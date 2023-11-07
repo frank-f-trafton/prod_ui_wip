@@ -8,6 +8,10 @@
 
 * strict.lua is used for testing.
 
+* `prod_ui/lib/pack_bin.lua` is adapted from [packer.js](https://github.com/jakesgordon/bin-packing/blob/master/js/packer.js).
+
+
+
 
 ## Concepts
 
