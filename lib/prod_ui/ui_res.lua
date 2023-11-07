@@ -1,4 +1,4 @@
--- Resource helper functions.
+-- uiRes: Resource helper functions.
 
 
 local uiRes = {}
