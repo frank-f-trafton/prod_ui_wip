@@ -1,8 +1,12 @@
 # ProdUI
 
-ProdUI is a (not yet finished) user interface library for the LÖVE Framework.
+ProdUI is a user interface library for the LÖVE Framework.
 
-The repo is currently not functional; I had been working on it locally (without Git), and I am now in the process of reviewing the code before I copy it over. I plan to have it bootable with LÖVE 11.4, 11.5 and 12.0-dev before the end of November 2023 (though it won't be ready for proper games and such). As of October, it looks like this:
+## Status
+
+ProdUI is currently unfinished. As there will most definitely be breaking changes between now and the 1.0 release, it is not recommended for general use at this time. (It should run with LÖVE 11.4 and 12.0-development if you want to take a look, though.)
+
+As of October 2023, it looks like this:
 
 ![prod_ui_pic_2023-10-31](https://github.com/rabbitboots/prod_ui_wip/assets/23288188/cc5fc615-0ed6-453c-909c-738721e717a3)
 
