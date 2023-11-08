@@ -4,11 +4,13 @@
 
 * [inspect.lua](https://github.com/kikito/inspect.lua) is used for debugging.
 
-* [nativefs](https://github.com/EngineerSmith/nativefs/tree/main) is used with the file selector example.
+* [nativefs](https://github.com/EngineerSmith/nativefs/tree/main) is used in the theme building script, and also in the file selector example.
 
 * strict.lua is used for testing.
 
-* `prod_ui/lib/pack_bin.lua` is adapted from [packer.js](https://github.com/jakesgordon/bin-packing/blob/master/js/packer.js).
+* `prod_ui/lib/pack_bin.lua` is adapted from [packer.js](https://github.com/jakesgordon/bin-packing/blob/master/js/packer.js). The packing algorithm is also used in AtlasB, a dependency of the theme builder.
+
+* The theme builder's table serialization library uses parts from [Serpent](https://github.com/pkulchenko/serpent).
 
 
 
@@ -25,7 +27,7 @@
 
 * Parts of the layout system are inspired by the `pack` command in [Tk](https://www.tcl.tk/).
 
-* The text editing component takes some code, design cues and general inspiration from [InputField](https://github.com/ReFreezed/InputField/tree/master).
+* The text editing component takes some code (UTF-8 iteration and string sanitizing, if I recall correctly), feature ideas and general inspiration from [InputField](https://github.com/ReFreezed/InputField/tree/master).
 
 * General inspiration taken from [GOOi](https://github.com/gustavostuff/gooi), [urutora](https://github.com/gustavostuff/urutora), [Love Frames](https://github.com/linux-man/LoveFrames), [SLAB](https://github.com/flamendless/Slab), and the aforementioned [LUIGI](https://github.com/airstruck/luigi).
 
