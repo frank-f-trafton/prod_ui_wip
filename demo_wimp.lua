@@ -80,7 +80,7 @@ love.keyboard.setKeyRepeat(true)
 love.filesystem.setSymlinksEnabled(true)
 
 --love.graphics.setLineStyle("rough")
-love.window.setVSync(0)
+--love.window.setVSync(0)
 
 local font_sz = 12
 local function reloadFont(sz)
