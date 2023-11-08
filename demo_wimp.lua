@@ -63,6 +63,13 @@ local demo_perf -- assigned at the end of love.draw
 -- * / Demo State *
 
 
+-- XXX: Replace this with a notification / toast system at some point.
+local notif_text = ""
+local notif_max = 10.0
+local notif_time = notif_max
+local notif_font = love.graphics.newFont("res/fonts/DejaVuSans.ttf", 20)
+
+
 -- LÖVE Setup
 
 love.graphics.setDefaultFilter("nearest", "nearest")
@@ -536,8 +543,15 @@ do
 		button_close.str_tool_tip = "Click for an inspiring quote."
 
 		button_close.wid_buttonAction = function(self)
-			-- XXX hook up to toast system
-			print("A person who doubts himself is like a man who would enlist in the ranks of his enemies and bear arms against himself. He makes his failure certain by himself being the first person to be convinced of it. -Alexandre Dumas")
+			-- XXX hook up to an actual toast system at some point.
+			notif_text = [[
+A person who doubts himself is like a man who would enlist in the
+ranks of his enemies and bear arms against himself. He makes his
+failure certain by himself being the first person to be convinced
+of it.
+
+-Alexandre Dumas]]
+			notif_time = 0.0
 		end
 
 		local checkbox
@@ -1277,6 +1291,8 @@ function love.update(dt)
 	--]]
 
 	--print(collectgarbage("count"))
+
+	notif_time = notif_time + dt
 end
 
 
@@ -1385,6 +1401,35 @@ function love.draw()
 		love.graphics.line(0.5, my + 0.5, ww + 0.5, my + 0.5)
 
 		love.graphics.points(love.mouse.getPosition())
+
+		love.graphics.pop()
+	end
+
+	-- XXX: need an actual notification system.
+	if notif_time < notif_max then
+		love.graphics.push("all")
+
+		local text_w = notif_font:getWidth(notif_text)
+		local text_h = notif_font:getHeight() * 6 -- Terrible.
+
+		love.graphics.origin()
+		love.graphics.translate(
+			math.floor((love.graphics.getWidth() - text_w) / 2),
+			math.floor((love.graphics.getHeight() - text_h) / 2)
+		)
+
+		love.graphics.setColor(0, 0, 0.2, 0.75 * math.sin((notif_time / notif_max) * 4.0))
+		love.graphics.rectangle(
+			"fill",
+			-2^16,
+			-(text_h * 0.25),
+			2^17,
+			text_h * 1.50
+		)
+		love.graphics.setColor(1, 1, 1, math.sin((notif_time / notif_max) * 4.0))
+
+		love.graphics.setFont(notif_font)
+		love.graphics.print(notif_text)
 
 		love.graphics.pop()
 	end
