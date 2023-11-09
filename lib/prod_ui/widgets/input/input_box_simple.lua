@@ -1,18 +1,18 @@
 --[[
-	input/input_field: A simple text box.
+A simple text box.
 --]]
 
 
 local context = select(1, ...)
 
 
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
-
-
 
 
 local def = {
@@ -20,36 +20,47 @@ local def = {
 }
 
 
+local function updateTextWidth(self)
+	self.text_w = self.skin.font:getWidth(self.text)
+end
+
+
 function def:uiCall_create(inst)
 
 	if self == inst then
 		self.visible = true
-
 		self.allow_hover = true
 		self.can_have_thimble = true
-		self.allow_focus_capture = false
+
+		widShared.setupViewport(self, 1)
+		widShared.setupViewport(self, 2)
 
 		self.text = ""
+		self.text_w = 0
 
-		-- Skin flags
+		-- State flags.
 		self.enabled = true
 		self.hovered = false
 		self.pressed = false
 
 		self:skinSetRefs()
 		self:skinInstall()
+
+		self:reshape()
 	end
 end
 
 
---[[
-function def:uiCall_destroy(inst)
+function def:uiCall_reshape()
 
-	if self == inst then
-		-- 
-	end
+	-- Viewport #1 is for text placement and offsetting.
+	-- Viewport #2 is the scissor-box boundary.
+
+	widShared.resetViewport(self, 1)
+	widShared.carveViewport(self, 1, "border")
+	widShared.copyViewport(self, 1, 2)
+	widShared.carveViewport(self, 1, "margin")
 end
---]]
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -90,13 +101,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
---function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
-
-
---function def:uiCall_pointerDrag(inst, x, y, dx, dy)
-
-
 function def:uiCall_thimbleTake(inst)
+
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
@@ -104,6 +110,7 @@ end
 
 
 function def:uiCall_thimbleRelease(inst)
+
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -120,6 +127,8 @@ function def:uiCall_textInput(inst, text)
 	if self == inst then
 		-- Input validation: The context checks the UTF-8 encoding before calling this event.
 		self.text = self.text .. text
+
+		updateTextWidth(self)
 	end
 end
 
@@ -137,10 +146,14 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		if byteoffset then
 			self.text = string.sub(self.text, 1, byteoffset - 1)
 		end
+		updateTextWidth(self)
+		return true
 
 	-- Delete all
 	elseif key == "delete" and mod["shift"] then
 		self.text = ""
+		updateTextWidth(self)
+		return true
 
 	-- Cut
 	elseif scancode == "x" and mod["ctrl"] then -- XXX config
@@ -148,16 +161,21 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			love.system.setClipboardText(self.text)
 		end
 		self.text = ""
+		updateTextWidth(self)
+		return true
 
 	-- Copy
 	elseif scancode == "c" and mod["ctrl"] then -- XXX config
 		love.system.setClipboardText(self.text)
+		return true
 
 	-- Paste
 	elseif scancode == "v" and mod["ctrl"] then -- XXX config
 		local clipboard_text = love.system.getClipboardText()
-		if clipboard_text and utf8.len(clipboard_text) then
+		if clipboard_text and utf8.len(clipboard_text) then -- XXX switch out utf8.len() for utf8_tools or utf8_check.
 			self.text = self.text .. clipboard_text
+			updateTextWidth(self)
+			return true
 		end
 	end
 end
@@ -181,43 +199,45 @@ def.skinners = {
 
 		render = function(self, ox, oy)
 
-			-- Temporary stand-in code...
-			love.graphics.setColor(0, 0, 0, 0.90)
-			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
-
-			love.graphics.setColor(0.1, 0.1, 0.1, 1.0)
-			love.graphics.print(self.text, 16, 16)
-
-			-- From the old skin file. Untested, not sure if it works now.
-			--[[
 			local skin = self.skin
 			local font = skin.font
 
-			-- Body
-			love.graphics.setColor(0, 0, 0, 1) -- XXX
-			love.graphics.rectangle("fill", 0.5, 0.5, self.w - 1, self.h - 1, self.rx, self.ry, self.segments)
+			local res = self.disabled and skin.res_disabled or self.hovered and skin.res_hover or skin.res_idle
 
-			-- Outline
-			love.graphics.setLineWidth(skin.line_width)
-			love.graphics.setLineJoin(skin.line_join)
-			love.graphics.setLineStyle(skin.line_style)
+			-- Body.
+			love.graphics.setColor(res.color_body)
+			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
-			love.graphics.setColor(1, 1, 1, 1) -- XXX
-			love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1, self.rx, self.ry, self.segments)
+			love.graphics.push("all")
 
-			-- Text
+			love.graphics.intersectScissor(
+				ox + self.x + self.vp2_x,
+				oy + self.y + self.vp2_y,
+				math.max(0, self.vp2_w),
+				math.max(0, self.vp2_h)
+			)
+
+			-- The caret is always in view.
+			local offset_x = -math.max(0, self.text_w + skin.caret_w - self.vp_w)
+
+			-- Center text vertically.
+			local font_h = math.floor(font:getHeight() * font:getLineHeight())
+			local offset_y = math.floor(0.5 + (self.vp_h - font_h) / 2)
+
+			-- Text.
 			if self.text then
-				love.graphics.setColor(1, 1, 1, 1) -- XXX
+				love.graphics.setColor(res.color_text)
 				love.graphics.setFont(font)
-				love.graphics.print(self.text, 0, 0)
+				love.graphics.print(self.text, self.vp_x + offset_x, self.vp_y + offset_y) -- Alignment
 			end
 
-			-- Cursor
+			-- Caret.
 			if self.context.current_thimble == self then
-				love.graphics.setColor(1, 0, 0, 1) -- XXX
-				love.graphics.rectangle("fill", -16, -16, 16, 16) -- XXX
+				love.graphics.setColor(skin.color_cursor)
+				love.graphics.rectangle("fill", self.vp_x + offset_x + self.text_w, self.vp_y + offset_y, skin.caret_w, font_h)
 			end
-		--]]
+
+			love.graphics.pop()
 		end,
 	},
 }
