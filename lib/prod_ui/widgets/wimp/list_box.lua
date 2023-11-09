@@ -421,8 +421,11 @@ function def:uiCall_create(inst)
 
 		self.menu.wrap_selection = false
 
-		-- Column widths.
+		-- Column X positions and widths.
+		self.col_icon_x = 0
 		self.col_icon_w = 0
+
+		self.col_text_x = 0
 		self.col_text_w = 0
 
 		-- State flags.

@@ -64,20 +64,30 @@ function plan.make(parent)
 		tree_box.w = 224
 		tree_box.h = 256
 
-		tree_box.show_icons = true
+		tree_box:setScrollBars(false, true)
+
+		tree_box:reshape()
+
+		tree_box:setIconsEnabled(true)
+		tree_box:setExpandersActive(true)
 
 		tree_box.drag_scroll = true
 		tree_box.drag_select = true
 		--tree_box.drag_reorder = true
 		--tree_box.drag_drop_mode = true
 
-		tree_box:setScrollBars(false, true)
-
 		--(text, parent_node, tree_pos, bijou_id)
 		local node_top = tree_box:addNode("Top", nil, nil, "icon_folder")
+		node_top.expanded = true
+
 		local node_mid = tree_box:addNode("Mid", node_top, nil, "icon_folder")
+		node_mid.expanded = true
+
 		local node_bot = tree_box:addNode("Bottom", node_mid, nil, "icon_folder")
-		tree_box:addNode("Back to top", nil, nil, "icon_folder")
+		node_bot.expanded = false
+
+		local back_to = tree_box:addNode("Back to top", nil, nil, "icon_folder")
+		back_to.expanded = false
 
 		tree_box:orderItems()
 		tree_box:arrange()
