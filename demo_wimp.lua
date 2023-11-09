@@ -1029,7 +1029,7 @@ of it.
 	end
 	--]]
 
-	--[[
+	-- [[
 	do
 		local planTreeBox = require("plan_wimp_tree_box")
 		local frame_lb = planTreeBox.make(wimp_root)

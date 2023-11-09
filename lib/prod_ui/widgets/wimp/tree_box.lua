@@ -51,8 +51,10 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 function def:arrange()
 
+	local skin = self.skin
 	local menu = self.menu
 	local items = menu.items
+	local font = skin.font
 
 	-- Empty list: nothing to do.
 	if #items == 0 then
@@ -64,7 +66,12 @@ function def:arrange()
 	for i = 1, #items do
 		local item = items[i]
 
-		item.x = item.depth * 16 -- XXX theming and scaling
+		if skin.item_align_h == "left" then
+			item.x = item.depth * 16 -- XXX theming and scaling.
+
+		else -- "right"
+			item.x = self.doc_w - item.w - (item.depth * 16) -- XXX theming and scaling.
+		end
 		item.y = yy
 
 		yy = item.y + item.h
@@ -187,13 +194,81 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		self:scrollDeltaH(-32) -- XXX config
+		local item = self.menu.items[self.menu.index]
+		if item
+		and self.expanders_active
+		and #item.nodes > 0
+		and item.expanded
+		then
+			item.expanded = not item.expanded -- XXX: wrap into a local function
+			self:orderItems()
+			self:arrange()
+			self:cacheUpdate(true)
+
+		else
+			self:scrollDeltaH(-32) -- XXX config
+		end
 		return true
 
 	elseif scancode == "right" then
-		self:scrollDeltaH(32) -- XXX config
+		local item = self.menu.items[self.menu.index]
+		if item
+		and self.expanders_active
+		and #item.nodes > 0
+		and not item.expanded
+		then
+			item.expanded = not item.expanded -- XXX: wrap into a local function
+			self:orderItems()
+			self:arrange()
+			self:cacheUpdate(true)
+
+		else
+			self:scrollDeltaH(32) -- XXX config
+		end
 		return true
 	end
+end
+
+
+local function updateItemDimensions(self, skin, item)
+
+	-- Do not try to update the root node.
+	if not item.parent then
+		return
+	end
+
+	local font = skin.font
+
+	item.w = font:getWidth(item.text) + self.expander_w + self.icon_w
+	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
+
+	print("new dimensions", "item.w", item.w, "gw(item.text)", font:getWidth(item.text), "self.expander_w", self.expander_w, "self.icon_w", self.icon_w)
+end
+
+
+local function updateAllItemDimensions(self, skin, node)
+
+	for i, item in ipairs(node.nodes) do
+		updateAllItemDimensions(self, skin, item)
+	end
+end
+
+
+function def:setIconsEnabled(enabled)
+
+	self.show_icons = not not enabled
+
+	self:cacheUpdate(true)
+	updateAllItemDimensions(self, self.skin, self.tree)
+end
+
+
+function def:setExpandersActive(active)
+
+	self.expanders_active = not not active
+
+	self:cacheUpdate(true)
+	updateAllItemDimensions(self, self.skin, self.tree)
 end
 
 
@@ -216,13 +291,12 @@ function def:addNode(text, parent_node, tree_pos, bijou_id)
 	item.selectable = true
 	item.marked = false -- multi-select
 
-	item.x, item.y = 0, 0
-	item.w = font:getWidth(text)
-	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-
 	item.text = text
 	item.bijou_id = bijou_id
 	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
+
+	item.x, item.y = 0, 0
+	updateItemDimensions(self, skin, item)
 
 	return item
 end
@@ -230,11 +304,17 @@ end
 
 local function _orderLoop(self, items, node)
 
-	print("_orderLoop", "expanded", node.expanded)
-
 	if node.expanded then
-		for i, child_node in ipairs(node.nodes) do
-			print("", "i", i, "child_node", child_node)
+		local start, stop, delta
+		if self.skin.item_align_v == "top" then
+			start, stop, delta = 1, #node.nodes, 1
+
+		else -- "bottom"
+			start, stop, delta = #node.nodes, 1, -1
+		end
+
+		for i = start, stop, delta do
+			local child_node = node.nodes[i]
 			items[#items + 1] = child_node
 			_orderLoop(self, items, child_node)
 		end
@@ -243,7 +323,6 @@ end
 
 
 function def:orderItems()
-	print("order items")
 
 	-- Clear the existing menu item layout.
 	local items = self.menu.items
@@ -448,14 +527,24 @@ function def:uiCall_create(inst)
 
 		self.menu.wrap_selection = false
 
-		-- Column widths.
-		self.col_icon_w = 0
-		self.col_text_w = 0
+		-- X positions and widths of components within menu items.
+		-- The X positions are reversed when right alignment is used.
+		self.expander_x = 0
+		self.expander_w = 0
+
+		self.icon_x = 0
+		self.icon_w = 0
+
+		self.text_x = 0
 
 		-- State flags.
 		self.enabled = true
 
-		-- Shows a column of icons when true.
+		-- When true, allows the user to expand and compress items with child items (click the icon or
+		-- press left/right arrow keys).
+		self.expanders_active = false
+
+		-- Shows item icons.
 		self.show_icons = false
 
 		-- Mouse drag behavior.
@@ -546,36 +635,26 @@ function def:cacheUpdate(refresh_dimensions)
 			self.doc_h = last_item.y + last_item.h
 		end
 
-		-- Calculate column widths.
-		if self.show_icons then
-			self.col_icon_w = skin.icon_spacing
-
-		else
-			self.col_icon_w = 0
-		end
-
-		self.col_text_w = 0
-		local font = skin.font
+		-- Document width is the rightmost visible item, or the viewport width, whichever is larger.
 		for i, item in ipairs(menu.items) do
-			self.col_text_w = math.max(self.col_text_w, item.x + item.w)
+			self.doc_w = math.max(self.doc_w, item.x + item.w)
 		end
+		self.doc_w = math.max(self.doc_w, self.vp_w)
 
-		-- Additional text padding.
-		self.col_text_w = self.col_text_w + skin.pad_text_x
+		-- Get component widths.
+		self.expander_w = (self.expanders_active) and skin.expander_spacing or 0
+		self.icon_w = (self.show_icons) and skin.icon_spacing or 0
 
-		self.col_text_w = math.max(self.col_text_w, self.vp_w - self.col_icon_w)
+		-- Get component left positions. (These numbers asssume left alignment, and are
+		-- adjusted at render time for right alignment.)
+		local xx = 0
+		self.expander_x = xx
+		xx = xx + self.expander_w
 
-		-- Get column left positions.
-		if skin.icon_side == "left" then
-			self.col_icon_x = 0
-			self.col_text_x = self.col_icon_w
+		self.icon_x = xx
+		xx = xx + self.icon_w
 
-		else
-			self.col_icon_x = self.col_text_w
-			self.col_text_x = 0
-		end
-
-		self.doc_w = math.max(self.vp_w, self.col_icon_w + self.col_text_w)
+		self.text_x = xx
 	end
 
 	-- Set the draw ranges for items.
@@ -716,7 +795,19 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						self.mouse_clicked_item = item_t
 
 						if button == 1 then
-							if self.mark_mode == "toggle" then
+
+							-- Check for clicking on an expander sensor.
+							if self.expanders_active
+							and #item_t.nodes > 0
+							and mx >= item_t.x + self.expander_x
+							and mx < item_t.x + self.expander_x + self.expander_w
+							then
+								item_t.expanded = not item_t.expanded
+								self:orderItems()
+								self:arrange()
+								self:cacheUpdate(true)
+
+							elseif self.mark_mode == "toggle" then
 								item_t.marked = not item_t.marked
 								self.mark_state = item_t.marked
 
@@ -985,6 +1076,29 @@ function def:uiCall_update(dt)
 end
 
 
+local function _drawLongPipes(self, skin, root, tq_px, line_x_offset, line_y_shorten)
+
+	local y1 = self.scr2_y
+	local y2 = y1 + self.vp2_h
+
+	local node_first, node_last = root.nodes[1], root.nodes[#root.nodes]
+	if not node_first or node_first.y + node_first.h >= y2 then
+		return
+
+	elseif node_first.y < y2 and node_last.y + node_last.h >= y1 then
+		uiGraphics.quadXYWH(tq_px,
+			node_first.x + line_x_offset,
+			node_first.y + line_y_shorten,
+			skin.pipe_width,
+			node_last.y - node_first.y - (line_y_shorten)
+		)
+		if node_first.expanded and #node_first.nodes > 1 then
+			_drawLongPipes(self, skin, node_first, tq_px, line_x_offset, line_y_shorten)
+		end
+	end
+end
+
+
 def.skinners = {
 	default = {
 
@@ -1013,6 +1127,13 @@ def.skinners = {
 			local menu = self.menu
 			local items = menu.items
 
+			local font = skin.font
+
+			local font_h = font:getHeight()
+
+			local first = math.max(self.items_first, 1)
+			local last = math.min(self.items_last, #items)
+
 			-- XXX: pick resources for enabled or disabled state, etc.
 			--local res = (self.active) and skin.res_active or skin.res_inactive
 
@@ -1039,52 +1160,127 @@ def.skinners = {
 			love.graphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
 			love.graphics.translate(-self.scr2_x, -self.scr2_y)
 
+			-- Vertical pipes.
+			if skin.draw_pipes then
+				love.graphics.setColor(skin.color_pipe)
+				local HACK_item_h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v) -- XXX: find a suitable way to get this directly
+				local line_x_offset = math.floor(self.expander_x + (self.expander_w - skin.pipe_width) / 2)
+				local line_y_shorten = math.floor(HACK_item_h / 2)
+
+				_drawLongPipes(self, skin, self.tree, tq_px, line_x_offset, line_y_shorten)
+
+				-- Short vertical pipes.
+				for i = math.max(first, 2), last do
+					local item = items[i]
+
+					if item.parent then
+						uiGraphics.quadXYWH(tq_px,
+							item.x + line_x_offset,
+							item.y,
+							skin.pipe_width,
+							math.floor(HACK_item_h / 2)
+						)
+					end
+				end
+
+				-- Horizontal pipes.
+				for i = first, last do
+					local item = items[i]
+
+					uiGraphics.quadXYWH(tq_px,
+						item.x + line_x_offset,
+						item.y + math.floor(HACK_item_h / 2),
+						line_y_shorten,
+						skin.pipe_width
+					)
+				end
+			end
+
 			-- Hover glow.
 			local item_hover = self.item_hover
 			if item_hover then
 				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.doc_w, item_hover.h)
+				uiGraphics.quadXYWH(tq_px, item_hover.x, item_hover.y, math.max(self.vp_w, self.doc_w) - item_hover.x, item_hover.h)
+				--print(item_hover.w)
+
+				--[[
+				love.graphics.push("all")
+				love.graphics.setColor(1,0,0,1)
+				love.graphics.rectangle("line", 0.5 + item_hover.x, 0.5 + item_hover.y, item_hover.w - 1, item_hover.h - 1)
+				love.graphics.pop()
+				--]]
 			end
 
 			-- Selection glow.
 			local sel_item = items[menu.index]
 			if sel_item then
 				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
+				uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h)
 			end
 
 			-- Menu items.
 			love.graphics.setColor(skin.color_item_text)
-			local font = skin.font
 			love.graphics.setFont(font)
-			local font_h = font:getHeight()
-
-			local first = math.max(self.items_first, 1)
-			local last = math.min(self.items_last, #items)
 
 			-- 1: Item markings
 			local rr, gg, bb, aa = love.graphics.getColor()
 			love.graphics.setColor(skin.color_item_marked)
+
 			for i = first, last do
 				local item = items[i]
 				if item.marked then
-					uiGraphics.quadXYWH(tq_px, 0, item.y, self.doc_w, item.h)
+					uiGraphics.quadXYWH(tq_px, item.x, item.y, math.max(self.vp_w, self.doc_w) - item.x, item.h)
 				end
 			end
 
-			-- 2: Bijou icons, if enabled
 			love.graphics.setColor(rr, gg, bb, aa)
+
+			-- 2: Expander sensors, if enabled.
+			if self.expanders_active then
+				local tq_on = (skin.item_align_v == "top") and skin.tq_expander_down or skin.tq_expander_up
+				local tq_off = (skin.item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
+
+				for i = first, last do
+					local item = items[i]
+
+					if #item.nodes > 0 then
+						local tq_expander = item.expanded and tq_on or tq_off
+						if tq_expander then
+							local item_x
+							if skin.item_align_h == "left" then
+								item_x = item.x + self.expander_x
+
+							else -- "right"
+								item_x = item.x + item.w - self.expander_x - self.expander_w
+							end
+
+							uiGraphics.quadShrinkOrCenterXYWH(tq_expander, item_x, item.y, self.expander_w, item.h)
+						end
+					end
+				end
+			end
+
+
+			-- 3: Bijou icons, if enabled
 			if self.show_icons then
 				for i = first, last do
 					local item = items[i]
 					local tq_bijou = item.tq_bijou
 					if tq_bijou then
-						uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item.x + self.col_icon_x, item.y, self.col_icon_w, item.h)
+						local item_x
+						if skin.item_align_h == "left" then
+							item_x = item.x + self.icon_x
+
+						else -- "right"
+							item_x = item.x + item.w - self.icon_x - self.icon_w
+						end
+
+						uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item_x, item.y, self.icon_w, item.h)
 					end
 				end
 			end
 
-			-- 3: Text labels
+			-- 4: Text labels
 			for i = first, last do
 				local item = items[i]
 				-- ugh
@@ -1099,21 +1295,17 @@ def.skinners = {
 				--]]
 
 				if item.text then
-					-- Need to align manually to prevent long lines from wrapping.
-					local text_x
-					if skin.text_align_h == "left" then
-						text_x = self.col_text_x + skin.pad_text_x
+					local item_x
+					if skin.item_align_h == "left" then
+						item_x = item.x + self.text_x
 
-					elseif skin.text_align_h == "center" then
-						text_x = self.col_text_x + math.floor((self.col_text_w - item.w) * 0.5)
-
-					elseif skin.text_align_h == "right" then
-						text_x = self.col_text_x + math.floor(self.col_text_w - item.w - skin.pad_text_x)
+					else -- "right"
+						item_x = item.x + item.w - self.text_x - font:getWidth(item.text)
+						-- XXX: Maybe cache text width in each item table?
 					end
-
 					love.graphics.print(
 						item.text,
-						item.x + text_x,
+						item_x,
 						item.y + math.floor((item.h - font_h) * 0.5)
 					)
 				end
