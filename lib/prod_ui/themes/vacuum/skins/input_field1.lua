@@ -1,18 +1,36 @@
 -- Skin: Basic Input Field
 
+
 return {
 
 	skinner_id = "default",
 
-	rx = 0,
-	ry = 0,
-	segments = nil, -- Optional.
-
-	["$line_width"] = 2,
-	line_join = "miter",
-	line_style = "smooth",
-
+	["*box"] = "style/boxes/input_box",
 	["*font"] = "fonts/p",
 
 	cursor_on = "ibeam",
+
+	text_align = "left", -- "left", "center", "right"
+
+	color_cursor = {1.0, 1.0, 1.0, 1.0},
+
+	["$caret_w"] = 2,
+
+	res_idle = {
+		["*slice"] = "tex_slices/input_box",
+		color_body = {1.0, 1.0, 1.0, 1.0},
+		color_text = {0.9, 0.9, 0.9, 1.0},
+	},
+
+	res_hover = {
+		["*slice"] = "tex_slices/input_box_hover",
+		color_body = {1.0, 1.0, 1.0, 1.0},
+		color_text = {0.9, 0.9, 0.9, 1.0},
+	},
+
+	res_disabled = {
+		["*slice"] = "tex_slices/input_box_disabled",
+		color_body = {1.0, 1.0, 1.0, 1.0},
+		color_text = {0.5, 0.5, 0.5, 1.0},
+	},
 }

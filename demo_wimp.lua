@@ -884,18 +884,6 @@ of it.
 			end
 		end
 
-
-		do
-			local input_field = content:addChild("input/input_field")
-
-			input_field.x = 384
-			input_field.y = 64
-			input_field.w = 128
-			input_field.h = 32
-
-			input_field:reshape()
-		end
-
 		content.w, content.h = widShared.getChildrenPerimeter(content)
 		content.doc_w, content.doc_h = content.w, content.h
 	end
@@ -1033,6 +1021,13 @@ of it.
 	do
 		local planTreeBox = require("plan_wimp_tree_box")
 		local frame_lb = planTreeBox.make(wimp_root)
+	end
+	--]]
+
+	-- [[
+	do
+		local planInputBox = require("plan_input_box")
+		local frame_lb = planInputBox.make(wimp_root)
 	end
 	--]]
 

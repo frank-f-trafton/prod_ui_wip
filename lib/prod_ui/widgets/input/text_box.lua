@@ -313,6 +313,7 @@ function def:uiCall_create(inst)
 
 		self.scr_breadth = 16 -- Styled
 
+		widShared.setupDoc(self)
 		self.doc_w = 256
 		self.doc_h = 256
 
