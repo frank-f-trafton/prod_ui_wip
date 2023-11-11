@@ -19,8 +19,8 @@ function plan.make(parent)
 
 	local frame = parent:addChild("wimp/window_frame", {make_menu_bar = true})
 
-	frame.w = 350--640
-	frame.h = 240--480
+	frame.w = 640--350
+	frame.h = 480--240
 
 	frame:setFrameTitle("EditField Test")
 
@@ -40,28 +40,34 @@ function plan.make(parent)
 
 		content:setScrollBars(false, false)
 
+
+		local temp_instructions = content:addChild("base/text", {font = context.resources.fonts.p})
+		temp_instructions.h = 64
+		temp_instructions.text = "F1/F2: Font Size\nF5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
+		temp_instructions:refreshText()
+
+		temp_instructions.lc_func = uiLayout.fitTop
+		uiLayout.register(content, temp_instructions)
+
+
 		local text_box = content:addChild("input/text_box", {font = context.resources.fonts.p})
-		text_box.x = 16
-		text_box.y = 16
+		text_box.x = 0
+		text_box.y = 0
 		text_box.w = 400
 		text_box.h = 350
 		text_box:setScrollBars(true, true)
 
 		text_box:reshape()
 
-		local temp_instructions = content:addChild("base/text", {font = context.resources.fonts.p})
-		temp_instructions.x = 16
-		temp_instructions.y = 350 + 16
-
-		temp_instructions.text = "F1/F2: Font Size\nF5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
-		temp_instructions:refreshText()
 
 		text_box.lc_func = uiLayout.fitRemaining
 		uiLayout.register(content, text_box)
 	end
 
+
 	frame:reshape(true)
 	frame:center(true, true)
+
 
 	-- Set up menu
 	local menu_bar = frame:findTag("frame_menu_bar")

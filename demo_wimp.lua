@@ -890,27 +890,6 @@ of it.
 
 	--[[
 	do
-		local frame_ef
-		local planEditFieldTest = require("plan_wimp_edit_field_test")
-		frame_ef = planEditFieldTest.make(wimp_root)
-		--]]
-
-		-- Test destroying window frame from userUpdate
-		--[[
-		frame_ef.userUpdate = function(self, dt)
-			self.DBG_TIME = self.DBG_TIME or 0
-			self.DBG_TIME = self.DBG_TIME + dt
-			if self.DBG_TIME >= 4 then
-				local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-				commonWimp.closeWindowFrame(self)
-				return true
-			end
-		end
-	end
-	--]]
-
-	--[[
-	do
 		local frame_d
 		local header_d
 		local content_d
@@ -1030,6 +1009,27 @@ of it.
 		local frame_lb = planInputBox.make(wimp_root)
 	end
 	--]]
+
+	-- [=[
+	do
+		local frame_ef
+		local planEditFieldTest = require("plan_wimp_edit_field_test")
+		frame_ef = planEditFieldTest.make(wimp_root)
+		--]=]
+
+		-- Test destroying window frame from userUpdate. XXX: move this somewhere more appropriate.
+		--[[
+		frame_ef.userUpdate = function(self, dt)
+			self.DBG_TIME = self.DBG_TIME or 0
+			self.DBG_TIME = self.DBG_TIME + dt
+			if self.DBG_TIME >= 4 then
+				local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+				commonWimp.closeWindowFrame(self)
+				return true
+			end
+		end
+		--]]
+	end
 
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")

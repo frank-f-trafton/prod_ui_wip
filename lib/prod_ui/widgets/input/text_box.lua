@@ -1252,10 +1252,10 @@ def.skinners = {
 			--]]
 
 			local scx, scy, scw, sch = love.graphics.getScissor()
-			love.graphics.intersectScissor(os_x + self.x + self.vp2_x, os_y + self.y + self.vp2_y, math.max(0, self.vp2_w), math.max(0, self.vp2_h))
+			love.graphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, math.max(0, self.vp2_w), math.max(0, self.vp2_h))
 
 			--[[
-			print("os", os_x, os_y)
+			print("ox, oy", ox, oy)
 			print("xy", self.x, self.y)
 			print("vp", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 			print("vp2", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
