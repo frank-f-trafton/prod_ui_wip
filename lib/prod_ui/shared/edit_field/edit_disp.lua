@@ -1,7 +1,13 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 	EditField graphics state. Handles wrapped and aligned text, highlight rectangles, and provides caret XYWH values and blinking state.
 	Does not handle scrolling, scroll bars, margins, line numbers, etc.
 --]]
+
+
+local context = select(1, ...)
 
 
 local editDisp = {}
@@ -16,15 +22,13 @@ local editDisp = {}
 --]]
 
 
-local PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-
 -- LÖVE Supplemental
 local utf8 = require("utf8")
 
 
-local edCom = require(PATH .. "ed_com")
-local edVis = require(PATH .. "ed_vis")
+-- ProdUI
+local edCom = context:getLua("shared/edit_field/ed_com")
+local edVis = context:getLua("shared/edit_field/ed_vis")
 
 
 -- Object metatables

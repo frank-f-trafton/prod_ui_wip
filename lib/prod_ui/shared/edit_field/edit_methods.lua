@@ -1,19 +1,26 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 	EditField plug-in methods for client widgets. Some internal-facing methods remain attached to 'core' and 'disp'.
 --]]
 
--- LÖVE Supplemental
-local utf8 = require("utf8")
+
+local context = select(1, ...)
+
 
 local client = {}
 
 
-local PATH = ... and (...):match("(.-)[^%.]+$") or ""
+-- LÖVE Supplemental
+local utf8 = require("utf8")
 
-local edCom = require(PATH .. "ed_com")
-local edVis = require(PATH .. "ed_vis")
-local editDisp = require(PATH .. "edit_disp")
-local editField = require(PATH .. "edit_field") -- XXX work on removing this reference (?)
+
+-- ProdUI
+local edCom = context:getLua("shared/edit_field/ed_com")
+local edVis = context:getLua("shared/edit_field/ed_vis")
+local editDisp = context:getLua("shared/edit_field/edit_disp")
+local editField = context:getLua("shared/edit_field/edit_field") -- XXX work on removing this reference (?)
 
 
 local code_groups = editField.code_groups

@@ -1,5 +1,11 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 -- editField common visual functions.
 -- Put stuff that requires a LÖVE font here.
+
+
+local context = select(1, ...)
 
 
 local edVis = {}
@@ -9,10 +15,8 @@ local edVis = {}
 local utf8 = require("utf8")
 
 
-local PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-
-local edCom = require(PATH .. "ed_com")
+-- ProdUI
+local edCom = context:getLua("shared/edit_field/ed_com")
 
 
 --- Given a string and a font, replace glyphs that aren't present in the font with a stand-in glyph. Some TrueType fonts specify a character for this purpose, and will print them automatically (for example, 'ə' with the default LÖVE 11.4 font with display an outlined box.) AFAIK LÖVE ImageFonts do not.

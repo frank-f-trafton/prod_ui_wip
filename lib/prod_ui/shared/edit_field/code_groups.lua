@@ -1,3 +1,6 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 	'code_groups' is a hash table of code points that are considered whitespace or punctuation.
 	This is used when jumping the caret across multiple code points of text. By default, only
@@ -5,6 +8,9 @@
 	loading the module (or replace this source file entirely with one that contains the entries
 	your application needs).
 --]]
+
+
+--local context = select(1, ...)
 
 
 local code_groups = {}

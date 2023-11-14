@@ -1,10 +1,21 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 -- editField common utility functions.
+
+
+local context = select(1, ...)
+
 
 local edCom = {}
 
 
 -- LÖVE Supplemental
 local utf8 = require("utf8")
+
+
+-- ProdUI
+local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 
 
 -- Overwrite these functions with your own clipboard handling code, if applicable.
@@ -15,9 +26,9 @@ edCom.setClipboardText = love.system.setClipboardText
 function edCom.validateEncoding(str, bad_byte_policy)
 
 	-- Input is good: nothing to do.
-	-- XXX: utf8.len() doesn't catch surrogate pairs, which will crash when fed to LÖVE text functions.
-	-- Fix: add utf8_tools or utf8_check.
-	if utf8.len(str) then
+	if utf8Tools.check(str) then
+		-- NOTE: As a validator, utf8.len() doesn't catch surrogate pairs.
+		-- LÖVE text functions reject code point values in the surrogate range.
 		return str
 
 	else
@@ -61,11 +72,11 @@ function edCom.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed
 		str = string.match(str, "^([^\n]*)")
 	end
 
-	if not tabs_to_spaces then
+	if tabs_to_spaces then
 		str = string.gsub(str, "\t", " ")
 	end
 
-	-- Exclude all remaining ASCII control codes, except tabs (0x09) and line feeds (0x0a) (conditionally excluded above)
+	-- Exclude all remaining ASCII control codes, except for tabs (0x09) and line feeds (0x0a) (conditionally excluded above).
 	str = string.gsub(str, "[%z\x01-\x08\x0b-\x1f]+", "")
 
 	return str

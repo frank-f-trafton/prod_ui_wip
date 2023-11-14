@@ -1,21 +1,28 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 -- editField core object. Provides the basic guts of a text input widget.
+
+
+local context = select(1, ...)
 
 
 local editField = {}
 
-local PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-local edCom = require(PATH .. "ed_com")
-local editDisp = require(PATH .. "edit_disp")
-local editHist = require(PATH .. "edit_hist")
-local edVis = require(PATH .. "ed_vis")
-local seqString = require(PATH .. "seq_string")
-
-editField.code_groups = require(PATH .. "code_groups")
-local code_groups = editField.code_groups
 
 -- LÖVE Supplemental
 local utf8 = require("utf8")
+
+
+-- ProdUI
+local edCom = context:getLua("shared/edit_field/ed_com")
+local editDisp = context:getLua("shared/edit_field/edit_disp")
+local editHist = context:getLua("shared/edit_field/edit_hist")
+local edVis = context:getLua("shared/edit_field/ed_vis")
+local seqString = context:getLua("shared/edit_field/seq_string")
+
+editField.code_groups = context:getLua("shared/edit_field/code_groups")
+local code_groups = editField.code_groups
 
 
 local _mt_field = {}

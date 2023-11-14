@@ -471,7 +471,7 @@ function def:uiCall_keyReleased(inst, kc, sc)
 end
 
 
--- Bubbles when a love.textinput() event reaches the widget. These are independent of keyboard down/up events, and text input must be enabled in LÖVE. The context checks the encoding with utf8.len() before invoking the event.
+-- Bubbles when a love.textinput() event reaches the widget. These are independent of keyboard down/up events, and text input must be enabled in LÖVE. The context checks the UTF-8 encoding before invoking the event.
 function def:uiCall_textInput(inst, text)
 
 end

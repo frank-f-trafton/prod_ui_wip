@@ -1,3 +1,6 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 
 Bindable wrapper functions for common editField actions.
@@ -14,11 +17,15 @@ bound actions may handle history directly and return false.
 
 --]]
 
--- LÖVE Supplemental
-local utf8 = require("utf8")
+
+--local context = select(1, ...)
 
 
 local editAct = {}
+
+
+-- LÖVE Supplemental
+local utf8 = require("utf8")
 
 
 -- Step left, right
