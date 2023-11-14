@@ -150,7 +150,7 @@ function def:uiCall_reshape()
 	if layout_mode == "auto"
 	or layout_mode == "resize" and self.lc_w_old ~= self.w or self.lc_h_old ~= self.h
 	then
-		uiLayout.resetLayoutPort1(self)
+		uiLayout.resetLayoutPort(self, 1)
 		uiLayout.applyLayout(self)
 	end
 

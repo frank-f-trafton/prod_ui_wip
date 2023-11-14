@@ -8,7 +8,7 @@
 	|                           |
 	  +-----------------------+
 	  |         vp_*          |
-	
+
 	+---------------------------+-+
 	| ......................... | |
 	| .                       . | |
@@ -76,6 +76,7 @@ local editMethods = require(context.conf.prod_ui_req .. "lib.edit_field.edit_met
 --local intersect = require(context.conf.prod_ui_req .. "logic.intersect") -- lerp
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -301,37 +302,15 @@ function def:uiCall_create(inst)
 		-- * self.scr_h
 		-- * self.scr_v
 
-		-- Scroll and viewport variables.
-		self.scr2_x = 0
-		self.scr2_y = 0
-
-		self.scr2_fx = 0
-		self.scr2_fy = 0
-
-		self.scr2_tx = 0
-		self.scr2_ty = 0
-
-		self.scr_breadth = 16 -- Styled
-
+		widShared.setupScroll2(self)
 		widShared.setupDoc(self)
-		self.doc_w = 256
-		self.doc_h = 256
 
 		-- How far to offset sub-line X positions depending on the alignment.
 		-- Based on doc_w.
 		self.align_offset = 0
 
-		self.vp_x = 0
-		self.vp_y = 0
-		self.vp_w = 256
-		self.vp_h = 256
-
-		-- As the vp_* fields are carved down to provide scrolling thresholds / padding, use these fields
-		-- to designate the visible text area including padding.
-		self.vp2_x = 0
-		self.vp2_y = 0
-		self.vp2_w = 1
-		self.vp2_h = 1
+		widShared.setupViewport(self, 1)
+		widShared.setupViewport(self, 2)
 
 		self.press_busy = false
 
@@ -403,8 +382,6 @@ function def:uiCall_create(inst)
 		self.bg_g = 0.0
 		self.bg_b = 0.0
 		self.bg_a = 0.0
-
-		self.display_pad = 16 -- XXX WIP
 
 		self:skinSetRefs()
 		self:skinInstall()
@@ -498,14 +475,22 @@ function def:uiCall_reshape()
 	self.w = math.max(self.w, self.min_w)
 	self.h = math.max(self.h, self.min_h)
 
-	-- Reset viewport and progressively carve out space for the scroll bars.
-	self.vp_x = 0
-	self.vp_y = 0
-	self.vp_w = self.w
-	self.vp_h = self.h
+	widShared.resetViewport(self, 1)
 
+	widShared.carveViewport(self, 1, "border")
 	commonScroll.arrangeScrollBars(self)
 
+	-- 'Okay-to-click' rectangle.
+	widShared.copyViewport(self, 1, 2)
+
+	-- Margin.
+	widShared.carveViewport(self, 1, "margin")
+
+	self:scrollClampViewport()
+	commonScroll.updateScrollBarShapes(self)
+	commonScroll.updateScroll2State(self)
+
+	--[[
 	local scr_h, scr_v = self.scr_h, self.scr_v
 	if scr_v then
 		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr2_y), self.vp_h, self.doc_h)
@@ -513,17 +498,7 @@ function def:uiCall_reshape()
 	if scr_h then
 		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr2_x), self.vp_w, self.doc_w)
 	end
-
-	-- Assign the 'okay-to-click' rectangle, then carve out more viewport space for scroll thresholds / padding.
-	self.vp2_x = self.vp_x
-	self.vp2_y = self.vp_y
-	self.vp2_w = self.vp_w
-	self.vp2_h = self.vp_h
-
-	self.vp_x = self.vp_x + self.display_pad
-	self.vp_y = self.vp_y + self.display_pad
-	self.vp_w = self.vp_w - self.display_pad*2
-	self.vp_h = self.vp_h - self.display_pad*2
+	--]]
 
 	core:displaySyncAll()
 
@@ -1389,6 +1364,12 @@ def.skinners = {
 
 			--print("text box scr xy", self.scr2_x, self.scr2_y, "fx fy", self.scr2_fx, self.scr2_fy, "tx ty", self.scr2_tx, self.scr2_ty)
 			--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
+
+			-- DEBUG: draw viewports.
+			--[[
+			widDebug.debugDrawViewport(self, 1)
+			widDebug.debugDrawViewport(self, 2)
+			--]]
 		end,
 	},
 }
