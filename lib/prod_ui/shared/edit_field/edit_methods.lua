@@ -9,7 +9,9 @@
 local context = select(1, ...)
 
 
-local client = {}
+local editMethods = {}
+editMethods.client = {}
+local client = editMethods.client
 
 
 -- LÖVE Supplemental

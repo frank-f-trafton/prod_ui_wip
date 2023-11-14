@@ -1,28 +1,24 @@
 --[[
-	input/text_box: A text input field.
 
-	Layout: vp_* represents the scrolling window, vp2_* represents the clickable area and render area.
+input/text_box: A text input field.
 
-	+---------------------------+
-	|           vp2_*           |
-	|                           |
-	  +-----------------------+
-	  |         vp_*          |
+         Viewport #1
+  +-----------------------+
+  |                       |
 
-	+---------------------------+-+
-	| ......................... | |
-	| .                       . | |
-	| .                       . | |
-	| .                       . | |
-	| .                       . | | scr_v
-	| .                       . | |
-	| .                       . | |
-	| ......................... | |
-	|                           | |
-	+---------------------------+-+
-	|                           | +
-	+---------------------------+-+
-	          scr_h
++---------------------------+-+
+| ......................... |^|
+| .The quick brown fox    . +-+
+| .jumps over the lazy    . | |
+| .dog.|                  . | |
+| .                       . | |
+| .                       . | |
+| .                       . | |
+| ......................... +-+
+|                           |v|  ---+
++-+-----------------------+-+-+     +- Optional scroll bars
+|<|                       |>| +  ---+
++-+-----------------------+-+-+
 
 --]]
 
@@ -61,11 +57,14 @@ do
 end
 
 
+local context = select(1, ...)
+
+
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
-local context = select(1, ...)
 
+-- ProdUI
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
@@ -230,6 +229,7 @@ end
 
 
 -- Attach editing methods to def.
+-- XXX: Do not use client:setFont().
 for k, v in pairs(editMethods) do
 
 	if def[k] then
@@ -237,43 +237,6 @@ for k, v in pairs(editMethods) do
 	end
 
 	def[k] = v
-end
-
-
-local color_scheme = { -- XXX WIP
-	body = {0.15, 0.15, 0.15, 1.0},
-	current_line_illuminate = {0.2, 0.2, 0.2, 1.0},
-	highlight = {0.5, 0.5, 0.5, 1.0},
-	text = {1.0, 1.0, 1.0, 1.0},
-	readonly = {1.0, 0.8, 0.8, 1.0},
-	ghost_text = {0.5, 0.5, 0.5, 1.0},
-	insert = {1.0, 1.0, 1.0, 1.0},
-	replace = {0.75, 0.75, 0.75, 1.0},
-	scroll_trench = {0.1, 0.1, 0.2, 1.0},
-	scroll_thumb = {0.4, 0.4, 0.4, 1.0},
-	scroll_thumb_hover = {0.5, 0.5, 0.5, 1.0},
-	scroll_thumb_pressed = {0.3, 0.3, 0.3, 1.0},
-	scroll_corner = {0.2, 0.2, 0.4, 1.0},
-	margin = {0.05, 0.05, 0.05, 1.0},
-	margin_line_numbers = {1.0, 1.0, 1.0, 1.0},
-}
-
-
-local function wrapperSetTextColor(self, col_t) -- XXX WIP
-
-	self.t_r = col_t[1] * self.brightness
-	self.t_g = col_t[2] * self.brightness
-	self.t_b = col_t[3] * self.brightness
-	self.t_a = col_t[4] * self.brightness
-end
-
-
-local function wrapperSetBackgroundColor(self, col_t) -- XXX WIP
-
-	self.bg_r = col_t[1] * self.brightness
-	self.bg_g = col_t[2] * self.brightness
-	self.bg_b = col_t[3] * self.brightness
-	self.bg_a = col_t[4] * self.brightness
 end
 
 
@@ -287,30 +250,21 @@ function def:uiCall_create(inst)
 		self.clip_hover = false
 		self.clip_scissor = true
 
-		self.r = 1
-		self.g = 1
-		self.b = 1
-		self.a = 1
+		widShared.setupScroll2(self)
+		widShared.setupDoc(self)
+
+		widShared.setupViewport(self, 1)
+		widShared.setupViewport(self, 2)
 
 		self.text = ""
 
-		-- Minimum widget size
+		-- Minimum widget size.
 		self.min_w = 8
 		self.min_h = 8
-
-		-- Installed by commonScroll:
-		-- * self.scr_h
-		-- * self.scr_v
-
-		widShared.setupScroll2(self)
-		widShared.setupDoc(self)
 
 		-- How far to offset sub-line X positions depending on the alignment.
 		-- Based on doc_w.
 		self.align_offset = 0
-
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
 
 		self.press_busy = false
 
@@ -318,9 +272,12 @@ function def:uiCall_create(inst)
 		self.caret_extend_x = 0
 		self.caret_extend_y = 0
 
-		self.dbg_font_sz = 13 -- XXX WIP
-		self.font = love.graphics.newFont(self.dbg_font_sz) -- XXX WIP
-		self.core = editField.newCoreObject(self.font)
+		self:skinSetRefs()
+		self:skinInstall()
+
+		local skin = self.skin
+
+		self.core = editField.newCoreObject(skin.font)
 
 		local core = self.core
 
@@ -328,15 +285,11 @@ function def:uiCall_create(inst)
 		core.hist:writeEntry(true, core.lines, core.car_line, core.car_byte, core.h_line, core.h_byte)
 		--core:highlightAll()
 
-		self.brightness = 1.0 -- XXX remove?
-
 		-- Ghost text appears when the field is empty.
 		-- This is not part of the editField core, and so it is not drawn through
 		-- the seqString or displayLine sub-objects, and is not affected by glyph masking.
 		self.ghost_text = false
 		self.ghost_text_align = "left" -- "left", "center", "right", "justify"
-		self.ghost_text_font = false -- optional separate ghost font. If false, the display font is used. -- XXX pending impl.
-		self._ghost_text_show = false -- cached
 
 		-- The first and last visible logical / super lines. Used as boundaries for text rendering.
 		-- Update whenever you scroll vertically or modify the text.
@@ -345,7 +298,6 @@ function def:uiCall_create(inst)
 
 		-- Caret fill mode and color table
 		self.caret_fill = "fill"
-		self.caret_color = color_scheme.insert
 
 		-- Tick this whenever something related to the text box needs to be updated/recached.
 		-- editField itself should immediately apply its own state changes.
@@ -357,7 +309,7 @@ function def:uiCall_create(inst)
 		self.caret_w = 0
 		self.caret_h = 0
 
-		self.text_object = _newTextBatch(self.font)
+		self.text_object = _newTextBatch(skin.font)
 		self.text_object_update = true
 
 		self.illuminate_current_line = true
@@ -371,20 +323,8 @@ function def:uiCall_create(inst)
 		self.click_line = 1
 		self.click_byte = 1
 
-		-- Text color
-		self.t_r = 1.0
-		self.t_g = 1.0
-		self.t_b = 1.0
-		self.t_a = 1.0
-
-		-- Background color, if applicable
-		self.bg_r = 0.0
-		self.bg_g = 0.0
-		self.bg_b = 0.0
-		self.bg_a = 0.0
-
-		self:skinSetRefs()
-		self:skinInstall()
+		-- State flags (WIP)
+		self.enabled = true
 	end
 end
 
@@ -407,6 +347,7 @@ end
 
 
 function def:scrollGetCaretInBounds(immediate)
+
 	-- XXX wrapped in self:scrollRectInBounds()
 	local disp = self.core.disp
 
@@ -469,6 +410,9 @@ end
 
 function def:uiCall_reshape()
 
+	-- Viewport #1 is the scrollable region.
+	-- Viewport #2 includes margins and excludes borders.
+
 	local core = self.core
 	local disp = core.disp
 
@@ -483,22 +427,11 @@ function def:uiCall_reshape()
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
-	-- Margin.
 	widShared.carveViewport(self, 1, "margin")
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScroll2State(self)
-
-	--[[
-	local scr_h, scr_v = self.scr_h, self.scr_v
-	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr2_y), self.vp_h, self.doc_h)
-	end
-	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr2_x), self.vp_w, self.doc_w)
-	end
-	--]]
 
 	core:displaySyncAll()
 
@@ -518,29 +451,9 @@ function def:cacheUpdate()
 	local lines = core.lines
 	local disp = core.disp
 
+	local skin = self.skin
+
 	self:updateDocumentDimensions()
-
-	self._ghost_text_show = (self.ghost_text and lines:isEmpty()) and true or false
-
-	-- Update text color
-	if core.allow_input then
-		self.brightness = 1.0
-
-		if not self._ghost_text_show then
-			wrapperSetTextColor(self, color_scheme.text)
-
-		else
-			wrapperSetTextColor(self, color_scheme.ghost_text)
-		end
-
-	else
-		self.brightness = 0.75
-
-		wrapperSetTextColor(self, color_scheme.readonly)
-	end
-
-	-- Update body color (after setting brightness)
-	wrapperSetBackgroundColor(self, color_scheme.body)
 
 	-- Update caret shape
 	self.caret_x = disp.caret_box_x
@@ -604,13 +517,6 @@ function def:cacheUpdate()
 				end
 			end
 		end
-	end
-end
-
-
-function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		
 	end
 end
 
@@ -910,6 +816,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			return true
 
 		-- XXX debug stuff
+		--[[
 		elseif scancode == "f1" then
 			self.dbg_font_sz = math.max(1, self.dbg_font_sz - 1) -- XXX WIP
 			self.font = love.graphics.newFont(self.dbg_font_sz) -- XXX WIP
@@ -927,7 +834,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			self.update_flag = true
 
 			input_intercepted = true
-
+		--]]
 		elseif scancode == "f5" then
 			self:setWrapMode(not self:getWrapMode())
 
@@ -1207,18 +1114,24 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
+
+			local skin = self.skin
+
 			local core = self.core
+			local lines = core.lines
 			local disp = core.disp
 			local font = disp.font
 
+			local res = core.allow_input and skin.res_readwrite or skin.res_readonly
+
 			local has_thimble = self == self.context.current_thimble
 
-			-- XXX Debug renderer
+			-- XXX Debug renderer.
 			--[[
 			love.graphics.setColor(0, 0, 0, 0.90)
 			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
-			love.graphics.setColor(self.r, self.g, self.b, self.a)
+			love.graphics.setColor(1, 1, 1, 1)
 			local yy = 0
 			for i, line in ipairs(self.core.lines) do
 				love.graphics.print(i .. ": " .. line, 16, yy)
@@ -1244,7 +1157,7 @@ def.skinners = {
 			--]]
 
 			-- Draw background body
-			love.graphics.setColor(self.bg_r, self.bg_g, self.bg_b, self.bg_a)
+			love.graphics.setColor(res.color_body)
 
 			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
@@ -1266,7 +1179,7 @@ def.skinners = {
 
 			-- Draw current super-line illumination, if applicable
 			if self.illuminate_current_line then
-				love.graphics.setColor(color_scheme.current_line_illuminate)
+				love.graphics.setColor(res.color_current_line_illuminate)
 				local super_line = disp.super_lines[disp.d_car_super]
 				local super_y = super_line[1].y
 
@@ -1284,10 +1197,8 @@ def.skinners = {
 			love.graphics.translate(self.vp_x + self.align_offset - self.scr2_x, self.vp_y - self.scr2_y)
 			--love.graphics.translate(-self.scr2_x, -self.scr2_y)
 
-			love.graphics.setFont(font)
-
 			-- Draw highlight rectangles
-			love.graphics.setColor(color_scheme.highlight)
+			love.graphics.setColor(res.color_highlight)
 			if core:isHighlighted() then
 				for i = self.vis_super_line_top, self.vis_super_line_bot do
 					local super_line = disp.super_lines[i]
@@ -1300,7 +1211,8 @@ def.skinners = {
 			end
 
 			-- Draw ghost text, if applicable
-			if self._ghost_text_show then
+			if self.ghost_text and lines:isEmpty() then
+				love.graphics.setFont(skin.font_ghost)
 				if disp.wrap_mode then
 					love.graphics.printf(self.ghost_text, 0, 0, disp.viewport_w, self.ghost_text_align)
 
@@ -1316,12 +1228,14 @@ def.skinners = {
 			end
 
 			-- Draw the main text.
-			love.graphics.setColor(self.t_r, self.t_g, self.t_b, self.t_a)
+			love.graphics.setColor(res.color_text)
 
 			if self.text_object then
 				love.graphics.draw(self.text_object)
 
 			else
+				love.graphics.setFont(skin.font)
+
 				for i = self.vis_super_line_top, self.vis_super_line_bot do
 					local super_line = disp.super_lines[i]
 					for j, sub_line in ipairs(super_line) do
@@ -1332,7 +1246,7 @@ def.skinners = {
 
 			-- Draw the caret.
 			if has_thimble and disp.show_caret then
-				love.graphics.setColor(self.caret_color)
+				love.graphics.setColor(res.color_insert) -- XXX: color_replace
 				love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
 			end
 
@@ -1340,19 +1254,17 @@ def.skinners = {
 
 			love.graphics.pop()
 
-			-- Draw scroll bars.
+			-- Scroll bars.
+			local data_scroll = skin.data_scroll
+
 			local scr_h = self.scr_h
 			local scr_v = self.scr_v
 
-			-- Right now, a common scroll bar data pack is necessary for this widget to function.
-			-- It's currently supplied by a theme.
-			local data_scroll = self.context.resources.common.scroll_bar1
-
 			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, scr_h, 0, 0)
+				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
 			end
 			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, scr_v, 0, 0)
+				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
 			end
 
 			-- DEBUG: draw history state
