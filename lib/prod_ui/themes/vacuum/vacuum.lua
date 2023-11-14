@@ -242,15 +242,16 @@ function themeDef.newInstance(scale)
 	inst.style.boxes.input_box.outpad_y1 = math.max(0, math.floor(2 * scale))
 	inst.style.boxes.input_box.outpad_y2 = math.max(0, math.floor(2 * scale))
 
-	inst.style.boxes.input_box.border_x1 = math.max(0, math.floor(5 * scale))
-	inst.style.boxes.input_box.border_x2 = math.max(0, math.floor(5 * scale))
+	inst.style.boxes.input_box.border_x1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.input_box.border_x2 = math.max(0, math.floor(2 * scale))
 	inst.style.boxes.input_box.border_y1 = math.max(0, math.floor(2 * scale))
 	inst.style.boxes.input_box.border_y2 = math.max(0, math.floor(2 * scale))
 
-	inst.style.boxes.input_box.margin_x1 = math.max(0, math.floor(5 * scale))
-	inst.style.boxes.input_box.margin_x2 = math.max(0, math.floor(5 * scale))
-	inst.style.boxes.input_box.margin_y1 = math.max(0, math.floor(0 * scale))
-	inst.style.boxes.input_box.margin_y2 = math.max(0, math.floor(0 * scale))
+	inst.style.boxes.input_box.margin_x1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.input_box.margin_x2 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.input_box.margin_y1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.input_box.margin_y2 = math.max(0, math.floor(2 * scale))
+
 
 	-- Icon classifications.
 	inst.style.icons = {}

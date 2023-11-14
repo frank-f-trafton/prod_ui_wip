@@ -18,6 +18,7 @@ local editDisp = {}
 
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
+
 -- LÖVE Supplemental
 local utf8 = require("utf8")
 
@@ -163,6 +164,10 @@ end
 
 --- Given a line length, a byte offset and a specific super-line structure, return a byte and sub-line offset suitable for the display structure.
 function editDisp.coreToDisplayOffsets(s_bytes, byte_n, super_line)
+
+	if #super_line == 0 then
+		error("EditField corruption: empty super-line.")
+	end
 
 	-- End of line
 	if byte_n == s_bytes + 1 then
@@ -586,7 +591,7 @@ function _mt_lc:updateSuperLine(i_super, str)
 	if self.masked then
 		work_str = edCom.getMaskedString(work_str, self.mask_glyph)
 
-	-- Only syntax-colorize unmasked text
+	-- Only syntax-colorize unmasked text.
 	elseif self.fn_colorize and self.generate_colored_text then
 		local len = self:fn_colorize(work_str, self.wip_syntax_colors, self.syntax_work)
 		-- Trim color table
@@ -602,9 +607,21 @@ function _mt_lc:updateSuperLine(i_super, str)
 	else
 		local width, wrapped = font:getWrap(work_str, self.view_w)
 		local start_code_point = 1
+		--[[
+		XXX 13-NOV-2023: LÖVE 12-Development (17362b6) returns an empty table when given an empty string.
+		LÖVE 11.4 returns a table with an empty string.
+		LÖVE 0.10.2 returns an empty table.
+		Just make 12 behave like 11.4 for now.
+		--]]
+		if #wrapped == 0 then
+			wrapped[1] = ""
+		end
 
 		for i, wrapped_line in ipairs(wrapped) do
-			-- Fix an edge case where font:getWrap() drops code points if the glyphs are thinner than wraplimit.
+			--[[
+			XXX 13-NOV-2023: LÖVE 11.4 font:getWrap() drops code points if the first glyph in a sub-line is thinner than
+			the wraplimit. LÖVE 12-Development (17362b6) will place at least one glyph. LÖVE 0.10.2 behaves like 11.4.
+			--]]
 			if i < #wrapped and wrapped_line == "" then
 				wrapped_line = "~"
 			end

@@ -16,7 +16,11 @@
 
 local uiLayout = {}
 
+
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+
+
+local widShared = require(REQ_PATH .. "logic.wid_shared")
 
 
 -- Stack of layout rectangles
@@ -280,27 +284,33 @@ function uiLayout.resetLayout(wid)
 end
 
 
---- Reset a widget's layout rectangle to match its primary viewport (vp_*).
--- @param The widget to reset.
+--- Reset a widget's layout rectangle to match one of its viewports. The rectangle top-left is (0,0).
+-- @param wid The widget to reset.
+-- @param v The Viewport ID.
 -- @return Nothing.
-function uiLayout.resetLayoutPort1(wid)
+function uiLayout.resetLayoutPort(wid, v)
 
-	wid.lp_x = wid.vp_x
-	wid.lp_y = wid.vp_y
-	wid.lp_w = wid.vp_w
-	wid.lp_h = wid.vp_h
+	v = widShared.vp_keys[v]
+
+	wid.lp_x = 0
+	wid.lp_y = 0
+	wid.lp_w = wid[v.w]
+	wid.lp_h = wid[v.h]
 end
 
 
---- Reset a widget's layout rectangle to match its secondary viewport (vp2_*).
--- @param The widget to reset.
+--- Reset a widget's layout rectangle to match one of its viewports. The rectangle top-left is the Viewport's top-left.
+-- @param wid The widget to reset.
+-- @param v The Viewport ID.
 -- @return Nothing.
-function uiLayout.resetLayoutPort2(wid)
+function uiLayout.resetLayoutPortFull(wid, v)
 
-	wid.lp_x = wid.vp2_x
-	wid.lp_y = wid.vp2_y
-	wid.lp_w = wid.vp2_w
-	wid.lp_h = wid.vp2_h
+	v = widShared.vp_keys[v]
+
+	wid.lp_x = wid[v.x]
+	wid.lp_y = wid[v.y]
+	wid.lp_w = wid[v.w]
+	wid.lp_h = wid[v.h]
 end
 
 

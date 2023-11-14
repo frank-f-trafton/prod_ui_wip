@@ -40,7 +40,6 @@ function plan.make(parent)
 
 		content:setScrollBars(false, false)
 
-
 		local temp_instructions = content:addChild("base/text", {font = context.resources.fonts.p})
 		temp_instructions.h = 64
 		temp_instructions.text = "F1/F2: Font Size\nF5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
@@ -49,8 +48,8 @@ function plan.make(parent)
 		temp_instructions.lc_func = uiLayout.fitTop
 		uiLayout.register(content, temp_instructions)
 
-
 		local text_box = content:addChild("input/text_box", {font = context.resources.fonts.p})
+		text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
 		text_box.x = 0
 		text_box.y = 0
 		text_box.w = 400
@@ -58,7 +57,6 @@ function plan.make(parent)
 		text_box:setScrollBars(true, true)
 
 		text_box:reshape()
-
 
 		text_box.lc_func = uiLayout.fitRemaining
 		uiLayout.register(content, text_box)

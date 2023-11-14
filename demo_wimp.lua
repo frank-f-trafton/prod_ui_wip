@@ -1355,7 +1355,7 @@ function love.draw()
 
 	if demo_show_perf then
 		qp:reset()
-		qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 128)
+		qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 160)
 		qp:print("FPS: ", love.timer.getFPS())
 		qp:print("avg.dt: ", love.timer.getAverageDelta())
 

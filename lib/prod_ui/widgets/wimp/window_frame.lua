@@ -544,7 +544,7 @@ function def:uiCall_reshape()
 	self.vp_w = self.w - self.border_breadth*2
 	self.vp_h = self.h - self.border_breadth*2
 
-	uiLayout.resetLayoutPort1(self)
+	uiLayout.resetLayoutPort(self, 1)
 
 	local header = self:findTag("frame_header")
 	local menu_bar = self:findTag("frame_menu_bar")
