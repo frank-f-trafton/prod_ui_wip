@@ -1,3 +1,6 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 	EditField history implementation.
 
@@ -9,9 +12,11 @@
 	* A max entries limit
 --]]
 
-local editHist = {}
 
-local PATH = ... and (...):match("(.-)[^%.]+$") or ""
+local context = select(1, ...)
+
+
+local editHist = {}
 
 
 local _mt_hist = {}

@@ -1,13 +1,19 @@
+-- To load: local lib = context:getLua("shared/lib")
+
 
 --[[
 The default action bindings.
 --]]
 
+
+local context = select(1, ...)
+
+
 local editBind = {}
 
-local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
-local editAct = require(PATH .. "edit_act")
+-- ProdUI
+local editAct = context:getLua("shared/edit_field/edit_act")
 
 
 -- The nesting order of modifier keys must always be: control -> gui -> alt -> shift

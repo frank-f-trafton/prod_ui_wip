@@ -21,6 +21,7 @@ local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
 local uiWidget = require(REQ_PATH .. "ui_widget")
+local utf8Tools = require(REQ_PATH .. "lib.utf8_tools")
 
 
 -- Error functions
@@ -545,9 +546,8 @@ function _mt_context:love_textinput(text)
 		return
 
 	-- In rare cases, a user's system or virtual keyboard may pass in badly-encoded strings as text input.
-	-- XXX: utf8.len() doesn't reject surrogate pairs, which will cause an error with LÖVE's UTF-8 conversion code.
-	-- Fix: add utf8_tools or utf8_check.
-	elseif not utf8.len(text) then
+	-- NOTE: utf8.len() doesn't reject surrogate pairs, which will cause an error with LÖVE's UTF-8 conversion code.
+	elseif not utf8Tools.check(text) then
 		return
 	end
 

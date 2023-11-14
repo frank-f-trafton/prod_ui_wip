@@ -8,6 +8,7 @@ local context = select(1, ...)
 
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -172,7 +173,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	-- Paste
 	elseif scancode == "v" and mod["ctrl"] then -- XXX config
 		local clipboard_text = love.system.getClipboardText()
-		if clipboard_text and utf8.len(clipboard_text) then -- XXX switch out utf8.len() for utf8_tools or utf8_check.
+		if clipboard_text and utf8Tools.check(clipboard_text) then
 			self.text = self.text .. clipboard_text
 			updateTextWidth(self)
 			return true

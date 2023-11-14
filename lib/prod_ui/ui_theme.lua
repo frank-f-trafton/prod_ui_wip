@@ -36,6 +36,7 @@ local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
+local utf8Tools = require(REQ_PATH .. "lib.utf8_tools")
 local utilTable = require(REQ_PATH .. "logic.util_table")
 
 
@@ -174,7 +175,7 @@ function _mt_themeInst:applyResource(tbl, id)
 
 	-- Invalid.
 	else
-		if not utf8.len(symbol) then
+		if not utf8Tools.check(symbol) then
 			symbol = "(Byte: " .. tostring(tonumber(symbol) .. ")")
 		end
 
