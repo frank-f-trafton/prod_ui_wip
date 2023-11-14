@@ -40,13 +40,27 @@ function plan.make(parent)
 
 		content:setScrollBars(false, false)
 
-		local temp_instructions = content:addChild("base/text", {font = context.resources.fonts.p})
-		temp_instructions.h = 64
-		temp_instructions.text = "F1/F2: Font Size\nF5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
-		temp_instructions:refreshText()
+		local c_bar = content:addChild("base/container")
+		c_bar.h = 64
 
-		temp_instructions.lc_func = uiLayout.fitTop
-		uiLayout.register(content, temp_instructions)
+		c_bar.lc_func = uiLayout.fitTop
+		uiLayout.register(content, c_bar)
+
+		--[[
+		local cbox_wrap = c_bar:addChild("base/checkbox")
+		cbox_wrap.x = 0
+		cbox_wrap.y = 0
+		cbox_wrap.w = 160
+		cbox_wrap.h = 40
+		cbox_wrap:setLabel("Wrap Mode (F5)", "single")
+		--]]
+
+		local temp_instructions = c_bar:addChild("base/text", {font = context.resources.fonts.p})
+		temp_instructions.x = 0
+		temp_instructions.w = 512
+		temp_instructions.h = c_bar.h
+		temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
+		temp_instructions:refreshText()
 
 		local text_box = content:addChild("input/text_box", {font = context.resources.fonts.p})
 		text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
@@ -55,6 +69,8 @@ function plan.make(parent)
 		text_box.w = 400
 		text_box.h = 350
 		text_box:setScrollBars(true, true)
+
+		text_box.ghost_text = "Ghost text"
 
 		text_box:reshape()
 
