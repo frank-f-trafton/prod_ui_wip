@@ -271,10 +271,10 @@ function utf8Tools.getUCString(str, pos)
 end
 
 
-function utf8Tools.step(str, pos)
+function utf8Tools.step(str, pos) -- UPDATE: allow max pos to be `#str + 1`.
 
 	_assertArgType(1, str, "string")
-	if type(pos) ~= "number" or pos < 1 or pos > math.max(1, #str) or pos ~= math.floor(pos) then errBadIntRange(2, pos, 1, math.max(1, #str)) end
+	if type(pos) ~= "number" or pos < 1 or pos > #str + 1 or pos ~= math.floor(pos) then errBadIntRange(2, pos, 1, #str + 1) end
 
 	while pos <= #str do
 		local b1 = string.byte(str, pos)

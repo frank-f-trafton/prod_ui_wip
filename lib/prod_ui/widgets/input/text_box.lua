@@ -1197,7 +1197,7 @@ def.skinners = {
 			love.graphics.translate(self.vp_x + self.align_offset - self.scr2_x, self.vp_y - self.scr2_y)
 			--love.graphics.translate(-self.scr2_x, -self.scr2_y)
 
-			-- Draw highlight rectangles
+			-- Draw highlight rectangles.
 			love.graphics.setColor(res.color_highlight)
 			if core:isHighlighted() then
 				for i = self.vis_super_line_top, self.vis_super_line_bot do
@@ -1210,20 +1210,21 @@ def.skinners = {
 				end
 			end
 
-			-- Draw ghost text, if applicable
+			-- Draw ghost text, if applicable.
+			-- XXX: center and right ghost text alignment modes aren't working correctly.
 			if self.ghost_text and lines:isEmpty() then
 				love.graphics.setFont(skin.font_ghost)
 				if disp.wrap_mode then
-					love.graphics.printf(self.ghost_text, 0, 0, disp.viewport_w, self.ghost_text_align)
+					love.graphics.printf(self.ghost_text, 0, 0, self.vp_w, self.ghost_text_align)
 
 				elseif self.ghost_text_align == "left" then
 					love.graphics.print(self.ghost_text)
 
 				elseif self.ghost_text_align == "center" then
-					love.graphics.print(self.ghost_text, math.floor(disp.viewport_w / 2 - font:getWidth(self.ghost_text) / 2), 0)
+					love.graphics.print(self.ghost_text, math.floor(self.vp_w / 2 - font:getWidth(self.ghost_text) / 2), 0)
 
 				elseif self.ghost_text_align == "right" then
-					love.graphics.print(self.ghost_text, math.floor(disp.viewport_w - font:getWidth(self.ghost_text)), 0)
+					love.graphics.print(self.ghost_text, math.floor(self.vp_w - font:getWidth(self.ghost_text)), 0)
 				end
 			end
 
