@@ -203,19 +203,6 @@ end
 -- * / UTF-8 Support *
 
 
---- Converts a string to a masked version, containing the same number of 'mask_glyph' characters as the original. Use to hide information, but still show that input is being accepted.
--- @param str The string to mask.
--- @param mask_glyph A single glyph to use as the masking character. Must be a single glyph, to keep the same number of code points between strings.
--- @return The masked string.
-function edCom.getMaskedString(str, mask_glyph)
-	if utf8.len(mask_glyph) ~= 1 then
-		error("mask string must be exactly one glyph in length.")
-	end
-
-	return string.rep(mask_glyph, utf8.len(str))
-end
-
-
 --- Gets caret and highlight lines and offsets in the correct order.
 function edCom.sortOffsets(line_1, byte_1, line_2, byte_2)
 	-- You may need to subtract 1 from byte_2 to get the correct range.

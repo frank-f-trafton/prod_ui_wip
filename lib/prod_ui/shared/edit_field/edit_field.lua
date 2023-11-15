@@ -20,6 +20,8 @@ local editDisp = context:getLua("shared/edit_field/edit_disp")
 local editHist = context:getLua("shared/edit_field/edit_hist")
 local edVis = context:getLua("shared/edit_field/ed_vis")
 local seqString = context:getLua("shared/edit_field/seq_string")
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+
 
 editField.code_groups = context:getLua("shared/edit_field/code_groups")
 local code_groups = editField.code_groups
@@ -140,7 +142,7 @@ function _mt_field:updateVertPosHint() -- XXX Stay
 	local d_sub = disp.super_lines[disp.d_car_super][disp.d_car_sub]
 	local d_str = d_sub.str
 
-	self.vertical_x_hint = d_sub.x + edVis.getCaretX(d_str, disp.d_car_byte, font)
+	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, disp.d_car_byte, font)
 end
 
 

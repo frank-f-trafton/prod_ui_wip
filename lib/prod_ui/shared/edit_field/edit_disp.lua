@@ -29,6 +29,7 @@ local utf8 = require("utf8")
 -- ProdUI
 local edCom = context:getLua("shared/edit_field/ed_com")
 local edVis = context:getLua("shared/edit_field/ed_vis")
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 -- Object metatables
@@ -479,7 +480,7 @@ function _mt_lc:getSubLineInfoAtX(super_i, sub_i, x, split_x)
 	-- Temporarily make X relative to start of sub-line.
 	x = x - sub_t.x
 
-	local byte, glyph_x, glyph_w = edVis.textInfoAtX(sub_str, font, x, split_x)
+	local byte, glyph_x, glyph_w = textUtil.getTextInfoAtX(sub_str, font, x, split_x)
 
 	return byte, glyph_x + sub_t.x, glyph_w
 end
@@ -589,11 +590,11 @@ function _mt_lc:updateSuperLine(i_super, str)
 	local work_str = str
 
 	if self.replace_missing then
-		work_str = edVis.replaceMissingGlyphs(work_str, font, "□")
+		work_str = textUtil.replaceMissingCodePointGlyphs(work_str, font, "□")
 	end
 
 	if self.masked then
-		work_str = edCom.getMaskedString(work_str, self.mask_glyph)
+		work_str = textUtil.getMaskedString(work_str, self.mask_glyph)
 
 	-- Only syntax-colorize unmasked text.
 	elseif self.fn_colorize and self.generate_colored_text then
@@ -707,7 +708,7 @@ function _mt_lc:updateSubLine(i_super, i_sub, str, syntax_colors, syntax_start)
 		sub_line.colored_text = edVis.stringToColoredText(sub_line.str, sub_line.colored_text, self.text_color, sub_line.syntax_colors)
 
 		-- Debug
-		--edVis.printColoredText(sub_line.colored_text)
+		--textUtil.debugPrintColoredText(sub_line.colored_text)
 
 	else
 		sub_line.syntax_colors = false
@@ -849,10 +850,13 @@ function _mt_lc:updateCaretRect()
 	local super_line_cur = super_lines[self.d_car_super]
 	local sub_line_cur = super_line_cur[self.d_car_sub]
 
-	-- Update cached caret info
-	self.caret_box_x, self.caret_box_w = edVis.getCaretXW(sub_line_cur.str, self.d_car_byte, font)
+	-- Update cached caret info.
+	self.caret_box_x = textUtil.getCharacterX(sub_line_cur.str, self.d_car_byte, font)
 
-	-- Apply horizontal alignment offsetting to caret
+	-- If we are at the end of the string + 1: use the width of the underscore character.
+	self.caret_box_w = textUtil.getCharacterW(sub_line_cur.str, self.d_car_byte, font) or font:getWidth("_")
+
+	-- Apply horizontal alignment offsetting to caret.
 	self.caret_box_x = applyCaretAlignOffset(self.caret_box_x, sub_line_cur.str, self.align, font)
 
 	self.caret_box_y = sub_line_cur.y

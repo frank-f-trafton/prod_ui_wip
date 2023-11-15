@@ -17,124 +17,17 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local edCom = context:getLua("shared/edit_field/ed_com")
-
-
---- Given a string and a font, replace glyphs that aren't present in the font with a stand-in glyph. Some TrueType fonts specify a character for this purpose, and will print them automatically (for example, 'ə' with the default LÖVE 11.4 font with display an outlined box.) AFAIK LÖVE ImageFonts do not.
--- @param str The input string.
--- @param font The LÖVE Font to check the string against.
--- @param err_glyph The glyph to insert. (Something like this: "□") Can be multi-byte, but should be exactly one code point if you want the resulting string to be the same Unicode length.
--- @return A modified string, or the same string if all glyphs were covered by the font.
-function edVis.replaceMissingGlyphs(str, font, err_glyph)
-	--[[
-	NOTES:
-	* Font:hasGlyphs() returns false for empty strings.
-
-	* Font:hasGlyphs() may return true or false for '\t' depending on if the font supplies an actual glyph for it.
-	LÖVE is still capable of rendering a tab regardless of this, however, so it will be exempted from
-	the check below.
-	--]]
-
-	-- Nothing to do if the string is empty or all glyphs are covered by the font.
-	--print("|"..str.."|", #str, string.byte(str))
-	if #str == 0 or font:hasGlyphs(str) then
-		return str
-
-	else
-		local ret_str = ""
-		local byte, u8_pos = 1, 1
-
-		while byte <= #str do
-			local byte2 = utf8.offset(str, u8_pos + 1)
-			if not byte2 then
-				break
-			end
-
-			local glyph = string.sub(str, byte, byte2 - 1)
-			if glyph == "\t" or font:hasGlyphs(glyph) then
-				ret_str = ret_str .. glyph
-			else
-				ret_str = ret_str .. err_glyph
-			end
-
-			u8_pos = u8_pos + 1
-			byte = byte2
-		end
-
-		return ret_str
-	end
-end
-
-
---- Trims a string so that it fits within a pixel width when rendered through a specific font.
--- @param str The string to trim.
--- @param font The font to use.
--- @param width The maximum allowed width, in pixels.
--- @return A trimmed version of 'str', or an empty string if nothing fit.
-function edVis.trimStringToWidth(str, font, width)
-	-- XXX maybe you'd be better off just using font:getWrap() and taking only the first array entry.
-	if font:getWidth(str) <= width then
-		return str
-	end
-
-	local byte, pos = 1, 1
-	local last_fit = ""
-
-	while true do
-		local sub = string.sub(str, 1, byte)
-		if font:getWidth(sub) > width then
-			break
-
-		else
-			last_fit = sub
-			pos = pos + 1
-			byte = utf8.offset(str, pos)
-
-			if not byte then
-				break
-			end
-		end
-	end
-
-	return last_fit
-end
-
-
-function edVis.getCaretXW(display_text, d_car_byte, font)
-	local text_before = string.sub(display_text, 1, d_car_byte - 1)
-
-	local cx = font:getWidth(text_before)
-
-	-- Get width of character the caret is currently resting on.
-	local cw
-	local offset = edCom.utf8FindRightStartOctet(display_text, d_car_byte + 1)
-
-	if offset then
-		cw = font:getWidth(string.sub(display_text, d_car_byte, offset - 1))
-
-	else
-		-- At end of string + 1: use the width of the underscore character
-		cw = font:getWidth("_")
-	end
-
-	return cx, cw
-end
-
-
-function edVis.getCaretX(display_text, d_car_byte, font)
-	-- Does not include alignment offsetting
-	local text_before = string.sub(display_text, 1, d_car_byte - 1)
-
-	return font:getWidth(text_before)
-end
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 function edVis.getDisplayTextSingle(text, font, replace_missing, masked)
+
 	local display_text = text
 	if masked then
-		display_text = edCom.getMaskedString(display_text, "*")
+		display_text = textUtil.getMaskedString(display_text, "*")
 
 	elseif replace_missing then
-		display_text = edVis.replaceMissingGlyphs(display_text, font, "□")
+		display_text = textUtil.replaceMissingCodePointGlyphs(display_text, font, "□")
 	end
 
 	return display_text
@@ -142,6 +35,7 @@ end
 
 
 function edVis.countToWidth(text, font, width)
+
 	local pixels = 0
 	local byte = 1
 	local u_char_count = 0
@@ -179,68 +73,6 @@ function edVis.countToWidth(text, font, width)
 end
 
 
---- Given a string of text and an X position (relative to the leftmost side of the text), 
-function edVis.textInfoAtX(text, font, x, split_x)
-
-	local byte, glyph_x, glyph_w
-
-	-- Empty string
-	if #text == 0 then
-		byte = 1
-		glyph_x = 0
-		glyph_w = 0
-
-	-- Input X is left of the line
-	elseif x < 0 then
-		byte = 1
-		local char_str = string.sub(text, 1, utf8.offset(text, 2) - 1)
-		glyph_x = 0
-		glyph_w = font:getWidth(char_str)
-
-	-- Input X is within, or to the right of the line
-	else
-		byte = 1
-		glyph_x = 0
-		glyph_w = 0
-
-		local char_str
-		local last_glyph = false
-
-		while byte <= #text do
-			local byte_2 = utf8.offset(text, 2, byte)
-			char_str = string.sub(text, byte, byte_2 - 1)
-			glyph_w = font:getWidth(char_str)
-
-			-- Apply kerning offset
-			if last_glyph then
-				glyph_x = glyph_x + font:getKerning(last_glyph, char_str)
-			end
-			last_glyph = char_str
-
-			-- 'split_x' will cause the following glyph to be selected if the X position is on the right side.
-			local split_w = glyph_w
-			if split_x then
-				split_w = split_w / 2
-			end
-
-			if x < glyph_x + split_w then
-				break
-			else
-				glyph_x = glyph_x + glyph_w
-				byte = byte_2
-			end
-		end
-
-		-- Byte exceeds text length: wipe glyph width.
-		if byte > #text then
-			glyph_w = 0
-		end
-	end
-
-	return byte, glyph_x, glyph_w
-end
-
-
 --- Given a super-line, sub-line offset and byte within the sub-line, get a count of unicode code points from the start to the byte as if it were a single string.
 function edVis.displaytoUCharCount(super_line, sub_i, byte)
 
@@ -272,7 +104,7 @@ end
 
 
 local color_seq_dummy = {}
---- Create or update a coloredtext table based on a string, where every code point is assigned its own color table.
+--- Create or update an alternating coloredtext table. Odd indices are colors, even indices are code point strings.
 -- @param str The input string.
 -- @param text_t (nil) An existing coloredtext table to recycle, if applicable.
 -- @param col_t ({1,1,1,1}) An existing color table to recycle, if applicable.
@@ -310,27 +142,4 @@ function edVis.stringToColoredText(str, text_t, col_t, color_seq)
 end
 
 
--- * Debug *
-
-
-function edVis.printColoredText(colored_text)
-	for i, chunk in ipairs(colored_text) do
-		if type(chunk) == "table" then
-			io.write("{"
-				.. tostring(chunk[1]) .. ", "
-				.. tostring(chunk[2]) .. ", "
-				.. tostring(chunk[3]) .. ", "
-				.. tostring(chunk[4]) .. "}, ")
-
-		else
-			io.write("| " .. tostring(chunk) .. " |,\n")
-		end
-	end
-end
-
-
--- * / Debug *
-
-
 return edVis
-
