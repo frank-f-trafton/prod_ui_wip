@@ -37,11 +37,11 @@ function edCom.validateEncoding(str, bad_byte_policy)
 		local byte_n = 1
 
 		while byte_n <= #str do
-			local len_ok, bad_byte = utf8.len(str, byte_n)
+			local ok, bad_byte, err_str = utf8Tools.check(str, byte_n)
 
 			-- String is good from byte_n to #str
-			if len_ok then
-				str_out = str_out .. string.sub(str, byte_n, #str)
+			if ok then
+				str_out = str_out .. string.sub(str, byte_n)
 				break
 
 			-- Encoding error at 'bad_byte'
@@ -54,7 +54,8 @@ function edCom.validateEncoding(str, bad_byte_policy)
 				str_out = str_out .. string.sub(str, byte_n, bad_byte - 1) .. "�"
 				byte_n = bad_byte + 1
 
-			else -- no policy: return empty string on bad input
+			-- no policy: return empty string on bad input
+			else
 				break
 			end
 		end
