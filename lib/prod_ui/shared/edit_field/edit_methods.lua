@@ -20,9 +20,9 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local edCom = context:getLua("shared/edit_field/ed_com")
-local edVis = context:getLua("shared/edit_field/ed_vis")
 local editDisp = context:getLua("shared/edit_field/edit_disp")
 local editField = context:getLua("shared/edit_field/edit_field") -- XXX work on removing this reference (?)
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 local code_groups = editField.code_groups
@@ -478,7 +478,7 @@ function client:caretStepUp(clear_highlight, n_steps)
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = super_lines[d_super][d_sub]
 		local d_str = d_sub_t.str
-		local pixels, new_byte, new_u_char = edVis.countToWidth(d_str, font, core.vertical_x_hint - d_sub_t.x)
+		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, core.vertical_x_hint - d_sub_t.x)
 
 		-- Not the last sub-line in the super-line: correct leftmost position so that it doesn't
 		-- spill over to the next sub-line (and get stuck).
@@ -489,7 +489,7 @@ function client:caretStepUp(clear_highlight, n_steps)
 		--]]
 
 		-- Convert display offsets to ones suitable for logical lines.
-		local u_count = edVis.displaytoUCharCount(super_lines[d_super], d_sub, new_byte)
+		local u_count = edCom.displaytoUCharCount(super_lines[d_super], d_sub, new_byte)
 		core.car_line = d_super
 		core.car_byte = utf8.offset(lines[core.car_line], u_count)
 
@@ -533,7 +533,7 @@ function client:caretStepDown(clear_highlight, n_steps)
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = super_lines[d_super][d_sub]
 		local d_str = d_sub_t.str
-		local pixels, new_byte, new_u_char = edVis.countToWidth(d_str, font, core.vertical_x_hint - d_sub_t.x)
+		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, core.vertical_x_hint - d_sub_t.x)
 
 		-- Not the last sub-line in the super-line: correct rightmost position so that it doesn't
 		-- spill over to the next sub-line.
@@ -542,7 +542,7 @@ function client:caretStepDown(clear_highlight, n_steps)
 		end
 
 		-- Convert display offsets to ones suitable for logical lines.
-		local u_count = edVis.displaytoUCharCount(super_lines[d_super], d_sub, new_byte)
+		local u_count = edCom.displaytoUCharCount(super_lines[d_super], d_sub, new_byte)
 		core.car_line = d_super
 		core.car_byte = utf8.offset(lines[core.car_line], u_count)
 

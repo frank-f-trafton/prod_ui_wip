@@ -28,7 +28,6 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local edCom = context:getLua("shared/edit_field/ed_com")
-local edVis = context:getLua("shared/edit_field/ed_vis")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
@@ -705,7 +704,7 @@ function _mt_lc:updateSubLine(i_super, i_sub, str, syntax_colors, syntax_start)
 			sub_line.syntax_colors[j] = nil
 		end
 
-		sub_line.colored_text = edVis.stringToColoredText(sub_line.str, sub_line.colored_text, self.text_color, sub_line.syntax_colors)
+		sub_line.colored_text = textUtil.stringToColoredText(sub_line.str, sub_line.colored_text, self.text_color, sub_line.syntax_colors)
 
 		-- Debug
 		--textUtil.debugPrintColoredText(sub_line.colored_text)
