@@ -1,11 +1,10 @@
--- To load: local lib = context:getLua("shared/lib")
+-- Data structure: Sequence of Strings.
 
 
--- SeqString v0.0.0 (prerelease)
 --[[
 MIT License
 
-Copyright (c) 2022 RBTS
+Copyright (c) 2022, 2023 RBTS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +24,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --]]
-
-
---local context = select(1, ...)
 
 
 local seqString = {}
@@ -293,7 +289,7 @@ function _mt_seq:offsetStepLeft(line_n, byte_n)
 
 		local byte = string.byte(self[line_n], byte_n)
 		-- Non-continuation byte
-		if byte and (byte < 0x80 or byte > 0xbf) then
+		if byte and (byte < 0x80) then
 			peeked = utf8.codepoint(self[line_n], byte_n)
 			break
 		end
@@ -332,22 +328,17 @@ function _mt_seq:offsetStepRight(line_n, byte_n)
 		local byte = string.byte(str, byte_n)
 
 		-- Non-continuation byte
-		if byte < 0x80 or byte > 0xbf then
-			if byte < 0x80 then
-				byte_n = byte_n + 1
+		if byte < 0x80 then
+			byte_n = byte_n + 1
 
-			elseif byte < 0xe0 then
-				byte_n = byte_n + 2
+		elseif byte < 0xe0 then
+			byte_n = byte_n + 2
 
-			elseif byte < 0xf0 then
-				byte_n = byte_n + 3
-
-			else
-				byte_n = byte_n + 4
-			end
+		elseif byte < 0xf0 then
+			byte_n = byte_n + 3
 
 		else
-			byte_n = byte_n + 1
+			byte_n = byte_n + 4
 		end
 
 		peeked = (byte_n == #str + 1) and 0x0a or utf8.codepoint(self[line_n], byte_n)
@@ -446,4 +437,3 @@ end
 
 
 return seqString
-

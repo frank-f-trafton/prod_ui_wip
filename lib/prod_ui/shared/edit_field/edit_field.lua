@@ -19,7 +19,7 @@ local edCom = context:getLua("shared/edit_field/ed_com")
 local editDisp = context:getLua("shared/edit_field/edit_disp")
 local editHist = context:getLua("shared/edit_field/edit_hist")
 local edVis = context:getLua("shared/edit_field/ed_vis")
-local seqString = context:getLua("shared/edit_field/seq_string")
+local seqString = require(context.conf.prod_ui_req .. "logic.struct.seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 

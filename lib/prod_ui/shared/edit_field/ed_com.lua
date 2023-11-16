@@ -83,7 +83,8 @@ function edCom.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed
 end
 
 
-function edCom.countUChars(text, u_char_room) 
+function edCom.countUChars(text, u_char_room)
+
 	local i = 1
 	local byte_count = 0
 
@@ -161,14 +162,16 @@ end
 
 -- NOTE: The byte search criteria skips over any byte which is within the "continuation byte" range. It assumes the subject string is valid UTF-8.
 function edCom.utf8FindLeftStartOctet(str, byte_pos)
+
 	if byte_pos < 1 or byte_pos > #str then
 		return nil
 	end
 
 	while byte_pos > 0 do
 		local byte = string.byte(str, byte_pos)
-		if byte < 0x80 or byte > 0xbf then
+		if byte < 0x80 then
 			return byte_pos
+
 		else
 			byte_pos = byte_pos - 1
 		end
@@ -179,6 +182,7 @@ end
 
 
 function edCom.utf8FindRightStartOctet(str, byte_pos)
+
 	if byte_pos < 1 or byte_pos > #str + 1 then
 		return nil
 	end
@@ -189,8 +193,9 @@ function edCom.utf8FindRightStartOctet(str, byte_pos)
 		end
 
 		local byte = string.byte(str, byte_pos)
-		if byte < 0x80 or byte > 0xbf then
+		if byte < 0x80 then
 			return byte_pos
+
 		else
 			byte_pos = byte_pos + 1
 		end
@@ -200,7 +205,7 @@ function edCom.utf8FindRightStartOctet(str, byte_pos)
 end
 
 
--- * / UTF-8 Support *
+-- * <Unsorted> *
 
 
 --- Gets caret and highlight lines and offsets in the correct order.
