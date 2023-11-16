@@ -18,7 +18,6 @@ local utf8 = require("utf8")
 local edCom = context:getLua("shared/edit_field/ed_com")
 local editDisp = context:getLua("shared/edit_field/edit_disp")
 local editHist = context:getLua("shared/edit_field/edit_hist")
-local edVis = context:getLua("shared/edit_field/ed_vis")
 local seqString = require(context.conf.prod_ui_req .. "logic.struct.seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -166,7 +165,7 @@ function _mt_field:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
 	--print("byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte
-	local u_count = edVis.displaytoUCharCount(super_line, sub_i, byte)
+	local u_count = edCom.displaytoUCharCount(super_line, sub_i, byte)
 
 	--print("u_count", u_count)
 

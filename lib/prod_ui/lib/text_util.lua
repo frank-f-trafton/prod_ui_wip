@@ -369,4 +369,83 @@ function textUtil.getMaskedString(str, mask_str)
 end
 
 
+--- Get the byte offset of a code point within a string at a given X position.
+-- @param str The string to check.
+-- @param font The font.
+-- @param x The X position to check.
+-- @return The byte offset, count of code points, and the glyph's X position in the string. The result is clamped if the input X position is outside of the text area. If the string is empty, returns byte index 1, code point count 0, and pixels 0.
+function textUtil.getByteOffsetAtX(str, font, x)
+
+	local pixels = 0
+	local byte = 1
+	local u_char_count = 0
+
+	local last_glyph = false
+
+	while byte <= #str do
+
+		if pixels >= x then
+			break
+		end
+
+		local byte_2 = utf8.offset(str, 2, byte)
+		if byte_2 == nil then
+			break
+		end
+
+		-- [UPGRADE] Use codepoint integers in LÖVE 12
+		local ch = string.sub(str, byte, byte_2 - 1)
+
+		pixels = pixels + font:getWidth(ch)
+
+		if last_glyph then
+			pixels = pixels + font:getKerning(last_glyph, ch)
+		end
+
+		last_glyph = ch
+		byte = byte_2
+		u_char_count = u_char_count + 1
+	end
+
+	return byte, u_char_count, pixels
+end
+
+
+local color_seq_dummy = {}
+--- Create or update an alternating coloredtext table. Odd indices are colors, even indices are code point strings.
+-- @param str The input string.
+-- @param text_t (nil) An optional existing coloredtext table to recycle.
+-- @param col_t ({1,1,1,1}) An optional existing color table to recycle.
+-- @param color_seq (nil) An optional table of existing color tables to apply to the code points.
+-- @return The coloredtext table.
+function textUtil.stringToColoredText(str, text_t, col_t, color_seq)
+
+	text_t = text_t or {}
+	col_t = col_t or {1, 1, 1, 1}
+	color_seq = color_seq or color_seq_dummy
+
+	local old_text_len = #text_t
+
+	local i = 1 -- byte in str
+	local j = 1 -- index in coloredtext array
+
+	while i <= #str do
+		local i2 = utf8.offset(str, 2, i)
+
+		text_t[j] = color_seq[i] or col_t
+		text_t[j + 1] = string.sub(str, i, i2 - 1)
+
+		i = i2
+		j = j + 2
+	end
+
+	-- Trim table excess
+	for k = #text_t, j, -1 do
+		text_t[k] = nil
+	end
+
+	return text_t
+end
+
+
 return textUtil
