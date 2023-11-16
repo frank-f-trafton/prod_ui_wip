@@ -289,7 +289,10 @@ function def:uiCall_create(inst)
 		-- This is not part of the editField core, and so it is not drawn through
 		-- the seqString or displayLine sub-objects, and is not affected by glyph masking.
 		self.ghost_text = false
-		self.ghost_text_align = "left" -- "left", "center", "right", "justify"
+
+		-- false: use content text alignment.
+		-- "left", "center", "right", "justify"
+		self.ghost_text_align = false
 
 		-- The first and last visible logical / super lines. Used as boundaries for text rendering.
 		-- Update whenever you scroll vertically or modify the text.
@@ -1139,6 +1142,7 @@ def.skinners = {
 			end
 			--]]
 
+
 			local scx, scy, scw, sch = love.graphics.getScissor()
 			love.graphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, math.max(0, self.vp2_w), math.max(0, self.vp2_h))
 
@@ -1190,7 +1194,6 @@ def.skinners = {
 				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr2_y + super_y, self.vp2_w, super_h)
 			end
 
-
 			love.graphics.push()
 
 			-- Translate into core region, with scrolling offsets applied.
@@ -1213,18 +1216,27 @@ def.skinners = {
 			-- Draw ghost text, if applicable.
 			-- XXX: center and right ghost text alignment modes aren't working correctly.
 			if self.ghost_text and lines:isEmpty() then
+
+				local align = self.ghost_text_align or disp.align
+
 				love.graphics.setFont(skin.font_ghost)
+
+				local gx, gy
+				if align == "left" then
+					gx, gy = 0, 0
+
+				elseif align == "center" then
+					gx, gy = math.floor(-font:getWidth(self.ghost_text) / 2), 0
+
+				elseif align == "right" then
+					gx, gy = math.floor(-font:getWidth(self.ghost_text)), 0
+				end
+
 				if disp.wrap_mode then
-					love.graphics.printf(self.ghost_text, 0, 0, self.vp_w, self.ghost_text_align)
+					love.graphics.printf(self.ghost_text, -self.align_offset, 0, self.vp_w, align)
 
-				elseif self.ghost_text_align == "left" then
-					love.graphics.print(self.ghost_text)
-
-				elseif self.ghost_text_align == "center" then
-					love.graphics.print(self.ghost_text, math.floor(self.vp_w / 2 - font:getWidth(self.ghost_text) / 2), 0)
-
-				elseif self.ghost_text_align == "right" then
-					love.graphics.print(self.ghost_text, math.floor(self.vp_w - font:getWidth(self.ghost_text)), 0)
+				else
+					love.graphics.print(self.ghost_text, gx, gy)
 				end
 			end
 
