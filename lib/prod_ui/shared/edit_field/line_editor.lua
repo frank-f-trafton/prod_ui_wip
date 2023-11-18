@@ -1,13 +1,13 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
--- editField core object. Provides the basic guts of a text input widget.
+-- LineEditor core object. Provides the basic guts of a text input widget.
 
 
 local context = select(1, ...)
 
 
-local editField = {}
+local lineEditor = {}
 
 
 -- LÖVE Supplemental
@@ -22,8 +22,8 @@ local seqString = require(context.conf.prod_ui_req .. "logic.struct.seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-editField.code_groups = context:getLua("shared/edit_field/code_groups")
-local code_groups = editField.code_groups
+lineEditor.code_groups = context:getLua("shared/edit_field/code_groups")
+local code_groups = lineEditor.code_groups
 
 
 local _mt_field = {}
@@ -33,12 +33,12 @@ _mt_field.__index = _mt_field
 -- * Public Functions *
 
 
---- Creates a new editField object.
+--- Creates a new Line Editor object.
 -- @return the edit_field table.
-function editField.newCoreObject(font)
+function lineEditor.new(font)
 
 	if not font then
-		error("missing argument #2 (font) for new core object.")
+		error("missing argument #1 (font) for new LineEditor object.")
 	end
 
 	local self = {}
@@ -60,7 +60,7 @@ function editField.newCoreObject(font)
 	hist:writeEntry(true, self.lines, self.car_line, self.car_byte, self.h_line, self.h_byte)
 
 	-- Cached display details for rendering text, highlights, and the caret.
-	-- editField is responsible for keeping this in sync with the internal state.
+	-- The LineEditor is responsible for keeping this in sync with the internal state.
 	self.disp = editDisp.newLineContainer(font)
 
 	self.disp:setHighlightDirtyRange(self.car_line, self.h_line)
@@ -138,7 +138,7 @@ function _mt_field:updateVertPosHint() -- XXX Stay
 	local disp = self.disp
 	local font = disp.font
 
-	local d_sub = disp.super_lines[disp.d_car_super][disp.d_car_sub]
+	local d_sub = disp.paragraphs[disp.d_car_para][disp.d_car_sub]
 	local d_str = d_sub.str
 
 	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, disp.d_car_byte, font)
@@ -152,24 +152,24 @@ end
 function _mt_field:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
 
 	local disp = self.disp
-	local super_lines = disp.super_lines
+	local paragraphs = disp.paragraphs
 	local font = disp.font
 
-	local super_i, sub_i = disp:getOffsetsAtY(y)
+	local para_i, sub_i = disp:getOffsetsAtY(y)
 
-	local super_line = super_lines[super_i]
-	local sub_line = super_line[sub_i]
-	--print("super_i", super_i, "sub_i", sub_i, "y1", sub_line.y, "y2", sub_line.y + sub_line.h)
+	local paragraph = paragraphs[para_i]
+	local sub_line = paragraph[sub_i]
+	--print("para_i", para_i, "sub_i", sub_i, "y1", sub_line.y, "y2", sub_line.y + sub_line.h)
 
-	local byte, x_pos, width = disp:getSubLineInfoAtX(super_i, sub_i, x, split_x)
+	local byte, x_pos, width = disp:getSubLineInfoAtX(para_i, sub_i, x, split_x)
 	--print("byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte
-	local u_count = edCom.displaytoUCharCount(super_line, sub_i, byte)
+	local u_count = edCom.displaytoUCharCount(paragraph, sub_i, byte)
 
 	--print("u_count", u_count)
 
-	local core_line = super_i
+	local core_line = para_i
 	local core_str = self.lines[core_line]
 	local core_byte = utf8.offset(core_str, u_count)
 	--print("core_byte", core_byte, "#core_str", #core_str)
@@ -184,7 +184,7 @@ function _mt_field:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
 end
 
 
-function editField.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed) -- XXX stay or move to util module
+function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed) -- XXX stay or move to util module
 
 	--print("huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group, "stop_on_line_feed", stop_on_line_feed)
 
@@ -271,8 +271,8 @@ function _mt_field:getWordRange(line_n, byte_n) -- XXX Stay
 		line_right, byte_right = line_n + 1, 1
 
 	else
-		line_left, byte_left = editField.huntWordBoundary(lines, line_n, byte_n, -1, true, first_group, true)
-		line_right, byte_right = editField.huntWordBoundary(lines, line_n, byte_n, 1, true, first_group, true)
+		line_left, byte_left = lineEditor.huntWordBoundary(lines, line_n, byte_n, -1, true, first_group, true)
+		line_right, byte_right = lineEditor.huntWordBoundary(lines, line_n, byte_n, 1, true, first_group, true)
 	end
 
 	--print("line+byte left, line+byte right", line_left, byte_left, line_right, byte_right)
@@ -295,12 +295,12 @@ function _mt_field:getWrappedLineRange(line_n, byte_n) -- XXX Stay
 		error("'byte_n' is out of range.")
 	end
 
-	-- Convert input line+byte pair to display super, sub, byte offsets.
-	local d_super = line_n
-	local d_byte, d_sub = editDisp.coreToDisplayOffsets(#line_str, byte_n, disp.super_lines[d_super])
+	-- Convert input line+byte pair to display paragraph, sub, byte offsets.
+	local d_para = line_n
+	local d_byte, d_sub = editDisp.coreToDisplayOffsets(#line_str, byte_n, disp.paragraphs[d_para])
 
 	-- Get first, last uChar offsets
-	local u_count_1, u_count_2 = disp:getSubLineUCharOffsetStartEnd(d_super, d_sub)
+	local u_count_1, u_count_2 = disp:getSubLineUCharOffsetStartEnd(d_para, d_sub)
 
 	-- Convert soft-wrap code point counts in disp to byte offsets in the core/source string
 	local byte_start = utf8.offset(lines[line_n], u_count_1)
@@ -451,7 +451,7 @@ function _mt_field:displaySyncCaretOffsets() -- XXX Stay
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
 	local disp = self.disp
-	local super_lines = disp.super_lines
+	local paragraphs = disp.paragraphs
 
 	--[[
 	print(
@@ -462,11 +462,11 @@ function _mt_field:displaySyncCaretOffsets() -- XXX Stay
 	)
 	--]]
 
-	disp.d_car_super = self.car_line
-	disp.d_car_byte, disp.d_car_sub = editDisp.coreToDisplayOffsets(#car_str, self.car_byte, super_lines[disp.d_car_super])
+	disp.d_car_para = self.car_line
+	disp.d_car_byte, disp.d_car_sub = editDisp.coreToDisplayOffsets(#car_str, self.car_byte, paragraphs[disp.d_car_para])
 
-	disp.d_h_super = self.h_line
-	disp.d_h_byte, disp.d_h_sub = editDisp.coreToDisplayOffsets(#h_str, self.h_byte, super_lines[disp.d_h_super])
+	disp.d_h_para = self.h_line
+	disp.d_h_byte, disp.d_h_sub = editDisp.coreToDisplayOffsets(#h_str, self.h_byte, paragraphs[disp.d_h_para])
 
 	disp:updateCaretRect()
 end
@@ -478,10 +478,10 @@ function _mt_field:displaySyncInsertion(line_1, line_2) -- XXX integrate into in
 	local disp = self.disp
 
 	if line_1 ~= line_2 then
-		disp:insertSuperLines(line_1, line_2 - line_1)
+		disp:insertParagraphs(line_1, line_2 - line_1)
 	end
 	for i = line_1, line_2 do
-		disp:updateSuperLine(i, lines[i])
+		disp:updateParagraph(i, lines[i])
 	end
 
 	disp:refreshYOffsets(line_1)
@@ -498,10 +498,10 @@ function _mt_field:displaySyncDeletion(line_1, line_2) -- XXX integrate into del
 	local disp = self.disp
 
 	if line_1 ~= line_2 then
-		disp:removeSuperLines(line_1, line_2 - line_1)
+		disp:removeParagraphs(line_1, line_2 - line_1)
 	end
 
-	disp:updateSuperLine(line_1, lines[line_1])
+	disp:updateParagraph(line_1, lines[line_1])
 	disp:refreshYOffsets(line_1)
 
 	disp:updateHighlightDirtyRange(line_1, line_2)
@@ -517,16 +517,16 @@ function _mt_field:displaySyncAll(line_i) -- XXX Stay
 
 	line_i = line_i or 1
 
-	-- Update all super-lines starting at the requested index.
-	-- We assume that all prior super-lines are up-to-date.
+	-- Update all display paragraphs starting at the requested index.
+	-- We assume that all prior display paragraphs are up-to-date.
 	for i = line_i, #lines do
-		disp:updateSuperLine(i, lines[i])
+		disp:updateParagraph(i, lines[i])
 	end
 
-	-- Trim excess super-lines
-	local super_lines = disp.super_lines
-	for i = #super_lines, #lines + 1, -1 do
-		super_lines[i] = nil
+	-- Trim excess paragraphs
+	local paragraphs = disp.paragraphs
+	for i = #paragraphs, #lines + 1, -1 do
+		paragraphs[i] = nil
 	end
 
 	-- Update Y positions of the remaining sub-lines
@@ -537,7 +537,7 @@ function _mt_field:displaySyncAll(line_i) -- XXX Stay
 	self:updateVertPosHint()
 
 	-- Finally, update all highlight ranges.
-	disp:updateHighlightDirtyRange(line_i, #super_lines)
+	disp:updateHighlightDirtyRange(line_i, #paragraphs)
 	disp:updateHighlights()
 end
 
@@ -547,7 +547,7 @@ function _mt_field:displaySyncAlign(line_i) -- XXX Stay
 	local disp = self.disp
 	line_i = line_i or 1
 
-	disp:updateSuperLineAlign(line_i)
+	disp:updateParagraphAlign(line_i)
 	self:updateVertPosHint()
 end
 
@@ -555,5 +555,5 @@ end
 -- * / Support Methods *
 
 
-return editField
+return lineEditor
 

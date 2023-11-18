@@ -1,7 +1,7 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
--- editField common utility functions.
+-- LineEditor common utility functions.
 
 
 local context = select(1, ...)
@@ -285,10 +285,10 @@ end
 --]=]
 
 
---- Given a super-line, sub-line offset and byte within the sub-line, get a count of unicode code points from the start to the byte as if it were a single string.
-function edCom.displaytoUCharCount(super_line, sub_i, byte)
+--- Given a Paragraph, sub-line offset and byte within the sub-line, get a count of unicode code points from the start to the byte as if it were a single string.
+function edCom.displaytoUCharCount(paragraph, sub_i, byte)
 
-	local string_one = super_line[sub_i].str
+	local string_one = paragraph[sub_i].str
 
 	-- 'byte' can be one past the end of the string to represent the caret being at the final position.
 	-- However, arg #3 to utf8.len() cannot exceed the size of the string (though arg #3 can handle offsets
@@ -305,7 +305,7 @@ function edCom.displaytoUCharCount(super_line, sub_i, byte)
 	--print("initial u_count", u_count)
 
 	for i = 1, sub_i - 1 do
-		u_count = u_count + utf8.len(super_line[i].str)
+		u_count = u_count + utf8.len(paragraph[i].str)
 		--print("i", i, "u_count", u_count)
 	end
 

@@ -2,7 +2,7 @@
 
 
 --[[
-	EditField graphics state. Handles wrapped and aligned text, highlight rectangles, and provides caret XYWH values and blinking state.
+	LineEditor graphics state. Handles wrapped and aligned text, highlight rectangles, and provides caret XYWH values and blinking state.
 	Does not handle scrolling, scroll bars, margins, line numbers, etc.
 --]]
 
@@ -14,11 +14,11 @@ local editDisp = {}
 
 
 --[[
-	Logical line: An input string to be used as a source.
-	Sub-line: A single line of display text to be printed. May also include a coloredtext sequence version of the text.
-	Super-line: One display line, broken up into sub-lines by word-wrap.
-		(Without wrapping, each super-line contains exactly one sub-line.)
-	Line container: Holds super-lines, plus metadata and an optional LÖVE Text object.
+	(Logical) Line: An input string to be used as a source.
+	Wrap-Line: A single line of display text to be printed. May also include a coloredtext sequence version of the text.
+	Paragraph: Holds one or more Wrap-Lines that correspond to a single Logical Line. Without wrapping, each Paragraph
+		contains exactly one Wrap-Line.
+	Line Container: The main 'disp' object. Holds Paragraphs, plus metadata and an optional LÖVE Text object.
 --]]
 
 
@@ -37,9 +37,9 @@ local _mt_lc = {}
 _mt_lc.__index = _mt_lc
 
 
--- Super-Line
-local _mt_sup = {}
-_mt_sup.__index = _mt_sup
+-- Paragraph
+local _mt_para = {}
+_mt_para.__index = _mt_para
 
 
 -- Sub-Line
@@ -92,11 +92,11 @@ local function dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
 end
 
 
-local function dispUpdateHighlight(self, i_super, i_sub, byte_1, byte_2)
+local function dispUpdateHighlight(self, i_para, i_sub, byte_1, byte_2)
 
 	local font = self.font
-	local super_line = self.super_lines[i_super]
-	local sub_line = super_line[i_sub]
+	local paragraph = self.paragraphs[i_para]
+	local sub_line = paragraph[i_sub]
 
 	if byte_1 == byte_2 then
 		sub_line.highlighted = false
@@ -166,29 +166,29 @@ end
 -- * Public helper functions *
 
 
---- Given a line length, a byte offset and a specific super-line structure, return a byte and sub-line offset suitable for the display structure.
-function editDisp.coreToDisplayOffsets(s_bytes, byte_n, super_line)
+--- Given a line length, a byte offset and a specific Paragraph structure, return a byte and sub-line offset suitable for the display structure.
+function editDisp.coreToDisplayOffsets(s_bytes, byte_n, paragraph)
 
-	if #super_line == 0 then
-		error("EditField corruption: empty super-line.")
+	if #paragraph == 0 then
+		error("LineEditor corruption: empty paragraph.")
 	end
 
 	-- End of line
 	if byte_n == s_bytes + 1 then
-		return #super_line[#super_line].str + 1, #super_line
+		return #paragraph[#paragraph].str + 1, #paragraph
 
 	else
 		local line_sub = 1
 
 		while true do
 			-- Uncomment to help debug OOB issues here:
-			--print("byte_n", byte_n, "super_line[line_sub]", super_line[line_sub])
+			--print("byte_n", byte_n, "paragraph[line_sub]", paragraph[line_sub])
 
-			if byte_n <= #super_line[line_sub].str then
+			if byte_n <= #paragraph[line_sub].str then
 				break
 			end
 
-			byte_n = byte_n - #super_line[line_sub].str
+			byte_n = byte_n - #paragraph[line_sub].str
 			line_sub = line_sub + 1
 		end
 
@@ -197,22 +197,22 @@ function editDisp.coreToDisplayOffsets(s_bytes, byte_n, super_line)
 end
 
 
---- Given a display-lines object, a super-line index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
+--- Given a display-lines object, a Paragraph index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
 --  the top or bottom sub-line if reaching the start or end respectively.
-function editDisp.stepSubLine(display_lines, d_car_super, d_car_sub, n_steps)
+function editDisp.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 
 	while n_steps < 0 do
 		-- First line
-		if d_car_super <= 1 and d_car_sub <= 1 then
-			d_car_super = 1
+		if d_car_para <= 1 and d_car_sub <= 1 then
+			d_car_para = 1
 			d_car_sub = 1
 			break
 
 		else
 			d_car_sub = d_car_sub - 1
 			if d_car_sub == 0 then
-				d_car_super = d_car_super - 1
-				d_car_sub = #display_lines[d_car_super]
+				d_car_para = d_car_para - 1
+				d_car_sub = #display_lines[d_car_para]
 			end
 
 			n_steps = n_steps + 1
@@ -221,16 +221,16 @@ function editDisp.stepSubLine(display_lines, d_car_super, d_car_sub, n_steps)
 
 	while n_steps > 0 do
 		-- Last line
-		if d_car_super >= #display_lines and d_car_sub >= #display_lines[#display_lines] then
-			d_car_super = #display_lines
+		if d_car_para >= #display_lines and d_car_sub >= #display_lines[#display_lines] then
+			d_car_para = #display_lines
 			d_car_sub = #display_lines[#display_lines]
 			break
 
 		else
 			d_car_sub = d_car_sub + 1
 
-			if d_car_sub > #display_lines[d_car_super] then
-				d_car_super = d_car_super + 1
+			if d_car_sub > #display_lines[d_car_para] then
+				d_car_para = d_car_para + 1
 				d_car_sub = 1
 			end
 
@@ -238,18 +238,18 @@ function editDisp.stepSubLine(display_lines, d_car_super, d_car_sub, n_steps)
 		end
 	end
 
-	return d_car_super, d_car_sub
+	return d_car_para, d_car_sub
 end
 
 
-function editDisp.getSubLineCount(super_lines, line_1, sub_1, line_2, sub_2)
+function editDisp.getSubLineCount(paragraphs, line_1, sub_1, line_2, sub_2)
 
 	local count = 0
 	local sub_c = sub_1
 
-	for i = line_1, #super_lines do
-		local super = super_lines[i]
-		while sub_c <= #super do
+	for i = line_1, #paragraphs do
+		local paragraph = paragraphs[i]
+		while sub_c <= #paragraph do
 			count = count + 1
 
 			if i == line_2 and sub_c == sub_2 then
@@ -265,8 +265,8 @@ function editDisp.getSubLineCount(super_lines, line_1, sub_1, line_2, sub_2)
 end
 
 
---- Sorts display caret and highlight offsets from first to last. (Super-line, sub-line, and byte.)
-function editDisp.getHighlightOffsetsSuperLine(line_1, sub_1, byte_1, line_2, sub_2, byte_2)
+--- Sorts display caret and highlight offsets from first to last. (Paragraph, sub-line, and byte.)
+function editDisp.getHighlightOffsetsParagraph(line_1, sub_1, byte_1, line_2, sub_2, byte_2)
 
 	if line_1 == line_2 and sub_1 == sub_2 then
 		byte_1, byte_2 = math.min(byte_1, byte_2), math.max(byte_1, byte_2)
@@ -292,13 +292,13 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 
 	local self = {} -- AKA "disp"
 
-	self.super_lines = {}
+	self.paragraphs = {}
 
-	-- To change align and wrap mode, use the methods in the core object.
+	-- To change align and wrap mode, use the methods in the LineEditor object.
 	-- With center and right alignment, sub-lines will have negative X positions. The client
 	-- needs to keep track of the align mode and offset the positions based on the document
 	-- dimensions (which in turn are based on the number of lines and which lines are widest).
-	-- Center alignment: Zero X == center of 
+	-- Center alignment: Zero X == center of
 	self.align = "left" -- "left", "center", "right"
 
 	self.wrap_mode = false
@@ -320,15 +320,15 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 	self.text_h_color = color_h_t or {0, 0, 0, 1}
 
 	-- Caret and highlight lines, sub-lines and bytes for the display text.
-	self.d_car_super = 1
+	self.d_car_para = 1
 	self.d_car_sub = 1
 	self.d_car_byte = 1
 
-	self.d_h_super = 1
+	self.d_h_para = 1
 	self.d_h_sub = 1
 	self.d_h_byte = 1
 
-	-- Update range for highlights, tracked on a per-super-line basis.
+	-- Update range for highlights, tracked on a per-Paragraph basis.
 	self.h_line_min = math.huge
 	self.h_line_max = 0
 
@@ -367,7 +367,7 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 	-- text).
 	self.generate_colored_text = false
 
-	-- Assign a function taking 'self', 'str', 'syntax_t', and 'work_t' to colorize a super-line when updating
+	-- Assign a function taking 'self', 'str', 'syntax_t', and 'work_t' to colorize a Paragraph when updating
 	-- it. 'self' is the line container. 'syntax_t' is 'self.wip_syntax_colors', and it may contain existing
 	-- contents. You must return the number of entries written to the table so that the update logic can clip
 	-- the contents. 'work_t' is self.syntax_work, an arbitrary table you may use to help keep track of your
@@ -393,13 +393,13 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 end
 
 
-function editDisp.newSuperLine()
+function editDisp.newParagraph()
 
 	local self = {}
 
-	-- Super-lines are basically just an array of sub-lines.
+	-- Paragraphs are basically just an array of sub-lines.
 
-	setmetatable(self, _mt_sup)
+	setmetatable(self, _mt_para)
 
 	return self
 end
@@ -414,8 +414,8 @@ end
 function _mt_lc:getDocumentHeight()
 
 	-- Assumes the final sub-line is current.
-	local last_super = self.super_lines[#self.super_lines]
-	local last_sub = last_super[#last_super]
+	local last_para = self.paragraphs[#self.paragraphs]
+	local last_sub = last_para[#last_para]
 
 	return last_sub.y + last_sub.h
 end
@@ -425,8 +425,8 @@ function _mt_lc:getDocumentXBoundaries()
 
 	local x1, x2 = 0, 0
 
-	for i, super_line in ipairs(self.super_lines) do
-		for j, sub_line in ipairs(super_line) do
+	for i, paragraph in ipairs(self.paragraphs) do
+		for j, sub_line in ipairs(paragraph) do
 			x1 = math.min(x1, sub_line.x)
 			x2 = math.max(x2, sub_line.x + sub_line.w)
 		end
@@ -439,40 +439,40 @@ end
 -- @param y Y position, relative to the line container start point.
 function _mt_lc:getOffsetsAtY(y)
 
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 
-	-- Find super-line and sub-line that are closest to the Y position.
+	-- Find Paragraph and sub-line that are closest to the Y position.
 	-- Default to the first sub-line, and progressively select each sub-line which
 	-- is at least equal to the input Y position.
-	local super_i = 1
+	local para_i = 1
 	local sub_i = 1
 
-	local sub_one = super_lines[1][1]
+	local sub_one = paragraphs[1][1]
 
-	for i, super_line in ipairs(super_lines) do
-		for j, sub_line in ipairs(super_line) do
+	for i, paragraph in ipairs(paragraphs) do
+		for j, sub_line in ipairs(paragraph) do
 			if y < sub_line.y then
 				break
 
 			else
-				super_i = i
+				para_i = i
 				sub_i = j
 			end
 		end
 	end
 
-	return super_i, sub_i
+	return para_i, sub_i
 end
 
 
 -- @return Byte, X position and width of the glyph (if applicable).
-function _mt_lc:getSubLineInfoAtX(super_i, sub_i, x, split_x)
+function _mt_lc:getSubLineInfoAtX(para_i, sub_i, x, split_x)
 
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 	local font = self.font
 
-	local super_t = super_lines[super_i]
-	local sub_t = super_t[sub_i]
+	local para_t = paragraphs[para_i]
+	local sub_t = para_t[sub_i]
 
 	local sub_str = sub_t.str
 
@@ -485,40 +485,40 @@ function _mt_lc:getSubLineInfoAtX(super_i, sub_i, x, split_x)
 end
 
 
---- Get the height of a super-line by comparing its first and last sub-lines. The positions must be up to date when calling. Includes lineHeight spacing, but not paragraph spacing.
-function _mt_lc:getSuperLineHeight(super_i) -- XXX test
+--- Get the height of a Paragraph by comparing its first and last sub-lines. The positions must be up to date when calling. Includes lineHeight spacing, but not paragraph spacing.
+function _mt_lc:getParagraphHeight(para_i) -- XXX test
 
-	local super_line = self.super_lines[super_i]
-	local sub_first, sub_last = super_line[1], super_line[#super_line]
+	local paragraph = self.paragraphs[para_i]
+	local sub_first, sub_last = paragraph[1], paragraph[#paragraph]
 
 	return sub_last.y + sub_last.h - sub_first.y
 end
 
 
-function _mt_lc:getSubLineUCharOffsetStart(super_i, sub_i)
+function _mt_lc:getSubLineUCharOffsetStart(para_i, sub_i)
 
-	local super_line = self.super_lines[super_i]
+	local paragraph = self.paragraphs[para_i]
 	local u_count = 1
 
 	for i = 1, sub_i - 1 do
-		u_count = u_count + utf8.len(super_line[i].str)
+		u_count = u_count + utf8.len(paragraph[i].str)
 	end
 
 	return u_count
 end
 
 
-function _mt_lc:getSubLineUCharOffsetEnd(super_i, sub_i)
+function _mt_lc:getSubLineUCharOffsetEnd(para_i, sub_i)
 
-	local super_line = self.super_lines[super_i]
+	local paragraph = self.paragraphs[para_i]
 	local u_count = 0
 
 	for i = 1, sub_i do
-		u_count = u_count + utf8.len(super_line[i].str)
+		u_count = u_count + utf8.len(paragraph[i].str)
 	end
 
-	-- End of the super-line: add one more byte past the end.
-	if sub_i >= #super_line then
+	-- End of the Paragraph: add one more byte past the end.
+	if sub_i >= #paragraph then
 		u_count = u_count + 1
 	end
 
@@ -526,19 +526,19 @@ function _mt_lc:getSubLineUCharOffsetEnd(super_i, sub_i)
 end
 
 
-function _mt_lc:getSubLineUCharOffsetStartEnd(super_i, sub_i)
+function _mt_lc:getSubLineUCharOffsetStartEnd(para_i, sub_i)
 
-	local super_line = self.super_lines[super_i]
+	local paragraph = self.paragraphs[para_i]
 	local u_count_1 = 1
 	local u_count_2
 
 	for i = 1, sub_i - 1 do
-		u_count_1 = u_count_1 + utf8.len(super_line[i].str)
+		u_count_1 = u_count_1 + utf8.len(paragraph[i].str)
 	end
-	u_count_2 = u_count_1 + utf8.len(super_line[sub_i].str) - 1
+	u_count_2 = u_count_1 + utf8.len(paragraph[sub_i].str) - 1
 
-	-- End of the super-line: add one more byte past the end.
-	if sub_i >= #super_line then
+	-- End of the Paragraph: add one more byte past the end.
+	if sub_i >= #paragraph then
 		u_count_2 = u_count_2 + 1
 	end
 
@@ -546,24 +546,24 @@ function _mt_lc:getSubLineUCharOffsetStartEnd(super_i, sub_i)
 end
 
 
---- Update sub-line Y offsets, beginning at the specified super-line index and continuing to the end of the super-lines array.
--- @param super_i The first super-line to check. All previous sub-lines in the container must have up-to-date Y offsets.
-function _mt_lc:refreshYOffsets(super_i) 
+--- Update sub-line Y offsets, beginning at the specified Paragraph index and continuing to the end of the `paragraphs` array.
+-- @param para_i The first Paragraph to check. All previous sub-lines in the container must have up-to-date Y offsets.
+function _mt_lc:refreshYOffsets(para_i)
 
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 	local y = 0
 
-	-- If starting after super-line #1, assume that the previous sub-line has known-good coordinates.
-	if super_i > 1 then
-		local super_prev = super_lines[super_i - 1]
-		local sub_prev = super_prev[#super_prev]
+	-- If starting after Paragraph #1, assume that the previous sub-line has known-good coordinates.
+	if para_i > 1 then
+		local para_prev = paragraphs[para_i - 1]
+		local sub_prev = para_prev[#para_prev]
 		y = sub_prev.y + sub_prev.h + self.paragraph_pad
 	end
 
-	for i = super_i, #super_lines do
-		local super_line = super_lines[i]
-		
-		for j, sub_line in ipairs(super_line) do
+	for i = para_i, #paragraphs do
+		local paragraph = paragraphs[i]
+
+		for j, sub_line in ipairs(paragraph) do
 			sub_line.y = y
 			y = y + sub_line.h
 		end
@@ -573,17 +573,17 @@ function _mt_lc:refreshYOffsets(super_i)
 end
 
 
---- Within a line container, update a super-line's contents.
--- @param i_super Index of the super-line. If not the first super-line, then all super-lines from index 1 to this index - 1 must be populated at time of call.
+--- Within a line container, update a Paragraph's contents.
+-- @param i_para Index of the Paragraph. If not the first Paragraph, then all Paragraphs from 'index 1' to 'this index - 1' must be populated at time of call.
 -- @param str The source / input string.
-function _mt_lc:updateSuperLine(i_super, str)
+function _mt_lc:updateParagraph(i_para, str)
 
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 	local font = self.font
 
-	-- Provision the super-line table.
-	local super_line = super_lines[i_super] or editDisp.newSuperLine()
-	super_lines[i_super] = super_line
+	-- Provision the Paragraph table.
+	local paragraph = paragraphs[i_para] or editDisp.newParagraph()
+	paragraphs[i_para] = paragraph
 
 	-- Perform optional modifications on the string.
 	local work_str = str
@@ -606,7 +606,7 @@ function _mt_lc:updateSuperLine(i_super, str)
 
 	local final_index = 1
 	if not self.wrap_mode then
-		self:updateSubLine(i_super, 1, work_str, self.wip_syntax_colors, 1)
+		self:updateSubLine(i_para, 1, work_str, self.wip_syntax_colors, 1)
 
 	else
 		local width, wrapped = font:getWrap(work_str, self.view_w)
@@ -629,7 +629,7 @@ function _mt_lc:updateSuperLine(i_super, str)
 			if i < #wrapped and wrapped_line == "" then
 				wrapped_line = "~"
 			end
-			self:updateSubLine(i_super, i, wrapped_line, self.wip_syntax_colors, start_code_point)
+			self:updateSubLine(i_para, i, wrapped_line, self.wip_syntax_colors, start_code_point)
 
 			start_code_point = start_code_point + utf8.len(wrapped_line)
 		end
@@ -637,25 +637,25 @@ function _mt_lc:updateSuperLine(i_super, str)
 	end
 
 	-- Clear any stale sub-lines beyond the last-touched index
-	for j = #super_line, final_index + 1, -1 do
-		super_line[j] = nil
+	for j = #paragraph, final_index + 1, -1 do
+		paragraph[j] = nil
 	end
 end
 
 
 -- Updates the alignment of sub-lines.
-function _mt_lc:updateSuperLineAlign(line_1, line_2)
+function _mt_lc:updateParagraphAlign(line_1, line_2)
 
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 
 	line_1 = line_1 or 1
-	line_2 = line_2 or #super_lines
+	line_2 = line_2 or #paragraph
 
 	local align, font, width = self.align, self.font, self.view_w
 
 	for i = line_1, line_2 do
-		local super_line = super_lines[i]
-		for j, sub_line in ipairs(super_line) do
+		local paragraph = paragraphs[i]
+		for j, sub_line in ipairs(paragraph) do
 			updateSubLineHorizontal(sub_line, align, font)
 		end
 	end
@@ -663,19 +663,19 @@ end
 
 
 --- Update a sub-line's text contents and X, width and height. Does not update Y position: call refreshYOffsets() afterward.
--- @param i_super Super-line index.
+-- @param i_para Paragraph index.
 -- @param i_sub Sub-line index.
 -- @param str The new string to use.
-function _mt_lc:updateSubLine(i_super, i_sub, str, syntax_colors, syntax_start)
+function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
 
 	local font = self.font
 
 	-- All sub-lines from index 1 to this index - 1 must be populated at time of call.
-	local super_line = self.super_lines[i_super]
+	local paragraph = self.paragraphs[i_para]
 
 	-- Get / create sub-line table
-	local sub_line = super_line[i_sub] or {}
-	super_line[i_sub] = sub_line
+	local sub_line = paragraph[i_sub] or {}
+	paragraph[i_sub] = sub_line
 
 	-- Position relative to top-left corner of the text region.
 	sub_line.x = 0
@@ -723,45 +723,50 @@ function _mt_lc:updateSubLine(i_super, i_sub, str, syntax_colors, syntax_start)
 
 	setmetatable(sub_line, _mt_sub)
 
-	super_line[i_sub] = sub_line
+	paragraph[i_sub] = sub_line
 
 	sub_line.h = math.ceil(font:getHeight() * font:getLineHeight())
 	updateSubLineHorizontal(sub_line, self.align, font)
 end
 
 
-function _mt_lc:insertSuperLines(i_super, qty)
+function _mt_lc:insertParagraphs(i_para, qty)
 	for i = 1, qty do
-		table.insert(self.super_lines, i_super + i, editDisp.newSuperLine())
+		table.insert(self.paragraphs, i_para + i, editDisp.newParagraph())
 	end
 end
 
 
-function _mt_lc:removeSuperLines(i_super, qty)
+function _mt_lc:removeParagraphs(i_para, qty)
+
 	for i = 1, qty do
-		table.remove(self.super_lines, i_super)
+		table.remove(self.paragraphs, i_para)
 	end
 end
 
 
 function _mt_lc:clearHighlightDirtyRange()
+
 	self.h_line_min = math.huge
 	self.h_line_max = 0
-end	
+end
 
 function _mt_lc:setHighlightDirtyRange(car_line, h_line)
+
 	self.h_line_min = math.min(car_line, h_line)
 	self.h_line_max = math.max(car_line, h_line)
 end
 
 
 function _mt_lc:updateHighlightDirtyRange(car_line, h_line)
+
 	self.h_line_min = math.min(self.h_line_min, car_line, h_line)
 	self.h_line_max = math.max(self.h_line_max, car_line, h_line)
 end
 
 
 function _mt_lc:fullHighlightDirtyRange()
+
 	self.h_line_min = 1
 	self.h_line_max = math.huge
 end
@@ -769,21 +774,21 @@ end
 
 function _mt_lc:updateHighlights()
 
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 
 	local line_1 = math.max(self.h_line_min, 1)
-	local line_2 = math.min(self.h_line_max, #super_lines)
+	local line_2 = math.min(self.h_line_max, #paragraphs)
 
 	if line_1 > line_2 then
 		return
 	end
 
 	-- Get line offsets relative to the display sequence.
-	local super_1, sub_1, byte_1, super_2, sub_2, byte_2 = editDisp.getHighlightOffsetsSuperLine(
-		self.d_car_super,
+	local para_1, sub_1, byte_1, para_2, sub_2, byte_2 = editDisp.getHighlightOffsetsParagraph(
+		self.d_car_para,
 		self.d_car_sub,
 		self.d_car_byte,
-		self.d_h_super,
+		self.d_h_para,
 		self.d_h_sub,
 		self.d_h_byte
 	)
@@ -794,25 +799,25 @@ function _mt_lc:updateHighlights()
 	-- 2: Handling in-between lines and bottom of multiple lines
 	-- 3: Done / fall through to 'not highlighted'
 	local paint_mode = 1
-	if super_1 == super_2 and sub_1 == sub_2 then
+	if para_1 == para_2 and sub_1 == sub_2 then
 		paint_mode = 0
 	end
 
 	for i = line_1, line_2 do
-		local super_line = super_lines[i]
+		local paragraph = paragraphs[i]
 
-		for j, sub_line in ipairs(super_line) do
+		for j, sub_line in ipairs(paragraph) do
 			-- Single highlighted line
-			if paint_mode == 0 and i == super_1 and j == sub_1 then
+			if paint_mode == 0 and i == para_1 and j == sub_1 then
 				dispUpdateHighlight(self, i, j, byte_1, byte_2)
 
 			-- Top of multiple lines
-			elseif paint_mode == 1 and i == super_1 and j == sub_1 then
+			elseif paint_mode == 1 and i == para_1 and j == sub_1 then
 				dispUpdateHighlight(self, i, j, byte_1, #sub_line.str + 2)
 				paint_mode = 2
 
 			-- Bottom of multiple lines
-			elseif paint_mode == 2 and i == super_2 and j == sub_2 then
+			elseif paint_mode == 2 and i == para_2 and j == sub_2 then
 				dispUpdateHighlight(self, i, j, 1, byte_2)
 				paint_mode = 3
 
@@ -831,12 +836,12 @@ end
 
 
 function _mt_lc:clearHighlights()
-	for i, super_line in ipairs(self.super_lines) do
-		for j, sub_line in ipairs(super_line) do
+	for i, paragraph in ipairs(self.paragraphs) do
+		for j, sub_line in ipairs(paragraph) do
 			sub_line.highlighted = false
 			dispUpdateSubLineSyntaxColors(self, sub_line, -1, -1)
 		end
-	end	
+	end
 end
 
 
@@ -844,10 +849,10 @@ function _mt_lc:updateCaretRect()
 	--print("disp:updateCaretRect()")
 
 	local font = self.font
-	local super_lines = self.super_lines
+	local paragraphs = self.paragraphs
 
-	local super_line_cur = super_lines[self.d_car_super]
-	local sub_line_cur = super_line_cur[self.d_car_sub]
+	local para_cur = paragraphs[self.d_car_para]
+	local sub_line_cur = para_cur[self.d_car_sub]
 
 	-- Update cached caret info.
 	self.caret_box_x = textUtil.getCharacterX(sub_line_cur.str, self.d_car_byte, font)

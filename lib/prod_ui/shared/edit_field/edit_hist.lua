@@ -2,7 +2,7 @@
 
 
 --[[
-	EditField history implementation.
+	LineEditor history implementation.
 
 	IMPORTANT: For password fields, you should disable undo/redo history.
 
