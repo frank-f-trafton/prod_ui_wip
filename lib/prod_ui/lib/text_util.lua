@@ -197,7 +197,7 @@ local temp_font, temp_replace
 -- string.gsub function for textUtil.replaceMissingCodePointGlyphs().
 local function hof_replaceMissing(key)
 
-	if key == "\t" or not temp_font:hasGlyphs(key) then
+	if key ~= "\t" and not temp_font:hasGlyphs(key) then
 		return temp_replace
 	end
 

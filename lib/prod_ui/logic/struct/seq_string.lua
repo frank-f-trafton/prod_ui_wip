@@ -41,11 +41,7 @@ _mt_seq.__index = _mt_seq
 
 
 function seqString.new()
-	local self = {""}
-
-	setmetatable(self, _mt_seq)
-
-	return self
+	return setmetatable({""}, _mt_seq)
 end
 
 
@@ -146,7 +142,6 @@ function _mt_seq:delete(line_start, byte_start, line_end, byte_end)
 	if line_start == line_end then
 		local line = self[line_start]
 		local s1 = string.sub(line, 1, byte_start - 1)
-		local s2 = string.sub(line, byte_start, byte_end)
 		local s3 = string.sub(line, byte_end + 1)
 
 		self[line_start] = s1 .. s3
