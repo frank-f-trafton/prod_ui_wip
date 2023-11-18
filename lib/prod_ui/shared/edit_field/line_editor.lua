@@ -1,7 +1,7 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
--- LineEditor core object. Provides the basic guts of a text input widget.
+-- LineEditor core object. Provides the basic guts of a text input field.
 
 
 local context = select(1, ...)
@@ -26,8 +26,8 @@ lineEditor.code_groups = context:getLua("shared/edit_field/code_groups")
 local code_groups = lineEditor.code_groups
 
 
-local _mt_field = {}
-_mt_field.__index = _mt_field
+local _mt_line_ed = {}
+_mt_line_ed.__index = _mt_line_ed
 
 
 -- * Public Functions *
@@ -108,7 +108,7 @@ function lineEditor.new(font)
 
 	-- End control state
 
-	setmetatable(self, _mt_field)
+	setmetatable(self, _mt_line_ed)
 
 	self.disp:refreshFontParams()
 	self:displaySyncAll()
@@ -123,17 +123,17 @@ end
 -- * Support Methods *
 
 
-function _mt_field:getCaretOffsets() -- XXX Stay
+function _mt_line_ed:getCaretOffsets() -- XXX Stay
 	return self.car_line, self.car_byte, self.h_line, self.h_byte
 end
 
 
-function _mt_field:getHighlightOffsets() -- XXX Stay
+function _mt_line_ed:getHighlightOffsets() -- XXX Stay
 	return edCom.sortOffsets(self.car_line, self.car_byte, self.h_line, self.h_byte)
 end
 
 
-function _mt_field:updateVertPosHint() -- XXX Stay
+function _mt_line_ed:updateVertPosHint() -- XXX Stay
 
 	local disp = self.disp
 	local font = disp.font
@@ -149,7 +149,7 @@ end
 -- @param y Y position.
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
-function _mt_field:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
+function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
 
 	local disp = self.disp
 	local paragraphs = disp.paragraphs
@@ -239,7 +239,7 @@ function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, fir
 end
 
 
-function _mt_field:updateDispHighlightRange() -- XXX Stay
+function _mt_line_ed:updateDispHighlightRange() -- XXX Stay
 
 	local disp = self.disp
 
@@ -249,7 +249,7 @@ function _mt_field:updateDispHighlightRange() -- XXX Stay
 end
 
 
-function _mt_field:getWordRange(line_n, byte_n) -- XXX Stay
+function _mt_line_ed:getWordRange(line_n, byte_n) -- XXX Stay
 
 	local lines = self.lines
 
@@ -281,7 +281,7 @@ function _mt_field:getWordRange(line_n, byte_n) -- XXX Stay
 end
 
 
-function _mt_field:getWrappedLineRange(line_n, byte_n) -- XXX Stay
+function _mt_line_ed:getWrappedLineRange(line_n, byte_n) -- XXX Stay
 
 	local lines = self.lines
 	local disp = self.disp
@@ -310,7 +310,7 @@ function _mt_field:getWrappedLineRange(line_n, byte_n) -- XXX Stay
 end
 
 
-function _mt_field:highlightCleanup() -- XXX Stay
+function _mt_line_ed:highlightCleanup() -- XXX Stay
 	if self:isHighlighted() then
 		self:clearHighlight()
 	end
@@ -320,7 +320,7 @@ end
 --- Insert a string at the caret position.
 -- @param text The string to insert.
 -- @return Nothing.
-function _mt_field:insertText(text) -- XXX Stay
+function _mt_line_ed:insertText(text) -- XXX Stay
 
 	local lines = self.lines
 	local old_line = self.car_line
@@ -345,9 +345,9 @@ end
 -- @param line_2 The final line to delete to.
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
-function _mt_field:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2) -- XXX Stay: uses line+byte offsets
-	-- XXX Maybe write a line and/or uChar offset version for the client method collection.
+function _mt_line_ed:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2) -- XXX Stay: uses line+byte offsets
 
+	-- XXX Maybe write a line and/or uChar offset version for the client method collection.
 	local lines = self.lines
 
 	local deleted
@@ -371,13 +371,84 @@ function _mt_field:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2) -- X
 end
 
 
+local function fixCaretAfterIndent(self, line_n, offset)
+
+	if self.car_line == line_n then
+		if string.find(self.lines[line_n], "%S", math.max(1, self.car_byte - 1)) then
+			self.car_byte = 1
+
+		else
+			self.car_byte = self.car_byte + offset
+		end
+	end
+
+	if self.h_line == line_n then
+		if string.find(self.lines[line_n], "%S", math.max(1, self.h_byte - 1)) then
+			self.h_byte = 1
+
+		else
+			self.h_byte = self.h_byte + offset
+		end
+	end
+end
+
+
+function _mt_line_ed:indent(line_n)
+
+	self.lines:add("\t", line_n, 1)
+
+	self.u_chars = self.u_chars + 1
+
+	fixCaretAfterIndent(self, line_n, 1)
+
+	self:displaySyncDeletion(line_n, line_n)
+	self:displaySyncCaretOffsets()
+
+	self:updateVertPosHint()
+end
+
+
+function _mt_line_ed:unindent(line_n)
+
+	local line = self.lines[line_n]
+
+	local offset
+
+	if string.sub(line, 1, 1) == "\t" then
+		print("line_n", line_n, "tabs codepath")
+		offset = 1
+		self.lines:delete(line_n, 1, line_n, 1)
+
+	else
+		print("line_n", line_n, "spaces codepath")
+		local space1, space2 = string.find(line, "^[\x20]+") -- (0x20 == space)
+		if space1 then
+			offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
+			print("", "space1", space1, "space2", space2)
+			self.lines:delete(line_n, 1, line_n, offset)
+		end
+	end
+
+	if offset then
+		self.u_chars = self.u_chars - 1
+
+		fixCaretAfterIndent(self, line_n, -offset)
+
+		self:displaySyncDeletion(line_n, line_n)
+		self:displaySyncCaretOffsets()
+
+		self:updateVertPosHint()
+	end
+end
+
+
 --- Returns if the field currently has a highlighted section (not whether highlighting itself is currently active.)
-function _mt_field:isHighlighted() -- XXX Stay
+function _mt_line_ed:isHighlighted() -- XXX Stay
 	return not (self.h_line == self.car_line and self.h_byte == self.car_byte)
 end
 
 
-function _mt_field:clearHighlight() -- XXX Stay
+function _mt_line_ed:clearHighlight() -- XXX Stay
 
 	self.h_line = self.car_line
 	self.h_byte = self.car_byte
@@ -387,7 +458,7 @@ function _mt_field:clearHighlight() -- XXX Stay
 end
 
 
-function _mt_field:caretToLineAndByte(clear_highlight, line_n, byte_n) -- XXX Stay
+function _mt_line_ed:caretToLineAndByte(clear_highlight, line_n, byte_n) -- XXX Stay
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 
 	line_n = math.max(1, math.min(line_n, #self.lines))
@@ -410,7 +481,7 @@ function _mt_field:caretToLineAndByte(clear_highlight, line_n, byte_n) -- XXX St
 end
 
 
-function _mt_field:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n) -- XXX Stay
+function _mt_line_ed:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n) -- XXX Stay
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 
 	car_line_n = math.max(1, math.min(car_line_n, #self.lines))
@@ -446,7 +517,7 @@ end
 
 
 --- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
-function _mt_field:displaySyncCaretOffsets() -- XXX Stay
+function _mt_line_ed:displaySyncCaretOffsets() -- XXX Stay
 
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
@@ -472,7 +543,7 @@ function _mt_field:displaySyncCaretOffsets() -- XXX Stay
 end
 
 
-function _mt_field:displaySyncInsertion(line_1, line_2) -- XXX integrate into insertText directly
+function _mt_line_ed:displaySyncInsertion(line_1, line_2) -- XXX integrate into insertText directly
 
 	local lines = self.lines
 	local disp = self.disp
@@ -492,7 +563,7 @@ function _mt_field:displaySyncInsertion(line_1, line_2) -- XXX integrate into in
 end
 
 
-function _mt_field:displaySyncDeletion(line_1, line_2) -- XXX integrate into deleteText directly
+function _mt_line_ed:displaySyncDeletion(line_1, line_2) -- XXX integrate into deleteText directly
 
 	local lines = self.lines
 	local disp = self.disp
@@ -510,7 +581,7 @@ function _mt_field:displaySyncDeletion(line_1, line_2) -- XXX integrate into del
 end
 
 
-function _mt_field:displaySyncAll(line_i) -- XXX Stay
+function _mt_line_ed:displaySyncAll(line_i) -- XXX Stay
 
 	local lines = self.lines
 	local disp = self.disp
@@ -542,7 +613,7 @@ function _mt_field:displaySyncAll(line_i) -- XXX Stay
 end
 
 
-function _mt_field:displaySyncAlign(line_i) -- XXX Stay
+function _mt_line_ed:displaySyncAlign(line_i) -- XXX Stay
 
 	local disp = self.disp
 	line_i = line_i or 1

@@ -472,22 +472,55 @@ function editAct.typeLineFeed(self, line_ed)
 end
 
 
--- Add tab (unhighlights first)
+-- Tab key
 function editAct.typeTab(self, line_ed)
+
 	if line_ed.allow_input and line_ed.allow_tab then
-		self:writeText("\t", true)
+		-- Caret and highlight are on the same line: write a literal tab.
+		-- (Unhighlights first)
+		if line_ed.car_line == line_ed.h_line then
+			self:writeText("\t", true)
+
+		-- Caret and highlight are on different lines: indent the range of lines.
+		else
+			-- Get the range of lines.
+			local r1, r2 = line_ed.car_line, line_ed.h_line
+			if r1 > r2 then
+				r1, r2 = r2, r1
+			end
+
+			-- Only perform the indent if the total number of added tabs will not take us beyond
+			-- the max code point value.
+			local tab_count = 1 + (r2 - r1)
+			if line_ed.u_chars + tab_count <= line_ed.u_chars_max then
+				for i = r1, r2 do
+					line_ed:indent(i)
+				end
+			end
+		end
 
 		return true, true, true
 	end
 end
 
 
--- (XXX Unfinished) Delete one tab (or an equivalent # of spaces) at the start of a line.
+-- Shift + Tab
 function editAct.typeUntab(self, line_ed)
-	if line_ed.allow_input and line_ed.allow_untab then
-		-- XXX TODO
 
-		-- return true, true, true
+	if line_ed.allow_input and line_ed.allow_untab then
+
+		-- Get the range of lines.
+		local r1, r2 = line_ed.car_line, line_ed.h_line
+		if r1 > r2 then
+			r1, r2 = r2, r1
+		end
+
+		local tab_count = 1 + (r2 - r1)
+		for i = r1, r2 do
+			line_ed:unindent(i)
+		end
+
+		return true, true, true
 	end
 end
 

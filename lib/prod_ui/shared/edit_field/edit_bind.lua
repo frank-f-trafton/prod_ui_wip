@@ -95,7 +95,7 @@ editBind["return"] = editAct.typeLineFeed
 editBind["kpenter"] = editAct.typeLineFeed
 
 editBind["tab"] = editAct.typeTab
-editBind["!shift"]["tab"] = editAct.typeUntab -- XXX incomplete
+editBind["!shift"]["tab"] = editAct.typeUntab
 
 editBind["!control"]["a"] = editAct.selectAll
 editBind["!control"]["c"] = editAct.copy

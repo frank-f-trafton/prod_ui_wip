@@ -182,7 +182,7 @@ function editDisp.coreToDisplayOffsets(s_bytes, byte_n, paragraph)
 
 		while true do
 			-- Uncomment to help debug OOB issues here:
-			--print("byte_n", byte_n, "paragraph[line_sub]", paragraph[line_sub])
+			print("byte_n", byte_n, "paragraph[line_sub]", paragraph[line_sub])
 
 			if byte_n <= #paragraph[line_sub].str then
 				break

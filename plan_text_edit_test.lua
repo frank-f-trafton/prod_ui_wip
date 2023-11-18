@@ -72,6 +72,10 @@ function plan.make(parent)
 
 		text_box.ghost_text = "Ghost text"
 
+		text_box.line_ed.allow_tab = true
+		text_box.line_ed.allow_untab = true
+		text_box.line_ed.tabs_to_spaces = false
+
 		text_box:reshape()
 
 		text_box.lc_func = uiLayout.fitRemaining
