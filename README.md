@@ -4,15 +4,32 @@ ProdUI is a user interface library for the LÖVE Framework.
 
 ## Status
 
-ProdUI is currently unfinished. As there will most definitely be breaking changes between now and the 1.0 release, it is not recommended for general use at this time. (It should run with LÖVE 11.4 and 12.0-development if you want to take a look, though.)
+**ProdUI is currently unfinished.** It is not recommended for general use at this time. (It should run with LÖVE 11.4 and 12.0-development if you want to take a look, though.)
 
-As of October 2023, it looks like this:
+
+## Repository Structure
+
+* Base directory: Example programs.
+* `lib/prod_ui`: ProdUI.
+* `lib/prod_ui/themes/build`: Theme builder scripts.
+
+
+## Screenshots
+
+### October 2023
 
 ![prod_ui_pic_2023-10-31](https://github.com/rabbitboots/prod_ui_wip/assets/23288188/cc5fc615-0ed6-453c-909c-738721e717a3)
 
 
+### March 2022
+
+![prod_ui_march_2022](https://github.com/rabbitboots/prod_ui_wip/assets/23288188/263389d1-dbb5-4c4d-a384-66baab789698)
+
+
+
 ## MIT License
 
+```
 Copyright (c) 2023 RBTS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,4 +49,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
+```
