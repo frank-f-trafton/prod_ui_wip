@@ -1013,8 +1013,8 @@ of it.
 	-- [=[
 	do
 		local frame_ef
-		local planEditFieldTest = require("plan_wimp_edit_field_test")
-		frame_ef = planEditFieldTest.make(wimp_root)
+		local planTextEditTest = require("plan_text_edit_test")
+		frame_ef = planTextEditTest.make(wimp_root)
 		--]=]
 
 		-- Test destroying window frame from userUpdate. XXX: move this somewhere more appropriate.

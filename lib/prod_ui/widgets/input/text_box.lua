@@ -26,7 +26,7 @@ input/text_box: A text input field.
 --[[
 -- XXX Orphaned command (ie virtual CLI) stuff
 -- Invoke a function as a result of hitting enter, clicking a linked button, etc.
-function editAct.runCommand(self, core)
+function editAct.runCommand(self, line_ed)
 	local ret1, ret2 = self:uiFunc_commandAction()
 
 	return ret1, ret2
@@ -70,10 +70,10 @@ local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editAct = context:getLua("shared/edit_field/edit_act")
 local editBind = context:getLua("shared/edit_field/edit_bind")
-local editField = context:getLua("shared/edit_field/edit_field")
 local editMethods = context:getLua("shared/edit_field/edit_methods")
 --local intersect = require(context.conf.prod_ui_req .. "logic.intersect") -- lerp
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local lineEditor = context:getLua("shared/edit_field/line_editor")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -98,15 +98,15 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 do
 	local function configItem_undo(item, client)
 		item.selectable = true
-		item.actionable = (client.core.hist.pos > 1)
+		item.actionable = (client.line_ed.hist.pos > 1)
 	end
 	local function configItem_redo(item, client)
 		item.selectable = true
-		item.actionable = (client.core.hist.pos < #client.core.hist.ledger)
+		item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
 	end
 	local function configItem_cutCopyDelete(item, client)
 		item.selectable = true
-		item.actionable = client.core:isHighlighted()
+		item.actionable = client.line_ed:isHighlighted()
 	end
 	local function configItem_paste(item, client)
 		item.selectable = true
@@ -127,7 +127,7 @@ do
 	end
 	local function configItem_selectAll(item, client)
 		item.selectable = true
-		item.actionable = (not client.core.lines:isEmpty())
+		item.actionable = (not client.line_ed.lines:isEmpty())
 	end
 
 	-- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
@@ -195,11 +195,11 @@ end
 
 	hist_y = qp:getYOrigin() + qp:getYPosition()
 
-	for i, entry in ipairs(wid_text_box.core.hist.ledger) do
+	for i, entry in ipairs(wid_text_box.line_ed.hist.ledger) do
 		qp:reset()
 		qp:setOrigin(hist_x, hist_y)
 
-		if i == wid_text_box.core.hist.pos then
+		if i == wid_text_box.line_ed.hist.pos then
 			love.graphics.setColor(1, 1, 1, 1)
 
 		else
@@ -277,16 +277,16 @@ function def:uiCall_create(inst)
 
 		local skin = self.skin
 
-		self.core = editField.newCoreObject(skin.font)
+		self.line_ed = lineEditor.new(skin.font)
 
-		local core = self.core
+		local line_ed = self.line_ed
 
-		core.hist:clearAll()
-		core.hist:writeEntry(true, core.lines, core.car_line, core.car_byte, core.h_line, core.h_byte)
-		--core:highlightAll()
+		line_ed.hist:clearAll()
+		line_ed.hist:writeEntry(true, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+		--line_ed:highlightAll()
 
 		-- Ghost text appears when the field is empty.
-		-- This is not part of the editField core, and so it is not drawn through
+		-- This is not part of the lineEditor core, and so it is not drawn through
 		-- the seqString or displayLine sub-objects, and is not affected by glyph masking.
 		self.ghost_text = false
 
@@ -294,16 +294,16 @@ function def:uiCall_create(inst)
 		-- "left", "center", "right", "justify"
 		self.ghost_text_align = false
 
-		-- The first and last visible logical / super lines. Used as boundaries for text rendering.
+		-- The first and last visible display paragraphs. Used as boundaries for text rendering.
 		-- Update whenever you scroll vertically or modify the text.
-		self.vis_super_line_top = 1
-		self.vis_super_line_bot = 1
+		self.vis_para_top = 1
+		self.vis_para_bot = 1
 
 		-- Caret fill mode and color table
 		self.caret_fill = "fill"
 
 		-- Tick this whenever something related to the text box needs to be updated/recached.
-		-- editField itself should immediately apply its own state changes.
+		-- lineEditor itself should immediately apply its own state changes.
 		self.update_flag = true
 
 		-- The caret rect dimensions for drawing.
@@ -335,7 +335,7 @@ end
 --- Call after changing alignment, then update the alignment of all sub-lines.
 function def:updateAlignOffset()
 
-	local align = self.core.disp.align
+	local align = self.line_ed.disp.align
 
 	if align == "left" then
 		self.align_offset = 0
@@ -352,7 +352,7 @@ end
 function def:scrollGetCaretInBounds(immediate)
 
 	-- XXX wrapped in self:scrollRectInBounds()
-	local disp = self.core.disp
+	local disp = self.line_ed.disp
 
 	--print("scrollGetCaretInBounds() BEFORE", self.scr2_tx, self.scr2_ty)
 
@@ -398,7 +398,7 @@ end
 
 function def:updateDocumentDimensions()
 	
-	local disp = self.core.disp
+	local disp = self.line_ed.disp
 
 	disp.view_w = self.vp_w
 
@@ -416,8 +416,8 @@ function def:uiCall_reshape()
 	-- Viewport #1 is the scrollable region.
 	-- Viewport #2 includes margins and excludes borders.
 
-	local core = self.core
-	local disp = core.disp
+	local line_ed = self.line_ed
+	local disp = line_ed.disp
 
 	self.w = math.max(self.w, self.min_w)
 	self.h = math.max(self.h, self.min_h)
@@ -436,12 +436,12 @@ function def:uiCall_reshape()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScroll2State(self)
 
-	core:displaySyncAll()
+	line_ed:displaySyncAll()
 
 	self:updateDocumentDimensions()
 
 	local font = disp.font
-	self.core.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
+	self.line_ed.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
 
 	self.update_flag = true
 end
@@ -450,9 +450,9 @@ end
 --- Updates cached display state.
 function def:cacheUpdate()
 
-	local core = self.core
-	local lines = core.lines
-	local disp = core.disp
+	local line_ed = self.line_ed
+	local lines = line_ed.lines
+	local disp = line_ed.disp
 
 	local skin = self.skin
 
@@ -464,7 +464,7 @@ function def:cacheUpdate()
 	self.caret_w = disp.caret_box_w
 	self.caret_h = disp.caret_box_h
 
-	if core.replace_mode then
+	if line_ed.replace_mode then
 		self.caret_fill = "line"
 
 	else
@@ -472,31 +472,31 @@ function def:cacheUpdate()
 		self.caret_w = disp.caret_line_width
 	end
 
-	-- Find the first visible super-line (or rather, one before it) to cut down on rendering.
+	-- Find the first visible display paragraph (or rather, one before it) to cut down on rendering.
 	local y_pos = self.scr2_y - self.vp_y -- XXX should this be viewport #2? Or does the viewport offset matter at all?
 
 	-- XXX default to 1?
-	--self.vis_super_line_top
-	for i, super_line in ipairs(disp.super_lines) do
-		local sub_one = super_line[1]
+	--self.vis_para_top
+	for i, paragraph in ipairs(disp.paragraphs) do
+		local sub_one = paragraph[1]
 		if sub_one.y > y_pos then
-			self.vis_super_line_top = math.max(1, i - 1)
+			self.vis_para_top = math.max(1, i - 1)
 			break
 		end
 	end
 
-	-- Find the last super-line (or one after it) as well.
-	self.vis_super_line_bot = #disp.super_lines
-	for i = self.vis_super_line_top, #disp.super_lines do
-		local super_line = disp.super_lines[i]
-		local sub_last = super_line[#super_line]
+	-- Find the last display paragraph (or one after it) as well.
+	self.vis_para_bot = #disp.paragraphs
+	for i = self.vis_para_top, #disp.paragraphs do
+		local paragraph = disp.paragraphs[i]
+		local sub_last = paragraph[#paragraph]
 		if sub_last.y + sub_last.h > y_pos + self.vp2_h then
-			self.vis_super_line_bot = i
+			self.vis_para_bot = i
 			break
 		end
 	end
 
-	--print("cacheUpdate", "self.vis_super_line_top", self.vis_super_line_top, "self.vis_super_line_bot", self.vis_super_line_bot)
+	--print("cacheUpdate", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
 
 	-- Update the text object, if applicable
 	if self.text_object then
@@ -509,9 +509,9 @@ function def:cacheUpdate()
 			text_object:setFont(disp.font)
 		end
 
-		for i = self.vis_super_line_top, self.vis_super_line_bot do
-			local super_line = disp.super_lines[i]
-			for j, sub_line in ipairs(super_line) do
+		for i = self.vis_para_top, self.vis_para_bot do
+			local paragraph = disp.paragraphs[i]
+			for j, sub_line in ipairs(paragraph) do
 
 				-- [BUG] [UPGRADE] Adding empty or whitespace-only strings can crash LÖVE 11.4.
 				-- These workarounds shouldn't be necessary in LÖVE 12.
@@ -591,8 +591,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 			else
 
-				local core = self.core
-				local disp = core.disp
+				local line_ed = self.line_ed
+				local disp = line_ed.disp
 
 				disp:resetCaretBlink()
 
@@ -606,7 +606,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					local mouse_sx = mouse_x + self.scr2_x - self.vp_x - self.align_offset
 					local mouse_sy = mouse_y + self.scr2_y - self.vp_y
 
-					local core_line, core_byte = core:getCharacterDetailsAtPosition(mouse_sx, mouse_sy, true)
+					local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, mouse_sy, true)
 
 					if context.cseq_button == 1 then
 						-- Not the same line+byte position as last click: force single-click mode.
@@ -619,15 +619,15 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 							self:caretToXY(true, mouse_sx, mouse_sy, true)
 							--self:scrollGetCaretInBounds() -- Helpful, or distracting?
 
-							self.click_line = core.car_line
-							self.click_byte = core.car_byte
+							self.click_line = line_ed.car_line
+							self.click_byte = line_ed.car_byte
 
 							self.update_flag = true
 
 						elseif context.cseq_presses == 2 then
 
-							self.click_line = core.car_line
-							self.click_byte = core.car_byte
+							self.click_line = line_ed.car_line
+							self.click_byte = line_ed.car_byte
 
 							-- Highlight group from highlight position to mouse position
 							self:highlightCurrentWord()
@@ -636,11 +636,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 						elseif context.cseq_presses == 3 then
 
-							self.click_line = core.car_line
-							self.click_byte = core.car_byte
+							self.click_line = line_ed.car_line
+							self.click_byte = line_ed.car_byte
 
 							--- Highlight sub-lines from highlight position to mouse position
-							--core:highlightCurrentLine()
+							--line_ed:highlightCurrentLine()
 							self:highlightCurrentWrappedLine()
 
 							self.update_flag = true
@@ -739,27 +739,27 @@ end
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
-		local core = self.core
-		local disp = core.disp
+		local line_ed = self.line_ed
+		local disp = line_ed.disp
 
-		if core.allow_input then
+		if line_ed.allow_input then
 
-			local hist = core.hist
+			local hist = line_ed.hist
 
 			disp:resetCaretBlink()
 
-			local old_line, old_byte, old_h_line, old_h_byte = core:getCaretOffsets()
+			local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
 			local suppress_replace = false
-			if core.replace_mode then
+			if line_ed.replace_mode then
 				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-				if core.car_byte < #core.lines[#core.lines] + 1 then
-					core.input_category = false
+				if line_ed.car_byte < #line_ed.lines[#line_ed.lines] + 1 then
+					line_ed.input_category = false
 				end
 
 				-- Replace mode should not overwrite line feeds.
-				local line = core.lines[core.car_line]
-				if core.car_byte > #line then
+				local line = line_ed.lines[line_ed.car_line]
+				if line_ed.car_byte > #line then
 					suppress_replace = true
 				end
 			end
@@ -772,7 +772,7 @@ function def:uiCall_textInput(inst, text)
 			local do_advance = true
 
 			if (entry and entry.car_line == old_line and entry.car_byte == old_byte)
-			and ((core.input_category == "typing" and no_ws) or (core.input_category == "typing-ws"))
+			and ((line_ed.input_category == "typing" and no_ws) or (line_ed.input_category == "typing-ws"))
 			then
 				do_advance = false
 			end
@@ -780,8 +780,8 @@ function def:uiCall_textInput(inst, text)
 			if do_advance then
 				hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
 			end
-			hist:writeEntry(do_advance, core.lines, core.car_line, core.car_byte, core.h_line, core.h_byte)
-			core.input_category = no_ws and "typing" or "typing-ws"
+			hist:writeEntry(do_advance, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+			line_ed.input_category = no_ws and "typing" or "typing-ws"
 
 			self:updateDocumentDimensions()
 			self:scrollGetCaretInBounds(true)
@@ -793,9 +793,9 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	if self == inst then
-		local core = self.core
-		local disp = core.disp
-		local hist = core.hist
+		local line_ed = self.line_ed
+		local disp = line_ed.disp
+		local hist = line_ed.hist
 
 		disp:resetCaretBlink()
 
@@ -896,7 +896,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			local DEMO_PURPLE = {1, 0, 1, 1}
 
 			wid_text_box:resizeWidget(512, 256)
-			wid_text_box.core.disp.fn_colorize = function(self, str, syntax_colors, syntax_work)
+			wid_text_box.line_ed.disp.fn_colorize = function(self, str, syntax_colors, syntax_work)
 
 				-- i: byte offset in string
 				-- j: the next byte offset
@@ -948,7 +948,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local bind_action = bind_t[scancode]
 
 		if bind_action then
-			-- NOTE: most history ledger changes are handled in 'editField.executeBoundAction()'.
+			-- NOTE: most history ledger changes are handled in 'lineEditor.executeBoundAction()'.
 			local res_1, res_2, res_3 = self:executeBoundAction(bind_action)
 			if res_1 then
 				self.update_flag = true
@@ -967,8 +967,8 @@ end
 --- Updates selection based on the position of the mouse and the number of repeat mouse-clicks.
 local function mouseDragLogic(self)
 
-	local core = self.core
-	local disp = core.disp
+	local line_ed = self.line_ed
+	local disp = line_ed.disp
 
 	local widget_needs_update = false
 
@@ -1024,8 +1024,8 @@ function def:uiCall_update(dt)
 	end
 	--]]
 
-	local core = self.core
-	local disp = core.disp
+	local line_ed = self.line_ed
+	local disp = line_ed.disp
 
 	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
 
@@ -1120,12 +1120,12 @@ def.skinners = {
 
 			local skin = self.skin
 
-			local core = self.core
-			local lines = core.lines
-			local disp = core.disp
+			local line_ed = self.line_ed
+			local lines = line_ed.lines
+			local disp = line_ed.disp
 			local font = disp.font
 
-			local res = core.allow_input and skin.res_readwrite or skin.res_readonly
+			local res = line_ed.allow_input and skin.res_readwrite or skin.res_readonly
 
 			local has_thimble = self == self.context.current_thimble
 
@@ -1136,9 +1136,9 @@ def.skinners = {
 
 			love.graphics.setColor(1, 1, 1, 1)
 			local yy = 0
-			for i, line in ipairs(self.core.lines) do
+			for i, line in ipairs(self.line_ed.lines) do
 				love.graphics.print(i .. ": " .. line, 16, yy)
-				yy = yy + self.core.disp.font:getHeight()
+				yy = yy + self.line_ed.disp.font:getHeight()
 			end
 			--]]
 
@@ -1153,7 +1153,7 @@ def.skinners = {
 			print("vp2", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 			--]]
 
-			--print("render", "self.vis_super_line_top", self.vis_super_line_top, "self.vis_super_line_bot", self.vis_super_line_bot)
+			--print("render", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
 
 			--[[
 			XXX It would probably make sense to chop this up into smaller functions, which can be selectively
@@ -1181,17 +1181,17 @@ def.skinners = {
 			end
 			--]]
 
-			-- Draw current super-line illumination, if applicable
+			-- Draw current paragraph illumination, if applicable.
 			if self.illuminate_current_line then
 				love.graphics.setColor(res.color_current_line_illuminate)
-				local super_line = disp.super_lines[disp.d_car_super]
-				local super_y = super_line[1].y
+				local paragraph = disp.paragraphs[disp.d_car_para]
+				local para_y = paragraph[1].y
 
-				local last_sub = super_line[#super_line]
-				local super_h = last_sub.y + last_sub.h - super_y
+				local last_sub = paragraph[#paragraph]
+				local para_h = last_sub.y + last_sub.h - para_y
 
-				--love.graphics.rectangle("fill", -2^16, super_y, 2^17, super_h) -- XXX Return to the bounds on this. Getting frustrated.
-				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr2_y + super_y, self.vp2_w, super_h)
+				--love.graphics.rectangle("fill", -2^16, para_y, 2^17, para_h) -- XXX Return to the bounds on this. Getting frustrated.
+				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr2_y + para_y, self.vp2_w, para_h)
 			end
 
 			love.graphics.push()
@@ -1202,10 +1202,10 @@ def.skinners = {
 
 			-- Draw highlight rectangles.
 			love.graphics.setColor(res.color_highlight)
-			if core:isHighlighted() then
-				for i = self.vis_super_line_top, self.vis_super_line_bot do
-					local super_line = disp.super_lines[i]
-					for j, sub_line in ipairs(super_line) do
+			if line_ed:isHighlighted() then
+				for i = self.vis_para_top, self.vis_para_bot do
+					local paragraph = disp.paragraphs[i]
+					for j, sub_line in ipairs(paragraph) do
 						if sub_line.highlighted then
 							love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
 						end
@@ -1249,9 +1249,9 @@ def.skinners = {
 			else
 				love.graphics.setFont(skin.font)
 
-				for i = self.vis_super_line_top, self.vis_super_line_bot do
-					local super_line = disp.super_lines[i]
-					for j, sub_line in ipairs(super_line) do
+				for i = self.vis_para_top, self.vis_para_bot do
+					local paragraph = disp.paragraphs[i]
+					for j, sub_line in ipairs(paragraph) do
 						love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
 					end
 				end
