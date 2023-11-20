@@ -374,21 +374,11 @@ end
 local function fixCaretAfterIndent(self, line_n, offset)
 
 	if self.car_line == line_n then
-		if string.find(self.lines[line_n], "%S", math.max(1, self.car_byte - 1)) then
-			self.car_byte = 1
-
-		else
-			self.car_byte = math.max(1, self.car_byte + offset)
-		end
+		self.car_byte = math.max(1, self.car_byte + offset)
 	end
 
 	if self.h_line == line_n then
-		if string.find(self.lines[line_n], "%S", math.max(1, self.h_byte - 1)) then
-			self.h_byte = 1
-
-		else
-			self.h_byte = math.max(1, self.h_byte + offset)
-		end
+		self.h_byte = math.max(1, self.h_byte + offset)
 	end
 end
 

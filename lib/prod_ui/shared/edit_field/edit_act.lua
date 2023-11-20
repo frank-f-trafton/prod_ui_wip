@@ -498,6 +498,7 @@ function editAct.typeTab(self, line_ed)
 				end
 			end
 		end
+		line_ed:updateDispHighlightRange()
 
 		return true, true, true
 	end
@@ -520,6 +521,7 @@ function editAct.typeUntab(self, line_ed)
 			line_ed:unindent(i)
 		end
 
+		line_ed:updateDispHighlightRange()
 		return true, true, true
 	end
 end
