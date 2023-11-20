@@ -649,7 +649,7 @@ function _mt_lc:updateParagraphAlign(line_1, line_2)
 	local paragraphs = self.paragraphs
 
 	line_1 = line_1 or 1
-	line_2 = line_2 or #paragraph
+	line_2 = line_2 or #paragraphs
 
 	local align, font, width = self.align, self.font, self.view_w
 

@@ -378,7 +378,7 @@ local function fixCaretAfterIndent(self, line_n, offset)
 			self.car_byte = 1
 
 		else
-			self.car_byte = self.car_byte + offset
+			self.car_byte = math.max(1, self.car_byte + offset)
 		end
 	end
 
@@ -387,7 +387,7 @@ local function fixCaretAfterIndent(self, line_n, offset)
 			self.h_byte = 1
 
 		else
-			self.h_byte = self.h_byte + offset
+			self.h_byte = math.max(1, self.h_byte + offset)
 		end
 	end
 end

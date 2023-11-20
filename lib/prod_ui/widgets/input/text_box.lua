@@ -1295,6 +1295,19 @@ def.skinners = {
 			widDebug.debugDrawViewport(self, 1)
 			widDebug.debugDrawViewport(self, 2)
 			--]]
+
+			-- DEBUG: show editor details.
+			love.graphics.push("all")
+			love.graphics.setScissor()
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.print(
+				"car_line:" .. line_ed.car_line .. "\n" ..
+				"car_byte:" .. line_ed.car_byte .. "\n" ..
+				"h_line:" .. line_ed.h_line .. "\n" ..
+				"h_byte:" .. line_ed.h_byte,
+				200, 200
+			)
+			love.graphics.pop()
 		end,
 	},
 }
