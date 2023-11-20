@@ -465,7 +465,18 @@ end
 function editAct.typeLineFeed(self, line_ed)
 	if line_ed.allow_input and line_ed.allow_enter then
 		line_ed.input_category = false
-		self:writeText("\n", true)
+
+		local new_str = "\n"
+
+		if line_ed.auto_indent then
+			local top_selected_line = math.min(line_ed.car_line, line_ed.h_line)
+			local leading_white_space = string.match(line_ed.lines[top_selected_line], "^%s+")
+			if leading_white_space then
+				new_str = new_str .. leading_white_space
+			end
+		end
+
+		self:writeText(new_str, true)
 
 		return true, true, true
 	end
