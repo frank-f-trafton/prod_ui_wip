@@ -71,6 +71,9 @@ editBind["down"] = editAct.caretStepDown
 editBind["!shift"]["up"] = editAct.caretStepUpHighlight
 editBind["!shift"]["down"] = editAct.caretStepDownHighlight
 
+editBind["!alt"]["up"] = editAct.shiftLinesUp
+editBind["!alt"]["down"] = editAct.shiftLinesDown
+
 editBind["!control"]["up"] = editAct.caretStepUpCoreLine
 editBind["!control"]["down"] = editAct.caretStepDownCoreLine
 editBind["!control"]["!shift"]["up"] = editAct.caretStepUpCoreLineHighlight

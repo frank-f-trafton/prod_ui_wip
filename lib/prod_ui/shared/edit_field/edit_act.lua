@@ -288,6 +288,51 @@ function editAct.caretPageDownHighlight(self, line_ed)
 end
 
 
+-- Shift selected lines up, down
+function editAct.shiftLinesUp(self, line_ed)
+
+	local r1, r2 = line_ed:getSelectedLinesRange()
+	local lines = line_ed.lines
+	local displaced_line = lines[r1 - 1]
+
+	if displaced_line then
+		for i = r1 - 1, r2 - 1 do
+			lines[i] = lines[i + 1]
+		end
+
+		lines[r2] = displaced_line
+
+		line_ed.car_line = math.max(1, line_ed.car_line - 1)
+		line_ed.h_line = math.max(1, line_ed.h_line - 1)
+		line_ed:displaySyncAll(r1 - 1)
+
+		return true, true, true
+	end
+end
+
+
+function editAct.shiftLinesDown(self, line_ed)
+
+	local r1, r2 = line_ed:getSelectedLinesRange()
+	local lines = line_ed.lines
+	local displaced_line = lines[r2 + 1]
+
+	if displaced_line then
+		for i = r2 + 1, r1 + 1, -1 do
+			lines[i] = lines[i - 1]
+		end
+
+		lines[r1] = displaced_line
+
+		line_ed.car_line = math.min(#lines, line_ed.car_line + 1)
+		line_ed.h_line = math.min(#lines, line_ed.h_line + 1)
+		line_ed:displaySyncAll(r1)
+
+		return true, true, true
+	end
+end
+
+
 -- Backspace, delete (or delete highlight)
 function editAct.backspace(self, line_ed)
 
@@ -494,11 +539,7 @@ function editAct.typeTab(self, line_ed)
 
 		-- Caret and highlight are on different lines: indent the range of lines.
 		else
-			-- Get the range of lines.
-			local r1, r2 = line_ed.car_line, line_ed.h_line
-			if r1 > r2 then
-				r1, r2 = r2, r1
-			end
+			local r1, r2 = line_ed:getSelectedLinesRange()
 
 			-- Only perform the indent if the total number of added tabs will not take us beyond
 			-- the max code point value.
@@ -521,11 +562,7 @@ function editAct.typeUntab(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_untab then
 
-		-- Get the range of lines.
-		local r1, r2 = line_ed.car_line, line_ed.h_line
-		if r1 > r2 then
-			r1, r2 = r2, r1
-		end
+		local r1, r2 = line_ed:getSelectedLinesRange()
 
 		local tab_count = 1 + (r2 - r1)
 		for i = r1, r2 do

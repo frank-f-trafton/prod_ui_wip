@@ -242,6 +242,18 @@ function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, fir
 end
 
 
+--- Gets the top and bottom selected line indices, top to bottom.
+function _mt_line_ed:getSelectedLinesRange()
+
+	local r1, r2 = self.car_line, self.h_line
+	if r1 > r2 then
+		r1, r2 = r2, r1
+	end
+
+	return r1, r2
+end
+
+
 function _mt_line_ed:updateDispHighlightRange() -- XXX Stay
 
 	local disp = self.disp
