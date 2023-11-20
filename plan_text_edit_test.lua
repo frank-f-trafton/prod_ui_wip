@@ -75,6 +75,7 @@ function plan.make(parent)
 		text_box.line_ed.allow_tab = true
 		text_box.line_ed.allow_untab = true
 		text_box.line_ed.tabs_to_spaces = false
+		text_box.line_ed.auto_indent = true
 
 		text_box:reshape()
 

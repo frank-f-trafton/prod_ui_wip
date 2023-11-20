@@ -83,6 +83,9 @@ function lineEditor.new(font)
 	self.allow_untab = false -- affects shift+tab (unindenting)
 	self.tabs_to_spaces = true -- affects '\t' in writeText()
 
+	-- When inserting a new line, copies the leading whitespace from the previous line.
+	self.auto_indent = false
+
 	-- When true, typing overwrites the current position instead of inserting.
 	-- Exception: Replace Mode still inserts characters at the end of a line (so before a line feed character or
 	-- the end of the text string).
