@@ -400,6 +400,8 @@ end
 
 function _mt_line_ed:indentLine(line_n)
 
+	local old_line = self.lines[line_n]
+
 	self.lines:add("\t", line_n, 1)
 
 	self.u_chars = self.u_chars + 1
@@ -410,23 +412,25 @@ function _mt_line_ed:indentLine(line_n)
 	self:displaySyncCaretOffsets()
 
 	self:updateVertPosHint()
+
+	return old_line ~= self.lines[line_n]
 end
 
 
 function _mt_line_ed:unindentLine(line_n)
 
-	local line = self.lines[line_n]
+	local old_line = self.lines[line_n]
 
 	local offset
 
-	if string.sub(line, 1, 1) == "\t" then
+	if string.sub(old_line, 1, 1) == "\t" then
 		print("line_n", line_n, "tabs codepath")
 		offset = 1
 		self.lines:delete(line_n, 1, line_n, 1)
 
 	else
 		print("line_n", line_n, "spaces codepath")
-		local space1, space2 = string.find(line, "^[\x20]+") -- (0x20 == space)
+		local space1, space2 = string.find(old_line, "^[\x20]+") -- (0x20 == space)
 		if space1 then
 			offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
 			print("", "space1", space1, "space2", space2)
@@ -444,6 +448,8 @@ function _mt_line_ed:unindentLine(line_n)
 
 		self:updateVertPosHint()
 	end
+
+	return old_line ~= self.lines[line_n]
 end
 
 

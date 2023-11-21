@@ -582,27 +582,37 @@ end
 function editAct.typeTab(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_tab then
+		local changed = false
+
 		-- Caret and highlight are on the same line: write a literal tab.
 		-- (Unhighlights first)
 		if line_ed.car_line == line_ed.h_line then
-			self:writeText("\t", true)
+			local written = self:writeText("\t", true)
+
+			if #written > 0 then
+				changed = true
+			end
 
 		-- Caret and highlight are on different lines: indent the range of lines.
 		else
 			local r1, r2 = line_ed:getSelectedLinesRange()
 
 			-- Only perform the indent if the total number of added tabs will not take us beyond
-			-- the max code point value.
+			-- the max code points setting.
 			local tab_count = 1 + (r2 - r1)
 			if line_ed.u_chars + tab_count <= line_ed.u_chars_max then
 				for i = r1, r2 do
-					line_ed:indentLine(i)
+					local line_changed = line_ed:indentLine(i)
+
+					if line_changed then
+						changed = true
+					end
 				end
 			end
 		end
 		line_ed:updateDispHighlightRange()
 
-		return true, true, true
+		return true, true, changed
 	end
 end
 
@@ -611,16 +621,20 @@ end
 function editAct.typeUntab(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_untab then
-
+		local changed = false
 		local r1, r2 = line_ed:getSelectedLinesRange()
-
 		local tab_count = 1 + (r2 - r1)
+
 		for i = r1, r2 do
-			line_ed:unindentLine(i)
+			local line_changed = line_ed:unindentLine(i)
+
+			if line_changed then
+				changed = true
+			end
 		end
 
 		line_ed:updateDispHighlightRange()
-		return true, true, true
+		return true, true, changed
 	end
 end
 
