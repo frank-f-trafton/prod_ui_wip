@@ -596,7 +596,7 @@ function editAct.typeTab(self, line_ed)
 			local tab_count = 1 + (r2 - r1)
 			if line_ed.u_chars + tab_count <= line_ed.u_chars_max then
 				for i = r1, r2 do
-					line_ed:indent(i)
+					line_ed:indentLine(i)
 				end
 			end
 		end
@@ -616,7 +616,7 @@ function editAct.typeUntab(self, line_ed)
 
 		local tab_count = 1 + (r2 - r1)
 		for i = r1, r2 do
-			line_ed:unindent(i)
+			line_ed:unindentLine(i)
 		end
 
 		line_ed:updateDispHighlightRange()
