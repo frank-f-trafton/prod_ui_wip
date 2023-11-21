@@ -21,6 +21,12 @@ local keyMgr = {}
 	Some key-combos may be intercepted by the user's OS, such as gui+l to lock the computer.
 
 	As love.keyboard.isDown("unknown") always returns false, 'unknown' key events are discarded.
+
+	Currently, LÖVE 12 modkey state is not tracked here. Use direct calls to `love.keyboard.isModifierActive()` to
+	get the modkey state.
+
+	https://love2d.org/wiki/love.keyboard.isModifierActive
+	https://love2d.org/wiki/ModifierKey
 --]]
 
 
@@ -394,6 +400,22 @@ do
 		keyMgr.key_constants[v] = true
 	end
 end
+
+
+-- Mappings for scancodes which are affected by NumLock.
+keyMgr.scan_numlock = {
+	kp0 = "insert",
+	kp1 = "end",
+	kp2 = "down",
+	kp3 = "pagedown",
+	kp4 = "left",
+	-- (no mapping for kp5)
+	kp6 = "right",
+	kp7 = "home",
+	kp8 = "up",
+	kp9 = "pageup",
+	["kp."] = "delete",
+}
 
 
 function keyMgr.assertScancode(sc)
