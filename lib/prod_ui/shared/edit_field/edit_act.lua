@@ -30,6 +30,7 @@ local utf8 = require("utf8")
 
 -- Step left, right
 function editAct.caretLeft(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeLeft(true)
 
@@ -42,6 +43,7 @@ end
 
 
 function editAct.caretRight(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(true)
 
@@ -55,6 +57,7 @@ end
 
 -- Step left, right while highlighting
 function editAct.caretLeftHighlight(self, line_ed)
+
 	self:caretStepLeft(not line_ed.allow_highlight)
 
 	return true, true, false
@@ -62,6 +65,7 @@ end
 
 
 function editAct.caretRightHighlight(self, line_ed)
+
 	self:caretStepRight(not line_ed.allow_highlight)
 
 	return true, true, false
@@ -70,9 +74,11 @@ end
 
 -- Jump left, right
 function editAct.caretJumpLeft(self, line_ed)
+
 	-- Don't leak details about the masked string.
 	if line_ed.disp.masked then
 		self:caretFirst(true)
+
 	else
 		self:caretJumpLeft(true)
 	end
@@ -82,9 +88,11 @@ end
 
 
 function editAct.caretJumpRight(self, line_ed)
+
 	-- Don't leak details about the masked string.
 	if line_ed.disp.masked then
 		self:caretLast(true)
+
 	else
 		self:caretJumpRight(true)
 	end
@@ -95,9 +103,11 @@ end
 
 -- Jump left, right with highlight
 function editAct.caretJumpLeftHighlight(self, line_ed)
+
 	-- Don't leak details about the masked string.
 	if line_ed.disp.masked then
 		self:caretFirst(not line_ed.allow_highlight)
+
 	else
 		self:caretJumpLeft(not line_ed.allow_highlight)
 	end
@@ -107,9 +117,11 @@ end
 
 
 function editAct.caretJumpRightHighlight(self, line_ed)
+
 	-- Don't leak details about the masked string.
 	if line_ed.disp.masked then
 		self:caretLast(not line_ed.allow_highlight)
+
 	else
 		self:caretJumpRight(not line_ed.allow_highlight)
 	end
@@ -120,6 +132,7 @@ end
 
 -- Move to first, end of line
 function editAct.caretLineFirst(self, line_ed)
+
 	-- [WARN] If multi-line is enabled, this can leak information about masked line feeds.
 	self:caretLineFirst(true)
 
@@ -128,6 +141,7 @@ end
 
 
 function editAct.caretLineLast(self, line_ed)
+
 	-- [WARN] If multi-line is enabled, this can leak information about masked line feeds.
 	self:caretLineLast(true)
 
@@ -137,6 +151,7 @@ end
 
 -- Jump to start, end of document
 function editAct.caretFirst(self, line_ed)
+
 	self:caretFirst(true)
 
 	return true, true, false
@@ -144,6 +159,7 @@ end
 
 
 function editAct.caretLast(self, line_ed)
+
 	self:caretLast(true)
 
 	return true, true, false
@@ -152,6 +168,7 @@ end
 
 -- Highlight to start, end of document
 function editAct.caretFirstHighlight(self, line_ed)
+
 	self:caretFirst(not line_ed.allow_highlight)
 
 	return true, true, false
@@ -159,6 +176,7 @@ end
 
 
 function editAct.caretLastHighlight(self, line_ed)
+
 	self:caretLast(not line_ed.allow_highlight)
 
 	return true, true, false
@@ -167,6 +185,7 @@ end
 
 -- Highlight to first, end of line
 function editAct.caretLineFirstHighlight(self, line_ed)
+
 	-- [WARN] Can leak masked line feeds (or would, if line feeds were masked)
 	self:caretLineFirst(not line_ed.allow_highlight)
 
@@ -175,6 +194,7 @@ end
 
 
 function editAct.caretLineLastHighlight(self, line_ed)
+
 	-- [WARN] Can leak masked line feeds (or would, if line feeds were masked)
 	self:caretLineLast(not line_ed.allow_highlight)
 
@@ -184,6 +204,7 @@ end
 
 -- Step up, down
 function editAct.caretStepUp(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeLeft(not line_ed.allow_highlight)
 	end
@@ -194,6 +215,7 @@ end
 
 
 function editAct.caretStepDown(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(not line_ed.allow_highlight)
 	end
@@ -205,6 +227,7 @@ end
 
 -- Highlight up, down
 function editAct.caretStepUpHighlight(self, line_ed)
+
 	self:caretStepUp(not line_ed.allow_highlight, 1)
 
 	return true, true, false
@@ -212,6 +235,7 @@ end
 
 
 function editAct.caretStepDownHighlight(self, line_ed)
+
 	self:caretStepDown(not line_ed.allow_highlight, 1)
 
 	return true, true, false
@@ -219,6 +243,7 @@ end
 
 
 function editAct.caretStepUpCoreLine(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeLeft(not line_ed.allow_highlight)
 	end
@@ -229,6 +254,7 @@ end
 
 
 function editAct.caretStepDownCoreLine(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(not line_ed.allow_highlight)
 	end
@@ -239,6 +265,7 @@ end
 
 
 function editAct.caretStepUpCoreLineHighlight(self, line_ed)
+
 	self:caretStepUpCoreLine(not line_ed.allow_highlight)
 
 	return true, true, false
@@ -246,6 +273,7 @@ end
 
 
 function editAct.caretStepDownCoreLineHighlight(self, line_ed)
+
 	self:caretStepDownCoreLine(not line_ed.allow_highlight)
 
 	return true, true, false
@@ -254,6 +282,7 @@ end
 
 -- Page-up, page-down
 function editAct.caretPageUp(self, line_ed)
+
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeLeft(not line_ed.allow_highlight)
 	end
@@ -264,6 +293,7 @@ end
 
 
 function editAct.caretPageDown(self, line_ed)
+
 	--print("line_ed.page_jump_steps", line_ed.page_jump_steps)
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(not line_ed.allow_highlight)
@@ -275,6 +305,7 @@ end
 
 
 function editAct.caretPageUpHighlight(self, line_ed)
+
 	self:caretStepUp(not line_ed.allow_highlight, line_ed.page_jump_steps)
 
 	return true, true, false
@@ -282,6 +313,7 @@ end
 
 
 function editAct.caretPageDownHighlight(self, line_ed)
+
 	self:caretStepDown(not line_ed.allow_highlight, line_ed.page_jump_steps)
 
 	return true, true, false
@@ -348,6 +380,7 @@ function editAct.backspace(self, line_ed)
 
 		if line_ed:isHighlighted() then
 			deleted = self:deleteHighlightedText()
+
 		else
 			deleted = self:backspaceUChar(1)
 		end
@@ -387,6 +420,7 @@ function editAct.delete(self, line_ed)
 
 		if line_ed:isHighlighted() then
 			deleted = self:deleteHighlightedText()
+
 		else
 			deleted = self:deleteUChar(1)
 		end
@@ -440,6 +474,7 @@ function editAct.deleteGroup(self, line_ed)
 		-- Don't leak masked info.
 		if line_ed.disp.masked then
 			write_hist = not not self:deleteUChar(1)
+
 		else
 			line_ed.input_category = false
 			write_hist = not not self:deleteGroup()
@@ -485,6 +520,7 @@ end
 
 -- Backspace, delete from caret to start/end of line, respectively (unhighlights first)
 function editAct.deleteCaretToLineEnd(self, line_ed)
+
 	if line_ed.allow_input then
 		-- [WARN] Can leak masked line feeds (or would, if line feeds were masked)
 		self:deleteCaretToLineEnd()
@@ -496,6 +532,7 @@ end
 
 
 function editAct.backspaceCaretToLineStart(self, line_ed)
+
 	if line_ed.allow_input then
 		-- [WARN] Will leak masked line feeds (or would, if line feeds were masked)
 		self:deleteCaretToLineStart()
@@ -508,6 +545,7 @@ end
 
 -- Add line feed (unhighlights first)
 function editAct.typeLineFeedWithAutoIndent(self, line_ed)
+
 	if line_ed.allow_input and line_ed.allow_enter then
 		line_ed.input_category = false
 
@@ -529,6 +567,7 @@ end
 
 
 function editAct.typeLineFeed(self, line_ed)
+
 	if line_ed.allow_input and line_ed.allow_enter then
 		line_ed.input_category = false
 
@@ -588,6 +627,7 @@ end
 
 -- Select all
 function editAct.selectAll(self, line_ed)
+
 	if line_ed.allow_highlight then
 		self:highlightAll()
 
@@ -600,8 +640,8 @@ end
 
 
 function editAct.selectCurrentWord(self, line_ed)
-	--print("editAct.selectCurrentWord")
 
+	--print("editAct.selectCurrentWord")
 	if line_ed.allow_highlight then
 		self:highlightCurrentWord()
 
@@ -614,8 +654,8 @@ end
 
 
 function editAct.selectCurrentLine(self, line_ed)
-	--print("editAct.selectLine")
 
+	--print("editAct.selectLine")
 	if line_ed.allow_highlight then
 		self:highlightCurrentWrappedLine()
 		--self:highlightCurrentLine()
@@ -630,6 +670,7 @@ end
 
 -- Copy, cut, paste
 function editAct.copy(self, line_ed)
+
 	if line_ed.allow_copy and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:copyHighlightedToClipboard() -- handles masking
 
@@ -639,6 +680,7 @@ end
 
 
 function editAct.cut(self, line_ed)
+
 	if line_ed.allow_input and line_ed.allow_cut and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:cutHighlightedToClipboard() -- handles masking, history, and blanking the input category.
 
@@ -648,6 +690,7 @@ end
 
 
 function editAct.paste(self, line_ed)
+
 	if line_ed.allow_input and line_ed.allow_paste then
 		self:pasteClipboardText() -- handles history, and blanking the input category.
 
@@ -658,6 +701,7 @@ end
 
 -- Toggle Insert / Replace mode
 function editAct.toggleReplaceMode(self, line_ed)
+
 	self:setReplaceMode(not self:getReplaceMode())
 
 	return true, false, false
@@ -666,6 +710,7 @@ end
 
 -- Undo / Redo
 function editAct.undo(self, line_ed)
+
 	self:stepHistory(-1)
 	line_ed.input_category = false
 
@@ -674,6 +719,7 @@ end
 
 
 function editAct.redo(self, line_ed)
+
 	self:stepHistory(1)
 	line_ed.input_category = false
 
@@ -682,4 +728,3 @@ end
 
 
 return editAct
-
