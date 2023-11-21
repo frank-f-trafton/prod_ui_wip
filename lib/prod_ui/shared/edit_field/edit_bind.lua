@@ -94,8 +94,11 @@ editBind["!control"]["!shift"]["backspace"] = editAct.backspaceCaretToLineStart
 
 editBind["!control"]["d"] = editAct.deleteLine
 
-editBind["return"] = editAct.typeLineFeed
-editBind["kpenter"] = editAct.typeLineFeed
+editBind["return"] = editAct.typeLineFeedWithAutoIndent
+editBind["kpenter"] = editAct.typeLineFeedWithAutoIndent
+
+editBind["!shift"]["return"] = editAct.typeLineFeed
+editBind["!shift"]["kpenter"] = editAct.typeLineFeed
 
 editBind["tab"] = editAct.typeTab
 editBind["!shift"]["tab"] = editAct.typeUntab
