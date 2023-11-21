@@ -398,7 +398,7 @@ local function fixCaretAfterIndent(self, line_n, offset)
 end
 
 
-function _mt_line_ed:indent(line_n)
+function _mt_line_ed:indentLine(line_n)
 
 	self.lines:add("\t", line_n, 1)
 
@@ -413,7 +413,7 @@ function _mt_line_ed:indent(line_n)
 end
 
 
-function _mt_line_ed:unindent(line_n)
+function _mt_line_ed:unindentLine(line_n)
 
 	local line = self.lines[line_n]
 
