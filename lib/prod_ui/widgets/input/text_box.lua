@@ -45,10 +45,12 @@ def_wid.uiFunc_commandAction = dummyFunc
 
 
 -- LÖVE 12 compatibility
+local love_major, love_minor = love.getVersion()
+
+
 local _newTextBatch
 do
-	local major, minor = love.getVersion()
-	if major <= 11 then
+	if love_major <= 11 then
 		_newTextBatch = love.graphics.newText
 
 	else
@@ -73,6 +75,7 @@ local editBind = context:getLua("shared/edit_field/edit_bind")
 local editMethods = context:getLua("shared/edit_field/edit_methods")
 --local intersect = require(context.conf.prod_ui_req .. "logic.intersect") -- lerp
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lineEditor = context:getLua("shared/edit_field/line_editor")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
@@ -930,6 +933,12 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		end
 
 		local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+
+		-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
+		if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
+			scancode = keyMgr.scan_numlock[scancode]
+			key = love.keyboard.getKeyFromScancode(scancode)
+		end
 
 		local bind_t = editBind
 		if ctrl_down then
