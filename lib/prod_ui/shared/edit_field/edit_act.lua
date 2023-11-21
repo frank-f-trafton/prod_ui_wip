@@ -507,7 +507,7 @@ end
 
 
 -- Add line feed (unhighlights first)
-function editAct.typeLineFeed(self, line_ed)
+function editAct.typeLineFeedWithAutoIndent(self, line_ed)
 	if line_ed.allow_input and line_ed.allow_enter then
 		line_ed.input_category = false
 
@@ -522,6 +522,17 @@ function editAct.typeLineFeed(self, line_ed)
 		end
 
 		self:writeText(new_str, true)
+
+		return true, true, true
+	end
+end
+
+
+function editAct.typeLineFeed(self, line_ed)
+	if line_ed.allow_input and line_ed.allow_enter then
+		line_ed.input_category = false
+
+		self:writeText("\n", true)
 
 		return true, true, true
 	end
