@@ -25,14 +25,14 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		local input_box_s = content:addChild("input/input_box_simple")
+		local input_box_s = content:addChild("barebones/input_box")
 
 		input_box_s.x = 32
 		input_box_s.y = 32
 		input_box_s.w = 256
 		input_box_s.h = 32
 
-		input_box_s:reshape()
+		input_box_s:setText("Barebones Input Box")
 	end
 
 	frame:reshape(true)
