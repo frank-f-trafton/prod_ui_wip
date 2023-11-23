@@ -61,6 +61,7 @@ local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editAct = context:getLua("shared/line_ed/multi/edit_act")
 local editBind = context:getLua("shared/line_ed/multi/edit_bind")
+local editHist = context:getLua("shared/line_ed/multi/edit_hist")
 local editMethods = context:getLua("shared/line_ed/multi/edit_methods")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
@@ -278,12 +279,6 @@ function def:uiCall_create(inst)
 		local skin = self.skin
 
 		self.line_ed = lineEditor.new(skin.font)
-
-		local line_ed = self.line_ed
-
-		line_ed.hist:clearAll()
-		line_ed.hist:writeEntry(true, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
-		--line_ed:highlightAll()
 
 		-- Ghost text appears when the field is empty.
 		-- This is not part of the lineEditor core, and so it is not drawn through
@@ -778,9 +773,9 @@ function def:uiCall_textInput(inst, text)
 			end
 
 			if do_advance then
-				hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
+				editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			hist:writeEntry(do_advance, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+			editHist.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "typing" or "typing-ws"
 
 			self:updateDocumentDimensions()

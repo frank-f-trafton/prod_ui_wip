@@ -18,7 +18,7 @@ bound actions may handle history directly and return false.
 --]]
 
 
---local context = select(1, ...)
+local context = select(1, ...)
 
 
 local editAct = {}
@@ -26,6 +26,9 @@ local editAct = {}
 
 -- LÖVE Supplemental
 local utf8 = require("utf8")
+
+
+local editHist = context:getLua("shared/line_ed/multi/edit_hist")
 
 
 -- Step left, right
@@ -400,9 +403,9 @@ function editAct.backspace(self, line_ed)
 			end
 
 			if do_advance then
-				hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
+				editHist.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			hist:writeEntry(do_advance, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+			editHist.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "backspacing" or "backspacing-ws"
 		end
 
@@ -440,9 +443,9 @@ function editAct.delete(self, line_ed)
 			end
 
 			if do_advance then
-				hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
+				editHist.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			hist:writeEntry(do_advance, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+			editHist.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "deleting" or "deleting-ws"
 		end
 
