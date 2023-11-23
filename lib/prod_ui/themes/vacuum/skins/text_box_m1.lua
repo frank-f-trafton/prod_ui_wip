@@ -1,4 +1,4 @@
--- Skin: Text Box.
+-- Skin: Multi-line text input box.
 
 
 return {

@@ -15,14 +15,14 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local edCom = context:getLua("shared/edit_field/ed_com")
-local editDisp = context:getLua("shared/edit_field/edit_disp")
-local editHist = context:getLua("shared/edit_field/edit_hist")
-local seqString = require(context.conf.prod_ui_req .. "logic.struct.seq_string")
+local edCom = context:getLua("shared/line_ed/multi/ed_com")
+local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
+local editHist = context:getLua("shared/line_ed/multi/edit_hist")
+local seqString = context:getLua("shared/line_ed/seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-lineEditor.code_groups = context:getLua("shared/edit_field/code_groups")
+lineEditor.code_groups = context:getLua("shared/line_ed/code_groups")
 local code_groups = lineEditor.code_groups
 
 
@@ -34,7 +34,7 @@ _mt_line_ed.__index = _mt_line_ed
 
 
 --- Creates a new Line Editor object.
--- @return the edit_field table.
+-- @return the LineEd table.
 function lineEditor.new(font)
 
 	if not font then
@@ -120,23 +120,32 @@ function lineEditor.new(font)
 end
 
 
--- * / Public Functions *
-
-
 -- * Support Methods *
 
 
-function _mt_line_ed:getCaretOffsets() -- XXX Stay
+function _mt_line_ed:getCaretOffsets()
 	return self.car_line, self.car_byte, self.h_line, self.h_byte
 end
 
 
-function _mt_line_ed:getHighlightOffsets() -- XXX Stay
-	return edCom.sortOffsets(self.car_line, self.car_byte, self.h_line, self.h_byte)
+--- Gets caret and highlight lines and offsets in the correct order.
+function _mt_line_ed:getHighlightOffsets()
+
+	-- You may need to subtract 1 from byte_2 to get the correct range.
+	local line_1, byte_1, line_2, byte_2 = self.car_line, self.car_byte, self.h_line, self.h_byte
+
+	if line_1 == line_2 then
+		byte_1, byte_2 = math.min(byte_1, byte_2), math.max(byte_1, byte_2)
+
+	elseif line_1 > line_2 then
+		line_1, line_2, byte_1, byte_2 = line_2, line_1, byte_2, byte_1
+	end
+
+	return line_1, byte_1, line_2, byte_2
 end
 
 
-function _mt_line_ed:updateVertPosHint() -- XXX Stay
+function _mt_line_ed:updateVertPosHint()
 
 	local disp = self.disp
 	local font = disp.font
@@ -152,7 +161,7 @@ end
 -- @param y Y position.
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
-function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
+function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x)
 
 	local disp = self.disp
 	local paragraphs = disp.paragraphs
@@ -187,7 +196,7 @@ function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x) -- XXX Stay
 end
 
 
-function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed) -- XXX stay or move to util module
+function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
 
 	--print("huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group, "stop_on_line_feed", stop_on_line_feed)
 
@@ -254,7 +263,7 @@ function _mt_line_ed:getSelectedLinesRange()
 end
 
 
-function _mt_line_ed:updateDispHighlightRange() -- XXX Stay
+function _mt_line_ed:updateDispHighlightRange()
 
 	local disp = self.disp
 
@@ -264,7 +273,7 @@ function _mt_line_ed:updateDispHighlightRange() -- XXX Stay
 end
 
 
-function _mt_line_ed:getWordRange(line_n, byte_n) -- XXX Stay
+function _mt_line_ed:getWordRange(line_n, byte_n)
 
 	local lines = self.lines
 
@@ -296,7 +305,7 @@ function _mt_line_ed:getWordRange(line_n, byte_n) -- XXX Stay
 end
 
 
-function _mt_line_ed:getWrappedLineRange(line_n, byte_n) -- XXX Stay
+function _mt_line_ed:getWrappedLineRange(line_n, byte_n)
 
 	local lines = self.lines
 	local disp = self.disp
@@ -325,7 +334,7 @@ function _mt_line_ed:getWrappedLineRange(line_n, byte_n) -- XXX Stay
 end
 
 
-function _mt_line_ed:highlightCleanup() -- XXX Stay
+function _mt_line_ed:highlightCleanup()
 	if self:isHighlighted() then
 		self:clearHighlight()
 	end
@@ -335,7 +344,7 @@ end
 --- Insert a string at the caret position.
 -- @param text The string to insert.
 -- @return Nothing.
-function _mt_line_ed:insertText(text) -- XXX Stay
+function _mt_line_ed:insertText(text)
 
 	local lines = self.lines
 	local old_line = self.car_line
@@ -360,7 +369,7 @@ end
 -- @param line_2 The final line to delete to.
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
-function _mt_line_ed:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2) -- XXX Stay: uses line+byte offsets
+function _mt_line_ed:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
 
 	-- XXX Maybe write a line and/or uChar offset version for the client method collection.
 	local lines = self.lines
@@ -454,12 +463,12 @@ end
 
 
 --- Returns if the field currently has a highlighted section (not whether highlighting itself is currently active.)
-function _mt_line_ed:isHighlighted() -- XXX Stay
+function _mt_line_ed:isHighlighted()
 	return not (self.h_line == self.car_line and self.h_byte == self.car_byte)
 end
 
 
-function _mt_line_ed:clearHighlight() -- XXX Stay
+function _mt_line_ed:clearHighlight()
 
 	self.h_line = self.car_line
 	self.h_byte = self.car_byte
@@ -469,7 +478,7 @@ function _mt_line_ed:clearHighlight() -- XXX Stay
 end
 
 
-function _mt_line_ed:caretToLineAndByte(clear_highlight, line_n, byte_n) -- XXX Stay
+function _mt_line_ed:caretToLineAndByte(clear_highlight, line_n, byte_n)
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 
 	line_n = math.max(1, math.min(line_n, #self.lines))
@@ -492,7 +501,7 @@ function _mt_line_ed:caretToLineAndByte(clear_highlight, line_n, byte_n) -- XXX 
 end
 
 
-function _mt_line_ed:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n) -- XXX Stay
+function _mt_line_ed:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n)
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 
 	car_line_n = math.max(1, math.min(car_line_n, #self.lines))
@@ -521,14 +530,11 @@ function _mt_line_ed:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_li
 end
 
 
--- * / Caret and highlight manipulation *
-
-
 -- * Core-to-display synchronization *
 
 
 --- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
-function _mt_line_ed:displaySyncCaretOffsets() -- XXX Stay
+function _mt_line_ed:displaySyncCaretOffsets()
 
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
@@ -592,7 +598,7 @@ function _mt_line_ed:displaySyncDeletion(line_1, line_2) -- XXX integrate into d
 end
 
 
-function _mt_line_ed:displaySyncAll(line_i) -- XXX Stay
+function _mt_line_ed:displaySyncAll(line_i)
 
 	local lines = self.lines
 	local disp = self.disp
@@ -624,7 +630,7 @@ function _mt_line_ed:displaySyncAll(line_i) -- XXX Stay
 end
 
 
-function _mt_line_ed:displaySyncAlign(line_i) -- XXX Stay
+function _mt_line_ed:displaySyncAlign(line_i)
 
 	local disp = self.disp
 	line_i = line_i or 1
@@ -634,8 +640,4 @@ function _mt_line_ed:displaySyncAlign(line_i) -- XXX Stay
 end
 
 
--- * / Support Methods *
-
-
 return lineEditor
-

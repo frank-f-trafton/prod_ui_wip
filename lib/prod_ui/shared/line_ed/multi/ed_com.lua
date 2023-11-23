@@ -210,20 +210,6 @@ end
 -- * <Unsorted> *
 
 
---- Gets caret and highlight lines and offsets in the correct order.
-function edCom.sortOffsets(line_1, byte_1, line_2, byte_2)
-	-- You may need to subtract 1 from byte_2 to get the correct range.
-	if line_1 == line_2 then
-		byte_1, byte_2 = math.min(byte_1, byte_2), math.max(byte_1, byte_2)
-
-	elseif line_1 > line_2 then
-		line_1, line_2, byte_1, byte_2 = line_2, line_1, byte_2, byte_1
-	end
-
-	return line_1, byte_1, line_2, byte_2	
-end
-
-
 function edCom.trimString(text, used, max)
 
 	-- Empty string: nothing to trim.

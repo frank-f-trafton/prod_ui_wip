@@ -524,8 +524,8 @@ function themeDef.newInstance(scale)
 	inst:loadSkinDef("tree_box1", BASE_PATH .. "skins/tree_box1.lua")
 	inst:loadSkinDef("progress_bar1", BASE_PATH .. "skins/progress_bar1.lua")
 	inst:loadSkinDef("stepper1", BASE_PATH .. "skins/stepper1.lua")
-	inst:loadSkinDef("input_field1", BASE_PATH .. "skins/input_field1.lua")
-	inst:loadSkinDef("text_box1", BASE_PATH .. "skins/text_box1.lua")
+	inst:loadSkinDef("text_box_s1", BASE_PATH .. "skins/text_box_s1.lua")
+	inst:loadSkinDef("text_box_m1", BASE_PATH .. "skins/text_box_m1.lua")
 
 	return inst
 end

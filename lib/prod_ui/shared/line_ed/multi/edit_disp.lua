@@ -27,7 +27,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local edCom = context:getLua("shared/edit_field/ed_com")
+local edCom = context:getLua("shared/line_ed/multi/ed_com")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 

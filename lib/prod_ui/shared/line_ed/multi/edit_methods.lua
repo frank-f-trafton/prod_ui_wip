@@ -19,9 +19,9 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local edCom = context:getLua("shared/edit_field/ed_com")
-local editDisp = context:getLua("shared/edit_field/edit_disp")
-local lineEditor = context:getLua("shared/edit_field/line_editor") -- XXX work on removing this reference (?)
+local edCom = context:getLua("shared/line_ed/multi/ed_com")
+local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
+local lineEditor = context:getLua("shared/line_ed/multi/line_editor") -- XXX work on removing this reference (?)
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
