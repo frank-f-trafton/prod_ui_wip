@@ -32,7 +32,11 @@ function plan.make(parent)
 		input_box_s.w = 256
 		input_box_s.h = 32
 
+		input_box_s.alignment = "center"
+
 		input_box_s:setText("Barebones Input Box")
+
+		--input_box_s:setMaxCodePoints(4)
 	end
 
 	frame:reshape(true)
