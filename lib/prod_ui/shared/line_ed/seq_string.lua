@@ -1,4 +1,10 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 -- Data structure: Sequence of Strings.
+
+
+--local context = select(1, ...)
 
 
 --[[

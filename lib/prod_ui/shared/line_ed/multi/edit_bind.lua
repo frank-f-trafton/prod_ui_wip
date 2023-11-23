@@ -13,7 +13,7 @@ local editBind = {}
 
 
 -- ProdUI
-local editAct = context:getLua("shared/edit_field/edit_act")
+local editAct = context:getLua("shared/line_ed/multi/edit_act")
 
 --[[
 The nesting order of modifier keys must always be: control -> gui -> alt -> shift

@@ -10,6 +10,13 @@ local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 uiGraphics.quadSlice = quadSlice
 
 
+-- LÖVE 12 compatibility
+local love_major, love_minor = love.getVersion()
+
+
+uiGraphics.newTextBatch = (love_major <= 11) and love.graphics.newText or love.graphics.newTextBatch
+
+
 -- * Color *
 
 
@@ -354,51 +361,50 @@ do
 	local defs = uiGraphics.astro_defs
 
 	defs.anim = require(GFX_PATH .. "spr_anim")
-	uiGraphics.newAnim = defs.anim.new -- (anim_def)
+	--uiGraphics.newAnim = defs.anim.new -- (anim_def)
 
 	defs.arc = require(GFX_PATH .. "spr_arc")
-	uiGraphics.newArc = defs.arc.new -- (radius, angle1, angle2)
+	--uiGraphics.newArc = defs.arc.new -- (radius, angle1, angle2)
 
 	defs.circle = require(GFX_PATH .. "spr_circle")
-	uiGraphics.newCircle = defs.circle.new -- (radius)
+	--uiGraphics.newCircle = defs.circle.new -- (radius)
 
 	defs.ellipse = require(GFX_PATH .. "spr_ellipse")
-	uiGraphics.newEllipse = defs.ellipse.new -- (radius_x, radius_y)
+	--uiGraphics.newEllipse = defs.ellipse.new -- (radius_x, radius_y)
 
 	defs.group = require(GFX_PATH .. "spr_group")
-	uiGraphics.newGroup = defs.group.new -- ()
+	--uiGraphics.newGroup = defs.group.new -- ()
 
 	defs.image = require(GFX_PATH .. "spr_image")
-	uiGraphics.newImage = defs.image.new -- (image, [quad])
+	--uiGraphics.newImage = defs.image.new -- (image, [quad])
 
 	defs.line = require(GFX_PATH .. "spr_line")
-	uiGraphics.newLine = defs.line.new -- (points)
+	--uiGraphics.newLine = defs.line.new -- (points)
 
 	defs.mesh = require(GFX_PATH .. "spr_mesh")
-	uiGraphics.newMesh = defs.mesh.new -- (mesh)
+	--uiGraphics.newMesh = defs.mesh.new -- (mesh)
 
 	defs.points = require(GFX_PATH .. "spr_points")
-	uiGraphics.newPoints = defs.points.new -- (points)
+	--uiGraphics.newPoints = defs.points.new -- (points)
 
 	defs.polygon = require(GFX_PATH .. "spr_polygon")
-	uiGraphics.newPolygon = defs.polygon.new -- (points)
+	--uiGraphics.newPolygon = defs.polygon.new -- (points)
 
 	defs.print = require(GFX_PATH .. "spr_print")
-	uiGraphics.newPrint = defs.print.new -- (text, font)
+	--uiGraphics.newPrint = defs.print.new -- (text, font)
 
 	defs.rect = require(GFX_PATH .. "spr_rect")
-	uiGraphics.newRect = defs.rect.new -- (w, h)
+	--uiGraphics.newRect = defs.rect.new -- (w, h)
 
 	defs.slice = require(GFX_PATH .. "spr_slice")
-	uiGraphics.newSlice = defs.slice.new -- (image, slice)
+	--uiGraphics.newSlice = defs.slice.new -- (image, slice)
 
 	defs.sprite_batch = require(GFX_PATH .. "spr_sprite_batch")
-	uiGraphics.newSpriteBatch = defs.sprite_batch.new -- (sprite_batch)
+	--uiGraphics.newSpriteBatch = defs.sprite_batch.new -- (sprite_batch)
 
 	defs.text_batch = require(GFX_PATH .. "spr_text_batch")
-	uiGraphics.newTextBatch = defs.text_batch.new -- (text_batch)
+	--uiGraphics.newTextBatch = defs.text_batch.new -- (text_batch) -- XXX: naming conflict
 end
 
 
 return uiGraphics
-

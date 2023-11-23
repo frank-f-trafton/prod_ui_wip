@@ -1,4 +1,4 @@
--- Skin: Basic Input Field
+-- Skin: Single-line text input box.
 
 
 return {

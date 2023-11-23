@@ -1,6 +1,6 @@
 --[[
 
-input/text_box: A text input field.
+input/text_box_multi: A multi-line text input box.
 
          Viewport #1
   +-----------------------+
@@ -48,17 +48,6 @@ def_wid.uiFunc_commandAction = dummyFunc
 local love_major, love_minor = love.getVersion()
 
 
-local _newTextBatch
-do
-	if love_major <= 11 then
-		_newTextBatch = love.graphics.newText
-
-	else
-		_newTextBatch = love.graphics.newTextBatch
-	end
-end
-
-
 local context = select(1, ...)
 
 
@@ -70,13 +59,13 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-local editAct = context:getLua("shared/edit_field/edit_act")
-local editBind = context:getLua("shared/edit_field/edit_bind")
-local editMethods = context:getLua("shared/edit_field/edit_methods")
---local intersect = require(context.conf.prod_ui_req .. "logic.intersect") -- lerp
+local editAct = context:getLua("shared/line_ed/multi/edit_act")
+local editBind = context:getLua("shared/line_ed/multi/edit_bind")
+local editMethods = context:getLua("shared/line_ed/multi/edit_methods")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
-local lineEditor = context:getLua("shared/edit_field/line_editor")
+local lineEditor = context:getLua("shared/line_ed/multi/line_editor")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -86,7 +75,7 @@ local function dummy() end
 
 
 local def = {
-	skin_id = "text_box1",
+	skin_id = "text_box_m1",
 	renderThimble = dummy,
 	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
 }
@@ -100,38 +89,49 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 -- Pop-up menu definition.
 do
 	local function configItem_undo(item, client)
+
 		item.selectable = true
 		item.actionable = (client.line_ed.hist.pos > 1)
 	end
+
+
 	local function configItem_redo(item, client)
+
 		item.selectable = true
 		item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
 	end
+
+
 	local function configItem_cutCopyDelete(item, client)
+
 		item.selectable = true
 		item.actionable = client.line_ed:isHighlighted()
 	end
-	local function configItem_paste(item, client)
-		item.selectable = true
-		-- XXX Ask LÖVE devs for a hasClipboardText function: https://wiki.libsdl.org/SDL_HasClipboardText
-		-- Test implementation: https://github.com/rabbitboots/love/tree/12.0-development-clipboard/src/modules/system
-		-- (Search 'hasclipboard' in src/modules/system.)
-		-- UPDATE: the SDL function didn't seem to be 100% reliable when I looked at it (and I don't recall when that
-		-- was). Have to follow up on it.
-		if love.system.hasClipboardText then
-			item.actionable = love.system.hasClipboardText()
 
-		else
-			-- I don't want to inadvertently pull in large amounts of text if the user doesn't end up pasting.
-			-- Attempting to paste with no text is harmless, so just leave the option actionable.
-			--item.actionable = (love.system.getClipboardText() ~= "")
-			item.actionable = true
-		end
+
+	local function configItem_paste(item, client)
+
+		item.selectable = true
+
+		-- XXX: There is an SDL function to check if the clipboard has text: https://wiki.libsdl.org/SDL_HasClipboardText
+		-- I tested it here: https://github.com/rabbitboots/love/tree/12.0-development-clipboard/src/modules/system
+		-- (Search 'hasclipboard' in src/modules/system.)
+		-- But the SDL function didn't seem to be 100% reliable when I looked at it (and I don't recall when that
+		-- was). Have to follow up on it.
+
+		-- Something like this:
+		-- item.actionable = love.system.hasClipboardText()
+
+		item.actionable = true
 	end
+
+
 	local function configItem_selectAll(item, client)
+
 		item.selectable = true
 		item.actionable = (not client.line_ed.lines:isEmpty())
 	end
+
 
 	-- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
 	def.pop_up_def = {
@@ -249,7 +249,6 @@ function def:uiCall_create(inst)
 		self.visible = true
 		self.allow_hover = true
 		self.can_have_thimble = true
-		self.allow_focus_capture = false
 		self.clip_hover = false
 		self.clip_scissor = true
 
@@ -258,8 +257,6 @@ function def:uiCall_create(inst)
 
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
-
-		self.text = ""
 
 		-- Minimum widget size.
 		self.min_w = 8
@@ -315,7 +312,7 @@ function def:uiCall_create(inst)
 		self.caret_w = 0
 		self.caret_h = 0
 
-		self.text_object = _newTextBatch(skin.font)
+		self.text_object = uiGraphics.newTextBatch(skin.font)
 		self.text_object_update = true
 
 		self.illuminate_current_line = true

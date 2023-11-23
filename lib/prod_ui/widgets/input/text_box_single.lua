@@ -1,9 +1,27 @@
 --[[
-A simple text box.
+
+A single-line text input box.
+
+         Viewport #1
+  +-------------------------+
+  |                         |
+
++-----------------------------+
+| The quick brown fox jumps   |
++-----------------------------+
+
 --]]
 
 
+-- LÖVE 12 compatibility
+local love_major, love_minor = love.getVersion()
+
+
 local context = select(1, ...)
+
+
+-- LÖVE Supplemental
+local utf8 = require("utf8") -- (Lua 5.3+)
 
 
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -12,18 +30,23 @@ local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
--- LÖVE Supplemental
-local utf8 = require("utf8") -- (Lua 5.3+)
-
-
 local def = {
-	skin_id = "input_field1",
+	skin_id = "text_box_s1",
 }
+
+
+widShared.scroll2SetMethods(def)
+-- No integrated scroll bars for single-line text boxes.
 
 
 local function updateTextWidth(self)
 	self.text_w = self.skin.font:getWidth(self.text)
 end
+
+
+-- TODO: Pop-up menu definition.
+
+
 
 
 function def:uiCall_create(inst)
@@ -36,8 +59,17 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
-		self.text = ""
-		self.text_w = 0
+		widShared.setupScroll2(self)
+		widShared.setupDoc(self)
+
+		widShared.setupViewport(self, 1)
+		widShared.setupViewport(self, 2)
+
+		self.press_busy = false
+
+		-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
+		self.caret_extend_x = 0
+		self.caret_extend_y = 0
 
 		-- State flags.
 		self.enabled = true
@@ -46,6 +78,9 @@ function def:uiCall_create(inst)
 
 		self:skinSetRefs()
 		self:skinInstall()
+
+		local skin = self.skin
+
 
 		self:reshape()
 	end

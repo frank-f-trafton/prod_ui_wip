@@ -32,11 +32,20 @@ function plan.make(parent)
 		input_box_s.w = 256
 		input_box_s.h = 32
 
-		input_box_s.alignment = "center"
-
 		input_box_s:setText("Barebones Input Box")
 
 		--input_box_s:setMaxCodePoints(4)
+
+		--[[
+		local input_single = content:addChild("input/text_box_single")
+
+		input_single.x = 32
+		input_single.y = 96
+		input_single.w = 256
+		input_single.h = 32
+
+		--input_box_s:setText("Single-Line Text Box")
+		--]]
 	end
 
 	frame:reshape(true)

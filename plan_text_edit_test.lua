@@ -62,7 +62,7 @@ function plan.make(parent)
 		temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
 		temp_instructions:refreshText()
 
-		local text_box = content:addChild("input/text_box", {font = context.resources.fonts.p})
+		local text_box = content:addChild("input/text_box_multi", {font = context.resources.fonts.p})
 		text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
 		text_box.x = 0
 		text_box.y = 0
