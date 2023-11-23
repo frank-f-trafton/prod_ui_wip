@@ -21,6 +21,7 @@ local context = select(1, ...)
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -38,11 +39,54 @@ local function updateTextWidth(self)
 end
 
 
+local function trimString(text, max_code_points)
+	return string.sub(text, 1, utf8.offset(text, max_code_points + 1) - 1)
+end
+
+
 function def:setText(text)
 
-	-- XXX: Assertions
+	-- Assertions
+	-- [[
+	if type(text) ~= "string" then uiShared.errBadType(1, text, "string") end
+	--]]
+
+	if self.max_code_points then
+		-- Trim text if it exceeds the max code point count.
+		local count_incoming = utf8.len(text)
+		if count_incoming > self.max_code_points then
+			text = trimString(text, self.max_code_points)
+		end
+	end
+
 	self.text = text
 	updateTextWidth(self)
+end
+
+
+-- @param max The maximum number of code points. Pass false or nil to effectively disable the limit.
+function def:setMaxCodePoints(max)
+
+	-- Assertions
+	-- [[
+	if max and type(max) ~= "number" then uiShared.errBadType(1, max, "false/nil/number") end
+	--]]
+
+	if max then
+		max = math.floor(math.max(0, max))
+	end
+
+	self.max_code_points = max or false
+
+	if self.max_code_points then
+		-- Re-trim any existing text.
+		local copo_count = utf8.len(self.text)
+
+		if copo_count > self.max_code_points then
+			self.text = trimString(self.text, self.max_code_points)
+			updateTextWidth(self)
+		end
+	end
 end
 
 
@@ -55,6 +99,8 @@ function def:uiCall_create(inst)
 
 		self.text = ""
 		self.text_w = 0
+
+		self.max_code_points = false
 
 		-- State flags.
 		self.enabled = true
@@ -124,7 +170,16 @@ end
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
-		-- Input validation: The context checks the UTF-8 encoding before calling this event.
+		-- Input validation happens in the context before this event is called.
+
+		if self.max_code_points then
+			-- Trim incoming text if the total would exceed the max code point count.
+			local count_incoming = utf8.len(text)
+			if count_incoming > self.max_code_points - utf8.len(self.text) then
+				text = trimString(text, self.max_code_points - utf8.len(self.text))
+			end
+		end
+
 		self.text = self.text .. text
 
 		updateTextWidth(self)
@@ -133,8 +188,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
-	-- XXX max text limit
 
 	local mod = self.context.key_mgr.mod
 
@@ -168,11 +221,21 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		love.system.setClipboardText(self.text)
 		return true
 
-	-- Paste
+	-- Paste (overwrites all existing text)
 	elseif scancode == "v" and mod["ctrl"] then -- XXX config
 		local clipboard_text = love.system.getClipboardText()
+
 		if clipboard_text and utf8Tools.check(clipboard_text) then
-			self.text = self.text .. clipboard_text
+
+			if self.max_code_points then
+				-- Trim text if it exceeds the max code point count.
+				local count_incoming = utf8.len(clipboard_text)
+				if count_incoming > self.max_code_points then
+					clipboard_text = trimString(clipboard_text, self.max_code_points)
+				end
+			end
+
+			self.text = clipboard_text
 			updateTextWidth(self)
 			return true
 		end
@@ -188,7 +251,7 @@ def.render = function(self, ox, oy)
 	local font = self.context.resources.fonts.internal
 
 	local line_w = math.floor(1.0 * scale)
-	local caret_w = math.floor(4.0 * scale)
+	local caret_w = math.floor(2.0 * scale)
 	local margin_w = math.floor(8.0 * scale)
 
 	if not self.enabled then
@@ -216,7 +279,7 @@ def.render = function(self, ox, oy)
 		math.max(0, self.h)
 	)
 
-	-- The caret is always in view.
+	-- Horizontal scroll offset. The caret should always be in view.
 	local offset_x = -math.max(0, self.text_w + caret_w + margin_w*2 - self.w)
 
 	-- Center text vertically.
@@ -224,10 +287,8 @@ def.render = function(self, ox, oy)
 	local offset_y = math.floor(0.5 + (self.h - font_h) / 2)
 
 	-- Text.
-	if self.text then
-		love.graphics.setFont(font)
-		love.graphics.print(self.text, margin_w + offset_x, offset_y) -- Alignment
-	end
+	love.graphics.setFont(font)
+	love.graphics.print(self.text, margin_w + offset_x, offset_y) -- Alignment
 
 	-- Caret.
 	if self.context.current_thimble == self then
