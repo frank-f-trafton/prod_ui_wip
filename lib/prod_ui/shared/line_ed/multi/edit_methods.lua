@@ -21,6 +21,7 @@ local utf8 = require("utf8")
 -- ProdUI
 local edCom = context:getLua("shared/line_ed/multi/ed_com")
 local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
+local editHist = context:getLua("shared/line_ed/multi/edit_hist")
 local lineEditor = context:getLua("shared/line_ed/multi/line_editor") -- XXX work on removing this reference (?)
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -262,21 +263,7 @@ function client:stepHistory(dir)
 	local changed, entry = hist:moveToEntry(hist.pos + dir)
 
 	if changed then
-		local line_ed_lines = line_ed.lines
-		local entry_lines = entry.lines
-
-		for i = 1, #entry_lines do
-			line_ed_lines[i] = entry_lines[i]
-		end
-		for i = #line_ed_lines, #entry_lines + 1, -1 do
-			line_ed_lines[i] = nil
-		end
-
-		line_ed.car_line = entry.car_line
-		line_ed.car_byte = entry.car_byte
-		line_ed.h_line = entry.h_line
-		line_ed.h_byte = entry.h_byte
-
+		editHist.applyEntry(self, entry)
 		line_ed:displaySyncAll()
 	end
 end
@@ -743,8 +730,8 @@ function client:cutHighlightedToClipboard()
 
 		self.input_category = false
 
-		hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
-		hist:writeEntry(true, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		editHist.writeEntry(line_ed, true)
 	end
 end
 
@@ -769,8 +756,8 @@ function client:pasteClipboardText()
 		line_ed.input_category = false
 		self:writeText(text, true)
 
-		hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
-		hist:writeEntry(true, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		editHist.writeEntry(line_ed, true)
 	end
 end
 
@@ -1219,10 +1206,8 @@ function client:executeBoundAction(bound_func)
 	if write_history then
 		line_ed.input_category = false
 
-		local hist = line_ed.hist
-
-		hist:doctorCurrentCaretOffsets(old_line, old_byte, old_h_line, old_h_byte)
-		hist:writeEntry(true, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		editHist.writeEntry(line_ed, true)
 	end
 
 	return update_viewport, caret_in_view, write_history

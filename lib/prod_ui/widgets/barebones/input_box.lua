@@ -40,6 +40,9 @@ end
 
 
 local function trimString(text, max_code_points)
+
+	max_code_points = math.min(max_code_points, utf8.len(text))
+
 	return string.sub(text, 1, utf8.offset(text, max_code_points + 1) - 1)
 end
 

@@ -34,7 +34,7 @@ function plan.make(parent)
 
 		input_box_s:setText("Barebones Input Box")
 
-		--input_box_s:setMaxCodePoints(4)
+		input_box_s:setMaxCodePoints(4)
 
 		--[[
 		local input_single = content:addChild("input/text_box_single")

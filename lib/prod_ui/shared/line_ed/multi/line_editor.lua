@@ -15,9 +15,11 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local commonEd = context:getLua("shared/line_ed/common_ed")
 local edCom = context:getLua("shared/line_ed/multi/ed_com")
 local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
 local editHist = context:getLua("shared/line_ed/multi/edit_hist")
+local history = require(context.conf.prod_ui_req .. "logic.struct.history")
 local seqString = context:getLua("shared/line_ed/seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -46,18 +48,11 @@ function lineEditor.new(font)
 	-- String sequence representing each line of internal text.
 	self.lines = seqString.new()
 
-	-- Current line and position (in bytes) of the text caret and the highlight selection.
-	-- The highlight can be greater or less than self.car_byte.
-	-- If (h_line == car_line and h_byte == car_byte), then highlighting is not active.
-	self.car_byte = 1
-	self.car_line = 1
-	self.h_byte = 1
-	self.h_line = 1
+	commonEd.setupCaretInfo(self, true, true)
 
 	-- History container
-	local hist = editHist.new()
-	self.hist = hist
-	hist:writeEntry(true, self.lines, self.car_line, self.car_byte, self.h_line, self.h_byte)
+	self.hist = history.new()
+	editHist.writeEntry(self, true)
 
 	-- Cached display details for rendering text, highlights, and the caret.
 	-- The LineEditor is responsible for keeping this in sync with the internal state.
