@@ -4,7 +4,7 @@ ProdUI is a user interface library for the LÖVE Framework.
 
 ## Status
 
-**ProdUI is currently unfinished.** It is not recommended for general use at this time. (It should run with LÖVE 11.4 and 12.0-development if you want to take a look, though.)
+**ProdUI is currently unfinished.** It is not recommended for general use at this time. It should run with LÖVE 11.4, 11.5 and 12.0-development if you want to take a look, though.
 
 
 ## Repository Structure
