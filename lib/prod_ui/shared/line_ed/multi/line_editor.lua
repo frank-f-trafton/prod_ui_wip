@@ -246,15 +246,25 @@ function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, fir
 end
 
 
---- Gets the top and bottom selected line indices, top to bottom.
-function _mt_line_ed:getSelectedLinesRange()
+--- Gets the top and bottom selected line indices, top to bottom, and the selection bytes that go with them.
+-- @param omit_empty_last_selection When true, exclude the bottom line if the selection is at the start.
+function _mt_line_ed:getSelectedLinesRange(omit_empty_last_selection)
 
-	local r1, r2 = self.car_line, self.h_line
+	local r1, r2, b1, b2 = self.car_line, self.h_line, self.car_byte, self.h_byte
 	if r1 > r2 then
-		r1, r2 = r2, r1
+		r1, r2, b1, b2 = r2, r1, b2, b1
 	end
 
-	return r1, r2
+	if r1 == r2 then
+		b1, b2 = math.min(b1, b2), math.max(b1, b2)
+	end
+
+	if omit_empty_last_selection and r2 > r1 and b2 <= 1 then
+		r2 = math.max(r1, r2 - 1)
+		b2 = #self.lines[r2] + 1
+	end
+
+	return r1, r2, b1, b2
 end
 
 

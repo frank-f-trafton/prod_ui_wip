@@ -326,7 +326,7 @@ end
 -- Shift selected lines up, down
 function editAct.shiftLinesUp(self, line_ed)
 
-	local r1, r2 = line_ed:getSelectedLinesRange()
+	local r1, r2 = line_ed:getSelectedLinesRange(true)
 	local lines = line_ed.lines
 	local displaced_line = lines[r1 - 1]
 
@@ -337,8 +337,10 @@ function editAct.shiftLinesUp(self, line_ed)
 
 		lines[r2] = displaced_line
 
-		line_ed.car_line = math.max(1, line_ed.car_line - 1)
-		line_ed.h_line = math.max(1, line_ed.h_line - 1)
+		line_ed.car_line = math.max(1, r1 - 1)
+		line_ed.car_byte = 1
+		line_ed.h_line = math.max(1, r2 - 1)
+		line_ed.h_byte = #line_ed.lines[line_ed.h_line] + 1
 		line_ed:displaySyncAll(r1 - 1)
 
 		return true, true, true
@@ -348,7 +350,7 @@ end
 
 function editAct.shiftLinesDown(self, line_ed)
 
-	local r1, r2 = line_ed:getSelectedLinesRange()
+	local r1, r2, b1, b2 = line_ed:getSelectedLinesRange(true)
 	local lines = line_ed.lines
 	local displaced_line = lines[r2 + 1]
 
@@ -359,8 +361,10 @@ function editAct.shiftLinesDown(self, line_ed)
 
 		lines[r1] = displaced_line
 
-		line_ed.car_line = math.min(#lines, line_ed.car_line + 1)
-		line_ed.h_line = math.min(#lines, line_ed.h_line + 1)
+		line_ed.car_line = math.min(#lines, r1 + 1)
+		line_ed.car_byte = 1
+		line_ed.h_line = math.min(#lines, r2 + 1)
+		line_ed.h_byte = #line_ed.lines[line_ed.h_line] + 1
 		line_ed:displaySyncAll(r1)
 
 		return true, true, true
@@ -598,7 +602,7 @@ function editAct.typeTab(self, line_ed)
 
 		-- Caret and highlight are on different lines: indent the range of lines.
 		else
-			local r1, r2 = line_ed:getSelectedLinesRange()
+			local r1, r2 = line_ed:getSelectedLinesRange(true)
 
 			-- Only perform the indent if the total number of added tabs will not take us beyond
 			-- the max code points setting.
@@ -625,7 +629,8 @@ function editAct.typeUntab(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_untab then
 		local changed = false
-		local r1, r2 = line_ed:getSelectedLinesRange()
+		local r1, r2 = line_ed:getSelectedLinesRange(true)
+
 		local tab_count = 1 + (r2 - r1)
 
 		for i = r1, r2 do
