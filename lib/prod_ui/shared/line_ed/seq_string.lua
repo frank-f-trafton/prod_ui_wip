@@ -322,7 +322,7 @@ function _mt_seq:offsetStepRight(line_n, byte_n)
 		else
 			line_n = line_n + 1
 			byte_n = 1
-			peeked = utf8.codepoint(self[line_n], byte_n)
+			peeked = #self[line_n] > 0 and utf8.codepoint(self[line_n], byte_n) or 0x0a
 		end
 
 	else
