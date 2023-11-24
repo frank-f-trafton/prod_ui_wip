@@ -27,7 +27,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local edCom = context:getLua("shared/line_ed/multi/ed_com")
+local commonEd = context:getLua("shared/line_ed/common_ed")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
@@ -80,6 +80,7 @@ local function dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
 
 			if k >= byte_1 and k < byte_2 then
 				col_text[i] = high_col
+
 			else
 				col_text[i] = syn_col[j] or def_col
 			end
@@ -316,46 +317,21 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
-	self.text_color = color_t or {1, 1, 1, 1}
-	self.text_h_color = color_h_t or {0, 0, 0, 1}
+	self.text_color = color_t or {1, 1, 1, 1} -- XXX: skin
+	self.text_h_color = color_h_t or {0, 0, 0, 1} -- XXX: skin
 
-	-- Caret and highlight lines, sub-lines and bytes for the display text.
-	self.d_car_para = 1
-	self.d_car_sub = 1
-	self.d_car_byte = 1
-
-	self.d_h_para = 1
-	self.d_h_sub = 1
-	self.d_h_byte = 1
+	commonEd.setupCaretDisplayInfo(self, true, true)
+	commonEd.setupCaretBox(self)
 
 	-- Update range for highlights, tracked on a per-Paragraph basis.
 	self.h_line_min = math.huge
 	self.h_line_max = 0
 
-	-- Caret position + dimensions relative to text.
-	self.caret_box_x = 0
-	self.caret_box_y = 0
-	self.caret_box_w = 0
-	self.caret_box_h = 0
-
-	-- Show the caret (text cursor).
-	self.caret_line_width = 1
-	self.show_caret = true
-
-	self.blink_time = 0
-	self.blink_reset = -0.5
-	self.blink_on = 0.5
-	self.blink_off = 0.5
-
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
 	self.replace_missing = true
 
-	-- Glyph masking mode, as used in password fields.
-	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
-	-- It does nothing else with respect to security.
-	self.masked = false
-	self.mask_glyph = "*" -- Must be exactly one glyph.
+	commonEd.setupMaskedState(self)
 
 	-- Set true to create coloredtext tables for each sub-line string. Each coloredtext
 	-- table contains a color table and a code point string for every code point in the base
@@ -379,13 +355,6 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 
 	-- Arbitrary table of state intended to help manage syntax highlighting.
 	self.syntax_work = {}
-
-	-- Used for word wrapping.
-	self.view_x = 0
-
-	-- How much to amplify wheel movement values. Is set in refreshFontParams().
-	self.wheel_scroll_x = 1.0
-	self.wheel_scroll_y = 1.0
 
 	setmetatable(self, _mt_lc)
 
@@ -836,6 +805,7 @@ end
 
 
 function _mt_lc:clearHighlights()
+
 	for i, paragraph in ipairs(self.paragraphs) do
 		for j, sub_line in ipairs(paragraph) do
 			sub_line.highlighted = false
@@ -846,6 +816,7 @@ end
 
 
 function _mt_lc:updateCaretRect()
+
 	--print("disp:updateCaretRect()")
 
 	local font = self.font
@@ -869,6 +840,7 @@ end
 
 
 function _mt_lc:updateFont(font)
+
 	self.font = font
 	self.font_height = font:getHeight()
 	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
@@ -890,34 +862,12 @@ function _mt_lc:refreshFontParams()
 	self.caret_line_width = math.max(1, math.ceil(em_width / 16))
 	self.width_line_feed = math.max(1, math.ceil(em_width / 4))
 
-	-- XXX Both of these probably need to be configurable.
-	-- XXX I don't have a pointing device with a horizontal scrolling wheel, so I have
-	-- no idea if this is a sensible value or not.
-	self.wheel_scroll_x = math.ceil(1.0 * em_width)
-	self.wheel_scroll_y = math.ceil(1.0 * line_height * 2)
-
 	-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
 end
 
 
-function _mt_lc:resetCaretBlink()
-	self.blink_time = self.blink_reset
-end
-
-
-function _mt_lc:updateCaretBlink(dt)
-
-	-- Implement caret blinking
-	self.blink_time = self.blink_time + dt
-	if self.blink_time > self.blink_on + self.blink_off then
-		self.blink_time = math.max(-(self.blink_on + self.blink_off), self.blink_time - (self.blink_on + self.blink_off))
-	end
-	if self.blink_time < self.blink_off then
-		self.show_caret = true
-	else
-		self.show_caret = false
-	end
-end
+_mt_lc.resetCaretBlink = commonEd.resetCaretBlink
+_mt_lc.updateCaretBlink = commonEd.updateCaretBlink
 
 
 return editDisp

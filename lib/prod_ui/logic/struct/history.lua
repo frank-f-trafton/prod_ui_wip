@@ -23,7 +23,7 @@ function history.new()
 	self.enabled = true
 
 	self.pos = 0
-	self.max = math.huge
+	self.max = 500
 
 	self.ledger = {}
 
