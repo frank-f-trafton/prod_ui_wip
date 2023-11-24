@@ -246,7 +246,7 @@ function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, fir
 end
 
 
---- Gets the top and bottom selected line indices, top to bottom, and the selection bytes that go with them.
+--- Gets the top and bottom selected line indices and the selection bytes that go with them, in order.
 -- @param omit_empty_last_selection When true, exclude the bottom line if the selection is at the start.
 function _mt_line_ed:getSelectedLinesRange(omit_empty_last_selection)
 
