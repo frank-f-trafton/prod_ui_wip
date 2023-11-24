@@ -1259,7 +1259,7 @@ def.skinners = {
 			end
 
 			-- Draw the caret.
-			if has_thimble and disp.show_caret then
+			if has_thimble and disp.caret_is_showing then
 				love.graphics.setColor(res.color_insert) -- XXX: color_replace
 				love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
 			end

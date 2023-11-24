@@ -5,12 +5,6 @@
 	LineEditor history implementation.
 
 	IMPORTANT: For password fields, you should disable undo/redo history.
-
-	The history state contains:
-	* A ledger of event entries
-	* A snapshot of the LineEditor's strings array
-	* An index indicating the current position in the ledger. (Can be zero if the ledger is empty.)
-	* A max entries limit
 --]]
 
 
@@ -74,9 +68,6 @@ function editHist.doctorCurrentCaretOffsets(hist, car_line, car_byte, h_line, h_
 
 	local entry = hist.ledger[hist.pos]
 
-	--print("entry", entry, "hist.pos", hist.pos)
-	--print("car_line, car_byte, h_line, h_byte", car_line, car_byte, h_line, h_byte)
-
 	if entry then
 		entry.car_line = car_line
 		entry.car_byte = car_byte
@@ -87,4 +78,3 @@ end
 
 
 return editHist
-

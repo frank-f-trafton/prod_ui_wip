@@ -50,7 +50,7 @@ function lineEditor.new(font)
 
 	commonEd.setupCaretInfo(self, true, true)
 
-	-- History container
+	-- History container.
 	self.hist = history.new()
 	editHist.writeEntry(self, true)
 
