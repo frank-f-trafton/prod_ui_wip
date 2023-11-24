@@ -88,7 +88,7 @@ function lineEditor.new(font)
 
 	-- What to do when there's a UTF-8 encoding problem.
 	-- Applies to input text, and also to clipboard get/set.
-	-- See 'edCom.validateEncoding()' for options.
+	-- See 'textUtil.sanitize()' for options.
 	self.bad_input_rule = false
 
 	-- Should be updated with core dimensions change.
