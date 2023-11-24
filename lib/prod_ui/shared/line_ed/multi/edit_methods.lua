@@ -959,16 +959,10 @@ function client:caretStepLeft(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	local left_pos = textUtil.utf8StartByteLeft(lines[line_ed.car_line], line_ed.car_byte - 1)
-
-	-- Move back one uChar
-	if left_pos then
-		line_ed.car_byte = left_pos
-
-	-- Move to end of previous line
-	elseif line_ed.car_line > 1 then
-		line_ed.car_line = line_ed.car_line - 1
-		line_ed.car_byte = #lines[line_ed.car_line] + 1
+	local new_line, new_byte = lines:offsetStepLeft(line_ed.car_line, line_ed.car_byte)
+	if new_line then
+		line_ed.car_line = new_line
+		line_ed.car_byte = new_byte
 	end
 
 	line_ed:displaySyncCaretOffsets()
@@ -987,22 +981,17 @@ function client:caretStepRight(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	local right_pos = textUtil.utf8StartByteRight(lines[line_ed.car_line], line_ed.car_byte + 1)
-
-	-- Move right one uChar
-	if right_pos then
-		line_ed.car_byte = right_pos
-
-	-- Move to start of next line
-	elseif line_ed.car_line < #lines then
-		line_ed.car_line = line_ed.car_line + 1
-		line_ed.car_byte = 1
+	local new_line, new_byte = lines:offsetStepRight(line_ed.car_line, line_ed.car_byte)
+	if new_line then
+		line_ed.car_line = new_line
+		line_ed.car_byte = math.max(1, new_byte)
 	end
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1020,6 +1009,7 @@ function client:caretJumpLeft(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1046,6 +1036,7 @@ function client:caretJumpRight(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1066,6 +1057,7 @@ function client:caretFirst(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1083,6 +1075,7 @@ function client:caretLast(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1105,6 +1098,7 @@ function client:caretLineFirst(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1127,6 +1121,7 @@ function client:caretLineLast(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
