@@ -205,6 +205,8 @@ function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, fir
 
 		local group = code_groups[peeked]
 
+		--print("group", group)
+
 		-- Beginning or end of document
 		if peeked == nil then
 			--print("break: peeked == nil")
