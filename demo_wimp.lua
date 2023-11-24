@@ -1003,6 +1003,13 @@ of it.
 	end
 	--]]
 
+	-- [[
+	do
+		local planInputBox = require("plan_input_box")
+		local frame_lb = planInputBox.make(wimp_root)
+	end
+	--]]
+
 	-- [=[
 	do
 		local frame_ef
@@ -1023,13 +1030,6 @@ of it.
 		end
 		--]]
 	end
-
-	-- [[
-	do
-		local planInputBox = require("plan_input_box")
-		local frame_lb = planInputBox.make(wimp_root)
-	end
-	--]]
 
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")

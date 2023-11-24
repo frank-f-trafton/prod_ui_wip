@@ -701,7 +701,7 @@ function client:copyHighlightedToClipboard()
 		copied = string.rep(disp.mask_glyph, utf8.len(copied))
 	end
 
-	copied = edCom.validateEncoding(copied, line_ed.bad_input_rule, false, false)
+	copied = textUtil.sanitize(copied, line_ed.bad_input_rule)
 
 	edCom.setClipboardText(copied)
 end
@@ -718,7 +718,7 @@ function client:cutHighlightedToClipboard()
 	local cut = self:deleteHighlightedText()
 
 	if cut then
-		cut = edCom.validateEncoding(cut, self.bad_input_rule, false, false)
+		cut = textUtil.sanitize(cut, self.bad_input_rule)
 
 		-- Don't leak masked string info.
 		if disp.masked then
@@ -855,11 +855,12 @@ function client:deleteUChar(n_u_chars)
 	local lines = line_ed.lines
 	local line_2, byte_2, u_count = lines:countUCharsRight(line_ed.car_line, line_ed.car_byte, n_u_chars)
 
-	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
-	local right_edge = math.max(0, byte_2 - 1)
-	local right_bounds = edCom.utf8FindRightStartOctet(lines[line_ed.car_line], right_edge + 1) - 1
+	byte_2 = math.max(1, byte_2)
 
 	if u_count > 0 then
+		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
+		local right_bounds = utf8.offset(lines[line_ed.car_line], 2, byte_2 - 1) - 1
+
 		-- Assumes there was no highlighted text at time of call.
 		return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_2, right_bounds)
 	end
@@ -963,7 +964,8 @@ function client:caretStepLeft(clear_highlight)
 
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local left_pos = edCom.utf8FindLeftStartOctet(lines[line_ed.car_line], line_ed.car_byte - 1)
+
+	local left_pos = utf8.offset(lines[line_ed.car_line], -1, line_ed.car_byte)
 
 	-- Move back one uChar
 	if left_pos then
@@ -979,6 +981,7 @@ function client:caretStepLeft(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
+
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -989,7 +992,7 @@ function client:caretStepRight(clear_highlight)
 
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local right_pos = edCom.utf8FindRightStartOctet(lines[line_ed.car_line], line_ed.car_byte + 1)
+	local right_pos = utf8.offset(lines[line_ed.car_line], 2, line_ed.car_byte)
 
 	-- Move right one uChar
 	if right_pos then

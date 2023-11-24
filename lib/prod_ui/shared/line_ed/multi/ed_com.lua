@@ -24,50 +24,9 @@ edCom.getClipboardText = love.system.getClipboardText
 edCom.setClipboardText = love.system.setClipboardText
 
 
-function edCom.validateEncoding(str, bad_byte_policy)
-
-	-- Input is good: nothing to do.
-	if utf8Tools.check(str) then
-		-- NOTE: As a validator, utf8.len() doesn't catch surrogate pairs.
-		-- LÖVE text functions reject code point values in the surrogate range.
-		return str
-
-	else
-		local str_out = ""
-		local byte_n = 1
-
-		while byte_n <= #str do
-			local ok, bad_byte, err_str = utf8Tools.check(str, byte_n)
-
-			-- String is good from byte_n to #str
-			if ok then
-				str_out = str_out .. string.sub(str, byte_n)
-				break
-
-			-- Encoding error at 'bad_byte'
-			elseif bad_byte_policy == "trim" then
-				str_out = string.sub(str, 1, bad_byte - 1)
-				break
-
-			elseif bad_byte_policy == "replacement_char" then
-				-- One '�' for every unrecognized byte.
-				str_out = str_out .. string.sub(str, byte_n, bad_byte - 1) .. "�"
-				byte_n = bad_byte + 1
-
-			-- no policy: return empty string on bad input
-			else
-				break
-			end
-		end
-	end
-
-	return str_out
-end
-
-
 function edCom.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed)
 
-	str = edCom.validateEncoding(str, bad_byte_policy)
+	str = textUtil.sanitize(str, bad_byte_policy)
 
 	if not allow_line_feed then
 		-- Stops just before the first line feed.
@@ -156,54 +115,6 @@ function edCom.getUCharSpan(str, i, n_u_chars)
 	end
 
 	return i - 1, u_char_count
-end
-
-
--- UTF-8 Support functions
-
-
--- NOTE: The byte search criteria skips over any byte which is within the "continuation byte" range. It assumes the subject string is valid UTF-8.
-function edCom.utf8FindLeftStartOctet(str, byte_pos)
-
-	if byte_pos < 1 or byte_pos > #str then
-		return nil
-	end
-
-	while byte_pos > 0 do
-		local byte = string.byte(str, byte_pos)
-		if byte < 0x80 then
-			return byte_pos
-
-		else
-			byte_pos = byte_pos - 1
-		end
-	end
-
-	return nil
-end
-
-
-function edCom.utf8FindRightStartOctet(str, byte_pos)
-
-	if byte_pos < 1 or byte_pos > #str + 1 then
-		return nil
-	end
-
-	while true do
-		if byte_pos == #str + 1 then
-			return byte_pos
-		end
-
-		local byte = string.byte(str, byte_pos)
-		if byte < 0x80 then
-			return byte_pos
-
-		else
-			byte_pos = byte_pos + 1
-		end
-	end
-
-	return nil
 end
 
 

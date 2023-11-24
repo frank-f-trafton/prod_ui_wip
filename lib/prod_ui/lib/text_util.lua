@@ -448,4 +448,47 @@ function textUtil.stringToColoredText(str, text_t, col_t, color_seq)
 end
 
 
+--- Validates a string.
+-- @param bad_byte_policy Controls mitigation codepaths if the encoding is bad.
+--	"trim": Cut the string at the first bad byte.
+--	"replacement_char": Replace every unrecognized bye with the Unicode replacement code point.
+--	otherwise: return an empty string on bad unput.
+function textUtil.sanitize(str, bad_byte_policy)
+
+	-- Input is good: nothing to do.
+	if utf8Tools.check(str) then
+		-- NOTE: As a validator, utf8.len() doesn't reject surrogate pairs.
+		-- LÖVE text functions reject code point values in the surrogate range.
+		return str
+
+	else
+		local str_out = ""
+		local byte_n = 1
+
+		while byte_n <= #str do
+			local ok, bad_byte, err_str = utf8Tools.check(str, byte_n)
+
+			if ok then
+				str_out = str_out .. string.sub(str, byte_n)
+				break
+
+			elseif bad_byte_policy == "trim" then
+				str_out = string.sub(str, 1, bad_byte - 1)
+				break
+
+			elseif bad_byte_policy == "replacement_char" then
+				str_out = str_out .. string.sub(str, byte_n, bad_byte - 1) .. "�"
+				byte_n = bad_byte + 1
+
+			-- no policy: return empty string on bad input
+			else
+				break
+			end
+		end
+	end
+
+	return str_out
+end
+
+
 return textUtil
