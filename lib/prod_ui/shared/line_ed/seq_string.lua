@@ -290,7 +290,7 @@ function _mt_seq:offsetStepLeft(line_n, byte_n)
 
 		local byte = string.byte(self[line_n], byte_n)
 		-- Non-continuation byte
-		if byte and (byte < 0x80) then
+		if byte and not (byte >= 0x80 and byte <= 0xbf) then
 			peeked = utf8.codepoint(self[line_n], byte_n)
 			break
 		end
@@ -393,7 +393,7 @@ function _mt_seq:countUCharsLeft(line_n, byte_n, n_u_chars)
 	while count < n_u_chars do
 		local line_new, byte_new = self:offsetStepLeft(line_n, byte_n)
 
-		-- Reached end of line
+		-- Reached beginning of text
 		if not line_new then
 			break
 
@@ -415,7 +415,7 @@ function _mt_seq:countUCharsRight(line_n, byte_n, n_u_chars)
 	while count < n_u_chars do
 		local line_new, byte_new = self:offsetStepRight(line_n, byte_n)
 
-		-- Reached end of line
+		-- Reached end of text
 		if not line_new then
 			break
 
