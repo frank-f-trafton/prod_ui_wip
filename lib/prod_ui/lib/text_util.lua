@@ -491,4 +491,36 @@ function textUtil.sanitize(str, bad_byte_policy)
 end
 
 
+function textUtil.utf8StartByteRight(str, pos)
+
+	pos = math.max(pos, 1)
+
+	while pos <= #str do
+		local byte = string.byte(str, pos)
+
+		if not (byte >= 0x80 and byte <= 0xbf) then
+			return pos
+		end
+
+		pos = pos + 1
+	end
+end
+
+
+function textUtil.utf8StartByteLeft(str, pos)
+
+	pos = math.min(pos, #str)
+
+	while pos >= 1 do
+		local byte = string.byte(str, pos)
+
+		if not (byte >= 0x80 and byte <= 0xbf) then
+			return pos
+		end
+
+		pos = pos - 1
+	end
+end
+
+
 return textUtil

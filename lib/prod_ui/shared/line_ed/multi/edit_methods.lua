@@ -678,7 +678,6 @@ function client:backspaceUChar(n_u_chars)
 	local line_1, byte_1, u_count = lines:countUCharsLeft(line_ed.car_line, line_ed.car_byte, n_u_chars)
 
 	if u_count > 0 then
-		-- Assumes there was no highlighted text at time of call.
 		return line_ed:deleteText(true, line_1, byte_1, line_ed.car_line, line_ed.car_byte - 1)
 	end
 
@@ -855,14 +854,9 @@ function client:deleteUChar(n_u_chars)
 	local lines = line_ed.lines
 	local line_2, byte_2, u_count = lines:countUCharsRight(line_ed.car_line, line_ed.car_byte, n_u_chars)
 
-	byte_2 = math.max(1, byte_2)
-
 	if u_count > 0 then
 		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
-		local right_bounds = utf8.offset(lines[line_ed.car_line], 2, byte_2 - 1) - 1
-
-		-- Assumes there was no highlighted text at time of call.
-		return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_2, right_bounds)
+		return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_2, byte_2 - 1)
 	end
 
 	return nil
@@ -965,7 +959,7 @@ function client:caretStepLeft(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	local left_pos = utf8.offset(lines[line_ed.car_line], -1, line_ed.car_byte)
+	local left_pos = textUtil.utf8StartByteLeft(lines[line_ed.car_line], line_ed.car_byte - 1)
 
 	-- Move back one uChar
 	if left_pos then
@@ -992,7 +986,8 @@ function client:caretStepRight(clear_highlight)
 
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local right_pos = utf8.offset(lines[line_ed.car_line], 2, line_ed.car_byte)
+
+	local right_pos = textUtil.utf8StartByteRight(lines[line_ed.car_line], line_ed.car_byte + 1)
 
 	-- Move right one uChar
 	if right_pos then
