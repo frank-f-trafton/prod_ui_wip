@@ -18,10 +18,11 @@ Ctrl + V: Paste text
 local context = select(1, ...)
 
 
+local lgcButtonBare = context:getLua("shared/lgc_button_bare")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -30,6 +31,9 @@ local utf8 = require("utf8")
 
 
 local def = {}
+
+
+def.wid_action = uiShared.dummyFunc
 
 
 local function updateTextWidth(self)
@@ -166,7 +170,12 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-	-- XXX should be capable of binding the user hitting "enter" or "confirm" to a function call.
+
+	if self == inst then
+		if self.enabled then
+			self:wid_action()
+		end
+	end
 end
 
 
@@ -192,55 +201,57 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
-	local mod = self.context.key_mgr.mod
+	if self == inst then
+		local mod = self.context.key_mgr.mod
 
-	-- Backspace
-	if key == "backspace" then
-		-- Taken from: https://love2d.org/wiki/love.textinput
-		local byteoffset = utf8.offset(self.text, -1)
-		if byteoffset then
-			self.text = string.sub(self.text, 1, byteoffset - 1)
-		end
-		updateTextWidth(self)
-		return true
-
-	-- Delete all
-	elseif key == "delete" and mod["shift"] then
-		self.text = ""
-		updateTextWidth(self)
-		return true
-
-	-- Cut
-	elseif scancode == "x" and mod["ctrl"] then -- XXX config
-		if self.text ~= "" then
-			love.system.setClipboardText(self.text)
-		end
-		self.text = ""
-		updateTextWidth(self)
-		return true
-
-	-- Copy
-	elseif scancode == "c" and mod["ctrl"] then -- XXX config
-		love.system.setClipboardText(self.text)
-		return true
-
-	-- Paste (overwrites all existing text)
-	elseif scancode == "v" and mod["ctrl"] then -- XXX config
-		local clipboard_text = love.system.getClipboardText()
-
-		if clipboard_text and utf8Tools.check(clipboard_text) then
-
-			if self.max_code_points then
-				-- Trim text if it exceeds the max code point count.
-				local count_incoming = utf8.len(clipboard_text)
-				if count_incoming > self.max_code_points then
-					clipboard_text = trimString(clipboard_text, self.max_code_points)
-				end
+		-- Backspace
+		if key == "backspace" then
+			-- Taken from: https://love2d.org/wiki/love.textinput
+			local byteoffset = utf8.offset(self.text, -1)
+			if byteoffset then
+				self.text = string.sub(self.text, 1, byteoffset - 1)
 			end
-
-			self.text = clipboard_text
 			updateTextWidth(self)
 			return true
+
+		-- Delete all
+		elseif key == "delete" and mod["shift"] then
+			self.text = ""
+			updateTextWidth(self)
+			return true
+
+		-- Cut
+		elseif scancode == "x" and mod["ctrl"] then -- XXX config
+			if self.text ~= "" then
+				love.system.setClipboardText(self.text)
+			end
+			self.text = ""
+			updateTextWidth(self)
+			return true
+
+		-- Copy
+		elseif scancode == "c" and mod["ctrl"] then -- XXX config
+			love.system.setClipboardText(self.text)
+			return true
+
+		-- Paste (overwrites all existing text)
+		elseif scancode == "v" and mod["ctrl"] then -- XXX config
+			local clipboard_text = love.system.getClipboardText()
+
+			if clipboard_text and utf8Tools.check(clipboard_text) then
+
+				if self.max_code_points then
+					-- Trim text if it exceeds the max code point count.
+					local count_incoming = utf8.len(clipboard_text)
+					if count_incoming > self.max_code_points then
+						clipboard_text = trimString(clipboard_text, self.max_code_points)
+					end
+				end
+
+				self.text = clipboard_text
+				updateTextWidth(self)
+				return true
+			end
 		end
 	end
 end

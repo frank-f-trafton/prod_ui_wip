@@ -23,27 +23,6 @@ input/text_box_multi: A multi-line text input box.
 --]]
 
 
---[[
--- XXX Orphaned command (ie virtual CLI) stuff
--- Invoke a function as a result of hitting enter, clicking a linked button, etc.
-function editAct.runCommand(self, line_ed)
-	local ret1, ret2 = self:uiFunc_commandAction()
-
-	return ret1, ret2
-end
-
-local dummyFunc = function() end
-
--- A function to be called when runCommand() is invoked.
-def_wid.uiFunc_commandAction = dummyFunc
---]]
--- DEBUG: Test command configuration
---[[
---editBind["return"] = editAct.runCommand
---editBind["kpenter"] = editAct.runCommand
---]]
-
-
 -- LÖVE 12 compatibility
 local love_major, love_minor = love.getVersion()
 
@@ -297,7 +276,7 @@ function def:uiCall_create(inst)
 		-- Caret fill mode and color table
 		self.caret_fill = "fill"
 
-		-- Tick this whenever something related to the text box needs to be updated/recached.
+		-- Tick this whenever something related to the text box needs to be cached again.
 		-- lineEditor itself should immediately apply its own state changes.
 		self.update_flag = true
 
@@ -308,7 +287,6 @@ function def:uiCall_create(inst)
 		self.caret_h = 0
 
 		self.text_object = uiGraphics.newTextBatch(skin.font)
-		self.text_object_update = true
 
 		self.illuminate_current_line = true
 

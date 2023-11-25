@@ -18,7 +18,7 @@ local _mt_hist = {}
 _mt_hist.__index = _mt_hist
 
 
-function editHistSingle.initEntry(entry, source_lines, car_byte, h_byte)
+function editHistSingle.initEntry(entry, source_line, car_byte, h_byte)
 
 	entry.line = source_line
 	entry.car_byte = car_byte
