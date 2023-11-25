@@ -2,6 +2,8 @@
 
 --[[
 Shared (barebones) button logic.
+
+This roughly follows the behavior of `shared/lgc_button.lua`. See that file for additional comments.
 --]]
 
 
@@ -82,7 +84,7 @@ function lgcButtonBare.setCheckedRadioConditional(self, key, value)
 	local siblings = parent.children
 
 	for i, wid in ipairs(parent.children) do
-		if wid.is_radio_button and wid[key] == value then
+		if wid.is_radio_button and wid.radio_group == self.radio_group and wid[key] == value then
 			wid:setChecked(true)
 			return wid
 		end

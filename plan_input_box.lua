@@ -25,17 +25,6 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		local input_box_s = content:addChild("barebones/input_box")
-
-		input_box_s.x = 32
-		input_box_s.y = 32
-		input_box_s.w = 256
-		input_box_s.h = 32
-
-		input_box_s:setText("Barebones Input Box")
-
-		input_box_s:setMaxCodePoints(4)
-
 		--[[
 		local input_single = content:addChild("input/text_box_single")
 

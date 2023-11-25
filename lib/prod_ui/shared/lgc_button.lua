@@ -99,7 +99,7 @@ function lgcButton.setCheckedRadio(self, checked)
 end
 
 
---- Sets a radio button within a group of siblings. The first radio button where `self[key] == value` is chosen.
+--- Sets a radio button within a group of siblings, choosing the first radio button where `self[key] == value`.
 -- @param self The widget.
 -- @param key The key to check.
 -- @param value The value to check.
@@ -110,7 +110,7 @@ function lgcButton.setCheckedRadioConditional(self, key, value)
 	local siblings = parent.children
 
 	for i, wid in ipairs(parent.children) do
-		if wid.is_radio_button and wid[key] == value then
+		if wid.is_radio_button and wid.radio_group == self.radio_group and wid[key] == value then
 			wid:setChecked(true)
 			return wid
 		end
