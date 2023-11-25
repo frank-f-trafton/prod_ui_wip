@@ -998,12 +998,17 @@ of it.
 	end
 	--]]
 
-	--[[
+	-- [[
 	do
-		local planInputBox = require("plan_input_box")
-		local frame_lb = planInputBox.make(wimp_root)
+		local planBarebones = require("plan_barebones")
+		local frame_lb = planBarebones.make(wimp_root)
 	end
 	--]]
+
+	do
+		local planButtonSkinners = require("plan_button_skinners")
+		local frame_b = planButtonSkinners.make(wimp_root)
+	end
 
 	-- [=[
 	do
@@ -1026,17 +1031,12 @@ of it.
 		--]]
 	end
 
-	-- [[
+	--[[
 	do
-		local planBarebones = require("plan_barebones")
-		local frame_lb = planBarebones.make(wimp_root)
+		local planInputBox = require("plan_input_box")
+		local frame_lb = planInputBox.make(wimp_root)
 	end
 	--]]
-
-	do
-		local planButtonSkinners = require("plan_button_skinners")
-		local frame_b = planButtonSkinners.make(wimp_root)
-	end
 
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")

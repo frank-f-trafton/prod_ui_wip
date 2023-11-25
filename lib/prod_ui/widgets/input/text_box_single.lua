@@ -13,8 +13,25 @@ A single-line text input box.
 --]]
 
 
--- LÖVE 12 compatibility
-local love_major, love_minor = love.getVersion()
+--[[
+-- XXX Orphaned command (ie virtual CLI) stuff
+-- Invoke a function as a result of hitting enter, clicking a linked button, etc.
+function editAct.runCommand(self, line_ed)
+	local ret1, ret2 = self:uiFunc_commandAction()
+
+	return ret1, ret2
+end
+
+local dummyFunc = function() end
+
+-- A function to be called when runCommand() is invoked.
+def_wid.uiFunc_commandAction = dummyFunc
+--]]
+-- DEBUG: Test command configuration
+--[[
+--editBind["return"] = editAct.runCommand
+--editBind["kpenter"] = editAct.runCommand
+--]]
 
 
 local context = select(1, ...)
@@ -23,8 +40,10 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
-
+local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
+local lineEdSingle = context:getLua("shared/line_ed/single/line_ed_single")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -35,18 +54,16 @@ local def = {
 }
 
 
+-- Override to make something happen when the user presses 'return' or 'kpenter' while the
+-- widget is active and has keyboard focus.
+def.wid_action = uiShared.dummyFunc -- args: (self)
+
+
 widShared.scroll2SetMethods(def)
 -- No integrated scroll bars for single-line text boxes.
 
 
-local function updateTextWidth(self)
-	self.text_w = self.skin.font:getWidth(self.text)
-end
-
-
 -- TODO: Pop-up menu definition.
-
-
 
 
 function def:uiCall_create(inst)
@@ -71,6 +88,14 @@ function def:uiCall_create(inst)
 		self.caret_extend_x = 0
 		self.caret_extend_y = 0
 
+		-- Used to update viewport scrolling as a result of dragging the mouse in update().
+		self.mouse_drag_x = 0
+		self.mouse_drag_y = 0
+
+		-- Position offset when clicking the mouse.
+		-- This is only valid when a mouse action is in progress.
+		self.click_byte = 1
+
 		-- State flags.
 		self.enabled = true
 		self.hovered = false
@@ -81,6 +106,7 @@ function def:uiCall_create(inst)
 
 		local skin = self.skin
 
+		self.line_ed = lineEdSingle.new(skin.font)
 
 		self:reshape()
 	end
@@ -154,65 +180,27 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-	-- XXX should be capable of binding the user hitting "enter" or "confirm" to a function call.
+
+	if self == inst then
+		if self.enabled then
+			self:wid_action()
+		end
+	end
 end
 
 
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
-		-- Input validation: The context checks the UTF-8 encoding before calling this event.
-		self.text = self.text .. text
 
-		updateTextWidth(self)
 	end
 end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
-	-- XXX max text limit
+	if self == inst then
 
-	local mod = self.context.key_mgr.mod
-
-	-- Backspace
-	if key == "backspace" then
-		-- Taken from: https://love2d.org/wiki/love.textinput
-		local byteoffset = utf8.offset(self.text, -1)
-		if byteoffset then
-			self.text = string.sub(self.text, 1, byteoffset - 1)
-		end
-		updateTextWidth(self)
-		return true
-
-	-- Delete all
-	elseif key == "delete" and mod["shift"] then
-		self.text = ""
-		updateTextWidth(self)
-		return true
-
-	-- Cut
-	elseif scancode == "x" and mod["ctrl"] then -- XXX config
-		if self.text ~= "" then
-			love.system.setClipboardText(self.text)
-		end
-		self.text = ""
-		updateTextWidth(self)
-		return true
-
-	-- Copy
-	elseif scancode == "c" and mod["ctrl"] then -- XXX config
-		love.system.setClipboardText(self.text)
-		return true
-
-	-- Paste
-	elseif scancode == "v" and mod["ctrl"] then -- XXX config
-		local clipboard_text = love.system.getClipboardText()
-		if clipboard_text and utf8Tools.check(clipboard_text) then
-			self.text = self.text .. clipboard_text
-			updateTextWidth(self)
-			return true
-		end
 	end
 end
 
@@ -235,43 +223,10 @@ def.skinners = {
 
 		render = function(self, ox, oy)
 
-			local skin = self.skin
-			local font = skin.font
-
-			local res = self.disabled and skin.res_disabled or self.hovered and skin.res_hover or skin.res_idle
-
-			-- Body.
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
-
 			love.graphics.push("all")
 
-			love.graphics.intersectScissor(
-				ox + self.x + self.vp2_x,
-				oy + self.y + self.vp2_y,
-				math.max(0, self.vp2_w),
-				math.max(0, self.vp2_h)
-			)
-
-			-- The caret is always in view.
-			local offset_x = -math.max(0, self.text_w + skin.caret_w - self.vp_w)
-
-			-- Center text vertically.
-			local font_h = math.floor(font:getHeight() * font:getLineHeight())
-			local offset_y = math.floor(0.5 + (self.vp_h - font_h) / 2)
-
-			-- Text.
-			if self.text then
-				love.graphics.setColor(res.color_text)
-				love.graphics.setFont(font)
-				love.graphics.print(self.text, self.vp_x + offset_x, self.vp_y + offset_y) -- Alignment
-			end
-
-			-- Caret.
-			if self.context.current_thimble == self then
-				love.graphics.setColor(skin.color_cursor)
-				love.graphics.rectangle("fill", self.vp_x + offset_x + self.text_w, self.vp_y + offset_y, skin.caret_w, font_h)
-			end
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.print("WIP")
 
 			love.graphics.pop()
 		end,

@@ -22,6 +22,7 @@ lineEdSingle.code_groups = context:getLua("shared/line_ed/code_groups")
 local code_groups = lineEdSingle.code_groups
 
 
+local history = require(context.conf.prod_ui_req .. "logic.struct.history")
 local lineManip = context:getLua("shared/line_ed/line_manip")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -144,7 +145,7 @@ function lineEdSingle.new(font)
 	self.u_chars = utf8.len(self.line)
 
 	-- Max number of Unicode characters (not bytes) permitted in the field.
-	self.u_chars_max = 5000
+	self.u_chars_max = math.huge
 
 
 	-- History state.
@@ -165,8 +166,8 @@ function lineEdSingle.new(font)
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
-	self.text_color = color_t or {1, 1, 1, 1} -- XXX: skin
-	self.text_h_color = color_h_t or {0, 0, 0, 1} -- XXX: skin
+	self.text_color = {1, 1, 1, 1} -- XXX: skin
+	self.text_h_color = {0, 0, 0, 1} -- XXX: skin
 
 	commonEd.setupCaretBox(self)
 	commonEd.setupCaretDisplayInfo(self, true)

@@ -25,7 +25,8 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		--[[
+		-- *** Under construction. This widget doesn't work yet. ***
+		-- [=[
 		local input_single = content:addChild("input/text_box_single")
 
 		input_single.x = 32
@@ -34,7 +35,7 @@ function plan.make(parent)
 		input_single.h = 32
 
 		--input_box_s:setText("Single-Line Text Box")
-		--]]
+		--]=]
 	end
 
 	frame:reshape(true)
