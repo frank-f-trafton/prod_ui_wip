@@ -8,6 +8,18 @@ local widShared = require("lib.prod_ui.logic.wid_shared")
 local plan = {}
 
 
+local function makeLabel(content, x, y, w, h, text, label_mode)
+
+	label_mode = label_mode or "single"
+
+	local label = content:addChild("base/label")
+	label.x, label.y, label.w, label.h = x, y, w, h
+	label:setLabel(text, label_mode)
+
+	return label
+end
+
+
 function plan.make(parent)
 
 	local context = parent.context
@@ -42,150 +54,88 @@ function plan.make(parent)
 		button_norm.h = 64
 		button_norm:setLabel("Normal Skinned Button")
 
-		local t_align_h = {"left", "center", "right", "justify"}
-		local btn_label_align_h = content:addChild("barebones/button")
-		btn_label_align_h.w = 224
-		btn_label_align_h.h = 64
-		btn_label_align_h:setLabel("label_align_h")
-
-		btn_label_align_h.wid_buttonAction = function(self)
-
-			button_norm.skin.label_align_h = t_align_h[love.math.random(1, 4)]
-			self:setLabel("button_norm's label_align_h: " .. button_norm.skin.label_align_h)
-			--[[
-			self.label_align_v = "middle" -- "top", "middle", "bottom"
-			--]]
+		local function radioAlignH(self)
+			button_norm.skin.label_align_h = self.usr_align
 		end
 
-		local t_align_v = {"top", "middle", "bottom"}
-		local btn_label_align_v = content:addChild("barebones/button")
-		btn_label_align_v.y = 64
-		btn_label_align_v.w = 224
-		btn_label_align_v.h = 64
-		btn_label_align_v.text = "label_align_v"
-
-		btn_label_align_v.wid_buttonAction = function(self)
-
-			button_norm.skin.label_align_v = t_align_v[love.math.random(1, 3)]
-			self:setLabel("button_norm's label_align_v: " .. button_norm.skin.label_align_v)
+		local function radioAlignV(self)
+			button_norm.skin.label_align_v = self.usr_align
 		end
 
-		local btn_rep = content:addChild("barebones/button_repeat")
-		btn_rep.x = 256
-		btn_rep.y = 64
-		btn_rep.w = 128
-		btn_rep.h = 64
-		btn_rep:setLabel("Button (Rep)")
-		btn_rep.usr_count = 0
-		btn_rep.wid_buttonAction = function(self)
-			self.usr_count = self.usr_count + 1
-			self:setLabel(tostring(self.usr_count))
-		end
+		local xx, yy, ww1, ww2, hh1, hh2 = 0, 0, 64, 192, 40, 64
 
-		local bare_check = content:addChild("barebones/checkbox")
-		bare_check.x = 256
-		bare_check.y = 128
-		bare_check.w = 128
-		bare_check.h = 64
-		bare_check:setLabel("Checkbox")
+		makeLabel(content, xx, yy, ww2, hh1, "skin.label_align_h", "single")
 
-		local bare_radio
-		bare_radio = content:addChild("barebones/radio_button")
-		bare_radio.radio_group = "bare1"
-		bare_radio.x = 256
-		bare_radio.y = 192
-		bare_radio.w = 128
-		bare_radio.h = 64
-		bare_radio:setLabel("Radio1")
+		yy = yy + hh1
 
-		bare_radio = content:addChild("barebones/radio_button")
-		bare_radio.radio_group = "bare1"
-		bare_radio.x = 256
-		bare_radio.y = 256
-		bare_radio.w = 128
-		bare_radio.h = 64
-		bare_radio:setLabel("Radio2")
+		local bb_rdo
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo.radio_group = "align_h"
+		bb_rdo.usr_align = "left"
+		bb_rdo:setLabel("Left")
+		bb_rdo.wid_buttonAction = radioAlignH
 
-		local lbl
-		lbl = content:addChild("base/label")
-		lbl.enabled = true
-		lbl.x = 32
-		lbl.y = 128
-		lbl.w = 192
-		lbl.h = 48
-		lbl:setLabel("Label (enabled)")
+		xx = xx + ww1
 
-		lbl = content:addChild("base/label")
-		lbl.enabled = false
-		lbl.x = 32
-		lbl.y = 128+48
-		lbl.w = 192
-		lbl.h = 48
-		lbl:setLabel("Label (disabled)")
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo.radio_group = "align_h"
+		bb_rdo.usr_align = "center"
+		bb_rdo:setLabel("Center")
+		bb_rdo.wid_buttonAction = radioAlignH
 
-		lbl = content:addChild("barebones/label")
-		lbl.enabled = true
-		lbl.x = 32
-		lbl.y = 128+48+48
-		lbl.w = 192
-		lbl.h = 48
-		lbl:setLabel("Barebones Label (enabled)")
+		xx = xx + ww1
 
-		lbl = content:addChild("barebones/label")
-		lbl.enabled = false
-		lbl.x = 32
-		lbl.y = 128+48+48+48
-		lbl.w = 192
-		lbl.h = 48
-		lbl:setLabel("Barebones Label (disabled)")
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo.radio_group = "align_h"
+		bb_rdo.usr_align = "right"
+		bb_rdo:setLabel("Right")
+		bb_rdo.wid_buttonAction = radioAlignH
 
-		local sl1 = content:addChild("barebones/slider_bar")
-		sl1.x = 32
-		sl1.y = 128+48+48+48+48
-		sl1.w = 192
-		sl1.h = 48
-		sl1.trough_vertical = false
-		sl1:setLabel("Barebones Slider Bar")
+		xx = 0
+		yy = yy + hh2
 
-		sl1.slider_pos = 0
-		sl1.slider_def = 0
-		sl1.slider_max = 64
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww2, h = hh2})
+		bb_rdo.radio_group = "align_h"
+		bb_rdo.usr_align = "justify"
+		bb_rdo:setLabel("Justify")
+		bb_rdo.wid_buttonAction = radioAlignH
 
-		local sl2 = content:addChild("barebones/slider_bar")
-		sl2.x = 128
-		sl2.y = 128+48+48+48+48+48
-		sl2.w = 48
-		sl2.h = 192
-		sl2.trough_vertical = true
-		sl2:setLabel("Vertical")
+		bb_rdo:setCheckedConditional("usr_align", button_norm.skin.label_align_h)
 
-		sl2.slider_pos = 0
-		sl2.slider_def = 0
-		sl2.slider_max = 64
+		yy = yy + hh2
 
-		local b_instant = content:addChild("barebones/button_instant")
-		b_instant.x = 240
-		b_instant.y = 128+48+48+48+48+48
-		b_instant.w = 192
-		b_instant.h = 48
-		b_instant:setLabel("Instant-Action Button")
-		b_instant.usr_n = 0
+		yy = yy + hh1
 
-		b_instant.wid_buttonAction = function(self)
-			self.usr_n = self.usr_n + 1
-			self:setLabel("Activated! #" .. self.usr_n)
-		end
+		makeLabel(content, xx, yy, ww2, hh1, "skin.label_align_v", "single")
 
-		local b_stick = content:addChild("barebones/button_instant")
-		b_stick.x = 240+200
-		b_stick.y = 128+48+48+48+48+48
-		b_stick.w = 192
-		b_stick.h = 48
-		b_stick:setLabel("Sticky Button")
+		yy = yy + hh1
 
-		b_stick.wid_buttonAction = function(self)
-			self:setLabel("Stuck!")
-		end
+		local bb_rdo
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo.radio_group = "align_v"
+		bb_rdo.usr_align = "top"
+		bb_rdo:setLabel("Top")
+		bb_rdo.wid_buttonAction = radioAlignV
+
+		xx = xx + ww1
+
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo.radio_group = "align_v"
+		bb_rdo.usr_align = "middle"
+		bb_rdo:setLabel("Middle")
+		bb_rdo.wid_buttonAction = radioAlignV
+
+		xx = xx + ww1
+
+		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo.radio_group = "align_v"
+		bb_rdo.usr_align = "bottom"
+		bb_rdo:setLabel("Bottom")
+		bb_rdo.wid_buttonAction = radioAlignV
+
+		bb_rdo:setCheckedConditional("usr_align", button_norm.skin.label_align_v)
+
+		xx = xx + ww1
 	end
 
 	frame:reshape(true)
