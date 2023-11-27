@@ -19,7 +19,7 @@ local keyMgr = require(REQ_PATH .. "key_mgr")
 local demo_key_combo = {
 
 	-- The final key in a combo can either refer to a scancode or a keyConstant, but not both.
-	-- Modkeys are KeyConstants and merged into one virtual button by keyMgr.
+	-- Modkeys are KeyConstants, and are merged into one virtual button by keyMgr.
 	is_sc = false,
 
 	-- Merged modifier keys. True or false.
