@@ -41,6 +41,7 @@ local context = select(1, ...)
 local utf8 = require("utf8") -- (Lua 5.3+)
 
 local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
+local editMethodsSingle = context:getLua("shared/line_ed/single/edit_methods_single")
 local lineEdSingle = context:getLua("shared/line_ed/single/line_ed_single")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -66,6 +67,17 @@ widShared.scroll2SetMethods(def)
 -- TODO: Pop-up menu definition.
 
 
+-- Attach editing methods to def.
+for k, v in pairs(editMethodsSingle) do
+
+	if def[k] then
+		error("meta field already populated: " .. tostring(k))
+	end
+
+	def[k] = v
+end
+
+
 function def:uiCall_create(inst)
 
 	if self == inst then
@@ -78,9 +90,6 @@ function def:uiCall_create(inst)
 
 		widShared.setupScroll2(self)
 		widShared.setupDoc(self)
-
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
 
 		self.press_busy = false
 
@@ -110,6 +119,18 @@ function def:uiCall_create(inst)
 
 		self:reshape()
 	end
+end
+
+
+function def:updateDocumentDimensions()
+
+	local line_ed = self.line_ed
+	local font = line_ed.font
+
+	self.doc_w = font:getWidth(line_ed.disp_text)
+	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
+
+	-- self:updateAlignOffset()
 end
 
 
@@ -192,9 +213,49 @@ end
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
+		local line_ed = self.line_ed
 
+		if line_ed.allow_input then
+
+			local hist = line_ed.hist
+
+			line_ed:resetCaretBlink()
+
+			local old_byte, old_h_byte = line_ed:getCaretOffsets()
+
+			local suppress_replace = false
+			if line_ed.replace_mode then
+				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
+				if line_ed.car_byte < #line_ed.line + 1 then
+					line_ed.input_category = false
+				end
+			end
+
+			local written = self:writeText(text, suppress_replace)
+			self.update_flag = true
+
+			local no_ws = string.find(written, "%S")
+			local entry = hist:getCurrentEntry()
+			local do_advance = true
+
+			if (entry and entry.car_byte == old_byte)
+			and ((line_ed.input_category == "typing" and no_ws) or (line_ed.input_category == "typing-ws"))
+			then
+				do_advance = false
+			end
+
+			if do_advance then
+				editHistSingle.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+			end
+			editHistSingle.writeEntry(line_ed, do_advance)
+			line_ed.input_category = no_ws and "typing" or "typing-ws"
+
+			self:updateDocumentDimensions()
+			-- self:scrollGetCaretInBounds(true)
+		end
 	end
 end
+
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
@@ -223,11 +284,27 @@ def.skinners = {
 
 		render = function(self, ox, oy)
 
+			local skin = self.skin
+			local res = uiTheme.pickButtonResource(self, skin)
+			local line_ed = self.line_ed
+
 			love.graphics.push("all")
 
-			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.print("WIP")
+			-- Body.
+			local slc_body = res.slice
+			love.graphics.setColor(res.color_body)
+			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
+			-- Highlight selection.
+			-- XXX
+
+			-- Text.
+			love.graphics.setColor(res.color_text)
+			love.graphics.print(line_ed.disp_text)
+			love.graphics.print(line_ed.line, 0, 32)
+
+			-- Caret.
+			-- XXX
 			love.graphics.pop()
 		end,
 	},

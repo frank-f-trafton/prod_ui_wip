@@ -112,6 +112,8 @@ function lineEdSingle.new(font)
 	self.highlight_h = 0
 
 	commonEd.setupCaretInfo(self, true, false)
+	commonEd.setupCaretDisplayInfo(self, true, false)
+	commonEd.setupCaretBox(self)
 
 	-- When true, typing overwrites the current position instead of inserting.
 	self.replace_mode = false
@@ -129,8 +131,8 @@ function lineEdSingle.new(font)
 	self.allow_highlight = true
 
 	-- Allows '\n' as text input.
-	-- Single-line input treats line feeds like any other character (which is to say, 'home' and 'end' will not
-	-- stop at line feeds). The external string will substitute line feeds for U+23CE (⏎).
+	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
+	-- stop at line feeds. The external string may substitute line feeds for U+23CE (⏎).
 	self.allow_line_feed = false
 
 	self.enter_types_line_feed = false -- Makes the enter/return key type '\n\.
@@ -168,9 +170,6 @@ function lineEdSingle.new(font)
 	-- References to these tables will be copied around.
 	self.text_color = {1, 1, 1, 1} -- XXX: skin
 	self.text_h_color = {0, 0, 0, 1} -- XXX: skin
-
-	commonEd.setupCaretBox(self)
-	commonEd.setupCaretDisplayInfo(self, true)
 
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
@@ -372,6 +371,51 @@ function _mt_line_s:refreshFontParams()
 	self.caret_line_width = math.max(1, math.ceil(em_width / 16))
 
 	-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
+end
+
+
+function _mt_line_s:highlightCleanup()
+	if self:isHighlighted() then
+		self:clearHighlight()
+	end
+end
+
+
+--- Insert a string at the caret position.
+-- @param text The string to insert.
+-- @return Nothing.
+function _mt_line_s:insertText(text)
+
+	self:highlightCleanup()
+
+	self.line = lineManip.add(text, self.car_byte)
+	self.car_byte = self.car_byte + #text
+	self.h_byte = self.car_byte
+
+	--self:displaySyncInsertion(old_line, self.car_line)
+	--self:displaySyncCaretOffsets()
+end
+
+
+--- Delete a section of text.
+-- @param copy_deleted If true, return the deleted text as a string.
+-- @param byte_1 The first byte offset to delete from.
+-- @param byte_2 The final byte offset to delete to.
+-- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
+function _mt_line_s:deleteText(copy_deleted, byte_1, byte_2)
+
+	local deleted
+	if copy_deleted then
+		deleted = string.sub(self.line, byte_1, byte_2)
+	end
+	self.line = lineManip.delete(self.line, byte_1, byte_2)
+
+	self.car_byte = byte_1
+	self.h_byte = self.car_byte
+
+	-- XXX: update caret details.
+
+	return deleted
 end
 
 

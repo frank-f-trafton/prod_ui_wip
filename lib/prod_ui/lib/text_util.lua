@@ -38,6 +38,14 @@ function textUtil.countLineFeeds(str)
 end
 
 
+function textUtil.trimString(text, max_code_points)
+
+	max_code_points = math.max(0, math.min(max_code_points, utf8.len(text)))
+
+	return string.sub(text, 1, utf8.offset(text, max_code_points + 1) - 1)
+end
+
+
 function textUtil.trimToFirstLine(text)
 
 --	if type(text) == "string" then

@@ -19,6 +19,7 @@ local context = select(1, ...)
 
 
 local lgcButtonBare = context:getLua("shared/lgc_button_bare")
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -43,14 +44,6 @@ local function updateTextWidth(self)
 end
 
 
-local function trimString(text, max_code_points)
-
-	max_code_points = math.min(max_code_points, utf8.len(text))
-
-	return string.sub(text, 1, utf8.offset(text, max_code_points + 1) - 1)
-end
-
-
 function def:setText(text)
 
 	-- Assertions
@@ -62,7 +55,7 @@ function def:setText(text)
 		-- Trim text if it exceeds the max code point count.
 		local count_incoming = utf8.len(text)
 		if count_incoming > self.max_code_points then
-			text = trimString(text, self.max_code_points)
+			text = textUtil.trimString(text, self.max_code_points)
 		end
 	end
 
@@ -90,7 +83,7 @@ function def:setMaxCodePoints(max)
 		local copo_count = utf8.len(self.text)
 
 		if copo_count > self.max_code_points then
-			self.text = trimString(self.text, self.max_code_points)
+			self.text = textUtil.trimString(self.text, self.max_code_points)
 			updateTextWidth(self)
 		end
 	end
@@ -188,7 +181,7 @@ function def:uiCall_textInput(inst, text)
 			-- Trim incoming text if the total would exceed the max code point count.
 			local count_incoming = utf8.len(text)
 			if count_incoming > self.max_code_points - utf8.len(self.text) then
-				text = trimString(text, self.max_code_points - utf8.len(self.text))
+				text = textUtil.trimString(text, self.max_code_points - utf8.len(self.text))
 			end
 		end
 
@@ -244,7 +237,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					-- Trim text if it exceeds the max code point count.
 					local count_incoming = utf8.len(clipboard_text)
 					if count_incoming > self.max_code_points then
-						clipboard_text = trimString(clipboard_text, self.max_code_points)
+						clipboard_text = textUtil.trimString(clipboard_text, self.max_code_points)
 					end
 				end
 

@@ -183,7 +183,7 @@ function editDisp.coreToDisplayOffsets(s_bytes, byte_n, paragraph)
 
 		while true do
 			-- Uncomment to help debug OOB issues here:
-			print("byte_n", byte_n, "paragraph[line_sub]", paragraph[line_sub])
+			--print("byte_n", byte_n, "paragraph[line_sub]", paragraph[line_sub])
 
 			if byte_n <= #paragraph[line_sub].str then
 				break
@@ -303,6 +303,9 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 	self.align = "left" -- "left", "center", "right"
 
 	self.wrap_mode = false
+
+	-- Copy of viewport #1 width. Used when wrapping text.
+	self.view_w = 0
 
 	self.font = font
 	self.font_height = font:getHeight()
