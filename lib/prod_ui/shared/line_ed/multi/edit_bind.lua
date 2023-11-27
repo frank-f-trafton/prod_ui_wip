@@ -14,12 +14,10 @@ local editBind = {}
 
 -- ProdUI
 local editAct = context:getLua("shared/line_ed/multi/edit_act")
+local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
+
 
 --[[
-The nesting order of modifier keys must always be: control -> gui -> alt -> shift
-
-This doesn't affect the order of keys which must be held down.
-
 NOTE: holding control prevents love.textinput from firing, but holding alt does not.
 --]]
 
@@ -29,107 +27,88 @@ NOTE: holding control prevents love.textinput from firing, but holding alt does 
 local host_os = love.system.getOS()
 
 
--- Tree structure to hold keybindings.               -- CGAS
------------------------------------------------------------------------------
-editBind["!control"]                           = {}  -- 1000
-editBind            ["!gui"]                   = {}  -- 0100
-editBind["!control"]["!gui"]                   = {}  -- 1100
-editBind                    ["!alt"]           = {}  -- 0010
-editBind["!control"]        ["!alt"]           = {}  -- 1010
-editBind            ["!gui"]["!alt"]           = {}  -- 0110
-editBind["!control"]["!gui"]["!alt"]           = {}  -- 1110
-editBind                            ["!shift"] = {}  -- 0001
-editBind["!control"]                ["!shift"] = {}  -- 1001
-editBind            ["!gui"]        ["!shift"] = {}  -- 0101
-editBind["!control"]["!gui"]        ["!shift"] = {}  -- 1101
-editBind                    ["!alt"]["!shift"] = {}  -- 0011
-editBind["!control"]        ["!alt"]["!shift"] = {}  -- 1011
-editBind            ["!gui"]["!alt"]["!shift"] = {}  -- 0111
-editBind["!control"]["!gui"]["!alt"]["!shift"] = {}  -- 1111
-
-
 editBind["left"] = editAct.caretLeft
 editBind["right"] = editAct.caretRight
 
-editBind["!shift"]["left"] = editAct.caretLeftHighlight
-editBind["!shift"]["right"] = editAct.caretRightHighlight
+editBind["S left"] = editAct.caretLeftHighlight
+editBind["S right"] = editAct.caretRightHighlight
 
-editBind["!control"]["left"] = editAct.caretJumpLeft
-editBind["!control"]["right"] = editAct.caretJumpRight
+editBind["C left"] = editAct.caretJumpLeft
+editBind["C right"] = editAct.caretJumpRight
 
-editBind["!control"]["!shift"]["left"] = editAct.caretJumpLeftHighlight
-editBind["!control"]["!shift"]["right"] = editAct.caretJumpRightHighlight
+editBind["CS left"] = editAct.caretJumpLeftHighlight
+editBind["CS right"] = editAct.caretJumpRightHighlight
 
 editBind["home"] = editAct.caretLineFirst
 editBind["end"] = editAct.caretLineLast
 
-editBind["!control"]["home"] = editAct.caretFirst
-editBind["!control"]["end"] = editAct.caretLast
+editBind["C home"] = editAct.caretFirst
+editBind["C end"] = editAct.caretLast
 
-editBind["!control"]["!shift"]["home"] = editAct.caretFirstHighlight
-editBind["!control"]["!shift"]["end"] = editAct.caretLastHighlight
+editBind["CS home"] = editAct.caretFirstHighlight
+editBind["CS end"] = editAct.caretLastHighlight
 
-editBind["!shift"]["home"] = editAct.caretLineFirstHighlight
-editBind["!shift"]["end"] = editAct.caretLineLastHighlight
+editBind["S home"] = editAct.caretLineFirstHighlight
+editBind["S end"] = editAct.caretLineLastHighlight
 
 editBind["up"] = editAct.caretStepUp
 editBind["down"] = editAct.caretStepDown
 
-editBind["!shift"]["up"] = editAct.caretStepUpHighlight
-editBind["!shift"]["down"] = editAct.caretStepDownHighlight
+editBind["S up"] = editAct.caretStepUpHighlight
+editBind["S down"] = editAct.caretStepDownHighlight
 
-editBind["!alt"]["up"] = editAct.shiftLinesUp
-editBind["!alt"]["down"] = editAct.shiftLinesDown
+editBind["A up"] = editAct.shiftLinesUp
+editBind["A down"] = editAct.shiftLinesDown
 
-editBind["!control"]["up"] = editAct.caretStepUpCoreLine
-editBind["!control"]["down"] = editAct.caretStepDownCoreLine
+editBind["C up"] = editAct.caretStepUpCoreLine
+editBind["C down"] = editAct.caretStepDownCoreLine
 
-editBind["!control"]["!shift"]["up"] = editAct.caretStepUpCoreLineHighlight
-editBind["!control"]["!shift"]["down"] = editAct.caretStepDownCoreLineHighlight
+editBind["CS up"] = editAct.caretStepUpCoreLineHighlight
+editBind["CS down"] = editAct.caretStepDownCoreLineHighlight
 
 editBind["pageup"] = editAct.caretPageUp
 editBind["pagedown"] = editAct.caretPageDown
 
-editBind["!shift"]["pageup"] = editAct.caretPageUpHighlight
-editBind["!shift"]["pagedown"] = editAct.caretPageDownHighlight
+editBind["S pageup"] = editAct.caretPageUpHighlight
+editBind["S pagedown"] = editAct.caretPageDownHighlight
 
 editBind["backspace"] = editAct.backspace
-editBind["!shift"]["backspace"] = editAct.backspace
-editBind["!control"]["backspace"] = editAct.backspaceGroup
-editBind["!control"]["!shift"]["backspace"] = editAct.backspaceCaretToLineStart
+editBind["S backspace"] = editAct.backspace
+editBind["C backspace"] = editAct.backspaceGroup
+editBind["CS backspace"] = editAct.backspaceCaretToLineStart
 
 editBind["delete"] = editAct.delete
-editBind["!control"]["delete"] = editAct.deleteGroup
-editBind["!control"]["!shift"]["delete"] = editAct.deleteCaretToLineEnd
+editBind["C delete"] = editAct.deleteGroup
+editBind["CS delete"] = editAct.deleteCaretToLineEnd
 
-editBind["!control"]["d"] = editAct.deleteLine
+editBind["C d"] = editAct.deleteLine
 
 editBind["return"] = editAct.typeLineFeedWithAutoIndent
 editBind["kpenter"] = editAct.typeLineFeedWithAutoIndent
 
-editBind["!shift"]["return"] = editAct.typeLineFeed
-editBind["!shift"]["kpenter"] = editAct.typeLineFeed
+editBind["S return"] = editAct.typeLineFeed
+editBind["S kpenter"] = editAct.typeLineFeed
 
 editBind["tab"] = editAct.typeTab
-editBind["!shift"]["tab"] = editAct.typeUntab
+editBind["S tab"] = editAct.typeUntab
 
-editBind["!control"]["a"] = editAct.selectAll
-editBind["!control"]["c"] = editAct.copy
-editBind["!control"]["x"] = editAct.cut
-editBind["!shift"]["delete"] = editAct.cut
-editBind["!control"]["v"] = editAct.paste
+editBind["C a"] = editAct.selectAll
+editBind["C c"] = editAct.copy
+editBind["C x"] = editAct.cut
+editBind["S delete"] = editAct.cut
+editBind["C v"] = editAct.paste
 
 editBind["insert"] = editAct.toggleReplaceMode
 
-editBind["!control"]["z"] = editAct.undo
-editBind["!control"]["!shift"]["z"] = editAct.redo
-editBind["!control"]["y"] = editAct.redo
+editBind["C z"] = editAct.undo
+editBind["CS z"] = editAct.redo
+editBind["C y"] = editAct.redo
 
 
 -- DEBUG: Test mouse-click commands from the keyboard
 --[[
-editBind["!control"]["!alt"]["w"] = editAct.selectCurrentWord
-editBind["!control"]["!alt"]["a"] = editAct.selectCurrentLine
+editBind["CA w"] = editAct.selectCurrentWord
+editBind["CA a"] = editAct.selectCurrentLine
 --]]
 
 

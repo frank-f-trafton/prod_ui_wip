@@ -1031,7 +1031,7 @@ of it.
 		--]]
 	end
 
-	--[[
+	-- [[
 	do
 		local planInputBox = require("plan_input_box")
 		local frame_lb = planInputBox.make(wimp_root)
