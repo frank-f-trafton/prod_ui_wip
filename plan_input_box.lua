@@ -9,6 +9,18 @@ local widShared = require("lib.prod_ui.logic.wid_shared")
 local plan = {}
 
 
+local function makeLabel(content, x, y, w, h, text, label_mode)
+
+	label_mode = label_mode or "single"
+
+	local label = content:addChild("base/label")
+	label.x, label.y, label.w, label.h = x, y, w, h
+	label:setLabel(text, label_mode)
+
+	return label
+end
+
+
 function plan.make(parent)
 
 	local context = parent.context
@@ -25,8 +37,8 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		-- *** Under construction. This widget doesn't work yet. ***
 		-- [=[
+		makeLabel(content, 0, 0, 512, 32, "*** Under construction. This input box widget doesn't work yet. ***", "single")
 		local input_single = content:addChild("input/text_box_single")
 
 		input_single.x = 32

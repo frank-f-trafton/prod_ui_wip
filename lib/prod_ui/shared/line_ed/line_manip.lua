@@ -18,7 +18,7 @@ function lineManip.add(text, byte_pos)
 
 	-- Assertions.
 	-- [[
-	if byte_pos < 0 or byte_pos > #self[line_n] + 1 then
+	if byte_pos < 0 or byte_pos > #text + 1 then
 		error("byte_pos is out of range.")
 	end
 	--]]

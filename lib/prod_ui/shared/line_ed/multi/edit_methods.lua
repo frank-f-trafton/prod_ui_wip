@@ -10,8 +10,7 @@ local context = select(1, ...)
 
 
 local editMethods = {}
-editMethods.client = {}
-local client = editMethods.client
+local client = editMethods
 
 
 -- LÖVE Supplemental
@@ -20,6 +19,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local edCom = context:getLua("shared/line_ed/multi/ed_com")
+local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
 local editHist = context:getLua("shared/line_ed/multi/edit_hist")
 local lineEditor = context:getLua("shared/line_ed/multi/line_editor") -- XXX work on removing this reference (?)
@@ -625,7 +625,7 @@ function client:writeText(text, suppress_replace)
 	local lines = line_ed.lines
 
 	-- Sanitize input
-	text = edCom.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, line_ed.allow_line_feed)
+	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, line_ed.allow_line_feed)
 
 	if not line_ed.allow_highlight then
 		line_ed:clearHighlight()
@@ -637,7 +637,7 @@ function client:writeText(text, suppress_replace)
 
 	elseif line_ed.replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		local n_to_delete = edCom.countUChars(text, math.huge)
+		local n_to_delete = edComBase.countUChars(text, math.huge)
 		self:deleteUChar(n_to_delete)
 	end
 
@@ -646,7 +646,7 @@ function client:writeText(text, suppress_replace)
 	-- XXX Planning to add and subtract to this as strings are written and deleted.
 	-- For now, just recalculate the length to ensure things are working.
 	line_ed.u_chars = lines:uLen()
-	text = edCom.trimString(text, line_ed.u_chars, line_ed.u_chars_max)
+	text = textUtil.trimString(text, line_ed.u_chars_max - line_ed.u_chars)
 
 	line_ed:insertText(text)
 
@@ -770,8 +770,6 @@ function client:deleteHighlightedText()
 	if not self:isHighlighted() then
 		return nil
 	end
-
-	local lines = line_ed.lines
 
 	-- Clean up display highlight beforehand. Much harder to determine the offsets after deleting things.
 	local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
@@ -1219,4 +1217,4 @@ function client:executeRemoteAction(item_t) -- XXX WIP
 end
 
 
-return client
+return editMethods
