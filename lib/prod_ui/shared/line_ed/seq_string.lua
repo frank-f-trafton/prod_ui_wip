@@ -264,27 +264,28 @@ end
 
 function _mt_seq:offsetStepLeft(line_n, byte_n)
 
-	-- Assertions
-	-- [[
-	if line_n < 1 or line_n > #self then
-		error("line_n is out of range.")
-
-	elseif byte_n < 1 or byte_n > #self[line_n] + 1 then
-		error("byte_n is out of range.")
-	end
-	--]]
-
 	local peeked
-	byte_n, peeked = lineManip.offsetStepLeft(self[line_n], byte_n)
 
-	if not byte_n then
-		if line_n <= 1 then
-			return nil
+	while true do
+		byte_n = byte_n - 1
 
-		else
-			line_n = line_n - 1
-			byte_n = #self[line_n] + 1
-			peeked = 0x0a -- "\n"
+		if byte_n == 0 then
+			if line_n == 1 then
+				return nil
+
+			else
+				line_n = line_n - 1
+				byte_n = #self[line_n] + 1
+				peeked = 0x0a -- "\n"
+				break
+			end
+		end
+
+		local byte = string.byte(self[line_n], byte_n)
+		-- Non-continuation byte
+		if byte and not (byte >= 0x80 and byte <= 0xbf) then
+			peeked = utf8.codepoint(self[line_n], byte_n)
+			break
 		end
 	end
 
@@ -294,21 +295,21 @@ end
 
 function _mt_seq:offsetStepRight(line_n, byte_n)
 
-	-- Assertions ('byte_n' is checked a bit later).
+	-- Assertions
 	-- [[
 	if line_n < 1 or line_n > #self then
 		error("line_n is out of range.")
-
-	elseif byte_n < 1 or byte_n > #self[line_n] + 1 then
-		error("byte_n is out of range.")
 	end
 	--]]
 
+	local str = self[line_n]
 	local peeked
-	byte_n, peeked = lineManip.offsetStepRight(self[line_n], byte_n)
 
-	if not byte_n then
-		if line_n >= #self then
+	if byte_n < 1 or byte_n > #str + 1 then
+		error("byte_n is out of range.")
+
+	elseif byte_n == #str + 1 then
+		if line_n == #self then
 			return nil
 
 		else
@@ -316,6 +317,25 @@ function _mt_seq:offsetStepRight(line_n, byte_n)
 			byte_n = 1
 			peeked = #self[line_n] > 0 and utf8.codepoint(self[line_n], byte_n) or 0x0a
 		end
+
+	else
+		local byte = string.byte(str, byte_n)
+
+		-- Non-continuation byte
+		if byte < 0x80 then
+			byte_n = byte_n + 1
+
+		elseif byte < 0xe0 then
+			byte_n = byte_n + 2
+
+		elseif byte < 0xf0 then
+			byte_n = byte_n + 3
+
+		else
+			byte_n = byte_n + 4
+		end
+
+		peeked = (byte_n == #str + 1) and 0x0a or utf8.codepoint(self[line_n], byte_n)
 	end
 
 	return line_n, byte_n, peeked

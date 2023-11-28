@@ -92,37 +92,31 @@ function lineManip.offsetStepRight(text, byte_n)
 
 	local peeked
 
+	byte_n = byte_n + 1
+
 	while true do
-		if byte_n == #text + 1 then
-			return nil
-		end
-
 		local byte = string.byte(text, byte_n)
+		print("top of while loop", "byte", byte, "byte_n", byte_n)
 
-		-- Non-continuation byte
-		if byte < 0x80 then
+		if not byte then
+			print("not byte; return nil")
+			return nil
+
+		-- Continuation byte.
+		elseif (byte >= 0x80 and byte <= 0xbf) then
+			print("continuation byte")
 			byte_n = byte_n + 1
-			break
 
-		elseif byte < 0xe0 then
-			byte_n = byte_n + 2
-			break
-
-		elseif byte < 0xf0 then
-			byte_n = byte_n + 3
-			break
-
-		elseif byte < 0xf8 then
-			byte_n = byte_n + 4
-			break
-
-		-- Continuation byte
+		-- Non-continuation byte.
 		else
-			byte_n = byte_n + 1
+			print("non-continuation byte (break)")
+			break
 		end
 	end
 
+	print("lineManip.offsetStepRight", "#text", #text, "byte_n", byte_n)
 	peeked = utf8.codepoint(text, byte_n)
+	print("peeked:", peeked)
 
 	return byte_n, peeked
 end

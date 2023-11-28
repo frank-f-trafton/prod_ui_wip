@@ -9,8 +9,8 @@
 local context = select(1, ...)
 
 
-local editMethodsSingle = {}
-local client = editMethodsSingle
+local editMethodsS = {}
+local client = editMethodsS
 
 
 -- LÖVE Supplemental
@@ -20,7 +20,7 @@ local utf8 = require("utf8")
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
-local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lineManip = context:getLua("shared/line_ed/line_manip")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -95,7 +95,7 @@ function client:stepHistory(dir)
 	local changed, entry = hist:moveToEntry(hist.pos + dir)
 
 	if changed then
-		editHistSingle.applyEntry(self, entry)
+		editHistS.applyEntry(self, entry)
 	end
 end
 
@@ -183,7 +183,7 @@ end
 
 --- Helper that takes care of history changes following an action.
 -- @param self The client widget
--- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also `edit_act.lua`.
+-- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
 -- @return The results of bound_func(), in case they are helpful to the calling widget logic.
 function client:executeBoundAction(bound_func)
 
@@ -253,6 +253,4 @@ function client:caretStepRight(clear_highlight)
 end
 
 
-
-
-return editMethodsSingle
+return editMethodsS

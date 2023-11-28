@@ -28,7 +28,7 @@ local editAct = {}
 local utf8 = require("utf8")
 
 
-local editHist = context:getLua("shared/line_ed/multi/edit_hist")
+local editHist = context:getLua("shared/line_ed/m/edit_hist_m")
 
 
 -- Step left, right

@@ -1,13 +1,13 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
--- LineEditor core object. Provides the basic guts of a text input field.
+-- LineEditor (multi) core object. Provides the basic guts of a text input field.
 
 
 local context = select(1, ...)
 
 
-local lineEditor = {}
+local lineEdM = {}
 
 
 -- LÖVE Supplemental
@@ -16,16 +16,16 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
-local edCom = context:getLua("shared/line_ed/multi/ed_com")
-local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
-local editHist = context:getLua("shared/line_ed/multi/edit_hist")
+local edComM = context:getLua("shared/line_ed/m/ed_com_m")
+local editDispM = context:getLua("shared/line_ed/m/edit_disp_m")
+local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local history = require(context.conf.prod_ui_req .. "logic.struct.history")
 local seqString = context:getLua("shared/line_ed/seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-lineEditor.code_groups = context:getLua("shared/line_ed/code_groups")
-local code_groups = lineEditor.code_groups
+lineEdM.code_groups = context:getLua("shared/line_ed/code_groups")
+local code_groups = lineEdM.code_groups
 
 
 local _mt_line_ed = {}
@@ -37,10 +37,10 @@ _mt_line_ed.__index = _mt_line_ed
 
 --- Creates a new Line Editor object.
 -- @return the LineEd table.
-function lineEditor.new(font)
+function lineEdM.new(font)
 
 	if not font then
-		error("missing argument #1 (font) for new LineEditor object.")
+		error("missing argument #1 (font) for new LineEditor (multi) object.")
 	end
 
 	local self = {}
@@ -52,11 +52,11 @@ function lineEditor.new(font)
 
 	-- History container.
 	self.hist = history.new()
-	editHist.writeEntry(self, true)
+	editHistM.writeEntry(self, true)
 
 	-- Cached display details for rendering text, highlights, and the caret.
 	-- The LineEditor is responsible for keeping this in sync with the internal state.
-	self.disp = editDisp.newLineContainer(font)
+	self.disp = editDispM.newLineContainer(font)
 
 	self.disp:setHighlightDirtyRange(self.car_line, self.h_line)
 
@@ -172,7 +172,7 @@ function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x)
 	--print("byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte
-	local u_count = edCom.displaytoUCharCount(paragraph, sub_i, byte)
+	local u_count = edComM.displaytoUCharCount(paragraph, sub_i, byte)
 
 	--print("u_count", u_count)
 
@@ -191,7 +191,7 @@ function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x)
 end
 
 
-function lineEditor.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
+function lineEdM.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
 
 	--print("huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group, "stop_on_line_feed", stop_on_line_feed)
 
@@ -302,8 +302,8 @@ function _mt_line_ed:getWordRange(line_n, byte_n)
 		line_right, byte_right = line_n + 1, 1
 
 	else
-		line_left, byte_left = lineEditor.huntWordBoundary(lines, line_n, byte_n, -1, true, first_group, true)
-		line_right, byte_right = lineEditor.huntWordBoundary(lines, line_n, byte_n, 1, true, first_group, true)
+		line_left, byte_left = lineEdM.huntWordBoundary(lines, line_n, byte_n, -1, true, first_group, true)
+		line_right, byte_right = lineEdM.huntWordBoundary(lines, line_n, byte_n, 1, true, first_group, true)
 	end
 
 	--print("line+byte left, line+byte right", line_left, byte_left, line_right, byte_right)
@@ -328,7 +328,7 @@ function _mt_line_ed:getWrappedLineRange(line_n, byte_n)
 
 	-- Convert input line+byte pair to display paragraph, sub, byte offsets.
 	local d_para = line_n
-	local d_byte, d_sub = editDisp.coreToDisplayOffsets(#line_str, byte_n, disp.paragraphs[d_para])
+	local d_byte, d_sub = editDispM.coreToDisplayOffsets(#line_str, byte_n, disp.paragraphs[d_para])
 
 	-- Get first, last uChar offsets
 	local u_count_1, u_count_2 = disp:getSubLineUCharOffsetStartEnd(d_para, d_sub)
@@ -558,10 +558,10 @@ function _mt_line_ed:displaySyncCaretOffsets()
 	--]]
 
 	disp.d_car_para = self.car_line
-	disp.d_car_byte, disp.d_car_sub = editDisp.coreToDisplayOffsets(#car_str, self.car_byte, paragraphs[disp.d_car_para])
+	disp.d_car_byte, disp.d_car_sub = editDispM.coreToDisplayOffsets(#car_str, self.car_byte, paragraphs[disp.d_car_para])
 
 	disp.d_h_para = self.h_line
-	disp.d_h_byte, disp.d_h_sub = editDisp.coreToDisplayOffsets(#h_str, self.h_byte, paragraphs[disp.d_h_para])
+	disp.d_h_byte, disp.d_h_sub = editDispM.coreToDisplayOffsets(#h_str, self.h_byte, paragraphs[disp.d_h_para])
 
 	disp:updateCaretRect()
 end
@@ -647,4 +647,4 @@ function _mt_line_ed:displaySyncAlign(line_i)
 end
 
 
-return lineEditor
+return lineEdM

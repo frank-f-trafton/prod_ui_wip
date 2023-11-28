@@ -29,8 +29,8 @@ def_wid.uiFunc_commandAction = dummyFunc
 --]]
 -- DEBUG: Test command configuration
 --[[
---editBindSingle["return"] = editAct.runCommand
---editBindSingle["kpenter"] = editAct.runCommand
+--editBindS["return"] = editAct.runCommand
+--editBindS["kpenter"] = editAct.runCommand
 --]]
 
 
@@ -44,12 +44,12 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
-local editBindSingle = context:getLua("shared/line_ed/single/edit_bind_single")
-local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
-local editMethodsSingle = context:getLua("shared/line_ed/single/edit_methods_single")
+local editBindS= context:getLua("shared/line_ed/s/edit_bind_s")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
-local lineEdSingle = context:getLua("shared/line_ed/single/line_ed_single")
+local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -75,7 +75,7 @@ widShared.scroll2SetMethods(def)
 
 
 -- Attach editing methods to def.
-for k, v in pairs(editMethodsSingle) do
+for k, v in pairs(editMethodsS) do
 
 	if def[k] then
 		error("meta field already populated: " .. tostring(k))
@@ -252,9 +252,9 @@ function def:uiCall_textInput(inst, text)
 			end
 
 			if do_advance then
-				editHistSingle.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+				editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
 			end
-			editHistSingle.writeEntry(line_ed, do_advance)
+			editHistS.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "typing" or "typing-ws"
 
 			self:updateDocumentDimensions()
@@ -307,7 +307,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		end
 
 		local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
-		local bind_action = editBindSingle[key_string]
+		local bind_action = editBindS[key_string]
 
 		if bind_action then
 			-- NOTE: most history ledger changes are handled in executeBoundAction().
