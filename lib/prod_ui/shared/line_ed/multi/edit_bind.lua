@@ -1,9 +1,7 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
---[[
-The default action bindings.
---]]
+-- Default action bindings.
 
 
 local context = select(1, ...)

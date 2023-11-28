@@ -29,9 +29,13 @@ def_wid.uiFunc_commandAction = dummyFunc
 --]]
 -- DEBUG: Test command configuration
 --[[
---editBind["return"] = editAct.runCommand
---editBind["kpenter"] = editAct.runCommand
+--editBindSingle["return"] = editAct.runCommand
+--editBindSingle["kpenter"] = editAct.runCommand
 --]]
+
+
+-- LÖVE 12 compatibility
+local love_major, love_minor = love.getVersion()
 
 
 local context = select(1, ...)
@@ -40,8 +44,11 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
+local editBindSingle = context:getLua("shared/line_ed/single/edit_bind_single")
 local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
 local editMethodsSingle = context:getLua("shared/line_ed/single/edit_methods_single")
+local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
+local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lineEdSingle = context:getLua("shared/line_ed/single/line_ed_single")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -261,7 +268,60 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	if self == inst then
+		local line_ed = self.line_ed
+		local hist = line_ed.hist
 
+		line_ed:resetCaretBlink()
+
+		local input_intercepted = false
+
+		if scancode == "application" then
+			-- XXX: context menu
+
+		elseif scancode == "f6" then
+			-- XXX: debug: left align
+
+		elseif scancode == "f7" then
+			-- XXX: debug: center align
+
+		elseif scancode == "f8" then
+			-- XXX: debug: right align
+
+		elseif scancode == "f9" then
+			-- XXX: masking (for passwords)
+
+		elseif scancode == "f10" then
+			-- XXX: debug: colorization test
+		end
+
+		if input_intercepted then
+			return true
+		end
+
+		local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+
+		-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
+		if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
+			scancode = keyMgr.scan_numlock[scancode]
+			key = love.keyboard.getKeyFromScancode(scancode)
+		end
+
+		local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
+		local bind_action = editBindSingle[key_string]
+
+		if bind_action then
+			-- NOTE: most history ledger changes are handled in executeBoundAction().
+			local res_1, res_2, res_3 = self:executeBoundAction(bind_action)
+			if res_1 then
+				self.update_flag = true
+			end
+
+			self:updateDocumentDimensions() -- XXX WIP
+			--self:scrollGetCaretInBounds(true) -- XXX WIP
+
+			-- Stop event propagation
+			return true
+		end
 	end
 end
 
@@ -300,8 +360,21 @@ def.skinners = {
 
 			-- Text.
 			love.graphics.setColor(res.color_text)
+			love.graphics.setFont(line_ed.font)
 			love.graphics.print(line_ed.disp_text)
 			love.graphics.print(line_ed.line, 0, 32)
+			love.graphics.print(
+				"#line: " .. #line_ed.line .. "\n" ..
+				"car_byte: " .. line_ed.car_byte .. "\n" ..
+				"h_byte: " .. line_ed.h_byte .. "\n",
+				0, 64
+			)
+			local yy, hh = 128, line_ed.font:getHeight()
+
+			for i, entry in ipairs(line_ed.hist.ledger) do
+				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
+				yy = yy + hh
+			end
 
 			-- Caret.
 			-- XXX

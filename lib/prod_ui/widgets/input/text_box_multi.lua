@@ -792,26 +792,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			-- Halt propagation
 			return true
 
-		-- XXX debug stuff
-		--[[
-		elseif scancode == "f1" then
-			self.dbg_font_sz = math.max(1, self.dbg_font_sz - 1) -- XXX WIP
-			self.font = love.graphics.newFont(self.dbg_font_sz) -- XXX WIP
-			self:setFont(self.font)
-
-			self.update_flag = true
-
-			input_intercepted = true
-
-		elseif scancode == "f2" then
-			self.dbg_font_sz = math.min(self.dbg_font_sz + 1, 72) -- XXX WIP
-			self.font = love.graphics.newFont(self.dbg_font_sz) -- XXX WIP
-			self:setFont(self.font)
-
-			self.update_flag = true
-
-			input_intercepted = true
-		--]]
 		elseif scancode == "f5" then
 			self:setWrapMode(not self:getWrapMode())
 
@@ -915,7 +895,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local bind_action = editBind[key_string]
 
 		if bind_action then
-			-- NOTE: most history ledger changes are handled in 'lineEditor.executeBoundAction()'.
+			-- NOTE: most history ledger changes are handled in executeBoundAction().
 			local res_1, res_2, res_3 = self:executeBoundAction(bind_action)
 			if res_1 then
 				self.update_flag = true

@@ -18,8 +18,15 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
+local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
+local lineManip = context:getLua("shared/line_ed/line_manip")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+
+
+client.getReplaceMode = commonEd.client_getReplaceMode
+client.setReplaceMode = commonEd.client_setReplaceMode
 
 
 --- Delete highlighted text from the field.
@@ -75,6 +82,177 @@ function client:writeText(text, suppress_replace)
 
 	return text
 end
+
+
+function client:stepHistory(dir)
+
+	-- -1 == undo
+	-- 1 == redo
+
+	local line_ed = self.line_ed
+	local hist = line_ed.hist
+
+	local changed, entry = hist:moveToEntry(hist.pos + dir)
+
+	if changed then
+		editHistSingle.applyEntry(self, entry)
+	end
+end
+
+
+function client:getText()
+	return self.line_ed.line
+end
+
+
+function client:getHighlightedText()
+
+	local line_ed = self.line_ed
+
+	if line_ed:isHighlighted() then
+		local b1, b2 = self.line_ed:getHighlightOffsets()
+		return string.sub(line_ed.line, b1, b2)
+	end
+
+	return nil
+end
+
+
+function client:isHighlighted()
+	return self.line_ed:isHighlighted()
+end
+
+
+function client:clearHighlight()
+	self.line_ed:clearHighlight()
+end
+
+
+function client:highlightAll()
+
+	local line_ed = self.line_ed
+
+	line_ed.car_byte = 1
+	line_ed.h_byte = #line_ed.line + 1
+
+	--line_ed:displaySyncCaretOffsets()
+	--line_ed:updateDispHighlightRange()
+end
+
+
+--- Moves caret to the left highlight edge
+function client:caretHighlightEdgeLeft()
+
+	local line_ed = self.line_ed
+
+	local byte_1, byte_2 = line_ed:getHighlightOffsets()
+
+	line_ed.car_byte = byte_1
+	line_ed.h_byte = byte_1
+
+	--line_ed:displaySyncCaretOffsets()
+	--line_ed:updateDispHighlightRange()
+end
+
+
+--- Moves caret to the right highlight edge
+function client:caretHighlightEdgeRight()
+
+	local line_ed = self.line_ed
+
+	local byte_1, byte_2 = line_ed:getHighlightOffsets()
+
+	line_ed.car_byte = byte_2
+	line_ed.h_byte = byte_2
+
+	--line_ed:displaySyncCaretOffsets()
+	--line_ed:updateDispHighlightRange()
+end
+
+
+function client:highlightCurrentWord()
+
+	local line_ed = self.line_ed
+
+	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
+
+	line_ed:displaySyncCaretOffsets()
+	line_ed:updateDispHighlightRange()
+end
+
+
+--- Helper that takes care of history changes following an action.
+-- @param self The client widget
+-- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also `edit_act.lua`.
+-- @return The results of bound_func(), in case they are helpful to the calling widget logic.
+function client:executeBoundAction(bound_func)
+
+	local line_ed = self.line_ed
+
+	local old_byte, old_h_byte = line_ed:getCaretOffsets()
+	local update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
+
+	--print("executeBoundAction()", "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
+
+	if update_viewport then
+		-- XXX refresh: update scroll bounds
+	end
+
+	if caret_in_view then
+		-- XXX refresh: tell client widget to get the caret in view
+	end
+
+	if write_history then
+		line_ed.input_category = false
+
+		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+		editHist.writeEntry(line_ed, true)
+	end
+
+	return update_viewport, caret_in_view, write_history
+end
+
+
+function client:caretStepLeft(clear_highlight)
+
+	local line_ed = self.line_ed
+
+	local new_byte = lineManip.offsetStepLeft(line_ed.line, line_ed.car_byte)
+	if new_byte then
+		line_ed.car_byte = new_byte
+	end
+
+	--line_ed:displaySyncCaretOffsets()
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+
+	else
+		line_ed:updateDispHighlightRange()
+	end
+end
+
+
+function client:caretStepRight(clear_highlight)
+
+	local line_ed = self.line_ed
+
+	local new_byte = lineManip.offsetStepRight(line_ed.line, line_ed.car_byte)
+	if new_byte then
+		line_ed.car_byte = new_byte
+	end
+
+	--line_ed:displaySyncCaretOffsets()
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+
+	else
+		line_ed:updateDispHighlightRange()
+	end
+end
+
+
 
 
 return editMethodsSingle
