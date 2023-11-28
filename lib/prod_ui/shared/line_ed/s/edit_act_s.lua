@@ -21,19 +21,19 @@ bound actions may handle history directly and return false.
 local context = select(1, ...)
 
 
-local editActSingle = {}
+local editActS = {}
 
 
 -- LÖVE Supplemental
 local utf8 = require("utf8")
 
 
-local editHist = context:getLua("shared/line_ed/single/edit_hist_single")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
 
 
 -- Step left, right
-function editActSingle.caretLeft(self, line_ed)
+function editActS.caretLeft(self, line_ed)
 
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeLeft(true)
@@ -46,7 +46,7 @@ function editActSingle.caretLeft(self, line_ed)
 end
 
 
-function editActSingle.caretRight(self, line_ed)
+function editActS.caretRight(self, line_ed)
 
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(true)
@@ -410,9 +410,9 @@ function editAct.backspace(self, line_ed)
 			end
 
 			if do_advance then
-				editHist.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
+				editHistS.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			editHist.writeEntry(line_ed, do_advance)
+			editHistS.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "backspacing" or "backspacing-ws"
 		end
 
@@ -450,9 +450,9 @@ function editAct.delete(self, line_ed)
 			end
 
 			if do_advance then
-				editHist.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
+				editHistS.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			editHist.writeEntry(line_ed, do_advance)
+			editHistS.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "deleting" or "deleting-ws"
 		end
 
@@ -755,4 +755,4 @@ end
 --]=====]
 
 
-return editActSingle
+return editActS

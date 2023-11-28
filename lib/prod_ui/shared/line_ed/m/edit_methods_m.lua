@@ -9,8 +9,8 @@
 local context = select(1, ...)
 
 
-local editMethods = {}
-local client = editMethods
+local editMethodsM = {}
+local client = editMethodsM
 
 
 -- LÖVE Supplemental
@@ -19,15 +19,15 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
-local edCom = context:getLua("shared/line_ed/multi/ed_com")
+local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
-local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
-local editHist = context:getLua("shared/line_ed/multi/edit_hist")
-local lineEditor = context:getLua("shared/line_ed/multi/line_editor") -- XXX work on removing this reference (?)
+local editDispM = context:getLua("shared/line_ed/m/edit_disp_m")
+local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
+local lineEdM = context:getLua("shared/line_ed/m/line_ed_m") -- XXX work on removing this reference (?)
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-local code_groups = lineEditor.code_groups
+local code_groups = lineEdM.code_groups
 
 
 client.getReplaceMode = commonEd.client_getReplaceMode
@@ -239,7 +239,7 @@ function client:stepHistory(dir)
 	local changed, entry = hist:moveToEntry(hist.pos + dir)
 
 	if changed then
-		editHist.applyEntry(self, entry)
+		editHistM.applyEntry(self, entry)
 		line_ed:displaySyncAll()
 	end
 end
@@ -413,7 +413,7 @@ function client:caretStepUp(clear_highlight, n_steps)
 
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
-		local d_para, d_sub = editDisp.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, -n_steps)
+		local d_para, d_sub = editDispM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, -n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
@@ -429,7 +429,7 @@ function client:caretStepUp(clear_highlight, n_steps)
 		--]]
 
 		-- Convert display offsets to ones suitable for logical lines.
-		local u_count = edCom.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
+		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
 		line_ed.car_line = d_para
 		line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
 
@@ -468,7 +468,7 @@ function client:caretStepDown(clear_highlight, n_steps)
 
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
-		local d_para, d_sub = editDisp.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, n_steps)
+		local d_para, d_sub = editDispM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
@@ -482,7 +482,7 @@ function client:caretStepDown(clear_highlight, n_steps)
 		end
 
 		-- Convert display offsets to ones suitable for logical lines.
-		local u_count = edCom.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
+		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
 		line_ed.car_line = d_para
 		line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
 
@@ -655,7 +655,7 @@ function client:copyHighlightedToClipboard()
 
 	copied = textUtil.sanitize(copied, line_ed.bad_input_rule)
 
-	edCom.setClipboardText(copied)
+	edComM.setClipboardText(copied)
 end
 
 
@@ -678,12 +678,12 @@ function client:cutHighlightedToClipboard()
 			cut = string.rep(disp.mask_glyph, utf8.len(cut))
 		end
 
-		edCom.setClipboardText(cut)
+		edComM.setClipboardText(cut)
 
 		self.input_category = false
 
-		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-		editHist.writeEntry(line_ed, true)
+		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		editHistM.writeEntry(line_ed, true)
 	end
 end
 
@@ -699,7 +699,7 @@ function client:pasteClipboardText()
 		self:deleteHighlightedText()
 	end
 
-	local text = edCom.getClipboardText()
+	local text = edComM.getClipboardText()
 
 	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
@@ -708,8 +708,8 @@ function client:pasteClipboardText()
 		line_ed.input_category = false
 		self:writeText(text, true)
 
-		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-		editHist.writeEntry(line_ed, true)
+		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		editHistM.writeEntry(line_ed, true)
 	end
 end
 
@@ -840,7 +840,7 @@ function client:backspaceGroup()
 		byte_left = #lines[line_left] + 1
 
 	else
-		line_left, byte_left = lineEditor.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, true)
+		line_left, byte_left = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, true)
 	end
 
 	if line_left then
@@ -875,7 +875,7 @@ function client:deleteGroup()
 		end
 		--print("HIT_NON_WS", hit_non_ws, "PEEKED", peeked, "FIRST_GROUP", first_group)
 
-		line_right, byte_right = lineEditor.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, true)
+		line_right, byte_right = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, true)
 		byte_right = byte_right - 1
 		--print("deleteGroup: line_right", line_right, "byte_right", byte_right)
 
@@ -954,7 +954,7 @@ function client:caretJumpLeft(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	line_ed.car_line, line_ed.car_byte = lineEditor.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, false)
+	line_ed.car_line, line_ed.car_byte = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, false)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateVertPosHint()
@@ -981,7 +981,7 @@ function client:caretJumpRight(clear_highlight)
 	--print("hit_non_ws", hit_non_ws, "first_group", first_group)
 
 	--(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
-	line_ed.car_line, line_ed.car_byte = lineEditor.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, false)
+	line_ed.car_line, line_ed.car_byte = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, false)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateVertPosHint()
@@ -1090,7 +1090,7 @@ function client:clickDragByWord(x, y, origin_line, origin_byte)
 	local cl1, cb1, cl2, cb2 = line_ed:getWordRange(origin_line, origin_byte)
 
 	-- Merge the two ranges
-	local ml1, mb1, ml2, mb2 = edCom.mergeRanges(dl1, db1, dl2, db2, cl1, cb1, cl2, cb2)
+	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(dl1, db1, dl2, db2, cl1, cb1, cl2, cb2)
 
 	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
 		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
@@ -1112,7 +1112,7 @@ function client:clickDragByLine(x, y, origin_line, origin_byte)
 	local click_first, click_last = line_ed:getWrappedLineRange(origin_line, origin_byte)
 
 	-- Merge the two ranges
-	local ml1, mb1, ml2, mb2 = edCom.mergeRanges(
+	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(
 		drag_line, drag_first, drag_line, drag_last,
 		origin_line, click_first, origin_line, click_last
 	)
@@ -1127,7 +1127,7 @@ end
 
 --- Helper that takes care of history changes following an action.
 -- @param self The client widget
--- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also `edit_act.lua`.
+-- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also EditAct.
 -- @return The results of bound_func(), in case they are helpful to the calling widget logic.
 function client:executeBoundAction(bound_func)
 
@@ -1150,8 +1150,8 @@ function client:executeBoundAction(bound_func)
 	if write_history then
 		line_ed.input_category = false
 
-		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-		editHist.writeEntry(line_ed, true)
+		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		editHistM.writeEntry(line_ed, true)
 	end
 
 	return update_viewport, caret_in_view, write_history
@@ -1170,4 +1170,4 @@ function client:executeRemoteAction(item_t) -- XXX WIP
 end
 
 
-return editMethods
+return editMethodsM

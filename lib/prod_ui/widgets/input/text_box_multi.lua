@@ -38,14 +38,14 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-local editAct = context:getLua("shared/line_ed/multi/edit_act")
-local editBind = context:getLua("shared/line_ed/multi/edit_bind")
-local editHist = context:getLua("shared/line_ed/multi/edit_hist")
-local editMethods = context:getLua("shared/line_ed/multi/edit_methods")
+local editActM = context:getLua("shared/line_ed/m/edit_act_m")
+local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
+local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
+local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
-local lineEditor = context:getLua("shared/line_ed/multi/line_editor")
+local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
@@ -119,48 +119,48 @@ do
 		{
 			type = "command",
 			text = "Undo",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.undo,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.undo,
 			config = configItem_undo,
 		}, {
 			type = "command",
 			text = "Redo",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.redo,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.redo,
 			config = configItem_redo,
 		},
 		itemOps.def_separator,
 		{
 			type = "command",
 			text = "Cut",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.cut,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.cut,
 			config = configItem_cutCopyDelete,
 		}, {
 			type = "command",
 			text = "Copy",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.copy,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.copy,
 			config = configItem_cutCopyDelete,
 		}, {
 			type = "command",
 			text = "Paste",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.paste,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.paste,
 			config = configItem_paste,
 		}, {
 			type = "command",
 			text = "Delete",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.deleteHighlighted,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.deleteHighlighted,
 			config = configItem_cutCopyDelete,
 		},
 		itemOps.def_separator,
 		{
 			type = "command",
 			text = "Select All",
-			callback = editMethods.executeRemoteAction,
-			bound_func = editAct.selectAll,
+			callback = editMethodsM.executeRemoteAction,
+			bound_func = editActM.selectAll,
 			config = configItem_selectAll,
 		},
 	}
@@ -214,7 +214,7 @@ end
 
 -- Attach editing methods to def.
 -- XXX: Do not use client:setFont().
-for k, v in pairs(editMethods) do
+for k, v in pairs(editMethodsM) do
 
 	if def[k] then
 		error("meta field already populated: " .. tostring(k))
@@ -258,7 +258,7 @@ function def:uiCall_create(inst)
 
 		local skin = self.skin
 
-		self.line_ed = lineEditor.new(skin.font)
+		self.line_ed = lineEdM.new(skin.font)
 
 		-- Ghost text appears when the field is empty.
 		-- This is not part of the lineEditor core, and so it is not drawn through
@@ -752,9 +752,9 @@ function def:uiCall_textInput(inst, text)
 			end
 
 			if do_advance then
-				editHist.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+				editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			editHist.writeEntry(line_ed, do_advance)
+			editHistM.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "typing" or "typing-ws"
 
 			self:updateDocumentDimensions()
@@ -892,7 +892,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		end
 
 		local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
-		local bind_action = editBind[key_string]
+		local bind_action = editBindM[key_string]
 
 		if bind_action then
 			-- NOTE: most history ledger changes are handled in executeBoundAction().

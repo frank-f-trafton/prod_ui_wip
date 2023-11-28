@@ -7,7 +7,7 @@
 local context = select(1, ...)
 
 
-local lineEdSingle = {}
+local lineEdS = {}
 
 
 -- LÖVE Supplemental
@@ -16,10 +16,10 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
-local editHistSingle = context:getLua("shared/line_ed/single/edit_hist_single")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
-lineEdSingle.code_groups = context:getLua("shared/line_ed/code_groups")
-local code_groups = lineEdSingle.code_groups
+lineEdS.code_groups = context:getLua("shared/line_ed/code_groups")
+local code_groups = lineEdS.code_groups
 
 
 local history = require(context.conf.prod_ui_req .. "logic.struct.history")
@@ -89,10 +89,10 @@ end
 
 --- Creates a new Line Editor object.
 -- @return the edit_field table.
-function lineEdSingle.new(font)
+function lineEdS.new(font)
 
 	if not font then
-		error("missing argument #1 (font) for new lineEdSingle object.")
+		error("missing argument #1 (font) for new LineEditor (single) object.")
 	end
 
 	local self = {}
@@ -152,7 +152,7 @@ function lineEdSingle.new(font)
 
 	-- History state.
 	self.hist = history.new()
-	editHistSingle.writeEntry(self, true)
+	editHistS.writeEntry(self, true)
 
 
 	-- Display state.
@@ -447,7 +447,7 @@ function _mt_line_s:getWordRange(byte_n)
 end
 
 
-function lineEdSingle.huntWordBoundary(line, byte_n, dir, hit_non_ws, first_group)
+function lineEdS.huntWordBoundary(line, byte_n, dir, hit_non_ws, first_group)
 
 	--print("(Single) huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group)
 
@@ -493,4 +493,4 @@ function lineEdSingle.huntWordBoundary(line, byte_n, dir, hit_non_ws, first_grou
 end
 
 
-return lineEdSingle
+return lineEdS
