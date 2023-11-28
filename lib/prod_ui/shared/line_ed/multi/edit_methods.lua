@@ -18,6 +18,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local commonEd = context:getLua("shared/line_ed/common_ed")
 local edCom = context:getLua("shared/line_ed/multi/ed_com")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local editDisp = context:getLua("shared/line_ed/multi/edit_disp")
@@ -29,15 +30,8 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local code_groups = lineEditor.code_groups
 
 
-function client:getReplaceMode()
-	return self.line_ed.replace_mode
-end
-
-
---- When Replace Mode is active, new text overwrites existing characters under the caret.
-function client:setReplaceMode(enabled)
-	self.line_ed.replace_mode = not not enabled
-end
+client.getReplaceMode = commonEd.client_getReplaceMode
+client.setReplaceMode = commonEd.client_setReplaceMode
 
 
 -- * Font, Wrap, Align state, Width *
@@ -59,24 +53,6 @@ function client:setWrapMode(enabled)
 
 	-- XXX refresh: clamp scroll and get caret in bounds
 end
---[[
-function def_wid:setWrapMode(enabled)
-
-	local line_ed = self.line_ed
-	local disp = line_ed.disp
-
-	line_ed:setWrapMode(enabled)
-
-	-- Disable horizontal scroll bar when wrapping
-	self.scr_h.show = not enabled
-
-	setCoreDimensions(self)
-	disp:updateScrollBoundaries()
-	disp:enforceScrollBounds()
-	disp:scrollGetCaretInBounds()
-	updateScrollIndicators(self)
-end
---]]
 
 
 function client:getFont()
@@ -282,30 +258,7 @@ function client:getText(line_1, line_2) -- XXX maybe replace with a call to line
 	line_1 = line_1 or 1
 	line_2 = line_2 or #lines
 
-	if line_1 > line_2 then
-		error("'line_1' must be less than or equal to 'line_2'.")
-
-	elseif line_1 < 1 or line_1 > #lines then
-		error("'line_1' is out of range.")
-
-	elseif line_2 < 1 or line_2 > #lines then
-		error("'line_2' is out of range.")
-	end
-
-	if line_1 == line_2 then
-		return lines[line_1]
-
-	elseif line_1 == 1 and line_2 == #lines then
-		return table.concat(lines, "\n")
-
-	else
-		local tbl = {}
-		for i = line_1, line_2 do
-			table.insert(tbl, lines[i])
-		end
-
-		return table.concat(tbl, "\n")
-	end
+	return lines:copyString(line_1, 1, line_end, #lines[line_end])
 end
 
 

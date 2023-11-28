@@ -96,4 +96,15 @@ function commonEd.updateCaretBlink(self, dt)
 end
 
 
+function commonEd.client_getReplaceMode(self)
+	return self.line_ed.replace_mode
+end
+
+
+--- When Replace Mode is active, new text overwrites existing characters under the caret.
+function commonEd.client_setReplaceMode(self, enabled)
+	self.line_ed.replace_mode = not not enabled
+end
+
+
 return commonEd
