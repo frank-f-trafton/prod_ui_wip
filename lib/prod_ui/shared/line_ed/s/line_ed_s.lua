@@ -16,6 +16,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
+local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
 lineEdS.code_groups = context:getLua("shared/line_ed/code_groups")
@@ -27,11 +28,12 @@ local lineManip = context:getLua("shared/line_ed/line_manip")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-local _mt_line_s = {}
-_mt_line_s.__index = _mt_line_s
+local _mt_ed_s = {}
+_mt_ed_s.__index = _mt_ed_s
 
 
 local function updateDisplayLineHorizontal(self, align, font)
+
 	self.disp_text_w = font:getWidth(self.disp_text)
 
 	if align == "left" then
@@ -201,7 +203,7 @@ function lineEdS.new(font)
 	self.syntax_work = {}
 
 
-	setmetatable(self, _mt_line_s)
+	setmetatable(self, _mt_ed_s)
 
 	--self.disp:refreshFontParams()
 	--self:displaySyncAll()
@@ -210,13 +212,13 @@ function lineEdS.new(font)
 end
 
 
-function _mt_line_s:getCaretOffsets()
+function _mt_ed_s:getCaretOffsets()
 	return self.car_byte, self.h_byte
 end
 
 
 --- Gets caret and highlight offsets in the correct order.
-function _mt_line_s:getHighlightOffsets()
+function _mt_ed_s:getHighlightOffsets()
 
 	-- You may need to subtract 1 from byte_2 to get the correct range.
 	local byte_1, byte_2 = self.car_byte, self.h_byte
@@ -225,12 +227,12 @@ end
 
 
 --- Returns if the field currently has a highlighted section (not whether highlighting itself is currently active.)
-function _mt_line_s:isHighlighted()
+function _mt_ed_s:isHighlighted()
 	return not (self.h_byte == self.car_byte)
 end
 
 
-function _mt_line_s:clearHighlight()
+function _mt_ed_s:clearHighlight()
 
 	self.h_byte = self.car_byte
 
@@ -239,13 +241,13 @@ function _mt_line_s:clearHighlight()
 end
 
 
-function _mt_line_s:getDocumentXBoundaries()
+function _mt_ed_s:getDocumentXBoundaries()
 	return sub_line.x, sub_line.x + sub_line.w
 end
 
 
 -- @return Byte, X position and width of the glyph (if applicable).
-function _mt_line_s:getLineInfoAtX(x, split_x)
+function _mt_ed_s:getLineInfoAtX(x, split_x)
 
 	local font = self.font
 	local line = self.line
@@ -260,7 +262,7 @@ end
 
 
 --- Update the external display text.
-function _mt_line_s:updateDisplayText()
+function _mt_ed_s:updateDisplayText()
 
 	local font = self.font
 	local str = self.line
@@ -289,7 +291,7 @@ end
 
 
 -- Updates the display text alignment.
-function _mt_line_s:updateDisplayTextAlign()
+function _mt_ed_s:updateDisplayTextAlign()
 
 	local align, font, width = self.align, self.font, self.view_w
 
@@ -302,7 +304,7 @@ function _mt_line_s:updateDisplayTextAlign()
 end
 
 
-function _mt_line_s:updateHighlight()
+function _mt_ed_s:updateHighlight()
 
 	-- Get line offsets relative to the display sequence.
 	local byte_1, byte_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
@@ -325,15 +327,15 @@ function _mt_line_s:updateHighlight()
 end
 
 
-function _mt_line_s:clearHighlight()
+function _mt_ed_s:clearHighlight()
 
 	dispUpdateLineSyntaxColors(self, -1, -1)
 end
 
 
-function _mt_line_s:updateCaretRect()
+function _mt_ed_s:updateCaretRect()
 
-	--print("_mt_line_s:updateCaretRect()")
+	--print("_mt_ed_s:updateCaretRect()")
 
 	local font = self.font
 
@@ -351,7 +353,7 @@ function _mt_line_s:updateCaretRect()
 end
 
 
-function _mt_line_s:updateFont(font)
+function _mt_ed_s:updateFont(font)
 
 	self.font = font
 	self.font_height = font:getHeight()
@@ -362,7 +364,7 @@ function _mt_line_s:updateFont(font)
 end
 
 
-function _mt_line_s:refreshFontParams()
+function _mt_ed_s:refreshFontParams()
 
 	local font = self.font
 	local em_width = font:getWidth("M")
@@ -374,7 +376,8 @@ function _mt_line_s:refreshFontParams()
 end
 
 
-function _mt_line_s:highlightCleanup()
+function _mt_ed_s:highlightCleanup()
+
 	if self:isHighlighted() then
 		self:clearHighlight()
 	end
@@ -384,7 +387,7 @@ end
 --- Insert a string at the caret position.
 -- @param text The string to insert.
 -- @return Nothing.
-function _mt_line_s:insertText(text)
+function _mt_ed_s:insertText(text)
 
 	self:highlightCleanup()
 
@@ -402,7 +405,7 @@ end
 -- @param byte_1 The first byte offset to delete from.
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
-function _mt_line_s:deleteText(copy_deleted, byte_1, byte_2)
+function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2)
 
 	local deleted
 	if copy_deleted then
@@ -419,11 +422,11 @@ function _mt_line_s:deleteText(copy_deleted, byte_1, byte_2)
 end
 
 
-_mt_line_s.resetCaretBlink = commonEd.resetCaretBlink
-_mt_line_s.updateCaretBlink = commonEd.updateCaretBlink
+_mt_ed_s.resetCaretBlink = commonEd.resetCaretBlink
+_mt_ed_s.updateCaretBlink = commonEd.updateCaretBlink
 
 
-function _mt_line_s:getWordRange(byte_n)
+function _mt_ed_s:getWordRange(byte_n)
 
 	local line = self.line
 
@@ -438,8 +441,8 @@ function _mt_line_s:getWordRange(byte_n)
 
 	local byte_left, byte_right
 
-	line_left, byte_left = lineEditorSingle.huntWordBoundary(line, byte_n, -1, true, first_group, true)
-	line_right, byte_right = lineEditorSingle.huntWordBoundary(line, byte_n, 1, true, first_group, true)
+	line_left, byte_left = edComS.huntWordBoundary(code_groups, line, byte_n, -1, true, first_group, true)
+	line_right, byte_right = edComS.huntWordBoundary(code_groups, line, byte_n, 1, true, first_group, true)
 
 	--print("line+byte left, line+byte right", line_left, byte_left, line_right, byte_right)
 
@@ -447,49 +450,19 @@ function _mt_line_s:getWordRange(byte_n)
 end
 
 
-function lineEdS.huntWordBoundary(line, byte_n, dir, hit_non_ws, first_group)
+--- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
+function _mt_ed_s:displaySyncCaretOffsets()
 
-	--print("(Single) huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group)
+	local line = self.line
 
-	-- If 'hit_non_ws' is true, this function skips over initial whitespace.
+	--d_car_byte
+	--d_h_byte
+	disp.d_car_byte, disp.d_car_sub = editDispM.coreToDisplayOffsets(#car_str, self.car_byte, paragraphs[disp.d_car_para])
 
-	while true do
-		--print("LOOP: huntWordBoundary")
+	disp.d_h_para = self.h_line
+	disp.d_h_byte, disp.d_h_sub = editDispM.coreToDisplayOffsets(#h_str, self.h_byte, paragraphs[disp.d_h_para])
 
-		local byte_p, peeked = lineManip.offsetStep(line, dir, byte_n)
-		local group = code_groups[peeked]
-
-		--print("byte_p", byte_p, "peeked", peeked)
-		--print("group", group)
-
-		-- Beginning or end of document
-		if peeked == nil then
-			--print("break: peeked == nil")
-			byte_n = (dir == 1) and #line + 1 or 1
-			break
-
-		-- We're past the initial whitespace and have encountered our first group mismatch.
-		elseif hit_non_ws and group ~= first_group then
-			--print("break: hit_non_ws and group ~= first_group")
-			--print("hit_non_ws", hit_non_ws, "group", group, "first_group", first_group, "peeked: ", peeked)
-			-- Correct right-dir offsets
-			if dir == 1 then
-				byte_n = byte_p
-			end
-
-			break
-
-		elseif group ~= "whitespace" then
-			hit_non_ws = true
-			first_group = code_groups[peeked] -- nil means "content" group
-		end
-
-		byte_n = byte_p
-	end
-
-	--print("return byte_n", byte_n)
-
-	return byte_n
+	disp:updateCaretRect()
 end
 
 

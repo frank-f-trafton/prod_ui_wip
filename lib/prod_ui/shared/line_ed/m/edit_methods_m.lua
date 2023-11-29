@@ -840,7 +840,7 @@ function client:backspaceGroup()
 		byte_left = #lines[line_left] + 1
 
 	else
-		line_left, byte_left = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, true)
+		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, true)
 	end
 
 	if line_left then
@@ -875,7 +875,7 @@ function client:deleteGroup()
 		end
 		--print("HIT_NON_WS", hit_non_ws, "PEEKED", peeked, "FIRST_GROUP", first_group)
 
-		line_right, byte_right = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, true)
+		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, true)
 		byte_right = byte_right - 1
 		--print("deleteGroup: line_right", line_right, "byte_right", byte_right)
 
@@ -954,7 +954,7 @@ function client:caretJumpLeft(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	line_ed.car_line, line_ed.car_byte = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, false)
+	line_ed.car_line, line_ed.car_byte = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, false)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateVertPosHint()
@@ -981,7 +981,7 @@ function client:caretJumpRight(clear_highlight)
 	--print("hit_non_ws", hit_non_ws, "first_group", first_group)
 
 	--(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
-	line_ed.car_line, line_ed.car_byte = lineEdM.huntWordBoundary(lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, false)
+	line_ed.car_line, line_ed.car_byte = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, false)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateVertPosHint()

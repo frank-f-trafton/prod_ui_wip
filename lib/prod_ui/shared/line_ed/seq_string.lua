@@ -264,6 +264,22 @@ end
 
 function _mt_seq:offsetStepLeft(line_n, byte_n)
 
+	-- Assertions
+	-- [[
+	if line_n < 1 or line_n > #self then
+		error("line_n is out of range.")
+
+	elseif byte_n < 1 or byte_n > #self[line_n] + 1 then
+		error("byte_n is out of range.")
+
+	elseif line_n ~= math.floor(line_n) then
+		error("line_n: expected integer.")
+
+	elseif byte_n ~= math.floor(byte_n) then
+		error("byte_n: expected integer.")
+	end
+	--]]
+
 	local peeked
 
 	while true do
@@ -295,20 +311,27 @@ end
 
 function _mt_seq:offsetStepRight(line_n, byte_n)
 
+	local str = self[line_n]
+
 	-- Assertions
 	-- [[
 	if line_n < 1 or line_n > #self then
 		error("line_n is out of range.")
+
+	elseif byte_n < 1 or byte_n > #str + 1 then
+		error("byte_n is out of range.")
+
+	elseif line_n ~= math.floor(line_n) then
+		error("line_n: expected integer.")
+
+	elseif byte_n ~= math.floor(byte_n) then
+		error("byte_n: expected integer.")
 	end
 	--]]
 
-	local str = self[line_n]
 	local peeked
 
-	if byte_n < 1 or byte_n > #str + 1 then
-		error("byte_n is out of range.")
-
-	elseif byte_n == #str + 1 then
+	if byte_n == #str + 1 then
 		if line_n == #self then
 			return nil
 
