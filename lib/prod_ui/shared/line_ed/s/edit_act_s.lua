@@ -31,7 +31,6 @@ local utf8 = require("utf8")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
 
-
 -- Step left, right
 function editActS.caretLeft(self, line_ed)
 
@@ -77,11 +76,10 @@ end
 
 
 -- Jump left, right
---[=[
 function editActS.caretJumpLeft(self, line_ed)
 
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretFirst(true)
 
 	else
@@ -90,14 +88,12 @@ function editActS.caretJumpLeft(self, line_ed)
 
 	return true, true, false
 end
---]=]
 
 
---[=[
 function editActS.caretJumpRight(self, line_ed)
 
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretLast(true)
 
 	else
@@ -106,7 +102,6 @@ function editActS.caretJumpRight(self, line_ed)
 
 	return true, true, false
 end
---]=]
 
 
 -- Jump left, right with highlight
@@ -114,7 +109,7 @@ end
 function editActS.caretJumpLeftHighlight(self, line_ed)
 
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretFirst(not line_ed.allow_highlight)
 
 	else
@@ -130,7 +125,7 @@ end
 function editActS.caretJumpRightHighlight(self, line_ed)
 
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretLast(not line_ed.allow_highlight)
 
 	else
@@ -313,7 +308,7 @@ function editActS.deleteGroup(self, line_ed)
 		local write_hist = false
 
 		-- Don't leak masked info.
-		if line_ed.disp.masked then
+		if line_ed.masked then
 			write_hist = not not self:deleteUChar(1)
 
 		else
@@ -350,7 +345,7 @@ function editActS.backspaceGroup(self, line_ed)
 		local write_hist = false
 
 		-- Don't leak masked info.
-		if line_ed.disp.masked then
+		if line_ed.masked then
 			write_hist = not not self:backspaceUChar(1)
 
 		else

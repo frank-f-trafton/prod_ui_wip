@@ -18,16 +18,13 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local code_groups = context:getLua("shared/line_ed/code_groups")
 local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local editDispM = context:getLua("shared/line_ed/m/edit_disp_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
-local lineEdM = context:getLua("shared/line_ed/m/line_ed_m") -- XXX work on removing this reference (?)
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
-
-
-local code_groups = lineEdM.code_groups
 
 
 client.getReplaceMode = commonEd.client_getReplaceMode

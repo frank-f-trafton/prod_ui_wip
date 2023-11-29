@@ -14,6 +14,10 @@ local edComS = {}
 local utf8 = require("utf8")
 
 
+-- ProdUI
+local lineManip = context:getLua("shared/line_ed/line_manip")
+
+
 --[=[
 -- XXX: to be used with single-line versions of text boxes.
 function edComS.getDisplayTextSingle(text, font, replace_missing, masked)
