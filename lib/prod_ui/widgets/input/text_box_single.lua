@@ -326,6 +326,11 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
+function def:uiCall_update(dt)
+	self.line_ed:updateCaretBlink(dt)
+end
+
+
 def.skinners = {
 	default = {
 		install = function(self, skinner, skin)
@@ -363,13 +368,23 @@ def.skinners = {
 			love.graphics.setFont(line_ed.font)
 			love.graphics.print(line_ed.disp_text)
 			love.graphics.print(line_ed.line, 0, 32)
+
+			--[[
+			line_ed.caret_box_w = 32
+			line_ed.caret_box_h = 32
+			--]]
+			-- (WIP debug work)
 			love.graphics.print(
 				"#line: " .. #line_ed.line .. "\n" ..
 				"car_byte: " .. line_ed.car_byte .. "\n" ..
-				"h_byte: " .. line_ed.h_byte .. "\n",
+				"h_byte: " .. line_ed.h_byte .. "\n" ..
+				"caret_is_showing: " .. tostring(line_ed.caret_is_showing) .. "\n" ..
+				"caret_blink_time: " .. tostring(line_ed.caret_blink_time) .. "\n" ..
+				"caret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h .. "\n"
+				,
 				0, 64
 			)
-			local yy, hh = 128, line_ed.font:getHeight()
+			local yy, hh = 192, line_ed.font:getHeight()
 
 			for i, entry in ipairs(line_ed.hist.ledger) do
 				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
@@ -377,7 +392,16 @@ def.skinners = {
 			end
 
 			-- Caret.
-			-- XXX
+			if self == self.context.current_thimble and line_ed.caret_is_showing then
+				love.graphics.setColor(skin.color_insert) -- XXX: color_replace
+				love.graphics.rectangle(
+					"fill",
+					line_ed.caret_box_x,
+					line_ed.caret_box_y,
+					line_ed.caret_box_w,
+					line_ed.caret_box_h
+				)
+			end
 			love.graphics.pop()
 		end,
 	},

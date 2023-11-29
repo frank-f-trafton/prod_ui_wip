@@ -10,7 +10,7 @@
 local context = select(1, ...)
 
 
-local editDisp = {}
+local editDispM = {}
 
 
 --[[
@@ -167,40 +167,45 @@ end
 -- * Public helper functions *
 
 
---- Given a line length, a byte offset and a specific Paragraph structure, return a byte and sub-line offset suitable for the display structure.
-function editDisp.coreToDisplayOffsets(s_bytes, byte_n, paragraph)
+--- Given an input line, a byte offset and a specific Paragraph structure, return a byte and sub-line offset suitable for the display structure.
+function editDispM.coreToDisplayOffsets(line, byte_n, paragraph)
 
 	if #paragraph == 0 then
 		error("LineEditor corruption: empty paragraph.")
 	end
 
 	-- End of line
-	if byte_n == s_bytes + 1 then
+	if byte_n == #line + 1 then
 		return #paragraph[#paragraph].str + 1, #paragraph
 
 	else
+		local code_point_index = utf8.len(line, 1, byte_n)
 		local line_sub = 1
 
 		while true do
-			-- Uncomment to help debug OOB issues here:
-			--print("byte_n", byte_n, "paragraph[line_sub]", paragraph[line_sub])
+			if not paragraph[line_sub] then
+				error("LineEditor: subline (" .. line_sub .. ") is out of bounds (max: "..#paragraph..")")
+			end
 
-			if byte_n <= #paragraph[line_sub].str then
+			local sub_line_utf8_len = utf8.len(paragraph[line_sub].str)
+			if code_point_index <= sub_line_utf8_len then
 				break
 			end
 
-			byte_n = byte_n - #paragraph[line_sub].str
+			code_point_index = code_point_index - sub_line_utf8_len
 			line_sub = line_sub + 1
 		end
 
-		return byte_n, line_sub
+		local ret_byte = utf8.offset(paragraph[line_sub].str, code_point_index)
+
+		return ret_byte, line_sub
 	end
 end
 
 
 --- Given a display-lines object, a Paragraph index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
 --  the top or bottom sub-line if reaching the start or end respectively.
-function editDisp.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
+function editDispM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 
 	while n_steps < 0 do
 		-- First line
@@ -243,7 +248,7 @@ function editDisp.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 end
 
 
-function editDisp.getSubLineCount(paragraphs, line_1, sub_1, line_2, sub_2)
+function editDispM.getSubLineCount(paragraphs, line_1, sub_1, line_2, sub_2)
 
 	local count = 0
 	local sub_c = sub_1
@@ -267,7 +272,7 @@ end
 
 
 --- Sorts display caret and highlight offsets from first to last. (Paragraph, sub-line, and byte.)
-function editDisp.getHighlightOffsetsParagraph(line_1, sub_1, byte_1, line_2, sub_2, byte_2)
+function editDispM.getHighlightOffsetsParagraph(line_1, sub_1, byte_1, line_2, sub_2, byte_2)
 
 	if line_1 == line_2 and sub_1 == sub_2 then
 		byte_1, byte_2 = math.min(byte_1, byte_2), math.max(byte_1, byte_2)
@@ -289,7 +294,7 @@ end
 -- * Object creation *
 
 
-function editDisp.newLineContainer(font, color_t, color_h_t)
+function editDispM.newLineContainer(font, color_t, color_h_t)
 
 	local self = {} -- AKA "disp"
 
@@ -365,7 +370,7 @@ function editDisp.newLineContainer(font, color_t, color_h_t)
 end
 
 
-function editDisp.newParagraph()
+function editDispM.newParagraph()
 
 	local self = {}
 
@@ -554,7 +559,7 @@ function _mt_lc:updateParagraph(i_para, str)
 	local font = self.font
 
 	-- Provision the Paragraph table.
-	local paragraph = paragraphs[i_para] or editDisp.newParagraph()
+	local paragraph = paragraphs[i_para] or editDispM.newParagraph()
 	paragraphs[i_para] = paragraph
 
 	-- Perform optional modifications on the string.
@@ -704,7 +709,7 @@ end
 
 function _mt_lc:insertParagraphs(i_para, qty)
 	for i = 1, qty do
-		table.insert(self.paragraphs, i_para + i, editDisp.newParagraph())
+		table.insert(self.paragraphs, i_para + i, editDispM.newParagraph())
 	end
 end
 
@@ -756,7 +761,7 @@ function _mt_lc:updateHighlights()
 	end
 
 	-- Get line offsets relative to the display sequence.
-	local para_1, sub_1, byte_1, para_2, sub_2, byte_2 = editDisp.getHighlightOffsetsParagraph(
+	local para_1, sub_1, byte_1, para_2, sub_2, byte_2 = editDispM.getHighlightOffsetsParagraph(
 		self.d_car_para,
 		self.d_car_sub,
 		self.d_car_byte,
@@ -873,4 +878,4 @@ _mt_lc.resetCaretBlink = commonEd.resetCaretBlink
 _mt_lc.updateCaretBlink = commonEd.updateCaretBlink
 
 
-return editDisp
+return editDispM

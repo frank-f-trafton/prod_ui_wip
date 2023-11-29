@@ -16,6 +16,9 @@ return {
 
 	["$caret_w"] = 2,
 
+	color_insert = {1.0, 1.0, 1.0, 1.0},
+	color_replace = {0.75, 0.75, 0.75, 1.0},
+
 	res_idle = {
 		["*slice"] = "tex_slices/input_box",
 		color_body = {1.0, 1.0, 1.0, 1.0},

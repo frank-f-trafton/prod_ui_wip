@@ -28,8 +28,8 @@ lineEdM.code_groups = context:getLua("shared/line_ed/code_groups")
 local code_groups = lineEdM.code_groups
 
 
-local _mt_line_ed = {}
-_mt_line_ed.__index = _mt_line_ed
+local _mt_ed_m = {}
+_mt_ed_m.__index = _mt_ed_m
 
 
 -- * Public Functions *
@@ -65,12 +65,12 @@ function lineEdM.new(font)
 
 	-- Begin control state
 
-	-- Enable/disable specific editing actions
+	-- Enable/disable specific editing actions.
 	self.allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
 	self.allow_cut = true
 	self.allow_copy = true
 	self.allow_paste = true
-	self.allow_highlight = true
+	self.allow_highlight = true -- XXX: Whoops, this is not checked in the mouse action code.
 
 	self.allow_enter = true -- affects single presses of enter/return
 	self.allow_line_feed = true -- affects '\n' in writeText()
@@ -106,7 +106,7 @@ function lineEdM.new(font)
 
 	-- End control state
 
-	setmetatable(self, _mt_line_ed)
+	setmetatable(self, _mt_ed_m)
 
 	self.disp:refreshFontParams()
 	self:displaySyncAll()
@@ -118,13 +118,13 @@ end
 -- * Support Methods *
 
 
-function _mt_line_ed:getCaretOffsets()
+function _mt_ed_m:getCaretOffsets()
 	return self.car_line, self.car_byte, self.h_line, self.h_byte
 end
 
 
 --- Gets caret and highlight lines and offsets in the correct order.
-function _mt_line_ed:getHighlightOffsets()
+function _mt_ed_m:getHighlightOffsets()
 
 	-- You may need to subtract 1 from byte_2 to get the correct range.
 	local line_1, byte_1, line_2, byte_2 = self.car_line, self.car_byte, self.h_line, self.h_byte
@@ -140,7 +140,7 @@ function _mt_line_ed:getHighlightOffsets()
 end
 
 
-function _mt_line_ed:updateVertPosHint()
+function _mt_ed_m:updateVertPosHint()
 
 	local disp = self.disp
 	local font = disp.font
@@ -156,7 +156,7 @@ end
 -- @param y Y position.
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
-function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x)
+function _mt_ed_m:getCharacterDetailsAtPosition(x, y, split_x)
 
 	local disp = self.disp
 	local paragraphs = disp.paragraphs
@@ -191,66 +191,9 @@ function _mt_line_ed:getCharacterDetailsAtPosition(x, y, split_x)
 end
 
 
-function lineEdM.huntWordBoundary(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
-
-	--print("huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group, "stop_on_line_feed", stop_on_line_feed)
-
-	-- If 'hit_non_ws' is true, this function skips over initial whitespace. 
-
-	while true do
-		--print("LOOP: huntWordBoundary")
-		local line_p, byte_p, peeked = lines:offsetStep(dir, line_n, byte_n)
-		--print("line_p", line_p, "byte_p", byte_p, "peeked", peeked)
-		--print("^", not peeked and "nil" or peeked == 0x0a and "\\n" or utf8.char(peeked))
-
-		local group = code_groups[peeked]
-
-		--print("group", group)
-
-		-- Beginning or end of document
-		if peeked == nil then
-			--print("break: peeked == nil")
-			if dir == 1 then
-				line_n = #lines
-				byte_n = #lines[#lines] + 1
-
-			else
-				line_n = 1
-				byte_n = 1
-			end
-
-			break
-
-		-- Hit line feed and instructed to stop, or we're past the initial whitespace and encountered
-		-- our first group mismatch
-		elseif (stop_on_line_feed and peeked == 0x0a) or (hit_non_ws and group ~= first_group) then
-			--print("break: hit_non_ws and group ~= first_group")
-			--print("hit_non_ws", hit_non_ws, "group", group, "first_group", first_group, "peeked: ", peeked)
-			-- Correct right-dir offsets
-			if dir == 1 then
-				line_n = line_p
-				byte_n = byte_p
-			end
-
-			break
-
-		elseif group ~= "whitespace" then
-			hit_non_ws = true
-			first_group = code_groups[peeked] -- nil means "content" group
-		end
-
-		line_n, byte_n = line_p, byte_p
-	end
-
-	--print("return line_n", line_n, "byte_n", byte_n)
-
-	return line_n, byte_n
-end
-
-
 --- Gets the top and bottom selected line indices and the selection bytes that go with them, in order.
 -- @param omit_empty_last_selection When true, exclude the bottom line if the selection is at the start.
-function _mt_line_ed:getSelectedLinesRange(omit_empty_last_selection)
+function _mt_ed_m:getSelectedLinesRange(omit_empty_last_selection)
 
 	local r1, r2, b1, b2 = self.car_line, self.h_line, self.car_byte, self.h_byte
 	if r1 > r2 then
@@ -270,7 +213,7 @@ function _mt_line_ed:getSelectedLinesRange(omit_empty_last_selection)
 end
 
 
-function _mt_line_ed:updateDispHighlightRange()
+function _mt_ed_m:updateDispHighlightRange()
 
 	local disp = self.disp
 
@@ -280,7 +223,7 @@ function _mt_line_ed:updateDispHighlightRange()
 end
 
 
-function _mt_line_ed:getWordRange(line_n, byte_n)
+function _mt_ed_m:getWordRange(line_n, byte_n)
 
 	local lines = self.lines
 
@@ -302,8 +245,8 @@ function _mt_line_ed:getWordRange(line_n, byte_n)
 		line_right, byte_right = line_n + 1, 1
 
 	else
-		line_left, byte_left = lineEdM.huntWordBoundary(lines, line_n, byte_n, -1, true, first_group, true)
-		line_right, byte_right = lineEdM.huntWordBoundary(lines, line_n, byte_n, 1, true, first_group, true)
+		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, -1, true, first_group, true)
+		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, 1, true, first_group, true)
 	end
 
 	--print("line+byte left, line+byte right", line_left, byte_left, line_right, byte_right)
@@ -312,7 +255,7 @@ function _mt_line_ed:getWordRange(line_n, byte_n)
 end
 
 
-function _mt_line_ed:getWrappedLineRange(line_n, byte_n)
+function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
 
 	local lines = self.lines
 	local disp = self.disp
@@ -328,7 +271,7 @@ function _mt_line_ed:getWrappedLineRange(line_n, byte_n)
 
 	-- Convert input line+byte pair to display paragraph, sub, byte offsets.
 	local d_para = line_n
-	local d_byte, d_sub = editDispM.coreToDisplayOffsets(#line_str, byte_n, disp.paragraphs[d_para])
+	local d_byte, d_sub = editDispM.coreToDisplayOffsets(line_str, byte_n, disp.paragraphs[d_para])
 
 	-- Get first, last uChar offsets
 	local u_count_1, u_count_2 = disp:getSubLineUCharOffsetStartEnd(d_para, d_sub)
@@ -341,7 +284,7 @@ function _mt_line_ed:getWrappedLineRange(line_n, byte_n)
 end
 
 
-function _mt_line_ed:highlightCleanup()
+function _mt_ed_m:highlightCleanup()
 	if self:isHighlighted() then
 		self:clearHighlight()
 	end
@@ -351,7 +294,7 @@ end
 --- Insert a string at the caret position.
 -- @param text The string to insert.
 -- @return Nothing.
-function _mt_line_ed:insertText(text)
+function _mt_ed_m:insertText(text)
 
 	local lines = self.lines
 	local old_line = self.car_line
@@ -376,7 +319,7 @@ end
 -- @param line_2 The final line to delete to.
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
-function _mt_line_ed:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
+function _mt_ed_m:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
 
 	-- XXX Maybe write a line and/or uChar offset version for the client method collection.
 	local lines = self.lines
@@ -414,7 +357,7 @@ local function fixCaretAfterIndent(self, line_n, offset)
 end
 
 
-function _mt_line_ed:indentLine(line_n)
+function _mt_ed_m:indentLine(line_n)
 
 	local old_line = self.lines[line_n]
 
@@ -433,7 +376,7 @@ function _mt_line_ed:indentLine(line_n)
 end
 
 
-function _mt_line_ed:unindentLine(line_n)
+function _mt_ed_m:unindentLine(line_n)
 
 	local old_line = self.lines[line_n]
 
@@ -470,12 +413,12 @@ end
 
 
 --- Returns if the field currently has a highlighted section (not whether highlighting itself is currently active.)
-function _mt_line_ed:isHighlighted()
+function _mt_ed_m:isHighlighted()
 	return not (self.h_line == self.car_line and self.h_byte == self.car_byte)
 end
 
 
-function _mt_line_ed:clearHighlight()
+function _mt_ed_m:clearHighlight()
 
 	self.h_line = self.car_line
 	self.h_byte = self.car_byte
@@ -485,7 +428,7 @@ function _mt_line_ed:clearHighlight()
 end
 
 
-function _mt_line_ed:caretToLineAndByte(clear_highlight, line_n, byte_n)
+function _mt_ed_m:caretToLineAndByte(clear_highlight, line_n, byte_n)
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 
 	line_n = math.max(1, math.min(line_n, #self.lines))
@@ -508,7 +451,7 @@ function _mt_line_ed:caretToLineAndByte(clear_highlight, line_n, byte_n)
 end
 
 
-function _mt_line_ed:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n)
+function _mt_ed_m:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n)
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 
 	car_line_n = math.max(1, math.min(car_line_n, #self.lines))
@@ -541,7 +484,7 @@ end
 
 
 --- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
-function _mt_line_ed:displaySyncCaretOffsets()
+function _mt_ed_m:displaySyncCaretOffsets()
 
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
@@ -558,16 +501,16 @@ function _mt_line_ed:displaySyncCaretOffsets()
 	--]]
 
 	disp.d_car_para = self.car_line
-	disp.d_car_byte, disp.d_car_sub = editDispM.coreToDisplayOffsets(#car_str, self.car_byte, paragraphs[disp.d_car_para])
+	disp.d_car_byte, disp.d_car_sub = editDispM.coreToDisplayOffsets(car_str, self.car_byte, paragraphs[disp.d_car_para])
 
 	disp.d_h_para = self.h_line
-	disp.d_h_byte, disp.d_h_sub = editDispM.coreToDisplayOffsets(#h_str, self.h_byte, paragraphs[disp.d_h_para])
+	disp.d_h_byte, disp.d_h_sub = editDispM.coreToDisplayOffsets(h_str, self.h_byte, paragraphs[disp.d_h_para])
 
 	disp:updateCaretRect()
 end
 
 
-function _mt_line_ed:displaySyncInsertion(line_1, line_2) -- XXX integrate into insertText directly
+function _mt_ed_m:displaySyncInsertion(line_1, line_2) -- XXX integrate into insertText directly
 
 	local lines = self.lines
 	local disp = self.disp
@@ -587,7 +530,7 @@ function _mt_line_ed:displaySyncInsertion(line_1, line_2) -- XXX integrate into 
 end
 
 
-function _mt_line_ed:displaySyncDeletion(line_1, line_2) -- XXX integrate into deleteText directly
+function _mt_ed_m:displaySyncDeletion(line_1, line_2) -- XXX integrate into deleteText directly
 
 	local lines = self.lines
 	local disp = self.disp
@@ -605,7 +548,7 @@ function _mt_line_ed:displaySyncDeletion(line_1, line_2) -- XXX integrate into d
 end
 
 
-function _mt_line_ed:displaySyncAll(line_i)
+function _mt_ed_m:displaySyncAll(line_i)
 
 	local lines = self.lines
 	local disp = self.disp
@@ -637,7 +580,7 @@ function _mt_line_ed:displaySyncAll(line_i)
 end
 
 
-function _mt_line_ed:displaySyncAlign(line_i)
+function _mt_ed_m:displaySyncAlign(line_i)
 
 	local disp = self.disp
 	line_i = line_i or 1
