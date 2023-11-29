@@ -37,17 +37,17 @@ editBindS["C right"] = editActS.caretJumpRight
 editBindS["CS left"] = editActS.caretJumpLeftHighlight
 editBindS["CS right"] = editActS.caretJumpRightHighlight
 
-editBindS["home"] = editActS.caretLineFirst
-editBindS["end"] = editActS.caretLineLast
+editBindS["home"] = editActS.caretFirst
+editBindS["end"] = editActS.caretLast
 
-editBindS["C home"] = editActS.caretLineFirst
-editBindS["C end"] = editActS.caretLineLast
+--editBindS["C home"] = editActS.caretFirst
+--editBindS["C end"] = editActS.caretLast
 
-editBindS["CS home"] = editActS.caretLineFirst
-editBindS["CS end"] = editActS.caretLineLast
+--editBindS["CS home"] = editActS.caretFirst
+--editBindS["CS end"] = editActS.caretLast
 
-editBindS["S home"] = editActS.caretLineFirstHighlight
-editBindS["S end"] = editActS.caretLineLastHighlight
+editBindS["S home"] = editActS.caretFirstHighlight
+editBindS["S end"] = editActS.caretLastHighlight
 
 editBindS["backspace"] = editActS.backspace
 editBindS["S backspace"] = editActS.backspace

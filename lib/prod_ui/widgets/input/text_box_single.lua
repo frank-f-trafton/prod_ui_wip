@@ -360,8 +360,17 @@ def.skinners = {
 			love.graphics.setColor(res.color_body)
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
-			-- Highlight selection.
-			-- XXX
+			-- Highlighted selection.
+			if line_ed.disp_highlighted then
+				love.graphics.setColor(res.color_highlight)
+				love.graphics.rectangle(
+					"fill",
+					line_ed.highlight_x,
+					line_ed.highlight_y,
+					line_ed.highlight_w,
+					line_ed.highlight_h
+				)
+			end
 
 			-- Text.
 			love.graphics.setColor(res.color_text)
