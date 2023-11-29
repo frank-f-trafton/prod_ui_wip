@@ -455,14 +455,10 @@ function _mt_ed_s:displaySyncCaretOffsets()
 
 	local line = self.line
 
-	--d_car_byte
-	--d_h_byte
-	disp.d_car_byte, disp.d_car_sub = editDispM.coreToDisplayOffsets(#car_str, self.car_byte, paragraphs[disp.d_car_para])
+	self.d_car_byte = edComS.coreToDisplayOffsets(line, self.car_byte, self.disp_text)
+	self.d_h_byte = edComS.coreToDisplayOffsets(line, self.h_byte, self.disp_text)
 
-	disp.d_h_para = self.h_line
-	disp.d_h_byte, disp.d_h_sub = editDispM.coreToDisplayOffsets(#h_str, self.h_byte, paragraphs[disp.d_h_para])
-
-	disp:updateCaretRect()
+	self:updateCaretRect()
 end
 
 

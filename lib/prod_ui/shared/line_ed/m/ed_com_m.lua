@@ -145,4 +145,102 @@ function edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, dir, hit_no
 end
 
 
+--- Given an input line, a byte offset and a specific Paragraph structure, return a byte and sub-line offset suitable for the display structure.
+function edComM.coreToDisplayOffsets(line, byte_n, paragraph)
+
+	if #paragraph == 0 then
+		error("LineEditor corruption: empty paragraph.")
+	end
+
+	-- End of line
+	if byte_n == #line + 1 then
+		return #paragraph[#paragraph].str + 1, #paragraph
+
+	else
+		local code_point_index = utf8.len(line, 1, byte_n)
+		local line_sub = 1
+
+		while true do
+			if not paragraph[line_sub] then
+				error("LineEditor: subline (" .. line_sub .. ") is out of bounds (max: "..#paragraph..")")
+			end
+
+			local sub_line_utf8_len = utf8.len(paragraph[line_sub].str)
+			if code_point_index <= sub_line_utf8_len then
+				break
+			end
+
+			code_point_index = code_point_index - sub_line_utf8_len
+			line_sub = line_sub + 1
+		end
+
+		local ret_byte = utf8.offset(paragraph[line_sub].str, code_point_index)
+
+		return ret_byte, line_sub
+	end
+end
+
+
+--- Sorts display caret and highlight offsets from first to last. (Paragraph, sub-line, and byte.)
+function edComM.getHighlightOffsetsParagraph(line_1, sub_1, byte_1, line_2, sub_2, byte_2)
+
+	if line_1 == line_2 and sub_1 == sub_2 then
+		byte_1, byte_2 = math.min(byte_1, byte_2), math.max(byte_1, byte_2)
+
+	elseif line_1 == line_2 and sub_1 > sub_2 then
+		sub_1, sub_2, byte_1, byte_2 = sub_2, sub_1, byte_2, byte_1
+
+	elseif line_1 > line_2 then
+		line_1, line_2, sub_1, sub_2, byte_1, byte_2 = line_2, line_1, sub_2, sub_1, byte_2, byte_1
+	end
+
+	return line_1, sub_1, byte_1, line_2, sub_2, byte_2
+end
+
+
+--- Given a display-lines object, a Paragraph index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
+--  the top or bottom sub-line if reaching the start or end respectively.
+function edComM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
+
+	while n_steps < 0 do
+		-- First line
+		if d_car_para <= 1 and d_car_sub <= 1 then
+			d_car_para = 1
+			d_car_sub = 1
+			break
+
+		else
+			d_car_sub = d_car_sub - 1
+			if d_car_sub == 0 then
+				d_car_para = d_car_para - 1
+				d_car_sub = #display_lines[d_car_para]
+			end
+
+			n_steps = n_steps + 1
+		end
+	end
+
+	while n_steps > 0 do
+		-- Last line
+		if d_car_para >= #display_lines and d_car_sub >= #display_lines[#display_lines] then
+			d_car_para = #display_lines
+			d_car_sub = #display_lines[#display_lines]
+			break
+
+		else
+			d_car_sub = d_car_sub + 1
+
+			if d_car_sub > #display_lines[d_car_para] then
+				d_car_para = d_car_para + 1
+				d_car_sub = 1
+			end
+
+			n_steps = n_steps - 1
+		end
+	end
+
+	return d_car_para, d_car_sub
+end
+
+
 return edComM
