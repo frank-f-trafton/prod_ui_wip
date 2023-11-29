@@ -285,9 +285,9 @@ function _mt_ed_s:clearHighlight()
 end
 
 
-function _mt_ed_s:updateCaretRect()
+local function updateCaretRect(self)
 
-	--print("_mt_ed_s:updateCaretRect()")
+	--print("updateCaretRect")
 	--print("", "d_car_byte", self.d_car_byte)
 
 	local font = self.font
@@ -411,7 +411,7 @@ function _mt_ed_s:displaySyncCaretOffsets()
 	self.d_car_byte = edComS.coreToDisplayOffsets(line, self.car_byte, self.disp_text)
 	self.d_h_byte = edComS.coreToDisplayOffsets(line, self.h_byte, self.disp_text)
 
-	self:updateCaretRect()
+	updateCaretRect(self)
 end
 
 
