@@ -239,9 +239,7 @@ function client:caretStepLeft(clear_highlight)
 	local line_ed = self.line_ed
 
 	local new_byte = lineManip.offsetStepLeft(line_ed.line, line_ed.car_byte)
-	if new_byte then
-		line_ed.car_byte = new_byte
-	end
+	line_ed.car_byte = new_byte or 1
 
 	line_ed:displaySyncCaretOffsets()
 
@@ -260,9 +258,7 @@ function client:caretStepRight(clear_highlight)
 	local line_ed = self.line_ed
 
 	local new_byte = lineManip.offsetStepRight(line_ed.line, line_ed.car_byte)
-	if new_byte then
-		line_ed.car_byte = new_byte
-	end
+	line_ed.car_byte = new_byte or #line_ed.line + 1
 
  	line_ed:displaySyncCaretOffsets()
 
