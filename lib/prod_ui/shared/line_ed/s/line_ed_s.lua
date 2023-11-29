@@ -457,6 +457,8 @@ function _mt_ed_s:updateDisplayText()
 	self.highlight_h = 0
 
 	updateDisplayLineHorizontal(self)
+
+	self:displaySyncCaretOffsets()
 end
 
 

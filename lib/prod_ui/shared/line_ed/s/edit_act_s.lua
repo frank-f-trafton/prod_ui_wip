@@ -546,7 +546,6 @@ end
 
 
 -- Undo / Redo
---[=[
 function editActS.undo(self, line_ed)
 
 	self:stepHistory(-1)
@@ -554,10 +553,8 @@ function editActS.undo(self, line_ed)
 
 	return true, true, false
 end
---]=]
 
 
---[=[
 function editActS.redo(self, line_ed)
 
 	self:stepHistory(1)
@@ -565,7 +562,6 @@ function editActS.redo(self, line_ed)
 
 	return true, true, false
 end
---]=]
 
 
 return editActS

@@ -115,6 +115,7 @@ function client:stepHistory(dir)
 
 	if changed then
 		editHistS.applyEntry(self, entry)
+		line_ed:updateDisplayText()
 	end
 end
 
