@@ -47,6 +47,25 @@ function client:deleteHighlightedText()
 end
 
 
+--- Delete characters by stepping backwards from the caret position.
+-- @param n_u_chars The number of code points to delete.
+-- @return The deleted characters in string form, or nil if nothing was deleted.
+function client:backspaceUChar(n_u_chars)
+
+	local line_ed = self.line_ed
+	line_ed:highlightCleanup()
+
+	local line = line_ed.line
+	local byte_1, u_count = lineManip.countUChars(line, -1, line_ed.car_byte, n_u_chars)
+
+	if u_count > 0 then
+		return line_ed:deleteText(true, byte_1, line_ed.car_byte - 1)
+	end
+
+	return nil
+end
+
+
 --- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
 -- @param text The input text. It will be sanitized and possibly trimmed to fit into the uChar limit.
 -- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
@@ -215,6 +234,8 @@ end
 
 function client:caretStepLeft(clear_highlight)
 
+	print("client:caretStepLeft()", "clear_highlight", clear_highlight)
+
 	local line_ed = self.line_ed
 
 	local new_byte = lineManip.offsetStepLeft(line_ed.line, line_ed.car_byte)
@@ -225,6 +246,7 @@ function client:caretStepLeft(clear_highlight)
 	line_ed:displaySyncCaretOffsets()
 
 	if clear_highlight then
+		print("??? clear_highlight ???", clear_highlight)
 		line_ed:clearHighlight()
 
 	else
@@ -242,7 +264,7 @@ function client:caretStepRight(clear_highlight)
 		line_ed.car_byte = new_byte
 	end
 
-	--line_ed:displaySyncCaretOffsets()
+ 	line_ed:displaySyncCaretOffsets()
 
 	if clear_highlight then
 		line_ed:clearHighlight()
