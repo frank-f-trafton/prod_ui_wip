@@ -63,7 +63,7 @@ function def:refreshText()
 		text_h = self.font:getHeight() * #lines
 
 	else
-		text_h = self.font:getHeight() * (1 + textUtil.countLineFeeds(self.text))
+		text_h = self.font:getHeight() * (1 + textUtil.countStringPatterns(self.text, "\n", true))
 		self.text_w = self.font:getWidth(self.text)
 	end
 

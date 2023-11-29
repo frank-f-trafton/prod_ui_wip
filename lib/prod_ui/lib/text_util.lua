@@ -16,22 +16,24 @@ local utf8 = require("utf8")
 local utf8Tools = require(REQ_PATH .. "utf8_tools")
 
 
---- Counts the number of line feeds in a string.
+--- Counts the number of substring patterns in a string.
 -- @param str The string to check.
--- @return The number of line feeds.
-function textUtil.countLineFeeds(str)
+-- @param sub The substring pattern to look for.
+-- @param plain Use plain mode (no magic characters).
+-- @return The number of appearances of the substring.
+function textUtil.countStringPatterns(str, sub, plain)
 
 	local i, c = 1, 0
 
 	while i <= #str do
-		i = string.find(str, "\n", i, true)
+		i = string.find(str, sub, i, plain)
 		if not i then
 			break
 
-		else
-			i = i + 1
-			c = c + 1
 		end
+
+		i = i + 1
+		c = c + 1
 	end
 
 	return c

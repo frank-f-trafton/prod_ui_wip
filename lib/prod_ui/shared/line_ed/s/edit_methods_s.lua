@@ -222,7 +222,7 @@ function client:caretStepLeft(clear_highlight)
 		line_ed.car_byte = new_byte
 	end
 
-	--line_ed:displaySyncCaretOffsets()
+	line_ed:displaySyncCaretOffsets()
 
 	if clear_highlight then
 		line_ed:clearHighlight()

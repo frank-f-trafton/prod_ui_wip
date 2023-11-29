@@ -10,6 +10,10 @@ local context = select(1, ...)
 local edComS = {}
 
 
+-- LÖVE Supplemental
+local utf8 = require("utf8")
+
+
 --[=[
 -- XXX: to be used with single-line versions of text boxes.
 function edComS.getDisplayTextSingle(text, font, replace_missing, masked)
@@ -76,14 +80,20 @@ end
 --- Given an input line, an input byte offset, and an output line, return a byte offset suitable for the output line.
 function edComS.coreToDisplayOffsets(line_in, byte_n, line_out)
 
+	print("edComS.coreToDisplayOffsets")
+
 	-- End of line
 	if byte_n == #line_in + 1 then
 		return #line_out + 1
 
 	else
 		local code_point_index = utf8.len(line_in, 1, byte_n)
+		local offset = utf8.offset(line_out, code_point_index)
+		print("", "line_out", "|"..line_out.."|")
+		print("", "code_point_index", code_point_index)
+		print("", "offset", offset)
 
-		return utf8.offset(line_out, code_point_index)
+		return offset
 	end
 end
 
