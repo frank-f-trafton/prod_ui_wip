@@ -29,7 +29,6 @@ function lineManip.add(line, text, byte_pos)
 	end
 
 	local ret1, ret2 = string.sub(line, 1, byte_pos - 1) .. text .. string.sub(line, byte_pos), byte_pos + #text
-	--print("lineManip.add(): ret1:", ret1, "ret2:", ret2)
 	return ret1, ret2
 end
 
@@ -95,27 +94,21 @@ function lineManip.offsetStepRight(text, byte_n)
 
 	while true do
 		local byte = string.byte(text, byte_n)
-		print("top of while loop", "byte", byte, "byte_n", byte_n)
 
 		if not byte then
-			print("not byte; return nil")
 			return nil
 
 		-- Continuation byte.
 		elseif (byte >= 0x80 and byte <= 0xbf) then
-			print("continuation byte")
 			byte_n = byte_n + 1
 
 		-- Non-continuation byte.
 		else
-			print("non-continuation byte (break)")
 			break
 		end
 	end
 
-	print("lineManip.offsetStepRight", "#text", #text, "byte_n", byte_n)
 	peeked = utf8.codepoint(text, byte_n)
-	print("peeked:", peeked)
 
 	return byte_n, peeked
 end
