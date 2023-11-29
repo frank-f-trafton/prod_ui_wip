@@ -234,8 +234,6 @@ end
 
 function client:caretStepLeft(clear_highlight)
 
-	print("client:caretStepLeft()", "clear_highlight", clear_highlight)
-
 	local line_ed = self.line_ed
 
 	local new_byte = lineManip.offsetStepLeft(line_ed.line, line_ed.car_byte)
