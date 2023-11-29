@@ -18,8 +18,10 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local code_groups = context:getLua("shared/line_ed/code_groups")
 local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
+local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lineManip = context:getLua("shared/line_ed/line_manip")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
@@ -266,6 +268,57 @@ function client:caretStepRight(clear_highlight)
 	else
 		line_ed:updateHighlightRect()
 	end
+end
+
+
+function client:caretJumpLeft(clear_highlight)
+
+	local line_ed = self.line_ed
+
+	line_ed.car_byte = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
+
+	line_ed:displaySyncCaretOffsets()
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+
+	else
+		line_ed:updateHighlightRect()
+	end
+end
+
+
+function client:caretJumpRight(clear_highlight)
+
+	local line_ed = self.line_ed
+
+	local hit_non_ws = false
+
+	local first_group
+	if line_ed.car_byte <= #line_ed.line then
+		first_group = code_groups[utf8.codepoint(line_ed.line, line_ed.car_byte)]
+	end
+
+	if first_group ~= "whitespace" then
+		hit_non_ws = true
+	end
+
+	--print("hit_non_ws", hit_non_ws, "first_group", first_group)
+
+	--(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
+	line_ed.car_byte = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
+
+	line_ed:displaySyncCaretOffsets()
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+
+	else
+		line_ed:updateHighlightRect()
+	end
+
+	-- One more step to land on the right position. -- XXX okay to delete?
+	--self:caretStepRight(clear_highlight)
 end
 
 

@@ -248,17 +248,21 @@ function _mt_ed_s:getLineInfoAtX(x, split_x)
 end
 
 
-function _mt_ed_s:updateHighlight()
+function _mt_ed_s:updateHighlightRect()
 
-	-- Get line offsets relative to the display sequence.
 	local byte_1, byte_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
 
-	if byte_1 ~= byte_2 then
+	if byte_1 == byte_2 then
+		self.disp_highlighted = false
+
+	else
 		local font = self.font
 		local line = self.line
 
 		local pixels_before = font:getWidth(string.sub(line, 1, byte_1 - 1))
 		local pixels_highlight = font:getWidth(string.sub(line, byte_1, byte_2 - 1))
+
+		self.disp_highlighted = true
 
 		self.highlight_x = pixels_before
 		self.highlight_y = 0
@@ -303,34 +307,6 @@ local function updateCaretRect(self)
 
 	self.caret_box_y = self.disp_text_y
 	self.caret_box_h = font:getHeight()
-end
-
-
-function _mt_ed_s:updateHighlightRect()
-
-	local font = self.font
-
-	local byte_1, byte_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
-
-	if byte_1 == byte_2 then
-		self.disp_highlighted = false
-
-	else
-		local line = self.line
-
-		local pixels_before = font:getWidth(string.sub(line, 1, byte_1 - 1))
-		local pixels_highlight = font:getWidth(string.sub(line, byte_1, byte_2 - 1))
-
-		self.disp_highlighted = true
-
-		self.highlight_x = pixels_before
-		self.highlight_y = 0
-		self.highlight_w = pixels_highlight
-		self.highlight_h = self.disp_text_h
-	end
-
-	-- If applicable, overwrite or restore syntax colors.
-	--XXX: dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
 end
 
 
@@ -417,17 +393,14 @@ function _mt_ed_s:getWordRange(byte_n)
 	end
 
 	local peeked = utf8.codepoint(byte_n)
-
 	local first_group = code_groups[peeked]
 
-	local byte_left, byte_right
+	local byte_left = edComS.huntWordBoundary(code_groups, line, byte_n, -1, true, first_group)
+	local byte_right = edComS.huntWordBoundary(code_groups, line, byte_n, 1, true, first_group)
 
-	line_left, byte_left = edComS.huntWordBoundary(code_groups, line, byte_n, -1, true, first_group, true)
-	line_right, byte_right = edComS.huntWordBoundary(code_groups, line, byte_n, 1, true, first_group, true)
+	--print("byte left, byte right", byte_left, byte_right)
 
-	--print("line+byte left, line+byte right", line_left, byte_left, line_right, byte_right)
-
-	return line_left, byte_left, line_right, byte_right
+	return byte_left, byte_right
 end
 
 
