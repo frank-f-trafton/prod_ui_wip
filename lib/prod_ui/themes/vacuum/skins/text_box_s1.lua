@@ -23,17 +23,20 @@ return {
 		["*slice"] = "tex_slices/input_box",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
+		color_highlight = {0.5, 0.5, 0.5, 1.0},
 	},
 
 	res_hover = {
 		["*slice"] = "tex_slices/input_box_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
+		color_highlight = {0.5, 0.5, 0.5, 1.0},
 	},
 
 	res_disabled = {
 		["*slice"] = "tex_slices/input_box_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.5, 0.5, 0.5, 1.0},
+		color_highlight = {0.5, 0.5, 0.5, 1.0},
 	},
 }

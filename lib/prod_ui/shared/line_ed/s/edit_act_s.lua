@@ -60,24 +60,20 @@ end
 
 
 -- Step left, right while highlighting
---[=[
 function editActS.caretLeftHighlight(self, line_ed)
 
 	self:caretStepLeft(not line_ed.allow_highlight)
 
 	return true, true, false
 end
---]=]
 
 
---[=[
 function editActS.caretRightHighlight(self, line_ed)
 
 	self:caretStepRight(not line_ed.allow_highlight)
 
 	return true, true, false
 end
---]=]
 
 
 -- Jump left, right
@@ -146,48 +142,21 @@ end
 --]=]
 
 
--- Move to first, end of line
---[=[
-function editActS.caretLineFirst(self, line_ed)
-
-	-- [WARN] If multi-line is enabled, this can leak information about masked line feeds.
-	self:caretLineFirst(true)
-
-	return true, true, false
-end
---]=]
-
-
---[=[
-function editActS.caretLineLast(self, line_ed)
-
-	-- [WARN] If multi-line is enabled, this can leak information about masked line feeds.
-	self:caretLineLast(true)
-
-	return true, true, false
-end
---]=]
-
-
 -- Jump to start, end of document
---[=[
 function editActS.caretFirst(self, line_ed)
 
 	self:caretFirst(true)
 
 	return true, true, false
 end
---]=]
 
 
---[=[
 function editActS.caretLast(self, line_ed)
 
 	self:caretLast(true)
 
 	return true, true, false
 end
---]=]
 
 
 -- Highlight to start, end of document
@@ -457,7 +426,7 @@ function editActS.typeTab(self, line_ed)
 				end
 			end
 		end
-		line_ed:updateDispHighlightRange()
+		line_ed:updateHighlightRect()
 
 		return true, true, changed
 	end

@@ -155,8 +155,8 @@ function client:highlightAll()
 	line_ed.car_byte = 1
 	line_ed.h_byte = #line_ed.line + 1
 
-	--line_ed:displaySyncCaretOffsets()
-	--line_ed:updateDispHighlightRange()
+	line_ed:displaySyncCaretOffsets()
+	line_ed:updateHighlightRect()
 end
 
 
@@ -170,8 +170,8 @@ function client:caretHighlightEdgeLeft()
 	line_ed.car_byte = byte_1
 	line_ed.h_byte = byte_1
 
-	--line_ed:displaySyncCaretOffsets()
-	--line_ed:updateDispHighlightRange()
+	line_ed:displaySyncCaretOffsets()
+	line_ed:updateHighlightRect()
 end
 
 
@@ -185,8 +185,8 @@ function client:caretHighlightEdgeRight()
 	line_ed.car_byte = byte_2
 	line_ed.h_byte = byte_2
 
-	--line_ed:displaySyncCaretOffsets()
-	--line_ed:updateDispHighlightRange()
+	line_ed:displaySyncCaretOffsets()
+	line_ed:updateHighlightRect()
 end
 
 
@@ -197,7 +197,7 @@ function client:highlightCurrentWord()
 	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
 
 	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	line_ed:updateHighlightRect()
 end
 
 
@@ -243,11 +243,10 @@ function client:caretStepLeft(clear_highlight)
 	line_ed:displaySyncCaretOffsets()
 
 	if clear_highlight then
-		print("??? clear_highlight ???", clear_highlight)
 		line_ed:clearHighlight()
 
 	else
-		line_ed:updateDispHighlightRange()
+		line_ed:updateHighlightRect()
 	end
 end
 
@@ -265,7 +264,7 @@ function client:caretStepRight(clear_highlight)
 		line_ed:clearHighlight()
 
 	else
-		line_ed:updateDispHighlightRange()
+		line_ed:updateHighlightRect()
 	end
 end
 
@@ -292,6 +291,40 @@ function client:deleteUChar(n_u_chars)
 
 	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
 	return line_ed:deleteText(true, line_ed.car_byte, byte_2 - 1)
+end
+
+
+function client:caretFirst(clear_highlight)
+
+	local line_ed = self.line_ed
+
+	line_ed.car_byte = 1
+
+	line_ed:displaySyncCaretOffsets()
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+
+	else
+		line_ed:updateHighlightRect()
+	end
+end
+
+
+function client:caretLast(clear_highlight)
+
+	local line_ed = self.line_ed
+
+	line_ed.car_byte = #line_ed.line + 1
+
+	line_ed:displaySyncCaretOffsets()
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+
+	else
+		line_ed:updateHighlightRect()
+	end
 end
 
 

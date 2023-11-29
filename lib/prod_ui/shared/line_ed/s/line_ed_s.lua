@@ -278,7 +278,7 @@ function _mt_ed_s:clearHighlight()
 
 	print("", "(1)", self.car_byte, self.h_byte)
 	self:displaySyncCaretOffsets()
-	-- XXX: updateDispHighlightRange()
+	self:updateHighlightRect()
 	print("", "(2)", self.car_byte, self.h_byte)
 
 	dispUpdateLineSyntaxColors(self, -1, -1)
@@ -303,6 +303,34 @@ local function updateCaretRect(self)
 
 	self.caret_box_y = self.disp_text_y
 	self.caret_box_h = font:getHeight()
+end
+
+
+function _mt_ed_s:updateHighlightRect()
+
+	local font = self.font
+
+	local byte_1, byte_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
+
+	if byte_1 == byte_2 then
+		self.disp_highlighted = false
+
+	else
+		local line = self.line
+
+		local pixels_before = font:getWidth(string.sub(line, 1, byte_1 - 1))
+		local pixels_highlight = font:getWidth(string.sub(line, byte_1, byte_2 - 1))
+
+		self.disp_highlighted = true
+
+		self.highlight_x = pixels_before
+		self.highlight_y = 0
+		self.highlight_w = pixels_highlight
+		self.highlight_h = self.disp_text_h
+	end
+
+	-- If applicable, overwrite or restore syntax colors.
+	--XXX: dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
 end
 
 
