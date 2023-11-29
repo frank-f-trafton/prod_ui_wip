@@ -535,14 +535,12 @@ end
 
 
 -- Toggle Insert / Replace mode
---[=[
 function editActS.toggleReplaceMode(self, line_ed)
 
 	self:setReplaceMode(not self:getReplaceMode())
 
 	return true, false, false
 end
---]=]
 
 
 -- Undo / Redo
