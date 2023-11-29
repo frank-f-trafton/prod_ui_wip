@@ -28,6 +28,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
+local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -131,22 +132,6 @@ local function dispUpdateHighlight(self, i_para, i_sub, byte_1, byte_2)
 end
 
 
-local function applyCaretAlignOffset(caret_x, line_str, align, font)
-
-	if align == "left" then
-		-- n/a
-
-	elseif align == "center" then
-		caret_x = caret_x + math.floor(0.5 - font:getWidth(line_str) / 2)
-
-	elseif align == "right" then
-		caret_x = caret_x - font:getWidth(line_str)
-	end
-
-	return caret_x
-end
-
-
 local function updateSubLineHorizontal(sub_line, align, font)
 	sub_line.w = font:getWidth(sub_line.str)
 
@@ -187,7 +172,6 @@ function editDispM.newLineContainer(font, color_t, color_h_t)
 	self.view_w = 0
 
 	self.font = font
-	self.font_height = font:getHeight()
 	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
 
 	-- Additional space between logical lines (in pixels).
@@ -539,6 +523,9 @@ function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
 	sub_line.line_height = 0
 
 	-- Normal string display text.
+	if not str then
+		error("DEBUG TODO: check why 'str' might be false/nil here.")
+	end
 	sub_line.str = str or ""
 
 	-- Update syntax coloring, if applicable
@@ -714,7 +701,7 @@ function _mt_lc:updateCaretRect()
 	self.caret_box_w = textUtil.getCharacterW(sub_line_cur.str, self.d_car_byte, font) or font:getWidth("_")
 
 	-- Apply horizontal alignment offsetting to caret.
-	self.caret_box_x = applyCaretAlignOffset(self.caret_box_x, sub_line_cur.str, self.align, font)
+	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, sub_line_cur.str, self.align, font)
 
 	self.caret_box_y = sub_line_cur.y
 	self.caret_box_h = font:getHeight()
@@ -724,7 +711,6 @@ end
 function _mt_lc:updateFont(font)
 
 	self.font = font
-	self.font_height = font:getHeight()
 	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
 
 	self:refreshFontParams()

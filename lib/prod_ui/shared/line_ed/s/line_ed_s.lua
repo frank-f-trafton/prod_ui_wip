@@ -16,6 +16,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
+local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
@@ -32,17 +33,17 @@ local _mt_ed_s = {}
 _mt_ed_s.__index = _mt_ed_s
 
 
-local function updateDisplayLineHorizontal(self, align, font)
+local function updateDisplayLineHorizontal(self)
 
-	self.disp_text_w = font:getWidth(self.disp_text)
+	self.disp_text_w = self.font:getWidth(self.disp_text)
 
-	if align == "left" then
+	if self.align == "left" then
 		self.disp_text_x = 0
 
-	elseif align == "center" then
+	elseif self.align == "center" then
 		self.disp_text_x = math.floor(0.5 - self.disp_text_w / 2)
 
-	elseif align == "right" then
+	elseif self.align == "right" then
 		self.disp_text_x = -self.disp_text_w
 	end
 end
@@ -53,8 +54,8 @@ local function dispUpdateLineSyntaxColors(self, byte_1, byte_2)
 	if self.colored_text and self.syntax_colors then
 
 		local disp_text = self.disp_text
-		local col_text = sub_line.colored_text
-		local syn_col = sub_line.syntax_colors
+		local col_text = self.colored_text
+		local syn_col = self.syntax_colors
 
 		local def_col = self.text_color
 		local high_col = self.text_h_color
@@ -99,19 +100,24 @@ function lineEdS.new(font)
 
 	local self = {}
 
-	-- The internal text.
-	self.line = ""
+	self.font = font
 
 	-- Position and dimensions of the display text and highlight box.
 	self.disp_text_x = 0
 	self.disp_text_y = 0
 	self.disp_text_w = 0
-	self.disp_text_h = 0
+	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
+
+	self.disp_highlighted = false
 
 	self.highlight_x = 0
 	self.highlight_y = 0
 	self.highlight_w = 0
-	self.highlight_h = 0
+	self.highlight_h = self.disp_text_h
+
+	-- The internal text.
+	self.line = ""
+
 
 	commonEd.setupCaretInfo(self, true, false)
 	commonEd.setupCaretDisplayInfo(self, true, false)
@@ -151,22 +157,14 @@ function lineEdS.new(font)
 	-- Max number of Unicode characters (not bytes) permitted in the field.
 	self.u_chars_max = math.huge
 
-
 	-- History state.
 	self.hist = history.new()
 	editHistS.writeEntry(self, true)
-
-
-	-- Display state.
 
 	-- External display text.
 	self.disp_text = ""
 
 	self.align = "left" -- "left", "center", "right"
-
-	self.font = font
-	self.font_height = font:getHeight()
-	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
@@ -179,7 +177,7 @@ function lineEdS.new(font)
 
 	commonEd.setupMaskedState(self)
 
-	-- Set true to create coloredtext tables for each sub-line string. Each coloredtext
+	-- Set true to create a coloredtext table for the display text. Each coloredtext
 	-- table contains a color table and a code point string for every code point in the base
 	-- string. The initial color table is 'self.text_color_t'. For example, the string "foobar"
 	-- would become {col_t, "f", col_t, "o", col_t, "o", col_t, "b", col_t, "a", col_t, "r", }.
@@ -189,10 +187,9 @@ function lineEdS.new(font)
 	-- text).
 	self.generate_colored_text = false
 
-	-- Assign a function taking 'self', 'str', 'syntax_t', and 'work_t' to colorize a Paragraph when updating
+	-- Assign a function taking 'self', 'str', 'syntax_t', and 'work_t' to colorize the display text when updating
 	-- it. 'self' is the LineEditor state. 'syntax_t' is 'self.wip_syntax_colors', and it may contain existing
-	-- contents. You must return the number of entries written to the table so that the update logic can clip
-	-- the contents. 'work_t' is self.syntax_work, an arbitrary table you may use to help keep track of your
+	-- contents. 'work_t' is self.syntax_work, an arbitrary table you may use to help keep track of your
 	-- colorization state.
 	self.fn_colorize = false
 
@@ -201,7 +198,6 @@ function lineEdS.new(font)
 
 	-- Arbitrary table of state intended to help manage syntax highlighting.
 	self.syntax_work = {}
-
 
 	setmetatable(self, _mt_ed_s)
 
@@ -236,13 +232,13 @@ function _mt_ed_s:clearHighlight()
 
 	self.h_byte = self.car_byte
 
-	-- XXX: displaySyncCaretOffsets()
+	self:displaySyncCaretOffsets()
 	-- XXX: updateDispHighlightRange()
 end
 
 
 function _mt_ed_s:getDocumentXBoundaries()
-	return sub_line.x, sub_line.x + sub_line.w
+	return self.disp_text_x, self.disp_text_x + self.disp_text_w
 end
 
 
@@ -258,49 +254,6 @@ function _mt_ed_s:getLineInfoAtX(x, split_x)
 	local byte, glyph_x, glyph_w = textUtil.getTextInfoAtX(line, font, x, split_x)
 
 	return byte, glyph_x + self.disp_text_x, glyph_w
-end
-
-
---- Update the external display text.
-function _mt_ed_s:updateDisplayText()
-
-	local font = self.font
-	local str = self.line
-
-	-- Perform optional modifications on the string.
-	local work_str = str
-
-	if self.replace_missing then
-		work_str = textUtil.replaceMissingCodePointGlyphs(work_str, font, "□")
-	end
-
-	if self.masked then
-		work_str = textUtil.getMaskedString(work_str, self.mask_glyph)
-
-	-- Only syntax-colorize unmasked text.
-	elseif self.fn_colorize and self.generate_colored_text then
-		local len = self:fn_colorize(work_str, self.wip_syntax_colors, self.syntax_work)
-		-- Trim color table
-		for i = #self.wip_syntax_colors, len + 1, -1 do
-			self.wip_syntax_colors[i] = nil
-		end
-	end
-
-	--self:updateSubLine(i_para, 1, work_str, self.wip_syntax_colors, 1) -- XXX: fix
-end
-
-
--- Updates the display text alignment.
-function _mt_ed_s:updateDisplayTextAlign()
-
-	local align, font, width = self.align, self.font, self.view_w
-
-	for i = line_1, line_2 do
-		local paragraph = paragraphs[i]
-		for j, sub_line in ipairs(paragraph) do
-			updateDisplayLineHorizontal(self, align, font)
-		end
-	end
 end
 
 
@@ -335,7 +288,8 @@ end
 
 function _mt_ed_s:updateCaretRect()
 
-	--print("_mt_ed_s:updateCaretRect()")
+	print("_mt_ed_s:updateCaretRect()")
+	print("", "d_car_byte", self.d_car_byte)
 
 	local font = self.font
 
@@ -346,7 +300,7 @@ function _mt_ed_s:updateCaretRect()
 	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
 
 	-- Apply horizontal alignment offsetting to caret.
-	self.caret_box_x = applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
+	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
 
 	self.caret_box_y = self.disp_text_y
 	self.caret_box_h = font:getHeight()
@@ -356,8 +310,7 @@ end
 function _mt_ed_s:updateFont(font)
 
 	self.font = font
-	self.font_height = font:getHeight()
-	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
+	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
 	self:refreshFontParams()
 	-- The display text needs to be updated after calling.
@@ -395,8 +348,8 @@ function _mt_ed_s:insertText(text)
 	self.car_byte = self.car_byte + #text
 	self.h_byte = self.car_byte
 
-	--self:displaySyncInsertion(old_line, self.car_line)
-	--self:displaySyncCaretOffsets()
+	self:updateDisplayText()
+	self:displaySyncCaretOffsets()
 end
 
 
@@ -459,6 +412,51 @@ function _mt_ed_s:displaySyncCaretOffsets()
 	self.d_h_byte = edComS.coreToDisplayOffsets(line, self.h_byte, self.disp_text)
 
 	self:updateCaretRect()
+end
+
+
+--- Update the display text.
+function _mt_ed_s:updateDisplayText()
+
+	local font = self.font
+
+	-- Perform optional modifications on the string.
+	local work_str = self.line
+
+	if self.replace_missing then
+		work_str = textUtil.replaceMissingCodePointGlyphs(work_str, font, "□")
+	end
+
+	if self.masked then
+		work_str = textUtil.getMaskedString(work_str, self.mask_glyph)
+
+	-- Only syntax-colorize unmasked text.
+	elseif self.fn_colorize and self.generate_colored_text then
+		self:fn_colorize(work_str, self.wip_syntax_colors, self.syntax_work)
+	end
+
+	self.disp_text = work_str
+
+	self.disp_text_x = 0
+	self.disp_text_y = 0
+	self.disp_text_w = font:getWidth(self.disp_text)
+	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
+
+	---------------------------------------------------------------------------
+
+	-- XXX: syntax coloring.
+	self.syntax_colors = false
+	self.colored_text = false
+
+	-- XXX: highlights.
+	self.disp_highlighted = false
+
+	self.highlight_x = 0
+	self.highlight_y = 0
+	self.highlight_w = 0
+	self.highlight_h = 0
+
+	updateDisplayLineHorizontal(self)
 end
 
 
