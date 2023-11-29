@@ -105,7 +105,6 @@ end
 
 
 -- Jump left, right with highlight
---[=[
 function editActS.caretJumpLeftHighlight(self, line_ed)
 
 	-- Don't leak details about the masked string.
@@ -118,10 +117,8 @@ function editActS.caretJumpLeftHighlight(self, line_ed)
 
 	return true, true, false
 end
---]=]
 
 
---[=[
 function editActS.caretJumpRightHighlight(self, line_ed)
 
 	-- Don't leak details about the masked string.
@@ -134,7 +131,6 @@ function editActS.caretJumpRightHighlight(self, line_ed)
 
 	return true, true, false
 end
---]=]
 
 
 -- Jump to start, end of document
