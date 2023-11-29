@@ -29,7 +29,7 @@ function lineManip.add(line, text, byte_pos)
 	end
 
 	local ret1, ret2 = string.sub(line, 1, byte_pos - 1) .. text .. string.sub(line, byte_pos), byte_pos + #text
-	print("lineManip.add(): ret1:", ret1, "ret2:", ret2)
+	--print("lineManip.add(): ret1:", ret1, "ret2:", ret2)
 	return ret1, ret2
 end
 
@@ -50,7 +50,6 @@ function lineManip.delete(text, byte_start, byte_end)
 end
 
 
-
 function lineManip.offsetStepLeft(text, byte_n)
 
 	-- Assertions
@@ -66,7 +65,7 @@ function lineManip.offsetStepLeft(text, byte_n)
 		byte_n = byte_n - 1
 		local byte = string.byte(text, byte_n)
 
-		if byte_n == 0 or not byte then
+		if not byte then
 			return nil
 		end
 
@@ -127,6 +126,27 @@ offsetStep_fn[-1] = "offsetStepLeft"
 offsetStep_fn[1] = "offsetStepRight"
 function lineManip.offsetStep(text, dir, byte_n)
 	return lineManip[offsetStep_fn[dir]](text, byte_n)
+end
+
+
+function lineManip.countUChars(text, dir, byte_n, n_u_chars)
+
+	local count = 0
+
+	while count < n_u_chars do
+		local byte_new = lineManip.offsetStep(text, dir, byte_n)
+
+		-- Reached beginning or end of text
+		if not byte_new then
+			break
+
+		else
+			byte_n = byte_new
+			count = count + 1
+		end
+	end
+
+	return byte_n, count
 end
 
 

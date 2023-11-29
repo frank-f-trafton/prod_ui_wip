@@ -228,15 +228,6 @@ function _mt_ed_s:isHighlighted()
 end
 
 
-function _mt_ed_s:clearHighlight()
-
-	self.h_byte = self.car_byte
-
-	self:displaySyncCaretOffsets()
-	-- XXX: updateDispHighlightRange()
-end
-
-
 function _mt_ed_s:getDocumentXBoundaries()
 	return self.disp_text_x, self.disp_text_x + self.disp_text_w
 end
@@ -282,14 +273,22 @@ end
 
 function _mt_ed_s:clearHighlight()
 
+	print("_mt_ed_s:clearHighlight")
+	self.h_byte = self.car_byte
+
+	print("", "(1)", self.car_byte, self.h_byte)
+	self:displaySyncCaretOffsets()
+	-- XXX: updateDispHighlightRange()
+	print("", "(2)", self.car_byte, self.h_byte)
+
 	dispUpdateLineSyntaxColors(self, -1, -1)
 end
 
 
 function _mt_ed_s:updateCaretRect()
 
-	print("_mt_ed_s:updateCaretRect()")
-	print("", "d_car_byte", self.d_car_byte)
+	--print("_mt_ed_s:updateCaretRect()")
+	--print("", "d_car_byte", self.d_car_byte)
 
 	local font = self.font
 
@@ -369,7 +368,8 @@ function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2)
 	self.car_byte = byte_1
 	self.h_byte = self.car_byte
 
-	-- XXX: update caret details.
+	self:updateDisplayText()
+	self:displaySyncCaretOffsets()
 
 	return deleted
 end
@@ -403,7 +403,7 @@ function _mt_ed_s:getWordRange(byte_n)
 end
 
 
---- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
+--- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle. The display text must be current at time of call.
 function _mt_ed_s:displaySyncCaretOffsets()
 
 	local line = self.line
