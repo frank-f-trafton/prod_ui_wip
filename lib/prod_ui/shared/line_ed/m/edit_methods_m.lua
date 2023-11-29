@@ -413,7 +413,7 @@ function client:caretStepUp(clear_highlight, n_steps)
 
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
-		local d_para, d_sub = editDispM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, -n_steps)
+		local d_para, d_sub = edComM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, -n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
@@ -468,7 +468,7 @@ function client:caretStepDown(clear_highlight, n_steps)
 
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
-		local d_para, d_sub = editDispM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, n_steps)
+		local d_para, d_sub = edComM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]

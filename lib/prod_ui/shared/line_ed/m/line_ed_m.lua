@@ -271,7 +271,7 @@ function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
 
 	-- Convert input line+byte pair to display paragraph, sub, byte offsets.
 	local d_para = line_n
-	local d_byte, d_sub = editDispM.coreToDisplayOffsets(line_str, byte_n, disp.paragraphs[d_para])
+	local d_byte, d_sub = edComM.coreToDisplayOffsets(line_str, byte_n, disp.paragraphs[d_para])
 
 	-- Get first, last uChar offsets
 	local u_count_1, u_count_2 = disp:getSubLineUCharOffsetStartEnd(d_para, d_sub)
@@ -501,10 +501,10 @@ function _mt_ed_m:displaySyncCaretOffsets()
 	--]]
 
 	disp.d_car_para = self.car_line
-	disp.d_car_byte, disp.d_car_sub = editDispM.coreToDisplayOffsets(car_str, self.car_byte, paragraphs[disp.d_car_para])
+	disp.d_car_byte, disp.d_car_sub = edComM.coreToDisplayOffsets(car_str, self.car_byte, paragraphs[disp.d_car_para])
 
 	disp.d_h_para = self.h_line
-	disp.d_h_byte, disp.d_h_sub = editDispM.coreToDisplayOffsets(h_str, self.h_byte, paragraphs[disp.d_h_para])
+	disp.d_h_byte, disp.d_h_sub = edComM.coreToDisplayOffsets(h_str, self.h_byte, paragraphs[disp.d_h_para])
 
 	disp:updateCaretRect()
 end
