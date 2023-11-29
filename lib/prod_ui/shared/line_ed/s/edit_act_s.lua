@@ -280,12 +280,11 @@ function editActS.backspace(self, line_ed)
 end
 
 
---[=[
 function editActS.delete(self, line_ed)
 
 	if line_ed.allow_input then
 		-- Need to handle history here.
-		local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
+		local old_byte, old_h_byte = line_ed:getCaretOffsets()
 		local deleted
 
 		if line_ed:isHighlighted() then
@@ -297,20 +296,20 @@ function editActS.delete(self, line_ed)
 
 		if deleted then
 			local hist = line_ed.hist
+			local entry = hist:getCurrentEntry()
 
 			local no_ws = string.find(deleted, "%S")
-			local entry = hist:getCurrentEntry()
 			local do_advance = true
 
 			if utf8.len(deleted) == 1 and deleted ~= "\n"
-			and (entry and entry.car_line == old_line and entry.car_byte == old_byte)
+			and (entry and entry.car_byte == old_byte)
 			and ((line_ed.input_category == "deleting" and no_ws) or (line_ed.input_category == "deleting-ws"))
 			then
 				do_advance = false
 			end
 
 			if do_advance then
-				editHistS.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
+				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
 			end
 			editHistS.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "deleting" or "deleting-ws"
@@ -319,7 +318,6 @@ function editActS.delete(self, line_ed)
 		return true, true, false
 	end
 end
---]=]
 
 
 -- Delete highlighted text (for the pop-up menu)

@@ -269,4 +269,29 @@ function client:caretStepRight(clear_highlight)
 end
 
 
+--- Delete characters on and to the right of the caret.
+-- @param n_u_chars The number of code points to delete.
+-- @return The deleted characters in string form, or nil if nothing was deleted.
+function client:deleteUChar(n_u_chars)
+
+	local line_ed = self.line_ed
+	local line = line_ed.line
+
+	line_ed:highlightCleanup()
+
+	-- Nothing to delete at the last caret position.
+	if line_ed.car_byte > #line then
+		return -- nil
+	end
+
+	local byte_2, u_count = lineManip.countUChars(line, 1, line_ed.car_byte, n_u_chars)
+	if u_count == 0 then
+		byte_2 = #line + 1
+	end
+
+	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
+	return line_ed:deleteText(true, line_ed.car_byte, byte_2 - 1)
+end
+
+
 return editMethodsS
