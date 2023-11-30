@@ -151,24 +151,20 @@ end
 
 
 -- Highlight to start, end of document
---[=[
 function editActS.caretFirstHighlight(self, line_ed)
 
 	self:caretFirst(not line_ed.allow_highlight)
 
 	return true, true, false
 end
---]=]
 
 
---[=[
 function editActS.caretLastHighlight(self, line_ed)
 
 	self:caretLast(not line_ed.allow_highlight)
 
 	return true, true, false
 end
---]=]
 
 
 -- Highlight to first, end of line
