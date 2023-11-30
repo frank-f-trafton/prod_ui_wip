@@ -875,17 +875,6 @@ function client:deleteGroup()
 		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, true)
 		byte_right = byte_right - 1
 		--print("deleteGroup: line_right", line_right, "byte_right", byte_right)
-
-		--[[
-		-- If the range is a single-byte code point, and a code point to the right exists, move one step over.
-		if line_right == line_ed.car_line and byte_right == line_ed.car_byte then
-			line_right, byte_right = lines:offsetStepRight(line_right, byte_right)
-			if not line_right then
-				return nil
-			end
-		end
-		--]]
-
 	end
 
 	--print("ranges:", line_ed.car_line, line_ed.car_byte, line_right, byte_right)
@@ -893,6 +882,7 @@ function client:deleteGroup()
 	--print("DEL", "|"..(del or "<nil>").."|")
 	if del ~= "" then
 		return del
+
 	else
 		return nil
 	end
