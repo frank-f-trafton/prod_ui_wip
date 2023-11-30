@@ -19,11 +19,6 @@ local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
--- Overwrite these functions with your own clipboard handling code, if applicable.
-edComM.getClipboardText = love.system.getClipboardText
-edComM.setClipboardText = love.system.setClipboardText
-
-
 -- * <Unsorted> *
 
 

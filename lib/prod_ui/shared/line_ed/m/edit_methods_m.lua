@@ -652,7 +652,7 @@ function client:copyHighlightedToClipboard()
 
 	copied = textUtil.sanitize(copied, line_ed.bad_input_rule)
 
-	edComM.setClipboardText(copied)
+	love.system.setClipboardText(copied)
 end
 
 
@@ -660,7 +660,6 @@ function client:cutHighlightedToClipboard()
 
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
-	local hist = line_ed.hist
 
 	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
@@ -675,7 +674,7 @@ function client:cutHighlightedToClipboard()
 			cut = string.rep(disp.mask_glyph, utf8.len(cut))
 		end
 
-		edComM.setClipboardText(cut)
+		love.system.setClipboardText(cut)
 
 		self.input_category = false
 
@@ -688,7 +687,6 @@ end
 function client:pasteClipboardText()
 
 	local line_ed = self.line_ed
-	local hist = line_ed.hist
 
 	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
@@ -696,7 +694,7 @@ function client:pasteClipboardText()
 		self:deleteHighlightedText()
 	end
 
-	local text = edComM.getClipboardText()
+	local text = love.system.getClipboardText()
 
 	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
