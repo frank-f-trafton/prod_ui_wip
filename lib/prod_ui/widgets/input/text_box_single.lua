@@ -232,6 +232,10 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 1, "border")
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")
+
+	self:scrollClampViewport()
+
+	self.update_flag = true
 end
 
 
