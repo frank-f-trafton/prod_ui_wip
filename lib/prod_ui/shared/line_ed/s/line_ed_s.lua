@@ -201,7 +201,7 @@ function lineEdS.new(font)
 
 	setmetatable(self, _mt_ed_s)
 
-	--self.disp:refreshFontParams()
+	self:refreshFontParams()
 	--self:displaySyncAll()
 
 	return self
