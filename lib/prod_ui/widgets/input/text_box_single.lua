@@ -268,6 +268,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
 					self:tryTakeThimble()
+					self.line_ed:resetCaretBlink()
 				end
 			end
 		end
