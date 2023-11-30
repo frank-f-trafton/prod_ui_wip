@@ -91,21 +91,6 @@ function client:setAlign(align)
 		return true
 	end
 end
---[[
-function def_wid:setAlign(align)
-
-	local line_ed = self.line_ed
-	local disp = line_ed.disp
-
-	if line_ed:setAlign(align) then
-		disp:updateScrollBoundaries()
-		disp:enforceScrollBounds()
-		disp:scrollGetCaretInBounds()
-		updateScrollIndicators(self)
-	end
-end
-
---]]
 
 
 -- * / Font, Wrap, Align state, Width *

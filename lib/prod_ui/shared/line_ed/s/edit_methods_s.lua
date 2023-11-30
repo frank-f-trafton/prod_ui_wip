@@ -529,4 +529,16 @@ function client:pasteClipboardText()
 end
 
 
+function client:executeRemoteAction(item_t) -- XXX WIP
+
+	local res_1, res_2, res_3 = self:executeBoundAction(item_t.bound_func)
+	if res_1 then
+		self.update_flag = true
+	end
+
+	self:updateDocumentDimensions(self) -- XXX WIP
+	self:scrollGetCaretInBounds(true) -- XXX WIP
+end
+
+
 return editMethodsS

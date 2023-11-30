@@ -98,6 +98,17 @@ function def:uiCall_create(inst)
 		widShared.setupScroll2(self)
 		widShared.setupDoc(self)
 
+		-- How far to offset the line X position depending on the alignment.
+		self.align_offset = 0
+
+		-- string: display this text when the input box is empty.
+		-- false: disabled.
+		self.ghost_text = false
+
+		-- false: use content text alignment.
+		-- "left", "center", "right", "justify"
+		self.ghost_text_align = false
+
 		self.press_busy = false
 
 		-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
@@ -137,6 +148,52 @@ function def:uiCall_create(inst)
 end
 
 
+function def:scrollGetCaretInBounds(immediate)
+
+	local line_ed = self.line_ed
+
+	--print("scrollGetCaretInBounds() BEFORE", self.scr2_tx, self.scr2_ty)
+
+	-- Get the extended caret rectangle.
+	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
+	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
+	local car_x2 = self.align_offset + line_ed.caret_box_x + line_ed.caret_box_w + self.caret_extend_x
+	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
+
+	-- Clamp the scroll target.
+	self.scr2_tx = math.max(car_x2 - self.vp_w, math.min(self.scr2_tx, car_x1))
+	self.scr2_ty = math.max(car_y2 - self.vp_h, math.min(self.scr2_ty, car_y1))
+
+	if immediate then
+		self.scr2_fx = self.scr2_tx
+		self.scr2_fy = self.scr2_ty
+		self.scr2_x = math.floor(0.5 + self.scr2_fx)
+		self.scr2_y = math.floor(0.5 + self.scr2_fy)
+	end
+
+	--print("car_x1", car_x1, "car_y1", car_y1, "car_x2", car_x2, "car_y2", car_y2)
+	--print("scr2 tx ty", self.scr2_tx, self.scr2_ty)
+
+--[[
+	print("BEFORE",
+		"scr2_x", self.scr2_x, "scr2_y", self.scr2_y, "scr2_tx", self.scr2_tx, "scr2_ty", self.scr2_ty,
+		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
+		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
+--]]
+	self:scrollClampViewport()
+
+--[[
+	print("AFTER",
+		"scr2_x", self.scr2_x, "scr2_y", self.scr2_y, "scr2_tx", self.scr2_tx, "scr2_ty", self.scr2_ty,
+		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
+		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
+--]]
+	--print("scrollGetCaretInBounds() AFTER", self.scr2_tx, self.scr2_ty)
+	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
+	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+end
+
+
 function def:updateDocumentDimensions()
 
 	local line_ed = self.line_ed
@@ -145,7 +202,24 @@ function def:updateDocumentDimensions()
 	self.doc_w = font:getWidth(line_ed.disp_text)
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
 
-	-- self:updateAlignOffset()
+	self:updateAlignOffset()
+end
+
+
+--- Call after changing alignment, then update the alignment of all sub-lines.
+function def:updateAlignOffset()
+
+	local align = self.line_ed.align
+
+	if align == "left" then
+		self.align_offset = 0
+
+	elseif align == "center" then
+		self.align_offset = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
+
+	else -- align == "right"
+		self.align_offset = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
+	end
 end
 
 
@@ -266,7 +340,7 @@ function def:uiCall_textInput(inst, text)
 			line_ed.input_category = no_ws and "typing" or "typing-ws"
 
 			self:updateDocumentDimensions()
-			-- self:scrollGetCaretInBounds(true)
+			self:scrollGetCaretInBounds(true)
 		end
 	end
 end
@@ -324,8 +398,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				self.update_flag = true
 			end
 
-			self:updateDocumentDimensions() -- XXX WIP
-			--self:scrollGetCaretInBounds(true) -- XXX WIP
+			self:updateDocumentDimensions()
+			self:scrollGetCaretInBounds(true)
 
 			-- Stop event propagation
 			return true
@@ -390,6 +464,18 @@ def.skinners = {
 			love.graphics.setColor(res.color_body)
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
+			love.graphics.intersectScissor(
+				ox + self.x + self.vp2_x,
+				oy + self.y + self.vp2_y,
+				math.max(0, self.vp2_w),
+				math.max(0, self.vp2_h)
+			)
+
+			love.graphics.translate(
+				self.vp_x + self.align_offset - self.scr2_x,
+				self.vp_y - self.scr2_y
+			)
+
 			-- Highlighted selection.
 			if line_ed.disp_highlighted then
 				love.graphics.setColor(res.color_highlight)
@@ -402,33 +488,16 @@ def.skinners = {
 				)
 			end
 
-			-- Text.
+			-- Ghost text. XXX: alignment
+			if self.ghost_text and #line_ed.line == 0 then
+				love.graphics.setFont(skin.font_ghost)
+				love.graphics.print(self.ghost_text, 0, 0)
+			end
+
+			-- Display Text.
 			love.graphics.setColor(res.color_text)
 			love.graphics.setFont(line_ed.font)
 			love.graphics.print(line_ed.disp_text)
-			love.graphics.print(line_ed.line, 0, 32)
-
-			--[[
-			line_ed.caret_box_w = 32
-			line_ed.caret_box_h = 32
-			--]]
-			-- (WIP debug work)
-			love.graphics.print(
-				"#line: " .. #line_ed.line .. "\n" ..
-				"car_byte: " .. line_ed.car_byte .. "\n" ..
-				"h_byte: " .. line_ed.h_byte .. "\n" ..
-				"caret_is_showing: " .. tostring(line_ed.caret_is_showing) .. "\n" ..
-				"caret_blink_time: " .. tostring(line_ed.caret_blink_time) .. "\n" ..
-				"caret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h .. "\n"
-				,
-				0, 64
-			)
-			local yy, hh = 192, line_ed.font:getHeight()
-
-			for i, entry in ipairs(line_ed.hist.ledger) do
-				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
-				yy = yy + hh
-			end
 
 			-- Caret.
 			if self == self.context.current_thimble and line_ed.caret_is_showing then
@@ -441,7 +510,31 @@ def.skinners = {
 					self.caret_h
 				)
 			end
+
 			love.graphics.pop()
+
+			-- Debug renderer.
+			-- [[
+			love.graphics.print(
+				"line: " .. line_ed.line
+				.. "\n#line: " .. #line_ed.line
+				.. "\ncar_byte: " .. line_ed.car_byte
+				.. "\nh_byte: " .. line_ed.h_byte
+				.. "\ncaret_is_showing: " .. tostring(line_ed.caret_is_showing)
+				.. "\ncaret_blink_time: " .. tostring(line_ed.caret_blink_time)
+				.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+				,
+				0, 64
+			)
+
+			local yy, hh = 240, line_ed.font:getHeight()
+			love.graphics.print("History state:", 0, 216)
+
+			for i, entry in ipairs(line_ed.hist.ledger) do
+				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
+				yy = yy + hh
+			end
+			--]]
 		end,
 	},
 }
