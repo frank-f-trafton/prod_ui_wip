@@ -100,6 +100,14 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
+		-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
+		self.caret_x = 0
+		self.caret_y = 0
+		self.caret_w = 0
+		self.caret_h = 0
+
+		self.caret_fill = "line"
+
 		-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
 		self.caret_extend_x = 0
 		self.caret_extend_y = 0
@@ -327,7 +335,29 @@ end
 
 
 function def:uiCall_update(dt)
-	self.line_ed:updateCaretBlink(dt)
+
+	local line_ed = self.line_ed
+
+	line_ed:updateCaretBlink(dt)
+
+	if self.update_flag then
+
+		-- Update caret shape.
+		self.caret_x = line_ed.caret_box_x
+		self.caret_y = line_ed.caret_box_y
+		self.caret_w = line_ed.caret_box_w
+		self.caret_h = line_ed.caret_box_h
+
+		if line_ed.replace_mode then
+			self.caret_fill = "line"
+
+		else
+			self.caret_fill = "fill"
+			self.caret_w = line_ed.caret_line_width
+		end
+
+		self.update_flag = false
+	end
 end
 
 
@@ -404,11 +434,11 @@ def.skinners = {
 			if self == self.context.current_thimble and line_ed.caret_is_showing then
 				love.graphics.setColor(skin.color_insert) -- XXX: color_replace
 				love.graphics.rectangle(
-					"fill",
-					line_ed.caret_box_x,
-					line_ed.caret_box_y,
-					line_ed.caret_box_w,
-					line_ed.caret_box_h
+					self.caret_fill,
+					self.caret_x,
+					self.caret_y,
+					self.caret_w,
+					self.caret_h
 				)
 			end
 			love.graphics.pop()

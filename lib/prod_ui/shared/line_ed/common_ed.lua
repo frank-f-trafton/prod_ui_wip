@@ -54,9 +54,8 @@ end
 
 function commonEd.setupCaretBox(self)
 
-	-- Caret position + dimensions relative to text.
-
-	-- XXX: this will likely be merged with setupCaretInfo() once editDisp's functionality is merged back into LineEditor.
+	-- The position and dimensions of the currently selected character.
+	-- The client widget uses these values to determine the size and location of its caret.
 	self.caret_box_x = 0
 	self.caret_box_y = 0
 	self.caret_box_w = 0
