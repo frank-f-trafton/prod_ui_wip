@@ -33,6 +33,27 @@ local _mt_ed_s = {}
 _mt_ed_s.__index = _mt_ed_s
 
 
+local function updateCaretRect(self)
+
+	--print("updateCaretRect")
+	--print("", "d_car_byte", self.d_car_byte)
+
+	local font = self.font
+
+	-- Update cached caret info.
+	self.caret_box_x = textUtil.getCharacterX(self.disp_text, self.d_car_byte, font)
+
+	-- If we are at the end of the string + 1: use the width of the underscore character.
+	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
+
+	-- Apply horizontal alignment offsetting to caret.
+	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
+
+	self.caret_box_y = self.disp_text_y
+	self.caret_box_h = font:getHeight()
+end
+
+
 local function updateDisplayLineHorizontal(self)
 
 	self.disp_text_w = self.font:getWidth(self.disp_text)
@@ -117,7 +138,6 @@ function lineEdS.new(font)
 
 	-- The internal text.
 	self.line = ""
-
 
 	commonEd.setupCaretInfo(self, true, false)
 	commonEd.setupCaretDisplayInfo(self, true, false)
@@ -206,7 +226,8 @@ function lineEdS.new(font)
 	setmetatable(self, _mt_ed_s)
 
 	self:refreshFontParams()
-	--self:displaySyncAll()
+	self:updateDisplayText()
+	updateCaretRect(self)
 
 	return self
 end
@@ -290,27 +311,6 @@ function _mt_ed_s:clearHighlight()
 	print("", "(2)", self.car_byte, self.h_byte)
 
 	dispUpdateLineSyntaxColors(self, -1, -1)
-end
-
-
-local function updateCaretRect(self)
-
-	--print("updateCaretRect")
-	--print("", "d_car_byte", self.d_car_byte)
-
-	local font = self.font
-
-	-- Update cached caret info.
-	self.caret_box_x = textUtil.getCharacterX(self.disp_text, self.d_car_byte, font)
-
-	-- If we are at the end of the string + 1: use the width of the underscore character.
-	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
-
-	-- Apply horizontal alignment offsetting to caret.
-	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
-
-	self.caret_box_y = self.disp_text_y
-	self.caret_box_h = font:getHeight()
 end
 
 
