@@ -7,6 +7,7 @@ return {
 
 	["*box"] = "style/boxes/input_box",
 	["*font"] = "fonts/p",
+	["*font_ghost"] = "fonts/p",
 
 	cursor_on = "ibeam",
 

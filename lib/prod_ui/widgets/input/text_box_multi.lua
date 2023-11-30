@@ -233,11 +233,11 @@ function def:uiCall_create(inst)
 		self.clip_hover = false
 		self.clip_scissor = true
 
-		widShared.setupScroll2(self)
-		widShared.setupDoc(self)
-
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
+
+		widShared.setupScroll2(self)
+		widShared.setupDoc(self)
 
 		-- Minimum widget size.
 		self.min_w = 8
@@ -325,7 +325,6 @@ end
 
 function def:scrollGetCaretInBounds(immediate)
 
-	-- XXX wrapped in self:scrollRectInBounds()
 	local disp = self.line_ed.disp
 
 	--print("scrollGetCaretInBounds() BEFORE", self.scr2_tx, self.scr2_ty)
@@ -1073,7 +1072,6 @@ def.skinners = {
 			local font = disp.font
 
 			local res = line_ed.allow_input and skin.res_readwrite or skin.res_readonly
-
 			local has_thimble = self == self.context.current_thimble
 
 			-- XXX Debug renderer.
@@ -1089,7 +1087,6 @@ def.skinners = {
 			end
 			--]]
 
-
 			local scx, scy, scw, sch = love.graphics.getScissor()
 			love.graphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, math.max(0, self.vp2_w), math.max(0, self.vp2_h))
 
@@ -1102,31 +1099,12 @@ def.skinners = {
 
 			--print("render", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
 
-			--[[
-			XXX It would probably make sense to chop this up into smaller functions, which can be selectively
-			overwritten for the purposes of implementing new themes.
-			--]]
-
 			-- Draw background body
 			love.graphics.setColor(res.color_body)
-
 			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
 			-- ^ Variant with less overdraw?
-			--love.graphics.rectangle("fill", disp.viewport_x, disp.viewport_y, disp.viewport_w, disp.viewport_h)
-
-			-- Debug: show viewport
-			--[[
-			do
-				love.graphics.push("all")
-
-				love.graphics.setColor(0,1,0,1)
-				love.graphics.setLineWidth(1)
-				love.graphics.rectangle("line", self.vp_x, disp.vp_y, disp.vp_w, disp.vp_h)
-
-				love.graphics.pop()
-			end
-			--]]
+			--love.graphics.rectangle("fill", disp.vp2_x, disp.vp2_y, disp.vp2_w, disp.vp2_h)
 
 			-- Draw current paragraph illumination, if applicable.
 			if self.illuminate_current_line then
@@ -1137,7 +1115,6 @@ def.skinners = {
 				local last_sub = paragraph[#paragraph]
 				local para_h = last_sub.y + last_sub.h - para_y
 
-				--love.graphics.rectangle("fill", -2^16, para_y, 2^17, para_h) -- XXX Return to the bounds on this. Getting frustrated.
 				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr2_y + para_y, self.vp2_w, para_h)
 			end
 
@@ -1145,7 +1122,6 @@ def.skinners = {
 
 			-- Translate into core region, with scrolling offsets applied.
 			love.graphics.translate(self.vp_x + self.align_offset - self.scr2_x, self.vp_y - self.scr2_y)
-			--love.graphics.translate(-self.scr2_x, -self.scr2_y)
 
 			-- Draw highlight rectangles.
 			love.graphics.setColor(res.color_highlight)
@@ -1244,6 +1220,7 @@ def.skinners = {
 			--]]
 
 			-- DEBUG: show editor details.
+			-- [[
 			love.graphics.push("all")
 			love.graphics.setScissor()
 			love.graphics.setColor(1, 1, 1, 1)
@@ -1254,6 +1231,8 @@ def.skinners = {
 				"h_byte:" .. line_ed.h_byte,
 				200, 200
 			)
+			--]]
+
 			love.graphics.pop()
 		end,
 	},
