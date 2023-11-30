@@ -196,7 +196,7 @@ function client:highlightCurrentWord()
 
 	local line_ed = self.line_ed
 
-	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
+	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_byte)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateHighlightRect()
@@ -347,7 +347,6 @@ function client:deleteUChar(n_u_chars)
 end
 
 
-
 function client:deleteGroup()
 
 	local line_ed = self.line_ed
@@ -384,6 +383,48 @@ function client:deleteGroup()
 end
 
 
+function client:backspaceGroup()
+
+	local line_ed = self.line_ed
+
+	line_ed:highlightCleanup()
+
+	local byte_left
+
+	if line_ed.car_byte == 1 then
+		return -- nil
+
+	else
+		byte_left = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
+	end
+
+	if byte_left and byte_left ~= line_ed.car_byte then
+		return line_ed:deleteText(true, byte_left, line_ed.car_byte - 1)
+	end
+
+	return nil
+end
+
+
+function client:deleteCaretToEnd()
+
+	local line_ed = self.line_ed
+
+	line_ed:highlightCleanup()
+
+	return line_ed:deleteText(true, line_ed.car_byte, #line_ed.line)
+end
+
+
+function client:deleteCaretToStart()
+
+	local line_ed = self.line_ed
+
+	line_ed:highlightCleanup()
+
+	return line_ed:deleteText(true, 1, line_ed.car_byte - 1)
+end
+
 
 function client:caretFirst(clear_highlight)
 
@@ -415,6 +456,75 @@ function client:caretLast(clear_highlight)
 
 	else
 		line_ed:updateHighlightRect()
+	end
+end
+
+
+function client:copyHighlightedToClipboard()
+
+	local line_ed = self.line_ed
+
+	local copied = self:getHighlightedText()
+
+	-- Don't leak masked string info.
+	if line_ed.masked then
+		copied = string.rep(line_ed.mask_glyph, utf8.len(copied))
+	end
+
+	copied = textUtil.sanitize(copied, line_ed.bad_input_rule)
+
+	love.system.setClipboardText(copied)
+end
+
+
+function client:cutHighlightedToClipboard()
+
+	local line_ed = self.line_ed
+
+	local old_byte, old_h_byte = line_ed:getCaretOffsets()
+
+	local cut = self:deleteHighlightedText()
+
+	if cut then
+		cut = textUtil.sanitize(cut, self.bad_input_rule)
+
+		-- Don't leak masked string info.
+		if line_ed.masked then
+			cut = table.concat(cut, "\n")
+			cut = string.rep(line_ed.mask_glyph, utf8.len(cut))
+		end
+
+		love.system.setClipboardText(cut)
+
+		self.input_category = false
+
+		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+		editHistS.writeEntry(line_ed, true)
+	end
+end
+
+
+function client:pasteClipboardText()
+
+	local line_ed = self.line_ed
+
+	local old_byte, old_h_byte = line_ed:getCaretOffsets()
+
+	if line_ed:isHighlighted() then
+		self:deleteHighlightedText()
+	end
+
+	local text = love.system.getClipboardText()
+
+	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
+	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
+	-- Check both cases here to be sure.
+	if text and text ~= "" then
+		line_ed.input_category = false
+		self:writeText(text, true)
+
+		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+		editHistS.writeEntry(line_ed, true)
 	end
 end
 

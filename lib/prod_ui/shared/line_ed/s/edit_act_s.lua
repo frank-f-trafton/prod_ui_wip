@@ -287,23 +287,19 @@ function editActS.deleteGroup(self, line_ed)
 end
 
 
---[=[
-function editActS.deleteLine(self, line_ed)
+function editActS.deleteAll(self, line_ed)
 
 	if line_ed.allow_input then
-		local write_hist = false
+		local old_line = line_ed.line
 
-		-- [WARN] Can leak masked line feeds.
 		line_ed.input_category = false
-		write_hist = not not self:deleteLine()
+		line_ed:deleteText(false, 1, #line_ed.line)
 
-		return true, true, write_hist
+		return true, true, (old_line ~= line_ed.line)
 	end
 end
---]=]
 
 
---[=[
 function editActS.backspaceGroup(self, line_ed)
 
 	if line_ed.allow_input then
@@ -321,81 +317,68 @@ function editActS.backspaceGroup(self, line_ed)
 		return true, true, write_hist
 	end
 end
---]=]
 
 
 -- Backspace, delete from caret to start/end of line, respectively (unhighlights first)
---[=[
-function editActS.deleteCaretToLineEnd(self, line_ed)
+function editActS.deleteCaretToEnd(self, line_ed)
 
 	if line_ed.allow_input then
-		-- [WARN] Can leak masked line feeds (or would, if line feeds were masked)
-		self:deleteCaretToLineEnd()
+		self:deleteCaretToEnd()
 		line_ed.input_category = false
 
 		return true, true, true
 	end
 end
---]=]
 
 
---[=[
-function editActS.backspaceCaretToLineStart(self, line_ed)
+function editActS.backspaceCaretToStart(self, line_ed)
 
 	if line_ed.allow_input then
 		-- [WARN] Will leak masked line feeds (or would, if line feeds were masked)
-		self:deleteCaretToLineStart()
+		self:deleteCaretToStart()
 		line_ed.input_category = false
 
 		return true, true, true
 	end
 end
---]=]
 
 
 -- Tab key
---[=[
 function editActS.typeTab(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_tab then
 		local changed = false
 
-		-- Caret and highlight are on the same line: write a literal tab.
+		-- Write a literal tab.
 		-- (Unhighlights first)
-		if line_ed.car_line == line_ed.h_line then
-			local written = self:writeText("\t", true)
+		local written = self:writeText("\t", true)
 
-			if #written > 0 then
-				changed = true
-			end
-
-		-- Caret and highlight are on different lines: indent the range of lines.
-		else
-			local r1, r2 = line_ed:getSelectedLinesRange(true)
-
-			-- Only perform the indent if the total number of added tabs will not take us beyond
-			-- the max code points setting.
-			local tab_count = 1 + (r2 - r1)
-			if line_ed.u_chars + tab_count <= line_ed.u_chars_max then
-				for i = r1, r2 do
-					local line_changed = line_ed:indentLine(i)
-
-					if line_changed then
-						changed = true
-					end
-				end
-			end
+		if #written > 0 then
+			changed = true
 		end
-		line_ed:updateHighlightRect()
 
 		return true, true, changed
 	end
 end
---]=]
+
+
+-- Return / Enter key
+function editActS.typeLineFeed(self, line_ed)
+
+	print("editActS.typeLineFeed")
+	print("", line_ed.allow_input, line_ed.allow_enter)
+	if line_ed.allow_input and line_ed.allow_enter then
+		print("???")
+		line_ed.input_category = false
+
+		print("??????", "|" .. self:writeText("\n", true) .. "|")
+
+		return true, true, true
+	end
+end
 
 
 -- Select all
---[=[
 function editActS.selectAll(self, line_ed)
 
 	if line_ed.allow_highlight then
@@ -407,13 +390,10 @@ function editActS.selectAll(self, line_ed)
 
 	return true, false, false
 end
---]=]
 
 
---[=[
 function editActS.selectCurrentWord(self, line_ed)
 
-	--print("editActS.selectCurrentWord")
 	if line_ed.allow_highlight then
 		self:highlightCurrentWord()
 
@@ -423,11 +403,9 @@ function editActS.selectCurrentWord(self, line_ed)
 
 	return true, false, false
 end
---]=]
 
 
 -- Copy, cut, paste
---[=[
 function editActS.copy(self, line_ed)
 
 	if line_ed.allow_copy and line_ed.allow_highlight and line_ed:isHighlighted() then
@@ -436,10 +414,8 @@ function editActS.copy(self, line_ed)
 		return true, false, false
 	end
 end
---]=]
 
 
---[=[
 function editActS.cut(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_cut and line_ed.allow_highlight and line_ed:isHighlighted() then
@@ -448,10 +424,8 @@ function editActS.cut(self, line_ed)
 		return true, true, false
 	end
 end
---]=]
 
 
---[=[
 function editActS.paste(self, line_ed)
 
 	if line_ed.allow_input and line_ed.allow_paste then
@@ -460,7 +434,6 @@ function editActS.paste(self, line_ed)
 		return true, true, false
 	end
 end
---]=]
 
 
 -- Toggle Insert / Replace mode

@@ -138,12 +138,16 @@ function lineEdS.new(font)
 	self.allow_paste = true
 	self.allow_highlight = true
 
-	-- Allows '\n' as text input.
+	-- Affects single presses of enter/return (which default to typing a line feed).
+	-- For invoking commands, you should leave this false and attach a keyhook for 'return' / 'kpenter'.
+	self.allow_enter = false
+
+	-- Allows '\n' as text input (including pasting from the clipboard).
 	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
-	-- stop at line feeds. The external string may substitute line feeds for U+23CE (⏎).
+	-- stop at line feeds.
+	-- XXX: In the external string, substitute line feeds for U+23CE (⏎).
 	self.allow_line_feed = false
 
-	self.enter_types_line_feed = false -- Makes the enter/return key type '\n\.
 	self.allow_tab = false -- affects single presses of the tab key
 	self.allow_untab = false -- affects shift+tab (unindenting)
 	self.tabs_to_spaces = false -- affects '\t' in writeText()
@@ -387,13 +391,16 @@ function _mt_ed_s:getWordRange(byte_n)
 
 	local line = self.line
 
+	if #line == 0 then
+		return 1, 1
+	end
+
 	-- If at the end of the line, and it contains at least one code point, then use that last code point.
-	if #line > 0 and byte_n == #line + 1 then
+	if byte_n >= #line + 1 then
 		byte_n = utf8.offset(line, -1, byte_n)
 	end
 
-	local peeked = utf8.codepoint(byte_n)
-	local first_group = code_groups[peeked]
+	local first_group = code_groups[utf8.codepoint(line, byte_n)]
 
 	local byte_left = edComS.huntWordBoundary(code_groups, line, byte_n, -1, true, first_group)
 	local byte_right = edComS.huntWordBoundary(code_groups, line, byte_n, 1, true, first_group)

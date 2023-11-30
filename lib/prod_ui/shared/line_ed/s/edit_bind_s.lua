@@ -52,11 +52,14 @@ editBindS["S end"] = editActS.caretLastHighlight
 editBindS["backspace"] = editActS.backspace
 editBindS["S backspace"] = editActS.backspace
 editBindS["C backspace"] = editActS.backspaceGroup
-editBindS["CS backspace"] = editActS.backspaceCaretToLineStart
+editBindS["CS backspace"] = editActS.backspaceCaretToStart
 
 editBindS["delete"] = editActS.delete
+editBindS["S delete"] = editActS.delete
 editBindS["C delete"] = editActS.deleteGroup
-editBindS["CS delete"] = editActS.deleteCaretToLineEnd
+editBindS["CS delete"] = editActS.deleteCaretToEnd
+
+--editBindS["C d"] = editActS.deleteAll
 
 editBindS["return"] = editActS.typeLineFeed
 editBindS["kpenter"] = editActS.typeLineFeed
@@ -82,7 +85,6 @@ editBindS["C y"] = editActS.redo
 -- DEBUG: Test mouse-click commands from the keyboard
 --[[
 editBindS["CA w"] = editActS.selectCurrentWord
-editBindS["CA a"] = editActS.selectCurrentLine
 --]]
 
 
