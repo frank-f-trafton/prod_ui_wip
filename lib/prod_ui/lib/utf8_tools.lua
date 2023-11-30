@@ -1,4 +1,4 @@
--- utf8Tools v1.2.1
+-- utf8Tools v1.2.2
 -- https://github.com/rabbitboots/utf8_tools
 
 
@@ -59,20 +59,17 @@ options.check_surrogates = true
 options.exclude_invalid_octets = true
 
 
--- * / Options *
-
-
 -- * Internal *
 
 
--- Octets 0xc0, 0xc1, and (0xf5 - 0xff) should never appear in a UTF-8 value
+-- Octets 0xc0, 0xc1, and (0xf5 - 0xff) should never appear in a UTF-8 value.
 utf8Tools.lut_invalid_octet = {}
 for i, v in ipairs({0xc0, 0xc1, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff}) do
 	utf8Tools.lut_invalid_octet[v] = true
 end
 
 
--- Used to verify number length against allowed octet ranges (1, 2, 3, 4)
+-- Used to verify number length against allowed octet ranges (1, 2, 3, 4).
 local lut_oct_min_max = {{0x00000, 0x00007f}, {0x00080, 0x0007ff}, {0x00800, 0x00ffff}, {0x10000, 0x10ffff}}
 
 
@@ -89,7 +86,7 @@ local function errBadIntRange(arg_n, val, min, max)
 end
 
 
--- Check octets 2-4 in a multi-octet code point
+-- Checks octets 2-4 in a multi-octet code point.
 local function _checkFollowingOctet(octet, position, n_octets)
 
 	-- NOTE: Do not call on the first octet.
@@ -100,18 +97,14 @@ local function _checkFollowingOctet(octet, position, n_octets)
 	elseif options.exclude_invalid_octets and utf8Tools.lut_invalid_octet[octet] then
 		return "Invalid octet value (" .. octet .. ") in byte #" .. position
 
-	-- Nul is allowed in single-octet code points, but not multi-octet
-	elseif octet == 0 then
-		return "Octet #" .. position .. ": Multi-byte code points cannot contain 0 / Nul bytes."
-
 	-- Verify "following" byte mark	
 	-- < 1000:0000
 	elseif octet < 0x80 then
 		return "Byte #" .. position .. " is too low (" .. octet .. ") for multi-byte encoding. Min: 0x80"
 
 	-- >= 1100:0000
-	elseif octet >= 0xC0 then
-		return "Byte #" .. position .. " is too high (" .. octet .. ") for multi-byte encoding. Max: 0xBF"
+	elseif octet >= 0xc0 then
+		return "Byte #" .. position .. " is too high (" .. octet .. ") for multi-byte encoding. Max: 0xbf"
 	end
 end
 
@@ -120,10 +113,10 @@ local function _getLengthMarker(byte)
 
 	-- (returns a number on success, or error string on failure)
 	return (byte < 0x80) and 1 -- 1 octet: 0000:0000 - 0111:1111
-	or (byte >= 0xC0 and byte < 0xE0) and 2 -- 2 octets: 1100:0000 - 1101:1111	
-	or (byte >= 0xE0 and byte < 0xF0) and 3 -- 3 octets: 1110:0000 - 1110:1111
-	or (byte >= 0xF0 and byte < 0xF8) and 4 -- 4 octets: 1111:0000 - 1111:0111
-	or (byte >= 0x80 and byte < 0xBF) and "trailing octet (2nd, 3rd or 4th) receieved as 1st" -- 1000:0000 - 1011:1111
+	or (byte >= 0xc0 and byte < 0xe0) and 2 -- 2 octets: 1100:0000 - 1101:1111
+	or (byte >= 0xe0 and byte < 0xf0) and 3 -- 3 octets: 1110:0000 - 1110:1111
+	or (byte >= 0xf0 and byte < 0xf8) and 4 -- 4 octets: 1111:0000 - 1111:0111
+	or (byte >= 0x80 and byte < 0xbf) and "trailing octet (2nd, 3rd or 4th) receieved as 1st" -- 1000:0000 - 1011:1111
 	or "Unable to determine octet length indicator in first byte of UTF-8 value"
 end
 
@@ -144,7 +137,7 @@ local function _checkCodePointIssue(code_point, u8_len)
 		return false, "code point is too large."
 	end
 
-	-- Look for overlong values based on the octet count
+	-- Look for overlong values based on the octet count.
 	-- (Only applicable if known to have originated from a UTF-8 sequence.)
 	if u8_len ~= false then
 		local min_max = lut_oct_min_max[u8_len]
@@ -246,9 +239,6 @@ local function _getCodePointFromString(str, pos)
 end
 
 
--- * / Internal *
-
-
 -- * Public *
 
 
@@ -271,10 +261,13 @@ function utf8Tools.getUCString(str, pos)
 end
 
 
-function utf8Tools.step(str, pos) -- UPDATE: allow max pos to be `#str + 1`.
+function utf8Tools.step(str, pos)
 
+	-- Assertions
+	-- [[
 	_assertArgType(1, str, "string")
 	if type(pos) ~= "number" or pos < 1 or pos > #str + 1 or pos ~= math.floor(pos) then errBadIntRange(2, pos, 1, #str + 1) end
+	--]]
 
 	while pos <= #str do
 		local b1 = string.byte(str, pos)
@@ -301,14 +294,18 @@ function utf8Tools.check(str, i, j)
 	if j == nil then j = str_max end
 
 	-- Assertions 2/2
-	-- [[	
+	-- [[
 	if type(i) ~= "number" or i ~= math.floor(i) then errBadType(2, i, "(whole) number")
 	elseif i < 1 or i > str_max then errBadIntRange(2, i, 1, str_max)
 	elseif type(j) ~= "number" or j ~= math.floor(j) then errBadType(3, j, "(whole) number")
 	elseif j < 1 or j > str_max then errBadIntRange(3, j, 1, str_max)
 	elseif i > j then error("start index 'i' (" .. i .. ") is greater than final index 'j' (" .. j .. ").") end
 	--]]
-	
+
+	if #str == 0 then
+		return true
+	end
+
 	while i <= j do
 		local code_point, u8_len = _getCodePointFromString(str, i)
 
@@ -324,9 +321,12 @@ end
 
 function utf8Tools.ucStringToCodePoint(str, pos)
 
+	-- Assertions
+	-- [[
 	_assertArgType(1, str, "string")
 	if #str == 0 then error("argument #1: string is empty (it must contain at least one character).")
 	elseif type(pos) ~= "number" or pos < 1 or pos > #str or pos ~= math.floor(pos) then errBadIntRange(2, pos, 1, #str) end
+	--]]
 
 	return _getCodePointFromString(str, pos)
 end
@@ -334,7 +334,10 @@ end
 
 function utf8Tools.codePointToUCString(code)
 
+	-- Assertions
+	-- [[
 	if type(code) ~= "number" or code ~= math.floor(code) then error("argument #1: expected whole number (integer).") end
+	--]]
 
 	local ok, err = _checkCodePointIssue(code, false)
 	if not ok then
@@ -345,9 +348,6 @@ function utf8Tools.codePointToUCString(code)
 
 	return _bytesToUCString(b1, b2, b3, b4)
 end
-
-
--- * / Public *
 
 
 return utf8Tools
