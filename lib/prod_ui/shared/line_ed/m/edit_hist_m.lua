@@ -11,14 +11,14 @@
 local context = select(1, ...)
 
 
-local editHist = {}
+local editHistM = {}
 
 
 local _mt_hist = {}
 _mt_hist.__index = _mt_hist
 
 
-function editHist.initEntry(entry, source_lines, car_line, car_byte, h_line, h_byte)
+function editHistM.initEntry(entry, source_lines, car_line, car_byte, h_line, h_byte)
 
 	entry.lines = entry.lines or {}
 
@@ -36,15 +36,15 @@ function editHist.initEntry(entry, source_lines, car_line, car_byte, h_line, h_b
 end
 
 
-function editHist.writeEntry(line_ed, do_advance)
+function editHistM.writeEntry(line_ed, do_advance)
 
 	local entry = line_ed.hist:writeEntry(do_advance)
-	editHist.initEntry(entry, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
+	editHistM.initEntry(entry, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
 	return entry
 end
 
 
-function editHist.applyEntry(self, entry)
+function editHistM.applyEntry(self, entry)
 
 	local line_ed = self.line_ed
 	local line_ed_lines = line_ed.lines
@@ -64,7 +64,7 @@ function editHist.applyEntry(self, entry)
 end
 
 
-function editHist.doctorCurrentCaretOffsets(hist, car_line, car_byte, h_line, h_byte)
+function editHistM.doctorCurrentCaretOffsets(hist, car_line, car_byte, h_line, h_byte)
 
 	local entry = hist.ledger[hist.pos]
 
@@ -77,4 +77,4 @@ function editHist.doctorCurrentCaretOffsets(hist, car_line, car_byte, h_line, h_
 end
 
 
-return editHist
+return editHistM

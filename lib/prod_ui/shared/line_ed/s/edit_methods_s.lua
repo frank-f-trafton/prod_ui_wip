@@ -38,7 +38,7 @@ function client:deleteHighlightedText()
 	local line_ed = self.line_ed
 
 	if not self:isHighlighted() then
-		return nil
+		return -- nil
 	end
 
 	-- Clean up display highlight beforehand. Much harder to determine the offsets after deleting things.
@@ -227,8 +227,8 @@ function client:executeBoundAction(bound_func)
 	if write_history then
 		line_ed.input_category = false
 
-		editHist.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-		editHist.writeEntry(line_ed, true)
+		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+		editHistS.writeEntry(line_ed, true)
 	end
 
 	return update_viewport, caret_in_view, write_history
@@ -345,6 +345,44 @@ function client:deleteUChar(n_u_chars)
 	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
 	return line_ed:deleteText(true, line_ed.car_byte, byte_2 - 1)
 end
+
+
+
+function client:deleteGroup()
+
+	local line_ed = self.line_ed
+
+	line_ed:highlightCleanup()
+
+	local byte_right
+
+	if line_ed.car_byte == #line_ed.line + 1 then
+		return -- nil
+
+	else
+		local hit_non_ws = false
+		local first_group = code_groups[utf8.codepoint(line_ed.line, line_ed.car_byte)]
+		if first_group ~= "whitespace" then
+			hit_non_ws = true
+		end
+		--print("HIT_NON_WS", hit_non_ws, "FIRST_GROUP", first_group)
+
+		byte_right = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
+		byte_right = byte_right - 1
+		--print("deleteGroup: byte_right", byte_right)
+	end
+
+	--print("ranges:", line_ed.car_byte, byte_right)
+	local del = line_ed:deleteText(true, line_ed.car_byte, byte_right)
+	--print("DEL", "|"..(del or "<nil>").."|")
+	if del ~= "" then
+		return del
+
+	else
+		return -- nil
+	end
+end
+
 
 
 function client:caretFirst(clear_highlight)

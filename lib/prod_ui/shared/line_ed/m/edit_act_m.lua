@@ -28,7 +28,7 @@ local editActM = {}
 local utf8 = require("utf8")
 
 
-local editHist = context:getLua("shared/line_ed/m/edit_hist_m")
+local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 
 
 -- Step left, right
@@ -407,9 +407,9 @@ function editActM.backspace(self, line_ed)
 			end
 
 			if do_advance then
-				editHist.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
+				editHistM.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			editHist.writeEntry(line_ed, do_advance)
+			editHistM.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "backspacing" or "backspacing-ws"
 		end
 
@@ -447,9 +447,9 @@ function editActM.delete(self, line_ed)
 			end
 
 			if do_advance then
-				editHist.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
+				editHistM.doctorCurrentCaretOffsets(hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
-			editHist.writeEntry(line_ed, do_advance)
+			editHistM.writeEntry(line_ed, do_advance)
 			line_ed.input_category = no_ws and "deleting" or "deleting-ws"
 		end
 

@@ -150,7 +150,7 @@ function editActS.caretLast(self, line_ed)
 end
 
 
--- Highlight to start, end of document
+-- Highlight to start, end of line
 function editActS.caretFirstHighlight(self, line_ed)
 
 	self:caretFirst(not line_ed.allow_highlight)
@@ -165,29 +165,6 @@ function editActS.caretLastHighlight(self, line_ed)
 
 	return true, true, false
 end
-
-
--- Highlight to first, end of line
---[=[
-function editActS.caretLineFirstHighlight(self, line_ed)
-
-	-- [WARN] Can leak masked line feeds (or would, if line feeds were masked)
-	self:caretLineFirst(not line_ed.allow_highlight)
-
-	return true, true, false
-end
---]=]
-
-
---[=[
-function editActS.caretLineLastHighlight(self, line_ed)
-
-	-- [WARN] Can leak masked line feeds (or would, if line feeds were masked)
-	self:caretLineLast(not line_ed.allow_highlight)
-
-	return true, true, false
-end
---]=]
 
 
 -- Backspace, delete (or delete highlight)
@@ -277,7 +254,6 @@ end
 
 
 -- Delete highlighted text (for the pop-up menu)
---[=[
 function editActS.deleteHighlighted(self, line_ed)
 
 	if line_ed.allow_input then
@@ -289,11 +265,9 @@ function editActS.deleteHighlighted(self, line_ed)
 		end
 	end
 end
---]=]
 
 
 -- Backspace, delete by group (unhighlights first)
---[=[
 function editActS.deleteGroup(self, line_ed)
 
 	if line_ed.allow_input then
@@ -311,7 +285,6 @@ function editActS.deleteGroup(self, line_ed)
 		return true, true, write_hist
 	end
 end
---]=]
 
 
 --[=[
