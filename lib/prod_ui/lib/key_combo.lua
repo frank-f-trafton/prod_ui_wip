@@ -343,10 +343,10 @@ function keyCombo.isDown(mgr, combo)
 
 	if keyCombo.checkModKeys(mgr, ctrl, shift, alt, gui) then
 		if is_sc then
-			return mgr:isScanDown1(code)
+			return mgr:isScanDown(code)
 			
 		else
-			return mgr:isKeyDown1(code)
+			return mgr:isKeyDown(code)
 		end
 	end
 
@@ -363,10 +363,10 @@ function keyCombo.isPressedOnce(mgr, combo)
 
 	if keyCombo.checkModKeys(mgr, ctrl, shift, alt, gui) then
 		if is_sc then
-			return mgr:isScanPressedOnce1(code)
+			return mgr:isScanPressedOnce(code)
 			
 		else
-			return mgr:isKeyPressedOnce1(code)
+			return mgr:isKeyPressedOnce(code)
 		end
 	end
 
@@ -383,10 +383,10 @@ function keyCombo.isPressedRep(mgr, combo)
 
 	if keyCombo.checkModKeys(mgr, ctrl, shift, alt, gui) then
 		if is_sc then
-			return mgr:isScanPressedRep1(code)
+			return mgr:isScanPressedRep(code)
 			
 		else
-			return mgr:isKeyPressedRep1(code)
+			return mgr:isKeyPressedRep(code)
 		end
 	end
 

@@ -1,4 +1,4 @@
--- Version 0.0.1b4 (Beta)
+-- Version 0.0.1b5 (Beta)
 
 
 local keyMgr = {}
@@ -39,7 +39,7 @@ local _getKeyFromScancode = love.keyboard.getKeyFromScancode
 
 
 -- Keep a list of valid scancode string IDs to help with assertions.
--- Valid for: LÖVE 11.4
+-- Valid for: LÖVE 11.4, 11.5
 keyMgr.scancodes = {}
 do
 	-- https://love2d.org/wiki/Scancode
@@ -245,7 +245,7 @@ end
 
 
 -- KeyConstants.
--- Valid for: LÖVE 11.4
+-- Valid for: LÖVE 11.4, 11.5
 keyMgr.key_constants = {}
 do
 	-- https://love2d.org/wiki/KeyConstant
@@ -915,61 +915,6 @@ function _mt_mgr:isScanDown(...)
 end
 
 
-function _mt_mgr:isScanDown1(a)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	--]]
-
-	local hash = self.hash
-
-	return hash[a] ~= nil
-end
-
-
-function _mt_mgr:isScanDown2(a, b)
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	--]]
-
-	local hash = self.hash
-
-	return hash[a] ~= nil or hash[b] ~= nil
-end
-
-
-function _mt_mgr:isScanDown3(a, b, c)
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	keyMgr.assertScancode(c)
-	--]]
-
-	local hash = self.hash
-
-	return hash[a] ~= nil or hash[b] ~= nil or hash[c] ~= nil
-end
-
-
-function _mt_mgr:isScanDown4(a, b, c, d)
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	keyMgr.assertScancode(c)
-	keyMgr.assertScancode(d)
-	--]]
-
-	local hash = self.hash
-
-	return hash[a] ~= nil or hash[b] ~= nil or hash[c] ~= nil or hash[d] ~= nil
-end
-
-
 function _mt_mgr:lastScanDown(sc)
 	-- Assertions
 	-- [[
@@ -1026,121 +971,6 @@ function _mt_mgr:isScanPressedRep(...)
 end
 
 
-function _mt_mgr:isScanPressedOnce1(a)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	--]]
-
-	local pressed_once = self.pressed_once
-
-	return pressed_once[a] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedRep1(a)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	--]]
-
-	local active = self.active
-
-	return active[a] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedOnce2(a, b)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	--]]
-
-	local pressed_once = self.pressed_once
-
-	return pressed_once[a] ~= nil or pressed_once[b] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedRep2(a, b)
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	--]]
-
-	local active = self.active
-
-	return active[a] ~= nil or active[b] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedOnce3(a, b, c)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	keyMgr.assertScancode(c)
-	--]]
-
-	local pressed_once = self.pressed_once
-
-	return pressed_once[a] ~= nil or pressed_once[b] ~= nil or pressed_once[c] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedRep3(a, b, c)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	keyMgr.assertScancode(c)
-	--]]
-
-	local active = self.active
-
-	return active[a] ~= nil or active[b] ~= nil or active[c] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedOnce3(a, b, c, d)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	keyMgr.assertScancode(c)
-	keyMgr.assertScancode(d)
-	--]]
-
-	local pressed_once = self.pressed_once
-
-	return pressed_once[a] ~= nil or pressed_once[b] ~= nil or pressed_once[c] ~= nil or pressed_once[d] ~= nil
-end
-
-
-function _mt_mgr:isScanPressedRep4(a, b, c, d)
-
-	-- Assertions
-	-- [[
-	keyMgr.assertScancode(a)
-	keyMgr.assertScancode(b)
-	keyMgr.assertScancode(c)
-	keyMgr.assertScancode(d)
-	--]]
-
-	local active = self.active
-
-	return active[a] ~= nil or active[b] ~= nil or active[c] ~= nil or active[d] ~= nil
-end
-
-
 -- * State query methods: KeyConstants *
 --[[
 	NOTE: 'love.keyboard.getScancodeFromKey()' asserts that the keyconstant is valid. The resulting scancode
@@ -1162,48 +992,6 @@ function _mt_mgr:isKeyDown(...)
 	end
 
 	return false
-end
-
-
-function _mt_mgr:isKeyDown1(a)
-
-	local hash = self.hash
-	local sa = _getScancodeFromKey(a)
-
-	return hash[sa] ~= nil
-end
-
-
-function _mt_mgr:isKeyDown2(a, b)
-
-	local hash = self.hash
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-
-	return hash[sa] ~= nil or hash[sb] ~= nil
-end
-
-
-function _mt_mgr:isKeyDown3(a, b, c)
-
-	local hash = self.hash
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-	local sc = _getScancodeFromKey(c)
-
-	return hash[sa] ~= nil or hash[sb] ~= nil or hash[sc] ~= nil
-end
-
-
-function _mt_mgr:isKeyDown4(a, b, c, d)
-
-	local hash = self.hash
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-	local sc = _getScancodeFromKey(c)
-	local sd = _getScancodeFromKey(d)
-
-	return hash[sa] ~= nil or hash[sb] ~= nil or hash[sc] ~= nil or hash[sd] ~= nil
 end
 
 
@@ -1248,89 +1036,4 @@ function _mt_mgr:isKeyPressedRep(...)
 end
 
 
-function _mt_mgr:isKeyPressedOnce1(a)
-
-	local pressed_once = self.pressed_once
-	local sa = _getScancodeFromKey(a)
-
-	return pressed_once[sa] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedRep1(a)
-
-	local active = self.active
-	local sa = _getScancodeFromKey(a)
-
-	return active[sa] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedOnce2(a, b)
-
-	local pressed_once = self.pressed_once
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-
-	return pressed_once[sa] ~= nil or pressed_once[sb] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedRep2(a, b)
-
-	local active = self.active
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-
-	return active[sa] ~= nil or active[sb] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedOnce3(a, b, c)
-
-	local pressed_once = self.pressed_once
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-	local sc = _getScancodeFromKey(c)
-
-	return pressed_once[sa] ~= nil or pressed_once[sb] ~= nil or pressed_once[sc] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedRep3(a, b, c)
-
-	local active = self.active
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-	local sc = _getScancodeFromKey(c)
-
-	return active[sa] ~= nil or active[sb] ~= nil or active[sc] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedOnce4(a, b, c, d)
-
-	local pressed_once = self.pressed_once
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-	local sc = _getScancodeFromKey(c)
-	local sd = _getScancodeFromKey(d)
-
-	return pressed_once[sa] ~= nil or pressed_once[sb] ~= nil or pressed_once[sc] ~= nil or pressed_once[sd] ~= nil
-end
-
-
-function _mt_mgr:isKeyPressedRep4(a, b, c, d)
-
-	local active = self.active
-	local sa = _getScancodeFromKey(a)
-	local sb = _getScancodeFromKey(b)
-	local sc = _getScancodeFromKey(c)
-	local sd = _getScancodeFromKey(d)
-
-	return active[sa] ~= nil or active[sb] ~= nil or active[sc] ~= nil or active[sd] ~= nil
-end
-
-
 return keyMgr
-
