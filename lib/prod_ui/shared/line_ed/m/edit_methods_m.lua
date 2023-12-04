@@ -560,7 +560,7 @@ function client:writeText(text, suppress_replace)
 	local lines = line_ed.lines
 
 	-- Sanitize input
-	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, line_ed.allow_line_feed)
+	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, true)
 
 	if not line_ed.allow_highlight then
 		line_ed:clearHighlight()
@@ -1105,33 +1105,34 @@ function client:executeBoundAction(bound_func)
 	local disp = line_ed.disp
 
 	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
-	local update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
+	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
 
-	--print("executeBoundAction()", "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
+	--print("executeBoundAction()", "ok", ok, "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
+	if ok then
+		if update_viewport then
+			-- XXX refresh: update scroll bounds
+		end
 
-	if update_viewport then
-		-- XXX refresh: update scroll bounds
+		if caret_in_view then
+			-- XXX refresh: tell client widget to get the caret in view
+		end
+
+		if write_history then
+			line_ed.input_category = false
+
+			editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+			editHistM.writeEntry(line_ed, true)
+		end
+
+		return true, update_viewport, caret_in_view, write_history
 	end
-
-	if caret_in_view then
-		-- XXX refresh: tell client widget to get the caret in view
-	end
-
-	if write_history then
-		line_ed.input_category = false
-
-		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-		editHistM.writeEntry(line_ed, true)
-	end
-
-	return update_viewport, caret_in_view, write_history
 end
 
 
 function client:executeRemoteAction(item_t) -- XXX WIP
 
-	local res_1, res_2, res_3 = self:executeBoundAction(item_t.bound_func)
-	if res_1 then
+	local ok, update_viewport, caret_in_view, write_history = self:executeBoundAction(item_t.bound_func)
+	if ok then
 		self.update_flag = true
 	end
 

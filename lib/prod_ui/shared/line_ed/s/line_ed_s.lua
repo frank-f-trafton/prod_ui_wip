@@ -91,7 +91,7 @@ local function dispUpdateLineSyntaxColors(self, byte_1, byte_2)
 
 		local i = 1 -- Color table index within coloredtext sequence (step: 2, always odd)
 		local j = 1 -- Color table index within syntax colors sequence (step: 1)
-		local k = 1 -- Byte position within source string
+		local k = 1 -- Byte position within source string (display, not internal)
 
 		while k <= #disp_text do
 			local k2 = utf8.offset(disp_text, 2, k)
@@ -158,15 +158,15 @@ function lineEdS.new(font)
 	self.allow_paste = true
 	self.allow_highlight = true
 
-	-- Affects single presses of enter/return (which default to typing a line feed).
-	-- For invoking commands, you should leave this false and attach a keyhook for 'return' / 'kpenter'.
-	self.allow_enter = false
-
 	-- Allows '\n' as text input (including pasting from the clipboard).
 	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
 	-- stop at line feeds.
-	-- XXX: In the external string, substitute line feeds for U+23CE (⏎).
+	-- In the external display string, line feed code points (0xa) are substituted for U+23CE (⏎).
 	self.allow_line_feed = false
+
+	-- Allows typing a line feed by pressing enter/return. `self.allow_line_feed` must be true.
+	-- Note that this may override other uses of enter/return in the owning widget.
+	self.allow_enter_line_feed = false
 
 	self.allow_tab = false -- affects single presses of the tab key
 	self.allow_untab = false -- affects shift+tab (unindenting)
@@ -282,10 +282,10 @@ function _mt_ed_s:updateHighlightRect()
 
 	else
 		local font = self.font
-		local line = self.line
+		local disp_text = self.disp_text
 
-		local pixels_before = font:getWidth(string.sub(line, 1, byte_1 - 1))
-		local pixels_highlight = font:getWidth(string.sub(line, byte_1, byte_2 - 1))
+		local pixels_before = font:getWidth(string.sub(disp_text, 1, byte_1 - 1))
+		local pixels_highlight = font:getWidth(string.sub(disp_text, byte_1, byte_2 - 1))
 
 		self.disp_highlighted = true
 
@@ -430,6 +430,9 @@ function _mt_ed_s:updateDisplayText()
 
 	-- Perform optional modifications on the string.
 	local work_str = self.line
+
+	-- Replace some whitespace characters with code points that represent them.
+	work_str = string.gsub(work_str, utf8.charpattern, textUtil.proxy_code_points)
 
 	if self.replace_missing then
 		work_str = textUtil.replaceMissingCodePointGlyphs(work_str, font, "□")

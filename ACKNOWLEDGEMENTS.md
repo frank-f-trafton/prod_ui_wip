@@ -30,6 +30,16 @@
 * General inspiration taken from [GOOi](https://github.com/gustavostuff/gooi), [urutora](https://github.com/gustavostuff/urutora), [Love Frames](https://github.com/linux-man/LoveFrames), [SLAB](https://github.com/flamendless/Slab), and the aforementioned [LUIGI](https://github.com/airstruck/luigi).
 
 
+## Fonts
+
+* In `lib/prod_ui/themes/vacuum/fonts/noto_sans`:
+	* [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans) (OFL)
+
+	* [Noto Sans Symbols](https://fonts.google.com/noto/specimen/Noto+Sans+Symbols) (OFL)
+
+	* [Noto Sans Symbols 2](https://fonts.google.com/noto/specimen/Noto+Sans+Symbols+2) (OFL)
+
+
 ## Thanks
 
 * Thanks to Pedro Gimeno for [this tip on premultiplied alpha](https://love2d.org/forums/viewtopic.php?p=254694#p254694).

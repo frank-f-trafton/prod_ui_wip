@@ -133,7 +133,7 @@ function client:getHighlightedText()
 
 	if line_ed:isHighlighted() then
 		local b1, b2 = self.line_ed:getHighlightOffsets()
-		return string.sub(line_ed.line, b1, b2)
+		return string.sub(line_ed.line, b1, b2 - 1)
 	end
 
 	return nil
@@ -212,26 +212,28 @@ function client:executeBoundAction(bound_func)
 	local line_ed = self.line_ed
 
 	local old_byte, old_h_byte = line_ed:getCaretOffsets()
-	local update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
+	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
 
-	--print("executeBoundAction()", "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
+	--print("executeBoundAction()", "ok", ok, "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
 
-	if update_viewport then
-		-- XXX refresh: update scroll bounds
+	if ok then
+		if update_viewport then
+			-- XXX refresh: update scroll bounds
+		end
+
+		if caret_in_view then
+			-- XXX refresh: tell client widget to get the caret in view
+		end
+
+		if write_history then
+			line_ed.input_category = false
+
+			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+			editHistS.writeEntry(line_ed, true)
+		end
+
+		return true, update_viewport, caret_in_view, write_history
 	end
-
-	if caret_in_view then
-		-- XXX refresh: tell client widget to get the caret in view
-	end
-
-	if write_history then
-		line_ed.input_category = false
-
-		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-		editHistS.writeEntry(line_ed, true)
-	end
-
-	return update_viewport, caret_in_view, write_history
 end
 
 
@@ -531,8 +533,8 @@ end
 
 function client:executeRemoteAction(item_t) -- XXX WIP
 
-	local res_1, res_2, res_3 = self:executeBoundAction(item_t.bound_func)
-	if res_1 then
+	local ok, update_viewport, update_caret, write_history = self:executeBoundAction(item_t.bound_func)
+	if ok then
 		self.update_flag = true
 	end
 
