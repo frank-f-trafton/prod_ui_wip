@@ -150,7 +150,12 @@ function uiDraw.popLayer()
 		love.graphics.setCanvas(new_top.canvas)
 	end
 
-	love.graphics.setScissor(entry.sx, entry.sy, entry.sw, entry.sh)
+	love.graphics.setScissor(
+		entry.sx,
+		entry.sy,
+		math.max(0, entry.sw),
+		math.max(0, entry.sh)
+	)
 
 	return entry.canvas
 end
@@ -189,14 +194,20 @@ local function drawLoop(wid, os_x, os_y, current_thimble)
 			love.graphics.translate(-wid.scr_x, -wid.scr_y)
 
 			if wid.clip_scissor == true then
-				love.graphics.intersectScissor(os_x + wid.x, os_y + wid.y, wid.w, wid.h)
+				love.graphics.intersectScissor(
+					os_x + wid.x,
+					os_y + wid.y,
+					math.max(0, wid.w),
+					math.max(0, wid.h)
+				)
 
 			elseif wid.clip_scissor == "manual" then
 				love.graphics.intersectScissor(
 					os_x + wid.x + wid.clip_scissor_x,
 					os_y + wid.y + wid.clip_scissor_y,
-					wid.clip_scissor_w,
-					wid.clip_scissor_h)
+					math.max(0, wid.clip_scissor_w),
+					math.max(0, wid.clip_scissor_h)
+				)
 			end
 
 			-- Keep temporary copies of offsets so that they don't change mid-loop.

@@ -212,11 +212,11 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 	local label_style = skin.label_style
 
 	-- Prevent text from spilling out of its allotted region (Viewport #1).
-	love.graphics.intersectScissor(
+	uiGraphics.intersectScissor(
 		ox + self.x + self.vp_x,
 		oy + self.y + self.vp_y,
-		math.max(0, self.vp_w),
-		math.max(0, self.vp_h)
+		self.vp_w,
+		self.vp_h
 	)
 
 	local height = self.label_h or math.floor(0.5 + font:getHeight() * font:getLineHeight())

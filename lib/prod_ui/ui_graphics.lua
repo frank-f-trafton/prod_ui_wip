@@ -144,6 +144,22 @@ else
 end
 
 
+-- * Scissor Wrappers *
+
+
+-- LÖVE's scissorbox functions will raise an error if the provided width or height are less than zero.
+
+
+function uiGraphics.setScissor(x, y, w, h)
+	love.graphics.setScissor(x, y, math.max(0, w), math.max(0, h))
+end
+
+
+function uiGraphics.intersectScissor(x, y, w, h)
+	love.graphics.intersectScissor(x, y, math.max(0, w), math.max(0, h))
+end
+
+
 -- * Drawing *
 
 

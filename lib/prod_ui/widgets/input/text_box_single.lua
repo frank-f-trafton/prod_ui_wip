@@ -469,11 +469,11 @@ def.skinners = {
 			love.graphics.setColor(res.color_body)
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
-			love.graphics.intersectScissor(
+			uiGraphics.intersectScissor(
 				ox + self.x + self.vp2_x,
 				oy + self.y + self.vp2_y,
-				math.max(0, self.vp2_w),
-				math.max(0, self.vp2_h)
+				self.vp2_w,
+				self.vp2_h
 			)
 
 			love.graphics.translate(

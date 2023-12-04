@@ -279,12 +279,7 @@ def.render = function(self, ox, oy)
 	love.graphics.setLineWidth(line_w)
 	love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1)
 
-	love.graphics.intersectScissor(
-		ox + self.x,
-		oy + self.y,
-		math.max(0, self.w),
-		math.max(0, self.h)
-	)
+	uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 	-- Horizontal scroll offset. The caret should always be in view.
 	local offset_x = -math.max(0, self.text_w + caret_w + margin_w*2 - self.w)

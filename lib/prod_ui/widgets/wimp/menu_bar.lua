@@ -919,7 +919,7 @@ def.skinners = {
 			love.graphics.push("all")
 
 			-- Don't draw menu contents outside of the widget bounding box.
-			love.graphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 			-- Body background.
 			uiGraphics.drawSlice(skin.sl_body, 0, 0, self.w, self.h)

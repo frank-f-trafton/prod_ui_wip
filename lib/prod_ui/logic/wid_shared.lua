@@ -1047,8 +1047,8 @@ function widShared.setClipScissorToViewport(self, v)
 	self.clip_scissor = "manual"
 	self.clip_scissor_x = self[v.x]
 	self.clip_scissor_y = self[v.y]
-	self.clip_scissor_w = math.max(0, self[v.w])
-	self.clip_scissor_h = math.max(0, self[v.h])
+	self.clip_scissor_w = self[v.w]
+	self.clip_scissor_h = self[v.h]
 end
 
 
