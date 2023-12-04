@@ -16,6 +16,12 @@ local utf8 = require("utf8")
 local utf8Tools = require(REQ_PATH .. "utf8_tools")
 
 
+textUtil.proxy_code_points = {
+	["\n"] = "⏎",
+	["\t"] = "⭾",
+}
+
+
 --- Counts the number of substring patterns in a string.
 -- @param str The string to check.
 -- @param sub The substring pattern to look for.
@@ -201,34 +207,32 @@ end
 
 
 -- Upvalues for textUtil.replaceMissingCodePointGlyphs().
-local temp_font, temp_replace
+local temp_font, temp_default
+local replace_exempt = {"\t", "\n"}
 
 
 -- string.gsub function for textUtil.replaceMissingCodePointGlyphs().
 local function hof_replaceMissing(key)
 
-	if key ~= "\t" and not temp_font:hasGlyphs(key) then
-		return temp_replace
+	if not replace_exempt[key] and not temp_font:hasGlyphs(key) then
+		return temp_default
 	end
 
 	-- return nil
 end
 
 
---- Given a UTF-8 string and a font, replace code points without glyphs in the font with a stand-in string. Some TrueType fonts specify a code point for this purpose, and will print them automatically (for example, 'ə' with the default LÖVE 11.4 font with display an outlined box.) AFAIK LÖVE ImageFonts do not.
+--- Given a UTF-8 string and a font, replace code points without glyphs in the font with a stand-in string. Some TrueType fonts specify a code point for this purpose, and will print them automatically (for example, 'ə' with the default LÖVE 11.4 font will display an outlined box.) AFAIK LÖVE ImageFonts do not.
 -- @param str The input string.
 -- @param font The LÖVE Font to check.
--- @param replacement The string to use in place of any missing code points. (Something like: "□") Can be multi-byte, but should be exactly one code point if you want the resulting string to be the same code point length as the input string.
+-- @param lookup A table of strings to use in place of any missing code points. The strings can be multi-byte, but should contain exactly one code point if you want the resulting string to be the same code point length as the input string.
+-- @param default A default string to use for any code points which are not present in `lookup`. (Something like: "□")
 -- @return The modified string, or the same string if the string was empty or all glyphs were covered by the font.
-function textUtil.replaceMissingCodePointGlyphs(str, font, replacement)
+function textUtil.replaceMissingCodePointGlyphs(str, font, lookup, default)
 
 	--[[
 	NOTES:
 	* Font:hasGlyphs() returns false for empty strings.
-
-	* Font:hasGlyphs() may return true or false for '\t' depending on if the font supplies an actual glyph for it.
-	LÖVE is still capable of rendering a tab regardless of this, however, so it will be exempted from
-	the check below.
 	--]]
 
 	-- Nothing to do if the string is empty or all glyphs are covered by the font.
@@ -237,12 +241,12 @@ function textUtil.replaceMissingCodePointGlyphs(str, font, replacement)
 
 	else
 		-- Load upvalues
-		temp_font, temp_replace = font, replacement
+		temp_font, temp_default = font, default
 
 		local ret_str = string.gsub(str, utf8.charpattern, hof_replaceMissing)
 
 		-- Clear upvalues
-		temp_font, temp_replace = false, false
+		temp_font, temp_default = false, false
 
 		return ret_str
 	end
@@ -467,8 +471,6 @@ function textUtil.sanitize(str, bad_byte_policy)
 
 	-- Input is good: nothing to do.
 	if utf8Tools.check(str) then
-		-- NOTE: As a validator, utf8.len() doesn't reject surrogate pairs.
-		-- LÖVE text functions reject code point values in the surrogate range.
 		return str
 
 	else
@@ -495,9 +497,9 @@ function textUtil.sanitize(str, bad_byte_policy)
 				break
 			end
 		end
-	end
 
-	return str_out
+		return str_out
+	end
 end
 
 

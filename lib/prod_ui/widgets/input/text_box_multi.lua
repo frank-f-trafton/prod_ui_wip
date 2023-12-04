@@ -704,11 +704,6 @@ function def:uiCall_thimbleRelease(inst)
 end
 
 
-function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-	-- XXX should be capable of binding the user hitting "enter" or "confirm" to a function call.
-end
-
-
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
@@ -895,16 +890,19 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		if bind_action then
 			-- NOTE: most history ledger changes are handled in executeBoundAction().
-			local res_1, res_2, res_3 = self:executeBoundAction(bind_action)
-			if res_1 then
-				self.update_flag = true
+			local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
+
+			if ok then
+				if update_scroll then
+					self.update_flag = true
+				end
+
+				self:updateDocumentDimensions() -- XXX WIP
+				self:scrollGetCaretInBounds(true) -- XXX WIP
+
+				-- Stop event propagation
+				return true
 			end
-
-			self:updateDocumentDimensions() -- XXX WIP
-			self:scrollGetCaretInBounds(true) -- XXX WIP
-
-			-- Stop event propagation
-			return true
 		end
 	end
 end

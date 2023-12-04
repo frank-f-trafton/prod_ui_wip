@@ -13,27 +13,6 @@ A single-line text input box.
 --]]
 
 
---[[
--- XXX Orphaned command (ie virtual CLI) stuff
--- Invoke a function as a result of hitting enter, clicking a linked button, etc.
-function editAct.runCommand(self, line_ed)
-	local ret1, ret2 = self:uiFunc_commandAction()
-
-	return ret1, ret2
-end
-
-local dummyFunc = function() end
-
--- A function to be called when runCommand() is invoked.
-def_wid.uiFunc_commandAction = dummyFunc
---]]
--- DEBUG: Test command configuration
---[[
---editBindS["return"] = editAct.runCommand
---editBindS["kpenter"] = editAct.runCommand
---]]
-
-
 -- LÖVE 12 compatibility
 local love_major, love_minor = love.getVersion()
 
@@ -398,16 +377,19 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		if bind_action then
 			-- NOTE: most history ledger changes are handled in executeBoundAction().
-			local res_1, res_2, res_3 = self:executeBoundAction(bind_action)
-			if res_1 then
-				self.update_flag = true
+			local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
+
+			if ok then
+				if update_scroll then
+					self.update_flag = true
+				end
+
+				self:updateDocumentDimensions()
+				self:scrollGetCaretInBounds(true)
+
+				-- Stop event propagation
+				return true
 			end
-
-			self:updateDocumentDimensions()
-			self:scrollGetCaretInBounds(true)
-
-			-- Stop event propagation
-			return true
 		end
 	end
 end

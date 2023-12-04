@@ -39,6 +39,15 @@ function themeDef.newInstance(scale)
 	inst.fonts.p = love.graphics.newFont(math.floor(14 * scale))
 	inst.fonts.small = love.graphics.newFont(math.floor(12 * scale))
 
+
+	-- XXX: Test symbol substitution in single-line text boxes
+	local test_font = love.graphics.newFont(BASE_PATH .. "fonts/noto_sans/NotoSans-Regular.ttf", math.floor(14 * scale))
+	local test_font2 = love.graphics.newFont(BASE_PATH .. "fonts/noto_sans/NotoSansSymbols-Regular.ttf", math.floor(14 * scale))
+	local test_font3 = love.graphics.newFont(BASE_PATH .. "fonts/noto_sans/NotoSansSymbols2-Regular.ttf", math.floor(14 * scale))
+	test_font:setFallbacks(test_font2, test_font3)
+	inst.fonts.p = test_font
+
+
 	-- Textures, quads, slices
 	inst.tex_defs = {}
 	inst.tex_quads = {}

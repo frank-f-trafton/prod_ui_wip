@@ -72,8 +72,6 @@ function lineEdM.new(font)
 	self.allow_paste = true
 	self.allow_highlight = true -- XXX: Whoops, this is not checked in the mouse action code.
 
-	self.allow_enter = true -- affects single presses of enter/return
-	self.allow_line_feed = true -- affects '\n' in writeText()
 	self.allow_tab = false -- affects single presses of the tab key
 	self.allow_untab = false -- affects shift+tab (unindenting)
 	self.tabs_to_spaces = true -- affects '\t' in writeText()

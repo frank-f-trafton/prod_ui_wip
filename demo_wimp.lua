@@ -67,7 +67,7 @@ local demo_perf -- assigned at the end of love.draw
 local notif_text = ""
 local notif_max = 10.0
 local notif_time = notif_max
-local notif_font = love.graphics.newFont("res/fonts/DejaVuSans.ttf", 20)
+local notif_font = love.graphics.newFont(20)
 
 
 -- LÖVE Setup
@@ -84,7 +84,7 @@ love.filesystem.setSymlinksEnabled(true)
 
 local font_sz = 12
 local function reloadFont(sz)
-	return love.graphics.newFont("res/fonts/DejaVuSans.ttf", sz)
+	return love.graphics.newFont(sz)
 end
 local font_test = reloadFont(font_sz)
 love.graphics.setFont(font_test)

@@ -10,11 +10,13 @@ Function arguments:
 2) line_ed: The LineEditor instance (self.line_ed). (Redundant but convenient.)
 
 Return values: -- XXX update
-1) true: the display object's scrolling information should be updated.
-2) true: the caret should be kept in view.
-3) true: an explicit history entry should be written after the bound action completes. Note that some
+1) true: the action was successful, and event handling should be stopped.
+2) true: the display object's scrolling information should be updated.
+3) true: the caret should be kept in view.
+4) true: an explicit history entry should be written after the bound action completes. Note that some
 bound actions may handle history directly and return false.
 
+Return values 2, 3 and 4 depend on 1 being true.
 --]]
 
 
@@ -41,7 +43,7 @@ function editActS.caretLeft(self, line_ed)
 		self:caretStepLeft(true)
 	end
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -54,7 +56,7 @@ function editActS.caretRight(self, line_ed)
 		self:caretStepRight(true)
 	end
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -63,7 +65,7 @@ function editActS.caretLeftHighlight(self, line_ed)
 
 	self:caretStepLeft(not line_ed.allow_highlight)
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -71,7 +73,7 @@ function editActS.caretRightHighlight(self, line_ed)
 
 	self:caretStepRight(not line_ed.allow_highlight)
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -86,7 +88,7 @@ function editActS.caretJumpLeft(self, line_ed)
 		self:caretJumpLeft(true)
 	end
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -100,7 +102,7 @@ function editActS.caretJumpRight(self, line_ed)
 		self:caretJumpRight(true)
 	end
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -115,7 +117,7 @@ function editActS.caretJumpLeftHighlight(self, line_ed)
 		self:caretJumpLeft(not line_ed.allow_highlight)
 	end
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -129,7 +131,7 @@ function editActS.caretJumpRightHighlight(self, line_ed)
 		self:caretJumpRight(not line_ed.allow_highlight)
 	end
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -138,7 +140,7 @@ function editActS.caretFirst(self, line_ed)
 
 	self:caretFirst(true)
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -146,7 +148,7 @@ function editActS.caretLast(self, line_ed)
 
 	self:caretLast(true)
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -155,7 +157,7 @@ function editActS.caretFirstHighlight(self, line_ed)
 
 	self:caretFirst(not line_ed.allow_highlight)
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -163,7 +165,7 @@ function editActS.caretLastHighlight(self, line_ed)
 
 	self:caretLast(not line_ed.allow_highlight)
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -208,7 +210,7 @@ function editActS.backspace(self, line_ed)
 			line_ed.input_category = no_ws and "backspacing" or "backspacing-ws"
 		end
 
-		return true, true, false
+		return true, true, true, false
 	end
 end
 
@@ -248,7 +250,7 @@ function editActS.delete(self, line_ed)
 			line_ed.input_category = no_ws and "deleting" or "deleting-ws"
 		end
 
-		return true, true, false
+		return true, true, true, false
 	end
 end
 
@@ -261,7 +263,7 @@ function editActS.deleteHighlighted(self, line_ed)
 			self:deleteHighlightedText()
 
 			-- Always write history if anything was deleted.
-			return true, true, true
+			return true, true, true, true
 		end
 	end
 end
@@ -282,7 +284,7 @@ function editActS.deleteGroup(self, line_ed)
 			write_hist = not not self:deleteGroup()
 		end
 
-		return true, true, write_hist
+		return true, true, true, write_hist
 	end
 end
 
@@ -295,7 +297,7 @@ function editActS.deleteAll(self, line_ed)
 		line_ed.input_category = false
 		line_ed:deleteText(false, 1, #line_ed.line)
 
-		return true, true, (old_line ~= line_ed.line)
+		return true, true, true, (old_line ~= line_ed.line)
 	end
 end
 
@@ -314,7 +316,7 @@ function editActS.backspaceGroup(self, line_ed)
 			line_ed.input_category = false
 		end
 
-		return true, true, write_hist
+		return true, true, true, write_hist
 	end
 end
 
@@ -326,7 +328,7 @@ function editActS.deleteCaretToEnd(self, line_ed)
 		self:deleteCaretToEnd()
 		line_ed.input_category = false
 
-		return true, true, true
+		return true, true, true, true
 	end
 end
 
@@ -338,7 +340,7 @@ function editActS.backspaceCaretToStart(self, line_ed)
 		self:deleteCaretToStart()
 		line_ed.input_category = false
 
-		return true, true, true
+		return true, true, true, true
 	end
 end
 
@@ -357,7 +359,7 @@ function editActS.typeTab(self, line_ed)
 			changed = true
 		end
 
-		return true, true, changed
+		return true, true, true, changed
 	end
 end
 
@@ -365,15 +367,12 @@ end
 -- Return / Enter key
 function editActS.typeLineFeed(self, line_ed)
 
-	print("editActS.typeLineFeed")
-	print("", line_ed.allow_input, line_ed.allow_enter)
-	if line_ed.allow_input and line_ed.allow_enter then
-		print("???")
+	if line_ed.allow_input and line_ed.allow_line_feed and line_ed.allow_enter_line_feed then
 		line_ed.input_category = false
 
-		print("??????", "|" .. self:writeText("\n", true) .. "|")
+		print("typeLineFeed(): writeText() result: ", "|" .. self:writeText("\n", true) .. "|")
 
-		return true, true, true
+		return true, true, true, true
 	end
 end
 
@@ -388,7 +387,7 @@ function editActS.selectAll(self, line_ed)
 		self:clearHighlight()
 	end
 
-	return true, false, false
+	return true, true, false, false
 end
 
 
@@ -401,7 +400,7 @@ function editActS.selectCurrentWord(self, line_ed)
 		self:clearHighlight()
 	end
 
-	return true, false, false
+	return true, true, false, false
 end
 
 
@@ -411,7 +410,7 @@ function editActS.copy(self, line_ed)
 	if line_ed.allow_copy and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:copyHighlightedToClipboard() -- handles masking
 
-		return true, false, false
+		return true, true, false, false
 	end
 end
 
@@ -421,7 +420,7 @@ function editActS.cut(self, line_ed)
 	if line_ed.allow_input and line_ed.allow_cut and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:cutHighlightedToClipboard() -- handles masking, history, and blanking the input category.
 
-		return true, true, false
+		return true, true, true, false
 	end
 end
 
@@ -431,7 +430,7 @@ function editActS.paste(self, line_ed)
 	if line_ed.allow_input and line_ed.allow_paste then
 		self:pasteClipboardText() -- handles history, and blanking the input category.
 
-		return true, true, false
+		return true, true, true, false
 	end
 end
 
@@ -441,7 +440,7 @@ function editActS.toggleReplaceMode(self, line_ed)
 
 	self:setReplaceMode(not self:getReplaceMode())
 
-	return true, false, false
+	return true, true, false, false
 end
 
 
@@ -451,7 +450,7 @@ function editActS.undo(self, line_ed)
 	self:stepHistory(-1)
 	line_ed.input_category = false
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
@@ -460,7 +459,7 @@ function editActS.redo(self, line_ed)
 	self:stepHistory(1)
 	line_ed.input_category = false
 
-	return true, true, false
+	return true, true, true, false
 end
 
 
