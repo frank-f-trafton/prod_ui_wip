@@ -1138,7 +1138,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 
 	-- Two scissor boxes: one for the header box, and one for the rest of the column.
 	local sx, sy, sw, sh = love.graphics.getScissor()
-	love.graphics.intersectScissor(
+	uiGraphics.intersectScissor(
 		ox + column.x - self.scr2_x,
 		oy + column.y,
 		column.w,
@@ -1178,7 +1178,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	end
 
 	love.graphics.setScissor(sx, sy, sw, sh)
-	love.graphics.intersectScissor(
+	uiGraphics.intersectScissor(
 		ox + column.x - self.scr2_x,
 		oy + column.y + column.h,
 		column.w,
@@ -1253,8 +1253,7 @@ def.skinners = {
 			love.graphics.push("all")
 
 			local sx0, sy0, sw0, sh0 = love.graphics.getScissor()
-			love.graphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-			--love.graphics.setScissor(ox + self.x, oy + self.y, self.w, self.h)
+			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 			-- Widget body fill.
 			love.graphics.setColor(skin.color_background)
@@ -1288,7 +1287,7 @@ def.skinners = {
 
 			love.graphics.translate(self.vp_x - self.scr2_x, self.vp_y - self.scr2_y)
 
-			love.graphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
+			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
 
 			-- Draw hover glow, if applicable
 			local item_hover = self.item_hover

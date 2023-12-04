@@ -6,6 +6,12 @@
 --]]
 
 
+local context = select(1, ...)
+
+
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+
+
 local def = {}
 
 

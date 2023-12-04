@@ -15,6 +15,7 @@ dragging sensor for the window as a whole.
 
 local context = select(1, ...)
 
+
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local intersect = require(context.conf.prod_ui_req .. "logic.intersect")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -91,9 +92,6 @@ function def:uiCall_create(inst)
 		self.condensed = false
 
 		self.tag = "frame_header"
-
-		self.clip_scissor = false
-		self.clip_hover = false
 
 		-- Which side control buttons should be added to: "left" or "right".
 		self.button_side = "right"
@@ -318,7 +316,7 @@ def.skinners = {
 
 				local sx, sy, sw, sh = love.graphics.getScissor()
 
-				love.graphics.intersectScissor(ox + self.text_safe_x, oy + self.text_safe_y, self.text_safe_w, self.text_safe_h)
+				uiGraphics.intersectScissor(ox + self.text_safe_x, oy + self.text_safe_y, self.text_safe_w, self.text_safe_h)
 
 				love.graphics.print(self.text_disp, self.text_ox, self.text_oy)
 

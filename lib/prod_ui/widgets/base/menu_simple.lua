@@ -13,6 +13,7 @@ local context = select(1, ...)
 
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
@@ -355,7 +356,7 @@ def.skinners = {
 
 			-- Don't draw menu contents outside of the widget bounding box.
 			love.graphics.push("all")
-			love.graphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 			-- Draw selection glow, if applicable
 			if menu.index > 0 then

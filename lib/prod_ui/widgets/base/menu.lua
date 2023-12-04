@@ -748,8 +748,7 @@ def.skinners = {
 
 			-- Scroll offsets
 			love.graphics.translate(-self.scr2_x + self.vp_x, -self.scr2_y + self.vp_y)
-			--love.graphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-			love.graphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
+			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
 
 			-- Draw hover glow, if applicable
 			local item_hover = self.item_hover

@@ -97,9 +97,6 @@
 	the scissor region is specified in 'clip_scissor_x', 'clip_scissor_y', 'clip_scissor_w', and
 	'clip_scissor_h', relative to the top-left of the widget.
 
-	'clip_scissor_w' and 'clip_scissor_h' need to be >= 0, or else set/intersectScissor() will
-	crash.
-
 	NOTE: don't use math.huge with setScissor or intersectScissor. It will become zero. -2^16 and
 	2^17 seem okay.
 

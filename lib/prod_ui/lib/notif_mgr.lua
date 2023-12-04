@@ -145,7 +145,12 @@ function _mt_tool_tip:draw(x, y)
 		love.graphics.setColor(r, g, b, a)
 		love.graphics.setFont(self.font)
 
-		love.graphics.intersectScissor(x, y, self.w, self.h)
+		love.graphics.intersectScissor(
+			x,
+			y,
+			math.max(0, self.w),
+			math.max(0, self.h)
+		)
 
 		for i, line in ipairs(self.lines) do
 			love.graphics.print(line, x + self.margin_x, y + self.margin_y + (i-1) * self.line_height)
