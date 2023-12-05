@@ -30,4 +30,19 @@ function dbg.widStringHierarchy(wid, thimble, _str, _tabs)
 end
 
 
+function dbg.hexString(str)
+
+	local out = ""
+	for i = 1, #str do
+		local byte = string.byte(str, i)
+		out = out .. string.format("%x", byte)
+		if i < #str then
+			out = out .. " "
+		end
+	end
+
+	return out
+end
+
+
 return dbg

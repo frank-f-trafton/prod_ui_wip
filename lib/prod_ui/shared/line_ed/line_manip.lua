@@ -51,6 +51,7 @@ end
 
 function lineManip.offsetStepLeft(text, byte_n)
 
+	print("text", text, "byte_n", byte_n)
 	-- Assertions
 	-- [[
 	if byte_n < 1 or byte_n > #text + 1 then

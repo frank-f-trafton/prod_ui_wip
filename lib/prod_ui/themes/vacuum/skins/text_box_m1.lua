@@ -11,7 +11,6 @@ return {
 	["*font_ghost"] = "fonts/p",
 
 	cursor_on = "ibeam",
-	cursor_press = "ibeam",
 
 	res_readwrite = {
 		color_body = {0.15, 0.15, 0.15, 1.0},

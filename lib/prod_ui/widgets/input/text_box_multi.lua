@@ -533,110 +533,99 @@ end
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
-	if self == inst then
-		if button == self.context.mouse_pressed_button then
-			if button <= 3 then
-				self:tryTakeThimble()
-			end
+	if self == inst
+	and self.enabled
+	and button == self.context.mouse_pressed_button
+	then
+		if button <= 3 then
+			self:tryTakeThimble()
+		end
 
-			local handled = false
+		local mouse_x, mouse_y = self:getRelativePosition(x, y)
+		local handled = false
 
-			local ax, ay = self:getAbsolutePosition()
-			local mouse_x = x - ax
-			local mouse_y = y - ay
+		-- Check for pressing on scroll bar components.
+		if button == 1 then
+			local fixed_step = 24 -- XXX style/config
 
-			-- Check if pointer was inside of viewport #2
-			local in_port_2 = (mouse_x >= self.vp2_x
-				and mouse_x < self.vp2_x + self.vp2_w
-				and mouse_y >= self.vp2_y
-				and mouse_y < self.vp2_y + self.vp2_h)
+			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+		end
 
-			-- Check for pressing on scroll bar components.
+		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
+		if handled then
+			self.context:forceClickSequence(false, button, 1)
+
+		elseif widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
+			local context = self.context
+			local line_ed = self.line_ed
+			local disp = line_ed.disp
+
+			disp:resetCaretBlink()
+
 			if button == 1 then
-				local fixed_step = 24 -- XXX style/config
+				self.press_busy = "text-drag"
 
-				handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
-			end
+				-- Apply scroll + margin offsets
+				local mouse_sx = mouse_x + self.scr2_x - self.vp_x - self.align_offset
+				local mouse_sy = mouse_y + self.scr2_y - self.vp_y
 
-			if not in_port_2 then
-				-- Successful mouse interaction with scroll bars should break any existing click-sequence.
-				self.context:forceClickSequence(false, button, 1)
+				local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, mouse_sy, true)
 
-			else
-
-				local line_ed = self.line_ed
-				local disp = line_ed.disp
-
-				disp:resetCaretBlink()
-
-				local context = self.context
-				if button == 1 and button == context.mouse_pressed_button then
-
-					self.press_busy = "text-drag"
-					--self:setCursorHigh(self.skin.cursor_press) -- XXX review
-
-					-- Apply scroll + margin offsets
-					local mouse_sx = mouse_x + self.scr2_x - self.vp_x - self.align_offset
-					local mouse_sy = mouse_y + self.scr2_y - self.vp_y
-
-					local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, mouse_sy, true)
-
-					if context.cseq_button == 1 then
-						-- Not the same line+byte position as last click: force single-click mode.
-						if context.cseq_presses > 1  and (core_line ~= self.click_line or core_byte ~= self.click_byte) then
-							context:forceClickSequence(self, button, 1)
-							-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
-						end
-
-						if context.cseq_presses == 1 then
-							self:caretToXY(true, mouse_sx, mouse_sy, true)
-							--self:scrollGetCaretInBounds() -- Helpful, or distracting?
-
-							self.click_line = line_ed.car_line
-							self.click_byte = line_ed.car_byte
-
-							self.update_flag = true
-
-						elseif context.cseq_presses == 2 then
-
-							self.click_line = line_ed.car_line
-							self.click_byte = line_ed.car_byte
-
-							-- Highlight group from highlight position to mouse position
-							self:highlightCurrentWord()
-
-							self.update_flag = true
-
-						elseif context.cseq_presses == 3 then
-
-							self.click_line = line_ed.car_line
-							self.click_byte = line_ed.car_byte
-
-							--- Highlight sub-lines from highlight position to mouse position
-							--line_ed:highlightCurrentLine()
-							self:highlightCurrentWrappedLine()
-
-							self.update_flag = true
-						end
+				if context.cseq_button == 1 then
+					-- Not the same line+byte position as last click: force single-click mode.
+					if context.cseq_presses > 1  and (core_line ~= self.click_line or core_byte ~= self.click_byte) then
+						context:forceClickSequence(self, button, 1)
+						-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
 					end
 
-				elseif button == 2 and button == context.mouse_pressed_button then
-					commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+					if context.cseq_presses == 1 then
+						self:caretToXY(true, mouse_sx, mouse_sy, true)
+						--self:scrollGetCaretInBounds() -- Helpful, or distracting?
 
-					local root = self:getTopWidgetInstance()
+						self.click_line = line_ed.car_line
+						self.click_byte = line_ed.car_byte
 
-					--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
+						self.update_flag = true
 
-					local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
-					root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+					elseif context.cseq_presses == 2 then
 
-					pop_up:tryTakeThimble()
+						self.click_line = line_ed.car_line
+						self.click_byte = line_ed.car_byte
 
-					root:runStatement("rootCall_bankThimble", self)
+						-- Highlight group from highlight position to mouse position
+						self:highlightCurrentWord()
 
-					-- Halt propagation
-					return true
+						self.update_flag = true
+
+					elseif context.cseq_presses == 3 then
+
+						self.click_line = line_ed.car_line
+						self.click_byte = line_ed.car_byte
+
+						--- Highlight sub-lines from highlight position to mouse position
+						--line_ed:highlightCurrentLine()
+						self:highlightCurrentWrappedLine()
+
+						self.update_flag = true
+					end
 				end
+
+			elseif button == 2 then
+				commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+				local root = self:getTopWidgetInstance()
+
+				--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
+
+				local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+				root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+
+				pop_up:tryTakeThimble()
+
+				root:runStatement("rootCall_bankThimble", self)
+
+				-- Halt propagation
+				return true
 			end
 		end
 	end
@@ -918,19 +907,19 @@ local function mouseDragLogic(self)
 
 	if self.press_busy == "text-drag" then
 
+		local context = self.context
+
 		disp:resetCaretBlink()
 
 		-- Relative mouse position relative to viewport #1.
 		local ax, ay = self:getAbsolutePosition()
-		local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
+		local mx, my = context.mouse_x - ax - self.vp_x, context.mouse_y - ay - self.vp_y
 
 		-- ...And with scroll offsets applied.
 		local s_mx = mx + self.scr2_x - self.align_offset
 		local s_my = my + self.scr2_y
 
 		--print("s_mx", s_mx, "s_my", s_my, "scr2_x", self.scr2_x, "scr2_y", self.scr2_y)
-
-		local context = self.context
 
 		-- Handle drag highlight actions
 		if context.cseq_presses == 1 then
@@ -956,17 +945,6 @@ end
 
 
 function def:uiCall_update(dt)
-
-	dt = math.min(dt, 1.0)
-
-	-- XXX progress bar test
-	--[[
-	for i, child in ipairs(self.children) do
-		if child.pos and child.max then
-			child.pos = child.pos + 24*dt
-		end
-	end
-	--]]
 
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
@@ -998,8 +976,6 @@ function def:uiCall_update(dt)
 	end
 
 	self:scrollUpdate(dt)
-
-	--print("scr xy", self.scr2_x, self.scr2_y, "tx ty", self.scr2_tx, self.scr2_ty)
 
 	-- Force a cache update if the external scroll position is different.
 	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then

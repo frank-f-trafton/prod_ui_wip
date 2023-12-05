@@ -432,7 +432,6 @@ function _mt_ed_m:caretToLineAndByte(clear_highlight, line_n, byte_n)
 	line_n = math.max(1, math.min(line_n, #self.lines))
 	local line = self.lines[line_n]
 	byte_n = math.max(1, math.min(byte_n, #line + 1))
-	local line = self.lines[line_n]
 
 	self.car_line = line_n
 	self.car_byte = byte_n
@@ -443,6 +442,7 @@ function _mt_ed_m:caretToLineAndByte(clear_highlight, line_n, byte_n)
 	self:updateVertPosHint()
 	if clear_highlight then
 		self:clearHighlight()
+
 	else
 		self:updateDispHighlightRange()
 	end

@@ -33,6 +33,7 @@
 ## Fonts
 
 * In `lib/prod_ui/themes/vacuum/fonts/noto_sans`:
+
 	* [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans) (OFL)
 
 	* [Noto Sans Symbols](https://fonts.google.com/noto/specimen/Noto+Sans+Symbols) (OFL)

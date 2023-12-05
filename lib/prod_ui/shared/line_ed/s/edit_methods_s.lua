@@ -196,7 +196,11 @@ function client:highlightCurrentWord()
 
 	local line_ed = self.line_ed
 
+	print("highlightCurrentWord - BEFORE", line_ed.car_byte, line_ed.h_byte)
+
 	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_byte)
+
+	print("highlightCurrentWord - AFTER", line_ed.car_byte, line_ed.h_byte)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateHighlightRect()
@@ -540,6 +544,37 @@ function client:executeRemoteAction(item_t) -- XXX WIP
 
 	self:updateDocumentDimensions(self) -- XXX WIP
 	self:scrollGetCaretInBounds(true) -- XXX WIP
+end
+
+
+function client:caretToX(clear_highlight, x, split_x)
+
+	local line_ed = self.line_ed
+	local byte = line_ed:getCharacterDetailsAtPosition(x, split_x)
+
+	line_ed:caretToByte(clear_highlight, byte)
+end
+
+
+function client:clickDragByWord(x, origin_byte)
+
+	local line_ed = self.line_ed
+
+	local drag_byte = line_ed:getCharacterDetailsAtPosition(x, true)
+
+	-- Expand ranges to cover full words
+	local db1, db2 = line_ed:getWordRange(drag_byte)
+	local cb1, cb2 = line_ed:getWordRange(origin_byte)
+
+	-- Merge the two ranges.
+	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
+
+	if drag_byte < origin_byte then
+		line_ed:caretAndHighlightToByte(mb1, mb2)
+
+	else
+		line_ed:caretAndHighlightToByte(mb2, mb1)
+	end
 end
 
 

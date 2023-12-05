@@ -16,6 +16,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonEd = context:getLua("shared/line_ed/common_ed")
+local dbg = require(context.conf.prod_ui_req .. "debug.dbg")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
@@ -302,13 +303,10 @@ end
 
 function _mt_ed_s:clearHighlight()
 
-	print("_mt_ed_s:clearHighlight")
 	self.h_byte = self.car_byte
 
-	print("", "(1)", self.car_byte, self.h_byte)
 	self:displaySyncCaretOffsets()
 	self:updateHighlightRect()
-	print("", "(2)", self.car_byte, self.h_byte)
 
 	dispUpdateLineSyntaxColors(self, -1, -1)
 end
@@ -397,7 +395,7 @@ function _mt_ed_s:getWordRange(byte_n)
 
 	-- If at the end of the line, and it contains at least one code point, then use that last code point.
 	if byte_n >= #line + 1 then
-		byte_n = utf8.offset(line, -1, byte_n)
+		byte_n = utf8.offset(line, -1)
 	end
 
 	local first_group = code_groups[utf8.codepoint(line, byte_n)]
@@ -470,6 +468,74 @@ function _mt_ed_s:updateDisplayText()
 	updateDisplayLineHorizontal(self)
 
 	self:displaySyncCaretOffsets()
+end
+
+
+-- @param x X position.
+-- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
+-- @return Line, byte and character string of the character at (or nearest to) the position.
+function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
+
+	local font = self.font
+	local line = self.line
+	local disp_text = self.disp_text
+
+	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
+	--print("byte", byte, "x_pos", x_pos, "width", width)
+
+	-- Convert display offset to core byte.
+	local u_count = utf8.len(disp_text, 1, math.min(#disp_text, byte))
+
+	--print("u_count", u_count)
+
+	local core_byte = utf8.offset(line, u_count)
+	--print("core_byte", core_byte, "#line", #line)
+	local core_char = false
+	if core_byte <= #line then
+		core_char = string.sub(line, core_byte, utf8.offset(line, 2, core_byte) - 1)
+	end
+
+	--print("core_byte", core_byte, "core_char", core_char)
+
+	return core_byte, core_char
+end
+
+
+function _mt_ed_s:caretToByte(clear_highlight, byte_n)
+
+	local line = self.line
+	byte_n = math.max(1, math.min(byte_n, #line + 1))
+
+	self.car_byte = byte_n
+
+	--print("self.car_byte", self.car_byte)
+
+	self:updateDisplayText()
+	if clear_highlight then
+		self:clearHighlight()
+
+	else
+		self:updateHighlightRect()
+	end
+end
+
+
+function _mt_ed_s:caretAndHighlightToByte(car_byte_n, h_byte_n)
+
+	local line = self.line
+	car_byte_n = math.max(1, math.min(car_byte_n, #line + 1))
+
+	self.car_byte = car_byte_n
+
+	h_byte_n = math.max(1, math.min(h_byte_n, #line + 1))
+
+	self.h_byte = h_byte_n
+
+	--print("self.car_byte", self.car_byte)
+	--print("self.h_byte", self.h_byte)
+
+	self:updateDisplayText()
+	self:updateHighlightRect()
 end
 
 
