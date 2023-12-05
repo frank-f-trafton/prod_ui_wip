@@ -23,6 +23,8 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
+local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
+local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS= context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
@@ -409,7 +411,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	return true
+	-- Allow propagation so that the root widget can destroy pop-up menus.
 end
 
 
@@ -513,7 +515,21 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local input_intercepted = false
 
 		if scancode == "application" then
-			-- XXX: context menu
+
+			-- Locate caret in UI space
+			local ax, ay = self:getAbsolutePosition()
+			local caret_x = ax + self.vp_x - self.scr2_x + line_ed.caret_box_x
+			local caret_y = ay + self.vp_y - self.scr2_y + line_ed.caret_box_y + line_ed.caret_box_h
+
+			commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+			local root = self:getTopWidgetInstance()
+			local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
+			self:bubbleStatement("rootCall_bankThimble", self)
+			pop_up:tryTakeThimble()
+
+			-- Halt propagation
+			return true
 
 		elseif scancode == "f6" then
 			-- XXX: debug: left align
@@ -594,7 +610,7 @@ local function mouseDragLogic(self)
 			widget_needs_update = true
 
 		elseif context.cseq_presses == 2 then
-			self:clickDragByWord(s_mx, s_my, self.click_line, self.click_byte)
+			self:clickDragByWord(s_mx, self.click_byte)
 			widget_needs_update = true
 		end
 		-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
@@ -651,6 +667,19 @@ function def:uiCall_update(dt)
 		end
 
 		self.update_flag = false
+	end
+end
+
+
+function def:uiCall_destroy(inst)
+
+	if self == inst then
+		-- Destroy pop-up menu if it exists in reference to this widget.
+		local root = self:getTopWidgetInstance()
+		if root.pop_up_menu then
+			root:runStatement("rootCall_destroyPopUp", self, "concluded")
+			root:runStatement("rootCall_restoreThimble", self)
+		end
 	end
 end
 
