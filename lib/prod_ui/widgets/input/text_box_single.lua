@@ -23,9 +23,11 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
+local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS= context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
+local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
@@ -44,6 +46,96 @@ local def = {
 -- Override to make something happen when the user presses 'return' or 'kpenter' while the
 -- widget is active and has keyboard focus.
 def.wid_action = uiShared.dummyFunc -- args: (self)
+
+
+-- Pop-up menu definition.
+do
+	local function configItem_undo(item, client)
+
+		item.selectable = true
+		item.actionable = (client.line_ed.hist.pos > 1)
+	end
+
+
+	local function configItem_redo(item, client)
+
+		item.selectable = true
+		item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
+	end
+
+
+	local function configItem_cutCopyDelete(item, client)
+
+		item.selectable = true
+		item.actionable = client.line_ed:isHighlighted()
+	end
+
+
+	local function configItem_paste(item, client)
+
+		item.selectable = true
+		item.actionable = true
+	end
+
+
+	local function configItem_selectAll(item, client)
+
+		item.selectable = true
+		item.actionable = (#client.line_ed.line > 0)
+	end
+
+
+	-- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
+	def.pop_up_def = {
+		{
+			type = "command",
+			text = "Undo",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.undo,
+			config = configItem_undo,
+		}, {
+			type = "command",
+			text = "Redo",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.redo,
+			config = configItem_redo,
+		},
+		itemOps.def_separator,
+		{
+			type = "command",
+			text = "Cut",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.cut,
+			config = configItem_cutCopyDelete,
+		}, {
+			type = "command",
+			text = "Copy",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.copy,
+			config = configItem_cutCopyDelete,
+		}, {
+			type = "command",
+			text = "Paste",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.paste,
+			config = configItem_paste,
+		}, {
+			type = "command",
+			text = "Delete",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.deleteHighlighted,
+			config = configItem_cutCopyDelete,
+		},
+		itemOps.def_separator,
+		{
+			type = "command",
+			text = "Select All",
+			callback = editMethodsS.executeRemoteAction,
+			bound_func = editActS.selectAll,
+			config = configItem_selectAll,
+		},
+	}
+end
 
 
 widShared.scroll2SetMethods(def)
@@ -104,7 +196,6 @@ function def:uiCall_create(inst)
 
 		-- Used to update viewport scrolling as a result of dragging the mouse in update().
 		self.mouse_drag_x = 0
-		self.mouse_drag_y = 0
 
 		-- Position offset when clicking the mouse.
 		-- This is only valid when a mouse action is in progress.
@@ -242,17 +333,97 @@ end
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
-	if self == inst then
-		if self.enabled then
-			if button == self.context.mouse_pressed_button then
-				if button <= 3 then
-					self:tryTakeThimble()
-					self.line_ed:resetCaretBlink()
+	if self == inst
+	and self.enabled
+	and button == self.context.mouse_pressed_button
+	then
+		if button <= 3 then
+			self:tryTakeThimble()
+		end
+
+		local mouse_x, mouse_y = self:getRelativePosition(x, y)
+
+		if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
+			local line_ed = self.line_ed
+			local context = self.context
+
+			self.line_ed:resetCaretBlink()
+
+			if button == 1 then
+				self.press_busy = "text-drag"
+
+				-- Apply scroll + margin offsets
+				local mouse_sx = mouse_x + self.scr2_x - self.vp_x - self.align_offset
+
+				local core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, true)
+
+				if context.cseq_button == 1 then
+					-- Not the same byte position as last click: force single-click mode.
+					if context.cseq_presses > 1  and core_byte ~= self.click_byte then
+						context:forceClickSequence(self, button, 1)
+						-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
+					end
+
+					if context.cseq_presses == 1 then
+						self:caretToX(true, mouse_sx, true)
+
+						self.click_byte = line_ed.car_byte
+
+						self.update_flag = true
+
+					elseif context.cseq_presses == 2 then
+						self.click_byte = line_ed.car_byte
+
+						-- Highlight group from highlight position to mouse position.
+						self:highlightCurrentWord()
+
+						self.update_flag = true
+
+					elseif context.cseq_presses == 3 then
+						self.click_byte = line_ed.car_byte
+
+						--- Highlight everything.
+						self:highlightAll()
+
+						self.update_flag = true
+					end
 				end
+
+			elseif button == 2 then
+				commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+				local root = self:getTopWidgetInstance()
+
+				--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
+
+				local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+				root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+
+				pop_up:tryTakeThimble()
+
+				root:runStatement("rootCall_bankThimble", self)
+
+				-- Halt propagation
+				return true
 			end
 		end
 	end
 
+	return true
+end
+
+
+function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+
+	if self == inst then
+		if button == 1 and button == self.context.mouse_pressed_button then
+			self.press_busy = false
+		end
+	end
+end
+
+
+function def:uiCall_pointerDrag(inst, x, y, dx, dy)
 	return true
 end
 
@@ -395,11 +566,73 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
+local function mouseDragLogic(self)
+
+	local line_ed = self.line_ed
+
+	local widget_needs_update = false
+
+	if self.press_busy == "text-drag" then
+
+		local context = self.context
+
+		line_ed:resetCaretBlink()
+
+		-- Mouse position relative to viewport #1.
+		local ax, ay = self:getAbsolutePosition()
+		local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
+
+		-- ...And with scroll offsets applied.
+		local s_mx = mx + self.scr2_x - self.align_offset
+		local s_my = my + self.scr2_y
+
+		--print("s_mx", s_mx, "s_my", s_my, "scr2_x", self.scr2_x, "scr2_y", self.scr2_y)
+
+		-- Handle drag highlight actions
+		if context.cseq_presses == 1 then
+			self:caretToX(false, s_mx, true)
+			widget_needs_update = true
+
+		elseif context.cseq_presses == 2 then
+			self:clickDragByWord(s_mx, s_my, self.click_line, self.click_byte)
+			widget_needs_update = true
+		end
+		-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
+
+		-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
+		self.mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
+	end
+
+	return widget_needs_update
+end
+
+
 function def:uiCall_update(dt)
 
 	local line_ed = self.line_ed
 
+	local scr2_x_old = self.scr2_x
+
+	-- Handle update-time drag-scroll.
+	if self.press_busy == "text-drag" then
+		-- Need to continuously update the selection.
+		if mouseDragLogic(self) then
+			self.update_flag = true
+		end
+		if self.mouse_drag_x ~= 0 then
+			self:scrollDeltaH(self.mouse_drag_x * dt * 4) -- XXX style/config
+			self.update_flag = true
+		end
+	end
+
 	line_ed:updateCaretBlink(dt)
+
+	self:scrollUpdate(dt)
+
+	-- Force a cache update if the external scroll position is different.
+	if scr2_x_old ~= self.scr2_x then
+		self.update_flag = true
+	end
 
 	if self.update_flag then
 
