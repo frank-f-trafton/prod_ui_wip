@@ -38,7 +38,7 @@ function plan.make(parent)
 		content:setScrollBars(false, false)
 
 		-- [=[
-		makeLabel(content, 0, 0, 512, 32, "*** Under construction. This input box widget doesn't work yet. ***", "single")
+		makeLabel(content, 32, 0, 512, 32, "Single-line text input widget", "single")
 		local input_single = content:addChild("input/text_box_single")
 
 		input_single.x = 32
@@ -52,7 +52,7 @@ function plan.make(parent)
 		input_single.line_ed.allow_enter_line_feed = true
 
 		input_single.wid_action = function(self)
-			print("I've been actioned!")
+			print("I've been actioned! " .. input_single.line_ed.line)
 		end
 		--]=]
 	end

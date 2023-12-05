@@ -387,6 +387,8 @@ _mt_ed_s.updateCaretBlink = commonEd.updateCaretBlink
 
 function _mt_ed_s:getWordRange(byte_n)
 
+	--print("_mt_ed_s:getWordRange(): byte_n", byte_n)
+
 	local line = self.line
 
 	if #line == 0 then
@@ -396,6 +398,7 @@ function _mt_ed_s:getWordRange(byte_n)
 	-- If at the end of the line, and it contains at least one code point, then use that last code point.
 	if byte_n >= #line + 1 then
 		byte_n = utf8.offset(line, -1)
+		--print("", "new byte_n", byte_n)
 	end
 
 	local first_group = code_groups[utf8.codepoint(line, byte_n)]
@@ -476,17 +479,19 @@ end
 -- @return Line, byte and character string of the character at (or nearest to) the position.
 function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 
+	--print("_mt_ed_s:getCharacterDetailsAtPosition()", "x", x, "split_x", split_x)
+
 	local font = self.font
 	local line = self.line
 	local disp_text = self.disp_text
 
 	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
-	--print("byte", byte, "x_pos", x_pos, "width", width)
+	--print("", "byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte.
-	local u_count = utf8.len(disp_text, 1, math.min(#disp_text, byte))
+	local u_count = edComS.displaytoUCharCount(disp_text, byte)
 
-	--print("u_count", u_count)
+	--print("", "u_count", u_count)
 
 	local core_byte = utf8.offset(line, u_count)
 	--print("core_byte", core_byte, "#line", #line)
@@ -495,7 +500,7 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 		core_char = string.sub(line, core_byte, utf8.offset(line, 2, core_byte) - 1)
 	end
 
-	--print("core_byte", core_byte, "core_char", core_char)
+	--print("", "core_byte", core_byte, "core_char", core_char)
 
 	return core_byte, core_char
 end
@@ -503,12 +508,14 @@ end
 
 function _mt_ed_s:caretToByte(clear_highlight, byte_n)
 
+	--print("_mt_ed_s:caretToByte()", "clear_highlight", clear_highlight, "byte_n", byte_n)
+
 	local line = self.line
 	byte_n = math.max(1, math.min(byte_n, #line + 1))
 
 	self.car_byte = byte_n
 
-	--print("self.car_byte", self.car_byte)
+	--print("", "self.car_byte", self.car_byte)
 
 	self:updateDisplayText()
 	if clear_highlight then

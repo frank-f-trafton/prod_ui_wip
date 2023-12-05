@@ -629,6 +629,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 		end
 	end
+
+	-- Allow propagation so that the root widget can destroy pop-up menus.
 end
 
 

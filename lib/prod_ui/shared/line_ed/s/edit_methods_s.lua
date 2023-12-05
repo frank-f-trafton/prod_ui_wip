@@ -196,11 +196,7 @@ function client:highlightCurrentWord()
 
 	local line_ed = self.line_ed
 
-	print("highlightCurrentWord - BEFORE", line_ed.car_byte, line_ed.h_byte)
-
 	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_byte)
-
-	print("highlightCurrentWord - AFTER", line_ed.car_byte, line_ed.h_byte)
 
 	line_ed:displaySyncCaretOffsets()
 	line_ed:updateHighlightRect()
