@@ -197,6 +197,9 @@ function editDispM.newLineContainer(font, color_t, color_h_t)
 	-- The internal contents (and results of clipboard actions) remain the same.
 	self.replace_missing = true
 
+	--[[
+	WARNING: masking cannot hide line feeds in the source string.
+	--]]
 	commonEd.setupMaskedState(self)
 
 	-- Set true to create coloredtext tables for each sub-line string. Each coloredtext
