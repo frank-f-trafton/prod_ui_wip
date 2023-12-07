@@ -51,9 +51,8 @@ _mt_widget.tag = ""
 _mt_widget.children = _mt_no_descendants
 
 
--- Scroll offsets. These are mainly applicable to widgets with children (a `scr_x` of 50 would
--- offset all of its children to the left by 50 pixels). A second set of scroll registers may be
--- used by childless controls with embedded scrolling: `scr2_x` and `scr2_y`.
+-- Scroll offsets. These apply to a widget's children (a `scr_x` of 50 would offset all of a widget's
+-- children to the left by 50 pixels). They may also be used for offsetting built-in components.
 _mt_widget.scr_x = 0
 _mt_widget.scr_y = 0
 

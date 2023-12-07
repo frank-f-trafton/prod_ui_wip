@@ -66,7 +66,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
@@ -262,7 +262,7 @@ function def:uiCall_create(inst)
 		self.can_have_thimble = true
 
 		widShared.setupDoc(self)
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
@@ -377,7 +377,7 @@ function def:uiCall_reshape()
 	self:scrollClampViewport()
 
 	-- Update scroll bar state.
-	commonScroll.updateScroll2State(self)
+	commonScroll.updateScrollState(self)
 
 	self:refreshColumnBar()
 	self:cacheUpdate(true)
@@ -550,7 +550,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		-- Implement column resizing by dragging the edge.
 		if column_box and self.press_busy == "column-edge" then
-			local mx2 = mx - column_box.x + self.scr2_x
+			local mx2 = mx - column_box.x + self.scr_x
 			local my2 = my - column_box.y
 
 			local column_min_w = 4 -- XXX config
@@ -564,8 +564,8 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
 			-- Mouse position relative to viewport #1 with scroll offsets
-			local s_mx = mouse_x - self.vp_x + self.scr2_x
-			local s_my = mouse_y - self.vp_y + self.scr2_y
+			local s_mx = mouse_x - self.vp_x + self.scr_x
+			local s_my = mouse_y - self.vp_y + self.scr_y
 
 			local item_i, item_t = self:getItemAtPoint(s_mx - ax, s_my - ay, 1, #self.menu.items)
 			if item_i and item_t.selectable then
@@ -594,7 +594,7 @@ local function testColumnMouseOverlapWithEdges(self, mx, my)
 	-- Broad check
 	if pointInColumnBar(self, mx, my) then
 		-- Take horizontal scrolling into account only.
-		local s2x = self.scr2_x
+		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
 			if column.visible and my >= column.y and my < column.y + column.h then
 
@@ -621,7 +621,7 @@ local function testColumnMouseOverlap(self, mx, my)
 	-- Broad check
 	if pointInColumnBar(self, mx, my) then
 		-- Take horizontal scrolling into account only.
-		local s2x = self.scr2_x
+		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
 			if column.visible and mx >= column.x - s2x and mx < column.x + column.w - s2x
 			and my >= column.y and my < column.y + column.h
@@ -661,8 +661,8 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			self.column_hovered = false
 		end
 
-		local xx = mouse_x + self.scr2_x - self.vp_x
-		local yy = mouse_y + self.scr2_y - self.vp_y
+		local xx = mouse_x + self.scr_x - self.vp_x
+		local yy = mouse_y + self.scr_y - self.vp_y
 
 		local hover_ok = false
 
@@ -799,8 +799,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					else
 
-						x = x - ax + self.scr2_x - self.vp_x
-						y = y - ay + self.scr2_y - self.vp_y
+						x = x - ax + self.scr_x - self.vp_x
+						y = y - ay + self.scr_y - self.vp_y
 
 						-- Check for click-able items.
 						if not self.press_busy then
@@ -896,8 +896,8 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			self.press_busy = false
 
 			local mx, my = self:getRelativePosition(x, y)
-			local mx2 = mx + self.scr2_x
-			local my2 = my + self.scr2_y
+			local mx2 = mx + self.scr_x
+			local my2 = my + self.scr_y
 
 			local old_col_press = self.column_pressed
 			self.column_pressed = false
@@ -1015,12 +1015,12 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 		-- XXX menuCall_pointerWheel() callback for items.
 
-		if (y > 0 and self.scr2_y > 0) or (y < 0 and self.scr2_y < self.doc_h - self.vp_h) then
-			local old_scr2_x, old_scr2_y = self.scr2_x, self.scr2_y
+		if (y > 0 and self.scr_y > 0) or (y < 0 and self.scr_y < self.doc_h - self.vp_h) then
+			local old_scr_x, old_scr_y = self.scr_x, self.scr_y
 
 			self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
 
-			if old_scr2_x ~= self.scr2_x or old_scr2_y ~= self.scr2_y then
+			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(false)
 			end
 			
@@ -1046,7 +1046,7 @@ function def:uiCall_update(dt)
 
 	dt = math.min(dt, 1.0)
 
-	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
 	local needs_update = false
 
@@ -1071,21 +1071,21 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		needs_update = true
 	end
 
 	-- Update scroll bar registers and thumb position
 	local scr_h = self.scr_h
 	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr2_x), self.vp_w, self.doc_w)
+		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
 
 		self.scr_h:updateThumb()
 	end
 
 	local scr_v = self.scr_v
 	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr2_y), self.vp_h, self.doc_h)
+		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
 
 		self.scr_v:updateThumb()
 	end
@@ -1117,8 +1117,8 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 
 	love.graphics.push("all")
 
-	--love.graphics.translate(self.vp_x - self.scr2_x, 0)
-	love.graphics.translate(column.x - self.scr2_x, 0)
+	--love.graphics.translate(self.vp_x - self.scr_x, 0)
+	love.graphics.translate(column.x - self.scr_x, 0)
 
 	local skin = self.skin
 	local impl_col = skin.impl_column
@@ -1139,7 +1139,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	-- Two scissor boxes: one for the header box, and one for the rest of the column.
 	local sx, sy, sw, sh = love.graphics.getScissor()
 	uiGraphics.intersectScissor(
-		ox + column.x - self.scr2_x,
+		ox + column.x - self.scr_x,
 		oy + column.y,
 		column.w,
 		column.h
@@ -1179,7 +1179,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 
 	love.graphics.setScissor(sx, sy, sw, sh)
 	uiGraphics.intersectScissor(
-		ox + column.x - self.scr2_x,
+		ox + column.x - self.scr_x,
 		oy + column.y + column.h,
 		column.w,
 		self.vp2_h -- This is a little too long, but it should intersect with a previously-set scissor-box.
@@ -1198,7 +1198,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	local col_bottom = column.y + column.h
 	uiGraphics.quadXYWH(tq_px, col_right - skin.column_sep_width, 0, skin.column_sep_width, self.h)
 
-	love.graphics.translate(0, self.vp_y - self.scr2_y)
+	love.graphics.translate(0, self.vp_y - self.scr_y)
 
 	-- Draw each menu item in range.
 	love.graphics.setColor(skin.color_item_text)
@@ -1273,8 +1273,8 @@ def.skinners = {
 			for i, column in ipairs(self.columns) do
 				if column.visible
 				and col_pres ~= column
-				and column.x - self.scr2_x < self.vp2_x + self.vp2_w
-				and column.x + column.w - self.scr2_x >= self.vp2_x
+				and column.x - self.scr_x < self.vp2_x + self.vp2_w
+				and column.x + column.w - self.scr_x >= self.vp2_x
 				then
 					drawWholeColumn(self, column, false, ox, oy)
 				end
@@ -1285,7 +1285,7 @@ def.skinners = {
 				drawWholeColumn(self, col_pres, true, ox, oy)
 			end
 
-			love.graphics.translate(self.vp_x - self.scr2_x, self.vp_y - self.scr2_y)
+			love.graphics.translate(self.vp_x - self.scr_x, self.vp_y - self.scr_y)
 
 			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
 

@@ -140,7 +140,7 @@ do
 end
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 -- No integrated scroll bars for single-line text boxes.
 
 
@@ -168,7 +168,7 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupDoc(self)
 
 		-- How far to offset the line X position depending on the alignment.
@@ -224,7 +224,7 @@ function def:scrollGetCaretInBounds(immediate)
 
 	local line_ed = self.line_ed
 
-	--print("scrollGetCaretInBounds() BEFORE", self.scr2_tx, self.scr2_ty)
+	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
 
 	-- Get the extended caret rectangle.
 	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
@@ -233,22 +233,22 @@ function def:scrollGetCaretInBounds(immediate)
 	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
 
 	-- Clamp the scroll target.
-	self.scr2_tx = math.max(car_x2 - self.vp_w, math.min(self.scr2_tx, car_x1))
-	self.scr2_ty = math.max(car_y2 - self.vp_h, math.min(self.scr2_ty, car_y1))
+	self.scr_tx = math.max(car_x2 - self.vp_w, math.min(self.scr_tx, car_x1))
+	self.scr_ty = math.max(car_y2 - self.vp_h, math.min(self.scr_ty, car_y1))
 
 	if immediate then
-		self.scr2_fx = self.scr2_tx
-		self.scr2_fy = self.scr2_ty
-		self.scr2_x = math.floor(0.5 + self.scr2_fx)
-		self.scr2_y = math.floor(0.5 + self.scr2_fy)
+		self.scr_fx = self.scr_tx
+		self.scr_fy = self.scr_ty
+		self.scr_x = math.floor(0.5 + self.scr_fx)
+		self.scr_y = math.floor(0.5 + self.scr_fy)
 	end
 
 	--print("car_x1", car_x1, "car_y1", car_y1, "car_x2", car_x2, "car_y2", car_y2)
-	--print("scr2 tx ty", self.scr2_tx, self.scr2_ty)
+	--print("scr tx ty", self.scr_tx, self.scr_ty)
 
 --[[
 	print("BEFORE",
-		"scr2_x", self.scr2_x, "scr2_y", self.scr2_y, "scr2_tx", self.scr2_tx, "scr2_ty", self.scr2_ty,
+		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
 		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
 		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
 --]]
@@ -256,11 +256,11 @@ function def:scrollGetCaretInBounds(immediate)
 
 --[[
 	print("AFTER",
-		"scr2_x", self.scr2_x, "scr2_y", self.scr2_y, "scr2_tx", self.scr2_tx, "scr2_ty", self.scr2_ty,
+		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
 		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
 		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
 --]]
-	--print("scrollGetCaretInBounds() AFTER", self.scr2_tx, self.scr2_ty)
+	--print("scrollGetCaretInBounds() AFTER", self.scr_tx, self.scr_ty)
 	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
 	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 end
@@ -355,7 +355,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				self.press_busy = "text-drag"
 
 				-- Apply scroll + margin offsets
-				local mouse_sx = mouse_x + self.scr2_x - self.vp_x - self.align_offset
+				local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.align_offset
 
 				local core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, true)
 
@@ -518,8 +518,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 			-- Locate caret in UI space
 			local ax, ay = self:getAbsolutePosition()
-			local caret_x = ax + self.vp_x - self.scr2_x + line_ed.caret_box_x
-			local caret_y = ay + self.vp_y - self.scr2_y + line_ed.caret_box_y + line_ed.caret_box_h
+			local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x
+			local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
 
 			commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
@@ -599,10 +599,10 @@ local function mouseDragLogic(self)
 		local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
 
 		-- ...And with scroll offsets applied.
-		local s_mx = mx + self.scr2_x - self.align_offset
-		local s_my = my + self.scr2_y
+		local s_mx = mx + self.scr_x - self.align_offset
+		local s_my = my + self.scr_y
 
-		--print("s_mx", s_mx, "s_my", s_my, "scr2_x", self.scr2_x, "scr2_y", self.scr2_y)
+		--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
 
 		-- Handle drag highlight actions
 		if context.cseq_presses == 1 then
@@ -627,7 +627,7 @@ function def:uiCall_update(dt)
 
 	local line_ed = self.line_ed
 
-	local scr2_x_old = self.scr2_x
+	local scr_x_old = self.scr_x
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
@@ -646,7 +646,7 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x then
+	if scr_x_old ~= self.scr_x then
 		self.update_flag = true
 	end
 
@@ -721,8 +721,8 @@ def.skinners = {
 			)
 
 			love.graphics.translate(
-				self.vp_x + self.align_offset - self.scr2_x,
-				self.vp_y - self.scr2_y
+				self.vp_x + self.align_offset - self.scr_x,
+				self.vp_y - self.scr_y
 			)
 
 			-- Highlighted selection.

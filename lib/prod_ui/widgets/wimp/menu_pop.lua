@@ -83,7 +83,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 def.arrange = commonMenu.arrangeListVerticalTB
 
 
@@ -671,7 +671,7 @@ function def:uiCall_create(inst)
 		self.sort_id = 6
 
 		widShared.setupDoc(self)
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
@@ -1068,7 +1068,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 	mx = mx - self.vp_x
 	my = my - self.vp_y
 
-	local item_i, item_t = self:getItemAtPoint(mx + self.scr2_x, my + self.scr2_y, 1, #self.menu.items)
+	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
 	if item_i and item_t.selectable then
 		self.menu:setSelectedIndex(item_i)
 		--self:selectionInView()
@@ -1094,8 +1094,8 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		local xx = mx + self.scr2_x - self.vp_x
-		local yy = my + self.scr2_y - self.vp_y
+		local xx = mx + self.scr_x - self.vp_x
+		local yy = my + self.scr_y - self.vp_y
 
 		local hover_ok = false
 
@@ -1168,8 +1168,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if inViewport2(self, mouse_x, mouse_y) then
 
-			x = x - ax + self.scr2_x - self.vp_x
-			y = y - ay + self.scr2_y - self.vp_y
+			x = x - ax + self.scr_x - self.vp_x
+			y = y - ay + self.scr_y - self.vp_y
 
 			-- Check for click-able items.
 			if not self.press_busy then
@@ -1213,8 +1213,8 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 					local mouse_y = y - ay
 
 					-- Apply scroll and viewport offsets
-					local xx = mouse_x + self.scr2_x - self.vp_x
-					local yy = mouse_y + self.scr2_y - self.vp_y
+					local xx = mouse_x + self.scr_x - self.vp_x
+					local yy = mouse_y + self.scr_y - self.vp_y
 
 					-- XXX safety precaution: ensure mouse position is within widget viewport #2?
 					if xx >= item_selected.x and xx < item_selected.x + item_selected.w
@@ -1244,14 +1244,14 @@ function def:uiCall_pointerWheel(inst, x, y)
 		-- XXX support mapping single-dimensional wheel to horizontal scroll motion
 		-- XXX support horizontal wheels
 
-		if (y > 0 and self.scr2_y > 0) or (y < 0 and self.scr2_y < self.doc_h - self.vp_h) then
-			local old_scr2_x, old_scr2_y = self.scr2_x, self.scr2_y
+		if (y > 0 and self.scr_y > 0) or (y < 0 and self.scr_y < self.doc_h - self.vp_h) then
+			local old_scr_x, old_scr_y = self.scr_x, self.scr_y
 
 			-- Scroll about 1/4 of the visible items.
 			--local n = self.h / self.item_h * 4
 			self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
 
-			if old_scr2_x ~= self.scr2_x or old_scr2_y ~= self.scr2_y then
+			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(true)
 			end
 			
@@ -1266,7 +1266,7 @@ function def:uiCall_update(dt)
 
 	dt = math.min(dt, 1.0)
 
-	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
 	local needs_update = false
 
@@ -1278,7 +1278,7 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		needs_update = true
 	end
 
@@ -1304,7 +1304,7 @@ function def:uiCall_update(dt)
 	local item_i, item_t
 	if self.context.mouse_focus then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
-		item_i, item_t = self:getItemAtPoint(mx + self.scr2_x - self.vp_x, my + self.scr2_y - self.vp_y, 1, #self.menu.items)
+		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.menu.items)
 	end
 
 	--or not (self.chain_next and self.chain_next.origin_item == selected)
@@ -1388,7 +1388,7 @@ def.skinners = {
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
 			-- Scroll offsets
-			love.graphics.translate(-self.scr2_x + self.vp_x, -self.scr2_y + self.vp_y)
+			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
 
 			-- (Pop up menus do not render hover-glow.)
 

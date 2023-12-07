@@ -415,27 +415,22 @@ end
 
 
 --[[
-There are two sets of scrolling variables. The first set ('scr_*') is built into ProdUI, and affects the positions
-of a widget's children. The second ('scr2_*') is intended for arbitrary sub-components that are not full widgets.
+Scroll registers:
 
-Generally, only one set of scroll registers is used in any given widget.
+scr_x: Public X Scroll value. Rounded to integer.
+scr_y: Public Y Scroll value. Rounded to integer.
 
-The scroll registers are:
+scr_fx: Private scroll X value. Double.
+scr_fy: Private scroll Y value. Double.
 
-scr_x / scr2_x: Public X Scroll value. Rounded to integer.
-scr_y / scr2_y: Public Y Scroll value. Rounded to integer.
-
-scr_fx / scr2_fx: Private scroll X value. Double.
-scr_fy / scr2_fy: Private scroll Y value. Double.
-
-scr_tx / scr2_tx: Target X scroll value. Double.
-scr_ty / scr2_ty: Target Y scroll value. Double.
+scr_tx: Target X scroll value. Double.
+scr_ty: Target Y scroll value. Double.
 
 The public values are provided just so that other code doesn't have to constantly round the values
 when drawing or performing intersection tests.
 
 In widgets that use the viewport system, The scroll values are offset by Viewport #1's position. The plug-in scroll
-methods take this into account, but if you read the scroll values directly, you may find that the scroll values for
+methods take this into account, but if you read the registers directly, you may find that the scroll values for
 the top-left position go into the negative. To get the expected value, add viewport 1's position.
 --]]
 
@@ -464,7 +459,7 @@ function widShared.scrollTargetUpdate(scr_p, scr_t, snap, spd_min, spd_mul, dt)
 	else
 		return math.max(scr_p + spd*dt, scr_t)
 	end
-end -- Safe to use for 'widShared.scroll2*'
+end
 
 
 --- Viewport scroll clamping for containers and other widgets which have embedded scroll bars.
@@ -481,19 +476,6 @@ function widShared.scrollClampViewport(self)
 end
 
 
-function widShared.scroll2ClampViewport(self)
-
-	self.scr2_fx = math.max(-self.vp_x, math.min(self.scr2_fx, -self.vp_x + self.doc_w - self.vp_w))
-	self.scr2_fy = math.max(-self.vp_y, math.min(self.scr2_fy, -self.vp_y + self.doc_h - self.vp_h))
-
-	self.scr2_x = math.floor(0.5 + self.scr2_fx)
-	self.scr2_y = math.floor(0.5 + self.scr2_fy)
-
-	self.scr2_tx = math.max(-self.vp_x, math.min(self.scr2_tx, -self.vp_x + self.doc_w - self.vp_w))
-	self.scr2_ty = math.max(-self.vp_y, math.min(self.scr2_ty, -self.vp_y + self.doc_h - self.vp_h))
-end
-
-
 function widShared.scrollUpdate(self, dt)
 
 	self.scr_fx = widShared.scrollTargetUpdate(self.scr_fx, self.scr_tx, 1, 800, 8.0, dt) -- XXX config
@@ -501,16 +483,6 @@ function widShared.scrollUpdate(self, dt)
 
 	self.scr_x = math.floor(0.5 + self.scr_fx)
 	self.scr_y = math.floor(0.5 + self.scr_fy)
-end
-
-
-function widShared.scroll2Update(self, dt)
-
-	self.scr2_fx = widShared.scrollTargetUpdate(self.scr2_fx, self.scr2_tx, 1, 800, 8.0, dt) -- XXX config
-	self.scr2_fy = widShared.scrollTargetUpdate(self.scr2_fy, self.scr2_ty, 1, 800, 8.0, dt) -- XXX config
-
-	self.scr2_x = math.floor(0.5 + self.scr2_fx)
-	self.scr2_y = math.floor(0.5 + self.scr2_fy)
 end
 
 
@@ -527,19 +499,6 @@ function widShared.scrollXInBounds(self, x1, x2, immediate)
 end
 
 
-function widShared.scroll2XInBounds(self, x1, x2, immediate)
-
-	-- Clamp the scroll target.
-	self.scr2_tx = math.max(x2 - self.vp_x - self.vp_w, math.min(self.scr2_tx, x1 - self.vp_x))
-
-	if immediate then
-		self.scr2_fx = self.scr2_tx
-	end
-
-	widShared.scroll2ClampViewport(self)
-end
-
-
 function widShared.scrollYInBounds(self, y1, y2, immediate)
 
 	-- Clamp the scroll target.
@@ -550,19 +509,6 @@ function widShared.scrollYInBounds(self, y1, y2, immediate)
 	end
 
 	widShared.scrollClampViewport(self)
-end
-
-
-function widShared.scroll2YInBounds(self, y1, y2, immediate)
-
-	-- Clamp the scroll target.
-	self.scr2_ty = math.max(y2 - self.vp_y - self.vp_h, math.min(self.scr2_ty, y1 - self.vp_y))
-
-	if immediate then
-		self.scr2_fy = self.scr2_ty
-	end
-
-	widShared.scroll2ClampViewport(self)
 end
 
 
@@ -581,21 +527,6 @@ function widShared.scrollRectInBounds(self, x1, y1, x2, y2, immediate)
 end
 
 
-function widShared.scroll2RectInBounds(self, x1, y1, x2, y2, immediate)
-
-	-- Clamp the scroll target.
-	self.scr2_tx = math.max(x2 - self.vp_x - self.vp_w, math.min(self.scr2_tx, x1 - self.vp_x))
-	self.scr2_ty = math.max(y2 - self.vp_y - self.vp_h, math.min(self.scr2_ty, y1 - self.vp_y))
-
-	if immediate then
-		self.scr2_fx = self.scr2_tx
-		self.scr2_fy = self.scr2_ty
-	end
-
-	widShared.scroll2ClampViewport(self)
-end
-
-
 function widShared.scrollH(self, x, immediate)
 
 	self.scr_tx = -self.vp_x + x
@@ -604,17 +535,6 @@ function widShared.scrollH(self, x, immediate)
 	end
 
 	widShared.scrollClampViewport(self)
-end
-
-
-function widShared.scroll2H(self, x, immediate)
-
-	self.scr2_tx = -self.vp_x + x
-	if immediate then
-		self.scr2_fx = self.scr2_tx
-	end
-
-	widShared.scroll2ClampViewport(self)
 end
 
 
@@ -629,17 +549,6 @@ function widShared.scrollDeltaH(self, dx, immediate)
 end
 
 
-function widShared.scroll2DeltaH(self, dx, immediate)
-
-	self.scr2_tx = self.scr2_tx + dx
-	if immediate then
-		self.scr2_fx = self.scr2_tx
-	end
-
-	widShared.scroll2ClampViewport(self)
-end
-
-
 function widShared.scrollV(self, y, immediate)
 
 	self.scr_ty = -self.vp_y + y
@@ -651,17 +560,6 @@ function widShared.scrollV(self, y, immediate)
 end
 
 
-function widShared.scroll2V(self, y, immediate)
-
-	self.scr2_ty = -self.vp_y + y
-	if immediate then
-		self.scr2_fy = self.scr2_ty
-	end
-
-	widShared.scroll2ClampViewport(self)
-end
-
-
 function widShared.scrollDeltaV(self, dy, immediate)
 
 	self.scr_ty = self.scr_ty + dy
@@ -670,17 +568,6 @@ function widShared.scrollDeltaV(self, dy, immediate)
 	end
 
 	widShared.scrollClampViewport(self)
-end
-
-
-function widShared.scroll2DeltaV(self, dy, immediate)
-
-	self.scr2_ty = self.scr2_ty + dy
-	if immediate then
-		self.scr2_fy = self.scr2_ty
-	end
-
-	widShared.scroll2ClampViewport(self)
 end
 
 
@@ -697,19 +584,6 @@ function widShared.scrollHV(self, x, y, immediate)
 end
 
 
-function widShared.scroll2HV(self, x, y, immediate)
-
-	self.scr2_tx = -self.vp_x + x
-	self.scr2_ty = -self.vp_y + y
-	if immediate then
-		self.scr2_fx = self.scr2_tx
-		self.scr2_fy = self.scr2_ty
-	end
-
-	widShared.scroll2ClampViewport(self)
-end
-
-
 function widShared.scrollDeltaHV(self, dx, dy, immediate)
 
 	self.scr_tx = self.scr_tx + dx
@@ -720,19 +594,6 @@ function widShared.scrollDeltaHV(self, dx, dy, immediate)
 	end
 
 	widShared.scrollClampViewport(self)
-end
-
-
-function widShared.scroll2DeltaHV(self, dx, dy, immediate)
-
-	self.scr2_tx = self.scr2_tx + dx
-	self.scr2_ty = self.scr2_ty + dy
-	if immediate then
-		self.scr2_fx = self.scr2_tx
-		self.scr2_fy = self.scr2_ty
-	end
-
-	widShared.scroll2ClampViewport(self)
 end
 
 
@@ -753,26 +614,6 @@ function widShared.scrollSetMethods(self)
 
 	self.scrollHV = widShared.scrollHV
 	self.scrollDeltaHV = widShared.scrollDeltaHV
-end
-
-
-function widShared.scroll2SetMethods(self)
-
-	self.scrollClampViewport = widShared.scroll2ClampViewport
-	self.scrollUpdate = widShared.scroll2Update
-
-	self.scrollXInBounds = widShared.scroll2XInBounds
-	self.scrollYInBounds = widShared.scroll2YInBounds
-	self.scrollRectInBounds = widShared.scroll2RectInBounds
-
-	self.scrollH = widShared.scroll2H
-	self.scrollDeltaH = widShared.scroll2DeltaH
-
-	self.scrollV = widShared.scroll2V
-	self.scrollDeltaV = widShared.scroll2DeltaV
-
-	self.scrollHV = widShared.scroll2HV
-	self.scrollDeltaHV = widShared.scroll2DeltaHV
 end
 
 
@@ -1080,14 +921,14 @@ function widShared.dragToScroll(self, dt)
 end
 
 
---- Assigns scroll registers to the widget. These offsets affect the widget's children only. The base widget metatable
---  contains default / dummy values for these, so you don't need to assign them for widgets that will never scroll
---  their descendants.
+--- Assigns scroll registers to the widget. These offsets affect the widget's children, and may be used to position
+--  components such as menus.
 -- @param self The widget to set up.
 -- @return Nothing.
 function widShared.setupScroll(self)
 
-	-- Integral / external-facing
+	-- Integral / external-facing.
+	-- The base widget metatable contains default / dummy values for these as well.
 	self.scr_x = 0
 	self.scr_y = 0
 
@@ -1098,23 +939,6 @@ function widShared.setupScroll(self)
 	-- Scrolling target
 	self.scr_tx = 0
 	self.scr_ty = 0
-end
-
-
---- Assigns secondary scroll registers to the widget. These offsets are typically used for integrated components that
---  are not themselves widgets. Examples include scrolling text boxes and menus.
--- @param self The widget to set up.
--- @return Nothing.
-function widShared.setupScroll2(self)
-
-	self.scr2_x = 0
-	self.scr2_y = 0
-
-	self.scr2_fx = 0
-	self.scr2_fy = 0
-
-	self.scr2_tx = 0
-	self.scr2_ty = 0
 end
 
 
@@ -1205,13 +1029,8 @@ end
 
 
 --- Get scroll position relative to the document.
-function widShared.getDocumentScroll1(self)
+function widShared.getDocumentScroll(self)
 	return self.vp_x + self.scr_x, self.vp_y + self.scr_y
-end
-
-
-function widShared.getDocumentScroll2(self)
-	return self.vp_x + self.scr2_x, self.vp_y + self.scr2_y
 end
 
 
@@ -1222,44 +1041,25 @@ Only scroll if we are not at the edge of the scrollable area. Otherwise, the whe
 event should bubble up.
 
 XXX support mapping single-dimensional wheel to horizontal scroll motion
-XXX support horizontal wheels (scr2)
-XXX Discrepancy between scr1 and scr2 versions of the function. The fields used to intensify scroll rate are different.
+XXX support horizontal wheels
 -- [XXX 4] add support for non-animated, immediate scroll-to
 --]]
 
 
-function widShared.checkScrollWheelScroll1(self, x, y)
+function widShared.checkScrollWheelScroll(self, x, y)
 
 	if (y > 0 and self.scr_y > -self.vp_y)
 	or (y < 0 and self.scr_y < self.doc_h - self.vp_y - self.vp_h)
 	then
-		local old_scr_x, old_scr_y = self.scr_x, self.scr_y
+		local old_scr_tx, old_scr_ty = self.scr_tx, self.scr_ty
 
 		-- [XXX 3] style/theme integration
-		-- XXX floor the inputs?
 		self:scrollDeltaHV(
 			-x * self.context.mouse_wheel_scale,
 			-y * self.context.mouse_wheel_scale
 		)
 
-		return old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y
-	end
-end
-
-
-function widShared.checkScrollWheelScroll2(self, x, y)
-
-	if (y > 0 and self.scr2_y > -self.vp_y)
-	or (y < 0 and self.scr2_y < self.doc_h - self.vp_y - self.vp_h)
-	then
-		local old_scr2_tx, old_scr2_ty = self.scr2_tx, self.scr2_ty
-
-		-- Scroll about 1/4 of the visible items.
-		self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
-
-		--print("old_scr2_tx ~= self.scr2_tx", old_scr2_tx ~= self.scr2_tx, "old_scr2_ty ~= self.scr2_ty", old_scr2_ty ~= self.scr2_ty)
-		--return old_scr2_tx ~= self.scr2_tx or old_scr2_ty ~= self.scr2_ty
-		return true
+		return old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty
 	end
 end
 

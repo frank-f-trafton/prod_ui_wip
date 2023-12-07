@@ -29,7 +29,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 
 
 --[[
@@ -301,7 +301,7 @@ function def:uiCall_create(inst)
 		self.clip_scissor = true
 
 		widShared.setupDoc(self)
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
@@ -610,8 +610,8 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local my = mouse_y - self.vp_y
 
 		-- And with scroll offsets
-		local s_mx = mx + self.scr2_x
-		local s_my = my + self.scr2_y
+		local s_mx = mx + self.scr_x
+		local s_my = my + self.scr_y
 
 		local ax, ay = self:getAbsolutePosition()
 
@@ -658,8 +658,8 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		mouse_x = mouse_x - ax
 		mouse_y = mouse_y - ay
 
-		local xx = mouse_x + self.scr2_x - self.vp_x
-		local yy = mouse_y + self.scr2_y - self.vp_y
+		local xx = mouse_x + self.scr_x - self.vp_x
+		local yy = mouse_y + self.scr_y - self.vp_y
 
 		-- Inside of viewport #2
 		if not self.press_busy
@@ -739,8 +739,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					self:cacheUpdate(true)
 
 				else
-					x = x - ax + self.scr2_x - self.vp_x
-					y = y - ay + self.scr2_y - self.vp_y
+					x = x - ax + self.scr_x - self.vp_x
+					y = y - ay + self.scr_y - self.vp_y
 
 					--print("self.press_busy", self.press_busy)
 
@@ -822,12 +822,12 @@ end
 
 function def:uiCall_update(dt)
 
-	--print(self.w, self.h, self.doc_w, self.doc_h, self.scr2_x, self.scr2_y)
+	--print(self.w, self.h, self.doc_w, self.doc_h, self.scr_x, self.scr_y)
 	--print("vp1", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 
 	dt = math.min(dt, 1.0)
 
-	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
 	local needs_update = false
 
@@ -839,7 +839,7 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		needs_update = true
 	end
 
@@ -925,7 +925,7 @@ def.skinners = {
 			uiGraphics.drawSlice(skin.sl_body, 0, 0, self.w, self.h)
 
 			-- Scroll offsets
-			love.graphics.translate(-self.scr2_x, -self.scr2_y)
+			love.graphics.translate(-self.scr_x, -self.scr_y)
 
 			-- Draw selection or hover glow (just one or the other).
 			local sel_item = items[selected_index]

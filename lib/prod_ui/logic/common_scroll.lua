@@ -8,10 +8,10 @@
 
 	* The plug-in methods assume that the client widget has the following methods affixed:
 
-	- self:scrollH()         -> widShared.scrollH or widShared.scroll2H
-	- self:scrollDeltaH()    -> widShared.scrollDeltaH or widShared.scroll2DeltaH
-	- self:scrollV()         -> widShared.scrollV or widShared.scroll2V
-	- self:scrollDeltaV()    -> widShared.scrollDeltaV or widShared.scroll2DeltaV
+	- self:scrollH()         -> widShared.scrollH
+	- self:scrollDeltaH()    -> widShared.scrollDeltaH
+	- self:scrollV()         -> widShared.scrollV
+	- self:scrollDeltaV()    -> widShared.scrollDeltaV
 --]]
 
 
@@ -892,27 +892,14 @@ end
 
 
 --- Updates a widget's built-in scroll registers.
-function commonScroll.updateScroll1State(self)
-
+function commonScroll.updateScrollState(self)
 	local scr_h, scr_v = self.scr_h, self.scr_v
+
 	if scr_v then
 		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.vp_y + self.scr_y), self.vp_h, self.doc_h)
 	end
 	if scr_h then
 		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.vp_x + self.scr_x), self.vp_w, self.doc_w)
-	end
-end
-
-
---- Updates a widget's auxiliary scroll registers.
-function commonScroll.updateScroll2State(self)
-
-	local scr_h, scr_v = self.scr_h, self.scr_v
-	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.vp_y + self.scr2_y), self.vp_h, self.doc_h)
-	end
-	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.vp_x + self.scr2_x), self.vp_w, self.doc_w)
 	end
 end
 

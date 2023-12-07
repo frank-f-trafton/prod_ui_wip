@@ -165,7 +165,7 @@ function def:uiCall_reshape()
 	-- Update scroll bar state.
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScroll1State(self)
+	commonScroll.updateScrollState(self)
 end
 
 
@@ -239,7 +239,7 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 
 	-- Catch wheel events from descendants that did not block it.
-	local caught = widShared.checkScrollWheelScroll1(self, x, y)
+	local caught = widShared.checkScrollWheelScroll(self, x, y)
 	commonScroll.updateScrollBarShapes(self)
 
 	-- Stop bubbling if the view scrolled.
@@ -271,7 +271,7 @@ function def:uiCall_update(dt)
 	end
 
 	self:scrollUpdate(dt)
-	commonScroll.updateScroll1State(self)
+	commonScroll.updateScrollState(self)
 	commonScroll.updateScrollBarShapes(self)
 end
 
