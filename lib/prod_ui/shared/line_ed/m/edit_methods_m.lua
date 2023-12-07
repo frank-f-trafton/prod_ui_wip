@@ -560,7 +560,7 @@ function client:writeText(text, suppress_replace)
 	local lines = line_ed.lines
 
 	-- Sanitize input
-	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, true)
+	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, line_ed.allow_line_feed)
 
 	if not line_ed.allow_highlight then
 		line_ed:clearHighlight()

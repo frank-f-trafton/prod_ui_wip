@@ -555,7 +555,7 @@ end
 -- Add line feed (unhighlights first)
 function editActM.typeLineFeedWithAutoIndent(self, line_ed)
 
-	if line_ed.allow_input then
+	if line_ed.allow_input and line_ed.allow_line_feed then
 		line_ed.input_category = false
 
 		local new_str = "\n"
@@ -577,7 +577,7 @@ end
 
 function editActM.typeLineFeed(self, line_ed)
 
-	if line_ed.allow_input then
+	if line_ed.allow_input and line_ed.allow_line_feed then
 		line_ed.input_category = false
 
 		self:writeText("\n", true)
