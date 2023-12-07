@@ -62,7 +62,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
@@ -236,7 +236,7 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupDoc(self)
 
 		-- Minimum widget size.
@@ -327,7 +327,7 @@ function def:scrollGetCaretInBounds(immediate)
 
 	local disp = self.line_ed.disp
 
-	--print("scrollGetCaretInBounds() BEFORE", self.scr2_tx, self.scr2_ty)
+	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
 
 	-- Get the extended caret rectangle.
 	local car_x1 = self.align_offset + disp.caret_box_x - self.caret_extend_x
@@ -336,22 +336,22 @@ function def:scrollGetCaretInBounds(immediate)
 	local car_y2 = disp.caret_box_y + disp.caret_box_h + self.caret_extend_y
 
 	-- Clamp the scroll target.
-	self.scr2_tx = math.max(car_x2 - self.vp_w, math.min(self.scr2_tx, car_x1))
-	self.scr2_ty = math.max(car_y2 - self.vp_h, math.min(self.scr2_ty, car_y1))
+	self.scr_tx = math.max(car_x2 - self.vp_w, math.min(self.scr_tx, car_x1))
+	self.scr_ty = math.max(car_y2 - self.vp_h, math.min(self.scr_ty, car_y1))
 
 	if immediate then
-		self.scr2_fx = self.scr2_tx
-		self.scr2_fy = self.scr2_ty
-		self.scr2_x = math.floor(0.5 + self.scr2_fx)
-		self.scr2_y = math.floor(0.5 + self.scr2_fy)
+		self.scr_fx = self.scr_tx
+		self.scr_fy = self.scr_ty
+		self.scr_x = math.floor(0.5 + self.scr_fx)
+		self.scr_y = math.floor(0.5 + self.scr_fy)
 	end
 
 	--print("car_x1", car_x1, "car_y1", car_y1, "car_x2", car_x2, "car_y2", car_y2)
-	--print("scr2 tx ty", self.scr2_tx, self.scr2_ty)
+	--print("scr tx ty", self.scr_tx, self.scr_ty)
 
 --[[
 	print("BEFORE",
-		"scr2_x", self.scr2_x, "scr2_y", self.scr2_y, "scr2_tx", self.scr2_tx, "scr2_ty", self.scr2_ty,
+		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
 		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
 		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
 --]]
@@ -359,11 +359,11 @@ function def:scrollGetCaretInBounds(immediate)
 
 --[[
 	print("AFTER",
-		"scr2_x", self.scr2_x, "scr2_y", self.scr2_y, "scr2_tx", self.scr2_tx, "scr2_ty", self.scr2_ty,
+		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
 		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
 		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
 --]]
-	--print("scrollGetCaretInBounds() AFTER", self.scr2_tx, self.scr2_ty)
+	--print("scrollGetCaretInBounds() AFTER", self.scr_tx, self.scr_ty)
 	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
 	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 end
@@ -407,7 +407,7 @@ function def:uiCall_reshape()
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScroll2State(self)
+	commonScroll.updateScrollState(self)
 
 	line_ed:displaySyncAll()
 
@@ -446,7 +446,7 @@ function def:cacheUpdate()
 	end
 
 	-- Find the first visible display paragraph (or rather, one before it) to cut down on rendering.
-	local y_pos = self.scr2_y - self.vp_y -- XXX should this be viewport #2? Or does the viewport offset matter at all?
+	local y_pos = self.scr_y - self.vp_y -- XXX should this be viewport #2? Or does the viewport offset matter at all?
 
 	-- XXX default to 1?
 	--self.vis_para_top
@@ -566,8 +566,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				self.press_busy = "text-drag"
 
 				-- Apply scroll + margin offsets
-				local mouse_sx = mouse_x + self.scr2_x - self.vp_x - self.align_offset
-				local mouse_sy = mouse_y + self.scr2_y - self.vp_y
+				local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.align_offset
+				local mouse_sy = mouse_y + self.scr_y - self.vp_y
 
 				local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, mouse_sy, true)
 
@@ -667,8 +667,8 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 	-- Catch wheel events from descendants that did not block it.
 
-	self.scr2_tx = self.scr2_tx - x * self.context.mouse_wheel_scale -- XXX style/theme integration
-	self.scr2_ty = self.scr2_ty - y * self.context.mouse_wheel_scale -- XXX style/theme integration
+	self.scr_tx = self.scr_tx - x * self.context.mouse_wheel_scale -- XXX style/theme integration
+	self.scr_ty = self.scr_ty - y * self.context.mouse_wheel_scale -- XXX style/theme integration
 	-- XXX add support for non-animated, immediate scroll-to
 
 	self:scrollClampViewport()
@@ -764,8 +764,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 			-- Locate caret in UI space
 			local ax, ay = self:getAbsolutePosition()
-			local caret_x = ax + self.vp_x - self.scr2_x + disp.caret_box_x
-			local caret_y = ay + self.vp_y - self.scr2_y + disp.caret_box_y + disp.caret_box_h
+			local caret_x = ax + self.vp_x - self.scr_x + disp.caret_box_x
+			local caret_y = ay + self.vp_y - self.scr_y + disp.caret_box_y + disp.caret_box_h
 
 			commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
@@ -918,10 +918,10 @@ local function mouseDragLogic(self)
 		local mx, my = context.mouse_x - ax - self.vp_x, context.mouse_y - ay - self.vp_y
 
 		-- ...And with scroll offsets applied.
-		local s_mx = mx + self.scr2_x - self.align_offset
-		local s_my = my + self.scr2_y
+		local s_mx = mx + self.scr_x - self.align_offset
+		local s_my = my + self.scr_y
 
-		--print("s_mx", s_mx, "s_my", s_my, "scr2_x", self.scr2_x, "scr2_y", self.scr2_y)
+		--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
 
 		-- Handle drag highlight actions
 		if context.cseq_presses == 1 then
@@ -951,7 +951,7 @@ function def:uiCall_update(dt)
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
-	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
@@ -980,21 +980,21 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		self.update_flag = true
 	end
 
 	-- Update scroll bar registers and thumb position
 	local scr_h = self.scr_h
 	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr2_x), self.vp_w, self.doc_w)
+		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
 
 		self.scr_h:updateThumb()
 	end
 
 	local scr_v = self.scr_v
 	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr2_y), self.vp_h, self.doc_h)
+		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
 
 		self.scr_v:updateThumb()
 	end
@@ -1096,13 +1096,13 @@ def.skinners = {
 				local last_sub = paragraph[#paragraph]
 				local para_h = last_sub.y + last_sub.h - para_y
 
-				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr2_y + para_y, self.vp2_w, para_h)
+				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr_y + para_y, self.vp2_w, para_h)
 			end
 
 			love.graphics.push()
 
 			-- Translate into core region, with scrolling offsets applied.
-			love.graphics.translate(self.vp_x + self.align_offset - self.scr2_x, self.vp_y - self.scr2_y)
+			love.graphics.translate(self.vp_x + self.align_offset - self.scr_x, self.vp_y - self.scr_y)
 
 			-- Draw highlight rectangles.
 			love.graphics.setColor(res.color_highlight)
@@ -1191,7 +1191,7 @@ def.skinners = {
 			love.graphics.pop()
 			--]]
 
-			--print("text box scr xy", self.scr2_x, self.scr2_y, "fx fy", self.scr2_fx, self.scr2_fy, "tx ty", self.scr2_tx, self.scr2_ty)
+			--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
 			--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
 
 			-- DEBUG: draw viewports.

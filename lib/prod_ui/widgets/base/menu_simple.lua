@@ -23,7 +23,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 
 
 -- XXX WIP

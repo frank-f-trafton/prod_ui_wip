@@ -8,7 +8,6 @@ Viewport 2 is the visible window into the content. It excludes scroll bars and o
 Viewport 1 is the scrolling viewport. It excludes scroll bars, opaque borders, and margin space.
 doc_w|h is the range containing menu items, and the range that Viewport 1 is allowed to scan over.
 
-Menu widgets use 'scr2' scrolling registers.
 
 	       Viewport 2
 	           |
@@ -55,7 +54,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
@@ -233,7 +232,7 @@ function def:uiCall_create(inst)
 		--self.allow_focus_capture = true
 
 		widShared.setupDoc(self)
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 		widShared.setupMargin(self)
@@ -306,10 +305,10 @@ function def:uiCall_reshape()
 	-- Update scroll bar state
 	local scr_h, scr_v = self.scr_h, self.scr_v
 	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr2_y), self.vp_h, self.doc_h)
+		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
 	end
 	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr2_x), self.vp_w, self.doc_w)
+		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
 	end
 end
 
@@ -376,8 +375,8 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local my = mouse_y - self.vp_y
 
 			-- And with scroll offsets
-			local s_mx = mx + self.scr2_x
-			local s_my = my + self.scr2_y
+			local s_mx = mx + self.scr_x
+			local s_my = my + self.scr_y
 
 			local ax, ay = self:getAbsolutePosition()
 
@@ -410,8 +409,8 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
 
-		local xx = mouse_x + self.scr2_x - self.vp_x
-		local yy = mouse_y + self.scr2_y - self.vp_y
+		local xx = mouse_x + self.scr_x - self.vp_x
+		local yy = mouse_y + self.scr_y - self.vp_y
 
 		local hover_ok = false
 
@@ -526,8 +525,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				else
 
-					x = x - ax + self.scr2_x - self.vp_x
-					y = y - ay + self.scr2_y - self.vp_y
+					x = x - ax + self.scr_x - self.vp_x
+					y = y - ay + self.scr_y - self.vp_y
 
 					-- Check for click-able items.
 					if not self.press_busy then
@@ -624,14 +623,14 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 		-- XXX menuCall_pointerWheel() callback for items.
 
-		if (y > 0 and self.scr2_y > 0) or (y < 0 and self.scr2_y < self.doc_h - self.vp_h) then
-			local old_scr2_x, old_scr2_y = self.scr2_x, self.scr2_y
+		if (y > 0 and self.scr_y > 0) or (y < 0 and self.scr_y < self.doc_h - self.vp_h) then
+			local old_scr_x, old_scr_y = self.scr_x, self.scr_y
 
 			-- Scroll about 1/4 of the visible items.
 			--local n = self.h / self.item_h * 4
 			self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
 
-			if old_scr2_x ~= self.scr2_x or old_scr2_y ~= self.scr2_y then
+			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(false)
 			end
 			
@@ -646,7 +645,7 @@ function def:uiCall_update(dt)
 
 	dt = math.min(dt, 1.0)
 
-	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
 	local needs_update = false
 
@@ -671,21 +670,21 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		needs_update = true
 	end
 
 	-- Update scroll bar registers and thumb position
 	local scr_h = self.scr_h
 	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr2_x), self.vp_w, self.doc_w)
+		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
 
 		self.scr_h:updateThumb()
 	end
 
 	local scr_v = self.scr_v
 	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr2_y), self.vp_h, self.doc_h)
+		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
 
 		self.scr_v:updateThumb()
 	end
@@ -747,7 +746,7 @@ def.skinners = {
 			love.graphics.push("all")
 
 			-- Scroll offsets
-			love.graphics.translate(-self.scr2_x + self.vp_x, -self.scr2_y + self.vp_y)
+			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
 			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
 
 			-- Draw hover glow, if applicable

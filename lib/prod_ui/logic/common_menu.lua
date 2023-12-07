@@ -510,7 +510,7 @@ end
 -- @param self The widget to configure.
 function commonMenu.instanceSetup(self)
 
-	-- Requires: scroll2 registers, viewport #1, viewport #2, document dimensions.
+	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
 
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
 	self.selection_extend_x = 0
@@ -557,7 +557,7 @@ function commonMenu.widgetAutoRangeV(self)
 	local items = self.menu.items
 
 	local first, last
-	local r1 = self.vp2_y + self.scr2_y
+	local r1 = self.vp2_y + self.scr_y
 	local r2 = r1 + self.vp2_h
 
 	-- First
@@ -594,7 +594,7 @@ function commonMenu.widgetAutoRangeH(self)
 	local items = self.menu.items
 
 	local first, last
-	local r1 = self.vp2_x + self.scr2_x
+	local r1 = self.vp2_x + self.scr_x
 	local r2 = r1 + self.vp2_w
 
 	-- First

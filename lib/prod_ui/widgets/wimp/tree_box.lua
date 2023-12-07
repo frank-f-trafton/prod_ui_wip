@@ -44,7 +44,7 @@ local def = {
 }
 
 
-widShared.scroll2SetMethods(def)
+widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
@@ -514,7 +514,7 @@ function def:uiCall_create(inst)
 		self.can_have_thimble = true
 
 		widShared.setupDoc(self)
-		widShared.setupScroll2(self)
+		widShared.setupScroll(self)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
@@ -612,7 +612,7 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 1, "margin")
 
 	self:scrollClampViewport()
-	commonScroll.updateScroll2State(self)
+	commonScroll.updateScrollState(self)
 
 	self:cacheUpdate(true)
 end
@@ -713,8 +713,8 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if not self.press_busy
 		and widShared.pointInViewport(self, 2, mx, my)
 		then
-			mx = mx + self.scr2_x
-			my = my + self.scr2_y
+			mx = mx + self.scr_x
+			my = my + self.scr_y
 
 			local menu = self.menu
 
@@ -773,8 +773,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			local mx, my = self:getRelativePosition(x, y)
 
 			if widShared.pointInViewport(self, 2, mx, my) then
-				mx = mx + self.scr2_x
-				my = my + self.scr2_y
+				mx = mx + self.scr_x
+				my = my + self.scr_y
 
 				-- Check for the cursor intersecting with a clickable item.
 				local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
@@ -918,8 +918,8 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 			-- Mouse position with scroll offsets.
 			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-			mx = mx + self.scr2_x
-			my = my + self.scr2_y
+			mx = mx + self.scr_x
+			my = my + self.scr_y
 
 			local item_i, item_t = self:getItemAtPoint(mx, my, 1, #self.menu.items)
 			if item_i and item_t.selectable then
@@ -975,7 +975,7 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 
 	if self == inst then
-		if widShared.checkScrollWheelScroll2(self, x, y) then
+		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
 
 			return true -- Stop bubbling.
@@ -1035,7 +1035,7 @@ function def:uiCall_update(dt)
 
 	dt = math.min(dt, 1.0)
 
-	local scr2_x_old, scr2_y_old = self.scr2_x, self.scr2_y
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
 	local needs_update = false
 
@@ -1062,13 +1062,13 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 
 	-- Force a cache update if the external scroll position is different.
-	if scr2_x_old ~= self.scr2_x or scr2_y_old ~= self.scr2_y then
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		needs_update = true
 	end
 
 	-- Update scroll bar registers and thumb position.
 	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScroll2State(self)
+	commonScroll.updateScrollState(self)
 
 	if needs_update then
 		self:cacheUpdate(false)
@@ -1078,7 +1078,7 @@ end
 
 local function _drawLongPipes(self, skin, root, tq_px, line_x_offset, line_y_shorten)
 
-	local y1 = self.scr2_y
+	local y1 = self.scr_y
 	local y2 = y1 + self.vp2_h
 
 	local node_first, node_last = root.nodes[1], root.nodes[#root.nodes]
@@ -1158,7 +1158,7 @@ def.skinners = {
 
 			-- Scissor, scroll offsets for content.
 			uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
-			love.graphics.translate(-self.scr2_x, -self.scr2_y)
+			love.graphics.translate(-self.scr_x, -self.scr_y)
 
 			-- Vertical pipes.
 			if skin.draw_pipes then
