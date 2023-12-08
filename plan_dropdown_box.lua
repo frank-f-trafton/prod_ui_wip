@@ -30,7 +30,7 @@ function plan.make(parent)
 	frame.w = 640
 	frame.h = 480
 
-	frame:setFrameTitle("Input Boxes")
+	frame:setFrameTitle("Dropdown Boxes")
 
 	local content = frame:findTag("frame_content")
 	if content then
