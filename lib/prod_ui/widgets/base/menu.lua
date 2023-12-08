@@ -235,7 +235,6 @@ function def:uiCall_create(inst)
 		widShared.setupScroll(self)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
-		widShared.setupMargin(self)
 
 		self.press_busy = false
 

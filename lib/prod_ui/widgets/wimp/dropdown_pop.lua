@@ -1,68 +1,18 @@
+-- XXX: Unfinished. Copy of `wimp/menu_pop.lua`.
 
 --[[
-wimp/menu_pop: A pop-up menu implementation.
+wimp/dropdown_pop: The pop-up component of a dropdown menu.
 
-Supports sub-menus by spawning additional menu widgets. All widgets in the sequence
-form a doubly-linked list, using the fields 'self.chain_next' and 'self.chain_prev'.
-The first item in the chain may be the client (invoking) widget.
+'self.chain_prev' points to the invoking dropdown base widget.
 
 
-+---------------------+
-|    Client Widget    |
-|                     |
-|               +----------------------+
-|               |    Foobar    Ctrl+f  |
-+---------------|[/] Docked    Shift+d |
-                |----------------------|
-                |    Save      Ctrl+s  |+-------------------+
-                |    Export          > || As Foo...   Alt+f |
-                |----------------------|| As Bar...   Alt+b |
-                |    Quit      Ctrl+F4 |+-------------------+
-                +----------------------+
-
-      Chain #1   --->    Chain #2     --->     Chain #3
-
-
-Three menu-items are supported:
+Two menu-items are supported:
 * Command: executes a function
-* Group: opens a sub-menu
 * Separator
+
 
 These are not real OS widgets, so they are limited to the boundaries of the window.
 They may act strangely if the window is too small for the menu contents.
-
-
-Horizontal item padding (not including widget margins):
-
-+---------------------------+
-|   [B]   Text    Ctrl+t  > |
-+---------------------------+
-  |  | | |    |*1|      |||| *2
-  |  | | |    |  |      |||self.pad_arrow_x2
-  |  | | |    |  |      |||
-  |  | | |    |  |      ||self.arrow_draw_w
-  |  | | |    |  |      ||
-  |  | | |    |  |      |self.pad_arrow_x1
-  |  | | |    |  |      |
-  |  | | |    |  |      |
-  |  | | |    |  |      self.pad_shortcut_x2
-  |  | | |    |  |
-  |  | | |    |  self.pad_shortcut_x1
-  |  | | |    |
-  |  | | |    self.pad_text_x2
-  |  | | |
-  |  | | self.pad_text_x1
-  |  | |
-  |  | self.pad_bijou_x2
-  |  |
-  |  self.bijou_draw_w
-  |
-  self.pad_bijou_x1
-
-
-*1: The shortcut text is right-aligned.
-*2: Arrow measurements apply to groups only.
-
 
 --]]
 
@@ -79,7 +29,7 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
 local def = {
-	skin_id = "menu_pop1",
+	skin_id = "dropdown_pop1",
 }
 
 
@@ -87,106 +37,12 @@ widShared.scrollSetMethods(def)
 def.arrange = commonMenu.arrangeListVerticalTB
 
 
--- * Internal: Sub-menu creation and teardown *
-
-
-local function destroySubMenus(self)
-
-	if self.chain_next then
-		widShared.chainRemovePost(self)
-		self.last_open_group = false
-	end
-end
-
-
-local function assignSubMenu(item, client, set_selection)
-
-	-- Only create a sub-menu if the last-open doesn't match the current index (including if last-open is false).
-	local selected_item = client.menu.items[client.menu.index]
-	if selected_item ~= client.last_open_group then
-
-		-- If this menu currently has a sub-menu, close it.
-		destroySubMenus(client)
-
-		local parent = client.parent
-		local group_def = item.group_def
-		if group_def and parent then
-			-- Add as a sibling and attach to the menu chain.
-			local client_sub = parent:addChild("wimp/menu_pop")
-
-			client.chain_next = client_sub
-			client_sub.chain_prev = client
-
-			client_sub.wid_ref = client.wid_ref
-
-			-- Configure menu defs.
-			commonMenu.widgetConfigureMenuItems(client_sub, group_def)
-
-			-- Append items to fresh menu
-			if group_def then
-				for i, item_guide in ipairs(group_def) do
-					client_sub:appendItem(item_guide.type, item_guide)
-				end
-			end
-
-			-- Set dimensions and decide whether to place on the right or left (if not enough space).
-			client_sub:updateDimensions()
-			client_sub:menuChangeCleanup()
-
-			client_sub.x = client.x + client.vp_x + client.vp_w -- XXX WIP
-			client_sub.y = client.y + item.y
-
-			client_sub:keepInView()
-
-			client_sub.origin_item = item
-
-			if set_selection then
-				client_sub.menu.default_deselect = false
-			end
-			client_sub.menu:setSelectedDefault()
-
-			-- Mark the item used to invoke this sub-menu.
-			client.last_open_group = item
-
-			-- Assign thimble to sub-menu
-			client_sub:tryTakeThimble()
-		end
-	end
-end
-
-
-local function async_changeSubMenu(self, item_index, dt)
-
-	-- We assume that this async function is only called as a result of the mouse hovering over a group,
-	-- so the sub-menu defaults to no selection.
-
-	if item_index == self.menu.index then
-		local item = self.menu.items[item_index]
-
-		if item and item.type == "group" then
-			assignSubMenu(item, self, false)
-
-		else
-			destroySubMenus(self)
-		end
-	end
-end
-
-
-local function activateGroup(client, item, set_selection)
-	
-	assignSubMenu(item, client, set_selection)
-	client.open_time = 0
-end
-
-
--- * / Internal: Sub-menu creation and teardown *
-
-
 -- * Internal: Item activation *
 
 
 local function activateCommand(client, item)
+
+	-- XXX: Dropdown menus will behave differently. The dropdown box itself should have the callback with the item passed as an argument.
 
 	local wid_ref = client.wid_ref
 
@@ -248,66 +104,9 @@ def._mt_command = {
 		)
 
 		item.text_y = client.pad_text_y1
-
-		if item.text_shortcut then
-			item.text_s_x = item.w - font:getWidth(item.text_shortcut) - client.pad_shortcut_x2
-			item.text_s_y = item.text_y
-		end
-
-		-- Underline state
-		local temp_str, x, w = textUtil.processUnderline(item.text, font)
-		if not temp_str then
-			item.ul_on = false
-			item.text_int = item.text
-
-		else
-			item.ul_on = true
-			item.text_int = temp_str
-			item.ul_x = item.text_x + x
-			item.ul_w = w
-			item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + client.underline_width / 2)
-		end
 	end,
 }
 def._mt_command.__index = def._mt_command
-
-
-def._mt_group = {
-	type = "group",
-
-	reshape = function(item, client)
-
-		local font = client.skin.font_item
-
-		item.text_x = (
-			client.pad_bijou_x1
-			+ client.bijou_draw_w
-			+ client.pad_bijou_x2
-			+ client.pad_text_x1
-		)
-		item.text_y = client.pad_text_y1
-
-		-- Underline state
-		local temp_str, x, w = textUtil.processUnderline(item.text, font)
-		if not temp_str then
-			item.ul_on = false
-			item.text_int = item.text
-
-		else
-			item.ul_on = true
-			item.text_int = temp_str
-			item.ul_x = item.text_x + x
-			item.ul_w = w
-			--item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + client.underline_width / 2)
-			item.ul_y = item.text_y + font:getBaseline() + math.floor(0.5 + client.underline_width / 2)
-		end
-
-		-- Arrow state
-		item.arrow_x = item.w - client.pad_arrow_x2 - client.arrow_draw_w - client.pad_arrow_x1
-		item.arrow_y = item.text_y
-	end,
-}
-def._mt_group.__index = def._mt_group
 
 
 def._mt_separator = {
@@ -338,12 +137,12 @@ function def:appendItem(item_type, info)
 	if item_type == "command" then
 		item.text = info.text or ""
 
-		-- internal (underline notation stripped) version of item.text
+		-- internal version of item.text
+		-- XXX: this was used as part of an underlining system that was removed when adapting menu_pop.lua for this def.
 		item.text_int = ""
 		item.text_x = 0
 		item.text_y = 0
 
-		item.text_shortcut = info.text_shortcut or false
 		item.text_s_x = 0
 		item.text_s_y = 0
 
@@ -359,24 +158,6 @@ function def:appendItem(item_type, info)
 		item.actionable = not not item.callback
 
 		setmetatable(item, self._mt_command)
-
-	elseif item_type == "group" then
-		item.text = info.text or ""
-
-		-- internal (underline notation stripped) version of item.text
-		item.text_int = ""
-		item.text_x = 0
-		item.text_y = 0
-
-		item.arrow_x = 0
-		item.arrow_y = 0
-
-		item.group_def = info.group_def
-
-		item.selectable = true
-		item.actionable = not not item.group_def
-
-		setmetatable(item, self._mt_group)
 
 	elseif item_type == "separator" then
 		item.selectable = false
@@ -412,6 +193,7 @@ function def:updateDimensions()
 	* Reshape the widget to correctly set viewport rectangles
 	* Set the width of all items to the width of viewport #1, and then reshape all items
 	--]]
+	-- XXX: We will just be using the maximum of (dropdown_box.w, widest item).
 
 	local skin = self.skin
 	local menu = self.menu
@@ -447,22 +229,11 @@ function def:updateDimensions()
 
 	print("#items", #items, "h", h, "items[#items].y", items[#items].y, "items[#items].h", items[#items].h)
 
-	local has_groups = false
-	local has_shortcuts = false
-
-	-- Combine the widest label text and the widest shortcut text.
-	local w_text, w_shortcut = 0, 0
+	-- Find the widest item text.
+	local w_text = 0
 	for i, item in ipairs(items) do
-		if item.type == "group" then
-			has_groups = true
-		end
-
 		if item.text_int then
 			w_text = math.max(w_text, font:getWidth(item.text_int))
-		end
-		if item.text_shortcut then
-			has_shortcuts = true
-			w_shortcut = math.max(w_shortcut, font:getWidth(item.text_shortcut))
 		end
 	end
 	w = (
@@ -473,21 +244,6 @@ function def:updateDimensions()
 		w_text +
 		self.pad_text_x2
 	)
-
-	-- If both groups and shortcuts are present, add the larger of the two padding values.
-	-- Otherwise add one or the other (or none).
-	local add_group_pad = self.pad_arrow_x1 + self.arrow_draw_w + self.pad_arrow_x2
-	local add_shortcut_pad = self.pad_shortcut_x1 + w_shortcut + self.pad_shortcut_x2
-	if has_shortcuts and has_groups then
-		w = w + math.max(add_group_pad, add_shortcut_pad)
-
-	elseif has_shortcuts then
-		w = w + add_shortcut_pad
-
-	elseif has_groups then
-		w = w + add_group_pad
-	end
-	
 
 	-- (We assume that the top-level widget's dimensions match the display area.)
 	local wid_top = self:getTopWidgetInstance()
@@ -526,12 +282,6 @@ function def:keepInView()
 		self.y = math.max(0, math.min(self.y, parent.h - self.h))
 	end
 end
-
-
--- * Internal *
-
-
--- * / Internal *
 
 
 -- * Scroll helpers *
@@ -696,9 +446,6 @@ function def:uiCall_create(inst)
 		self.pad_bijou_y1 = 2
 		self.pad_bijou_y2 = 2
 
-		self.pad_shortcut_x1 = 16
-		self.pad_shortcut_x2 = 8
-
 		-- Drawing offsets and size for bijou quads.
 		self.bijou_draw_w = 24
 		self.bijou_draw_h = 24
@@ -713,18 +460,9 @@ function def:uiCall_create(inst)
 		-- Padding for separators.
 		self.pad_separator_y = 4
 
-		-- Padding for group arrow indicators.
-		self.pad_arrow_x1 = 4
-		self.pad_arrow_x2 = 0
-		self.arrow_draw_w = 24
-		self.arrow_draw_h = 24
-
 		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
 		self.selection_extend_x = 0
 		self.selection_extend_y = 0
-
-		-- Used when underlining shortcut key letters in menu items.
-		self.underline_width = 1 -- XXX pull from skin.
 
 		-- References populated when this widget is part of a chain of menus.
 		self.chain_next = false
@@ -733,14 +471,8 @@ function def:uiCall_create(inst)
 		-- Caller sets this to the widget table that this menu "belongs to" or extends.
 		self.wid_ref = false
 
-		-- Used to determine if a sub-menu needs to be invoked.
-		self.last_open_group = false
-
-		-- Timer to delay the opening and closing of sub-menus.
-		self.open_time = 0.0
-
 		-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
-		--self.origin_item = 
+		--self.origin_item =
 
 		self.menu = self.menu or commonMenu.new()
 		self.menu.default_deselect = true
@@ -854,7 +586,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				self:remove()
 
 				temp_chain_prev.chain_next = false
-				temp_chain_prev.last_open_group = false
 				temp_chain_prev:tryTakeThimble()
 
 				return true
@@ -869,7 +600,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				self:remove()
 
 				temp_chain_prev.chain_next = false
-				temp_chain_prev.last_open_group = false
 				temp_chain_prev:tryTakeThimble()
 
 				return true
@@ -880,13 +610,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local sel_item = self.menu.items[self.menu.index]
 
 		if sel_item and sel_item.selectable and sel_item.actionable then
-			if sel_item.type == "group" then
-				if sel_item.group_def and (key == "return" or key == "kpenter" or key == "space" or key == "right") then
-					activateGroup(self, sel_item, true)
-					return true
-				end
-
-			elseif sel_item.type == "command" then
+			if sel_item.type == "command" then
 				if key == "return" or key == "kpenter" or key == "space" then
 					activateCommand(self, sel_item)
 					return true
@@ -914,13 +638,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			if item and item.selectable then
 				self.menu:setSelectedIndex(item_i)
 				if item.actionable then
-					if item.type == "group" then
-						if item.group_def then
-							activateGroup(self, item, true)
-							return true
-						end
-
-					elseif item.type == "command" then
+					if item.type == "command" then
 						activateCommand(self, item)
 						return true
 					end
@@ -934,27 +652,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	-- menu to the root menu.
 	-- It might break other things, though.
 	return true -- XXX
-end
-
-
-function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
-
-	local item_i, item = keyMnemonicSearch(self.menu.items, key)
-	if item and item.selectable then
-		self.menu:setSelectedIndex(item_i)
-		if item.actionable then
-			if item.type == "group" then
-				if item.group_def then
-					activateGroup(self, item, true)
-					return true
-				end
-
-			elseif item.type == "command" then
-				activateCommand(self, item)
-				return true
-			end
-		end
-	end
 end
 
 
@@ -991,34 +688,25 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local rolled = false
 
-		-- Handle press roll-over for menus in Open Mode.
 		if self.press_busy == "menu-drag" then
-			local wid = widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 
-			if wid and wid ~= self then
-				pressedAndThimbleHandoff(self, wid)
+			-- Implement Drag-to-select.
+			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
-				rolled = true
-				wid:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
+			-- Mouse position relative to viewport #1
+			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+			mx = mx - self.vp_x
+			my = my - self.vp_y
+
+			local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
+			if item_i and item_t.selectable then
+				self.menu:setSelectedIndex(item_i)
+
+			else
+				self.menu:setSelectedIndex(0)
 			end
 		end
-
-		-- Continue with the rest of the logic if no roll-over occurred.
-		if not rolled then
-			self:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
-		end
 	end
-end
-
-
-local function restingOnOpenGroup(self)
-	--[[
-	print("restingOnOpenGroup",
-		self.chain_next,
-		self.chain_next and self.chain_next.origin_item,
-		self.menu.items[self.menu.index])
-	--]]
-	return self.chain_next and self.chain_next.origin_item == self.menu.items[self.menu.index]
 end
 
 
@@ -1032,55 +720,6 @@ local function findOriginItemIndex(c_prev, origin_item)
 	end
 
 	-- return nil
-end
-
-
-local function forceSuperMenuGroupSelection(self)
-
-	local w_prev = self.chain_prev
-
-	-- (Filter out menu-bars -> they don't have 'menu' populated)
-	if w_prev and w_prev.menu and self.origin_item then
-
-		-- We have the origin item table, but not its index in the menu list. Dig that up now.
-		local index = findOriginItemIndex(w_prev, self.origin_item)
-
-		if index then
-			w_prev.menu:setSelectedIndex(index)
-		end
-	end
-end
-
-
-function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
-
-	-- Implement Drag-to-select.
-	-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
-
-	-- Mouse position relative to viewport #1
-	local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-	mx = mx - self.vp_x
-	my = my - self.vp_y
-
-	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
-	if item_i and item_t.selectable then
-		self.menu:setSelectedIndex(item_i)
-		--self:selectionInView()
-
-		-- Immediately open groups when dragging over them.
-		if item_t.type == "group" then
-			if item_t.group_def then
-				activateGroup(self, item_t, false)
-			end
-		end
-
-	-- Only remove the selection if it is not a group that is currently opened.
-	elseif not restingOnOpenGroup(self) then
-		self.menu:setSelectedIndex(0)
-	end
-
-	-- If this is a sub-menu, force the left-menu's open group to remain selected.
-	forceSuperMenuGroupSelection(self)
 end
 
 
@@ -1103,6 +742,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
 				if self.item_hover ~= item then
+
 					self.item_hover = item
 				end
 
@@ -1120,16 +760,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if self.item_hover and not hover_ok then
 			self.item_hover = false
-
-			-- Only remove the selection if it is not a group that is currently opened.
-			if not restingOnOpenGroup(self) then
-				self.menu:setSelectedIndex(0)
-			end
-		end
-
-		-- If this is a sub-menu, force the left-menu's open group to remain selected.
-		if self.chain_prev then
-			forceSuperMenuGroupSelection(self)
 		end
 	end
 end
@@ -1139,11 +769,6 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 	if self == inst then
 		self.item_hover = false
-
-		-- Only remove the selection if it is not a group that is currently opened.
-		if not restingOnOpenGroup(self) then
-			self.menu:setSelectedIndex(0)
-		end
 	end
 end
 
@@ -1169,16 +794,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
 
 				self.press_busy = "menu-drag"
-
-				if item_t then
-					-- Don't activate commands on press-down.
-					if item_t.type == "group" then
-						if item_t.group_def then
-							activateGroup(self, item_t, false)
-						end
-					end
-					-- Don't activate separators.
-				end
 
 				self:cacheUpdate(true)
 			end
@@ -1215,9 +830,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 					then
 						if item_selected.type == "command" then
 							activateCommand(self, item_selected)
-
-						elseif item_selected.type == "group" then
-							activateGroup(self, item_selected, false)
 						end
 					end
 				end
@@ -1247,7 +859,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(true)
 			end
-			
+
 			-- Stop bubbling
 			return true
 		end
@@ -1275,8 +887,6 @@ function def:uiCall_update(dt)
 		needs_update = true
 	end
 
-	--print("wid_update", "open_time", self.open_time)
-
 	local selected = self.menu.items[self.menu.index]
 
 	local cur_thimble = self.context.current_thimble
@@ -1291,7 +901,7 @@ function def:uiCall_update(dt)
 	end
 
 	--print("chain_next", self.chain_next, "in_chain", in_chain)
-	--print("menu.index", self.menu.index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
+	--print("menu.index", self.menu.index, "selected", selected, "type", selected and selected.type)
 
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
@@ -1302,22 +912,7 @@ function def:uiCall_update(dt)
 
 	--or not (self.chain_next and self.chain_next.origin_item == selected)
 
-	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a", "last_open", self.last_open_group, "open_time", self.open_time)
-
-	if item_t and selected and selected == item_t
-	and (selected.type == "group" and not self.last_open_group
-	or self.last_open_group and selected ~= self.last_open_group)
-	then
-		self.open_time = self.open_time + dt
-
-	else
-		self.open_time = 0
-	end
-
-	if self.open_time >= 0.20 then -- XXX config/style
-		self.context:appendAsyncAction(self, async_changeSubMenu, self.menu.index)
-		self.open_time = 0
-	end
+	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a")
 
 	-- Update cache if necessary.
 	if needs_update then
@@ -1401,22 +996,6 @@ def.skinners = {
 				end
 			end
 
-			-- Underlines
-			for i = items_first, items_last do
-				local item = items[i]
-				if item.ul_on then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
-					uiGraphics.quad1x1(
-						tq_px,
-						item.x + item.ul_x,
-						item.y + item.ul_y,
-						item.ul_w,
-						self.underline_width
-					)
-				end
-			end
-
 			-- Bijoux for commands, arrow graphics for groups
 			for i = items_first, items_last do
 				local item = items[i]
@@ -1435,23 +1014,11 @@ def.skinners = {
 						)
 					end
 				end
-
-				if item.type == "group" then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
-					uiGraphics.quadXYWH(
-						tq_arrow,
-						item.x + item.arrow_x,
-						item.y + item.arrow_y,
-						tq_arrow.w,
-						tq_arrow.h
-					)
-				end
 			end
 
 			love.graphics.setFont(font)
 
-			-- Main text and shortcuts
+			-- Main text
 			for i = items_first, items_last do
 				local item = items[i]
 
@@ -1459,21 +1026,13 @@ def.skinners = {
 				if item.text_int then
 					local tbl_color = selectItemColor(item, self, skin)
 					love.graphics.setColor(tbl_color)
-					
+
 					love.graphics.print(
 						item.text_int,
 						item.x + item.text_x,
 						item.y + item.text_y
 					)
 				end
-
-				-- Shortcut indicator
-				if item.text_shortcut then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
-					love.graphics.print(item.text_shortcut, item.x + item.text_s_x, item.y + item.text_s_y)
-				end
-
 			end
 
 			love.graphics.pop()
