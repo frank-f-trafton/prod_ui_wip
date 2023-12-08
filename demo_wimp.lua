@@ -1038,6 +1038,13 @@ of it.
 	end
 	--]]
 
+	-- [[
+	do
+		local planDropdownBox = require("plan_dropdown_box")
+		local frame_lb = planDropdownBox.make(wimp_root)
+	end
+	--]]
+
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 

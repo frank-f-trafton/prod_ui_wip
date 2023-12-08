@@ -261,16 +261,6 @@ function def:stepIndex(delta)
 end
 
 
-local function inViewport2(self, x, y)
-	return (x >= self.vp2_x and x < self.vp2_x + self.vp2_w and y >= self.vp2_y and y < self.vp2_y + self.vp2_h)
-end
-
-
-local function inViewport3(self, x, y)
-	return (x >= self.vp3_x and x < self.vp3_x + self.vp3_w and y >= self.vp3_y and y < self.vp3_y + self.vp3_h)
-end
-
-
 function def:uiCall_create(inst)
 
 	if self == inst then
@@ -354,11 +344,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					x, y = self:getRelativePosition(x, y)
 
-					if self.b_prev_enabled and inViewport2(self, x, y) then
+					if self.b_prev_enabled and widShared.pointInViewport(self, 2, x, y) then
 						self.b_pressing = "prev"
 						self:stepIndex(-1)
 
-					elseif self.b_next_enabled and inViewport3(self, x, y) then
+					elseif self.b_next_enabled and widShared.pointInViewport(self, 3, x, y) then
 
 						self.b_pressing = "next"
 						self:stepIndex(1)
@@ -386,10 +376,10 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 				if button == 1 then
 					x, y = self:getRelativePosition(x, y)
 
-					if self.b_pressing == "prev" and inViewport2(self, x, y) then
+					if self.b_pressing == "prev" and widShared.pointInViewport(self, 2, x, y) then
 						self:stepIndex(-1)
 
-					elseif self.b_pressing == "next" and inViewport3(self, x, y) then
+					elseif self.b_pressing == "next" and widShared.pointInViewport(self, 3, x, y) then
 						self:stepIndex(1)
 					end
 				end
