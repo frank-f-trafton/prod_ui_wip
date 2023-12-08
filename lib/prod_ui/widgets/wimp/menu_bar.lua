@@ -184,7 +184,7 @@ local function makePopUpMenu(item, client, bank_thimble, take_thimble, doctor_pr
 	if set_selection then
 		pop_up.menu.default_deselect = false
 	end
-	pop_up.menu:setSelectedDefault()
+	pop_up.menu:setDefaultSelection()
 
 	if take_thimble then
 		pop_up:tryTakeThimble()

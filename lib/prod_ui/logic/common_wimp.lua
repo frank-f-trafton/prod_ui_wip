@@ -56,7 +56,7 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 	-- Reposition menu so that it's in view
 	pop_up:keepInView()
 
-	pop_up.menu:setSelectedDefault()
+	pop_up.menu:setDefaultSelection()
 
 	root:runStatement("rootCall_assignPopUp", self, pop_up)
 

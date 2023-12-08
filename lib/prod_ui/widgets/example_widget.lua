@@ -430,10 +430,8 @@ end
 
 -- Bubbles when the thimble moves to a widget.
 -- @param inst The originating widget instance.
--- @param a A generic argument which is supplied through widget:thimbleTake(). Usage depends on the implementation. One example is to center some widgets in their container, while not in other cases.
--- @param b Second generic argument.
--- @param c Third generic argument.
--- @param d Fourth generic argument.
+-- @param a, b, c, d Generic arguments which are supplied through widget:thimbleTake(). Usage depends on the implementation.
+-- One example is to center some widgets in their container, while not in other cases.
 function def:uiCall_thimbleTake(inst, a, b, c, d)
 
 end
@@ -441,10 +439,7 @@ end
 
 -- Bubbles when the thimble leaves a widget.
 -- @param inst The originating widget instance.
--- @param a A generic argument which is supplied through widget:thimbleTake(). Usage depends on the implementation.
--- @param b Second generic argument.
--- @param c Third generic argument.
--- @param d Fourth generic argument.
+-- @param a, b, c, d Generic arguments which are supplied through widget:thimbleTake(). Usage depends on the implementation.
 function def:uiCall_thimbleRelease(inst, a, b, c, d)
 
 end

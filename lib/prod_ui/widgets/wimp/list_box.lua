@@ -304,6 +304,7 @@ function def:toggleMarkedItem(item_t)
 	item_t.marked = not item_t.marked
 end
 
+
 function def:setMarkedItemByIndex(item_i, marked)
 
 	-- Assertions
@@ -315,7 +316,6 @@ function def:setMarkedItemByIndex(item_i, marked)
 
 	self:setMarkedItem(item_t, marked)
 end
-
 
 
 function def:getMarkedItem(item_t)

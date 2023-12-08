@@ -10,16 +10,15 @@ return {
 	["*font"] = "fonts/p",
 	["*font_ghost"] = "fonts/p",
 
-	cursor_on = "ibeam",
+	["$item_pad_v"] = 2,
 
 	text_align = "left", -- "left", "center", "right"
 
-	color_cursor = {1.0, 1.0, 1.0, 1.0},
-
-	["$caret_w"] = 2,
-
-	color_insert = {1.0, 1.0, 1.0, 1.0},
-	color_replace = {0.75, 0.75, 0.75, 1.0},
+	--XXX: Text stuff for ComboBoxes.
+	--color_cursor = {1.0, 1.0, 1.0, 1.0},
+	--["$caret_w"] = 2,
+	--color_insert = {1.0, 1.0, 1.0, 1.0},
+	--color_replace = {0.75, 0.75, 0.75, 1.0},
 
 	res_idle = {
 		["*slice"] = "tex_slices/input_box",
