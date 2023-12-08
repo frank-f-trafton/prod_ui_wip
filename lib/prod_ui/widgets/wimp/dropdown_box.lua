@@ -44,6 +44,9 @@ local def = {
 }
 
 
+def.arrange = commonMenu.arrangeListVerticalTB
+
+
 def.movePrev = commonMenu.widgetMovePrev
 def.moveNext = commonMenu.widgetMoveNext
 def.moveFirst = commonMenu.widgetMoveFirst
@@ -57,6 +60,150 @@ def.wid_buttonAction3 = uiShared.dummyFunc
 
 --def.uiCall_thimbleAction
 --def.uiCall_thimbleAction2
+
+
+function def:addItem(text, pos, bijou_id)
+
+	-- XXX: Assertions.
+
+	local skin = self.skin
+	local font = skin.font
+
+	local items = self.menu.items
+
+	local item = {}
+
+	item.selectable = true
+
+	item.x, item.y = 0, 0
+	item.w = font:getWidth(text)
+	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
+
+	item.text = text
+	item.bijou_id = bijou_id
+	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
+
+	pos = pos or #items + 1
+
+	if pos < 1 or pos > #items + 1 then
+		error("addItem: insert position is out of range.")
+	end
+
+	table.insert(items, pos, item)
+
+	self:arrange(pos, #items)
+
+	print("addItem text:", item.text, "y: ", item.y)
+
+	-- If there is no chosen item, assign this one as chosen now.
+	if not self.chosen then
+		local i, tbl = self.menu:hasAnySelectableItems()
+		if i then
+			self.chosen = tbl
+		end
+	end
+
+	return item
+end
+
+
+function def:removeItem(item_t)
+
+	-- Assertions
+	-- [[
+	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
+	--]]
+
+	local item_i = self.menu:getItemIndex(item_t)
+
+	local removed_item = self:removeItemByIndex(item_i)
+
+	return removed_item
+end
+
+
+function def:removeItemByIndex(item_i)
+
+	-- Assertions
+	-- [[
+	uiShared.assertNumber(1, item_i)
+	--]]
+
+	local items = self.menu.items
+	local removed_item = items[item_i]
+	if not removed_item then
+		error("no item to remove at index: " .. tostring(item_i))
+	end
+
+	local removed = table.remove(items, item_i)
+
+	-- Removed item was the last in the list, and was selected:
+	if self.menu.index > #self.menu.items then
+		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
+		if landing_i then
+			self:setSelectionByIndex(landing_i)
+
+		else
+			self:setSelectionByIndex(0)
+		end
+
+	-- Removed item was not selected, and the selected item appears after the removed item in the list:
+	elseif self.menu.index > item_i then
+		self.menu.index = self.menu.index - 1
+	end
+
+	-- Handle the current chosen item being removed.
+	if self.chosen == removed then
+		-- XXX: fix this so that the new chosen item is close to the removed one's position.
+		local i, new_chosen = self.menu:hasAnySelectableItems()
+		self.chosen = new_chosen or false
+	end
+
+	self:arrange(item_i, #items)
+
+	return removed_item
+end
+
+
+function def:setSelection(item_t)
+
+	-- NOTE: This affects the selection in the pop-up menu, not the current chosen item in the body.
+
+	-- Assertions
+	-- [[
+	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
+	--]]
+
+	local item_i = self.menu:getItemIndex(item_t)
+	self:setSelectionByIndex(item_i)
+end
+
+
+function def:setSelectionByIndex(item_i)
+
+	-- NOTE: This affects the selection in the pop-up menu, not the current chosen item in the body.
+
+	-- Assertions
+	-- [[
+	uiShared.assertNumber(1, item_i)
+	--]]
+
+	self.menu:setSelectedIndex(item_i)
+end
+
+
+function def:setChosen(item_t)
+
+	-- Assertions
+	-- [[
+	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
+	--]]
+
+	-- Confirms the item is in the menu list.
+	local item_i = self.menu:getItemIndex(item_t)
+
+	self.chosen = item_t
+end
 
 
 function def:uiCall_create(inst)
@@ -169,6 +316,24 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
+function def:uiCall_thimbleRelease(inst)
+
+	print("def:uiCall_thimbleRelease", self, inst, self == inst)
+
+	if self == inst then
+		-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
+		-- This precludes opening a right-click context menu on an item in the pop-up menu, since
+		-- the context menu takes the thimble while it exists.
+		-- If you require opening context menus on list items, consider using a plain ListBox
+		-- widget instead.
+		if self.opened then
+			closePopUpMenu(self, false)
+			return true
+		end
+	end
+end
+
+
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	if self == inst then
@@ -276,14 +441,17 @@ def.skinners = {
 			end
 
 			-- If a chosen item is defined, render it.
-			if self.opened and type(self.opened) == "table" then -- XXX: the second condition is a temporary debug check.
-				love.graphics.print("WIP <render chosen item>")
+			if self.chosen then
+				love.graphics.print(self.chosen.text, 0, 0)
 
 			else
 				love.graphics.print("WIP <no chosen item>")
 			end
 
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
+
+			-- Debug
+			love.graphics.print("self.opened: " .. tostring(self.opened), 0, 48)
 
 			love.graphics.pop()
 		end,

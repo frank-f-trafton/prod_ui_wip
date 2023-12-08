@@ -68,12 +68,12 @@ local function sign(n)
 end
 
 
-local function clampIndex(self)
+local function clampIndex(self, pos)
 
 	-- Assumes the menu has at least one item, and does not account for no selection (index 0).
 	-- Check that the index is acceptable after calling.
 
-	self.index = math.max(1, math.min(math.floor(self.index), #self.items))
+	return math.max(1, math.min(math.floor(pos), #self.items))
 end
 
 
@@ -81,13 +81,13 @@ end
 
 
 --- Check if the menu has any items that can be selected.
--- @return true if any item is selectable, false otherwise.
+-- @return index and table of the first selectable item, or false if there are no selectable items.
 function _mt_menu:hasAnySelectableItems()
 
 	local items = self.items
 	for i = 1, #items do
 		if items[i].selectable then
-			return true
+			return i, items[i]
 		end
 	end
 
@@ -132,7 +132,7 @@ function _mt_menu:findSelectableLanding(i, dir)
 		i = i + dir
 	until not item
 
-	return nil
+	-- return nil
 end
 
 
@@ -149,14 +149,10 @@ function _mt_menu:setSelectedIndex(index)
 end
 
 
---- Sets the current menu selection to the default.
-function _mt_menu:setSelectedDefault()
+function _mt_menu:getDefaultSelection()
 
-	if self.default_deselect then
-		self.index = 0
-
-	else
-		local first_sel_i = false
+	if not self.default_deselect then
+		local first_sel_i, first_sel = false, false
 
 		-- Prefer the first item marked as the default.
 		-- If no default is set, fall back to the first selectable item.
@@ -164,23 +160,30 @@ function _mt_menu:setSelectedDefault()
 
 			if item.selectable then
 				if item.is_default_selection then
-					self:setSelectedIndex(i)
-					return
+					return i, item
 
 				elseif not first_sel_i then
 					first_sel_i = i
+					first_sel = item
 				end
 			end
 		end
 
 		if first_sel_i then
-			self:setSelectedIndex(first_sel_i)
-
-		-- Nothing selectable: deselect
-		else
-			self.index = 0
+			return first_sel_i, first_sel
 		end
 	end
+
+	-- Nothing selectable.
+	return 0
+end
+
+
+--- Sets the current menu selection to the default.
+function _mt_menu:setDefaultSelection()
+
+	local i, tbl = self:getSelectedDefault()
+	self:setSelectedIndex(i)
 end
 
 
@@ -191,285 +194,218 @@ function _mt_menu:getSelectedItem()
 end
 
 
---- Move the current menu selection index.
--- @param delta The direction to move in. 1 == down, -1 == up, 0 == stay put (and do the clamping and landing checks). You can move more than one step at a time.
--- @param wrap (boolean) When true, wrap around the list when at the first or last selectable item. Pass `self.wrap_selection` here unless you have a reason to override it.
-function _mt_menu:stepSelected(delta, wrap)
+--- Get a selection from a position.
+function _mt_menu:getSelectionStep(pos, delta, wrap)
 
 	delta = math.floor(delta + 0.5)
 
 	-- Starting from no selection:
-	if self.index == 0 then
+	if pos == 0 then
 		-- If wrapping, depending on the direction, go to the top-most or bottom-most selectable.
 		-- Default to nothing if there are no selectable items.
 		-- Zero delta is treated like a positive value (forward).
 		if wrap then
 			if delta < 0 then
-				self.index = self:findSelectableLanding(#self.items, -1) or 0
+				pos = self:findSelectableLanding(#self.items, -1) or 0
 
 			else
-				self.index = self:findSelectableLanding(1, 1) or 0
+				pos = self:findSelectableLanding(1, 1) or 0
 			end
 
 		-- Not wrapping: go to the top-most selection, regardless of the delta.
 		-- Default to nothing if there are no selectable items.
 		else
-			self.index = self:findSelectableLanding(1, 1) or 0
+			pos = self:findSelectableLanding(1, 1) or 0
 		end
 
 	-- Normal selection handling:
 	else
-		clampIndex(self)
+		pos = clampIndex(self, pos)
 
 		-- Special handling for wrap-around. Wrapping only happens if the selection is at the edge
 		-- of the list, and it always puts the selector at the first selectable item on the opposite
 		-- side.
 		if wrap then
-			if delta < 0 and not self:findSelectableLanding(self.index - 1, -1) then
-				self.index = self:findSelectableLanding(#self.items, -1) or 0
-				return 
+			if delta < 0 and not self:findSelectableLanding(pos - 1, -1) then
+				pos = self:findSelectableLanding(#self.items, -1) or 0
+				return pos
 
-			elseif delta >= 0 and not self:findSelectableLanding(self.index + 1, 1) then
-				self.index = self:findSelectableLanding(1, 1) or 0
-				return
+			elseif delta >= 0 and not self:findSelectableLanding(pos + 1, 1) then
+				pos = self:findSelectableLanding(1, 1) or 0
+				return pos
 			end
 		end
 
 		-- Advance.
-		self.index = self.index + delta
-
-		clampIndex(self)
+		pos = pos + delta
+		pos = clampIndex(self, pos)
 
 		local dir = sign(delta)
 
 		-- If the new item is not selectable, then we need to hunt for the closest one nearby that is.
-		self.index = self:findSelectableLanding(self.index, dir) or self:findSelectableLanding(self.index - dir, -dir) or 0
+		pos = self:findSelectableLanding(pos, dir) or self:findSelectableLanding(pos - dir, -dir) or 0
 	end
+
+	return pos
 end
 
 
---- Move to the first selectable menu item.
-function _mt_menu:setSelectedIndexFirst()
-	self.index = self:findSelectableLanding(1, 1) or 0
+--- Move the current menu selection index.
+-- @param delta The direction to move in. 1 == down, -1 == up, 0 == stay put (and do the clamping and landing checks). You can move more than one step at a time.
+-- @param wrap (boolean) When true, wrap around the list when at the first or last selectable item. Pass `self.wrap_selection` here unless you have a reason to override it.
+function _mt_menu:setSelectionStep(delta, wrap)
+	self.index = self:getSelectionStep(self.index, delta, wrap)
 end
 
 
---- Move to the last selectable menu item.
-function _mt_menu:setSelectedIndexLast()
-	self.index = self:findSelectableLanding(#self.items, -1) or 0
+--- The first selectable menu item.
+function _mt_menu:getFirstSelectableIndex()
+	return self:findSelectableLanding(1, 1) or 0
+end
+
+
+function _mt_menu:setFirstSelectableIndex()
+	self.index = self:getFirstSelectableIndex()
+end
+
+
+--- The last selectable menu item.
+function _mt_menu:getLastSelectableIndex()
+	return self:findSelectableLanding(#self.items, -1) or 0
+end
+
+
+function _mt_menu:setLastSelectableIndex()
+	self.index = self:getLastSelectableIndex()
 end
 
 
 --- Move to the previous selectable menu item, wrapping depending on the menu config.
-function _mt_menu:setSelectedPrev(n)
+function _mt_menu:setPrev(n)
+
 	n = n and math.max(math.floor(n), 1) or 1
-	self:stepSelected(-n, self.wrap_selection)
+	self:setSelectionStep(-n, self.wrap_selection)
 end
 
 
 --- Move to the next selectable menu item, wrapping depending on the menu config.
-function _mt_menu:setSelectedNext(n) -- XXX setSelectionNext
+function _mt_menu:setNext(n)
+
 	n = n and math.max(math.floor(n), 1) or 1
-	self:stepSelected(n, self.wrap_selection)
+	self:setSelectionStep(n, self.wrap_selection)
 end
 
 
---- Stepping backwards, select the first item whose bottom edge is <= the current item's top edge and whose left edge
---  is <= the current item's left edge. If no suitable item is found, try again starting from the bottom. If there is
---  no selection, follow the standard behavior of stepSelected(). Intended for 2D grids of menu-items arranged
---  left-to-right, top-to-bottom.
-function _mt_menu:moveSelectedGridUp() -- XXX needs testing
+--- Step vertically in a 2D grid of items. If no suitable item is found, try again starting from the bottom. If there
+--  is no selection, follow the standard behavior of stepSelected(). Intended for menu-items arranged left-to-right,
+--  top-to-bottom.
+function _mt_menu:moveSelectedGridVertical(dy) -- XXX needs testing
 
 	local items = self.items
 	local item_current = items[self.index]
 
-	-- Handle no current selection or invalid index.
-	if not item_current then
-		self:stepSelected(-1, self.wrap_selection)
+	dy = math.min(1, math.max(-1, math.floor(0.5 + dy)))
 
-	else
-		local current_x = item_current.x
-		local current_y = item_current.y
+	-- Handle no current selection, invalid index or zero delta.
+	if not item_current or dy == 0 then
+		self:setSelectionStep(0)
+	end
 
-		local i = self.index
-		local looped = false
+	local current_x, current_y = item_current.x, item_current.y
 
-		while true do
-			i = i - 1
-			local item = items[i]
+	local i = self.index
+	local looped = false
 
-			if not item then
-				-- Try again, from the bottom
-				if not looped then
+	while true do
+		i = i + dy
+		local item = items[i]
+
+		if not item then
+			-- Try again, from the other edge.
+			if not looped then
+				if dy == -1 then
 					i = #items + 1
 					current_y = math.huge
-					looped = true
 
-				-- Give up
 				else
-					--self:stepSelected(-1, self.wrap_selection)
-					return
-				end
-
-			elseif item.selectable and item.y + item.h <= current_y and item.x <= current_x then
-				self:setSelectedIndex(i)
-				return
-			end
-		end
-	end
-end
-
-
---- Stepping forwards, select the first item whose top edge is >= the current item's bottom edge and whose right edge
---  is >= the current item's right edge. If no suitable item is found, try again starting from the top. If there is
---  no selection, follow the standard behavior of stepSelected(). Intended for 2D grids of menu-items arranged
---  left-to-right, top-to-bottom.
-function _mt_menu:moveSelectedGridDown() -- XXX needs testing
-
-	local items = self.items
-	local item_current = items[self.index]
-
-	-- Handle no current selection or invalid index.
-	if not item_current then
-		self:stepSelected(1, self.wrap_selection)
-
-	else
-		local current_x = item_current.x + item_current.w
-		local current_y = item_current.y + item_current.h
-
-		local i = self.index
-		local looped = false
-
-		while true do
-			i = i + 1
-			local item = items[i]
-
-			if not item then
-				-- Try again, from the bottom
-				if not looped then
 					i = 0
 					current_y = -math.huge
-					looped = true
-
-				-- Give up
-				else
-					--self:stepSelected(1, self.wrap_selection)
-					return
 				end
+				looped = true
 
-			elseif item.selectable and item.y >= current_y and item.x + item.w >= current_x then
-				self:setSelectedIndex(i)
-				return
+			-- Give up
+			else
+				break
 			end
+
+		elseif item.selectable
+		and (dy == -1 and item.y + item.h <= current_y and item.x <= current_x
+		or dy == 1 and item.y >= current_y and item.x + item.w >= current_x)
+		then
+			self:setSelectedIndex(i)
+			return
 		end
 	end
+
+	self:setSelectionStep(0)
 end
 
 
---- Stepping backwards, select the first item at the same Y position whose right edge is <= the current item's left
---  edge. If no suitable item is found, try again starting from the end of the row. If there is no selection, follow
---  the standard behavior of stepSelected(). Intended for 2D grids of menu-items arranged left-to-right, top-to-bottom.
-function _mt_menu:moveSelectedGridLeft() -- XXX needs testing
-
-	local items = self.items
-	local item_current = items[self.index]
-
-	-- Handle no current selection or invalid index.
-	if not item_current then
-		self:stepSelected(-1, self.wrap_selection)
-
-	else
-		local current_x = item_current.x
-		local current_y = item_current.y
-
-		local i = self.index
-		local i_start = i
-		local looped = false
-
-		while true do
-			i = i - 1
-			local item = items[i]
-
-			if not item or item.y < current_y then
-				-- Try again from the end of the row.
-				if not looped then
-					i = i_start
-					while true do
-						local item2 = items[i]
-						if item2 and item2.y <= current_y then
-							i = i + 1
-						else
-							break
-						end
-					end
-					looped = true
-
-				-- Give up
-				else
-					--self:stepSelected(-1, self.wrap_selection)
-					return
-				end
-
-			elseif item.selectable and item.x + item.w <= current_x then
-				self:setSelectedIndex(i)
-				return
-			end
-		end
-	end
-end
-
-
---- Stepping forwards, select the first item at the same Y position whose left edge is >= the current item's right
---  edge. If no suitable item is found, try again starting from the beginning of the row. If there is no selection,
---  follow the standard behavior of stepSelected(). Intended for 2D grids of menu-items arranged left-to-right,
+--- Step horizontally in a 2D grid of items. If no suitable item is found, try again starting from the bottom. If there
+--  is no selection, follow the standard behavior of stepSelected(). Intended for menu-items arranged left-to-right,
 --  top-to-bottom.
-function _mt_menu:moveSelectedGridRight() -- XXX needs testing
+function _mt_menu:moveSelectedGridHorizontal(dx) -- XXX needs testing
 
 	local items = self.items
 	local item_current = items[self.index]
 
-	-- Handle no current selection or invalid index.
-	if not item_current then
-		self:stepSelected(1, self.wrap_selection)
+	dx = math.min(1, math.max(-1, math.floor(0.5 + dx)))
 
-	else
-		local current_x = item_current.x
-		local current_y = item_current.y
+	-- Handle no current selection, invalid index or zero delta.
+	if not item_current or dx == 0 then
+		self:setSelectionStep(0)
+	end
 
-		local i = self.index
-		local i_start = i
-		local looped = false
+	local current_x, current_y = item_current.x, item_current.y
 
-		while true do
-			i = i + 1
-			local item = items[i]
+	local i = self.index
+	local i_start = i
+	local looped = false
 
-			if not item or item.y > current_y then
-				-- Try again from the start of the row.
-				if not looped then
-					i = i_start
-					while true do
-						local item2 = items[i]
-						if item2 and item2.y >= current_y then
-							i = i - 1
-						else
-							break
-						end
+	while true do
+		i = i + dx
+		local item = items[i]
+
+		if not item or (dx < 0 and item.y < current_y or dx > 0 and item.y > current_y) then
+			-- Try again from the other side of the row.
+			if not looped then
+				i = i_start
+				while true do
+					local item2 = = items[i]
+					if item2 and (dx < 0 and item2.y <= current_y or dx > 0 and item2.y >= current_y then
+						i = i - dx
+
+					else
+						break
 					end
-					looped = true
-
-				-- Give up
-				else
-					--self:stepSelected(-1, self.wrap_selection)
-					return
 				end
+				looped = true
 
-			elseif item.selectable and item.x + item.w >= current_x then
-				self:setSelectedIndex(i)
-				return
+			-- Give up
+			else
+				break
 			end
+
+		elseif item.selectable
+		and (dx == -1 and item.x + item.w <= current_x
+		or dx == 1 and item.x + item.w >= current_x)
+		then
+			self:setSelectedIndex(i)
+			return
 		end
 	end
+
+	self:setSelectionStep(0)
 end
 
 
@@ -911,8 +847,6 @@ end
 
 --[[
 	Some default selection methods for widgets, assuming they support scrolling viewports.
-	They were originally built into the generic menu widget, but have been moved here so that other widgets can
-	access them.
 
 	They expect the widget to have a single menu table at `self.menu`.
 
@@ -930,7 +864,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 function commonMenu.widgetMovePrev(self, n, immediate)
 
-	self.menu:setSelectedPrev(n)
+	self.menu:setPrev(n)
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -948,7 +882,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 function commonMenu.widgetMoveNext(self, n, immediate)
 
-	self.menu:setSelectedNext(n)
+	self.menu:setNext(n)
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -965,7 +899,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 function commonMenu.widgetMoveFirst(self, immediate)
 
-	self.menu:setSelectedIndexFirst()
+	self.menu:setFirstSelectableIndex()
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -982,7 +916,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 function commonMenu.widgetMoveLast(self, immediate)
 
-	self.menu:setSelectedIndexLast()
+	self.menu:setLastSelectableIndex()
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -1177,4 +1111,3 @@ end
 
 
 return commonMenu
-

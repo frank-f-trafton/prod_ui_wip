@@ -143,7 +143,7 @@ local function assignSubMenu(item, client, set_selection)
 			if set_selection then
 				client_sub.menu.default_deselect = false
 			end
-			client_sub.menu:setSelectedDefault()
+			client_sub.menu:setDefaultSelection()
 
 			-- Mark the item used to invoke this sub-menu.
 			client.last_open_group = item
@@ -643,7 +643,7 @@ end
 
 function def:menuChangeCleanup()
 
-	self.menu:stepSelected(0, false)
+	self.menu:setSelectionStep(0, false)
 	self:arrange()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()

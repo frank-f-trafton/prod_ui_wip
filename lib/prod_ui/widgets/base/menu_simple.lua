@@ -224,7 +224,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		-- Debug
 		elseif scancode == "insert" then
 			table.insert(self.menu.items, math.max(1, self.menu.index), {text = "filler entry #" .. #self.menu.items + 1, selectable = true, type = "press_action"})
-			self.menu:stepSelected(0)
+			self.menu:setSelectionStep(0)
 			if self.scroll_clamp then
 				clampScroll(self)
 			end
@@ -233,7 +233,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		-- Debug
 		elseif scancode == "delete" then
 			table.remove(self.menu.items, self.menu.index)
-			self.menu:stepSelected(0)
+			self.menu:setSelectionStep(0)
 			if self.scroll_clamp then
 				clampScroll(self)
 			end
@@ -293,7 +293,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 
-		self.menu:stepSelected(4 * -y, self.wrap_selection)
+		self.menu:setSelectionStep(4 * -y, self.wrap_selection)
 		self:selectionInView()
 
 		-- Block bubbling if event was handled.

@@ -44,6 +44,11 @@ function plan.make(parent)
 		dropdown.y = 96
 		dropdown.w = 256
 		dropdown.h = 32
+
+		dropdown:addItem("foo")
+		dropdown:addItem("bar")
+		dropdown:addItem("baz")
+		dropdown:addItem("bop")
 	end
 
 	frame:reshape(true)

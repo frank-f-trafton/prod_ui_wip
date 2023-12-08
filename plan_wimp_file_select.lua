@@ -275,7 +275,7 @@ local function menu_getDirectoryItems(self, filter_type)
 		self.menu.items[i] = nil
 	end
 
-	self.menu:setSelectedDefault()
+	self.menu:setDefaultSelection()
 
 	local items = nativefs.getDirectoryItemsInfo(self.usr_path, filter_type)
 

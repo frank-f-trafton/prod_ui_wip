@@ -208,7 +208,7 @@ end
 
 
 function def:menuChangeCleanup()
-	self.menu:stepSelected(0, false)
+	self.menu:setSelectionStep(0, false)
 	if self.arrange then
 		self:arrange()
 	end
