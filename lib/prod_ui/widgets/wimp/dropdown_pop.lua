@@ -3,7 +3,7 @@
 --[[
 wimp/dropdown_pop: The pop-up component of a dropdown menu.
 
-'self.chain_prev' points to the invoking dropdown base widget.
+'self.owner' points to the invoking dropdown base widget.
 
 
 Two menu-items are supported:
@@ -35,41 +35,6 @@ local def = {
 
 widShared.scrollSetMethods(def)
 def.arrange = commonMenu.arrangeListVerticalTB
-
-
--- * Internal: Item activation *
-
-
-local function activateCommand(client, item)
-
-	-- XXX: Dropdown menus will behave differently. The dropdown box itself should have the callback with the item passed as an argument.
-
-	local wid_ref = client.wid_ref
-
-	if item.callback and wid_ref then -- XXX deal with cases where wid_ref is a dangling reference
-		item.callback(wid_ref, item)
-	end
-
-	local root = client:getTopWidgetInstance()
-	root:runStatement("rootCall_destroyPopUp", client, "concluded")
-	root:runStatement("rootCall_restoreThimble", client)
-end
-
-
--- * / Internal: Item activation *
-
-
-local function keyMnemonicSearch(items, key)
-
-	for i, item in ipairs(items) do
-		if key == item.key_mnemonic then
-			return i, item
-		end
-	end
-
-	return nil
-end
-
 
 
 local function selectItemColor(item, client, skin)
@@ -407,9 +372,17 @@ end
 function def:uiCall_create(inst)
 
 	if self == inst then
+		if not self.owner then
+			error("no owner widget assigned to this menu.")
+
+		elseif not self.menu then
+			error("owner widget did not provide a menu sub-table.")
+		end
+
 		self.visible = true
 		self.allow_hover = true
-		self.can_have_thimble = true
+		-- This widget does not take the thimble.
+		-- The owner widget holds onto the thimble and forwards keyboard events through a callback.
 
 		self.clip_scissor = true
 
@@ -421,9 +394,6 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 2)
 
 		self.press_busy = false
-
-		-- Do not block this widget while a modal frame is active.
-		self.modal_level = math.huge
 
 		-- Ref to currently-hovered item, or false if not hovering over any items.
 		self.item_hover = false
@@ -463,19 +433,6 @@ function def:uiCall_create(inst)
 		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
 		self.selection_extend_x = 0
 		self.selection_extend_y = 0
-
-		-- References populated when this widget is part of a chain of menus.
-		self.chain_next = false
-		self.chain_prev = false
-
-		-- Caller sets this to the widget table that this menu "belongs to" or extends.
-		self.wid_ref = false
-
-		-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
-		--self.origin_item =
-
-		self.menu = self.menu or commonMenu.new()
-		self.menu.default_deselect = true
 
 		self:skinSetRefs()
 		self:skinInstall()
@@ -529,129 +486,50 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 
 	local mod = self.context.key_mgr.mod
 
-	if key == "up" or (key == "tab" and mod["shift"]) then
+	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
 
-	elseif scancode == "down" or (key == "tab" and not mod["shift"]) then
+	elseif scancode == "down" then
 		self:moveNext(1, true)
+		return true
+
+	elseif scancode == "home" then
+		self:moveFirst(true)
+		return true
+
+	elseif scancode == "end" then
+		self:moveLast(true)
+		return true
+
+	elseif scancode == "pageup" then
+		self:movePrev(self.page_jump_size, true)
+		return true
+
+	elseif scancode == "pagedown" then
+		self:moveNext(self.page_jump_size, true)
 		return true
 	end
 end
 
 
+-- Used instead of 'uiCall_keypressed'. The dropdown body passes keyboard events through here.
+function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+	-- Suppress stepping the thimble while a menu is open.
+	if scancode == "tab" then
+		return true
 
-	if self == inst then
+	elseif scancode == "escape" then
+		-- closePopUpMenu(self.owner, false)
+		-- self:remove()
+		return true
 
-		local root = self:getTopWidgetInstance()
-
-		if key == "escape" then
-
-			destroySubMenus(self)
-
-			--print("self.chain_prev", self.chain_prev)
-
-			-- Need some special handling depending on whether this is the base pop-up, or
-			-- if the previous chain entry is the widget that invoked the pop-up (or is
-			-- yet another temporary pop-up menu).
-
-			-- This is the base pop-up.
-			if not self.chain_prev or (self.wid_ref and self.wid_ref == self.chain_prev) then
-				local wid_ref = self.wid_ref
-
-				root:runStatement("rootCall_destroyPopUp", self, "concluded")
-				-- NOTE: self is now dead.
-
-				root:runStatement("rootCall_restoreThimble", wid_ref)
-
-				-- If there is a reference widget, try and pass the thimble to it and clear
-				-- the thimble bank. We assume the reference widget, if it cannot hold the
-				-- thimble, has already restored the banked thimble via its cleanup callback.
-				-- This is a Plan B behavior in case that's not true.
-				if wid_ref then
-					wid_ref:tryTakeThimble()
-				end
-				root:runStatement("rootCall_clearThimbleBank", wid_ref)
-
-				return true
-
-			-- This pop-up is further down the menu chain.
-			-- We do not want to destroy the entire chain, just this one (and any others to the
-			-- right, which we took care of above) and move the thimble back.
-			else
-				local temp_chain_prev = self.chain_prev
-
-				self:remove()
-
-				temp_chain_prev.chain_next = false
-				temp_chain_prev:tryTakeThimble()
-
-				return true
-			end
-
-		elseif key == "left" then
-			-- Similar to Esc, but we only want to act here if chain_prev is another pop-up.
-			if self.chain_prev and self.chain_prev ~= self.wid_ref then
-				destroySubMenus(self)
-				local temp_chain_prev = self.chain_prev
-
-				self:remove()
-
-				temp_chain_prev.chain_next = false
-				temp_chain_prev:tryTakeThimble()
-
-				return true
-			end
-		end
-		-- 'left' needs to fall down here if not handled.
-
-		local sel_item = self.menu.items[self.menu.index]
-
-		if sel_item and sel_item.selectable and sel_item.actionable then
-			if sel_item.type == "command" then
-				if key == "return" or key == "kpenter" or key == "space" then
-					activateCommand(self, sel_item)
-					return true
-				end
-			end
-		end
-
-		-- Run the default navigation checks.
-		if self.wid_defaultKeyNav and self:wid_defaultKeyNav(key, scancode, isrepeat) then
-			return true
-		end
-
-		-- prev/next movement for the menu bar, if it exists and nothing has already handled input.
-		if self.wid_ref and self.wid_ref.widCall_keyPressedFallback then
-			local result = self.wid_ref:widCall_keyPressedFallback(self, key, scancode, isrepeat)
-			if result then
-				return true
-			end
-		end
-
-		local mod = self.context.key_mgr.mod
-		if not mod["ctrl"] then
-			-- Finally, check for key mnemonics.
-			local item_i, item = keyMnemonicSearch(self.menu.items, key)
-			if item and item.selectable then
-				self.menu:setSelectedIndex(item_i)
-				if item.actionable then
-					if item.type == "command" then
-						activateCommand(self, item)
-						return true
-					end
-				end
-			end
-		end
+	elseif scancode == "return" or scancode == "kpenter" then
+		-- closePopUpMenu(self.owner, true)
+		-- self:remove()
+		return true
 	end
-
-	-- XXX: Test blocking keyhooks while the menu is active and has thimble focus.
-	-- Solves issues like pressing Alt+? multiple times causing a jump from a window-frame
-	-- menu to the root menu.
-	-- It might break other things, though.
-	return true -- XXX
 end
 
 
@@ -659,26 +537,6 @@ function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 	if self == inst then
 		self:tryTakeThimble()
-	end
-end
-
-
-local function pressedAndThimbleHandoff(self, wid)
-
-	if self.context.current_pressed == self and wid.allow_hover then
-		self.context:transferPressedState(wid)
-
-		wid.press_busy = self.press_busy
-		self.press_busy = false
-	end
-
-	wid:tryTakeThimble()
-
-	if self.wid_chainRollOff then
-		self:wid_chainRollOff()
-	end
-	if wid.wid_chainRollOn then
-		wid:wid_chainRollOn()
 	end
 end
 
@@ -829,7 +687,8 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 					and yy >= item_selected.y and yy < item_selected.y + item_selected.h
 					then
 						if item_selected.type == "command" then
-							activateCommand(self, item_selected)
+							-- XXX: run callback in owner widget with item_selected
+							-- XXX: destroy this pop-up
 						end
 					end
 				end
@@ -869,7 +728,11 @@ end
 
 function def:uiCall_update(dt)
 
-	dt = math.min(dt, 1.0)
+	local owner = self.owner
+	if not owner then
+		self:remove()
+		return
+	end
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
@@ -889,19 +752,7 @@ function def:uiCall_update(dt)
 
 	local selected = self.menu.items[self.menu.index]
 
-	local cur_thimble = self.context.current_thimble
-	local in_chain = false
-	local wid = self.chain_next
-	while wid do
-		if cur_thimble == wid then
-			in_chain = true
-			break
-		end
-		wid = wid.chain_next
-	end
-
-	--print("chain_next", self.chain_next, "in_chain", in_chain)
-	--print("menu.index", self.menu.index, "selected", selected, "type", selected and selected.type)
+	--print("menu.index", self.menu.index, "selected", selected)
 
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
@@ -910,11 +761,8 @@ function def:uiCall_update(dt)
 		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.menu.items)
 	end
 
-	--or not (self.chain_next and self.chain_next.origin_item == selected)
-
 	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a")
 
-	-- Update cache if necessary.
 	if needs_update then
 		self:cacheUpdate(true)
 	end
@@ -924,16 +772,7 @@ end
 function def:uiCall_destroy(inst)
 
 	if self == inst then
-		-- If this widget is part of a chain and currently holds the context pressed and/or thimble state,
-		-- try to transfer it back to the previous menu in the chain.
-		if self.press_busy == "menu-drag" then
-			local c_prev = self.chain_prev
-			if c_prev then
-				pressedAndThimbleHandoff(self, c_prev)
-			end
-		end
-
-		widShared.chainUnlink(self)
+		-- WIP
 	end
 end
 
@@ -957,83 +796,12 @@ def.skinners = {
 		render = function(self, ox, oy)
 
 			local skin = self.skin
-			local tq_px = skin.tq_px
-			local tq_arrow = skin.tq_arrow
 
-			local menu = self.menu
-			local items = menu.items
-
-			local font = skin.font_item
-
-			local items_first, items_last = math.max(self.items_first, 1), math.min(self.items_last, #items)
-
-			-- Don't draw menu contents outside of the widget bounding box.
 			love.graphics.push("all")
-			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-			-- Back panel body
-			local slc_body = skin.slc_body
-			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
-
-			-- Scroll offsets
-			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
-
-			-- (Pop up menus do not render hover-glow.)
-
-			-- Draw selection glow, if applicable
-			local sel_item = items[menu.index]
-			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quad1x1(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
-			end
-
-			-- Separators
-			love.graphics.setColor(skin.color_separator)
-			for i = items_first, items_last do
-				local item = items[i]
-				if item.type == "separator" then
-					uiGraphics.quad1x1(tq_px, item.x, math.floor(item.y + item.h/2), item.w, skin.separator_size)
-				end
-			end
-
-			-- Bijoux for commands, arrow graphics for groups
-			for i = items_first, items_last do
-				local item = items[i]
-				--print("item.bijou", item.bijou, "xywh", item.bijou_x, item.bijou_y, item.bijou_w, item.bijou_h)
-				if item.bijou then
-					local tq_bijou = skin[item.bijou]
-					if tq_bijou then
-						local tbl_color = selectItemColor(item, self, skin)
-						love.graphics.setColor(tbl_color)
-						uiGraphics.quadXYWH(
-							tq_bijou,
-							item.x + self.pad_bijou_x1,
-							item.y + self.pad_bijou_y1,
-							self.bijou_draw_w,
-							self.bijou_draw_h
-						)
-					end
-				end
-			end
-
-			love.graphics.setFont(font)
-
-			-- Main text
-			for i = items_first, items_last do
-				local item = items[i]
-
-				-- Main text label
-				if item.text_int then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
-
-					love.graphics.print(
-						item.text_int,
-						item.x + item.text_x,
-						item.y + item.text_y
-					)
-				end
-			end
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
+			love.graphics.print("WIP dropdown pop-up menu")
 
 			love.graphics.pop()
 		end,

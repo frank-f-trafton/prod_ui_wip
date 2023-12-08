@@ -801,7 +801,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		self:movePrev(1, true)
 		return true
 
-	elseif scancode == "down" or (key == "tab" and not mod["shift"]) then
+	elseif key == "down" or (key == "tab" and not mod["shift"]) then
 		self:moveNext(1, true)
 		return true
 	end
@@ -1279,6 +1279,7 @@ function def:uiCall_update(dt)
 
 	local selected = self.menu.items[self.menu.index]
 
+	--[[
 	local cur_thimble = self.context.current_thimble
 	local in_chain = false
 	local wid = self.chain_next
@@ -1292,6 +1293,7 @@ function def:uiCall_update(dt)
 
 	--print("chain_next", self.chain_next, "in_chain", in_chain)
 	--print("menu.index", self.menu.index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
+	--]]
 
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
@@ -1299,8 +1301,6 @@ function def:uiCall_update(dt)
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.menu.items)
 	end
-
-	--or not (self.chain_next and self.chain_next.origin_item == selected)
 
 	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a", "last_open", self.last_open_group, "open_time", self.open_time)
 
@@ -1319,7 +1319,6 @@ function def:uiCall_update(dt)
 		self.open_time = 0
 	end
 
-	-- Update cache if necessary.
 	if needs_update then
 		self:cacheUpdate(true)
 	end

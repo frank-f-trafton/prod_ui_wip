@@ -19,6 +19,7 @@ function commonWimp.closeWindowFrame(self)
 		if wid.is_frame then
 			if not self.context:isLocked() then
 				wid:remove()
+
 			else
 				self.context:appendAsyncAction(wid, commonWimp.async_widget_remove, false)
 			end
@@ -41,7 +42,7 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 	pop_up.y = y
 	pop_up.wid_ref = self
 
-	-- Append items to fresh menu
+	-- Append items to fresh menu.
 	if menu_def then
 		for i, item_guide in ipairs(menu_def) do
 			pop_up:appendItem(item_guide.type, item_guide)
