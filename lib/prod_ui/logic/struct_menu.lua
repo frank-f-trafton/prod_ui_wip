@@ -356,7 +356,7 @@ end
 --- Sets the current menu selection to the default.
 function _mt_menu:setDefaultSelection(id)
 
-	local i, tbl = self:getSelectedDefault()
+	local i, tbl = self:getDefaultSelection()
 	self:setSelectedIndex(i, id)
 end
 
