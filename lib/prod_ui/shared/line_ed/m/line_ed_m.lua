@@ -15,17 +15,17 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local code_groups = context:getLua("shared/line_ed/code_groups")
 local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editDispM = context:getLua("shared/line_ed/m/edit_disp_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
-local history = require(context.conf.prod_ui_req .. "logic.struct.history")
 local seqString = context:getLua("shared/line_ed/seq_string")
+local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-lineEdM.code_groups = context:getLua("shared/line_ed/code_groups")
-local code_groups = lineEdM.code_groups
+lineEdM.code_groups = code_groups
 
 
 local _mt_ed_m = {}
@@ -51,7 +51,7 @@ function lineEdM.new(font)
 	commonEd.setupCaretInfo(self, true, true)
 
 	-- History container.
-	self.hist = history.new()
+	self.hist = structHistory.new()
 	editHistM.writeEntry(self, true)
 
 	-- Cached display details for rendering text, highlights, and the caret.

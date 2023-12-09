@@ -525,7 +525,7 @@ function def:uiCall_create(inst)
 		self.tree = commonTree.new()
 		self.menu = commonMenu.new()
 
-		self.menu.wrap_selection = false
+		self.wrap_selection = false
 
 		-- X positions and widths of components within menu items.
 		-- The X positions are reversed when right alignment is used.
