@@ -216,8 +216,8 @@ function def:uiCall_create(inst)
 		-- When opened, this holds a reference to the pop-up widget.
 		self.opened = false
 
-		-- Menu index for the current selection displayed in the dropdown body.
-		-- This is different from the menu index, which denotes the current selection in the pop-up menu.
+		-- Index for the current selection displayed in the dropdown body.
+		-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
 		self.menu.chosen_i = 0
 
 		self:skinSetRefs()
