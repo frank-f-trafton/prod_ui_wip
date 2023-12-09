@@ -419,7 +419,7 @@ function def:uiCall_create(inst)
 
 		self.menu = commonMenu.new()
 
-		self.menu.wrap_selection = false
+		self.wrap_selection = false
 
 		-- Column X positions and widths.
 		self.col_icon_x = 0

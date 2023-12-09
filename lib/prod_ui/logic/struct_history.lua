@@ -1,7 +1,7 @@
 -- A generic history container.
 
 
-local history = {}
+local structHistory = {}
 
 
 local _mt_hist = {}
@@ -16,7 +16,7 @@ local function _assertEntryPosition(self)
 end
 
 
-function history.new()
+function structHistory.new()
 
 	local self = setmetatable({}, _mt_hist)
 
@@ -164,4 +164,4 @@ function _mt_hist:writeEntry(do_advance)
 end
 
 
-return history
+return structHistory

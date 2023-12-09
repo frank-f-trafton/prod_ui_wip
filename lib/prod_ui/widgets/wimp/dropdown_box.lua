@@ -96,10 +96,10 @@ function def:addItem(text, pos, bijou_id)
 	print("addItem text:", item.text, "y: ", item.y)
 
 	-- If there is no chosen item, assign this one as chosen now.
-	if not self.chosen then
+	if self.menu.chosen_i == 0 then
 		local i, tbl = self.menu:hasAnySelectableItems()
 		if i then
-			self.chosen = tbl
+			self.menu.chosen_i = i
 		end
 	end
 
@@ -153,10 +153,10 @@ function def:removeItemByIndex(item_i)
 	end
 
 	-- Handle the current chosen item being removed.
-	if self.chosen == removed then
+	if self.menu.chosen_i == item_i then
 		-- XXX: fix this so that the new chosen item is close to the removed one's position.
 		local i, new_chosen = self.menu:hasAnySelectableItems()
-		self.chosen = new_chosen or false
+		self.menu.chosen_i = i or 0
 	end
 
 	self:arrange(item_i, #items)
@@ -165,9 +165,7 @@ function def:removeItemByIndex(item_i)
 end
 
 
-function def:setSelection(item_t)
-
-	-- NOTE: This affects the selection in the pop-up menu, not the current chosen item in the body.
+function def:setSelection(item_t, id)
 
 	-- Assertions
 	-- [[
@@ -175,34 +173,18 @@ function def:setSelection(item_t)
 	--]]
 
 	local item_i = self.menu:getItemIndex(item_t)
-	self:setSelectionByIndex(item_i)
+	self:setSelectionByIndex(item_i, id)
 end
 
 
-function def:setSelectionByIndex(item_i)
-
-	-- NOTE: This affects the selection in the pop-up menu, not the current chosen item in the body.
+function def:setSelectionByIndex(item_i, id)
 
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
 	--]]
 
-	self.menu:setSelectedIndex(item_i)
-end
-
-
-function def:setChosen(item_t)
-
-	-- Assertions
-	-- [[
-	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
-	--]]
-
-	-- Confirms the item is in the menu list.
-	local item_i = self.menu:getItemIndex(item_t)
-
-	self.chosen = item_t
+	self.menu:setSelectedIndex(item_i, id)
 end
 
 
@@ -222,7 +204,7 @@ function def:uiCall_create(inst)
 
 		self.menu = commonMenu.new()
 
-		self.menu.wrap_selection = false
+		self.wrap_selection = false
 
 		-- XXX: dropdown button icon.
 
@@ -234,9 +216,9 @@ function def:uiCall_create(inst)
 		-- When opened, this holds a reference to the pop-up widget.
 		self.opened = false
 
-		-- Reference to the current selection displayed in the dropdown body.
+		-- Menu index for the current selection displayed in the dropdown body.
 		-- This is different from the menu index, which denotes the current selection in the pop-up menu.
-		self.chosen = false
+		self.menu.chosen_i = 0
 
 		self:skinSetRefs()
 		self:skinInstall()
@@ -263,7 +245,10 @@ end
 local function closePopUpMenu(self, update_chosen)
 
 	if update_chosen then
-		-- XXX
+		if self.menu.index > 0 then
+			-- XXX: probably double-check the main index before attempting to assign it.
+			self.menu:setSelectedIndex(self.menu.index, "chosen_i")
+		end
 	end
 
 	-- XXX: destroy pop-up widget.
@@ -290,27 +275,27 @@ end
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 
 	if scancode == "up" then
-		self:movePrev(1, true)
+		self:movePrev(1, true, "chosen_i")
 		return true
 
 	elseif scancode == "down" then
-		self:moveNext(1, true)
+		self:moveNext(1, true, "chosen_i")
 		return true
 
 	elseif scancode == "home" then
-		self:moveFirst(true)
+		self:moveFirst(true, "chosen_i")
 		return true
 
 	elseif scancode == "end" then
-		self:moveLast(true)
+		self:moveLast(true, "chosen_i")
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
+		self:movePrev(self.page_jump_size, true, "chosen_i")
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
+		self:moveNext(self.page_jump_size, true, "chosen_i")
 		return true
 	end
 end
@@ -441,8 +426,10 @@ def.skinners = {
 			end
 
 			-- If a chosen item is defined, render it.
-			if self.chosen then
-				love.graphics.print(self.chosen.text, 0, 0)
+			local chosen = self.menu.items[self.menu.chosen_i]
+			print("chosen", chosen, "chosen_i", self.menu.chosen_i)
+			if chosen then
+				love.graphics.print(chosen.text, 0, 0)
 
 			else
 				love.graphics.print("WIP <no chosen item>")

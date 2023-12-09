@@ -324,7 +324,7 @@ function plan.make(parent)
 		menu_tab.renderThimble = widShared.dummy
 
 		menu_tab.drag_select = true
-		menu_tab.menu.wrap_selection = false
+		menu_tab.wrap_selection = false
 
 		--[[
 		menu_tab.x = 16

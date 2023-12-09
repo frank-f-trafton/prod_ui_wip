@@ -15,19 +15,18 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local code_groups = context:getLua("shared/line_ed/code_groups")
 local commonEd = context:getLua("shared/line_ed/common_ed")
 local dbg = require(context.conf.prod_ui_req .. "debug.dbg")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
-
-lineEdS.code_groups = context:getLua("shared/line_ed/code_groups")
-local code_groups = lineEdS.code_groups
-
-
-local history = require(context.conf.prod_ui_req .. "logic.struct.history")
 local lineManip = context:getLua("shared/line_ed/line_manip")
+local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+
+
+lineEdS.code_groups = code_groups
 
 
 local _mt_ed_s = {}
@@ -183,7 +182,7 @@ function lineEdS.new(font)
 	self.u_chars_max = math.huge
 
 	-- History state.
-	self.hist = history.new()
+	self.hist = structHistory.new()
 	editHistS.writeEntry(self, true)
 
 	-- External display text.
