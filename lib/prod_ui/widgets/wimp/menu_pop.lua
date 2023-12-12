@@ -492,8 +492,8 @@ function def:updateDimensions()
 	-- (We assume that the top-level widget's dimensions match the display area.)
 	local wid_top = self:getTopWidgetInstance()
 
-	self.w = math.min(w + self.margin_x1 + self.margin_x2, wid_top.w)
-	self.h = math.min(h + self.margin_y1 + self.margin_y2, wid_top.h)
+	self.w = math.min(w + skin.box.margin_x1 + skin.box.margin_x2, wid_top.w)
+	self.h = math.min(h + skin.box.margin_y1 + skin.box.margin_y2, wid_top.h)
 
 	self:reshape()
 
@@ -672,23 +672,10 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
+		commonMenu.instanceSetup(self)
+
 		-- Do not block this widget while a modal frame is active.
 		self.modal_level = math.huge
-
-		-- Ref to currently-hovered item, or false if not hovering over any items.
-		self.item_hover = false
-
-		self.wheel_jump_size = 64 -- pixels
-
-		-- Range of items that are visible and should be checked for press/hover state.
-		self.items_first = 0 -- max(first, 1)
-		self.items_last = 2^53 -- min(last, #items)
-
-		-- Edge margin -- XXX style/config, scale
-		self.margin_x1 = 4
-		self.margin_x2 = 4
-		self.margin_y1 = 4
-		self.margin_y2 = 4
 
 		-- Padding values. -- XXX style/config, scale
 		self.pad_bijou_x1 = 2
@@ -718,10 +705,6 @@ function def:uiCall_create(inst)
 		self.pad_arrow_x2 = 0
 		self.arrow_draw_w = 24
 		self.arrow_draw_h = 24
-
-		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
-		self.selection_extend_x = 0
-		self.selection_extend_y = 0
 
 		-- Used when underlining shortcut key letters in menu items.
 		self.underline_width = 1 -- XXX pull from skin.
@@ -756,21 +739,13 @@ end
 
 function def:uiCall_reshape()
 
-	self.vp_x = 0
-	self.vp_y = 0
-	self.vp_w = self.w
-	self.vp_h = self.h
+	widShared.resetViewport(self, 1)
 
-	-- Apply edge padding
-	self.vp_x = self.vp_x + self.margin_x1
-	self.vp_y = self.vp_y + self.margin_y1
-	self.vp_h = self.vp_h - (self.margin_y1 + self.margin_y2)
-	self.vp_w = self.vp_w - (self.margin_x1 + self.margin_x2)
+	-- Apply edge padding.
+	widShared.carveViewport(self, 1, "margin")
 
-	self.vp2_x = self.vp_x
-	self.vp2_y = self.vp_y
-	self.vp2_w = self.vp_w
-	self.vp2_h = self.vp_h
+	-- 'Okay-to-click' rectangle.
+	widShared.copyViewport(self, 1, 2)
 
 	self:cacheUpdate()
 end

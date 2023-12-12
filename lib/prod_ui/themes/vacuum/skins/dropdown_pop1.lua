@@ -6,7 +6,7 @@ return {
 
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/input_box",
+	["*box"] = "style/boxes/panel",
 	["*font"] = "fonts/p",
 	["*font_ghost"] = "fonts/p",
 

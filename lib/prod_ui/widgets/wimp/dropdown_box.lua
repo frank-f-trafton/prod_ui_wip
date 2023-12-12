@@ -201,11 +201,12 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		--commonMenu.instanceSetup(self)
+		self.page_jump_size = 4
+		self.wheel_jump_size = 64
+		self.wrap_selection = false
 
 		self.menu = commonMenu.new()
-
-		self.wrap_selection = false
 
 		-- XXX: dropdown button icon.
 
@@ -239,19 +240,18 @@ end
 function def:_openPopUpMenu()
 
 	if not self.wid_drawer then
-		-- XXX: create pop-up widget.
-		local primer = {
-			wid_ref = self,
-			menu = self.menu,
-		}
-
 		local root = self:getTopWidgetInstance()
-		local drawer = root:addChild("wimp/dropdown_pop", primer)
+		local menu = self.menu
 
+		local drawer = root:addChild("wimp/dropdown_pop", {wid_ref = self, menu = menu})
+
+		local ax, ay = self:getAbsolutePosition()
+
+		local item_h = 40 -- XXX
 		drawer.w = self.w
-		drawer.h = 40 -- XXX
-		drawer.x = self.x
-		drawer.y = self.y + drawer.h
+		drawer.h = item_h * #menu.items
+		drawer.x = ax
+		drawer.y = ay + self.h
 
 		self.wid_drawer = drawer
 
@@ -469,7 +469,7 @@ def.skinners = {
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
 
 			-- Debug
-			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 0, 48)
+			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
 
 			love.graphics.pop()
 		end,
