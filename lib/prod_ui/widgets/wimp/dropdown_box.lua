@@ -363,7 +363,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	if self == inst then
 		-- If there is a pop-up menu, send keyboard events to it first.
-		if self.wid_drawer and type(self.wid_drawer) == "table" then -- XXX: WIP: remove temporary second check
+		if self.wid_drawer then
 			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
 
 		else
