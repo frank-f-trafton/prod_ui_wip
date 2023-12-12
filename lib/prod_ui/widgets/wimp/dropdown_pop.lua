@@ -529,8 +529,6 @@ end
 
 function def:uiCall_update(dt)
 
-	print("Hello?")
-
 	-- This widget cannot operate if the owner which it extends is gone.
 	local wid_ref = self.wid_ref
 	if not wid_ref then
