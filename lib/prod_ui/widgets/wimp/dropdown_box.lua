@@ -33,6 +33,7 @@ local context = select(1, ...)
 
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
+local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -214,7 +215,7 @@ function def:uiCall_create(inst)
 		self.pressed = false
 
 		-- When opened, this holds a reference to the pop-up widget.
-		self.opened = false
+		self.wid_drawer = false
 
 		-- Index for the current selection displayed in the dropdown body.
 		-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
@@ -235,14 +236,38 @@ function def:uiCall_reshape()
 end
 
 
-local function openPopUpMenu(self)
+function def:_openPopUpMenu()
 
-	-- XXX: create pop-up widget.
-	self.opened = true -- XXX: assign pop-up widget to this field.
+	if not self.wid_drawer then
+		-- XXX: create pop-up widget.
+		local primer = {
+			wid_ref = self,
+			menu = self.menu,
+		}
+
+		local root = self:getTopWidgetInstance()
+		local drawer = root:addChild("wimp/dropdown_pop", primer)
+
+		drawer.w = self.w
+		drawer.h = 40 -- XXX
+		drawer.x = self.x
+		drawer.y = self.y + drawer.h
+
+		self.wid_drawer = drawer
+
+		commonWimp.assignPopUp(self, drawer)
+	end
 end
 
 
-local function closePopUpMenu(self, update_chosen)
+local function closeCleanup(self, update_chosen)
+
+	self.wid_drawer = false
+
+end
+
+
+function def:_closePopUpMenu(update_chosen, destroy_widget)
 
 	if update_chosen then
 		if self.menu.index > 0 then
@@ -251,20 +276,33 @@ local function closePopUpMenu(self, update_chosen)
 		end
 	end
 
-	-- XXX: destroy pop-up widget.
-	self.opened = false
-end
-
-
-local function togglePopUpMenu(self, update_chosen)
-
-	if self.opened then
-		closePopUpMenu(self, update_chosen)
-
-	else
-		openPopUpMenu(self)
+	if destroy_widget and self.wid_drawer and not self.wid_drawer._dead then
+		self.wid_drawer:remove()
+		self.wid_drawer = false
 	end
 end
+
+
+function def:_togglePopUpMenu(update_chosen)
+
+	if self.wid_drawer then
+		self:_closePopUpMenu(update_chosen)
+
+	else
+		self:_openPopUpMenu()
+	end
+end
+
+
+function def:wid_popUpCleanup(reason_code)
+
+	-- Prevent instantly creating the drawer again when clicking on the dropdown body (with the intention of closing it).
+	if self.context.current_pressed == self then
+		self.context.current_pressed = false
+	end
+	closeCleanup(self)
+end
+
 
 
 --- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
@@ -306,15 +344,17 @@ function def:uiCall_thimbleRelease(inst)
 	print("def:uiCall_thimbleRelease", self, inst, self == inst)
 
 	if self == inst then
+		--[=[
 		-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
 		-- This precludes opening a right-click context menu on an item in the pop-up menu, since
 		-- the context menu takes the thimble while it exists.
 		-- If you require opening context menus on list items, consider using a plain ListBox
 		-- widget instead.
-		if self.opened then
-			closePopUpMenu(self, false)
+		if self.wid_drawer then
+			self:_closePopUpMenu(false)
 			return true
 		end
+		--]=]
 	end
 end
 
@@ -322,9 +362,9 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	if self == inst then
-		-- If there is a pop-up menu, send keyboard events to it.
-		if self.opened and type(self.opened) == "table" then -- XXX: WIP: remove temporary second check
-			return self.opened:wid_forwardKeyPressed(key, scancode, isrepeat)
+		-- If there is a pop-up menu, send keyboard events to it first.
+		if self.wid_drawer and type(self.wid_drawer) == "table" then -- XXX: WIP: remove temporary second check
+			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
 
 		else
 			local items = self.menu.items
@@ -333,22 +373,15 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 			-- Space opens, but does not close the pop-up.
 			if key == "space" then
-				if not self.opened then
-					openPopUpMenu(self)
+				if not self.wid_drawer then
+					self:_openPopUpMenu()
 					return true
 				end
 
-			-- Enter toggles the pop-up, updating the chosen selection when closing.
+			-- Enter toggles the pop-up, opening it here and closing it in the drawer.
 			elseif key == "return" or key == "kpenter" then
-				togglePopUpMenu(self, true)
+				self:_openPopUpMenu()
 				return true
-
-			-- Escape closes the menu without updating the chosen selection.
-			elseif key == "escape" then
-				if self.opened then
-					closePopUpMenu(self, false)
-					return true
-				end
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then
 				return true
@@ -385,11 +418,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 
 		if button == 1 then
-			if self.opened then
-				closePopUpMenu(self)
-
-			else
-				openPopUpMenu(self)
+			if not self.wid_drawer then
+				self:_openPopUpMenu()
+				return true
 			end
 		end
 	end
@@ -418,7 +449,7 @@ def.skinners = {
 
 			love.graphics.push("all")
 
-			if self.opened then
+			if self.wid_drawer then
 				love.graphics.setColor(1, 0, 0, 1)
 
 			else
@@ -427,7 +458,7 @@ def.skinners = {
 
 			-- If a chosen item is defined, render it.
 			local chosen = self.menu.items[self.menu.chosen_i]
-			print("chosen", chosen, "chosen_i", self.menu.chosen_i)
+			--print("chosen", chosen, "chosen_i", self.menu.chosen_i)
 			if chosen then
 				love.graphics.print(chosen.text, 0, 0)
 
@@ -438,7 +469,7 @@ def.skinners = {
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
 
 			-- Debug
-			love.graphics.print("self.opened: " .. tostring(self.opened), 0, 48)
+			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 0, 48)
 
 			love.graphics.pop()
 		end,

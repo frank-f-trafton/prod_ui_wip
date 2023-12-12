@@ -1,19 +1,12 @@
 -- XXX: Unfinished. Copy of `wimp/menu_pop.lua`.
 
 --[[
-wimp/dropdown_pop: The pop-up component of a dropdown menu.
+wimp/dropdown_pop: The pop-up (or "drawer") component of a dropdown menu.
 
-'self.owner' points to the invoking dropdown base widget.
-
-
-Two menu-items are supported:
-* Command: executes a function
-* Separator
-
+'self.wid_ref' points to the invoking dropdown base widget.
 
 These are not real OS widgets, so they are limited to the boundaries of the window.
 They may act strangely if the window is too small for the menu contents.
-
 --]]
 
 
@@ -51,102 +44,6 @@ local function selectItemColor(item, client, skin)
 end
 
 
--- * MenuItem Defs *
-
-
-def._mt_command = {
-	type = "command",
-
-	reshape = function(item, client)
-
-		local font = client.skin.font_item
-
-		item.text_x = (
-			client.pad_bijou_x1
-			+ client.bijou_draw_w
-			+ client.pad_bijou_x2
-			+ client.pad_text_x1
-		)
-
-		item.text_y = client.pad_text_y1
-	end,
-}
-def._mt_command.__index = def._mt_command
-
-
-def._mt_separator = {
-	type = "separator",
-
-	reshape = function(item, client)
-
-	end,
-}
-def._mt_separator.__index = def._mt_separator
-
-
---- Append an item based on one of a few hardcoded types. The base menu addItem() method is low-level and not terribly
---  useful, so this wrapper is provided for convenience.
--- @param self The client widget.
--- @param item_type Identifier (typically a string) for the kind of item to append.
--- @param item_info Table of default fields to assign to the fresh item.
--- @return The new item table for additional tweaks.
-function def:appendItem(item_type, info)
-
-	local item = {
-		x = 0,
-		y = 0,
-		w = 1,
-		h = 1,
-	}
-
-	if item_type == "command" then
-		item.text = info.text or ""
-
-		-- internal version of item.text
-		-- XXX: this was used as part of an underlining system that was removed when adapting menu_pop.lua for this def.
-		item.text_int = ""
-		item.text_x = 0
-		item.text_y = 0
-
-		item.text_s_x = 0
-		item.text_s_y = 0
-
-		item.bijou = info.bijou or false
-		item.bijou_x = 0
-		item.bijou_y = 0
-		item.bijou_w = 0
-		item.bijou_h = 0
-
-		item.callback = info.callback
-
-		item.selectable = true
-		item.actionable = not not item.callback
-
-		setmetatable(item, self._mt_command)
-
-	elseif item_type == "separator" then
-		item.selectable = false
-		item.actionable = false
-
-		setmetatable(item, self._mt_separator)
-
-	else
-		error("unknown item type: " .. tostring(item_type))
-	end
-
-	for k, v in pairs(info) do
-		item[k] = v
-	end
-
-	self:addItem(item)
-
-	return item
-end
-
-
--- * / MenuItem Defs *
-
-
 --- Changes the widget dimensions based on its menu contents.
 function def:updateDimensions()
 
@@ -169,20 +66,15 @@ function def:updateDimensions()
 	-- Update item heights.
 	for i, item in ipairs(items) do
 
-		if item.type == "separator" then
-			item.h = self.pad_separator_y
+		local font = skin.font_item
 
-		else
-			local font = skin.font_item
-
-			local text_h, bijou_h = 1, 1
-			text_h = font:getHeight() + self.pad_text_y1 + self.pad_text_y2
-			if self.bijou then
-				bijou_h = self.pad_bijou_y1 + self.bijou_draw_h + self.pad_bijou_y2
-			end
-
-			item.h = math.max(text_h, bijou_h)
+		local text_h, bijou_h = 1, 1
+		text_h = font:getHeight() + self.pad_text_y1 + self.pad_text_y2
+		if self.bijou then
+			bijou_h = self.pad_bijou_y1 + self.bijou_draw_h + self.pad_bijou_y2
 		end
+
+		item.h = math.max(text_h, bijou_h)
 	end
 
 	-- Arrange the items vertically.
@@ -256,17 +148,11 @@ def.getInBounds = commonMenu.getItemInBoundsRect
 def.selectionInView = commonMenu.selectionInView
 
 
--- * / Scroll helpers *
-
-
 -- * Spatial selection *
 
 
 def.getItemAtPoint = commonMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
 def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
-
-
--- * / Spatial selection *
 
 
 -- * Selection movement *
@@ -276,84 +162,6 @@ def.movePrev = commonMenu.widgetMovePrev
 def.moveNext = commonMenu.widgetMoveNext
 def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
-
-
--- * / Selection movement *
-
-
--- * Item management *
-
-
---[[
-	These 'add' and 'remove' methods are pretty basic. You may have to wrap them in functions that
-	are more aware of the kind of menu in use.
-
-	You also need to call self:menuChangeCleanup() when you are done adding or removing. (When handling
-	many items at once, it doesn't make sense to call it over and over.)
---]]
-
-
---- Adds an item instance to the menu.
--- @param item_instance The item instance (not the def!) to add.
--- @param index (default: #items + 1) Where to add the item in the list.
--- @return Nothing.
-function def:addItem(item_instance, index)
-
-	local items = self.menu.items
-	index = index or #items + 1
-
-	table.insert(items, index, item_instance)
-
-	item_instance:reshape(self)
-
-	-- Call self:menuChangeCleanup() when you are done.
-end
-
-
---- Removes an item from the menu at the specified index.
--- @param index (default: #items) Index of the item to remove. Must point to a valid table.
--- @return The removed item instance.
-function def:removeItem(index)
-
-	local items = self.menu.items
-	index = index or #items
-
-	-- Catch attempts to remove invalid item indexes (Lua's table.remove() is okay with empty indexes 0 and 1)
-	if not items[index] then
-		error("Menu has no item at index: " .. tostring(index))
-	end
-
-	local removed = table.remove(self.menu.items, index)
-
-	return removed
-
-	-- Call self:menuChangeCleanup() when you are done.
-	-- No cleanup callback is run on the removed item, so any manual resource freeing needs to be handled by the caller.
-end
-
-
---- Removes an item from the menu, using the item table reference instead of the index.
--- @param item The item table in the menu.
--- @return The removed item. Raises an error if the item is not found in the menu.
-function def:removeItemTable(item) -- XXX untested
-
-	local index
-	for i, check in ipairs(self.menu.items) do
-		if check == item then
-			index = i
-			break
-		end
-	end
-
-	if not index then
-		error("couldn't find item table in menu.")
-
-	else
-		return self:removeItem(index)
-	end
-
-	-- Call self:menuChangeCleanup() when you are done.
-end
 
 
 function def:menuChangeCleanup()
@@ -366,13 +174,10 @@ function def:menuChangeCleanup()
 end
 
 
--- * / Item management *
-
-
 function def:uiCall_create(inst)
 
 	if self == inst then
-		if not self.owner then
+		if not self.wid_ref then
 			error("no owner widget assigned to this menu.")
 
 		elseif not self.menu then
@@ -426,9 +231,6 @@ function def:uiCall_create(inst)
 		self.pad_text_x2 = 4
 		self.pad_text_y1 = 4
 		self.pad_text_y2 = 4
-
-		-- Padding for separators.
-		self.pad_separator_y = 4
 
 		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
 		self.selection_extend_x = 0
@@ -516,18 +318,19 @@ end
 -- Used instead of 'uiCall_keypressed'. The dropdown body passes keyboard events through here.
 function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 
+	local root = self:getTopWidgetInstance()
+
 	-- Suppress stepping the thimble while a menu is open.
 	if scancode == "tab" then
 		return true
 
 	elseif scancode == "escape" then
-		-- closePopUpMenu(self.owner, false)
-		-- self:remove()
+		root:runStatement("rootCall_destroyPopUp", self, "concluded")
 		return true
 
+	-- Enter toggles the pop-up, closing it here. Update the chosen selection.
 	elseif scancode == "return" or scancode == "kpenter" then
-		-- closePopUpMenu(self.owner, true)
-		-- self:remove()
+		root:runStatement("rootCall_destroyPopUp", self, "concluded")
 		return true
 	end
 end
@@ -686,10 +489,8 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 					if xx >= item_selected.x and xx < item_selected.x + item_selected.w
 					and yy >= item_selected.y and yy < item_selected.y + item_selected.h
 					then
-						if item_selected.type == "command" then
-							-- XXX: run callback in owner widget with item_selected
-							-- XXX: destroy this pop-up
-						end
+						-- XXX: run callback in owner widget with item_selected
+						-- XXX: destroy this pop-up
 					end
 				end
 			end
@@ -728,8 +529,11 @@ end
 
 function def:uiCall_update(dt)
 
-	local owner = self.owner
-	if not owner then
+	print("Hello?")
+
+	-- This widget cannot operate if the owner which it extends is gone.
+	local wid_ref = self.wid_ref
+	if not wid_ref then
 		self:remove()
 		return
 	end
@@ -750,19 +554,6 @@ function def:uiCall_update(dt)
 		needs_update = true
 	end
 
-	local selected = self.menu.items[self.menu.index]
-
-	--print("menu.index", self.menu.index, "selected", selected)
-
-	-- Is the mouse currently hovering over the selected item?
-	local item_i, item_t
-	if self.context.mouse_focus then
-		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
-		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.menu.items)
-	end
-
-	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a")
-
 	if needs_update then
 		self:cacheUpdate(true)
 	end
@@ -772,7 +563,7 @@ end
 function def:uiCall_destroy(inst)
 
 	if self == inst then
-		-- WIP
+		--
 	end
 end
 
@@ -799,7 +590,7 @@ def.skinners = {
 
 			love.graphics.push("all")
 
-			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.setColor(1, 0, 1, 1)
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
 			love.graphics.print("WIP dropdown pop-up menu")
 
