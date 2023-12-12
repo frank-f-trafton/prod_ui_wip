@@ -64,7 +64,7 @@ function def:uiCall_create(inst)
 		-- Reference to the base of a pop-up menu, if active.
 		self.pop_up_menu = false
 
-		-- Used to save and restore the current thimble while temporary pop-up menus are active.
+		-- Used to save and restore the current thimble while some temporary pop-up menus are active.
 		-- nil: bank is not active
 		-- false: "nothing" is banked (so upon restoration, 'current_thimble' will become false)
 		-- table: Widget reference.
@@ -493,7 +493,7 @@ function def:rootCall_assignPopUp(inst, pop_up)
 		clearPopUp(self, "concluded")
 	end
 
-	-- If invoking widget is part of a window-frame, bring it to the front before creating the pop-up.
+	-- If invoking widget is part of a window-frame, bring it to the front.
 	local frame = inst:findAncestorByField("is_frame", true)
 	if frame then
 		self:setSelectedFrame(frame, true)

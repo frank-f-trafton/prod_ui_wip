@@ -32,6 +32,7 @@ function commonWimp.closeWindowFrame(self)
 end
 
 
+--- Makes a generic context menu and registers it with the WIMP root.
 function commonWimp.makePopUpMenu(self, menu_def, x, y)
 
 	local root = self:getTopWidgetInstance()
@@ -65,6 +66,18 @@ end
 
 
 -- XXX makePopUpList()
+
+
+--- Sets up a pop-up widget and registers it to the WIMP root. The caller needs to create and set up the widget
+-- before calling.
+function commonWimp.assignPopUp(self, pop_up)
+
+	local root = self:getTopWidgetInstance()
+
+	pop_up.wid_ref = self
+
+	root:runStatement("rootCall_assignPopUp", self, pop_up)
+end
 
 
 return commonWimp
