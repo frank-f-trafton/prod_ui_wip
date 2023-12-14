@@ -535,4 +535,28 @@ function textUtil.utf8StartByteLeft(str, pos)
 end
 
 
+--- Get an alignment offset for a single line of text. Use in cases where you want to align
+-- text without love.graphics.printf() wrapping it if the text width exceeds the limit.
+function textUtil.getAlignmentOffset(str, font, align, width)
+
+	if align == "left" then
+		assert(type(str) == "string") -- assert arg #1
+		font:getHeight() -- assert arg #2
+		assert(type(width) == "number") -- assert arg #4
+		return 0
+
+	elseif align == "center" then
+		local text_w = font:getWidth(str)
+		return math.floor(0.5 + (width - text_w) / 2)
+
+	elseif align == "right" then
+		local text_w = font:getWidth(str)
+		return math.floor(0.5 + width - text_w)
+
+	else
+		error("argument #3: invalid alignment value.")
+	end
+end
+
+
 return textUtil

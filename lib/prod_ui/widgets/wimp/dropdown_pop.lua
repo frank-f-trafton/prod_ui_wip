@@ -43,7 +43,7 @@ def.selectionInView = commonMenu.selectionInView
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
+def.getItemAtPoint = commonMenu.widgetGetItemAtPointVClamp -- (self, px, py, first, last)
 def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
@@ -56,13 +56,23 @@ def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
 
 
-local function selectItemColor(item, client, skin)
 
-	if client.menu.items[client.menu.index] == item then
-		return skin.color_selected
+function def:_closeSelf(update_chosen)
 
-	else
-		return skin.color_inactive
+	if not self._dead then
+		local wid_ref = self.wid_ref
+		if wid_ref and not wid_ref._dead then
+			wid_ref.wid_drawer = false
+
+			if update_chosen then
+				wid_ref:setSelectionByIndex(self.menu.index, "chosen_i")
+			end
+		end
+
+		local root = self:getTopWidgetInstance()
+		if root.pop_up_menu == self then
+			root:runStatement("rootCall_destroyPopUp", self, "concluded")
+		end
 	end
 end
 
@@ -230,6 +240,8 @@ function def:uiCall_create(inst)
 		self:skinSetRefs()
 		self:skinInstall()
 
+		--self:setScrollBars(false, true)
+
 		self:arrange()
 
 		self:reshape()
@@ -279,50 +291,17 @@ function def:cacheUpdate(refresh_dimensions)
 end
 
 
---- The default navigational key input.
-function def:wid_defaultKeyNav(key, scancode, isrepeat)
-
-	local mod = self.context.key_mgr.mod
-
-	if scancode == "up" then
-		self:movePrev(1, true)
-		return true
-
-	elseif scancode == "down" then
-		self:moveNext(1, true)
-		return true
-
-	elseif scancode == "home" then
-		self:moveFirst(true)
-		return true
-
-	elseif scancode == "end" then
-		self:moveLast(true)
-		return true
-
-	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
-		return true
-
-	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
-		return true
-
-	elseif scancode == "left" then
-		self:scrollDeltaH(-32) -- XXX config
-		return true
-
-	elseif scancode == "right" then
-		self:scrollDeltaH(32) -- XXX config
-		return true
-	end
-end
-
-
 -- Used instead of 'uiCall_keypressed'. The dropdown body passes keyboard events through here.
 function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 
 	local root = self:getTopWidgetInstance()
+
+	-- XXX: debug
+	if scancode == "1" then
+		if self.wid_ref then
+			self.wid_ref:releaseThimble()
+		end
+	end
 
 	if scancode == "up" then
 		self:movePrev(1, true)
@@ -353,38 +332,18 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 		return true
 
 	elseif scancode == "escape" then
-		root:runStatement("rootCall_destroyPopUp", self, "concluded")
+		self:_closeSelf(false)
 		return true
 
 	-- Enter toggles the pop-up, closing it here. Update the chosen selection.
 	elseif scancode == "return" or scancode == "kpenter" then
-		root:runStatement("rootCall_destroyPopUp", self, "concluded")
+		self:_closeSelf(true)
 		return true
 	end
 end
 
---[=[
-	local check_chosen = false
-	local chosen_i_old = self.menu.chosen_i
 
-
-
-	if check_chosen then
-		if chosen_i_old ~= self.menu.chosen_i then
-			self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
-		end
-		return true
-	end
-end
---]=]
-
-
-function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
-	if self == inst then
-		self:tryTakeThimble()
-	end
-end
+--function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -414,19 +373,6 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-local function findOriginItemIndex(c_prev, origin_item)
-
-	for i, c_item in ipairs(c_prev.menu.items) do
-		--print(i, c_item, #c_prev.menu.items)
-		if c_item == origin_item then
-			return i
-		end
-	end
-
-	-- return nil
-end
-
-
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 	if self == inst then
@@ -445,11 +391,9 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.items_first), math.min(#menu.items, self.items_last))
 
 			if item and item.selectable then
-				-- Un-hover any existing hovered item
-				if self.item_hover ~= item then
+				self.item_hover = item
 
-					self.item_hover = item
-				end
+				print("item", item, "index", menu.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
@@ -470,10 +414,6 @@ end
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 	if self == inst then
-		if button <= 3 then
-			self:tryTakeThimble()
-		end
-
 		local ax, ay = self:getAbsolutePosition()
 		local mouse_x = x - ax
 		local mouse_y = y - ay
@@ -488,7 +428,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
 
 				self.press_busy = "menu-drag"
-
 				self:cacheUpdate(true)
 			end
 		end
@@ -503,38 +442,17 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 	if self == inst
 	and button == self.context.mouse_pressed_button
+	and self.press_busy == "menu-drag"
 	then
 		self.press_busy = false
 
 		-- Handle mouse unpressing over the selected item.
 		if button == 1 then
 			local item_selected = self.menu.items[self.menu.index]
-			local chosen_item_old = self.menu.items[self.menu.chosen_i]
 
-			if item_selected and item_selected.selectable and chosen_item_old ~= item_selected then
-				local ax, ay = self:getAbsolutePosition()
-				local mouse_x = x - ax
-				local mouse_y = y - ay
-
-				-- Apply scroll and viewport offsets
-				local xx = mouse_x + self.scr_x - self.vp_x
-				local yy = mouse_y + self.scr_y - self.vp_y
-
-				-- XXX safety precaution: ensure mouse position is within widget viewport #2?
-				if xx >= item_selected.x and xx < item_selected.x + item_selected.w
-				and yy >= item_selected.y and yy < item_selected.y + item_selected.h
-				then
-					local wid_ref = self.wid_ref
-					if wid_ref and not wid_ref._dead then
-						wid_ref:setSelection(item_selected, "chosen_i")
-						--self:remove()
-
-						local root = self:getTopWidgetInstance()
-						root:runStatement("rootCall_destroyPopUp", self, "concluded")
-
-						return true
-					end
-				end
+			if item_selected and item_selected.selectable then
+				self:_closeSelf(true)
+				return true
 			end
 		end
 	end
@@ -603,7 +521,7 @@ end
 function def:uiCall_destroy(inst)
 
 	if self == inst then
-		--
+		self:_closeSelf(false)
 	end
 end
 
@@ -629,29 +547,39 @@ def.skinners = {
 			local skin = self.skin
 			local menu = self.menu
 
+			local font = skin.font
+
 			love.graphics.push("all")
 
+			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+
+			-- XXX: Back panel body.
 			love.graphics.setColor(1, 1, 1, 1)
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
 
+			-- Scroll offsets.
+			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+
+			-- Dropdown drawers do not render hover-glow.
+
+			-- Selection glow.
 			local selected_item = menu.items[menu.index]
 			if selected_item then
 				love.graphics.setColor(1, 1, 1, 0.5)
-				love.graphics.rectangle(
-					"fill",
-					selected_item.x,
-					selected_item.y,
-					selected_item.w,
-					selected_item.h
-				)
+				love.graphics.rectangle("fill", 0, selected_item.y, self.vp_w - self.vp_x, selected_item.h)
 			end
 
-			print("self.items_first", self.items_first, "self.items_last", self.items_last)
+			-- XXX: icons.
+
+			-- Item text.
 			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.setFont(font)
+
 			for i = math.max(1, self.items_first), math.min(#menu.items, self.items_last) do
 			--for i = 1, #menu.items do
 				local item = menu.items[i]
-				love.graphics.print(item.text, item.x, item.y)
+				local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
+				love.graphics.print(item.text, xx, item.y)
 			end
 
 			love.graphics.pop()
@@ -660,10 +588,8 @@ def.skinners = {
 
 		--renderLast = function(self, ox, oy) end,
 
-
-		renderThimble = function(self, ox, oy)
-			-- nothing
-		end,
+		-- The Dropdown drawer cannot take the thimble.
+		--renderThimble = function(self, ox, oy)
 	},
 }
 

@@ -1076,10 +1076,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.items_first), math.min(#menu.items, self.items_last))
 
 			if item and item.selectable then
-				-- Un-hover any existing hovered item
-				if self.item_hover ~= item then
-					self.item_hover = item
-				end
+				self.item_hover = item
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
@@ -1350,16 +1347,16 @@ def.skinners = {
 			love.graphics.push("all")
 			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-			-- Back panel body
+			-- Back panel body.
 			local slc_body = skin.slc_body
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
-			-- Scroll offsets
+			-- Scroll offsets.
 			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
 
-			-- (Pop up menus do not render hover-glow.)
+			-- Pop up menus do not render hover-glow.
 
-			-- Draw selection glow, if applicable
+			-- Selection glow.
 			local sel_item = items[menu.index]
 			if sel_item then
 				love.graphics.setColor(skin.color_select_glow)

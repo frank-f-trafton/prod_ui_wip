@@ -37,7 +37,7 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		makeLabel(content, 32, 0, 512, 32, "*** Under construction *** This widget does not work yet.", "single")
+		makeLabel(content, 32, 0, 512, 32, "*** Under construction ***", "single")
 		local dropdown = content:addChild("wimp/dropdown_box")
 
 		dropdown.x = 32

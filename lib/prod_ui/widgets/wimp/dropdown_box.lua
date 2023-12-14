@@ -35,6 +35,7 @@ local context = select(1, ...)
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -104,8 +105,6 @@ function def:addItem(text, pos, bijou_id)
 
 	table.insert(items, pos, item)
 
-	self:arrange(pos, #items)
-
 	print("addItem text:", item.text, "y: ", item.y)
 
 	-- If there is no chosen item, assign this one as chosen now.
@@ -114,6 +113,10 @@ function def:addItem(text, pos, bijou_id)
 		if i then
 			self:setSelectionByIndex(i, "chosen_i")
 		end
+	end
+
+	if self.wid_drawer then
+		self.wid_drawer:menuChangeCleanup()
 	end
 
 	return item
@@ -174,7 +177,9 @@ function def:removeItemByIndex(item_i)
 	removeItemIndexCleanup(self, item_i, "index")
 	removeItemIndexCleanup(self, item_i, "chosen_i")
 
-	self:arrange(item_i, #items)
+	if self.wid_drawer then
+		self.wid_drawer:menuChangeCleanup()
+	end
 
 	return removed_item
 end
@@ -206,6 +211,10 @@ function def:setSelectionByIndex(item_i, id)
 	if id == "chosen_i" and chosen_i_old ~= self.menu.chosen_i then
 		self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
 	end
+
+	if self.wid_drawer then
+		self.wid_drawer:menuChangeCleanup()
+	end
 end
 
 
@@ -218,8 +227,6 @@ function def:uiCall_create(inst)
 
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
-
-		self.press_busy = false
 
 		-- -> commonMenu.instanceSetup(self)
 		self.page_jump_size = 4
@@ -252,27 +259,40 @@ end
 
 function def:uiCall_reshape()
 
+	-- Viewport #1 is the chosen item text area.
+	-- Viewport #2 is the decorative button which indicates that this widget is clickable.
+
+	local skin = self.skin
+
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
+
+	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
+
+	widShared.partitionViewport(self, 1, 2, button_spacing, skin.button_placement)
 end
 
 
 function def:_openPopUpMenu()
 
 	if not self.wid_drawer then
+		local skin = self.skin
 		local root = self:getTopWidgetInstance()
 		local menu = self.menu
 
 		local ax, ay = self:getAbsolutePosition()
-		local item_h = 40 -- XXX
+
+		-- (We assume that the root widget's dimensions match the display area.)
+		local drawer_w = math.min(root.w, self.w)
+		local drawer_h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #menu.items)))
 
 		local primer = {
 			wid_ref = self,
 			menu = menu,
 			x = ax,
 			y = ay + self.h,
-			w = self.w,
-			h = item_h * #menu.items,
+			w = drawer_w,
+			h = drawer_h,
 		}
 
 		local drawer = root:addChild("wimp/dropdown_pop", primer)
@@ -284,25 +304,11 @@ function def:_openPopUpMenu()
 end
 
 
-local function closeCleanup(self, update_chosen)
+function def:_closePopUpMenu(update_chosen)
 
-	self.wid_drawer = false
-
-end
-
-
-function def:_closePopUpMenu(update_chosen, destroy_widget)
-
-	if update_chosen then
-		if self.menu.index > 0 then
-			-- XXX: probably double-check the main index before attempting to assign it.
-			self.menu:setSelectedIndex(self.menu.index, "chosen_i")
-		end
-	end
-
-	if destroy_widget and self.wid_drawer and not self.wid_drawer._dead then
-		self.wid_drawer:remove()
-		self.wid_drawer = false
+	local wid_drawer = self.wid_drawer
+	if wid_drawer and not wid_drawer._dead then
+		self.wid_drawer:_closeSelf(update_chosen)
 	end
 end
 
@@ -324,7 +330,7 @@ function def:wid_popUpCleanup(reason_code)
 	if self.context.current_pressed == self then
 		self.context.current_pressed = false
 	end
-	closeCleanup(self)
+	self.wid_drawer = false
 end
 
 
@@ -377,17 +383,23 @@ function def:uiCall_thimbleRelease(inst)
 	print("def:uiCall_thimbleRelease", self, inst, self == inst)
 
 	if self == inst then
-		--[=[
-		-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
-		-- This precludes opening a right-click context menu on an item in the pop-up menu, since
-		-- the context menu takes the thimble while it exists.
-		-- If you require opening context menus on list items, consider using a plain ListBox
-		-- widget instead.
 		if self.wid_drawer then
+			-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
+			-- This precludes opening a right-click context menu on an item in the pop-up menu, since
+			-- the context menu takes the thimble while it exists.
+			-- If you require opening context menus on list items, consider using a plain ListBox
+			-- widget instead.
 			self:_closePopUpMenu(false)
 			return true
 		end
-		--]=]
+	end
+end
+
+
+function def:uiCall_destroy(inst)
+
+	if self == inst then
+		self:_closePopUpMenu(false)
 	end
 end
 
@@ -453,8 +465,27 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if button == 1 then
 			if not self.wid_drawer then
 				self:_openPopUpMenu()
+
 				return true
 			end
+		end
+	end
+end
+
+
+function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+	-- If the cursor overlaps the pop-up drawer, transfer context pressed state.
+	local wid_drawer = self.wid_drawer
+	if wid_drawer then
+		local ax, ay = wid_drawer:getAbsolutePosition()
+		if mouse_x >= ax and mouse_x < ax + wid_drawer.w
+		and mouse_y >= ay and mouse_y < ay + wid_drawer.h
+		then
+			self.context:transferPressedState(wid_drawer)
+
+			wid_drawer.press_busy = "menu-drag"
+			wid_drawer:cacheUpdate(true)
 		end
 	end
 end
@@ -479,27 +510,39 @@ def.skinners = {
 		render = function(self, ox, oy)
 
 			local skin = self.skin
+			local font = skin.font
 
 			love.graphics.push("all")
 
-			if self.wid_drawer then
-				love.graphics.setColor(1, 0, 0, 1)
-
-			else
-				love.graphics.setColor(1, 1, 1, 1)
-			end
-
-			-- If a chosen item is defined, render it.
-			local chosen = self.menu.items[self.menu.chosen_i]
-			--print("chosen", chosen, "chosen_i", self.menu.chosen_i)
-			if chosen then
-				love.graphics.print(chosen.text, 0, 0)
-
-			else
-				love.graphics.print("WIP <no chosen item>")
-			end
-
+			-- XXX: Back panel body.
+			love.graphics.setColor(1, 1, 1, 1)
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
+
+			-- XXX: Decorative button.
+			love.graphics.setColor(0.75, 0.75, 0.75, 1)
+			love.graphics.rectangle("line", self.vp2_x, self.vp2_y, self.vp2_w - 1, self.vp2_h - 1)
+
+			-- Crop item text.
+			uiGraphics.intersectScissor(
+				ox + self.x + self.vp_x,
+				oy + self.y + self.vp_y,
+				self.vp_w,
+				self.vp_h
+			)
+
+			love.graphics.setColor(1, 1, 1, 1)
+
+			local chosen = self.menu.items[self.menu.chosen_i]
+
+			if chosen then
+				-- XXX: Chosen item icon.
+
+				-- Chosen item text.
+				love.graphics.setFont(font)
+				local xx = self.vp_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp_w)
+				local yy = math.floor(0.5 + self.vp_y + (self.vp_h - font:getHeight()) / 2)
+				love.graphics.print(chosen.text, xx, yy)
+			end
 
 			-- Debug
 			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
