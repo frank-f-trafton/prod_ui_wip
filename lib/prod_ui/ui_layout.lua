@@ -676,7 +676,7 @@ function uiLayout.applyLayout(parent)
 
 		-- Otherwise, treat as a widget.
 		else
-			if wid._dead then
+			if wid._dead == "dead" then
 				error("dead widget reference in layout sequence. It should have been cleaned up when removed.")
 
 			elseif not wid.lc_func then

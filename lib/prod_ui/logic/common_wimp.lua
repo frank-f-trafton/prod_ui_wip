@@ -68,7 +68,7 @@ end
 -- XXX makePopUpList()
 
 
---- Sets up a pop-up widget and registers it to the WIMP root. The caller needs to create and set up the widget
+--- Registers a widget as a pop-up in the WIMP root. The caller needs to create and initialize the widget
 -- before calling.
 function commonWimp.assignPopUp(self, pop_up)
 

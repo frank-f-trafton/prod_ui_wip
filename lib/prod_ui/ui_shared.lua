@@ -131,6 +131,20 @@ function uiShared.assertIntRange(n, num, first, last)
 end
 
 
+function uiShared.assertIntMinNotNaN(n, num, first)
+
+	if type(num) ~= "number" then
+		uiShared.errBadType(n, num, "number")
+
+	elseif math.floor(num) ~= num then
+		error("argument #" .. n .. ": value must be an integer.")
+
+	elseif num < first then
+		error("argument #" .. n .. ": value must be at least " .. n .. ".")
+	end
+end
+
+
 -- * / Assertions *
 
 

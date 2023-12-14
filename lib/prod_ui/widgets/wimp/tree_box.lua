@@ -87,17 +87,11 @@ def.getInBounds = commonMenu.getItemInBoundsY
 def.selectionInView = commonMenu.selectionInView
 
 
--- * / Scroll helpers *
-
-
 -- * Spatial selection *
 
 
 def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
 def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
-
-
--- * / Spatial selection *
 
 
 -- * Selection movement *
@@ -107,9 +101,6 @@ def.movePrev = commonMenu.widgetMovePrev
 def.moveNext = commonMenu.widgetMoveNext
 def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
-
-
--- * / Selection movement *
 
 
 --- Called when user double-clicks on the widget or presses "return" or "kpenter".
