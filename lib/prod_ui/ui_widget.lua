@@ -511,8 +511,10 @@ end
 function _mt_widget:remove()
 
 	if self._dead then
-		error("attempted to remove widget that is already dead.")
+		error("attempted to remove widget that is already " .. tostring(self._dead) .. ".")
 	end
+
+	self._dead = "dying"
 
 	local locks = self.context.locks
 	if locks[self.parent] then
@@ -618,8 +620,7 @@ function _mt_widget:remove()
 		self.context:clearClickSequence()
 	end
 
-	-- Very last thing: explicitly mark the widget as dead. Helps in some cases with stale table references.
-	self._dead = true
+	self._dead = "dead"
 end
 
 

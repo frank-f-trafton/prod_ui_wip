@@ -72,8 +72,12 @@
 
 	-> Fields set during instance destruction:
 
-	_dead: is set true when the widget is removed from the context.	Helps identify stale
-	references. Do not modify.
+	_dead: Identifies widgets that are being removed or have already been removed. Read but do not
+	modify.
+
+	* nil: the widget is still part of the context.
+	* "dying": the widget is in the process of being removed from the context.
+	* "dead": The widget has been removed from the context.
 
 
 	-> Context-to-widget behavior flags:

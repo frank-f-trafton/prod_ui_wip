@@ -23,19 +23,42 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 local def = {
 	skin_id = "dropdown_pop1",
+	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
 }
 
 
 widShared.scrollSetMethods(def)
+def.setScrollBars = commonScroll.setScrollBars
+def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 def.arrange = commonMenu.arrangeListVerticalTB
+
+
+-- * Scroll helpers *
+
+
+def.getInBounds = commonMenu.getItemInBoundsY
+def.selectionInView = commonMenu.selectionInView
+
+
+-- * Spatial selection *
+
+
+def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
+def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
+
+
+-- * Selection movement *
+
+
+def.movePrev = commonMenu.widgetMovePrev
+def.moveNext = commonMenu.widgetMoveNext
+def.moveFirst = commonMenu.widgetMoveFirst
+def.moveLast = commonMenu.widgetMoveLast
 
 
 local function selectItemColor(item, client, skin)
 
-	if item.actionable then
-		return skin.color_actionable
-
-	elseif client.menu.items[client.menu.index] == item then
+	if client.menu.items[client.menu.index] == item then
 		return skin.color_selected
 
 	else
@@ -143,29 +166,6 @@ function def:keepInView()
 end
 
 
--- * Scroll helpers *
-
-
-def.getInBounds = commonMenu.getItemInBoundsRect
-def.selectionInView = commonMenu.selectionInView
-
-
--- * Spatial selection *
-
-
-def.getItemAtPoint = commonMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
-
-
--- * Selection movement *
-
-
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
-
-
 function def:menuChangeCleanup()
 
 	self.menu:setSelectionStep(0, false)
@@ -179,6 +179,7 @@ end
 function def:uiCall_create(inst)
 
 	if self == inst then
+		-- Caller should set this widget's position and dimensions as part of the call to addChild().
 		if not self.wid_ref then
 			error("no owner widget assigned to this menu.")
 
@@ -188,10 +189,10 @@ function def:uiCall_create(inst)
 
 		self.visible = true
 		self.allow_hover = true
+		self.clip_scissor = true
+
 		-- This widget does not take the thimble.
 		-- The owner widget holds onto the thimble and forwards keyboard events through a callback.
-
-		self.clip_scissor = true
 
 		self.sort_id = 6
 
@@ -203,6 +204,8 @@ function def:uiCall_create(inst)
 		self.press_busy = false
 
 		commonMenu.instanceSetup(self)
+
+		self.wrap_selection = false
 
 		-- Ref to currently-hovered item, or false if not hovering over any items.
 		self.item_hover = false
@@ -224,7 +227,6 @@ function def:uiCall_create(inst)
 		self.pad_text_y1 = 4
 		self.pad_text_y2 = 4
 
-
 		self:skinSetRefs()
 		self:skinInstall()
 
@@ -237,6 +239,9 @@ end
 
 
 function def:uiCall_reshape()
+
+	-- Viewport #1 is the main content viewport.
+	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
 	widShared.resetViewport(self, 1)
 
@@ -302,6 +307,14 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	elseif scancode == "pagedown" then
 		self:moveNext(self.page_jump_size, true)
 		return true
+
+	elseif scancode == "left" then
+		self:scrollDeltaH(-32) -- XXX config
+		return true
+
+	elseif scancode == "right" then
+		self:scrollDeltaH(32) -- XXX config
+		return true
 	end
 end
 
@@ -311,8 +324,32 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 
 	local root = self:getTopWidgetInstance()
 
+	if scancode == "up" then
+		self:movePrev(1, true)
+		return true
+
+	elseif scancode == "down" then
+		self:moveNext(1, true)
+		return true
+
+	elseif scancode == "home" then
+		self:moveFirst(true)
+		return true
+
+	elseif scancode == "end" then
+		self:moveLast(true)
+		return true
+
+	elseif scancode == "pageup" then
+		self:movePrev(self.page_jump_size, true)
+		return true
+
+	elseif scancode == "pagedown" then
+		self:moveNext(self.page_jump_size, true)
+		return true
+
 	-- Suppress stepping the thimble while a menu is open.
-	if scancode == "tab" then
+	elseif scancode == "tab" then
 		return true
 
 	elseif scancode == "escape" then
@@ -325,6 +362,21 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 		return true
 	end
 end
+
+--[=[
+	local check_chosen = false
+	local chosen_i_old = self.menu.chosen_i
+
+
+
+	if check_chosen then
+		if chosen_i_old ~= self.menu.chosen_i then
+			self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+		end
+		return true
+	end
+end
+--]=]
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -379,10 +431,11 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+
+		commonScroll.widgetProcessHover(self, mx, my)
+
 		local xx = mx + self.scr_x - self.vp_x
 		local yy = my + self.scr_y - self.vp_y
-
-		local hover_ok = false
 
 		if not self.press_busy and widShared.pointInViewport(self, 2, mx, my) then
 
@@ -405,24 +458,13 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 						self.menu:setSelectedIndex(i)
 					end
 				end
-
-				hover_ok = true
 			end
 		end
-
-		if self.item_hover and not hover_ok then
-			self.item_hover = false
-		end
 	end
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
-	if self == inst then
-		self.item_hover = false
-	end
-end
+--function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
@@ -459,29 +501,38 @@ end
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
-	if self == inst then
-		if button == self.context.mouse_pressed_button then
-			self.press_busy = false
+	if self == inst
+	and button == self.context.mouse_pressed_button
+	then
+		self.press_busy = false
 
-			-- Handle mouse unpressing over the selected item.
-			if button == 1 then
-				local item_selected = self.menu.items[self.menu.index]
-				if item_selected and item_selected.selectable and item_selected.actionable then
+		-- Handle mouse unpressing over the selected item.
+		if button == 1 then
+			local item_selected = self.menu.items[self.menu.index]
+			local chosen_item_old = self.menu.items[self.menu.chosen_i]
 
-					local ax, ay = self:getAbsolutePosition()
-					local mouse_x = x - ax
-					local mouse_y = y - ay
+			if item_selected and item_selected.selectable and chosen_item_old ~= item_selected then
+				local ax, ay = self:getAbsolutePosition()
+				local mouse_x = x - ax
+				local mouse_y = y - ay
 
-					-- Apply scroll and viewport offsets
-					local xx = mouse_x + self.scr_x - self.vp_x
-					local yy = mouse_y + self.scr_y - self.vp_y
+				-- Apply scroll and viewport offsets
+				local xx = mouse_x + self.scr_x - self.vp_x
+				local yy = mouse_y + self.scr_y - self.vp_y
 
-					-- XXX safety precaution: ensure mouse position is within widget viewport #2?
-					if xx >= item_selected.x and xx < item_selected.x + item_selected.w
-					and yy >= item_selected.y and yy < item_selected.y + item_selected.h
-					then
-						-- XXX: run callback in owner widget with item_selected
-						-- XXX: destroy this pop-up
+				-- XXX safety precaution: ensure mouse position is within widget viewport #2?
+				if xx >= item_selected.x and xx < item_selected.x + item_selected.w
+				and yy >= item_selected.y and yy < item_selected.y + item_selected.h
+				then
+					local wid_ref = self.wid_ref
+					if wid_ref and not wid_ref._dead then
+						wid_ref:setSelection(item_selected, "chosen_i")
+						--self:remove()
+
+						local root = self:getTopWidgetInstance()
+						root:runStatement("rootCall_destroyPopUp", self, "concluded")
+
+						return true
 					end
 				end
 			end
@@ -583,7 +634,20 @@ def.skinners = {
 			love.graphics.setColor(1, 1, 1, 1)
 			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
 
+			local selected_item = menu.items[menu.index]
+			if selected_item then
+				love.graphics.setColor(1, 1, 1, 0.5)
+				love.graphics.rectangle(
+					"fill",
+					selected_item.x,
+					selected_item.y,
+					selected_item.w,
+					selected_item.h
+				)
+			end
+
 			print("self.items_first", self.items_first, "self.items_last", self.items_last)
+			love.graphics.setColor(1, 1, 1, 1)
 			for i = math.max(1, self.items_first), math.min(#menu.items, self.items_last) do
 			--for i = 1, #menu.items do
 				local item = menu.items[i]

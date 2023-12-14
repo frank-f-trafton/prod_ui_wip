@@ -25,7 +25,8 @@ Opened:
 
 
 The dropdown menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance
-and mouse actions. The body manages the menu's contents, and handles keyboard actions.
+and mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and
+the pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
 --]]
 
 
@@ -63,14 +64,31 @@ def.wid_buttonAction3 = uiShared.dummyFunc
 --def.uiCall_thimbleAction2
 
 
-function def:addItem(text, pos, bijou_id)
+--- Callback for a change in the item choice.
+function def:wid_chosenSelection(index, tbl)
+	-- ...
+end
 
-	-- XXX: Assertions.
+
+
+function def:addItem(text, pos, bijou_id)
 
 	local skin = self.skin
 	local font = skin.font
 
 	local items = self.menu.items
+
+	pos = pos or #items + 1
+
+	-- Assertions.
+	-- [[
+	if type(text) ~= "string" then uiShared.errBadType(1, text, "string")
+	elseif type(pos) ~= "number" then uiShared.errBadType(2, pos, "nil/number") end
+
+	uiShared.assertIntRange(2, pos, 1, #items + 1)
+
+	-- XXX: bijou_id
+	--]]
 
 	local item = {}
 
@@ -84,12 +102,6 @@ function def:addItem(text, pos, bijou_id)
 	item.bijou_id = bijou_id
 	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
 
-	pos = pos or #items + 1
-
-	if pos < 1 or pos > #items + 1 then
-		error("addItem: insert position is out of range.")
-	end
-
 	table.insert(items, pos, item)
 
 	self:arrange(pos, #items)
@@ -100,7 +112,7 @@ function def:addItem(text, pos, bijou_id)
 	if self.menu.chosen_i == 0 then
 		local i, tbl = self.menu:hasAnySelectableItems()
 		if i then
-			self.menu.chosen_i = i
+			self:setSelectionByIndex(i, "chosen_i")
 		end
 	end
 
@@ -123,6 +135,27 @@ function def:removeItem(item_t)
 end
 
 
+
+local function removeItemIndexCleanup(self, item_i, id)
+
+	-- Removed item was the last in the list, and was selected:
+	if self.menu[id] > #self.menu.items then
+		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
+		self:setSelectionByIndex(landing_i or 0, id)
+
+	-- Removed item was not selected, and the selected item appears after the removed item in the list:
+	elseif self.menu[id] > item_i then
+		self.menu[id] = self.menu[id] - 1
+	end
+
+	-- Handle the current selection being removed.
+	if self.menu[id] == item_i then
+		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1) or self.menu:findSelectableLanding(#self.menu.items, 1)
+		self.menu[id] = landing_i or 0
+	end
+end
+
+
 function def:removeItemByIndex(item_i)
 
 	-- Assertions
@@ -138,27 +171,8 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	-- Removed item was the last in the list, and was selected:
-	if self.menu.index > #self.menu.items then
-		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
-		if landing_i then
-			self:setSelectionByIndex(landing_i)
-
-		else
-			self:setSelectionByIndex(0)
-		end
-
-	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self.menu.index > item_i then
-		self.menu.index = self.menu.index - 1
-	end
-
-	-- Handle the current chosen item being removed.
-	if self.menu.chosen_i == item_i then
-		-- XXX: fix this so that the new chosen item is close to the removed one's position.
-		local i, new_chosen = self.menu:hasAnySelectableItems()
-		self.menu.chosen_i = i or 0
-	end
+	removeItemIndexCleanup(self, item_i, "index")
+	removeItemIndexCleanup(self, item_i, "chosen_i")
 
 	self:arrange(item_i, #items)
 
@@ -185,7 +199,13 @@ function def:setSelectionByIndex(item_i, id)
 	uiShared.assertNumber(1, item_i)
 	--]]
 
+	local chosen_i_old = self.menu.chosen_i
+
 	self.menu:setSelectedIndex(item_i, id)
+
+	if id == "chosen_i" and chosen_i_old ~= self.menu.chosen_i then
+		self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+	end
 end
 
 
@@ -201,7 +221,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		--commonMenu.instanceSetup(self)
+		-- -> commonMenu.instanceSetup(self)
 		self.page_jump_size = 4
 		self.wheel_jump_size = 64
 		self.wrap_selection = false
@@ -243,15 +263,19 @@ function def:_openPopUpMenu()
 		local root = self:getTopWidgetInstance()
 		local menu = self.menu
 
-		local drawer = root:addChild("wimp/dropdown_pop", {wid_ref = self, menu = menu})
-
 		local ax, ay = self:getAbsolutePosition()
-
 		local item_h = 40 -- XXX
-		drawer.w = self.w
-		drawer.h = item_h * #menu.items
-		drawer.x = ax
-		drawer.y = ay + self.h
+
+		local primer = {
+			wid_ref = self,
+			menu = menu,
+			x = ax,
+			y = ay + self.h,
+			w = self.w,
+			h = item_h * #menu.items,
+		}
+
+		local drawer = root:addChild("wimp/dropdown_pop", primer)
 
 		self.wid_drawer = drawer
 
@@ -304,7 +328,6 @@ function def:wid_popUpCleanup(reason_code)
 end
 
 
-
 --- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
 -- @param key The key code.
 -- @param scancode The scancode.
@@ -312,28 +335,38 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 
+	local check_chosen = false
+	local chosen_i_old = self.menu.chosen_i
+
 	if scancode == "up" then
 		self:movePrev(1, true, "chosen_i")
-		return true
+		check_chosen = true
 
 	elseif scancode == "down" then
 		self:moveNext(1, true, "chosen_i")
-		return true
+		check_chosen = true
 
 	elseif scancode == "home" then
 		self:moveFirst(true, "chosen_i")
-		return true
+		check_chosen = true
 
 	elseif scancode == "end" then
 		self:moveLast(true, "chosen_i")
-		return true
+		check_chosen = true
 
 	elseif scancode == "pageup" then
 		self:movePrev(self.page_jump_size, true, "chosen_i")
-		return true
+		check_chosen = true
 
 	elseif scancode == "pagedown" then
 		self:moveNext(self.page_jump_size, true, "chosen_i")
+		check_chosen = true
+	end
+
+	if check_chosen then
+		if chosen_i_old ~= self.menu.chosen_i then
+			self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+		end
 		return true
 	end
 end
