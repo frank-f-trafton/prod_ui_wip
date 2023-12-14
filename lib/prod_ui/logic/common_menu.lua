@@ -167,7 +167,7 @@ function commonMenu.widgetGetItemAtPoint(self, px, py, first, last)
 		end
 	end
 
-	return nil
+	-- return nil
 end
 
 
