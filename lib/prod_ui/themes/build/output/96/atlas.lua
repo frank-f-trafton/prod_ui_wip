@@ -83,31 +83,31 @@ return {
     button_minor = {
       h = 12,
       w = 12,
-      x = 141,
+      x = 169,
       y = 131,
     },
     button_minor_depressed = {
       h = 12,
       w = 12,
-      x = 127,
+      x = 155,
       y = 131,
     },
     button_minor_disabled = {
       h = 12,
       w = 12,
-      x = 113,
+      x = 141,
       y = 131,
     },
     button_minor_hover = {
       h = 12,
       w = 12,
-      x = 99,
+      x = 127,
       y = 131,
     },
     button_minor_press = {
       h = 12,
       w = 12,
-      x = 85,
+      x = 113,
       y = 131,
     },
     button_press = {
@@ -151,6 +151,18 @@ return {
       w = 24,
       x = 183,
       y = 35,
+    },
+    dropdown_body = {
+      h = 16,
+      w = 16,
+      x = 127,
+      y = 113,
+    },
+    dropdown_drawer = {
+      h = 16,
+      w = 16,
+      x = 109,
+      y = 113,
     },
     icon_file = {
       h = 16,
@@ -203,13 +215,13 @@ return {
     label = {
       h = 12,
       w = 12,
-      x = 71,
+      x = 99,
       y = 131,
     },
     label_disabled = {
       h = 12,
       w = 12,
-      x = 57,
+      x = 85,
       y = 131,
     },
     list_box_body = {
@@ -263,7 +275,7 @@ return {
     progress_back = {
       h = 8,
       w = 8,
-      x = 175,
+      x = 203,
       y = 131,
     },
     progress_ichor = {
@@ -317,25 +329,25 @@ return {
     scroll_button = {
       h = 12,
       w = 12,
-      x = 43,
+      x = 71,
       y = 131,
     },
     scroll_button_disabled = {
       h = 12,
       w = 12,
-      x = 29,
+      x = 57,
       y = 131,
     },
     scroll_button_hover = {
       h = 12,
       w = 12,
-      x = 15,
+      x = 43,
       y = 131,
     },
     scroll_button_press = {
       h = 12,
       w = 12,
-      x = 1,
+      x = 29,
       y = 131,
     },
     scroll_trough = {
@@ -359,13 +371,13 @@ return {
     slider_trough_active = {
       h = 8,
       w = 8,
-      x = 165,
+      x = 193,
       y = 131,
     },
     slider_trough_empty = {
       h = 8,
       w = 8,
-      x = 155,
+      x = 183,
       y = 131,
     },
     slider_trough_tick_major = {
@@ -401,19 +413,19 @@ return {
     tabular_category_body = {
       h = 12,
       w = 12,
-      x = 235,
-      y = 113,
+      x = 15,
+      y = 131,
     },
     tabular_category_body_hover = {
       h = 12,
       w = 12,
-      x = 221,
-      y = 113,
+      x = 1,
+      y = 131,
     },
     tabular_category_body_press = {
       h = 12,
       w = 12,
-      x = 207,
+      x = 243,
       y = 113,
     },
     window_body = {
@@ -425,19 +437,19 @@ return {
     window_graphic_close = {
       h = 12,
       w = 12,
-      x = 193,
+      x = 229,
       y = 113,
     },
     window_graphic_maximize = {
       h = 12,
       w = 12,
-      x = 179,
+      x = 215,
       y = 113,
     },
     window_graphic_unmaximize = {
       h = 12,
       w = 12,
-      x = 165,
+      x = 201,
       y = 113,
     },
     window_header = {
@@ -449,25 +461,25 @@ return {
     window_header_button = {
       h = 12,
       w = 12,
-      x = 151,
+      x = 187,
       y = 113,
     },
     window_header_button_disabled = {
       h = 12,
       w = 12,
-      x = 137,
+      x = 173,
       y = 113,
     },
     window_header_button_hover = {
       h = 12,
       w = 12,
-      x = 123,
+      x = 159,
       y = 113,
     },
     window_header_button_press = {
       h = 12,
       w = 12,
-      x = 109,
+      x = 145,
       y = 113,
     },
   },
@@ -569,6 +581,26 @@ return {
       w1 = 4,
       w2 = 16,
       w3 = 4,
+      x = 0,
+      y = 0,
+    },
+    dropdown_body = {
+      h1 = 6,
+      h2 = 4,
+      h3 = 6,
+      w1 = 6,
+      w2 = 4,
+      w3 = 6,
+      x = 0,
+      y = 0,
+    },
+    dropdown_drawer = {
+      h1 = 6,
+      h2 = 4,
+      h3 = 6,
+      w1 = 6,
+      w2 = 4,
+      w3 = 6,
       x = 0,
       y = 0,
     },

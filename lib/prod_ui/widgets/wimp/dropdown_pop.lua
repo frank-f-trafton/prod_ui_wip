@@ -7,6 +7,10 @@ wimp/dropdown_pop: The pop-up (or "drawer") component of a dropdown menu.
 
 These are not real OS widgets, so they are limited to the boundaries of the window.
 They may act strangely if the window is too small for the menu contents.
+
+TODO: pressing keys to jump to the next item beginning with the key cap label.
+^ Probably need a text-input field for additional code points... same for ListBoxes.
+Not sure about TreeBoxes.
 --]]
 
 
@@ -315,13 +319,6 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 
 	local root = self:getTopWidgetInstance()
 
-	-- XXX: debug
-	if scancode == "1" then
-		if self.wid_ref then
-			self.wid_ref:releaseThimble()
-		end
-	end
-
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -377,16 +374,20 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 			-- Mouse position relative to viewport #1
 			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-			mx = mx - self.vp_x
-			my = my - self.vp_y
 
-			local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
-			if item_i and item_t.selectable then
-				self.menu:setSelectedIndex(item_i)
+			-- test: Only update the selection via dragging if the mouse is within range horizontally.
+			--if mx >= 0 and mx < self.w then
+				mx = mx - self.vp_x
+				my = my - self.vp_y
 
-			else
-				self.menu:setSelectedIndex(0)
-			end
+				local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
+				if item_i and item_t.selectable then
+					self.menu:setSelectedIndex(item_i)
+
+				else
+					self.menu:setSelectedIndex(0)
+				end
+			--end
 		end
 	end
 end
@@ -412,7 +413,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			if item and item.selectable then
 				self.item_hover = item
 
-				print("item", item, "index", menu.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
+				--print("item", item, "index", menu.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
@@ -492,18 +493,21 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 	if self == inst
 	and button == self.context.mouse_pressed_button
-	and self.press_busy == "menu-drag"
 	then
 		commonScroll.widgetClearPress(self)
+
+		local old_press_busy = self.press_busy
 		self.press_busy = false
 
-		-- Handle mouse unpressing over the selected item.
-		if button == 1 then
-			local item_selected = self.menu.items[self.menu.index]
+		if old_press_busy == "menu-drag" then
+			-- Handle mouse unpressing over the selected item.
+			if button == 1 then
+				local item_selected = self.menu.items[self.menu.index]
 
-			if item_selected and item_selected.selectable then
-				self:_closeSelf(true)
-				return true
+				if item_selected and item_selected.selectable then
+					self:_closeSelf(true)
+					return true
+				end
 			end
 		end
 	end
@@ -554,6 +558,13 @@ function def:uiCall_update(dt)
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "menu-drag" and widShared.dragToScroll(self, dt) then
 		needs_update = true
+
+	elseif commonScroll.press_busy_codes[self.press_busy] then
+		if self.context.mouse_pressed_ticks > 1 then
+			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+			local button_step = 350 -- XXX style/config
+			commonScroll.widgetDragLogic(self, mx, my, button_step*dt)
+		end
 	end
 
 	self:scrollUpdate(dt)
@@ -606,28 +617,19 @@ def.skinners = {
 
 			love.graphics.push("all")
 
-			-- Embedded scroll bars, if present and active.
-			local data_scroll = skin.data_scroll
-
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
-
-			--[[
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-			end
-			--]]
-			if scr_v and scr_v.active then
-				print("???")
-				love.graphics.setScissor()
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-
 			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 			-- Back panel body.
 			love.graphics.setColor(skin.color_body)
 			uiGraphics.drawSlice(skin.slice, 0, 0, self.w, self.h)
+
+			-- Embedded scroll bars, if present and active.
+			local data_scroll = skin.data_scroll
+			local scr_v = self.scr_v
+
+			if scr_v and scr_v.active then
+				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+			end
 
 			-- Scroll offsets.
 			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
