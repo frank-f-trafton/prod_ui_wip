@@ -40,8 +40,8 @@ Single category:
 
 
 In single category mode:
-	* Only the first category in the list is shown.
-	* `category.expanded` has no effect in single category mode.
+	* Only items from `self.category` are shown.
+	* `category.expanded` has no effect.
 
 
 category = {
