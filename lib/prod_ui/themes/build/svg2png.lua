@@ -1,5 +1,7 @@
 --[[
 clear && love12d svg2png.lua --source vacuum_dark --dpi 96
+
+* Requires Inkscape 1.3.2 to be aliased to 'inkscape132'
 --]]
 local example_usage = [[love svg2png.lua --source <input_path> --dpi <number>]]
 
@@ -177,7 +179,7 @@ local tasks_export = {
 					local out_file_path = out_path .. "/" .. file_no_ext .. ".png"
 					print("export: " .. out_file_path)
 					local ok = os.execute(
-						"inkscape --export-filename=" .. out_path .. "/" .. file_no_ext .. ".png" ..
+						"inkscape132 --export-filename=" .. out_path .. "/" .. file_no_ext .. ".png" ..
 						" --export-dpi=" .. arg_dpi ..
 						" " .. arg_src_path .. "/" .. item.name
 					)

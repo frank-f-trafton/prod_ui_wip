@@ -37,7 +37,7 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		makeLabel(content, 32, 0, 512, 32, "*** Under construction ***", "single")
+		--makeLabel(content, 32, 0, 512, 32, "...", "single")
 		local dropdown = content:addChild("wimp/dropdown_box")
 
 		dropdown.x = 32
@@ -52,6 +52,10 @@ function plan.make(parent)
 
 		for i = 1, 100 do
 			dropdown:addItem(tostring(i))
+		end
+
+		dropdown.wid_chosenSelection = function(self, index, tbl)
+			print("Dropdown: New chosen selection: #" .. index .. ", Text: " .. tostring(tbl.text))
 		end
 	end
 

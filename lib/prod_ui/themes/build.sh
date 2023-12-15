@@ -1,6 +1,8 @@
 
 # NOTE: This is a quick-and-dirty script that only outputs at 96 DPI (DPI scale of 1.0).
-# It also requires that LÖVE 12 is aliased to 'love12d'.
+# It also requires the following aliases:
+# LÖVE 12 -> 'love12d'
+# Inkscape 1.3.2 -> 'inkscape132'
 echo Running svg2png...
 cd build
 love12d svg2png.lua --source vacuum_dark --dpi 96

@@ -237,8 +237,6 @@ function def:uiCall_create(inst)
 
 		-- State flags
 		self.enabled = true
-		self.hovered = false
-		self.pressed = false
 
 		-- When opened, this holds a reference to the pop-up widget.
 		self.wid_drawer = false
@@ -431,20 +429,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
-	if self == inst and self.enabled then
-		self.hovered = true
-	end
-end
-
-
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
-	if self == inst and self.enabled then
-		self.hovered = false
-	end
-end
+--function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+--function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
@@ -489,6 +475,35 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
+function def:uiCall_pointerWheel(inst, x, y)
+
+	if self == inst then
+		-- Cycle menu options if the drawer is closed.
+		if not self.wid_drawer then
+
+			local check_chosen = false
+			local chosen_i_old = self.menu.chosen_i
+
+			if y > 0 then
+				self:movePrev(y, true, "chosen_i")
+				check_chosen = true
+
+			elseif y < 0 then
+				self:moveNext(math.abs(y), true, "chosen_i")
+				check_chosen = true
+			end
+
+			if check_chosen then
+				if chosen_i_old ~= self.menu.chosen_i then
+					self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+				end
+				return true
+			end
+		end
+	end
+end
+
+
 def.skinners = {
 	default = {
 		install = function(self, skinner, skin)
@@ -510,7 +525,13 @@ def.skinners = {
 			local skin = self.skin
 			local font = skin.font
 
-			local res = (self.enabled) and skin.res_idle or skin.res_disabled
+			local res
+			if self.enabled then
+				res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
+
+			else
+				res = skin.res_disabled
+			end
 
 			love.graphics.push("all")
 
@@ -520,8 +541,8 @@ def.skinners = {
 
 			-- XXX: Decorative button.
 			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(skin.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+			uiGraphics.drawSlice(res.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x + res.deco_ox, self.vp2_y + res.deco_oy, self.vp2_w, self.vp2_h)
 
 			-- Crop item text.
 			uiGraphics.intersectScissor(

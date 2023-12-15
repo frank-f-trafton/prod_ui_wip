@@ -113,6 +113,12 @@ return {
 		["button_minor_press"] = {
 			x = 0, y = 0, w1 = 2, h1 = 2, w2 = 8, h2 = 8, w3 = 2, h3 = 2,
 		},
+		["dropdown_body"] = {
+			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
+		},
+		["dropdown_drawer"] = {
+			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
+		},
 		["input_box"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
