@@ -386,6 +386,35 @@ function themeDef.newInstance(scale)
 	inst.style.scroll_bar_styles.norm.h_button2_mode = "pend-cont"
 
 
+	-- Use cases: dropdown drawers
+	inst.style.scroll_bar_styles.norm_hide = {}
+
+	inst.style.scroll_bar_styles.norm_hide.has_buttons = true
+	inst.style.scroll_bar_styles.norm_hide.trough_enabled = true
+	inst.style.scroll_bar_styles.norm_hide.thumb_enabled = true
+
+	inst.style.scroll_bar_styles.norm_hide.bar_size = math.max(1, math.floor(16 * scale))
+	inst.style.scroll_bar_styles.norm_hide.button_size = math.max(1, math.floor(16 * scale))
+	inst.style.scroll_bar_styles.norm_hide.thumb_size_min = math.max(1, math.floor(16 * scale))
+	inst.style.scroll_bar_styles.norm_hide.thumb_size_max = math.max(1, math.floor(2^16 * scale))
+
+	inst.style.scroll_bar_styles.norm_hide.v_near_side = false
+	inst.style.scroll_bar_styles.norm_hide.v_auto_hide = true
+
+	inst.style.scroll_bar_styles.norm_hide.v_button1_enabled = true
+	inst.style.scroll_bar_styles.norm_hide.v_button1_mode = "pend-cont"
+	inst.style.scroll_bar_styles.norm_hide.v_button2_enabled = true
+	inst.style.scroll_bar_styles.norm_hide.v_button2_mode = "pend-cont"
+
+	inst.style.scroll_bar_styles.norm_hide.h_near_side = false
+	inst.style.scroll_bar_styles.norm_hide.h_auto_hide = true
+
+	inst.style.scroll_bar_styles.norm_hide.h_button1_enabled = true
+	inst.style.scroll_bar_styles.norm_hide.h_button1_mode = "pend-cont"
+	inst.style.scroll_bar_styles.norm_hide.h_button2_enabled = true
+	inst.style.scroll_bar_styles.norm_hide.h_button2_mode = "pend-cont"
+
+
 	inst.style.scroll_bar_styles.half = {}
 
 	inst.style.scroll_bar_styles.half.has_buttons = true

@@ -49,6 +49,10 @@ function plan.make(parent)
 		dropdown:addItem("bar")
 		dropdown:addItem("baz")
 		dropdown:addItem("bop")
+
+		for i = 1, 100 do
+			dropdown:addItem(tostring(i))
+		end
 	end
 
 	frame:reshape(true)

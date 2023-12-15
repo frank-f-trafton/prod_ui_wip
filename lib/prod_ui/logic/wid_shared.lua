@@ -38,6 +38,17 @@ local edge_keys = {
 widShared.edge_keys = edge_keys
 
 
+local function getWidgetBox(self, v)
+
+	if v then
+		v = vp_keys[v]
+		return self[v.x], self[v.y], self[v.w], self[v.h]
+
+	else
+		return 0, 0, self.w, self.h
+	end
+end
+
 
 -- Widget must have 'min_w', 'min_h', 'max_w' and 'max_h' fields for these functions to work.
 -- Both need to be greater than 0 to prevent issues (divide by zero, etc.)
@@ -50,6 +61,7 @@ function widShared.enforceLimitedDimensions(self)
 end
 
 
+--[[
 function widShared.keepInBounds(self)
 
 	local parent = self.parent
@@ -60,8 +72,10 @@ function widShared.keepInBounds(self)
 	self.x = math.max(-self.w - self.p_bounds_x1, math.min(self.x, parent.w + self.p_bounds_x2))
 	self.y = math.max(-self.h - self.p_bounds_y1, math.min(self.y, parent.h + self.p_bounds_y2))
 end
+--]]
 
 
+--[[
 function widShared.keepInBoundsPort2(self)
 
 	local parent = self.parent
@@ -72,7 +86,44 @@ function widShared.keepInBoundsPort2(self)
 	self.x = math.max(-self.w - self.p_bounds_x1 + parent.vp2_x, math.min(self.x, parent.vp2_w + self.p_bounds_x2))
 	self.y = math.max(-self.h - self.p_bounds_y1 + parent.vp2_y, math.min(self.y, parent.vp2_h + self.p_bounds_y2))
 end
+--]]
 
+
+-- Use to keep a widget within the bounds of its parent.
+-- TODO: document spill-out behavior.
+-- @param self The widget.
+-- @param v The viewport box to use. Leave `nil` to use the parent's width and height.
+function widShared.keepInBoundsOfParent(self, v)
+
+	local parent = self.parent
+	if not parent then
+		return
+	end
+
+	local px, py, pw, ph = getWidgetBox(parent, v)
+
+	self.x = math.max(px, math.min(self.x, pw - self.w))
+	self.y = math.max(py, math.min(self.y, ph - self.h))
+end
+
+
+-- Use to keep a widget partially within the bounds of a parent (ie window frames).
+-- TODO: document spill-out behavior.
+-- @param self The widget.
+-- @param v The viewport box to use. Leave `nil` to use the parent's width and height.
+-- @param x1, x2, y1, y2 How much of the widget must remain within the parent's boundaries on each side.
+function widShared.keepInBoundsExtended(self, v, x1, x2, y1, y2)
+
+	local parent = self.parent
+	if not parent then
+		return
+	end
+
+	local px, py, pw, ph = getWidgetBox(parent, v)
+
+	self.x = math.max(-self.w - x1 + px, math.min(self.x, pw + x2))
+	self.y = math.max(-self.h - y1 + py, math.min(self.y, ph + y2))
+end
 
 
 -- @param self The widget to resize.
@@ -181,7 +232,8 @@ function widShared.uiCapEvent_resize_mouseReleased(self, x, y, button, istouch, 
 		-- Hack: clamp frame to parent. This isn't handled while resizing because the
 		-- width and height can go haywire when resizing against the bounds of the
 		-- screen (see the 'p_bounds_*' fields).
-		widShared.keepInBoundsPort2(self)
+		--widShared.keepInBoundsPort2(self)
+		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 
 		-- mousereleased cleanup
 		return false
@@ -257,7 +309,8 @@ function widShared.uiCapEvent_drag_mouseMoved(self, x, y, dx, dy, istouch)
 			self.y = self.context.mouse_y - pa_y + self.drag_oy
 		end
 
-		widShared.keepInBoundsPort2(self)
+		--widShared.keepInBoundsPort2(self)
+		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
 	-- Tweak to fix accidental maximizes from double-clicks.

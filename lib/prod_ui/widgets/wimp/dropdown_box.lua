@@ -105,8 +105,6 @@ function def:addItem(text, pos, bijou_id)
 
 	table.insert(items, pos, item)
 
-	print("addItem text:", item.text, "y: ", item.y)
-
 	-- If there is no chosen item, assign this one as chosen now.
 	if self.menu.chosen_i == 0 then
 		local i, tbl = self.menu:hasAnySelectableItems()
@@ -282,24 +280,21 @@ function def:_openPopUpMenu()
 
 		local ax, ay = self:getAbsolutePosition()
 
-		-- (We assume that the root widget's dimensions match the display area.)
-		local drawer_w = math.min(root.w, self.w)
-		local drawer_h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #menu.items)))
-
-		local primer = {
+		local drawer = root:addChild("wimp/dropdown_pop", {
+			skin_id = skin.skin_id_pop,
 			wid_ref = self,
 			menu = menu,
 			x = ax,
 			y = ay + self.h,
-			w = drawer_w,
-			h = drawer_h,
-		}
-
-		local drawer = root:addChild("wimp/dropdown_pop", primer)
-
+		})
 		self.wid_drawer = drawer
-
 		commonWimp.assignPopUp(self, drawer)
+
+		self:setSelectionByIndex(menu.chosen_i)
+
+		drawer:resize()
+		drawer:reshape()
+		drawer:menuChangeCleanup()
 	end
 end
 
@@ -475,12 +470,15 @@ end
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
-	-- If the cursor overlaps the pop-up drawer, transfer context pressed state.
+	-- If the cursor overlaps the pop-up drawer while not overlapping the body,
+	-- transfer context pressed state.
 	local wid_drawer = self.wid_drawer
 	if wid_drawer then
-		local ax, ay = wid_drawer:getAbsolutePosition()
-		if mouse_x >= ax and mouse_x < ax + wid_drawer.w
-		and mouse_y >= ay and mouse_y < ay + wid_drawer.h
+		local ax1, ay1 = self:getAbsolutePosition()
+		local ax2, ay2 = wid_drawer:getAbsolutePosition()
+
+		if not (mouse_x >= ax1 and mouse_x < ax1 + self.w and mouse_y >= ay1 and mouse_y < ay1 + self.h)
+		and (mouse_x >= ax2 and mouse_x < ax2 + wid_drawer.w and mouse_y >= ay2 and mouse_y < ay2 + wid_drawer.h)
 		then
 			self.context:transferPressedState(wid_drawer)
 
@@ -512,15 +510,18 @@ def.skinners = {
 			local skin = self.skin
 			local font = skin.font
 
+			local res = (self.enabled) and skin.res_idle or skin.res_disabled
+
 			love.graphics.push("all")
 
-			-- XXX: Back panel body.
-			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
+			-- Back panel body.
+			love.graphics.setColor(res.color_body)
+			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
 			-- XXX: Decorative button.
-			love.graphics.setColor(0.75, 0.75, 0.75, 1)
-			love.graphics.rectangle("line", self.vp2_x, self.vp2_y, self.vp2_w - 1, self.vp2_h - 1)
+			love.graphics.setColor(1, 1, 1, 1)
+			uiGraphics.drawSlice(skin.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 
 			-- Crop item text.
 			uiGraphics.intersectScissor(
@@ -530,11 +531,16 @@ def.skinners = {
 				self.vp_h
 			)
 
-			love.graphics.setColor(1, 1, 1, 1)
+			-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
+			if not self.wid_drawer and self.context.current_thimble == self then
+				love.graphics.setColor(res.color_highlight)
+				love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+			end
 
 			local chosen = self.menu.items[self.menu.chosen_i]
-
 			if chosen then
+				love.graphics.setColor(res.color_text)
+
 				-- XXX: Chosen item icon.
 
 				-- Chosen item text.

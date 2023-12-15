@@ -165,15 +165,7 @@ end
 --]=]
 
 
-function def:keepInView()
-
-	local parent = self.parent
-
-	if parent then
-		self.x = math.max(0, math.min(self.x, parent.w - self.w))
-		self.y = math.max(0, math.min(self.y, parent.h - self.h))
-	end
-end
+def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 function def:menuChangeCleanup()
@@ -182,14 +174,13 @@ function def:menuChangeCleanup()
 	self:arrange()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
-	self:selectionInView()
+	self:selectionInView(true)
 end
 
 
 function def:uiCall_create(inst)
 
 	if self == inst then
-		-- Caller should set this widget's position and dimensions as part of the call to addChild().
 		if not self.wid_ref then
 			error("no owner widget assigned to this menu.")
 
@@ -221,32 +212,60 @@ function def:uiCall_create(inst)
 		self.item_hover = false
 
 		-- Padding values. -- XXX style/config, scale
+		--[[
 		self.pad_bijou_x1 = 2
 		self.pad_bijou_x2 = 2
 		self.pad_bijou_y1 = 2
 		self.pad_bijou_y2 = 2
+		--]]
 
 		-- Drawing offsets and size for bijou quads.
+		--[[
 		self.bijou_draw_w = 24
 		self.bijou_draw_h = 24
+		--]]
 
 		-- Padding above and below text and bijoux in items.
 		-- The tallest of the two components determines the item's height.
+		--[[
 		self.pad_text_x1 = 4
 		self.pad_text_x2 = 4
 		self.pad_text_y1 = 4
 		self.pad_text_y2 = 4
+		--]]
 
 		self:skinSetRefs()
 		self:skinInstall()
 
-		--self:setScrollBars(false, true)
+		self:setScrollBars(false, true)
 
-		self:arrange()
-
-		self:reshape()
-		self:menuChangeCleanup()
+		-- Set up the widget's position, then call reshape() and then menuChangeCleanup().
 	end
+end
+
+
+function def:uiCall_resize()
+
+	local skin = self.skin
+	local menu = self.menu
+	local wid_ref = self.wid_ref
+	local root = self:getTopWidgetInstance()
+
+	if not wid_ref or wid_ref._dead then
+		return
+	end
+
+	-- We assume that the root widget's dimensions match the display area.
+	-- Item dimensions must be up-to-date before calling.
+	local widest_item_width = 0
+	for i, item in ipairs(menu.items) do
+		widest_item_width = math.max(widest_item_width, item.w)
+	end
+
+	self.w = math.min(root.w, math.max(wid_ref.w, widest_item_width))
+	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #menu.items)))
+
+	self:keepInBounds()
 end
 
 
@@ -408,7 +427,12 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
---function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+	if self == inst then
+		commonScroll.widgetClearHover(self)
+	end
+end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
@@ -418,24 +442,50 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		local mouse_x = x - ax
 		local mouse_y = y - ay
 
-		if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
+		local handled_scroll_bars
 
-			x = x - ax + self.scr_x - self.vp_x
-			y = y - ay + self.scr_y - self.vp_y
+		-- Check for pressing on scroll bar components.
+		if button == 1 then
+			local fixed_step = 24 -- XXX style/config
+			handled_scroll_bars = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+		end
 
-			-- Check for click-able items.
-			if not self.press_busy then
-				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
+		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
+		if handled_scroll_bars then
+			self.context:clearClickSequence()
 
-				self.press_busy = "menu-drag"
-				self:cacheUpdate(true)
+		else
+			if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
+
+				x = x - ax + self.scr_x - self.vp_x
+				y = y - ay + self.scr_y - self.vp_y
+
+				-- Check for click-able items.
+				if not self.press_busy then
+					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
+
+					self.press_busy = "menu-drag"
+					self:cacheUpdate(true)
+				end
 			end
 		end
 	end
 end
 
 
---function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+
+	if self == inst then
+		-- Repeat-press events for scroll bar buttons
+		if commonScroll.press_busy_codes[self.press_busy]
+		and button == 1
+		and button == self.context.mouse_pressed_button
+		then
+			local fixed_step = 24 -- XXX style/config
+			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+		end
+	end
+end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
@@ -444,6 +494,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	and self.press_busy == "menu-drag"
 	then
+		commonScroll.widgetClearPress(self)
 		self.press_busy = false
 
 		-- Handle mouse unpressing over the selected item.
@@ -512,6 +563,10 @@ function def:uiCall_update(dt)
 		needs_update = true
 	end
 
+	-- Update scroll bar registers and thumb position.
+	commonScroll.updateScrollBarShapes(self)
+	commonScroll.updateScrollState(self)
+
 	if needs_update then
 		self:cacheUpdate(true)
 	end
@@ -551,11 +606,28 @@ def.skinners = {
 
 			love.graphics.push("all")
 
+			-- Embedded scroll bars, if present and active.
+			local data_scroll = skin.data_scroll
+
+			local scr_h = self.scr_h
+			local scr_v = self.scr_v
+
+			--[[
+			if scr_h and scr_h.active then
+				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+			end
+			--]]
+			if scr_v and scr_v.active then
+				print("???")
+				love.graphics.setScissor()
+				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+			end
+
 			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-			-- XXX: Back panel body.
-			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
+			-- Back panel body.
+			love.graphics.setColor(skin.color_body)
+			uiGraphics.drawSlice(skin.slice, 0, 0, self.w, self.h)
 
 			-- Scroll offsets.
 			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
@@ -565,18 +637,17 @@ def.skinners = {
 			-- Selection glow.
 			local selected_item = menu.items[menu.index]
 			if selected_item then
-				love.graphics.setColor(1, 1, 1, 0.5)
+				love.graphics.setColor(skin.color_selected)
 				love.graphics.rectangle("fill", 0, selected_item.y, self.vp_w - self.vp_x, selected_item.h)
 			end
 
 			-- XXX: icons.
 
 			-- Item text.
-			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.setColor(skin.color_text)
 			love.graphics.setFont(font)
 
 			for i = math.max(1, self.items_first), math.min(#menu.items, self.items_last) do
-			--for i = 1, #menu.items do
 				local item = menu.items[i]
 				local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
 				love.graphics.print(item.text, xx, item.y)
@@ -587,9 +658,7 @@ def.skinners = {
 
 
 		--renderLast = function(self, ox, oy) end,
-
-		-- The Dropdown drawer cannot take the thimble.
-		--renderThimble = function(self, ox, oy)
+		--renderThimble = function(self, ox, oy) -- (This widget can't take the thimble.)
 	},
 }
 
