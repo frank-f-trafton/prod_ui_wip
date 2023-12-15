@@ -240,7 +240,7 @@ end
 local function updateAllItemDimensions(self, skin, node)
 
 	for i, item in ipairs(node.nodes) do
-		updateAllItemDimensions(self, skin, item)
+		updateItemDimensions(self, skin, item)
 	end
 end
 

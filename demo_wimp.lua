@@ -1045,6 +1045,13 @@ of it.
 	end
 	--]]
 
+	-- [[
+	do
+		local planPropertiesBox = require("plan_properties_box")
+		local frame_lb = planPropertiesBox.make(wimp_root)
+	end
+	--]]
+
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 

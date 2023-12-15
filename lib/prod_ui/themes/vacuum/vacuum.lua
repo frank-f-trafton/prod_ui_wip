@@ -566,6 +566,7 @@ function themeDef.newInstance(scale)
 	inst:loadSkinDef("text_box_m1", BASE_PATH .. "skins/text_box_m1.lua")
 	inst:loadSkinDef("dropdown_box1", BASE_PATH .. "skins/dropdown_box1.lua")
 	inst:loadSkinDef("dropdown_pop1", BASE_PATH .. "skins/dropdown_pop1.lua")
+	inst:loadSkinDef("properties_box1", BASE_PATH .. "skins/properties_box1.lua")
 
 	return inst
 end
