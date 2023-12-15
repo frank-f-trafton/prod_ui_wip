@@ -1,4 +1,3 @@
--- XXX: Unfinished.
 
 --[[
 The main body of a dropdown box.
@@ -7,7 +6,7 @@ Closed:
 
 +-----------+-+
 | Foobar    |v| --- To open, click anywhere or press space/enter.
-+-----------+-+     Press up/down to change the selection without opening.
++-----------+-+     Press up/down or mouse-wheel to change the selection without opening.
 
 
 Opened:
@@ -27,6 +26,16 @@ Opened:
 The dropdown menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance
 and mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and
 the pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
+
+TODO: pressing keys to jump to the next item beginning with the key cap label.
+^ Probably need a text-input field for additional code points... same for ListBoxes.
+Not sure about TreeBoxes.
+
+TODO: menu-item icons.
+
+TODO: right-click and thimble actions on the dropdown body. Note that context menus will not be supported from
+the dropdown drawer, since the drawer uses the same "pop-up menu slot" in the WIMP root as context menus. They
+should still work when clicking on the body, however.
 --]]
 
 

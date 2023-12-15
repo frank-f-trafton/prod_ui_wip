@@ -1,4 +1,3 @@
--- XXX: Unfinished. Copy of `wimp/menu_pop.lua`.
 
 --[[
 wimp/dropdown_pop: The pop-up (or "drawer") component of a dropdown menu.
@@ -8,9 +7,7 @@ wimp/dropdown_pop: The pop-up (or "drawer") component of a dropdown menu.
 These are not real OS widgets, so they are limited to the boundaries of the window.
 They may act strangely if the window is too small for the menu contents.
 
-TODO: pressing keys to jump to the next item beginning with the key cap label.
-^ Probably need a text-input field for additional code points... same for ListBoxes.
-Not sure about TreeBoxes.
+See `wimp/dropdown_box.lua` for more notes.
 --]]
 
 
