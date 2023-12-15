@@ -123,6 +123,7 @@ function def:setDefaultBounds()
 		header_h = header.h
 	end
 
+	-- XXX: theme/scale
 	self.p_bounds_x1 = -48
 	self.p_bounds_x2 = -48
 	self.p_bounds_y1 = -self.h + math.max(4, math.floor(header_h/4))
@@ -570,7 +571,8 @@ function def:uiCall_reshape()
 
 	-- Hacky way of not interfering with resize actions. Call keepInBounds* before exiting the resize mode.
 	if self.cap_mode ~= "resize" then
-		widShared.keepInBoundsPort2(self)
+		--widShared.keepInBoundsPort2(self)
+		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
 	-- The rest should take care of themselves with their own reshape calls.

@@ -55,17 +55,11 @@ def.getInBounds = commonMenu.getItemInBoundsY
 def.selectionInView = commonMenu.selectionInView
 
 
--- * / Scroll helpers *
-
-
 -- * Spatial selection *
 
 
 def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
 def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
-
-
--- * / Spatial selection *
 
 
 -- * Selection movement *
@@ -75,9 +69,6 @@ def.movePrev = commonMenu.widgetMovePrev
 def.moveNext = commonMenu.widgetMoveNext
 def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
-
-
--- * / Selection movement *
 
 
 --- Called when user double-clicks on the widget or presses "return" or "kpenter".
@@ -162,7 +153,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		self:scrollDeltaH(-32) -- XXX config
+		self:DeltaH(-32) -- XXX config
 		return true
 
 	elseif scancode == "right" then
@@ -752,7 +743,6 @@ end
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 
 	if self == inst then
-
 		-- Repeat-press events for scroll bar buttons
 		if commonScroll.press_busy_codes[self.press_busy]
 		and button == 1

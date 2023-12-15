@@ -136,7 +136,7 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.x = client.x + client.vp_x + client.vp_w -- XXX WIP
 			client_sub.y = client.y + item.y
 
-			client_sub:keepInView()
+			client_sub:keepInBounds()
 
 			client_sub.origin_item = item
 
@@ -517,15 +517,7 @@ function def:updateDimensions()
 end
 
 
-function def:keepInView()
-
-	local parent = self.parent
-
-	if parent then
-		self.x = math.max(0, math.min(self.x, parent.w - self.w))
-		self.y = math.max(0, math.min(self.y, parent.h - self.h))
-	end
-end
+def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 -- * Internal *
