@@ -119,6 +119,22 @@ return {
 		["dropdown_drawer"] = {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
 		},
+		["group_perimeter_unbroken"] = { -- XXX: untested.
+			draw_fn_id = "hollow",
+			x = 2, y = 2, w1 = 4, h1 = 4, w2 = 12, h2 = 12, w3 = 4, h3 = 4,
+		},
+		["group_perimeter_a"] = {
+			draw_fn_id = "hollow", -- XXX: 3x2 mosaic with a hollow middle.
+			x = 2, y = 2, w1 = 4, h1 = 0, w2 = 12, h2 = 16, w3 = 4, h3 = 4,
+		},
+		["group_perimeter_b"] = {
+			draw_fn_id = "x0y0w3h1",
+			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
+		},
+		["group_perimeter_c"] = {
+			draw_fn_id = "x0y0w3h1",
+			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
+		},
 		["input_box"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},

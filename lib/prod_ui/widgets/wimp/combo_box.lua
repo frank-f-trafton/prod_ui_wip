@@ -357,6 +357,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	elseif scancode == "pagedown" then
 		self:moveLast(true, "chosen_i")
 		check_chosen = true
+	end
 
 	if check_chosen then
 		if chosen_i_old ~= self.menu.chosen_i then
