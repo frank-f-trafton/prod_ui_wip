@@ -761,6 +761,15 @@ quadSlice.draw_functions = {
 
 	-- 3x3 Full slice
 	full = _mt_slice.drawFromParams
+
+	-- XXX: 3x2 top and middle
+	-- XXX: 3x2 top and middle (hollow)
+	-- XXX: 3x2 middle and bottom
+	-- XXX: 3x2 middle and bottom (hollow)
+	-- XXX: 2x3 left and middle
+	-- XXX: 2x3 left and middle (hollow)
+	-- XXX: 2x3 middle and right
+	-- XXX: 2x3 middle and right (hollow)
 }
 
 

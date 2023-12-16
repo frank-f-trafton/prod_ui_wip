@@ -177,6 +177,25 @@ function themeDef.newInstance(scale)
 	inst.style.boxes.frame_norm.margin_y2 = math.max(0, math.floor(2 * scale))
 
 
+	inst.style.boxes.wimp_group = uiTheme.newBoxStyle()
+
+	-- XXX: WIP.
+	inst.style.boxes.frame_norm.outpad_x1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.outpad_x2 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.outpad_y1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.outpad_y2 = math.max(0, math.floor(2 * scale))
+
+	inst.style.boxes.frame_norm.border_x1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.border_x2 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.border_y1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.border_y2 = math.max(0, math.floor(2 * scale))
+
+	inst.style.boxes.frame_norm.margin_x1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.margin_x2 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.margin_y1 = math.max(0, math.floor(2 * scale))
+	inst.style.boxes.frame_norm.margin_y2 = math.max(0, math.floor(2 * scale))
+
+
 	inst.style.boxes.button = uiTheme.newBoxStyle()
 
 	-- inst.style.boxes.button: No sl_body_id.
