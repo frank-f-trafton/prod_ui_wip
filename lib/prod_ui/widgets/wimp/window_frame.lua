@@ -66,6 +66,7 @@ function def:debugVisibleSensors(enabled)
 		if child.is_frame_sensor then
 			if enabled then
 				child.visible = true
+
 			else
 				child.visible = false
 			end
