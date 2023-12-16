@@ -1,12 +1,14 @@
 
+-- XXX: Under construction. Copy of `wimp/dropdown_box.lua`
+
 --[[
-The main body of a dropdown box.
+The main body of a ComboBox (a Dropdown Box with text input).
 
 Closed:
 
 +-----------+-+
-| Foobar    |v| --- To open, click anywhere or press space/enter.
-+-----------+-+     Press up/down or mouse-wheel to change the selection without opening.
+| Foobar|   |v| --- Type and manipulate the text. To open the drawer, click the button or press Alt+Down.
++-----------+-+     Press up/down or mouse-wheel to cycle through items without opening the drawer.
 
 
 Opened:
@@ -27,15 +29,14 @@ The dropdown menu object is shared by the body and pop-up widget. The pop-up han
 and mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and
 the pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
 
-TODO: pressing keys to jump to the next item beginning with the key cap label.
-^ Probably need a text-input field for additional code points... same for ListBoxes.
-Not sure about TreeBoxes.
+Unlike similar list widgets, ComboBoxes do not support menu-item icons. ComboBoxes and Dropdowns use the same
+drawer widget.
 
-TODO: menu-item icons.
+See wimp/dropdown_box.lua for relevant 'TODO's.
 
-TODO: right-click and thimble actions on the dropdown body. Note that context menus will not be supported from
-the dropdown drawer, since the drawer uses the same "pop-up menu slot" in the WIMP root as context menus. They
-should still work when clicking on the body, however.
+The last chosen index is tracked to help the user keep their place in the drawer when repeatedly opening
+and closing it. This index should not be referenced by your program logic, however, because it might
+have no association with the current input text. Track the field 'self.combo_text' instead.
 --]]
 
 
@@ -52,7 +53,7 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
 local def = {
-	skin_id = "dropdown_box1",
+	skin_id = "combo_box1",
 }
 
 
@@ -74,14 +75,14 @@ def.wid_buttonAction3 = uiShared.dummyFunc
 --def.uiCall_thimbleAction2
 
 
---- Callback for a change in the item choice.
-function def:wid_chosenSelection(index, tbl)
+--- Callback for a change in the ComboBox state.
+function def:wid_chosenSelection(index, tbl) -- XXX: change to def:wid_inputChanged(text)
 	-- ...
 end
 
 
 
-function def:addItem(text, pos, bijou_id)
+function def:addItem(text, pos)
 
 	local skin = self.skin
 	local font = skin.font
@@ -96,12 +97,11 @@ function def:addItem(text, pos, bijou_id)
 	elseif type(pos) ~= "number" then uiShared.errBadType(2, pos, "nil/number") end
 
 	uiShared.assertIntRange(2, pos, 1, #items + 1)
-
-	-- XXX: bijou_id
 	--]]
 
 	local item = {}
 
+	-- All ComboBox items should be selectable.
 	item.selectable = true
 
 	item.x, item.y = 0, 0
@@ -109,18 +109,10 @@ function def:addItem(text, pos, bijou_id)
 	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
 
 	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
 
 	table.insert(items, pos, item)
 
-	-- If there is no chosen item, assign this one as chosen now.
-	if self.menu.chosen_i == 0 then
-		local i, tbl = self.menu:hasAnySelectableItems()
-		if i then
-			self:setSelectionByIndex(i, "chosen_i")
-		end
-	end
+	-- (Unlike Dropdown, we do not assign a default chosen index here if the list was previously empty.)
 
 	if self.wid_drawer then
 		self.wid_drawer:menuChangeCleanup()
@@ -215,6 +207,7 @@ function def:setSelectionByIndex(item_i, id)
 
 	self.menu:setSelectedIndex(item_i, id)
 
+	-- XXX: update combo_text
 	if id == "chosen_i" and chosen_i_old ~= self.menu.chosen_i then
 		self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
 	end
@@ -242,7 +235,7 @@ function def:uiCall_create(inst)
 
 		self.menu = commonMenu.new()
 
-		-- XXX: dropdown button icon.
+		self.combo_text = ""
 
 		-- State flags
 		self.enabled = true
@@ -250,8 +243,9 @@ function def:uiCall_create(inst)
 		-- When opened, this holds a reference to the pop-up widget.
 		self.wid_drawer = false
 
-		-- Index for the current selection displayed in the dropdown body.
+		-- Index for the last chopsen selection.
 		-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
+		-- The item contents may be outdated from what is stored in `self.combo_text`.
 		self.menu.chosen_i = 0
 
 		self:skinSetRefs()
@@ -265,7 +259,7 @@ end
 function def:uiCall_reshape()
 
 	-- Viewport #1 is the chosen item text area.
-	-- Viewport #2 is the decorative button which indicates that this widget is clickable.
+	-- Viewport #2 is the "open menu" button.
 
 	local skin = self.skin
 
@@ -346,6 +340,8 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
 	local chosen_i_old = self.menu.chosen_i
 
+	-- XXX: Text input stuff.
+
 	if scancode == "up" then
 		self:movePrev(1, true, "chosen_i")
 		check_chosen = true
@@ -354,22 +350,13 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		self:moveNext(1, true, "chosen_i")
 		check_chosen = true
 
-	elseif scancode == "home" then
+	elseif scancode == "pageup" then
 		self:moveFirst(true, "chosen_i")
 		check_chosen = true
 
-	elseif scancode == "end" then
+	elseif scancode == "pagedown" then
 		self:moveLast(true, "chosen_i")
 		check_chosen = true
-
-	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true, "chosen_i")
-		check_chosen = true
-
-	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true, "chosen_i")
-		check_chosen = true
-	end
 
 	if check_chosen then
 		if chosen_i_old ~= self.menu.chosen_i then
@@ -418,14 +405,13 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			local old_index = self.menu.index
 			local old_item = items[old_index]
 
-			-- Space opens, but does not close the pop-up.
-			if key == "space" then
+			-- Alt+Down opens the pop-up.
+			if key == "down" and context.key_mgr.mod["alt"] then
 				self:_openPopUpMenu()
 				return true
 
-			-- Enter toggles the pop-up, opening it here and closing it in the drawer.
 			elseif key == "return" or key == "kpenter" then
-				self:_openPopUpMenu()
+				-- XXX: tie enter to a widget event.
 				return true
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then
@@ -451,9 +437,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 
 		if button == 1 then
-			if not self.wid_drawer then
-				self:_openPopUpMenu()
+			local mx, my = self:getRelativePosition(x, y)
 
+			-- Mouse is over "open menu" button.
+			if not self.wid_drawer and widShared.pointInViewport(self, 2, mx, my) then
+				self:_openPopUpMenu()
 				return true
 			end
 		end
@@ -462,6 +450,8 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+	-- XXX: text manipulation stuff.
 
 	-- If the cursor overlaps the pop-up drawer while not overlapping the body,
 	-- transfer context pressed state.
@@ -546,7 +536,7 @@ def.skinners = {
 			love.graphics.setColor(res.color_body)
 			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
-			-- XXX: Decorative button.
+			-- XXX: "Open menu" button.
 			love.graphics.setColor(1, 1, 1, 1)
 			uiGraphics.drawSlice(res.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x + res.deco_ox, self.vp2_y + res.deco_oy, self.vp2_w, self.vp2_h)
