@@ -1129,16 +1129,4 @@ function client:executeBoundAction(bound_func)
 end
 
 
-function client:executeRemoteAction(item_t) -- XXX WIP
-
-	local ok, update_viewport, caret_in_view, write_history = self:executeBoundAction(item_t.bound_func)
-	if ok then
-		self.update_flag = true
-	end
-
-	self:updateDocumentDimensions(self) -- XXX WIP
-	self:scrollGetCaretInBounds(true) -- XXX WIP
-end
-
-
 return editMethodsM

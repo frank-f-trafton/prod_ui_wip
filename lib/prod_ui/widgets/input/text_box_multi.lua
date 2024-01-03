@@ -67,6 +67,18 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
+local function executeRemoteAction(self, item_t)
+
+	local ok, update_viewport, caret_in_view, write_history = self:executeBoundAction(item_t.bound_func)
+	if ok then
+		self.update_flag = true
+	end
+
+	self:updateDocumentDimensions(self)
+	self:scrollGetCaretInBounds(true)
+end
+
+
 -- Pop-up menu definition.
 do
 	local function configItem_undo(item, client)
@@ -119,13 +131,13 @@ do
 		{
 			type = "command",
 			text = "Undo",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.undo,
 			config = configItem_undo,
 		}, {
 			type = "command",
 			text = "Redo",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.redo,
 			config = configItem_redo,
 		},
@@ -133,25 +145,25 @@ do
 		{
 			type = "command",
 			text = "Cut",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.cut,
 			config = configItem_cutCopyDelete,
 		}, {
 			type = "command",
 			text = "Copy",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.copy,
 			config = configItem_cutCopyDelete,
 		}, {
 			type = "command",
 			text = "Paste",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.paste,
 			config = configItem_paste,
 		}, {
 			type = "command",
 			text = "Delete",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.deleteHighlighted,
 			config = configItem_cutCopyDelete,
 		},
@@ -159,7 +171,7 @@ do
 		{
 			type = "command",
 			text = "Select All",
-			callback = editMethodsM.executeRemoteAction,
+			callback = executeRemoteAction,
 			bound_func = editActM.selectAll,
 			config = configItem_selectAll,
 		},

@@ -531,18 +531,6 @@ function client:pasteClipboardText()
 end
 
 
-function client:executeRemoteAction(item_t) -- XXX WIP
-
-	local ok, update_viewport, update_caret, write_history = self:executeBoundAction(item_t.bound_func)
-	if ok then
-		self.update_flag = true
-	end
-
-	self:updateDocumentDimensions(self) -- XXX WIP
-	self:scrollGetCaretInBounds(true) -- XXX WIP
-end
-
-
 function client:caretToX(clear_highlight, x, split_x)
 
 	local line_ed = self.line_ed

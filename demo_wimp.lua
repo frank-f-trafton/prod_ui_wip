@@ -1040,6 +1040,13 @@ of it.
 
 	-- [[
 	do
+		local planPropertiesBox = require("plan_properties_box")
+		local frame_lb = planPropertiesBox.make(wimp_root)
+	end
+	--]]
+
+	-- [[
+	do
 		local planDropdownBox = require("plan_dropdown_box")
 		local frame_lb = planDropdownBox.make(wimp_root)
 	end
@@ -1047,8 +1054,8 @@ of it.
 
 	-- [[
 	do
-		local planPropertiesBox = require("plan_properties_box")
-		local frame_lb = planPropertiesBox.make(wimp_root)
+		local planComboBox = require("plan_combo_box")
+		local frame_lb = planComboBox.make(wimp_root)
 	end
 	--]]
 

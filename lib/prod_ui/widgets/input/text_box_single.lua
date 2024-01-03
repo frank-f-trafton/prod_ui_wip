@@ -25,13 +25,12 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS= context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
-local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -50,112 +49,17 @@ local def = {
 def.wid_action = uiShared.dummyFunc -- args: (self)
 
 
--- Pop-up menu definition.
-do
-	local function configItem_undo(item, client)
-
-		item.selectable = true
-		item.actionable = (client.line_ed.hist.pos > 1)
-	end
-
-
-	local function configItem_redo(item, client)
-
-		item.selectable = true
-		item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
-	end
-
-
-	local function configItem_cutCopyDelete(item, client)
-
-		item.selectable = true
-		item.actionable = client.line_ed:isHighlighted()
-	end
-
-
-	local function configItem_paste(item, client)
-
-		item.selectable = true
-		item.actionable = true
-	end
-
-
-	local function configItem_selectAll(item, client)
-
-		item.selectable = true
-		item.actionable = (#client.line_ed.line > 0)
-	end
-
-
-	-- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
-	def.pop_up_def = {
-		{
-			type = "command",
-			text = "Undo",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.undo,
-			config = configItem_undo,
-		}, {
-			type = "command",
-			text = "Redo",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.redo,
-			config = configItem_redo,
-		},
-		itemOps.def_separator,
-		{
-			type = "command",
-			text = "Cut",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.cut,
-			config = configItem_cutCopyDelete,
-		}, {
-			type = "command",
-			text = "Copy",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.copy,
-			config = configItem_cutCopyDelete,
-		}, {
-			type = "command",
-			text = "Paste",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.paste,
-			config = configItem_paste,
-		}, {
-			type = "command",
-			text = "Delete",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.deleteHighlighted,
-			config = configItem_cutCopyDelete,
-		},
-		itemOps.def_separator,
-		{
-			type = "command",
-			text = "Select All",
-			callback = editMethodsS.executeRemoteAction,
-			bound_func = editActS.selectAll,
-			config = configItem_selectAll,
-		},
-	}
-end
-
-
 widShared.scrollSetMethods(def)
 -- No integrated scroll bars for single-line text boxes.
 
 
--- TODO: Pop-up menu definition.
+lgcInputS.setupDef(def)
 
 
--- Attach editing methods to def.
-for k, v in pairs(editMethodsS) do
-
-	if def[k] then
-		error("meta field already populated: " .. tostring(k))
-	end
-
-	def[k] = v
-end
+def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
+def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
+def.updateAlignOffset = lgcInputS.method_updateAlignOffset
+def.pop_up_def = lgcInputS.pop_up_def
 
 
 function def:uiCall_create(inst)
@@ -171,37 +75,9 @@ function def:uiCall_create(inst)
 		widShared.setupScroll(self)
 		widShared.setupDoc(self)
 
-		-- How far to offset the line X position depending on the alignment.
-		self.align_offset = 0
-
-		-- string: display this text when the input box is empty.
-		-- false: disabled.
-		self.ghost_text = false
-
-		-- false: use content text alignment.
-		-- "left", "center", "right", "justify"
-		self.ghost_text_align = false
-
 		self.press_busy = false
 
-		-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
-		self.caret_x = 0
-		self.caret_y = 0
-		self.caret_w = 0
-		self.caret_h = 0
-
-		self.caret_fill = "line"
-
-		-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
-		self.caret_extend_x = 0
-		self.caret_extend_y = 0
-
-		-- Used to update viewport scrolling as a result of dragging the mouse in update().
-		self.mouse_drag_x = 0
-
-		-- Position offset when clicking the mouse.
-		-- This is only valid when a mouse action is in progress.
-		self.click_byte = 1
+		lgcInputS.setupInstance(self)
 
 		-- State flags.
 		self.enabled = true
@@ -216,81 +92,6 @@ function def:uiCall_create(inst)
 		self.line_ed = lineEdSingle.new(skin.font)
 
 		self:reshape()
-	end
-end
-
-
-function def:scrollGetCaretInBounds(immediate)
-
-	local line_ed = self.line_ed
-
-	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
-
-	-- Get the extended caret rectangle.
-	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
-	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
-	local car_x2 = self.align_offset + line_ed.caret_box_x + line_ed.caret_box_w + self.caret_extend_x
-	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
-
-	-- Clamp the scroll target.
-	self.scr_tx = math.max(car_x2 - self.vp_w, math.min(self.scr_tx, car_x1))
-	self.scr_ty = math.max(car_y2 - self.vp_h, math.min(self.scr_ty, car_y1))
-
-	if immediate then
-		self.scr_fx = self.scr_tx
-		self.scr_fy = self.scr_ty
-		self.scr_x = math.floor(0.5 + self.scr_fx)
-		self.scr_y = math.floor(0.5 + self.scr_fy)
-	end
-
-	--print("car_x1", car_x1, "car_y1", car_y1, "car_x2", car_x2, "car_y2", car_y2)
-	--print("scr tx ty", self.scr_tx, self.scr_ty)
-
---[[
-	print("BEFORE",
-		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
-		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
-		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
---]]
-	self:scrollClampViewport()
-
---[[
-	print("AFTER",
-		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
-		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
-		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
---]]
-	--print("scrollGetCaretInBounds() AFTER", self.scr_tx, self.scr_ty)
-	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
-	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-end
-
-
-function def:updateDocumentDimensions()
-
-	local line_ed = self.line_ed
-	local font = line_ed.font
-
-	self.doc_w = font:getWidth(line_ed.disp_text)
-	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
-
-	self:updateAlignOffset()
-end
-
-
---- Call after changing alignment, then update the alignment of all sub-lines.
-function def:updateAlignOffset()
-
-	local align = self.line_ed.align
-
-	if align == "left" then
-		self.align_offset = 0
-
-	elseif align == "center" then
-		self.align_offset = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
-
-	else -- align == "right"
-		self.align_offset = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
 	end
 end
 

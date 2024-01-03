@@ -1,5 +1,4 @@
 -- Skin: Dropdown box (the pop-up menu).
--- XXX: Unfinished. Copy of text_box_s1.lua.
 
 
 return {

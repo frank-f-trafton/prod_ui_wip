@@ -45,6 +45,8 @@ local context = select(1, ...)
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local lgcInputS = context:getLua("shared/lgc_input_s")
+local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -55,6 +57,15 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 local def = {
 	skin_id = "combo_box1",
 }
+
+
+lgcInputS.setupDef(def)
+
+
+def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
+def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
+def.updateAlignOffset = lgcInputS.method_updateAlignOffset
+def.pop_up_def = lgcInputS.pop_up_def
 
 
 def.arrange = commonMenu.arrangeListVerticalTB
@@ -235,7 +246,9 @@ function def:uiCall_create(inst)
 
 		self.menu = commonMenu.new()
 
-		self.combo_text = ""
+		lgcInputS.setupInstance(self)
+
+		self.combo_text = "" -- WIP
 
 		-- State flags
 		self.enabled = true
@@ -250,6 +263,10 @@ function def:uiCall_create(inst)
 
 		self:skinSetRefs()
 		self:skinInstall()
+
+		local skin = self.skin
+
+		self.line_ed = lineEdSingle.new(skin.font)
 
 		self:reshape()
 	end
@@ -351,11 +368,11 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		check_chosen = true
 
 	elseif scancode == "pageup" then
-		self:moveFirst(true, "chosen_i")
+		self:movePrev(self.page_jump_size, true, "chosen_i")
 		check_chosen = true
 
 	elseif scancode == "pagedown" then
-		self:moveLast(true, "chosen_i")
+		self:moveNext(self.page_jump_size, true, "chosen_i")
 		check_chosen = true
 	end
 
