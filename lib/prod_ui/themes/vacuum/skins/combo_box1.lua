@@ -1,4 +1,4 @@
--- Skin: Dropdown box (the body).
+-- Skin: ComboBox (the body).
 
 
 return {
@@ -11,16 +11,22 @@ return {
 	["*box"] = "style/boxes/input_box",
 	["*font"] = "fonts/p",
 
-	-- Horizontal size of the decorative button.
+	-- Horizontal size of the expander button.
 	-- "auto": use Viewport #2's height.
 	["$button_spacing"] = 24,
 
-	-- Placement of the decorative button.
+	-- Placement of the expander button.
 	button_placement = "right", -- "left", "right"
 
 	["$item_pad_v"] = 2,
 
 	text_align = "left", -- "left", "center", "right"
+
+	--XXX: Text stuff for ComboBoxes.
+	--color_cursor = {1.0, 1.0, 1.0, 1.0},
+	--["$caret_w"] = 2,
+	--color_insert = {1.0, 1.0, 1.0, 1.0},
+	--color_replace = {0.75, 0.75, 0.75, 1.0},
 
 	["*tq_deco_glyph"] = "tex_quads/arrow_down",
 
