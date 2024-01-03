@@ -20,6 +20,7 @@ A rough list of development tasks for ProdUI. (Subject to change!)
 * Mac tailoring (expected hotkeys, etc.) (need hardware)
 * Touchscreen support; mobile support in general (need hardware)
 * Stencil support?
+* Toast / notification system (see the ad hoc toast overlay in `demo_wimp.lua`)
 
 
 # Documentation
@@ -52,6 +53,7 @@ A rough list of development tasks for ProdUI. (Subject to change!)
 * `base/button_split` (#8): A button with main and auxiliary sides. Clicking the auxiliary side activates different callbacks (typical use case is to open a menu).
 * `base/map2d` (#9): A box with a crosshair that is repositioned by clicking and dragging. (Use case: colour picker.)
 * (#10) (WIMP compound object) Colour picker.
+* `base/log` (#11): Log (lines of text that roll over)
 
 
 # Style
