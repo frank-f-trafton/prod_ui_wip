@@ -7,14 +7,14 @@ The main body of a ComboBox (a Dropdown Box with text input).
 Closed:
 
 +-----------+-+
-| Foobar|   |v| --- Type and manipulate the text. To open the drawer, click the button or press Alt+Down.
-+-----------+-+     Press up/down or mouse-wheel to cycle through items without opening the drawer.
+| Foobar|   |v| --- Type and manipulate the text. To open the drawer, click the button to the side or press Alt+Down.
++-----------+-+     To cycle through items without opening the drawer, press the up/down keys or turn the mouse-wheel.
 
 
 Opened:
 
 +-----------+-+
-| Foobar    |v|
+| Foobar    |v| --- Click to close the drawer and return keyboard focus to the text.
 +-----------+-+
 | Bazbop    |^| --\
 | Foobar    +-+   |
@@ -454,11 +454,20 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble()
 		end
 
-		if button == 1 then
-			local mx, my = self:getRelativePosition(x, y)
+		local mx, my = self:getRelativePosition(x, y)
 
-			-- Mouse is over "open menu" button.
-			if not self.wid_drawer and widShared.pointInViewport(self, 2, mx, my) then
+		-- Clicking the text area:
+		-- XXX I might need three viewports: one for the scissor box and initial click, one for the text area, and one for the button.
+		-- Just compare against viewport 1 for now.
+		if widShared.pointInViewport(self, 1, mx, my) then
+			-- Propagation is halted when a context menu is created.
+			if lgcInputS.mousePressLogic(self, button, mx, my) then
+				return true
+			end
+
+		-- Clicking the drawer expander button:
+		elseif widShared.pointInViewport(self, 2, mx, my) then
+			if button == 1 and not self.wid_drawer then
 				self:_openPopUpMenu()
 				return true
 			end

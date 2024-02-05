@@ -144,69 +144,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble()
 		end
 
-		local mouse_x, mouse_y = self:getRelativePosition(x, y)
+		local mx, my = self:getRelativePosition(x, y)
 
-		if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
-			local line_ed = self.line_ed
-			local context = self.context
-
-			self.line_ed:resetCaretBlink()
-
-			if button == 1 then
-				self.press_busy = "text-drag"
-
-				-- Apply scroll + margin offsets
-				local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.align_offset
-
-				local core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, true)
-
-				if context.cseq_button == 1 then
-					-- Not the same byte position as last click: force single-click mode.
-					if context.cseq_presses > 1  and core_byte ~= self.click_byte then
-						context:forceClickSequence(self, button, 1)
-						-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
-					end
-
-					if context.cseq_presses == 1 then
-						self:caretToX(true, mouse_sx, true)
-
-						self.click_byte = line_ed.car_byte
-
-						self.update_flag = true
-
-					elseif context.cseq_presses == 2 then
-						self.click_byte = line_ed.car_byte
-
-						-- Highlight group from highlight position to mouse position.
-						self:highlightCurrentWord()
-
-						self.update_flag = true
-
-					elseif context.cseq_presses == 3 then
-						self.click_byte = line_ed.car_byte
-
-						--- Highlight everything.
-						self:highlightAll()
-
-						self.update_flag = true
-					end
-				end
-
-			elseif button == 2 then
-				commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
-
-				local root = self:getTopWidgetInstance()
-
-				--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
-
-				local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
-				root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
-
-				pop_up:tryTakeThimble()
-
-				root:runStatement("rootCall_bankThimble", self)
-
-				-- Halt propagation
+		if widShared.pointInViewport(self, 2, mx, my) then
+			-- Propagation is halted when a context menu is created.
+			if lgcInputS.mousePressLogic(self, button, mx, my) then
 				return true
 			end
 		end

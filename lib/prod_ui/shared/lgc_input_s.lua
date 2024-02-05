@@ -9,6 +9,8 @@ local context = select(1, ...)
 local lgcInputS = {}
 
 
+local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
+local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
@@ -105,6 +107,75 @@ function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
 	--print("scrollGetCaretInBounds() AFTER", self.scr_tx, self.scr_ty)
 	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
 	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+end
+
+
+-- @param mouse_x, mouse_y Mouse position relative to widget top-left.
+-- @return true if event propagation should be halted.
+function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
+
+	local line_ed = self.line_ed
+	local context = self.context
+
+	self.line_ed:resetCaretBlink()
+
+	if button == 1 then
+		self.press_busy = "text-drag"
+
+		-- Apply scroll + margin offsets
+		local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.align_offset
+
+		local core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, true)
+
+		if context.cseq_button == 1 then
+			-- Not the same byte position as last click: force single-click mode.
+			if context.cseq_presses > 1  and core_byte ~= self.click_byte then
+				context:forceClickSequence(self, button, 1)
+				-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
+			end
+
+			if context.cseq_presses == 1 then
+				self:caretToX(true, mouse_sx, true)
+
+				self.click_byte = line_ed.car_byte
+
+				self.update_flag = true
+
+			elseif context.cseq_presses == 2 then
+				self.click_byte = line_ed.car_byte
+
+				-- Highlight group from highlight position to mouse position.
+				self:highlightCurrentWord()
+
+				self.update_flag = true
+
+			elseif context.cseq_presses == 3 then
+				self.click_byte = line_ed.car_byte
+
+				--- Highlight everything.
+				self:highlightAll()
+
+				self.update_flag = true
+			end
+		end
+
+	elseif button == 2 then
+		commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+		local root = self:getTopWidgetInstance()
+
+		--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
+
+		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+		root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+
+		pop_up:tryTakeThimble()
+
+		root:runStatement("rootCall_bankThimble", self)
+
+		-- Halt propagation
+		return true
+	end
 end
 
 
