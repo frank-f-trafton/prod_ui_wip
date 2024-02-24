@@ -166,7 +166,8 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
 
 		--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
 
-		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+		local ax, ay = self:getAbsolutePosition()
+		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, ax + mouse_x, ay + mouse_y)
 		root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble()
