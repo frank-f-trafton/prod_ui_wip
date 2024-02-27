@@ -445,7 +445,7 @@ function def:updateDimensions()
 	local w = 1
 	local h = items and (items[#items].y + items[#items].h) or 1
 
-	print("#items", #items, "h", h, "items[#items].y", items[#items].y, "items[#items].h", items[#items].h)
+	--print("#items", #items, "h", h, "items[#items].y", items[#items].y, "items[#items].h", items[#items].h)
 
 	local has_groups = false
 	local has_shortcuts = false
