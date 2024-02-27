@@ -202,7 +202,7 @@ end
 --- Check if this widget currently has the thimble. This is effectively the same as 'wid == wid.context.current_thimble'.
 -- @return True if it has the thimble, false if not.
 function _mt_widget:hasThimble()
-	return self == self.current_thimble
+	return self == self.context.current_thimble
 end
 
 
