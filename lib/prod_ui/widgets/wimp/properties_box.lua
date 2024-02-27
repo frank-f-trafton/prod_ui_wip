@@ -383,7 +383,7 @@ def.skinners = {
 			love.graphics.rectangle("line", self.control_x, 0, self.control_w - 1, self.h - 1)
 			--]]
 
-			print("categories", #self.categories, "#items", #items)
+			--print("categories", #self.categories, "#items", #items)
 
 			for i = 1, #items do
 				local item = items[i]

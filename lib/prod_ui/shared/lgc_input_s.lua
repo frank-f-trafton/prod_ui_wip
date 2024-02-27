@@ -13,6 +13,7 @@ local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
@@ -191,6 +192,53 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	elseif scancode == "f10" then
 		-- XXX: debug: colorization test
 	--]]
+end
+
+
+function lgcInputS.textInputLogic(self, text)
+
+	local line_ed = self.line_ed
+
+	print("textInputLogic", "allow_input", line_ed.allow_input)
+
+	if line_ed.allow_input then
+
+		local hist = line_ed.hist
+
+		line_ed:resetCaretBlink()
+
+		local old_byte, old_h_byte = line_ed:getCaretOffsets()
+
+		local suppress_replace = false
+		if line_ed.replace_mode then
+			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
+			if line_ed.car_byte < #line_ed.line + 1 then
+				line_ed.input_category = false
+			end
+		end
+
+		local written = self:writeText(text, suppress_replace)
+		self.update_flag = true
+
+		local no_ws = string.find(written, "%S")
+		local entry = hist:getCurrentEntry()
+		local do_advance = true
+
+		if (entry and entry.car_byte == old_byte)
+		and ((line_ed.input_category == "typing" and no_ws) or (line_ed.input_category == "typing-ws"))
+		then
+			do_advance = false
+		end
+
+		if do_advance then
+			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+		end
+		editHistS.writeEntry(line_ed, do_advance)
+		line_ed.input_category = no_ws and "typing" or "typing-ws"
+
+		self:updateDocumentDimensions()
+		self:scrollGetCaretInBounds(true)
+	end
 end
 
 

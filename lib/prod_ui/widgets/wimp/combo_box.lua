@@ -299,6 +299,9 @@ end
 function def:_openPopUpMenu()
 
 	if not self.wid_drawer then
+		if self:hasThimble() then
+			love.keyboard.setTextInput(false)
+		end
 
 		local skin = self.skin
 		local root = self:getTopWidgetInstance()
@@ -351,6 +354,11 @@ function def:wid_popUpCleanup(reason_code)
 	if self.context.current_pressed == self then
 		self.context.current_pressed = false
 	end
+
+	if self:hasThimble() then
+		love.keyboard.setTextInput(true)
+	end
+
 	self.wid_drawer = false
 end
 
@@ -394,7 +402,7 @@ end
 function def:uiCall_thimbleTake(inst)
 
 	if self == inst then
-		love.keyboard.setTextInput(not not self.wid_drawer)
+		love.keyboard.setTextInput(not self.wid_drawer)
 	end
 end
 
@@ -461,6 +469,14 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
+function def:uiCall_textInput(inst, text)
+
+	if self == inst then
+		lgcInputS.textInputLogic(self, text)
+	end
+end
+
+
 --function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 --function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
@@ -473,6 +489,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	then
 		if button <= 3 then
 			self:tryTakeThimble()
+			print("hasInput", love.keyboard.hasTextInput())
 		end
 
 		local mx, my = self:getRelativePosition(x, y)
@@ -618,6 +635,20 @@ def.skinners = {
 
 			-- Debug
 			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
+
+			-- Debug: working on text input enable/disable in events.
+			love.graphics.pop()
+
+			love.graphics.push()
+			if love.keyboard.hasTextInput() then
+				love.graphics.setColor(1, 0, 0, 1)
+			else
+				love.graphics.setColor(0, 0, 1, 1)
+			end
+			love.graphics.circle("fill", 0, 0, 32)
+
+			-- Just debug-print the LineEd internal text for now...
+			love.graphics.print(self.line_ed.line, 0, 32)
 
 			love.graphics.pop()
 		end,

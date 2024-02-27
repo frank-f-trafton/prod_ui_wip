@@ -198,46 +198,7 @@ end
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
-		local line_ed = self.line_ed
-
-		if line_ed.allow_input then
-
-			local hist = line_ed.hist
-
-			line_ed:resetCaretBlink()
-
-			local old_byte, old_h_byte = line_ed:getCaretOffsets()
-
-			local suppress_replace = false
-			if line_ed.replace_mode then
-				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-				if line_ed.car_byte < #line_ed.line + 1 then
-					line_ed.input_category = false
-				end
-			end
-
-			local written = self:writeText(text, suppress_replace)
-			self.update_flag = true
-
-			local no_ws = string.find(written, "%S")
-			local entry = hist:getCurrentEntry()
-			local do_advance = true
-
-			if (entry and entry.car_byte == old_byte)
-			and ((line_ed.input_category == "typing" and no_ws) or (line_ed.input_category == "typing-ws"))
-			then
-				do_advance = false
-			end
-
-			if do_advance then
-				editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-			end
-			editHistS.writeEntry(line_ed, do_advance)
-			line_ed.input_category = no_ws and "typing" or "typing-ws"
-
-			self:updateDocumentDimensions()
-			self:scrollGetCaretInBounds(true)
-		end
+		lgcInputS.textInputLogic(self, text)
 	end
 end
 
