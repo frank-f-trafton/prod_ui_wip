@@ -256,7 +256,7 @@ function def:uiCall_create(inst)
 		-- When opened, this holds a reference to the pop-up widget.
 		self.wid_drawer = false
 
-		-- Index for the last chopsen selection.
+		-- Index for the last chosen selection.
 		-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
 		-- The item contents may be outdated from what is stored in `self.combo_text`.
 		self.menu.chosen_i = 0
