@@ -59,6 +59,10 @@ local def = {
 }
 
 
+widShared.scrollSetMethods(def)
+-- No integrated scroll bars for single-line text inputs.
+
+
 lgcInputS.setupDef(def)
 
 
@@ -239,6 +243,9 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
+		widShared.setupScroll(self)
+		widShared.setupDoc(self)
+
 		-- -> commonMenu.instanceSetup(self)
 		self.page_jump_size = 4
 		self.wheel_jump_size = 64
@@ -292,6 +299,7 @@ end
 function def:_openPopUpMenu()
 
 	if not self.wid_drawer then
+
 		local skin = self.skin
 		local root = self:getTopWidgetInstance()
 		local menu = self.menu
@@ -357,8 +365,6 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
 	local chosen_i_old = self.menu.chosen_i
 
-	-- XXX: Text input stuff.
-
 	if scancode == "up" then
 		self:movePrev(1, true, "chosen_i")
 		check_chosen = true
@@ -385,11 +391,21 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
+function def:uiCall_thimbleTake(inst)
+
+	if self == inst then
+		love.keyboard.setTextInput(not not self.wid_drawer)
+	end
+end
+
+
 function def:uiCall_thimbleRelease(inst)
 
 	print("def:uiCall_thimbleRelease", self, inst, self == inst)
 
 	if self == inst then
+		love.keyboard.setTextInput(false)
+
 		if self.wid_drawer then
 			-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
 			-- This precludes opening a right-click context menu on an item in the pop-up menu, since
@@ -419,6 +435,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
 
 		else
+
 			local items = self.menu.items
 			local old_index = self.menu.index
 			local old_item = items[old_index]
@@ -429,11 +446,15 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				return true
 
 			elseif key == "return" or key == "kpenter" then
-				-- XXX: tie enter to a widget event.
+				-- XXX: tie 'enter' to a widget event (probably wid_action).
 				return true
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then
 				return true
+
+			-- Standard text box controls (caret navigation, etc.)
+			else
+				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 			end
 		end
 	end
