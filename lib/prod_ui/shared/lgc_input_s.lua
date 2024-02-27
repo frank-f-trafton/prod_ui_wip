@@ -12,10 +12,17 @@ local lgcInputS = {}
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
+local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
+local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+
+
+-- LÖVE 12 compatibility.
+local love_major, love_minor = love.getVersion()
 
 
 -- Widget def configuration.
@@ -77,6 +84,8 @@ function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
 	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
 
 	-- Clamp the scroll target.
+	print("self.scr_tx", self.scr_tx, "car_x2", car_x2, "car_x1", car_x1)
+	print("self.scr_ty", self.scr_ty, "car_y2", car_y2, "car_y1", car_y1)
 	self.scr_tx = math.max(car_x2 - self.vp_w, math.min(self.scr_tx, car_x1))
 	self.scr_ty = math.max(car_y2 - self.vp_h, math.min(self.scr_ty, car_y1))
 
@@ -107,6 +116,81 @@ function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
 	--print("scrollGetCaretInBounds() AFTER", self.scr_tx, self.scr_ty)
 	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
 	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+end
+
+
+-- @return true if event propagation should halt.
+function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+
+	local line_ed = self.line_ed
+	local hist = line_ed.hist
+
+	line_ed:resetCaretBlink()
+
+	if scancode == "application" then
+
+		-- Locate caret in UI space
+		local ax, ay = self:getAbsolutePosition()
+		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x
+		local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
+
+		commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+		local root = self:getTopWidgetInstance()
+		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
+		self:bubbleStatement("rootCall_bankThimble", self)
+		pop_up:tryTakeThimble()
+
+		-- Halt propagation
+		return true
+	end
+
+	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+
+	-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
+	if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
+		scancode = keyMgr.scan_numlock[scancode]
+		key = love.keyboard.getKeyFromScancode(scancode)
+	end
+
+	local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
+	local bind_action = editBindS[key_string]
+
+	if bind_action then
+		-- NOTE: most history ledger changes are handled in executeBoundAction().
+		local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
+
+		if ok then
+			if update_scroll then
+				self.update_flag = true
+			end
+
+			self:updateDocumentDimensions()
+			self:scrollGetCaretInBounds(true)
+
+			-- Stop event propagation
+			return true
+		end
+	end
+
+
+	-- XXX: This is old debug functionality that should be moved elsewhere.
+	--[[
+	elseif scancode == "f6" then
+		-- XXX: debug: left align
+
+	elseif scancode == "f7" then
+		-- XXX: debug: center align
+
+	elseif scancode == "f8" then
+		-- XXX: debug: right align
+
+	elseif scancode == "f9" then
+		-- XXX: masking (for passwords)
+
+	elseif scancode == "f10" then
+		-- XXX: debug: colorization test
+	--]]
 end
 
 
