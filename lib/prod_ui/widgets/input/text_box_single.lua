@@ -164,7 +164,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerDrag(inst, x, y, dx, dy)
+function def:uiCall_pointerDrag(inst, x, y, dx, dy) -- XXX: can't remember if this is necessary, or just the stub of an old function.
 	return true
 end
 
@@ -212,47 +212,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-local function mouseDragLogic(self)
-
-	local line_ed = self.line_ed
-
-	local widget_needs_update = false
-
-	if self.press_busy == "text-drag" then
-
-		local context = self.context
-
-		line_ed:resetCaretBlink()
-
-		-- Mouse position relative to viewport #1.
-		local ax, ay = self:getAbsolutePosition()
-		local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
-
-		-- ...And with scroll offsets applied.
-		local s_mx = mx + self.scr_x - self.align_offset
-		local s_my = my + self.scr_y
-
-		--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
-
-		-- Handle drag highlight actions
-		if context.cseq_presses == 1 then
-			self:caretToX(false, s_mx, true)
-			widget_needs_update = true
-
-		elseif context.cseq_presses == 2 then
-			self:clickDragByWord(s_mx, self.click_byte)
-			widget_needs_update = true
-		end
-		-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
-
-		-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
-		self.mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
-	end
-
-	return widget_needs_update
-end
-
-
 function def:uiCall_update(dt)
 
 	local line_ed = self.line_ed
@@ -262,11 +221,12 @@ function def:uiCall_update(dt)
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
 		-- Need to continuously update the selection.
-		if mouseDragLogic(self) then
+		local needs_update, mouse_drag_x = lgcInputS.mouseDragLogic(self)
+		if needs_update then
 			self.update_flag = true
 		end
-		if self.mouse_drag_x ~= 0 then
-			self:scrollDeltaH(self.mouse_drag_x * dt * 4) -- XXX style/config
+		if mouse_drag_x ~= 0 then
+			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
 			self.update_flag = true
 		end
 	end
@@ -281,21 +241,7 @@ function def:uiCall_update(dt)
 	end
 
 	if self.update_flag then
-
-		-- Update caret shape.
-		self.caret_x = line_ed.caret_box_x
-		self.caret_y = line_ed.caret_box_y
-		self.caret_w = line_ed.caret_box_w
-		self.caret_h = line_ed.caret_box_h
-
-		if line_ed.replace_mode then
-			self.caret_fill = "line"
-
-		else
-			self.caret_fill = "fill"
-			self.caret_w = line_ed.caret_line_width
-		end
-
+		lgcInputS.updateCaretShape(self)
 		self.update_flag = false
 	end
 end
@@ -304,12 +250,7 @@ end
 function def:uiCall_destroy(inst)
 
 	if self == inst then
-		-- Destroy pop-up menu if it exists in reference to this widget.
-		local root = self:getTopWidgetInstance()
-		if root.pop_up_menu then
-			root:runStatement("rootCall_destroyPopUp", self, "concluded")
-			root:runStatement("rootCall_restoreThimble", self)
-		end
+		commonWimp.checkDestroyPopUp(self)
 	end
 end
 
@@ -350,45 +291,15 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			love.graphics.translate(
-				self.vp_x + self.align_offset - self.scr_x,
-				self.vp_y - self.scr_y
+			-- Text edit component.
+			lgcInputS.draw(
+				self,
+				res.color_highlight,
+				skin.font_ghost,
+				res.color_text,
+				line_ed.font,
+				skin.color_insert -- XXX: color_replace
 			)
-
-			-- Highlighted selection.
-			if line_ed.disp_highlighted then
-				love.graphics.setColor(res.color_highlight)
-				love.graphics.rectangle(
-					"fill",
-					line_ed.highlight_x,
-					line_ed.highlight_y,
-					line_ed.highlight_w,
-					line_ed.highlight_h
-				)
-			end
-
-			-- Ghost text. XXX: alignment
-			if self.ghost_text and #line_ed.line == 0 then
-				love.graphics.setFont(skin.font_ghost)
-				love.graphics.print(self.ghost_text, 0, 0)
-			end
-
-			-- Display Text.
-			love.graphics.setColor(res.color_text)
-			love.graphics.setFont(line_ed.font)
-			love.graphics.print(line_ed.disp_text)
-
-			-- Caret.
-			if self == self.context.current_thimble and line_ed.caret_is_showing then
-				love.graphics.setColor(skin.color_insert) -- XXX: color_replace
-				love.graphics.rectangle(
-					self.caret_fill,
-					self.caret_x,
-					self.caret_y,
-					self.caret_w,
-					self.caret_h
-				)
-			end
 
 			love.graphics.pop()
 

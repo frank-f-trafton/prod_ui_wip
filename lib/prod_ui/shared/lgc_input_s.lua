@@ -18,6 +18,7 @@ local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
@@ -312,6 +313,44 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
 end
 
 
+-- Used in uiCall_update(). Before calling, check that text-drag state is active.
+function lgcInputS.mouseDragLogic(self)
+
+	local context = self.context
+	local line_ed = self.line_ed
+
+	local widget_needs_update = false
+
+	line_ed:resetCaretBlink()
+
+	-- Mouse position relative to viewport #1.
+	local ax, ay = self:getAbsolutePosition()
+	local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
+
+	-- ...And with scroll offsets applied.
+	local s_mx = mx + self.scr_x - self.align_offset
+	local s_my = my + self.scr_y
+
+	--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
+
+	-- Handle drag highlight actions.
+	if context.cseq_presses == 1 then
+		self:caretToX(false, s_mx, true)
+		widget_needs_update = true
+
+	elseif context.cseq_presses == 2 then
+		self:clickDragByWord(s_mx, self.click_byte)
+		widget_needs_update = true
+	end
+	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
+
+	-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
+	local mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
+
+	return widget_needs_update, mouse_drag_x
+end
+
+
 function lgcInputS.executeRemoteAction(self, item_t)
 
 	local ok, update_viewport, update_caret, write_history = self:executeBoundAction(item_t.bound_func)
@@ -349,6 +388,75 @@ function lgcInputS.method_updateAlignOffset(self)
 
 	else -- align == "right"
 		self.align_offset = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
+	end
+end
+
+
+-- Update the widget's caret shape and appearance.
+function lgcInputS.updateCaretShape(self)
+
+	local line_ed = self.line_ed
+
+	self.caret_x = line_ed.caret_box_x
+	self.caret_y = line_ed.caret_box_y
+	self.caret_w = line_ed.caret_box_w
+	self.caret_h = line_ed.caret_box_h
+
+	if line_ed.replace_mode then
+		self.caret_fill = "line"
+
+	else
+		self.caret_fill = "fill"
+		self.caret_w = line_ed.caret_line_width
+	end
+end
+
+
+-- Draw the text component.
+function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
+
+	-- Call after setting up the text area scissor box, within `love.graphics.push("all")` and `pop()`.
+
+	local line_ed = self.line_ed
+
+	love.graphics.translate(
+		self.vp_x + self.align_offset - self.scr_x,
+		self.vp_y - self.scr_y
+	)
+
+	-- Highlighted selection.
+	if line_ed.disp_highlighted then
+		love.graphics.setColor(color_highlight)
+		love.graphics.rectangle(
+			"fill",
+			line_ed.highlight_x,
+			line_ed.highlight_y,
+			line_ed.highlight_w,
+			line_ed.highlight_h
+		)
+	end
+
+	-- Ghost text. XXX: alignment
+	if self.ghost_text and #line_ed.line == 0 then
+		love.graphics.setFont(font_ghost)
+		love.graphics.print(self.ghost_text, 0, 0)
+	end
+
+	-- Display Text.
+	love.graphics.setColor(color_text)
+	love.graphics.setFont(font)
+	love.graphics.print(line_ed.disp_text)
+
+	-- Caret.
+	if self == self.context.current_thimble and line_ed.caret_is_showing then
+		love.graphics.setColor(color_caret)
+		love.graphics.rectangle(
+			self.caret_fill,
+			self.caret_x,
+			self.caret_y,
+			self.caret_w,
+			self.caret_h
+		)
 	end
 end
 

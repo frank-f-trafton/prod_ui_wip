@@ -80,5 +80,16 @@ function commonWimp.assignPopUp(self, pop_up)
 end
 
 
-return commonWimp
+-- Destroy the pop-up menu if it exists in reference to this widget. If applicable, restore banked thimble state.
+function commonWimp.checkDestroyPopUp(self)
 
+	local root = self:getTopWidgetInstance()
+
+	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
+		root:runStatement("rootCall_destroyPopUp", self, "concluded")
+		root:runStatement("rootCall_restoreThimble", self)
+	end
+end
+
+
+return commonWimp
