@@ -115,7 +115,7 @@ local function clearPopUp(self, reason_code)
 
 	-- If mouse was pressing on any part of the pop-up menu chain from the base onward, blank out current_pressed in
 	-- the context table.
-	-- We exclude wid_ref which may be part of the chain (to the left of the base pop-up) because it is not
+	-- We exclude `wid_ref` which may be part of the chain (to the left of the base pop-up) because it is not
 	-- being destroyed by this function.
 	if self.context.current_pressed and widShared.chainHasThisWidgetRight(self.pop_up_menu, self.context.current_pressed) then
 		self.context.current_pressed = false
@@ -123,7 +123,7 @@ local function clearPopUp(self, reason_code)
 
 	local wid_ref = self.pop_up_menu.wid_ref
 
-	-- Remove nested pop-ups, then the base pop-up, then clear the root's reference to it
+	-- Remove nested pop-ups, then the base pop-up, then clear the root's reference to it.
 	widShared.chainRemovePost(self.pop_up_menu)
 	self.pop_up_menu:remove()
 	self.pop_up_menu = false
@@ -480,13 +480,7 @@ end
 function def:rootCall_assignPopUp(inst, pop_up)
 	--print("rootCall_assignPopUp", inst, pop_up, debug.traceback())
 
-	--[[
-	Caller should create and initialize the widget before attaching it to the root here.
-
-	When called as a result of uiCall_pointerPress, you should block bubbling of the event by returning true.
-	This prevents code in the window frame and wimp root from interfering with the intended thimble
-	state and banking.
-	--]]
+	-- Caller should create and initialize the widget before attaching it to the root here.
 
 	-- Destroy any existing pop-up menu tree.
 	if self.pop_up_menu then
@@ -501,8 +495,8 @@ function def:rootCall_assignPopUp(inst, pop_up)
 
 	self.pop_up_menu = pop_up
 
-	-- If the calling function is a pointerPress event, it should return true to block further propagation up.
-	-- Otherwise, the window-frame and root pointerPress code may interfere with thimble and banking state.
+	-- If the calling function is a uiCall_pointerPress event, it should return true to block further propagation
+	-- up. Otherwise, the window-frame and root pointerPress code may interfere with thimble and banking state.
 end
 
 

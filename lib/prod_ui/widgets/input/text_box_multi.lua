@@ -914,45 +914,41 @@ end
 --- Updates selection based on the position of the mouse and the number of repeat mouse-clicks.
 local function mouseDragLogic(self)
 
+	local context = self.context
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
 	local widget_needs_update = false
 
-	if self.press_busy == "text-drag" then
+	disp:resetCaretBlink()
 
-		local context = self.context
+	-- Relative mouse position relative to viewport #1.
+	local ax, ay = self:getAbsolutePosition()
+	local mx, my = context.mouse_x - ax - self.vp_x, context.mouse_y - ay - self.vp_y
 
-		disp:resetCaretBlink()
+	-- ...And with scroll offsets applied.
+	local s_mx = mx + self.scr_x - self.align_offset
+	local s_my = my + self.scr_y
 
-		-- Relative mouse position relative to viewport #1.
-		local ax, ay = self:getAbsolutePosition()
-		local mx, my = context.mouse_x - ax - self.vp_x, context.mouse_y - ay - self.vp_y
+	--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
 
-		-- ...And with scroll offsets applied.
-		local s_mx = mx + self.scr_x - self.align_offset
-		local s_my = my + self.scr_y
+	-- Handle drag highlight actions
+	if context.cseq_presses == 1 then
+		self:caretToXY(false, s_mx, s_my, true)
+		widget_needs_update = true
 
-		--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
+	elseif context.cseq_presses == 2 then
+		self:clickDragByWord(s_mx, s_my, self.click_line, self.click_byte)
+		widget_needs_update = true
 
-		-- Handle drag highlight actions
-		if context.cseq_presses == 1 then
-			self:caretToXY(false, s_mx, s_my, true)
-			widget_needs_update = true
-
-		elseif context.cseq_presses == 2 then
-			self:clickDragByWord(s_mx, s_my, self.click_line, self.click_byte)
-			widget_needs_update = true
-
-		elseif context.cseq_presses == 3 then
-			self:clickDragByLine(s_mx, s_my, self.click_line, self.click_byte)
-			widget_needs_update = true
-		end
-
-		-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
-		self.mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
-		self.mouse_drag_y = (my < 0) and my or (my >= self.vp_h) and my - self.vp_h or 0
+	elseif context.cseq_presses == 3 then
+		self:clickDragByLine(s_mx, s_my, self.click_line, self.click_byte)
+		widget_needs_update = true
 	end
+
+	-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
+	self.mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
+	self.mouse_drag_y = (my < 0) and my or (my >= self.vp_h) and my - self.vp_h or 0
 
 	return widget_needs_update
 end
@@ -1026,7 +1022,7 @@ function def:uiCall_destroy(inst)
 	if self == inst then
 		-- Destroy pop-up menu if it exists in reference to this widget.
 		local root = self:getTopWidgetInstance()
-		if root.pop_up_menu then
+		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
 			root:runStatement("rootCall_destroyPopUp", self, "concluded")
 			root:runStatement("rootCall_restoreThimble", self)
 		end

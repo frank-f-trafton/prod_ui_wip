@@ -37,6 +37,10 @@ See wimp/dropdown_box.lua for relevant 'TODO's.
 The last chosen index is tracked to help the user keep their place in the drawer when repeatedly opening
 and closing it. This index should not be referenced by your program logic, however, because it might
 have no association with the current input text. Track the field 'self.combo_text' instead.
+
+Two kinds of pop-up menu are associated with this widget: the drawer, and also the standard context menu
+when right-clicking on the editable text area. Only one of these may be active at a time, and you cannot
+invoke another context menu a selection in the drawer.
 --]]
 
 
@@ -296,6 +300,41 @@ function def:uiCall_reshape()
 end
 
 
+function def:uiCall_update(dt) -- Copied from input/text_box_single.lua, 27 Feb 2024.
+
+	local line_ed = self.line_ed
+
+	local scr_x_old = self.scr_x
+
+	-- Handle update-time drag-scroll.
+	if self.press_busy == "text-drag" then
+		-- Need to continuously update the selection.
+		local needs_update, mouse_drag_x = lgcInputS.mouseDragLogic(self)
+		if needs_update then
+			self.update_flag = true
+		end
+		if mouse_drag_x ~= 0 then
+			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
+			self.update_flag = true
+		end
+	end
+
+	line_ed:updateCaretBlink(dt)
+
+	self:scrollUpdate(dt)
+
+	-- Force a cache update if the external scroll position is different.
+	if scr_x_old ~= self.scr_x then
+		self.update_flag = true
+	end
+
+	if self.update_flag then
+		lgcInputS.updateCaretShape(self)
+		self.update_flag = false
+	end
+end
+
+
 function def:_openPopUpMenu()
 
 	if not self.wid_drawer then
@@ -415,11 +454,7 @@ function def:uiCall_thimbleRelease(inst)
 		love.keyboard.setTextInput(false)
 
 		if self.wid_drawer then
-			-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
-			-- This precludes opening a right-click context menu on an item in the pop-up menu, since
-			-- the context menu takes the thimble while it exists.
-			-- If you require opening context menus on list items, consider using a plain ListBox
-			-- widget instead.
+			-- The drawer should not exist if the dropdown body does not have the UI thimble.
 			self:_closePopUpMenu(false)
 			return true
 		end
@@ -430,7 +465,10 @@ end
 function def:uiCall_destroy(inst)
 
 	if self == inst then
-		self:_closePopUpMenu(false)
+		-- Destroy pop-up menu (either kind) if it exists in reference to this widget.
+		commonWimp.checkDestroyPopUp(self)
+		--self:_closePopUpMenu(false)
+		-- XXX: test the above change.
 	end
 end
 
