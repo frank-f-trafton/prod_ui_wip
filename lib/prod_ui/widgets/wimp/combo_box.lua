@@ -1,5 +1,5 @@
 
--- XXX: Under construction. Copy of `wimp/dropdown_box.lua`
+-- XXX: Under construction. Combination of `wimp/dropdown_box.lua` and `input/text_box_single.lua`.
 
 --[[
 The main body of a ComboBox (a Dropdown Box with text input).
@@ -25,9 +25,9 @@ Opened:
 +-----------+-+ --/
 
 
-The dropdown menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance
-and mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and
-the pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
+The menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance and
+mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and the
+pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
 
 Unlike similar list widgets, ComboBoxes do not support menu-item icons. ComboBoxes and Dropdowns use the same
 drawer widget.
@@ -36,7 +36,8 @@ See wimp/dropdown_box.lua for relevant 'TODO's.
 
 The last chosen index is tracked to help the user keep their place in the drawer when repeatedly opening
 and closing it. This index should not be referenced by your program logic, however, because it might
-have no association with the current input text. Track the field 'self.combo_text' instead.
+have no association with the current input text. Use `self:getDisplayText()` or `self:getInternalText()`
+instead.
 
 Two kinds of pop-up menu are associated with this widget: the drawer, and also the standard context menu
 when right-clicking on the editable text area. Only one of these may be active at a time, and you cannot
@@ -55,6 +56,7 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -92,6 +94,25 @@ def.wid_buttonAction3 = uiShared.dummyFunc
 
 --def.uiCall_thimbleAction
 --def.uiCall_thimbleAction2
+
+
+local function refreshLineEdText(self)
+
+	local chosen_tbl = self.menu.items[self.menu.chosen_i]
+	local line_ed = self.line_ed
+
+	if chosen_tbl then
+		line_ed:deleteText(false, 1, #line_ed.line)
+		line_ed:insertText(chosen_tbl.text)
+		line_ed.input_category = false
+		line_ed.hist:clearAll()
+
+		if line_ed.allow_highlight then
+			self:highlightAll()
+		end
+		self.update_flag = true
+	end
+end
 
 
 --- Callback for a change in the ComboBox state.
@@ -226,14 +247,26 @@ function def:setSelectionByIndex(item_i, id)
 
 	self.menu:setSelectedIndex(item_i, id)
 
-	-- XXX: update combo_text
 	if id == "chosen_i" and chosen_i_old ~= self.menu.chosen_i then
+		refreshLineEdText(self)
 		self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
 	end
 
 	if self.wid_drawer then
 		self.wid_drawer:menuChangeCleanup()
 	end
+end
+
+
+--- Gets the internal text string.
+function def:getInternalText()
+	return self.line_ed.line
+end
+
+
+--- Gets the display text string (which may be modified to show different UTF-8 code points).
+function def:getDisplayText()
+	return self.line_ed.disp_text
 end
 
 
@@ -259,17 +292,16 @@ function def:uiCall_create(inst)
 
 		lgcInputS.setupInstance(self)
 
-		self.combo_text = "" -- WIP
-
 		-- State flags
 		self.enabled = true
+		self.hovered = false
 
 		-- When opened, this holds a reference to the pop-up widget.
 		self.wid_drawer = false
 
 		-- Index for the last chosen selection.
 		-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
-		-- The item contents may be outdated from what is stored in `self.combo_text`.
+		-- The item contents may be outdated from what is stored in the LineEditor object.
 		self.menu.chosen_i = 0
 
 		self:skinSetRefs()
@@ -286,8 +318,9 @@ end
 
 function def:uiCall_reshape()
 
-	-- Viewport #1 is the chosen item text area.
-	-- Viewport #2 is the "open menu" button.
+	-- Viewport #1 is for text placement and offsetting.
+	-- Viewport #2 is the text scissor-box boundary.
+	-- Viewport #3 is the "open menu" button.
 
 	local skin = self.skin
 
@@ -295,8 +328,10 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 1, "border")
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
+	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement)
 
-	widShared.partitionViewport(self, 1, 2, button_spacing, skin.button_placement)
+	widShared.copyViewport(self, 1, 2)
+	widShared.carveViewport(self, 1, "margin")
 end
 
 
@@ -431,6 +466,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 
 	if check_chosen then
 		if chosen_i_old ~= self.menu.chosen_i then
+			refreshLineEdText(self)
 			self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
 		end
 		return true
@@ -515,8 +551,43 @@ function def:uiCall_textInput(inst, text)
 end
 
 
---function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
---function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+	if self == inst
+	and self.enabled
+	then
+		self.hovered = true
+	end
+end
+
+
+function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+	if self == inst
+	and self.enabled
+	then
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+		print(mx, my, widShared.pointInViewport(self, 1, mx, my))
+		if widShared.pointInViewport(self, 1, mx, my) then
+			self:setCursorLow(self.skin.cursor_on)
+
+		else
+			self:setCursorLow()
+		end
+	end
+end
+
+
+function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+	if self == inst then
+		if self.enabled then
+			self.hovered = false
+			self:setCursorLow()
+		end
+	end
+end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
@@ -533,8 +604,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		local mx, my = self:getRelativePosition(x, y)
 
 		-- Clicking the text area:
-		-- XXX I might need three viewports: one for the scissor box and initial click, one for the text area, and one for the button.
-		-- Just compare against viewport 1 for now.
 		if widShared.pointInViewport(self, 1, mx, my) then
 			-- Propagation is halted when a context menu is created.
 			if lgcInputS.mousePressLogic(self, button, mx, my) then
@@ -542,7 +611,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 
 		-- Clicking the drawer expander button:
-		elseif widShared.pointInViewport(self, 2, mx, my) then
+		elseif widShared.pointInViewport(self, 3, mx, my) then
 			if button == 1 and not self.wid_drawer then
 				self:_openPopUpMenu()
 				return true
@@ -575,6 +644,16 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
+function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+
+	if self == inst then
+		if button == 1 and button == self.context.mouse_pressed_button then
+			self.press_busy = false
+		end
+	end
+end
+
+
 function def:uiCall_pointerWheel(inst, x, y)
 
 	if self == inst then
@@ -595,6 +674,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 			if check_chosen then
 				if chosen_i_old ~= self.menu.chosen_i then
+					refreshLineEdText(self)
 					self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
 				end
 				return true
@@ -623,7 +703,8 @@ def.skinners = {
 		render = function(self, ox, oy)
 
 			local skin = self.skin
-			local font = skin.font
+			--local font = skin.font
+			local line_ed = self.line_ed
 
 			local res
 			if self.enabled then
@@ -641,28 +722,35 @@ def.skinners = {
 
 			-- XXX: "Open menu" button.
 			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(res.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x + res.deco_ox, self.vp2_y + res.deco_oy, self.vp2_w, self.vp2_h)
+			uiGraphics.drawSlice(res.slc_deco_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
 
 			-- Crop item text.
 			uiGraphics.intersectScissor(
-				ox + self.x + self.vp_x,
-				oy + self.y + self.vp_y,
-				self.vp_w,
-				self.vp_h
+				ox + self.x + self.vp2_x,
+				oy + self.y + self.vp2_y,
+				self.vp2_w,
+				self.vp2_h
 			)
 
-			-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
-			if not self.wid_drawer and self.context.current_thimble == self then
-				love.graphics.setColor(res.color_highlight)
-				love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-			end
+			-- (Unlike DropDowns, do not draw the highlight if this widget has the thimble
+			-- and there is no drawer.)
 
+			-- Text editor component.
+			lgcInputS.draw(
+				self,
+				res.color_highlight,
+				skin.font_ghost,
+				res.color_text,
+				line_ed.font,
+				(not self.wid_drawer) and skin.color_insert or false -- Don't draw caret if drawer is pulled out. It's annoying.
+				-- XXX: color_replace
+			)
+
+			--[=[
 			local chosen = self.menu.items[self.menu.chosen_i]
 			if chosen then
 				love.graphics.setColor(res.color_text)
-
-				-- XXX: Chosen item icon.
 
 				-- Chosen item text.
 				love.graphics.setFont(font)
@@ -670,25 +758,34 @@ def.skinners = {
 				local yy = math.floor(0.5 + self.vp_y + (self.vp_h - font:getHeight()) / 2)
 				love.graphics.print(chosen.text, xx, yy)
 			end
+			--]=]
 
-			-- Debug
-			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
 
-			-- Debug: working on text input enable/disable in events.
+
 			love.graphics.pop()
 
+			-- Debug
 			love.graphics.push()
+
+			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
+
+			--[[
+			-- Debug: working on text input enable/disable in events.
 			if love.keyboard.hasTextInput() then
 				love.graphics.setColor(1, 0, 0, 1)
 			else
 				love.graphics.setColor(0, 0, 1, 1)
 			end
 			love.graphics.circle("fill", 0, 0, 32)
-
-			-- Just debug-print the LineEd internal text for now...
-			love.graphics.print(self.line_ed.line, 0, 32)
+			--]]
 
 			love.graphics.pop()
+
+			--[[
+			widDebug.debugDrawViewport(self, 1)
+			widDebug.debugDrawViewport(self, 2)
+			widDebug.debugDrawViewport(self, 3)
+			--]]
 		end,
 
 

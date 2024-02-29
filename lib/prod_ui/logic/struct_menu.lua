@@ -340,6 +340,7 @@ end
 
 --- Sets the current menu selection. If the index is invalid or the item cannot be selected, raises a Lua error.
 -- @param index The index of the menu item to select.
+-- @param id ("index") Specify an alternative table key, if applicable.
 function _mt_menu:setSelectedIndex(index, id)
 
 	id = id or "index"

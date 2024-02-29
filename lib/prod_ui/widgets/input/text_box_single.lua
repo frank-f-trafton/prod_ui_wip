@@ -95,7 +95,7 @@ end
 function def:uiCall_reshape()
 
 	-- Viewport #1 is for text placement and offsetting.
-	-- Viewport #2 is the scissor-box boundary.
+	-- Viewport #2 is the text scissor-box boundary.
 
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
@@ -291,7 +291,7 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			-- Text edit component.
+			-- Text editor component.
 			lgcInputS.draw(
 				self,
 				res.color_highlight,

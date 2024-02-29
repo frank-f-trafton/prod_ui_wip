@@ -413,6 +413,11 @@ end
 
 
 -- Draw the text component.
+-- @param color_caret Table of colors for the text caret, or nil/false to not draw the caret.
+-- @param font_ghost Font to use for optional "Ghost Text", or nil/false to not draw it.
+-- @param color_text Table of colors to use for the body text, or nil/false to not draw it.
+-- @param font Font to use when printing the main text (required, even if printing is disabled by color_text being false).
+-- @param color_highlight Table of colors for the text highlight, or nil/false to not draw the highlight.
 function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
 
 	-- Call after setting up the text area scissor box, within `love.graphics.push("all")` and `pop()`.
@@ -425,7 +430,7 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 	)
 
 	-- Highlighted selection.
-	if line_ed.disp_highlighted then
+	if color_highlight and line_ed.disp_highlighted then
 		love.graphics.setColor(color_highlight)
 		love.graphics.rectangle(
 			"fill",
@@ -437,18 +442,20 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 	end
 
 	-- Ghost text. XXX: alignment
-	if self.ghost_text and #line_ed.line == 0 then
+	if font_ghost and self.ghost_text and #line_ed.line == 0 then
 		love.graphics.setFont(font_ghost)
 		love.graphics.print(self.ghost_text, 0, 0)
 	end
 
 	-- Display Text.
-	love.graphics.setColor(color_text)
-	love.graphics.setFont(font)
-	love.graphics.print(line_ed.disp_text)
+	if color_text then
+		love.graphics.setColor(color_text)
+		love.graphics.setFont(font)
+		love.graphics.print(line_ed.disp_text)
+	end
 
 	-- Caret.
-	if self == self.context.current_thimble and line_ed.caret_is_showing then
+	if color_caret and self == self.context.current_thimble and line_ed.caret_is_showing then
 		love.graphics.setColor(color_caret)
 		love.graphics.rectangle(
 			self.caret_fill,
