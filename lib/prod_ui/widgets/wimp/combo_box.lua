@@ -279,6 +279,7 @@ function def:uiCall_create(inst)
 
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
+		widShared.setupViewport(self, 3)
 
 		widShared.setupScroll(self)
 		widShared.setupDoc(self)
@@ -568,7 +569,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	and self.enabled
 	then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		print(mx, my, widShared.pointInViewport(self, 1, mx, my))
+
 		if widShared.pointInViewport(self, 1, mx, my) then
 			self:setCursorLow(self.skin.cursor_on)
 
@@ -746,21 +747,6 @@ def.skinners = {
 				(not self.wid_drawer) and skin.color_insert or false -- Don't draw caret if drawer is pulled out. It's annoying.
 				-- XXX: color_replace
 			)
-
-			--[=[
-			local chosen = self.menu.items[self.menu.chosen_i]
-			if chosen then
-				love.graphics.setColor(res.color_text)
-
-				-- Chosen item text.
-				love.graphics.setFont(font)
-				local xx = self.vp_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp_w)
-				local yy = math.floor(0.5 + self.vp_y + (self.vp_h - font:getHeight()) / 2)
-				love.graphics.print(chosen.text, xx, yy)
-			end
-			--]=]
-
-
 
 			love.graphics.pop()
 

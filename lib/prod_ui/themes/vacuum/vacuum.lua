@@ -588,6 +588,7 @@ function themeDef.newInstance(scale)
 	inst:loadSkinDef("combo_box1", BASE_PATH .. "skins/combo_box1.lua")
 	inst:loadSkinDef("properties_box1", BASE_PATH .. "skins/properties_box1.lua")
 	inst:loadSkinDef("icon_box1", BASE_PATH .. "skins/icon_box1.lua")
+	inst:loadSkinDef("number_box1", BASE_PATH .. "skins/number_box1.lua")
 
 	return inst
 end
