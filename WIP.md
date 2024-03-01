@@ -54,6 +54,7 @@ A rough list of development tasks for ProdUI. (Subject to change!)
 * `base/map2d` (#9): A box with a crosshair that is repositioned by clicking and dragging. (Use case: colour picker.)
 * (#10) (WIMP compound object) Colour picker.
 * `base/log` (#11): Log (lines of text that roll over)
+* `wimp/number_box` (#12): A single-line text box with controls for incrementing and decrementing numeric values.
 
 
 # Style

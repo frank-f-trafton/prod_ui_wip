@@ -1013,8 +1013,8 @@ of it.
 	-- [=[
 	do
 		local frame_ef
-		local planTextEditTest = require("plan_text_edit_test")
-		frame_ef = planTextEditTest.make(wimp_root)
+		local planTextBoxMulti = require("plan_text_box_multi")
+		frame_ef = planTextBoxMulti.make(wimp_root)
 		--]=]
 
 		-- Test destroying window frame from userUpdate. XXX: move this somewhere more appropriate.
@@ -1033,15 +1033,8 @@ of it.
 
 	-- [[
 	do
-		local planInputBox = require("plan_input_box")
-		local frame_lb = planInputBox.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planPropertiesBox = require("plan_properties_box")
-		local frame_lb = planPropertiesBox.make(wimp_root)
+		local planTextBoxSingle = require("plan_text_box_single")
+		local frame_lb = planTextBoxSingle.make(wimp_root)
 	end
 	--]]
 
@@ -1056,6 +1049,20 @@ of it.
 	do
 		local planComboBox = require("plan_combo_box")
 		local frame_lb = planComboBox.make(wimp_root)
+	end
+	--]]
+
+	-- [[
+	do
+		local planPropertiesBox = require("plan_properties_box")
+		local frame_lb = planPropertiesBox.make(wimp_root)
+	end
+	--]]
+
+	-- [[
+	do
+		local planNumberBox = require("plan_number_box")
+		local frame_lb = planNumberBox.make(wimp_root)
 	end
 	--]]
 
