@@ -276,10 +276,19 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
+local function checkNumber(self)
+
+	local line = self.line_ed.line
+	if not tonumber(line) then
+		return false
+	end
+end
+
+
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
-		lgcInputS.textInputLogic(self, text)
+		lgcInputS.textInputLogic(self, text, checkNumber)
 	end
 end
 

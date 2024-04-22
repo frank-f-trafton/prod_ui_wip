@@ -196,7 +196,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 end
 
 
-function lgcInputS.textInputLogic(self, text)
+function lgcInputS.textInputLogic(self, text, fn_check)
 
 	local line_ed = self.line_ed
 
@@ -209,17 +209,29 @@ function lgcInputS.textInputLogic(self, text)
 		line_ed:resetCaretBlink()
 
 		local old_byte, old_h_byte = line_ed:getCaretOffsets()
+		local old_line = line_ed.line
+		local old_disp_text = line_ed.disp_text
 
-		local suppress_replace = false
+		local written = self:writeText(text, false)
+
+		-- Allow the caller to discard the changed text.
+		if fn_check and fn_check(self) == false then
+			line_ed.line = old_line
+			line_ed.car_byte = old_byte
+			line_ed.h_byte = old_h_byte
+			line_ed.disp_text = old_disp_text
+
+			return
+		end
+
+		self.update_flag = true
+
 		if line_ed.replace_mode then
 			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
 			if line_ed.car_byte < #line_ed.line + 1 then
 				line_ed.input_category = false
 			end
 		end
-
-		local written = self:writeText(text, suppress_replace)
-		self.update_flag = true
 
 		local no_ws = string.find(written, "%S")
 		local entry = hist:getCurrentEntry()
@@ -232,7 +244,7 @@ function lgcInputS.textInputLogic(self, text)
 		end
 
 		if do_advance then
-			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+			editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
 		end
 		editHistS.writeEntry(line_ed, do_advance)
 		line_ed.input_category = no_ws and "typing" or "typing-ws"
