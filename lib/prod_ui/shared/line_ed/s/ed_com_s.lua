@@ -118,4 +118,63 @@ function edComS.displaytoUCharCount(str, byte)
 end
 
 
+local number_ptn = {
+	binary = "^[01]+$",
+	octal = "^[0-7]+$",
+	decimal = "^[0-9%.%-]+$",
+	decimal_exp = "^[%d%.%-%+e]+$",
+	hexadecimal = "^%x+$",
+}
+
+
+--- Check text input for number boxes.
+function edComS.checkNumberInput(str, number_mode)
+
+	assert(number_ptn[number_mode], "invalid number_mode.")
+
+	-- Strip leading and trailing whitespace.
+	str = string.match(str, "^%s*(.-)%s*$")
+
+	return string.find(str, number_ptn[number_mode])
+end
+
+
+--[[
+if true then
+	print("testing checkNumberInput()")
+
+	local test = {
+		{"binary", "0"},
+		{"binary", "1"},
+		{"binary", "01"},
+		{"binary", "10"},
+		{"binary", " 10 "},
+		{"binary", "1 0"}, -- fail
+		{"octal", "-1"}, -- fail
+		{"octal", "0"},
+		{"octal", "1"},
+		{"octal", "2"},
+		{"octal", "3"},
+		{"octal", "4"},
+		{"octal", "5"},
+		{"octal", "6"},
+		{"octal", "7"},
+		{"octal", "8"}, -- fail
+		{"octal", " 01234567 "},
+		{"decimal", "0.0.0"}, -- pass
+		{"decimal", "-----1"}, -- pass
+		{"decimal_exp", "-+1e..."}, -- pass
+		{"hexadecimal", "0123456789abcdefABCDEF"}, -- pass
+		{"hexadecimal", "1.1"}, -- fail
+	}
+
+	for i, tbl in ipairs(test) do
+		print("mode", tbl[1], "input", tbl[2], "test", edComS.checkNumberInput(tbl[2], tbl[1]))
+	end
+
+	os.exit()
+end
+--]]
+
+
 return edComS
