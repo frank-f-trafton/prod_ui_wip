@@ -122,7 +122,6 @@ local number_ptn = {
 	binary = "^[01]+$",
 	octal = "^[0-7]+$",
 	decimal = "^[0-9%.%-]+$",
-	decimal_exp = "^[%d%.%-%+e]+$",
 	hexadecimal = "^%x+$",
 }
 
@@ -163,7 +162,6 @@ if true then
 		{"octal", " 01234567 "},
 		{"decimal", "0.0.0"}, -- pass
 		{"decimal", "-----1"}, -- pass
-		{"decimal_exp", "-+1e..."}, -- pass
 		{"hexadecimal", "0123456789abcdefABCDEF"}, -- pass
 		{"hexadecimal", "1.1"}, -- fail
 	}

@@ -276,10 +276,11 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-local function checkNumber(self)
+local function checkDecimal(self)
 
-	local line = self.line_ed.line
-	if not tonumber(line) then
+	local str = self.line_ed.line
+
+	if string.find(str, "[%s%+e]") or not (str == "." or str == "-" or str == "-." or tonumber(str)) then
 		return false
 	end
 end
@@ -288,7 +289,7 @@ end
 function def:uiCall_textInput(inst, text)
 
 	if self == inst then
-		lgcInputS.textInputLogic(self, text, checkNumber)
+		lgcInputS.textInputLogic(self, text, checkDecimal)
 	end
 end
 

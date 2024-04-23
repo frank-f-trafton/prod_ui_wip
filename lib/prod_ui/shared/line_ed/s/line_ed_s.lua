@@ -545,4 +545,24 @@ function _mt_ed_s:caretAndHighlightToByte(car_byte_n, h_byte_n)
 end
 
 
+--- Copies the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
+-- @return The current internal string, the display text, the caret byte, the highlight byte, and the input category.
+function _mt_ed_s:copyState()
+
+	return self.line, self.disp_text, self.car_byte, self.h_byte, self.input_category
+end
+
+
+--- Sets the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
+-- @param line, disp_text, car_byte, h_byte, input_category The old internal state, as gotten from self:copyState().
+function _mt_ed_s:setState(line, disp_text, car_byte, h_byte, input_category)
+
+	self.line = line
+	self.disp_text = disp_text
+	self.car_byte = car_byte
+	self.h_byte = h_byte
+	self.input_category = input_category
+end
+
+
 return lineEdS
