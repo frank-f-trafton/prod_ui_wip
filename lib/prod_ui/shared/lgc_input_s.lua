@@ -208,19 +208,13 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 
 		line_ed:resetCaretBlink()
 
-		local old_byte, old_h_byte = line_ed:getCaretOffsets()
-		local old_line = line_ed.line
-		local old_disp_text = line_ed.disp_text
+		local old_line, old_disp_text, old_byte, old_h_byte, old_input_category = line_ed:copyState()
 
 		local written = self:writeText(text, false)
 
 		-- Allow the caller to discard the changed text.
 		if fn_check and fn_check(self) == false then
-			line_ed.line = old_line
-			line_ed.car_byte = old_byte
-			line_ed.h_byte = old_h_byte
-			line_ed.disp_text = old_disp_text
-
+			line_ed:setState(old_line, old_disp_text, old_byte, old_h_byte, old_input_category)
 			return
 		end
 
