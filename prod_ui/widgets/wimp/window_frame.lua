@@ -3,22 +3,22 @@
 
 wimp/window_frame: A WIMP-style window frame.
 
-........................  <- Invisible resize sensor
-.+--------------------+.
-.|       Window [o][x]|.  <- Window frame header, integrated drag sensor and control buttons
-.+--------------------+.
-.|File|Edit|View|Help |.  <- Optional menu bar
-.+--------------------+.
-.|+-----------------+^|.  <- Content container, with optional scroll bars
-.||                 |||.
-.||                 |||.
-.||                 |||.
-.||                 |||.
-.|+-----------------+v|.
-.|<=================> |.
-.+--------------------+.
-.|Condition: Green    |.  <- Optional status bar ([XXX 13] TODO)
-.+--------------------+.
+........................  <─ Invisible resize sensor
+.┌────────────────────┐.
+.│       Window [o][x]│.  <─ Window frame header, integrated drag sensor and control buttons
+.├────────────────────┤.
+.│File Edit View Help │.  <─ Optional menu bar
+.├────────────────────┤.
+.│┌─────────────────┐^│.  <─ Content container, with optional scroll bars
+.││                 │║│.
+.││                 │║│.
+.││                 │║│.
+.││                 │║│.
+.│└─────────────────┘v│.
+.│<═════════════════> │.
+.├────────────────────┤.
+.│Condition: Green    │.  <─ Optional status bar ([XXX 13] TODO)
+.└────────────────────┘.
 ........................
 
 Your widgets go into the 'content' container widget. You can get a reference to this widget with:
@@ -77,7 +77,6 @@ end
 
 
 function def:initiateResizeMode(axis_x, axis_y)
-
 	if axis_x == 0 and axis_y == 0 then
 		error("invalid resize mode (0, 0).")
 	end
@@ -114,8 +113,7 @@ end
 
 
 function def:setDefaultBounds()
-
-	-- Allow container to be moved partially out of bounds, but not 
+	-- Allow container to be moved partially out of bounds, but not
 	-- so much that the mouse wouldn't be able to drag it back.
 
 	local header_h = 0
@@ -133,7 +131,6 @@ end
 
 
 function def:setFrameTitle(text)
-
 	local header = self:findTag("frame_header")
 
 	if header then
@@ -145,7 +142,6 @@ end
 --- Controls what happens when the container has both scroll bars active and the user clicks
 -- on the square patch where the bars meet.
 local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
-
 	-- XXX doesn't set the resize cursor. Maybe the core resize action would be better handled by a
 	-- separate resize sensor.
 
@@ -174,7 +170,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -281,7 +276,7 @@ function def:uiCall_create(inst)
 		--content.render = content.renderBlank
 
 		content:setScrollBars(true, true)
-		
+
 		-- Add content to layout sequence
 		content.lc_func = uiLayout.fitRemaining
 
@@ -319,14 +314,12 @@ end
 
 
 function def:_trySettingThimble()
-
 	-- Check modal state before calling.
 
 	local wid_banked = self.banked_thimble
 
 	if wid_banked and wid_banked.can_have_thimble and self:hasThisDescendant(wid_banked) then
 		wid_banked:takeThimble()
-
 	else
 		local content = self:findTag("frame_content")
 		if content and content.can_have_thimble then
@@ -337,7 +330,6 @@ end
 
 
 function def:setModal(target)
-
 	-- You can chain modal frames together, but only one frame may be modal to another frame at a time.
 	if target.ref_modal_next then
 		error("target frame already has a modal reference set (target.ref_modal_next).")
@@ -357,7 +349,6 @@ end
 
 
 function def:clearModal()
-
 	-- Frame-modal state must be popped last-to-first.
 	if self.ref_modal_next then
 		error("this frame still has a modal reference (self.ref_modal_next).")
@@ -380,7 +371,6 @@ end
 
 
 function def:frameCall_close(inst)
-
 	self:remove() -- XXX fortify against calls during update-lock
 
 	-- Stop bubbling
@@ -389,7 +379,6 @@ end
 
 
 function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
-
 	if self.cap_mode == "resize" then
 		return widShared.uiCapEvent_resize_mouseMoved(self, self.cap_axis_x, self.cap_axis_y, x, y, dx, dy, istouch)
 
@@ -400,7 +389,6 @@ end
 
 
 function def:uiCap_mouseReleased(x, y, button, istouch, presses)
-
 	if self.cap_mode == "resize" then
 		return widShared.uiCapEvent_resize_mouseReleased(self, x, y, button, istouch, presses)
 
@@ -417,7 +405,6 @@ end
 
 
 function def:refreshSelected(is_selected)
-
 	local header = self:findTag("frame_header")
 	if header then
 		header.selected = not not is_selected
@@ -426,7 +413,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	-- Frame-modal check
 	if self.ref_modal_next then
 		return
@@ -440,7 +426,6 @@ end
 
 
 function def:uiCall_keyReleased(inst, key, scancode)
-
 	-- Frame-modal check
 	if self.ref_modal_next then
 		return
@@ -454,7 +439,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-
 	-- Frame-modal check
 	if self.ref_modal_next then
 		return
@@ -463,14 +447,12 @@ end
 
 
 function def:bringToFront()
-
 	self:reorder("last")
 	self.parent:sortChildren()
 end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	--print("window-frame pointer-press", self, inst, x, y, button)
 	-- Resize and drag actions are primarily initiated by child sensors.
 
@@ -483,7 +465,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local modal_next = self.ref_modal_next
 	if modal_next then
 		root:setSelectedFrame(modal_next, true)
-
 		return
 	end
 
@@ -523,7 +504,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- (parent should be the WIMP root widget.)
 	local parent = self.parent
 	local wimp_res = self.context.resources.wimp
@@ -581,7 +561,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		-- Clean up any existing frame-modal connection. Note that this function will crash if another frame
 		-- is still blocking this frame.
@@ -622,7 +601,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local slc_body = skin.slc_body
 

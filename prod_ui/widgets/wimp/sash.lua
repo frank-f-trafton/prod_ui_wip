@@ -7,29 +7,29 @@
 Horizontal split:
 
      Widgets
-    |      |
+    │      │
     v      v
-+-------+-------+
-|       |       |
-|   A   |   B   |
-|       |       |
-|       |       |
-+-------+-------+
+┌───────┬───────┐
+│       ┆       │
+│   A   ┆   B   │
+│       ┆       │
+│       ┆       │
+└───────┴───────┘
         ^
-        |
+        │
       Sash
   Drag to resize
 
 
 Vertical split:
 
-+------------+
-|     A      |
-|            |
-+------------+
-|     B      |
-|            |
-+------------+
+┌────────────┐
+│     A      │
+│            │
+├┄┄┄┄┄┄┄┄┄┄┄┄┤
+│     B      │
+│            │
+└────────────┘
 --]]
 
 
@@ -43,7 +43,6 @@ local def = {}
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		-- XXX: SkinDef.
 		self.visible = false
@@ -58,7 +57,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and button == 1
 	and self.context.mouse_pressed_button == button
@@ -72,7 +70,6 @@ end
 
 -- Debug visualizer
 function def:render(os_x, os_y)
-
 	love.graphics.setScissor()
 
 	love.graphics.setColor(1.0, 0.0, 0.0, 1.0)

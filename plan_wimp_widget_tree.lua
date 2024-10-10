@@ -15,7 +15,6 @@ local plan = {}
 
 
 local function refreshWidTextDimensions(self)
-
 	self:refreshText()
 
 	local font = self.font
@@ -26,7 +25,6 @@ end
 
 
 local function text_userUpdate(self, dt)
-
 	local context = self.context
 	local root = self:getTopWidgetInstance()
 
@@ -50,7 +48,6 @@ end
 
 
 function plan.make(root)
-
 	local context = root.context
 
 	local frame_b = root:addChild("wimp/window_frame")
@@ -93,4 +90,3 @@ end
 
 
 return plan
-

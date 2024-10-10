@@ -14,7 +14,6 @@ local plan = {}
 
 
 local function rngChr(n)
-
 	local str = ""
 	for i = 1, n do
 		str = str .. string.char(love.math.random(33, 127))
@@ -25,7 +24,6 @@ end
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
@@ -107,4 +105,3 @@ end
 
 
 return plan
-

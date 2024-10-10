@@ -101,9 +101,9 @@ local idef_sep = {}
 --idef_sep.initInstance = -- ...
 
 idef_sep.render = function(self, client, ox, oy)
-		love.graphics.setLineWidth(1)
-		love.graphics.line(self.x + 0.5, self.y + math.floor(self.h/2) + 0.5, self.w - 1, self.h - 1)
-	end
+	love.graphics.setLineWidth(1)
+	love.graphics.line(self.x + 0.5, self.y + math.floor(self.h/2) + 0.5, self.w - 1, self.h - 1)
+end
 itemOps.initDef(idef_sep)
 
 local idef_text = {}
@@ -192,7 +192,6 @@ end
 
 
 local function newWimpContext()
-
 	local context = uiContext.newContext("prod_ui", 0, 0, love.graphics.getDimensions())
 
 	-- Assign resources ASAP.
@@ -258,7 +257,6 @@ end
 
 
 function love.resize(w, h)
-
 	-- Assertions
 	-- [[
 	_assertNonZero(app_base_w)
@@ -300,7 +298,6 @@ end
 
 
 function love.mousemoved(x, y, dx, dy, istouch)
-
 	x = x / app_scale_x
 	y = y / app_scale_y
 
@@ -312,7 +309,6 @@ end
 
 
 function love.mousepressed(x, y, button, istouch, presses)
-
 	x = x / app_scale_x
 	y = y / app_scale_y
 
@@ -321,7 +317,6 @@ end
 
 
 function love.mousereleased(x, y, button, istouch, presses)
-
 	x = x / app_scale_x
 	y = y / app_scale_y
 
@@ -1327,7 +1322,6 @@ end
 
 
 function love.draw()
-
 	-- NOTE: Any persistent canvas work (draw once, display multiple times) needs to be handled
 	-- in love.update() or before this clause.
 	if not context.window_visible then
@@ -1464,5 +1458,3 @@ function love.draw()
 		love.graphics.pop()
 	end
 end
-
-

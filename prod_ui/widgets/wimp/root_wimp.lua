@@ -16,7 +16,6 @@ local def = {}
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.allow_hover = true
 		self.can_have_thimble = false
@@ -95,7 +94,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	uiLayout.resetLayout(self)
 	uiLayout.applyLayout(self)
 
@@ -110,7 +108,6 @@ end
 -- @param self The root widget.
 -- @param reason_code A string to pass to the wid_ref indicating the context for clearing the menu.
 local function clearPopUp(self, reason_code)
-
 	-- check 'if self.pop_up_menu' before calling.
 
 	-- If mouse was pressing on any part of the pop-up menu chain from the base onward, blank out current_pressed in
@@ -136,7 +133,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	-- User clicked on the root widget (whether directly or because other widgets aren't clickable).
 	if self == inst then
 		if button <= 3 then
@@ -163,7 +159,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				self:setSelectedFrame(wid, true)
 			end
 		end
-
 	-- This is bubbling up from an instance.
 	else
 		-- Auto thimble assignment
@@ -187,7 +182,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		* Or: the currently-pressed widget is not the pop-up menu, and the pop-up menu chain does not contain currently-pressed.
 		--]]
 		if not cur_pres or cur_pres == self or (pop_up ~= cur_pres and not widShared.chainHasThisWidget(pop_up, cur_pres)) then
-
 			-- Hack to discard banked thimble when user clicked on another widget which has just taken the thimble.
 			-- Also do so if we have clicked on nothing or the root widget.
 			if cur_pres == self.context.current_thimble
@@ -204,14 +198,12 @@ end
 
 
 function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
-
 	-- DropState cleanup.
 	self.drop_state = false
 end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	local context = self.context
 
 	-- Check keyPressed hooks.
@@ -224,7 +216,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	-- Run thimble logic.
 	-- Block keyboard-driven thimble actions if the mouse is currently pressed.
 	if not context.current_pressed then
-
 		-- Keypress-driven step events.
 		local wid_cur = context.current_thimble
 		local mods = context.key_mgr.mod
@@ -250,14 +241,12 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					local dest_cur
 					if mods["shift"] then
 						dest_cur = stepHandlers.intergenerationalPrevious(wid_cur)
-
 					else
 						dest_cur = stepHandlers.intergenerationalNext(wid_cur)
 					end
 
 					if dest_cur then
 						dest_cur:takeThimble("widget_in_view")
-
 					else
 						wid_cur:releaseThimble()
 					end
@@ -281,7 +270,6 @@ end
 
 
 function def:uiCall_keyReleased(inst, key, scancode)
-
 	-- Check keyReleased hooks.
 	if self.modal_level == 0 then
 		if widShared.evaluateKeyhooks(self.hooks_key_released, key, scancode) then
@@ -292,7 +280,6 @@ end
 
 
 function def:uiCall_windowResize(w, h)
-
 	-- XXX consider rate-limiting this (either here or in the core) to about 1/10th of a second.
 	-- It fires over and over on Fedora, but pauses the main thread on Windows. Apparently, Wayland
 	-- can fire it multiple times per frame.
@@ -305,7 +292,6 @@ end
 
 
 local function refreshSelectedFrame(self)
-
 	local selected = self.selected_frame
 
 	for i, child in ipairs(self.children) do
@@ -317,7 +303,6 @@ end
 
 
 function def:rootCall_getFrameOrderID()
-
 	self.frame_order_counter = self.frame_order_counter + 1
 	return self.frame_order_counter
 end
@@ -325,7 +310,6 @@ end
 
 -- @param set_new_order When true, assign a new top order_id to the frame. This may be desired when clicking on a frame, and not when ctrl+tabbing through them.
 function def:setSelectedFrame(inst, set_new_order)
-
 	if inst and not self:hasThisChild(inst) then
 		error("instance is not a child of the root widget.")
 	end
@@ -349,7 +333,6 @@ end
 
 
 local function frameSearch(self, dir, v1, v2)
-
 	local candidate = false
 
 	for i, child in ipairs(self.children) do
@@ -361,7 +344,6 @@ local function frameSearch(self, dir, v1, v2)
 			if dir == 1 then
 				v2 = child.order_id
 				candidate = child
-
 			else
 				v1 = child.order_id
 				candidate = child
@@ -377,7 +359,6 @@ end
 -- @param exclude Optionally provide one window frame to exclude from the search. Use this when the
 -- current selected frame is in the process of being destroyed.
 function def:selectTopWindowFrame(exclude)
-
 	for i = #self.children, 1, -1 do
 		local child = self.children[i]
 
@@ -399,7 +380,6 @@ end
 -- @param dir 1 or -1.
 -- @return true if the step was successful, false if no step happened.
 function def:stepSelectedFrame(dir)
-
 	if dir ~= 1 and dir ~= -1 then
 		error("argument #1: invalid direction.")
 	end
@@ -418,7 +398,6 @@ function def:stepSelectedFrame(dir)
 	if current then
 		if dir == 1 then
 			v1 = current.order_id
-
 		else
 			v2 = current.order_id
 		end
@@ -449,8 +428,6 @@ function def:stepSelectedFrame(dir)
 
 	return false
 end
-
-
 
 
 --- Doctor the context 'current_pressed' field. Intended for use with pop-up menus in some special cases.
@@ -501,7 +478,6 @@ end
 
 
 local function thimbleUnbank(self)
-
 	if self.banked_thimble == false then
 		self.context:clearThimble()
 
@@ -529,7 +505,6 @@ end
 --- Some non-pop-up widgets need to bank and restore the thimble, or set the initial banked state before invoking
 --  a pop-up.
 function def:rootCall_bankThimble(inst)
-
 	--print("rootCall_bankThimble", inst, debug.traceback())
 
 	self.banked_thimble = inst
@@ -540,13 +515,11 @@ end
 
 --- Bank the thimble, but only if the current bank is inactive.
 function def:rootCall_tryBankThimble(inst)
-
 	--print("rootCall_tryBankThimble", inst, debug.traceback())
 
 	if self.banked_thimble == nil then
 		self.banked_thimble = inst
 		print("self.banked_thimble", self.banked_thimble)
-
 	else
 		print("(something is already banked.)")
 	end
@@ -572,7 +545,6 @@ end
 --  To opt widgets out of this, set their modal_level to math.huge.
 -- @param self The root widget.
 local function updateModalHoverState(self)
-
 	for i, child in ipairs(self.children) do
 		local modal_level = child.modal_level or 0
 
@@ -587,7 +559,6 @@ end
 
 
 function def:rootCall_setModalFrame(inst)
-
 	if inst.modal_level ~= 0 then
 		-- Troubleshooting:
 		-- * Ensure you are not double-assigning modal state to a frame.
@@ -602,7 +573,6 @@ end
 
 
 function def:rootCall_clearModalFrame(inst)
-
 	if inst.modal_level ~= self.modal_level then
 		-- Troubleshooting:
 		-- * Attempted to clear the modal state of a frame twice?
@@ -618,7 +588,6 @@ end
 
 
 function def:rootCall_setDragAndDropState(inst, drop_state)
-
 	print("hello?")
 	-- XXX: Assertions
 	self.drop_state = drop_state
@@ -626,7 +595,6 @@ end
 
 
 local function resetToolTipState(self)
-
 	self.tool_tip_hover = false
 	self.tool_tip_time = 0.0
 	self.tool_tip.visible = false
@@ -635,7 +603,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	local tool_tip = self.tool_tip
 	local current_hover = self.context.current_hover
 
@@ -664,7 +631,6 @@ function def:uiCall_update(dt)
 			tool_tip:arrange(tip_hover.str_tool_tip, 0, 0)
 			tool_tip.visible = true
 		end
-
 	else
 		tool_tip.alpha = math.min(1, tool_tip.alpha + dt * tool_tip.alpha_dt_mul)
 	end
@@ -672,7 +638,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	-- Bubbled events from children
 	if self ~= inst then
 		--[=[
@@ -692,7 +657,6 @@ end
 
 
 function def:renderLast(os_x, os_y)
-
 	if self.tool_tip.visible then
 		local mx, my = self.context.mouse_x, self.context.mouse_y
 		local xx, yy, ww, hh = self.x, self.y, self.w, self.h

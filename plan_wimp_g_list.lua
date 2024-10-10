@@ -28,7 +28,6 @@ local sort_functions = {
 
 
 local function columnSortGlobals(wid, column)
-
 	local items = wid.menu.items
 
 	table.sort(items, sort_functions[column.id])
@@ -42,7 +41,6 @@ end
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local implTabCell = context:getLua("shared/impl_tab_cell")
@@ -101,7 +99,6 @@ function plan.make(parent)
 
 	local content = frame:findTag("frame_content")
 	if content then
-
 		content.layout_mode = "resize"
 
 		content:setScrollBars(false, false)
@@ -160,4 +157,3 @@ end
 
 
 return plan
-

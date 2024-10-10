@@ -9,7 +9,6 @@ local plan = {}
 
 
 local function getDisplayInfo()
-
 	local count = love.window.getDisplayCount()
 
 	local displays = {}
@@ -25,7 +24,6 @@ end
 
 
 local function makeLabel(content, x, y, w, h, text, label_mode)
-
 	label_mode = label_mode or "single"
 
 	local label = content:addChild("base/label")
@@ -37,7 +35,6 @@ end
 
 
 local function swapItems(menu, index_1, index_2)
-
 	local items = menu.items
 
 	if index_1 < 1 or index_1 > #items or index_2 < 1 or index_2 > #items then
@@ -50,7 +47,6 @@ end
 
 
 local function keyPressed_swapItems(self, key, scancode, isrepeat)
-
 	local mods = self.context.key_mgr.mod
 	local menu = self.menu
 
@@ -71,7 +67,6 @@ end
 
 
 local function transferItem(item, from, to)
-
 	-- XXX: Need to work on a solution for transferring menu items between widgets.
 	-- As written, this won't preserve additional user data tied to the item.
 	local new_item = to:addItem(item.text, nil, item.bijou_id)
@@ -85,7 +80,6 @@ end
 
 
 local function wid_dropped(self, drop_state)
-
 	-- * Only accept drop events with ID "menu" from demo_listbox3a or demo_listbox3b.
 	-- * For this example, do not allow the ListBoxes to drop onto themselves.
 
@@ -107,7 +101,6 @@ end
 
 
 local function makeListBox1(content, x, y)
-
 	-- Apply a SkinDef patch to this ListBox so that we can modify its skin settings.
 	local resources = content.context.resources
 	local patch = resources:newSkinDef("list_box1")
@@ -309,7 +302,6 @@ end
 
 
 local function makeListBox2(content, x, y)
-
 	local list_box = content:addChild("wimp/list_box")
 	list_box:setTag("demo_listbox2")
 
@@ -350,7 +342,6 @@ end
 
 
 local function makeListBox3(content, x, y)
-
 	local lb1 = content:addChild("wimp/list_box")
 	lb1:setTag("demo_listbox3a")
 
@@ -419,7 +410,6 @@ end
 
 
 local function makeListBox4(content, x, y)
-
 	local lb1 = content:addChild("wimp/list_box")
 	lb1:setTag("demo_listbox4a")
 
@@ -462,7 +452,6 @@ local function makeListBox4(content, x, y)
 	b1:setLabel(">")
 
 	b1.wid_buttonAction = function(self)
-
 		local l1 = self:findSiblingTag("demo_listbox4a")
 		local l2 = self:findSiblingTag("demo_listbox4b")
 
@@ -486,7 +475,6 @@ local function makeListBox4(content, x, y)
 	b2:setLabel("<")
 
 	b2.wid_buttonAction = function(self)
-
 		local l1 = self:findSiblingTag("demo_listbox4a")
 		local l2 = self:findSiblingTag("demo_listbox4b")
 
@@ -537,7 +525,6 @@ end
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
@@ -566,4 +553,3 @@ end
 
 
 return plan
-

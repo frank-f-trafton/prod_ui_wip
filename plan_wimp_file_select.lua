@@ -62,7 +62,6 @@ local sort_functions = {
 
 
 local function columnSortFiles(wid, column)
-
 	local items = wid.menu.items
 
 	-- Sort directories + symlinks first, then all other files.
@@ -98,7 +97,6 @@ end
 
 
 local function fileSelectorKeyNav(self, key, scancode, isrepeat)
-
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -172,7 +170,6 @@ end
 
 
 local function setupMenuItem(self, source)
-
 	local item = self:addRow()
 
 	-- Maintain a separation between internal values and what is displayed to the end user.
@@ -238,7 +235,6 @@ end
 
 
 local function menu_trySetPath(self, path)
-
 	-- Assertions
 	-- [[
 	-- XXX TODO
@@ -268,7 +264,6 @@ end
 
 
 local function menu_getDirectoryItems(self, filter_type)
-
 	-- Clear existing menu items.
 	-- XXX might make sense to pool these, and maybe write a custom getDirectoryItemsInfo to reduce table churn.
 	for i = #self.menu.items, 1, -1 do
@@ -296,7 +291,6 @@ end
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
@@ -313,7 +307,6 @@ function plan.make(parent)
 
 	local content = frame:findTag("frame_content")
 	if content then
-
 		content.layout_mode = "resize"
 
 		--content:setScrollBars(false, false)
@@ -374,4 +367,3 @@ end
 
 
 return plan
-

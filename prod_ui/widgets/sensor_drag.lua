@@ -12,7 +12,6 @@ local def = {}
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.r = 0.25
 		self.g = 0.25
@@ -31,7 +30,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	if not self.parent then
 		return
 	end
@@ -45,7 +43,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == 1 and self.context.mouse_pressed_button == button then
 			local frame = self:findAncestorByField("is_frame", true)
@@ -82,14 +79,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 
 		-- Bubble up
-		return nil
 	end
 end
 
 
 -- Debug visualizer
 function def:render(os_x, os_y)
-
 	love.graphics.setScissor()
 
 	love.graphics.setColor(0.8, 0.1, 0.2, 0.8)
