@@ -406,7 +406,7 @@ do
 		local content = frame:findTag("frame_content")
 		content.DEBUG = "dimensions"
 
-		--local inspect = require("lib.test.inspect.inspect")
+		--local inspect = require("lib.test.inspect")
 		--print("inspect frame:", inspect(frame))
 
 		-- Light up the front window.
@@ -1172,7 +1172,7 @@ of it.
 				callback = function(client, item) print("BAR") end,
 				--key_mnemonic = ,
 				--key_shortcut = ,
-			}, 
+			},
 			itemOps.def_separator,
 			{
 				type = "command",
@@ -1205,7 +1205,7 @@ of it.
 				callback = function(client, item) print("BAR") end,
 				key_mnemonic = "a",
 				--key_shortcut = ,
-			}, 
+			},
 		}
 		bar_menu:appendItem("category", {
 			text = "_H_elp",
@@ -1327,7 +1327,7 @@ end
 
 
 function love.draw()
-	
+
 	-- NOTE: Any persistent canvas work (draw once, display multiple times) needs to be handled
 	-- in love.update() or before this clause.
 	if not context.window_visible then
