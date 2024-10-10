@@ -23,7 +23,7 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
+local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -231,7 +231,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		elseif scancode == "v" and mod["ctrl"] then -- XXX config
 			local clipboard_text = love.system.getClipboardText()
 
-			if clipboard_text and utf8Tools.check(clipboard_text) then
+			if clipboard_text and pUTF8.check(clipboard_text) then
 
 				if self.max_code_points then
 					-- Trim text if it exceeds the max code point count.

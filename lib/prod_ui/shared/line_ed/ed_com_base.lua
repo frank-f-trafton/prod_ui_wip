@@ -12,7 +12,6 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
