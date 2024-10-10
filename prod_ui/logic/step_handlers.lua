@@ -5,7 +5,6 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local function _getSiblings(self)
-
 	if not self.parent then
 		error("can't get siblings of top-level (root) widget instances.")
 	end
@@ -15,7 +14,6 @@ end
 
 
 function stepHandlers.linear(self, start, delta, wrap)
-
 	local seq = _getSiblings(self)
 
 	start = start or self:getIndex(seq)
@@ -43,7 +41,6 @@ end
 
 
 function stepHandlers.intergenerationalNext(wid)
-
 	local failsafe_loops = 0
 
 	while true do
@@ -87,7 +84,6 @@ end
 
 
 local function getRightmostDescendant(wid)
-
 	-- https://github.com/airstruck/luigi/blob/gh-pages/luigi/widget.lua#L375
 	while #wid.children > 0 do
 		wid = wid.children[#wid.children]
@@ -98,7 +94,6 @@ end
 
 
 function stepHandlers.intergenerationalPrevious(wid)
-
 	local failsafe_loops = 0
 
 	while true do
@@ -107,7 +102,6 @@ function stepHandlers.intergenerationalPrevious(wid)
 		if not parent or parent.block_step_intergen then
 			failsafe_loops = failsafe_loops + 1
 			wid = getRightmostDescendant(wid)
-
 		else
 			-- If left-sibling exists, try diving to its rightmost descendant.
 			-- If none exists, rise up one generation.
@@ -115,7 +109,6 @@ function stepHandlers.intergenerationalPrevious(wid)
 			local sibling = parent.children[wid_ind - 1]
 			if sibling then
 				wid = getRightmostDescendant(sibling)
-
 			else
 				wid = parent
 			end
@@ -139,7 +132,6 @@ end
 -- @param dy (1, 0 or -1) Search Y direction.
 -- @param wrap When true, search is run twice, the second time from the edge of the container.
 function stepHandlers.proximity(self, px, py, dx, dy, wrap)
-
 	--[[
 		NOTE: The wrapping behavior will break on layouts where children are placed outside
 		of the container's bounding box. (When wrapping, the target XY coordinate is moved
@@ -162,7 +154,6 @@ function stepHandlers.proximity(self, px, py, dx, dy, wrap)
 		if not sibling then
 			if not wrap or looped then
 				break
-
 			else
 				looped = true
 				i = 1
@@ -176,7 +167,6 @@ function stepHandlers.proximity(self, px, py, dx, dy, wrap)
 		end
 
 		if self ~= sibling and sibling.can_have_thimble then
-
 			local sx = math.max(sibling.x, math.min(px, sibling.x + sibling.w))
 			local sy = math.max(sibling.y, math.min(py, sibling.y + sibling.h))
 
@@ -326,4 +316,3 @@ end
 
 
 return stepHandlers
-

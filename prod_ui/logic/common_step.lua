@@ -4,7 +4,7 @@
 	Common "step" button state and functions.
 
 	Based mostly on 'logic/common_scroll.lua'.
-	
+
 	NOTE: commonScroll and commonStepper are not designed to work in the same widget.
 --]]
 
@@ -37,7 +37,6 @@ code_map["cont"]["b2"] = "stepper-b2-cont"
 -- @param horizontal When true, the stepper is aligned horizontally. When false, it's vertical.
 -- @return The stepper table.
 function commonStep.newStepper(is_horizontal)
-
 	is_horizontal = not not is_horizontal
 
 	local self = setmetatable({}, _mt_step)
@@ -88,7 +87,6 @@ end
 
 
 function _mt_step:testPoint(px, py)
-
 	-- (No broad overlap check.)
 
 	-- In the event of overlap, 'more' gets priority over 'less'.
@@ -110,12 +108,10 @@ end
 
 
 local function updateShapesH(self)
-
 	-- Too small: disable buttons
 	if self.w < 2 then
 		self.b1 = false
 		self.b2 = false
-
 	else
 		-- Special case: Compress buttons if they are at least as long as the broad shape.
 		local button_check = (self.b1 and self.button_length or 0) + (self.b2 and self.button_length or 0)
@@ -166,12 +162,10 @@ end
 
 
 local function updateShapesV(self)
-
 	-- Too small: disable buttons
 	if self.h < 2 then
 		self.b1 = false
 		self.b2 = false
-
 	else
 		-- Special case: Compress buttons if they are at least as long as the broad shape.
 		local button_check = (self.b1 and self.button_length or 0) + (self.b2 and self.button_length or 0)
@@ -190,7 +184,6 @@ local function updateShapesV(self)
 				self.b2_w = self.w
 				self.b2_h = shortened_length
 			end
-
 		-- Normal positioning.
 		else
 			local measure = 0
@@ -241,10 +234,8 @@ end
 -- @param is_horizontal True for the step buttons to be aligned horizontally, false for vertical alignment.
 -- @return Nothing.
 function commonStep.setButtons(self, enabled, is_horizontal)
-
 	if not enabled then
 		self.stepper = nil
-
 	else
 		self.stepper = commonStep.newStepper(is_horizontal)
 		local stepper = self.stepper
@@ -266,7 +257,6 @@ end
 -- @param y Mouse Y position in UI space.
 -- @return True if the stepper is considered activated by the click.
 function commonStep.widgetStepperPress(self, x, y)
-
 	-- Don't override existing 'busy' state.
 	if self.press_busy then
 		return
@@ -278,7 +268,7 @@ function commonStep.widgetStepperPress(self, x, y)
 	y = y - ay
 
 	local stepper = self.stepper
-	
+
 	--print("stepper", stepper, "active", stepper.active)
 	if stepper and stepper.active then
 		local test_code = stepper:testPoint(x, y)
@@ -308,7 +298,6 @@ end
 
 --- Plug-in for client's uiCall_pointerPressRepeat(), which implements repeated 'pend' button motions.
 function commonStep.widgetStepperPressRepeat(self, x, y)
-
 	local stepper = self.stepper
 	local busy_code = self.press_busy
 
@@ -336,9 +325,7 @@ end
 
 
 function commonStep.widgetProcessHover(self, mx, my)
-
 	local skip = false
-
 	local stepper = self.stepper
 
 	if stepper then
@@ -351,8 +338,8 @@ end
 -- @param self The client widget.
 -- @return Nothing.
 function commonStep.widgetClearHover(self)
-
 	local stepper = self.stepper
+
 	if stepper then
 		stepper.hover = false
 	end
@@ -363,8 +350,8 @@ end
 -- @param self The client widget.
 -- @return Nothing.
 function commonStep.widgetClearPress(self)
-
 	local stepper = self.stepper
+
 	if stepper then
 		stepper.press = false
 	end
@@ -378,9 +365,7 @@ end
 -- @param dt The frame delta time, passed to callbacks if one of the stepper buttons triggers in continuous mode.
 -- @return true if an action was taken, false if not.
 function commonStep.widgetDragLogic(self, mx, my, dt)
-
 	local mode = self.press_busy
-
 	local stepper = self.stepper
 
 	if mode and stepper and stepper.active then
@@ -401,7 +386,6 @@ end
 -- @param self The client widget, with 'self.stepper' populated.
 -- @param far_end If true, hori-steppers go to the bottom and vert-steppers go to the right. If false, hori-steppers go to the top, vert-steppers to the left.
 function commonStep.arrangeStepper(self, far_end)
-
 	local stepper = self.stepper
 	if not stepper then
 		return
@@ -414,7 +398,6 @@ function commonStep.arrangeStepper(self, far_end)
 		stepper.h = stepper.breadth
 		stepper.x = 0
 		stepper.y = (far_end) and stepper.h - stepper.breadth or 0
-
 	else
 		stepper.w = stepper.breadth
 		stepper.h = self.h

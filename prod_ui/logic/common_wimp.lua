@@ -13,13 +13,11 @@ end
 -- @param self Any widget belonging to the current window frame, or the window frame itself.
 -- @return Nothing.
 function commonWimp.closeWindowFrame(self)
- 
 	local wid = self
 	while wid do
 		if wid.is_frame then
 			if not self.context:isLocked() then
 				wid:remove()
-
 			else
 				self.context:appendAsyncAction(wid, commonWimp.async_widget_remove, false)
 			end
@@ -34,7 +32,6 @@ end
 
 --- Makes a generic context menu and registers it with the WIMP root.
 function commonWimp.makePopUpMenu(self, menu_def, x, y)
-
 	local root = self:getTopWidgetInstance()
 
 	local pop_up = root:addChild("wimp/menu_pop")
@@ -71,7 +68,6 @@ end
 --- Registers a widget as a pop-up in the WIMP root. The caller needs to create and initialize the widget
 -- before calling.
 function commonWimp.assignPopUp(self, pop_up)
-
 	local root = self:getTopWidgetInstance()
 
 	pop_up.wid_ref = self
@@ -82,7 +78,6 @@ end
 
 -- Destroy the pop-up menu if it exists in reference to this widget. If applicable, restore banked thimble state.
 function commonWimp.checkDestroyPopUp(self)
-
 	local root = self:getTopWidgetInstance()
 
 	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then

@@ -1,4 +1,3 @@
-
 --[[
 	Provides the basic guts of a 1D menu.
 
@@ -42,14 +41,12 @@ _mt_menu.items_per_row = 1
 
 
 local function sign(n)
-
 	-- Treats zero as positive.
 	return n < 0 and -1 or 1
 end
 
 
 local function clampIndex(self, pos)
-
 	-- Assumes the menu has at least one item, and does not account for no selection (index 0).
 	-- Check that the index is acceptable after calling.
 
@@ -64,7 +61,6 @@ end
 --- Makes a new menu.
 -- @return The menu table.
 function structMenu.new()
-
 	local self = {}
 
 	self.items = {}
@@ -87,7 +83,6 @@ end
 --- Check if the menu has any items that can be selected.
 -- @return index and table of the first selectable item, or false if there are no selectable items.
 function _mt_menu:hasAnySelectableItems()
-
 	local items = self.items
 	for i = 1, #items do
 		if items[i].selectable then
@@ -103,7 +98,6 @@ end
 -- @param index The item index to check.
 -- @param return true if selectable, false plus string if not.
 function _mt_menu:canSelect(index)
-
 	-- Permit deselection
 	if index == 0 then
 		return true
@@ -126,7 +120,6 @@ end
 -- @param dir The desired direction to move in, if the current index is not selectable. Can be 1 or -1.
 -- @return The most suitable selectable item index, or nil if there were no selectable item.
 function _mt_menu:findSelectableLanding(i, dir)
-
 	local item
 	repeat
 		item = self.items[i]
@@ -141,7 +134,6 @@ end
 
 
 function _mt_menu:getDefaultSelection()
-
 	if not self.default_deselect then
 		local first_sel_i, first_sel = false, false
 
@@ -174,7 +166,6 @@ end
 -- @param id ("index") The index key.
 -- @return The selected item, or nil if there is no current selection.
 function _mt_menu:getSelectedItem(id)
-
 	id = id or "index"
 
 	return self.items[self[id]]
@@ -183,7 +174,6 @@ end
 
 --- Get a selection from a position.
 function _mt_menu:getSelectionStep(pos, delta, wrap)
-
 	delta = math.floor(delta + 0.5)
 
 	-- Starting from no selection:
@@ -194,7 +184,6 @@ function _mt_menu:getSelectionStep(pos, delta, wrap)
 		if wrap then
 			if delta < 0 then
 				pos = self:findSelectableLanding(#self.items, -1) or 0
-
 			else
 				pos = self:findSelectableLanding(1, 1) or 0
 			end
@@ -204,7 +193,6 @@ function _mt_menu:getSelectionStep(pos, delta, wrap)
 		else
 			pos = self:findSelectableLanding(1, 1) or 0
 		end
-
 	-- Normal selection handling:
 	else
 		pos = clampIndex(self, pos)
@@ -258,7 +246,6 @@ end
 -- @param wrap If true, when no matches are found, run the loop again starting from the edges that were blocked off.
 -- @return Closest item index and table, or nil if no match was found.
 function _mt_menu:getNearest2D(pos, x, y, dx, dy, wrap) -- XXX: Untested
-
 	local items = self.items
 	local item_current = items[pos]
 
@@ -315,7 +302,6 @@ end
 -- @param item_t The item table. Must be populated in the menu, or else the function will raise a Lua error.
 -- @return The item index.
 function _mt_menu:getItemIndex(item_t)
-
 	for i, item in ipairs(self.items) do
 		if item == item_t then
 			return i
@@ -327,7 +313,6 @@ end
 
 
 function _mt_menu:hasItem(item_t)
-
 	for i, item in ipairs(self.items) do
 		if item == item_t then
 			return i
@@ -342,7 +327,6 @@ end
 -- @param index The index of the menu item to select.
 -- @param id ("index") Specify an alternative table key, if applicable.
 function _mt_menu:setSelectedIndex(index, id)
-
 	id = id or "index"
 
 	local ok, err = self:canSelect(index)
@@ -356,7 +340,6 @@ end
 
 --- Sets the current menu selection to the default.
 function _mt_menu:setDefaultSelection(id)
-
 	local i, tbl = self:getDefaultSelection()
 	self:setSelectedIndex(i, id)
 end
@@ -367,7 +350,6 @@ end
 -- @param wrap (boolean) When true, wrap around the list when at the first or last selectable item.
 -- @param id ("index") Key ID for the index. Specify when using additional index variables.
 function _mt_menu:setSelectionStep(delta, wrap, id)
-
 	id = id or "index"
 
 	self[id] = self:getSelectionStep(self[id], delta, wrap)
@@ -375,7 +357,6 @@ end
 
 
 function _mt_menu:setFirstSelectableIndex(id)
-
 	id = id or "index"
 
 	self[id] = self:getFirstSelectableIndex()
@@ -383,7 +364,6 @@ end
 
 
 function _mt_menu:setLastSelectableIndex(id)
-
 	id = id or "index"
 
 	self[id] = self:getLastSelectableIndex()
@@ -392,7 +372,6 @@ end
 
 --- Move to the previous selectable menu item, wrapping depending on the menu config.
 function _mt_menu:setPrev(n, wrap, id)
-
 	id = id or "index"
 
 	n = n and math.max(math.floor(n), 1) or 1
@@ -402,7 +381,6 @@ end
 
 --- Move to the next selectable menu item, wrapping depending on the menu config.
 function _mt_menu:setNext(n, wrap, id)
-
 	id = id or "index"
 
 	n = n and math.max(math.floor(n), 1) or 1

@@ -28,7 +28,6 @@ end
 
 
 local function setupLineState()
-
 	love.graphics.setLineWidth(1)
 	love.graphics.setLineStyle("smooth")
 	love.graphics.setLineJoin("miter")
@@ -42,7 +41,6 @@ end
 -- the viewport index will be used instead (see `vp_colors`). `r` can be a table of four numbers
 -- ({R, G, B, A}).
 function widDebug.debugDrawViewport(self, v, r, g, b, a)
-
 	love.graphics.push("all")
 
 	if type(r) == "table" then

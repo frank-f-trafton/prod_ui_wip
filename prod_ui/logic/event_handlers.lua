@@ -12,7 +12,6 @@ local hoverLogic = require(REQ_PATH .. "hover_logic")
 
 
 function eventHandlers.mousemoved(context, x, y, dx, dy, istouch)
-
 	-- Update mouse position
 	context.mouse_x = x
 	context.mouse_y = y

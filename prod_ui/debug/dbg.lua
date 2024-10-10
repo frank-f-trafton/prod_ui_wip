@@ -11,7 +11,6 @@ local dbg = {}
 -- @param _tabs (Internal use, leave blank when calling) How many tabs to indent.
 -- @return The finalized string, and indentation level (internal use).
 function dbg.widStringHierarchy(wid, thimble, _str, _tabs)
-
 	_str = _str or ""
 	_tabs = _tabs or 0
 
@@ -31,7 +30,6 @@ end
 
 
 function dbg.hexString(str)
-
 	local out = ""
 	for i = 1, #str do
 		local byte = string.byte(str, i)

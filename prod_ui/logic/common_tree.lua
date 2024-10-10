@@ -9,7 +9,6 @@ _mt_tree.__index = _mt_tree
 
 
 local function _getNodeIndex(self, parent)
-
 	local nodes = parent.nodes
 	local node_i
 
@@ -24,7 +23,6 @@ end
 
 
 local function getRightmostNode(node)
-
 	while node.expanded and #node.nodes > 0 do
 		node = node.nodes[#node.nodes]
 	end
@@ -34,7 +32,6 @@ end
 
 
 function commonTree.new()
-
 	local self = setmetatable({}, _mt_tree)
 
 	self.parent = false
@@ -50,7 +47,6 @@ end
 
 
 function _mt_tree:addNode(pos)
-
 	pos = pos or #self.nodes + 1
 
 	local node = commonTree.new()
@@ -63,7 +59,6 @@ end
 
 
 function _mt_tree:removeNode(pos)
-
 	local removed = table.remove(self.nodes, pos)
 	removed.parent = nil
 
@@ -72,7 +67,6 @@ end
 
 
 function _mt_tree:getNodeIndex()
-
 	local parent = self.parent
 	if not parent then
 		error("the tree root does not have a node index.")
@@ -89,14 +83,12 @@ end
 
 
 function _mt_tree:getNextNode()
-
 	local parent = self.parent
 
 	-- Root node: return first child node or nil.
 	if not parent then
 		if self.expanded then
 			return self.nodes[1] -- or nil
-
 		else
 			return
 		end
@@ -129,7 +121,6 @@ end
 
 
 function _mt_tree:getPreviousNode()
-
 	local parent = self.parent
 
 	-- Root node: return the last selectable node or nil.
@@ -144,11 +135,9 @@ function _mt_tree:getPreviousNode()
 	if node_i == 1 then
 		if parent.parent then
 			return parent
-
 		else
 			return
 		end
-
 	-- Select the rightmost descendant of the left sibling, or just the left sibling
 	-- if it is unexpanded or has no nodes.
 	else
@@ -171,7 +160,6 @@ end
 
 
 function _mt_tree:getNodeDepth()
-
 	local depth = 0
 	local node = self
 

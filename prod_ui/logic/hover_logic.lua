@@ -19,7 +19,6 @@ local intersect = require(REQ_PATH .. "intersect")
 -- @param y2 Bottom clipping boundary.
 -- @return A widget that the mouse is hovering over, or nil if no match was found.
 local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
-
 	if widget.allow_hover then
 		-- Evaluate children first, front-to-back.
 		if widget.allow_hover == true and #widget.children > 0 then
@@ -63,7 +62,6 @@ end
 
 --- Check for the mouse pressing on a widget.
 local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, istouch, presses)
-
 	--[[
 	Press detection used to piggy-back off of the hover code: only the current-hovered widget could be
 	pressed. It's now split into a separate function and called for every press. While not as efficient,
@@ -76,7 +74,6 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 	if widget.allow_hover then
 		-- Evaluate children first, front-to-back.
 		if widget.allow_hover == true and #widget.children > 0 then
-
 			local xx1, yy1, xx2, yy2 = x1, y1, x2, y2
 
 			if widget.clip_hover == true then
@@ -114,7 +111,6 @@ end
 
 
 function hoverLogic.checkPressed(context, button, istouch, presses)
-
 	if context.tree then
 		return _pressLoop(context.mouse_x, context.mouse_y, 0, 0, context.tree, -2^53, -2^53, 2^53, 2^53, button, istouch, presses)
 	end
@@ -122,7 +118,6 @@ end
 
 
 function hoverLogic.update(context, dx, dy)
-
 	if context.tree then
 		-- Hover state
 
@@ -161,10 +156,8 @@ function hoverLogic.update(context, dx, dy)
 				end
 				wid:bubbleStatement("uiCall_pointerDragDestMove", context.current_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
 			end
-
 		-- No mouse buttons are active: update hover state.
 		else
-
 			-- Must have both window and mouse focus for hover state. If either is not true,
 			-- remove any existing hover.
 			if not (context.window_focus and context.mouse_focus) then -- XXX needs testing across different operating systems.
@@ -174,7 +167,6 @@ function hoverLogic.update(context, dx, dy)
 				if old_hover then
 					old_hover:bubbleStatement("uiCall_pointerHoverOff", old_hover, context.mouse_x, context.mouse_y, dx, dy)
 				end
-
 			else
 				local old_hover = context.current_hover
 				wid = _hoverLoop(context.mouse_x, context.mouse_y, 0, 0, context.tree, -2^53, -2^53, 2^53, 2^53)
