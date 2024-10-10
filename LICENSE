@@ -25,7 +25,7 @@ SOFTWARE.
 
 -------------------------------------------------------------------------------
 /lib/nativefs/:
-/lib/prod_ui/themes/build/lib/nativefs/:
+/prod_ui/themes/build/lib/nativefs/:
 
 Copyright 2020 megagrump@pm.me
 
@@ -38,7 +38,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 -------------------------------------------------------------------------------
 /lib/nativefs/test/luaunit.lua:
-/lib/prod_ui/themes/build/lib/nativefs/test/luaunit.lua:
+/prod_ui/themes/build/lib/nativefs/test/luaunit.lua:
 
 This software is distributed under the BSD License.
 
@@ -86,7 +86,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-(Font) /lib/prod_ui/themes/vacuum/fonts/NotoSans-Regular.ttf:
+(Font) /prod_ui/themes/vacuum/fonts/NotoSans-Regular.ttf:
 
 Copyright 2015-2021 Google LLC. All Rights Reserved.
 
@@ -184,7 +184,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-(Font) /lib/prod_ui/themes/vacuum/fonts/NotoSansSymbols-Regular.ttf:
+(Font) prod_ui/themes/vacuum/fonts/NotoSansSymbols-Regular.ttf:
 
 Copyright 2012 Google Inc. All Rights Reserved.
 
@@ -282,7 +282,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-(Font) /lib/prod_ui/themes/vacuum/fonts/NotoSansSymbols2-Regular.ttf:
+(Font) prod_ui/themes/vacuum/fonts/NotoSansSymbols2-Regular.ttf:
 
 Copyright 2012 Google Inc. All Rights Reserved.
 
@@ -380,7 +380,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-lib/prod_ui/themes/build/lib/atlas_b.lua:
+prod_ui/themes/build/lib/atlas_b.lua:
 
 Copyright (c) 2023 RBTS
 

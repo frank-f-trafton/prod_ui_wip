@@ -1,8 +1,8 @@
 
 -- ProdUI
-local commonMenu = require("lib.prod_ui.logic.common_menu")
-local uiLayout = require("lib.prod_ui.ui_layout")
-local widShared = require("lib.prod_ui.logic.wid_shared")
+local commonMenu = require("prod_ui.logic.common_menu")
+local uiLayout = require("prod_ui.ui_layout")
+local widShared = require("prod_ui.logic.wid_shared")
 
 
 local plan = {}
