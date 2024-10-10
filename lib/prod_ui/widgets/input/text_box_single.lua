@@ -31,7 +31,6 @@ local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local utf8Tools = require(context.conf.prod_ui_req .. "lib.utf8_tools")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 

@@ -18,10 +18,10 @@ local eventHandlers = require(REQ_PATH .. "logic.event_handlers")
 local hoverLogic = require(REQ_PATH .. "logic.hover_logic")
 local intersect = require(REQ_PATH .. "logic.intersect")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
+local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
 local uiWidget = require(REQ_PATH .. "ui_widget")
-local utf8Tools = require(REQ_PATH .. "lib.utf8_tools")
 
 
 -- Error functions
@@ -546,8 +546,9 @@ function _mt_context:love_textinput(text)
 		return
 
 	-- In rare cases, a user's system or virtual keyboard may pass in badly-encoded strings as text input.
-	-- NOTE: utf8.len() doesn't reject surrogate pairs, which will cause an error with LÖVE's UTF-8 conversion code.
-	elseif not utf8Tools.check(text) then
+	-- NOTE: The Lua 5.3-derived utf8.len() doesn't reject surrogate pairs, which will cause an error with
+	-- LÖVE's UTF-8 conversion code.
+	elseif not pUTF8.check(text) then
 		return
 	end
 
@@ -625,7 +626,7 @@ function _mt_context:love_textedited(text, start, length)
 		return
 	end
 
-	
+
 	-- XXX not handled yet
 end
 
@@ -862,7 +863,7 @@ function _mt_context:love_joystickremoved(joystick) -- XXX untested
 
 	if self.tree then
 		self.tree:runStatement("uiCall_joystickRemoved", joystick) -- no ancestors
-	end	
+	end
 end
 
 
@@ -1019,7 +1020,7 @@ function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	-- Assertions
 	-- [[
 	if type(chunk) ~= "function" then _errBadType(1, chunk, "function")
-	elseif id == nil or id ~= id then _errBadType(2, id, "not nil, not NaN") end	
+	elseif id == nil or id ~= id then _errBadType(2, id, "not nil, not NaN") end
 	--]]
 
 	if self.widget_defs[id] then
@@ -1121,7 +1122,7 @@ local function _unloadFindWidgetByID(wid, id)
 		end
 	end
 
-	return nil	
+	return nil
 end
 
 
@@ -1179,7 +1180,7 @@ function _mt_context:addWidget(id, init_t, pos)
 
 	-- Assertions
 	-- [[
-	if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN") 
+	if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN")
 	elseif init_t and type(init_t) ~= "table" then _errBadType(2, init_t, "nil or table")
 	elseif pos and type(pos) ~= "number" then _errBadType(3, pos, "nil or number") end
 	--]]

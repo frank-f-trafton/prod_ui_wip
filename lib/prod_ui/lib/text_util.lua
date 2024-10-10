@@ -13,7 +13,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local utf8Tools = require(REQ_PATH .. "utf8_tools")
+local pUTF8 = require(REQ_PATH .. "pile_utf8")
 
 
 textUtil.proxy_code_points = {
@@ -470,7 +470,7 @@ end
 function textUtil.sanitize(str, bad_byte_policy)
 
 	-- Input is good: nothing to do.
-	if utf8Tools.check(str) then
+	if pUTF8.check(str) then
 		return str
 
 	else
@@ -478,7 +478,7 @@ function textUtil.sanitize(str, bad_byte_policy)
 		local byte_n = 1
 
 		while byte_n <= #str do
-			local ok, bad_byte, err_str = utf8Tools.check(str, byte_n)
+			local ok, bad_byte, err_str = pUTF8.check(str, byte_n)
 
 			if ok then
 				str_out = str_out .. string.sub(str, byte_n)
