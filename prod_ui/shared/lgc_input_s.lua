@@ -29,7 +29,6 @@ local love_major, love_minor = love.getVersion()
 
 -- Widget def configuration.
 function lgcInputS.setupDef(def)
-
 	-- Attach editing methods to def.
 	for k, v in pairs(editMethodsS) do
 		def[k] = v
@@ -38,7 +37,6 @@ end
 
 
 function lgcInputS.setupInstance(self)
-
 	-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
 	self.caret_x = 0
 	self.caret_y = 0
@@ -74,7 +72,6 @@ end
 
 
 function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
-
 	local line_ed = self.line_ed
 
 	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
@@ -123,7 +120,6 @@ end
 
 -- @return true if event propagation should halt.
 function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
-
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
@@ -197,7 +193,6 @@ end
 
 
 function lgcInputS.textInputLogic(self, text, fn_check)
-
 	local line_ed = self.line_ed
 
 	print("textInputLogic", "allow_input", line_ed.allow_input)
@@ -252,7 +247,6 @@ end
 -- @param mouse_x, mouse_y Mouse position relative to widget top-left.
 -- @return true if event propagation should be halted.
 function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
-
 	local line_ed = self.line_ed
 	local context = self.context
 
@@ -321,7 +315,6 @@ end
 
 -- Used in uiCall_update(). Before calling, check that text-drag state is active.
 function lgcInputS.mouseDragLogic(self)
-
 	local context = self.context
 	local line_ed = self.line_ed
 
@@ -358,7 +351,6 @@ end
 
 
 function lgcInputS.executeRemoteAction(self, item_t)
-
 	local ok, update_viewport, update_caret, write_history = self:executeBoundAction(item_t.bound_func)
 	if ok then
 		self.update_flag = true
@@ -370,7 +362,6 @@ end
 
 
 function lgcInputS.method_updateDocumentDimensions(self)
-
 	local line_ed = self.line_ed
 	local font = line_ed.font
 
@@ -383,7 +374,6 @@ end
 
 --- Call after changing alignment.
 function lgcInputS.method_updateAlignOffset(self)
-
 	local align = self.line_ed.align
 
 	if align == "left" then
@@ -400,7 +390,6 @@ end
 
 -- Update the widget's caret shape and appearance.
 function lgcInputS.updateCaretShape(self)
-
 	local line_ed = self.line_ed
 
 	self.caret_x = line_ed.caret_box_x
@@ -410,7 +399,6 @@ function lgcInputS.updateCaretShape(self)
 
 	if line_ed.replace_mode then
 		self.caret_fill = "line"
-
 	else
 		self.caret_fill = "fill"
 		self.caret_w = line_ed.caret_line_width
@@ -425,7 +413,6 @@ end
 -- @param font Font to use when printing the main text (required, even if printing is disabled by color_text being false).
 -- @param color_highlight Table of colors for the text highlight, or nil/false to not draw the highlight.
 function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
-
 	-- Call after setting up the text area scissor box, within `love.graphics.push("all")` and `pop()`.
 
 	local line_ed = self.line_ed
@@ -478,35 +465,30 @@ end
 
 
 function lgcInputS.configItem_undo(item, client)
-
 	item.selectable = true
 	item.actionable = (client.line_ed.hist.pos > 1)
 end
 
 
 function lgcInputS.configItem_redo(item, client)
-
 	item.selectable = true
 	item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
 end
 
 
 function lgcInputS.configItem_cutCopyDelete(item, client)
-
 	item.selectable = true
 	item.actionable = client.line_ed:isHighlighted()
 end
 
 
 function lgcInputS.configItem_paste(item, client)
-
 	item.selectable = true
 	item.actionable = true
 end
 
 
 function lgcInputS.configItem_selectAll(item, client)
-
 	item.selectable = true
 	item.actionable = (#client.line_ed.line > 0)
 end

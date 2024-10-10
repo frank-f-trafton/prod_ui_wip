@@ -12,7 +12,6 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
 
 function implScrollBar1.draw(t_data, scr, x, y)
-
 	local shared = t_data.shared
 
 	local tbl_idle = shared.idle

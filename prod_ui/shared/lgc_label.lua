@@ -49,7 +49,6 @@ local modes = {["single"] = true, ["single-ul"] = true, ["multi"] = true}
 
 
 local function _assertLabelMode(n, mode)
-
 	if not modes[mode] then
 		error("argument #" .. n .. ": invalid label mode: " .. tostring(mode), 2)
 	end
@@ -57,7 +56,6 @@ end
 
 
 local function multiLineWrap(self, font)
-
 	local _, lines = font:getWrap(self.label, self.vp_w)
 	self.label_h = math.floor(0.5 + font:getHeight() * font:getLineHeight() * #lines)
 	self.label_w_old = self.vp_w
@@ -68,7 +66,6 @@ end
 -- @param self The widget to update.
 -- @param mode ("single") The label mode to use.
 function lgcLabel.setup(self, mode)
-
 	mode = mode or "single"
 
 	-- Assertions
@@ -89,7 +86,6 @@ function lgcLabel.setup(self, mode)
 
 		-- Height of the wrapped text. Used for vertical centering.
 		self.label_h = 0
-
 	else
 		-- These settings are not used in the other modes.
 		self.label_w_old = nil
@@ -103,7 +99,6 @@ function lgcLabel.setup(self, mode)
 		self.label_ul_ox = 0
 		self.label_ul_w = 0
 		-- Underline height is handled through theming.
-
 	else
 		-- These settings are not used in the other modes.
 		self.label_ul_x = nil
@@ -116,7 +111,6 @@ end
 --- Removes all label fields from the widget.
 -- @param self The widget to modify.
 function lgcLabel.remove(self)
-
 	self.label_mode = nil
 	self.label = nil
 	self.label_w_old = nil
@@ -128,7 +122,6 @@ end
 
 
 local function _calculateUnderlineOffset(self, font)
-
 	-- Valid only for "single-ul" mode.
 	local align_h = self.skin.label_align_h
 	if align_h == "center" then
@@ -148,7 +141,6 @@ end
 --@param text The text to assign to the label.
 --@param mode (current) Optionally change the label mode.
 function lgcLabel.widSetLabel(self, text, mode)
-
 	mode = mode or self.label_mode
 
 	-- Assertions
@@ -182,7 +174,6 @@ end
 
 --- Update a label during widget reshaping, if necessary.
 function lgcLabel.reshapeLabel(self)
-
 	if self.label_mode == "single-ul" then
 		_calculateUnderlineOffset(self, self.skin.label_style.font)
 
@@ -206,7 +197,6 @@ end
 -- @param ox Scissor X offset.
 -- @param oy Scissor Y offset.
 function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox, oy)
-
 	love.graphics.push("all")
 
 	local label_style = skin.label_style
@@ -260,4 +250,3 @@ end
 
 
 return lgcLabel
-

@@ -17,7 +17,6 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
 function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, ox, oy)
-
 	--[[
 	Expects: self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h
 	--]]
@@ -55,4 +54,3 @@ end
 
 
 return lgcGraphic
-
