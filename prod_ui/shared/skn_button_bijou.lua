@@ -26,7 +26,6 @@ return {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = uiTheme.pickButtonResource(self, skin)
 			local tex_quad = self.checked and res.quad_checked or res.quad_unchecked

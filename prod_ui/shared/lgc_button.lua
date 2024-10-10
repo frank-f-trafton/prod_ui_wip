@@ -38,7 +38,6 @@ lgcButton.wid_buttonAction3 = uiShared.dummyFunc
 
 --- Enables or disables a button.
 function lgcButton.setEnabled(self, enabled)
-
 	self.enabled = not not enabled
 
 	if not self.enabled then
@@ -50,7 +49,6 @@ end
 
 --- Enables or disables a sticky button.
 function lgcButton.setEnabledSticky(self, enabled)
-
 	self.enabled = not not enabled
 
 	if not self.enabled then
@@ -74,13 +72,11 @@ end
 
 --- Turns off a radio button, plus all sibling radio buttons with the same group ID.
 function lgcButton.uncheckAllRadioSiblings(self)
-
 	local parent = self.parent
 
 	-- No parent (this is the root, or the widget data is corrupt): just uncheck self.
 	if not parent then
 		self.checked = false
-
 	else
 		for i, sibling in ipairs(parent.children) do
 			if sibling.is_radio_button and sibling.radio_group == self.radio_group then
@@ -93,7 +89,6 @@ end
 
 --- Sets or unsets a radio button. All radio button siblings with the same group ID will be turned off as a side effect.
 function lgcButton.setCheckedRadio(self, checked)
-
 	lgcButton.uncheckAllRadioSiblings(self)
 	self.checked = not not checked
 end
@@ -105,7 +100,6 @@ end
 -- @param value The value to check.
 -- @return The widget which is now checked, or nil if no match was found.
 function lgcButton.setCheckedRadioConditional(self, key, value)
-
 	local parent = self:getParent()
 	local siblings = parent.children
 
@@ -125,7 +119,6 @@ end
 
 --- Mouse callback for when the cursor overlaps a widget.
 function lgcButton.uiCall_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -137,7 +130,6 @@ end
 
 --- Mouse callback for when the cursor overlaps a sticky button.
 function lgcButton.uiCall_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			if not self.pressed then
@@ -151,7 +143,6 @@ end
 
 --- Mouse callback for when the cursor leaves a widget.
 function lgcButton.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -163,7 +154,6 @@ end
 
 --- Mouse callback for when the cursor leaves a sticky button.
 function lgcButton.uiCall_pointerHoverOffSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -175,7 +165,6 @@ end
 
 --- Mouse callback for pressing normal buttons (whose primary actions don't activate just on click-down).
 function lgcButton.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -203,7 +192,6 @@ end
 
 --- Mouse callback for pressing buttons which activate upon first click-down.
 function lgcButton.uiCall_pointerPressActivate(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -234,7 +222,6 @@ end
 
 --- Mouse callback for pressing buttons which activate upon double-click.
 function lgcButton.uiCall_pointerPressDoubleClick(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -265,7 +252,6 @@ end
 
 --- Mouse callback for pressing buttons which activate repeatedly while held down.
 function lgcButton.uiCall_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -283,7 +269,6 @@ end
 
 --- Mouse callback for pressing buttons which activate upon first click-down, but which do not have a repeat-held action.
 function lgcButton.uiCall_pointerPressSticky(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -322,7 +307,6 @@ end
 
 --- Mouse callback for releasing buttons which activate upon click-up (while hovered over the widget).
 function lgcButton.uiCall_pointerReleaseActivate(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -338,7 +322,6 @@ end
 
 --- Mouse callback for releasing buttons which do not activate upon click-up.
 function lgcButton.uiCall_pointerRelease(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -353,7 +336,6 @@ end
 
 --- Mouse callback for releasing checkboxes, which toggle and activate upon click-up.
 function lgcButton.uiCall_pointerReleaseCheck(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -370,7 +352,6 @@ end
 
 --- Mouse callback for releasing radio buttons. Upon click-up, they turn on, while turning off all siblings with the same group ID.
 function lgcButton.uiCall_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -390,7 +371,6 @@ end
 
 --- Mouse callback for releasing normal buttons upon click-up (in general, regardless of the cursor location).
 function lgcButton.uiCall_pointerUnpress(self, inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -406,7 +386,6 @@ end
 
 --- Callback for primary thimble action (ie user presses Enter) on normal buttons.
 function lgcButton.uiCall_thimbleAction(self, inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			self:wid_buttonAction()
@@ -417,7 +396,6 @@ end
 
 --- Callback for secondary thimble action (ie user presses "application" KeyConstant) on normal buttons.
 function lgcButton.uiCall_thimbleAction2(self, inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			self:wid_buttonAction2()
@@ -431,7 +409,6 @@ end
 
 --- Callback for primary thimble action (ie user presses Enter) on checkboxes.
 function lgcButton.uiCall_thimbleActionCheck(self, inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			self:setChecked(not self.checked)
@@ -443,7 +420,6 @@ end
 
 --- Callback for primary thimble action (ie user presses Enter) on radio buttons.
 function lgcButton.uiCall_thimbleActionRadio(self, inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			self:setChecked(true)
@@ -455,7 +431,6 @@ end
 
 --- Callback for primary thimble action (ie user presses Enter) on sticky buttons.
 function lgcButton.uiCall_thimbleActionSticky(self, inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			if not self.pressed then
@@ -468,4 +443,3 @@ end
 
 
 return lgcButton
-

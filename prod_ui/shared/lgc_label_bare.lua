@@ -25,7 +25,6 @@ end
 
 
 function lgcLabelBare.widSetLabel(self, text)
-
 	-- Assertions
 	-- [[
 	uiShared.assertText(2, text)
@@ -37,7 +36,6 @@ end
 
 --- Draws a widget's label text.
 function lgcLabelBare.render(self, font, r, g, b, a)
-
 	love.graphics.push("all")
 
 	if self.label then

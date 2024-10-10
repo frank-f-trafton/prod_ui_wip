@@ -11,7 +11,6 @@ local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
 
 
 return function(self, ox, oy)
-
 	love.graphics.push("all")
 
 	-- Checkboxes, radio buttons
@@ -19,7 +18,6 @@ return function(self, ox, oy)
 		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
 		if self.is_radio_button then
 			love.graphics.ellipse("fill", self.w/2, self.h/2, self.w/2, self.h/2)
-
 		else
 			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 		end

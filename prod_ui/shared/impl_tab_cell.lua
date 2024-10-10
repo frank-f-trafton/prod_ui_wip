@@ -12,7 +12,6 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
 --- A default render function for cells.
 function implTabCell.default_renderCell(item, widget, column, cell, os_x, os_y)
-
 	local skin = widget.skin
 
 	local tq_bijou = cell.tq_bijou

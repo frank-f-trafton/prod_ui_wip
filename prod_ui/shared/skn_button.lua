@@ -27,7 +27,6 @@ return {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = uiTheme.pickButtonResource(self, skin)
 
@@ -70,7 +69,6 @@ return {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = uiTheme.pickButtonResource(self, skin)
 			local slc_body = res.slice
