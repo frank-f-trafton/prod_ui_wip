@@ -40,9 +40,7 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 local utilTable = require(REQ_PATH .. "logic.util_table")
 
 
-function uiTheme.dummyFunc()
-	-- n/a
-end
+function uiTheme.dummyFunc() end
 
 
 local _mt_themeInst = {}
@@ -61,7 +59,6 @@ _mt_box_style.__index = _mt_box_style
 -- @param scale (1.0) UI scaling factor.
 -- @return A theme instance table, which should be assigned to context.resources.
 function uiTheme.newThemeInstance(scale)
-
 	scale = scale or 1.0
 
 	uiTheme.assertScale(1, scale, false)
@@ -102,7 +99,6 @@ end
 -- @param field The field ID to check.
 -- @return The field value.
 function _mt_themeInst:get(field)
-
 	local ret = self[field]
 	if ret == nil then
 		error("theme resource look-up failed. Field: " .. tostring(field))
@@ -118,7 +114,6 @@ _mt_themeDataPack.get = _mt_themeInst.get
 -- @param ... Varargs list of fields to check.
 -- @return The field value.
 function _mt_themeInst:drill(...)
-
 	local len = select("#", ...)
 
 	local ret, bad_index = utilTable.tryDrillV(self, ...)
@@ -128,7 +123,6 @@ function _mt_themeInst:drill(...)
 
 	if bad_index then
 		error("resource drill failed on index #" .. bad_index .. ". Fields: " .. utilTable.concatVarargs(...))
-
 	else
 		error("resource drill failed: final value is nil. Fields: " .. utilTable.concatVarargs(...))
 	end
@@ -141,7 +135,6 @@ _mt_themeDataPack.drill = _mt_themeInst.drill
 -- @param str The string containing the fields to check.
 -- @return The field value.
 function _mt_themeInst:drillS(str)
-
 	local ret, bad_index = utilTable.tryDrillS(self, "/", str)
 	if ret ~= nil then
 		return ret
@@ -149,7 +142,6 @@ function _mt_themeInst:drillS(str)
 
 	if bad_index then
 		error("resource drill failed on index #" .. bad_index .. ". Fields: " .. str)
-
 	else
 		error("resource drill failed: final value is nil. Fields: " .. str)
 	end
@@ -162,7 +154,6 @@ _mt_themeDataPack.drillS = _mt_themeInst.drillS
 -- @param tbl The table to update (typically a skin definition or widget instance).
 -- @param id String ID of the field to load or refresh (with the leading symbol).
 function _mt_themeInst:applyResource(tbl, id)
-
 	local symbol = string.sub(id, 1, 1)
 
 	-- Pull in a resource from the main theme table.
@@ -199,7 +190,6 @@ end
 -- @param skin A pre-filled table to use for the SkinDef. This table must not be shared among other SkinDefs.
 -- @return The new skin table.
 function _mt_themeInst:newSkinDef(extends, skin)
-
 	-- WARNING: Avoid making very deep __index chains.
 
 	skin = skin or {}
@@ -241,7 +231,6 @@ end
 -- @param preserve When true, the SkinDef is added to a table which prevents it from being automatically
 -- garbage-collected. (Use false for SkinDefs which will only be used for a single widget in an ad hoc manner.)
 function _mt_themeInst:registerSkinDef(skin, id, preserve)
-
 	-- Assertions
 	-- [[
 	if type(skin) ~= "table" then uiShared.errBadType(1, skin, "table")
@@ -269,7 +258,6 @@ end
 -- @param path Path to the file containing the SkinDef.
 -- @return The loaded SkinDef.
 function _mt_themeInst:loadSkinDef(id, path)
-
 	local def = uiRes.loadLuaFile(path, self, REQ_PATH)
 
 	if type(def) ~= "table" then
@@ -290,7 +278,6 @@ local temp_remove = {}
 --- Remove a SkinDef from the theme registry.
 -- @param id ID of the SkinDef to remove.
 function _mt_themeInst:removeSkinDef(id) -- XXX Untested
-
 	--[[
 	The library user must:
 
@@ -331,7 +318,6 @@ end
 
 local temp = {}
 function _mt_themeInst:refreshSkinDef(skin)
-
 	if #temp > 0 then
 		error("internal scratchspace table is corrupt.")
 	end
@@ -357,7 +343,6 @@ function _mt_themeInst:refreshSkinDef(skin)
 	if box then
 		if type(box) ~= "table" then
 			error("expected type 'table' for SkinDef box style.")
-
 		else
 			if box.border_x1 then
 				box:copyBorder(skin)
@@ -383,7 +368,6 @@ end
 -- @param self The widget instance, containing a skin table reference.
 -- @return The selected resource table.
 function uiTheme.pickButtonResource(self, skin)
-
 	if not self.enabled then
 		return skin.res_disabled
 
@@ -400,7 +384,6 @@ end
 
 
 function uiTheme.skinnerCopyMethods(self, skinner)
-
 	self.render = skinner.render
 	self.renderLast = skinner.renderLast
 	self.renderThimble = skinner.renderThimble
@@ -408,7 +391,6 @@ end
 
 
 function uiTheme.skinnerClearData(self)
-
 	self.render = nil
 	self.renderLast = nil
 	self.renderThimble = nil
@@ -427,7 +409,6 @@ end
 -- @param integral When true, the scale value must be an integer (math.floor(scale) == scale).
 -- @return Nothing. Raises a Lua error if there's a problem.
 function uiTheme.assertScale(arg_n, scale, integral)
-
 	if type(scale) ~= "number" then
 		error("argument #" .. arg_n .. ": expected number, got " .. type(scale), 2)
 
@@ -443,7 +424,6 @@ end
 --- Creates a new Box Style table.
 -- @return The new Box Style table.
 function uiTheme.newBoxStyle()
-
 	--[[
 	Fields:
 	sl_body_id: The ID of a 9-Slice texture which should be rendered with the box.
@@ -467,7 +447,6 @@ end
 
 
 local function _assertBoxVar(box, id, expected)
-
 	if type(box[id]) ~= expected then
 		error("Box Style: bad type for requested field: " .. id .. " (expected " .. expected .. ", got " .. type(box[id]) .. ")")
 	end
@@ -475,7 +454,6 @@ end
 
 
 function _mt_box_style:getBodyID()
-
 	_assertBoxVar(self, "sl_body_id", "string")
 
 	return self.sl_body_id
@@ -483,7 +461,6 @@ end
 
 
 function _mt_box_style:getOutpad()
-
 	_assertBoxVar(self, "outpad_x1", "number")
 	_assertBoxVar(self, "outpad_x2", "number")
 	_assertBoxVar(self, "outpad_y1", "number")
@@ -499,7 +476,6 @@ end
 
 
 function _mt_box_style:getBorder()
-
 	_assertBoxVar(self, "border_x1", "number")
 	_assertBoxVar(self, "border_x2", "number")
 	_assertBoxVar(self, "border_y1", "number")
@@ -515,7 +491,6 @@ end
 
 
 function _mt_box_style:getMargin()
-
 	_assertBoxVar(self, "margin_x1", "number")
 	_assertBoxVar(self, "margin_x2", "number")
 	_assertBoxVar(self, "margin_y1", "number")
@@ -537,7 +512,6 @@ end
 -- @param has_border The box must have Border numbers.
 -- @param has_margin The box must have Margin numbers.
 function _mt_box_style:validate(has_body_id, has_outpad, has_border, has_margin)
-
 	if has_body_id then
 		self:getBodyID()
 	end

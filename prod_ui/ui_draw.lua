@@ -33,7 +33,7 @@ love.graphics.push = function(stack_type)
 	old_push(stack_type)
 end
 love.graphics.pop = function()
-	
+
 	print("love.graphics.pop() STACK N " .. tostring(stack_n) .. " " .. stringScissor())
 	stack_n = stack_n - 1
 	--print(debug.traceback())
@@ -92,7 +92,6 @@ uiDraw.canvas_settings = {}
 
 
 local function newCanvasEntry(w, h, sx, sy, sw, sh)
-
 	local entry = {}
 
 	w = math.min(w, graphics_limits.texturesize)
@@ -113,7 +112,6 @@ end
 
 --- Push a canvas layer.
 function uiDraw.pushLayer(sx, sy, sw, sh)
-
 	canvas_layers_i = canvas_layers_i + 1
 	if canvas_layers_i > canvas_layers_max then
 		error("max canvas stack size exceeded (" .. canvas_layers_max .. ")")
@@ -135,7 +133,6 @@ end
 
 --- Pop a canvas layer.
 function uiDraw.popLayer()
-
 	local entry = canvas_layers[canvas_layers_i]
 	if not entry then
 		error("no canvas table at stack position: " .. tostring(canvas_layers_i))
@@ -145,7 +142,6 @@ function uiDraw.popLayer()
 	local new_top = canvas_layers[canvas_layers_i]
 	if not new_top then
 		love.graphics.setCanvas()
-
 	else
 		love.graphics.setCanvas(new_top.canvas)
 	end
@@ -163,7 +159,6 @@ end
 
 --- Clears all entries in the canvas layer stack. Call outside of uiDraw.drawContext().
 function uiDraw.clearAllLayers()
-
 	for i = #canvas_layers, 1, -1 do
 		canvas_layers[i].canvas:release()
 		canvas_layers[i] = nil
@@ -177,9 +172,7 @@ end
 -- @param os_x, os_y X and Y offsets of the widget in screen space (for scissor boxes).
 -- @param current_thimble Widget that currently has the UI thimble, if applicable.
 local function drawLoop(wid, os_x, os_y, current_thimble)
-
 	if wid.visible then
-
 		local do_layering = wid.ly_enabled
 
 		if do_layering then
@@ -300,7 +293,6 @@ end
 -- @param context The context to draw.
 -- @param x, y The top-left origin point.
 function uiDraw.drawContext(context, x, y)
-
 	local stack = context.stack
 	local current_thimble = context.current_thimble
 
@@ -325,4 +317,3 @@ end
 
 
 return uiDraw
-

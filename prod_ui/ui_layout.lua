@@ -44,10 +44,8 @@ local lo_bind = false
 
 
 local function getBoundWidget()
-
 	if not lo_bind then
 		error("no widget is currently bound to the layout system.", 2)
-		
 	else
 		return lo_bind
 	end
@@ -55,7 +53,6 @@ end
 
 
 local function incrementStackPointer()
-
 	lo_stack_i = lo_stack_i + 1
 	if lo_stack_i > lo_stack_max then
 		error("layout stack overflow.", 2)
@@ -67,7 +64,6 @@ end
 
 
 local function decrementStackPointer()
-
 	if lo_stack_i < 1 then
 		error("attempt to pop empty stack. (More pops than pushes?)")
 	end
@@ -88,11 +84,9 @@ end
 
 
 local function getLayoutTable(self) -- (For parent widgets)
-
 	local lp_seq = self.lp_seq
 	if not lp_seq then
 		error("missing layout table.", 2)
-		
 	else
 		return lp_seq
 	end
@@ -106,7 +100,6 @@ end
 -- @param wid The widget to bind.
 -- @return Nothing.
 function uiLayout.bindWidget(wid)
-
 	if type(wid) ~= "table" then
 		error("argument #1 bad type: expected table, got " .. type(wid))
 
@@ -123,7 +116,6 @@ end
 -- @param wid The widget to unbind.
 -- @return Nothing.
 function uiLayout.unbindWidget(wid)
-
 	if type(wid) ~= "table" then
 		error("argument #1 bad type: expected table, got " .. type(wid))
 
@@ -145,7 +137,6 @@ end
 -- up after an error.
 -- @return Nothing.
 function uiLayout.unwindAll()
-
 	lo_bind = false
 	lo_stack_i = 0
 	for i = #lo_stack, 1, -1 do
@@ -161,7 +152,6 @@ end
 -- @param h Layout height.
 -- @return Nothing.
 function uiLayout.push(x, y, w, h)
-
 	if not lo_bind then
 		error("no widget is bound to the layout system.")
 	end
@@ -178,7 +168,6 @@ end
 --- Pop the layout stack, applying its layout rectangle to the bound widget.
 -- @return Nothing. Bound rectangle is modified in-place.
 function uiLayout.pop()
-
 	local wid = getBoundWidget()
 	local rect = decrementStackPointer()
 
@@ -201,7 +190,6 @@ end
 -- @param w Width of the slice.
 -- @return Nothing.
 function uiLayout.pushLeft(w)
-
 	local wid = getBoundWidget()
 
 	w = math.max(0, w)
@@ -219,7 +207,6 @@ end
 -- @param w Width of the slice.
 -- @return Nothing.
 function uiLayout.pushRight(w)
-
 	local wid = getBoundWidget()
 
 	w = math.max(0, w)
@@ -237,7 +224,6 @@ end
 -- @param h Height of the slice.
 -- @return Nothing.
 function uiLayout.pushTop(h)
-
 	local wid = getBoundWidget()
 
 	h = math.max(0, h)
@@ -255,7 +241,6 @@ end
 -- @param h Height of the slice.
 -- @return Nothing.
 function uiLayout.pushBottom(h)
-
 	local wid = getBoundWidget()
 
 	h = math.max(0, h)
@@ -276,7 +261,6 @@ end
 -- @param wid The widget to reset.
 -- @return Nothing.
 function uiLayout.resetLayout(wid)
-
 	wid.lp_x = 0
 	wid.lp_y = 0
 	wid.lp_w = wid.w
@@ -289,7 +273,6 @@ end
 -- @param v The Viewport ID.
 -- @return Nothing.
 function uiLayout.resetLayoutPort(wid, v)
-
 	v = widShared.vp_keys[v]
 
 	wid.lp_x = 0
@@ -304,7 +287,6 @@ end
 -- @param v The Viewport ID.
 -- @return Nothing.
 function uiLayout.resetLayoutPortFull(wid, v)
-
 	v = widShared.vp_keys[v]
 
 	wid.lp_x = wid[v.x]
@@ -322,7 +304,6 @@ end
 -- @param y_bottom Pixels to carve on the bottom side.
 -- @return Nothing.
 function uiLayout.edgeCarvePixels(wid, x_left, y_top, x_right, y_bottom)
-
 	wid.lp_w = math.max(0, wid.lp_w - x_left - x_right)
 	wid.lp_h = math.max(0, wid.lp_h - y_top - y_bottom)
 	wid.lp_x = wid.lp_x + x_left
@@ -338,7 +319,6 @@ end
 -- @param y_bottom Percentage (0.0 - 1.0) of height to carve on the bottom side.
 -- @return Nothing.
 function uiLayout.edgeCarveNorm(wid, x_left, y_top, x_right, y_bottom)
-
 	x_left = math.max(0.0, math.min(x_left, 1.0))
 	y_top = math.max(0.0, math.min(y_top, 1.0))
 	x_right = math.max(0.0, math.min(x_right, 1.0))
@@ -364,7 +344,6 @@ of assigning a widget to it.
 -- @param w Width of the discarded area.
 -- @return X, Y, width and height of the discarded area.
 function uiLayout.discardLeft(parent, w)
-
 	w = math.max(0, w)
 	local dx, dy, dw, dh = parent.lp_x, parent.lp_y, w, parent.lp_h
 
@@ -380,7 +359,6 @@ end
 -- @param w Width of the discarded area.
 -- @return X, Y, width and height of the discarded area.
 function uiLayout.discardRight(parent, w)
-
 	w = math.max(0, w)
 	local dx, dy, dw, dh = parent.lp_x + parent.lp_w - w, parent.lp_y, w, parent.lp_h
 
@@ -395,7 +373,6 @@ end
 -- @param h Height of the discarded area.
 -- @return X, Y, width and height of the discarded area.
 function uiLayout.discardTop(parent, h)
-
 	h = math.max(0, h)
 	local dx, dy, dw, dh = parent.lp_x, parent.lp_y, parent.lp_w, h
 
@@ -411,7 +388,6 @@ end
 -- @param h Height of the discarded area.
 -- @return X, Y, width and height of the discarded area.
 function uiLayout.discardBottom(parent, h)
-
 	h = math.max(0, h)
 	local dx, dy, dw, dh = parent.lp_x, parent.lp_y + parent.lp_h - h, parent.lp_w, h
 
@@ -467,7 +443,6 @@ end
 -- @param wid One of the parent's direct children.
 -- @return Nothing.
 function uiLayout.fitRemaining(parent, wid)
-
 	wid.x = parent.lp_x
 	wid.y = parent.lp_y
 	wid.w = math.max(0, parent.lp_w)
@@ -484,7 +459,6 @@ end
 -- @param wid The widget to position.
 -- @return Nothing.
 function uiLayout.placeAbsolute(parent, wid)
-
 	wid.x = wid.lc_pos_x
 	wid.y = wid.lc_pos_y
 	wid.w = wid.lc_pos_w or wid.w
@@ -498,7 +472,6 @@ end
 -- @param wid The widget to position.
 -- @return Nothing.
 function uiLayout.placeRelative(parent, wid)
-
 	wid.x = parent.lp_x + wid.lc_pos_x
 	wid.y = parent.lp_y + wid.lc_pos_y
 	wid.w = wid.lc_pos_w or wid.w
@@ -512,7 +485,6 @@ end
 -- @param wid The widget to position.
 -- @return Nothing.
 function uiLayout.placeIndex(parent, wid)
-
 	local rect = parent.lp_rects[wid.lc_index]
 
 	if not rect then
@@ -532,7 +504,6 @@ end
 -- @param wid The child widget.
 -- @return Nothing.
 function uiLayout.placeGrid(parent, wid)
-
 	local cols = parent.lp_grid_cols
 	local rows = parent.lp_grid_rows
 
@@ -584,7 +555,6 @@ Code running from applyLayout() should not add or remove widgets, or add to or d
 -- @param self The widget which will hold the layout sequence.
 -- @return Nothing.
 function uiLayout.initLayoutSequence(self)
-
 	self.lp_seq = {}
 
 	self.lp_x = 0
@@ -598,7 +568,6 @@ end
 -- @param self The widget which will hold the layout rectangle.
 -- @return Nothing.
 function uiLayout.initLayoutRectangle(self)
-
 	self.lp_x = 0
 	self.lp_y = 0
 	self.lp_w = 0
@@ -612,7 +581,6 @@ end
 -- @param wid The child widget.
 -- @return Nothing.
 function uiLayout.register(parent, wid)
-
 	local lp_seq = getLayoutTable(parent)
 
 	if not parent:hasThisChild(wid) then
@@ -636,7 +604,6 @@ end
 -- @param wid The child widget to remove.
 -- @return Nothing.
 function uiLayout.unregister(parent, wid)
-
 	local lp_seq = getLayoutTable(parent)
 
 	if not parent:hasThisChild(wid) then
@@ -664,7 +631,6 @@ wrappers with error checking appropriate to your use case).
 -- @param parent The widget whose children will be arranged.
 -- @return Nothing.
 function uiLayout.applyLayout(parent)
-
 	uiLayout.bindWidget(parent)
 
 	local lp_seq = getLayoutTable(parent)

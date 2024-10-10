@@ -64,7 +64,6 @@ end
 
 --- Argument is a string or coloredtext sequence.
 function uiShared.assertText(n, text)
-
 	if type(text) ~= "string" and type(text) ~= "table" then
 		error("argument #" .. n .. ": bad type (expected text (string or table), got " .. type(text), 2)
 	end
@@ -73,7 +72,6 @@ end
 
 --- Argument is a number.
 function uiShared.assertNumber(n, num)
-
 	if type(num) ~= "number" then
 		uiShared.errBadType(n, num, "number")
 	end
@@ -82,7 +80,6 @@ end
 
 --- Argument is a table.
 function uiShared.assertTable(n, tbl)
-
 	if type(tbl) ~= "table" then
 		uiShared.errBadType(n, tbl, "table")
 	end
@@ -91,7 +88,6 @@ end
 
 --- Argument is a number which is not NaN.
 function uiShared.assertNumberNotNaN(n, num)
-
 	if type(num) ~= "number" then
 		uiShared.errBadType(n, num, "number")
 
@@ -103,7 +99,6 @@ end
 
 --- Argument is an integer which is not NaN.
 function uiShared.assertNumberIntNotNaN(n, num)
-
 	if type(num) ~= "number" then
 		uiShared.errBadType(n, num, "number")
 
@@ -118,7 +113,6 @@ end
 
 --- Argument is an integer, within a certain range.
 function uiShared.assertIntRange(n, num, first, last)
-
 	if type(num) ~= "number" then
 		uiShared.errBadType(n, num, "number")
 
@@ -132,7 +126,6 @@ end
 
 
 function uiShared.assertIntMinNotNaN(n, num, first)
-
 	if type(num) ~= "number" then
 		uiShared.errBadType(n, num, "number")
 
