@@ -5,7 +5,7 @@ return {
     filter_mag = "linear",
     filter_min = "linear",
     wrap_h = "clamp",
-    wrap_v = "clamp",
+    wrap_v = "clamp"
   },
   slice_coords = {
     button = {
@@ -16,7 +16,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_depressed = {
       h1 = 4,
@@ -26,7 +26,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_disabled = {
       h1 = 4,
@@ -36,7 +36,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_hover = {
       h1 = 4,
@@ -46,7 +46,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_minor = {
       h1 = 2,
@@ -56,7 +56,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_minor_depressed = {
       h1 = 2,
@@ -66,7 +66,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_minor_disabled = {
       h1 = 2,
@@ -76,7 +76,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_minor_hover = {
       h1 = 2,
@@ -86,7 +86,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_minor_press = {
       h1 = 2,
@@ -96,7 +96,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     button_press = {
       h1 = 4,
@@ -106,7 +106,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     dropdown_body = {
       h1 = 6,
@@ -116,7 +116,7 @@ return {
       w2 = 4,
       w3 = 6,
       x = 0,
-      y = 0,
+      y = 0
     },
     dropdown_drawer = {
       h1 = 6,
@@ -126,7 +126,7 @@ return {
       w2 = 4,
       w3 = 6,
       x = 0,
-      y = 0,
+      y = 0
     },
     group_perimeter_a = {
       draw_fn_id = "hollow",
@@ -137,7 +137,7 @@ return {
       w2 = 12,
       w3 = 4,
       x = 2,
-      y = 2,
+      y = 2
     },
     group_perimeter_b = {
       draw_fn_id = "x0y0w3h1",
@@ -148,7 +148,7 @@ return {
       w2 = 5,
       w3 = 2,
       x = 1,
-      y = 1,
+      y = 1
     },
     group_perimeter_c = {
       draw_fn_id = "x0y0w3h1",
@@ -159,7 +159,7 @@ return {
       w2 = 5,
       w3 = 2,
       x = 1,
-      y = 1,
+      y = 1
     },
     group_perimeter_unbroken = {
       draw_fn_id = "hollow",
@@ -170,7 +170,7 @@ return {
       w2 = 12,
       w3 = 4,
       x = 2,
-      y = 2,
+      y = 2
     },
     input_box = {
       h1 = 4,
@@ -180,7 +180,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     input_box_disabled = {
       h1 = 4,
@@ -190,7 +190,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     input_box_hover = {
       h1 = 4,
@@ -200,7 +200,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     input_keyboard_key = {
       h1 = 9,
@@ -210,7 +210,7 @@ return {
       w2 = 23,
       w3 = 9,
       x = 0,
-      y = 0,
+      y = 0
     },
     label = {
       h1 = 5,
@@ -220,7 +220,7 @@ return {
       w2 = 2,
       w3 = 5,
       x = 0,
-      y = 0,
+      y = 0
     },
     label_disabled = {
       h1 = 5,
@@ -230,7 +230,7 @@ return {
       w2 = 2,
       w3 = 5,
       x = 0,
-      y = 0,
+      y = 0
     },
     list_box_body = {
       h1 = 6,
@@ -240,7 +240,7 @@ return {
       w2 = 4,
       w3 = 6,
       x = 0,
-      y = 0,
+      y = 0
     },
     menu_bar_body = {
       draw_fn_id = "x1y1w1h2",
@@ -251,7 +251,7 @@ return {
       w2 = 4,
       w3 = 0,
       x = 0,
-      y = 0,
+      y = 0
     },
     menu_pop_body = {
       h1 = 6,
@@ -261,7 +261,7 @@ return {
       w2 = 4,
       w3 = 6,
       x = 0,
-      y = 0,
+      y = 0
     },
     progress_back = {
       h1 = 2,
@@ -271,7 +271,7 @@ return {
       w2 = 4,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     progress_ichor = {
       h1 = 3,
@@ -281,7 +281,7 @@ return {
       w2 = 1,
       w3 = 1,
       x = 0,
-      y = 0,
+      y = 0
     },
     scroll_button = {
       h1 = 4,
@@ -291,7 +291,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     scroll_button_disabled = {
       h1 = 4,
@@ -301,7 +301,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     scroll_button_hover = {
       h1 = 4,
@@ -311,7 +311,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     scroll_button_press = {
       h1 = 4,
@@ -321,7 +321,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     slider_trough_active = {
       h1 = 3,
@@ -331,7 +331,7 @@ return {
       w2 = 2,
       w3 = 3,
       x = 0,
-      y = 0,
+      y = 0
     },
     slider_trough_empty = {
       h1 = 3,
@@ -341,7 +341,7 @@ return {
       w2 = 2,
       w3 = 3,
       x = 0,
-      y = 0,
+      y = 0
     },
     stepper_body = {
       h1 = 4,
@@ -351,7 +351,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     tabular_category_body = {
       h1 = 2,
@@ -361,7 +361,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     tabular_category_body_hover = {
       h1 = 2,
@@ -371,7 +371,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     tabular_category_body_press = {
       h1 = 2,
@@ -381,7 +381,7 @@ return {
       w2 = 8,
       w3 = 2,
       x = 0,
-      y = 0,
+      y = 0
     },
     window_body = {
       h1 = 4,
@@ -391,7 +391,7 @@ return {
       w2 = 16,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     window_header = {
       h1 = 6,
@@ -401,7 +401,7 @@ return {
       w2 = 12,
       w3 = 6,
       x = 0,
-      y = 0,
+      y = 0
     },
     window_header_button = {
       h1 = 4,
@@ -411,7 +411,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     window_header_button_disabled = {
       h1 = 4,
@@ -421,7 +421,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     window_header_button_hover = {
       h1 = 4,
@@ -431,7 +431,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
+      y = 0
     },
     window_header_button_press = {
       h1 = 4,
@@ -441,7 +441,7 @@ return {
       w2 = 4,
       w3 = 4,
       x = 0,
-      y = 0,
-    },
-  },
+      y = 0
+    }
+  }
 }

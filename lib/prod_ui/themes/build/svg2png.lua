@@ -16,7 +16,7 @@ local shared = require("shared")
 
 -- Libraries
 local nativefs = require("lib.nativefs")
-local tableToString = require("lib.table_to_string")
+local t2s2 = require("lib.t2s2.t2s2")
 
 
 local arg_src_path
@@ -160,8 +160,8 @@ local tasks_export = {
 				v.by2 = tryScaleCoord(v.by2, arg_dpi)
 				assertAllOrNone("border offsets", v.bx1, v.by1, v.bx2, v.by2)
 			end
-			local out_str = tableToString.convert(base_data)
-			shared.nfsWrite("output/" .. arg_dpi .. "/base_data.lua", out_str)
+			local out_str = t2s2.serialize(base_data)
+			shared.nfsWrite("output/" .. arg_dpi .. "/base_data.lua", out_str .. "\n")
 		end
 
 		task_i = task_i + 1
