@@ -4,10 +4,10 @@
 --]]
 
 -- ProdUI
-local commonWimp = require("lib.prod_ui.logic.common_wimp")
-local itemOps = require("lib.prod_ui.logic.item_ops")
-local keyCombo = require("lib.prod_ui.lib.key_combo")
-local uiLayout = require("lib.prod_ui.ui_layout")
+local commonWimp = require("prod_ui.logic.common_wimp")
+local itemOps = require("prod_ui.logic.item_ops")
+local keyCombo = require("prod_ui.lib.key_combo")
+local uiLayout = require("prod_ui.ui_layout")
 
 
 local plan = {}

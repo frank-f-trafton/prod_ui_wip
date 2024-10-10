@@ -38,14 +38,14 @@ end
 
 
 -- Libs: ProdUI
-local itemOps = require("lib.prod_ui.logic.item_ops")
-local keyCombo = require("lib.prod_ui.lib.key_combo")
-local uiContext = require("lib.prod_ui.ui_context")
-local uiDraw = require("lib.prod_ui.ui_draw")
-local uiGraphics = require("lib.prod_ui.ui_graphics")
-local uiLayout = require("lib.prod_ui.ui_layout")
-local uiRes = require("lib.prod_ui.ui_res")
-local widShared = require("lib.prod_ui.logic.wid_shared")
+local itemOps = require("prod_ui.logic.item_ops")
+local keyCombo = require("prod_ui.lib.key_combo")
+local uiContext = require("prod_ui.ui_context")
+local uiDraw = require("prod_ui.ui_draw")
+local uiGraphics = require("prod_ui.ui_graphics")
+local uiLayout = require("prod_ui.ui_layout")
+local uiRes = require("prod_ui.ui_res")
+local widShared = require("prod_ui.logic.wid_shared")
 
 -- Libs: QuickPrint
 local quickPrint = require("lib.quick_print") -- (Helps with debug-printing to the framebuffer.)
@@ -193,16 +193,16 @@ end
 
 local function newWimpContext()
 
-	local context = uiContext.newContext("lib/prod_ui", 0, 0, love.graphics.getDimensions())
+	local context = uiContext.newContext("prod_ui", 0, 0, love.graphics.getDimensions())
 
 	-- Assign resources ASAP.
-	local theme_main_path = "lib/prod_ui/themes/vacuum/vacuum.lua"
+	local theme_main_path = "prod_ui/themes/vacuum/vacuum.lua"
 	local theme_module = uiRes.loadLuaFile(theme_main_path, context)
 	local theme_instance = theme_module.newInstance(1.0)
 
 	context.resources = theme_instance
 
-	context:loadWidgetDefsInDirectory("lib/prod_ui/widgets", true, "", false)
+	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
 	local wid_root = context:addWidget("wimp/root_wimp")
 	wid_root.tag = "wimp_workspace"

@@ -1,12 +1,12 @@
 
 
 -- ProdUI
-local commonMenu = require("lib.prod_ui.logic.common_menu")
-local commonTab = require("lib.prod_ui.logic.common_tab")
-local commonWimp = require("lib.prod_ui.logic.common_wimp")
-local keyCombo = require("lib.prod_ui.lib.key_combo")
-local uiLayout = require("lib.prod_ui.ui_layout")
-local widShared = require("lib.prod_ui.logic.wid_shared")
+local commonMenu = require("prod_ui.logic.common_menu")
+local commonTab = require("prod_ui.logic.common_tab")
+local commonWimp = require("prod_ui.logic.common_wimp")
+local keyCombo = require("prod_ui.lib.key_combo")
+local uiLayout = require("prod_ui.ui_layout")
+local widShared = require("prod_ui.logic.wid_shared")
 
 -- NativeFS
 local nativefs = require("lib.nativefs")

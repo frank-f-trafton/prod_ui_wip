@@ -10,8 +10,8 @@ ProdUI is a user interface library for the LÖVE Framework.
 ## Repository Structure
 
 * Base directory: Example programs.
-* `lib/prod_ui`: ProdUI.
-* `lib/prod_ui/themes/build`: Theme builder scripts.
+* `prod_ui`: ProdUI.
+* `prod_ui/themes/build`: Theme builder scripts.
 
 
 ## Screenshots
