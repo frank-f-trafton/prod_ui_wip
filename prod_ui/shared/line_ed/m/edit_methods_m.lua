@@ -41,7 +41,6 @@ end
 
 -- @return true if the mode changed.
 function client:setWrapMode(enabled)
-
 	local disp = self.line_ed.disp
 
 	disp.wrap_mode = not not enabled
@@ -58,7 +57,6 @@ end
 
 
 function client:setFont(font)
-
 	self.line_ed.disp:updateFont(font)
 	self.line_ed:displaySyncAll()
 
@@ -72,7 +70,6 @@ end
 
 
 function client:setAlign(align)
-
 	local disp = self.line_ed.disp
 
 	if align ~= "left" and align ~= "center" and align ~= "right" then
@@ -100,7 +97,6 @@ end
 
 
 function client:getMasking()
-
 	local disp = self.line_ed.disp
 
 	return disp.masked, (disp.masked) and disp.mask_glyph or nil
@@ -108,14 +104,12 @@ end
 
 
 function client:setMasking(enabled, optional_glyph)
-
 	local disp = self.line_ed.disp
 
 	disp.masked = not not enabled
 
 	if optional_glyph then
 		self.line_ed:setMaskGlyph(optional_glyph)
-
 	else
 		self.line_ed:displaySyncAll()
 	end
@@ -123,7 +117,6 @@ end
 
 
 function client:setMaskGlyph(glyph)
-
 	local disp = self.line_ed.disp
 
 	if utf8.len(glyph) ~= 1 then
@@ -142,13 +135,11 @@ end
 
 
 function client:getColorization()
-
 	return self.line_ed.disp.generate_colored_text
 end
 
 
 function client:setColorization(enabled)
-
 	local disp = self.line_ed.disp
 	disp.generate_colored_text = not not enabled
 
@@ -211,7 +202,6 @@ end
 
 
 function client:stepHistory(dir)
-
 	-- -1 == undo
 	-- 1 == redo
 
@@ -234,7 +224,6 @@ end
 
 
 function client:getText(line_1, line_2) -- XXX maybe replace with a call to lines:copyString().
-
 	local lines = self.line_ed.lines
 
 	line_1 = line_1 or 1
@@ -245,7 +234,6 @@ end
 
 
 function client:getHighlightedText()
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
@@ -273,7 +261,6 @@ end
 
 
 function client:highlightAll()
-
 	local line_ed = self.line_ed
 
 	line_ed.car_line = #line_ed.lines
@@ -289,7 +276,6 @@ end
 
 --- Moves caret to the left highlight edge
 function client:caretHighlightEdgeLeft()
-
 	local line_ed = self.line_ed
 
 	local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
@@ -307,7 +293,6 @@ end
 
 --- Moves caret to the right highlight edge
 function client:caretHighlightEdgeRight()
-
 	local line_ed = self.line_ed
 
 	local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
@@ -324,7 +309,6 @@ end
 
 
 function client:highlightCurrentLine()
-
 	local line_ed = self.line_ed
 
 	line_ed.h_line = line_ed.car_line
@@ -336,7 +320,6 @@ end
 
 
 function client:highlightCurrentWord()
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
@@ -348,7 +331,6 @@ end
 
 
 function client:highlightCurrentWrappedLine()
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 	local disp = line_ed.disp
@@ -371,7 +353,6 @@ end
 
 
 function client:caretStepUp(clear_highlight, n_steps)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 	local disp = line_ed.disp
@@ -392,7 +373,6 @@ function client:caretStepUp(clear_highlight, n_steps)
 		else
 			line_ed:updateDispHighlightRange()
 		end
-
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
 		local d_para, d_sub = edComM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, -n_steps)
@@ -426,7 +406,6 @@ end
 
 
 function client:caretStepDown(clear_highlight, n_steps)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 	local disp = line_ed.disp
@@ -447,7 +426,6 @@ function client:caretStepDown(clear_highlight, n_steps)
 		else
 			line_ed:updateDispHighlightRange()
 		end
-
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
 		local d_para, d_sub = edComM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, n_steps)
@@ -471,7 +449,6 @@ function client:caretStepDown(clear_highlight, n_steps)
 		line_ed:displaySyncCaretOffsets()
 		if clear_highlight then
 			line_ed:clearHighlight()
-
 		else
 			line_ed:updateDispHighlightRange()
 		end
@@ -480,7 +457,6 @@ end
 
 
 function client:caretStepUpCoreLine(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -509,7 +485,6 @@ end
 
 
 function client:caretStepDownCoreLine(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -538,7 +513,6 @@ end
 
 
 function client:caretToXY(clear_highlight, x, y, split_x)
-
 	local line_ed = self.line_ed
 
 	local line_ed_line, line_ed_byte = line_ed:getCharacterDetailsAtPosition(x, y, split_x)
@@ -554,7 +528,6 @@ end
 -- entering line feeds, typing at the end of a line (so as not to overwrite line feeds), etc.
 -- @return The sanitized and trimmed text which was inserted into the field.
 function client:writeText(text, suppress_replace)
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 	local lines = line_ed.lines
@@ -591,7 +564,6 @@ end
 
 --- Set the current internal text, wiping anything currently present.
 function client:setText(text)
-
 	local line_ed = self.line_ed
 
 	local deleted = self:deleteAll()
@@ -605,7 +577,6 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:backspaceUChar(n_u_chars)
-
 	local line_ed = self.line_ed
 	line_ed:highlightCleanup()
 
@@ -624,7 +595,6 @@ end
 
 
 function client:copyHighlightedToClipboard()
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
@@ -642,7 +612,6 @@ end
 
 
 function client:cutHighlightedToClipboard()
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
@@ -670,7 +639,6 @@ end
 
 
 function client:pasteClipboardText()
-
 	local line_ed = self.line_ed
 
 	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
@@ -697,7 +665,6 @@ end
 --- Delete highlighted text from the field.
 -- @return Substring of the deleted text.
 function client:deleteHighlightedText()
-
 	local line_ed = self.line_ed
 
 	if not self:isHighlighted() then
@@ -713,7 +680,6 @@ end
 
 
 function client:deleteLine()
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -750,7 +716,6 @@ end
 
 
 function client:deleteCaretToLineEnd()
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -762,7 +727,6 @@ end
 
 
 function client:deleteCaretToLineStart()
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -777,7 +741,6 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -795,7 +758,6 @@ end
 
 
 function client:deleteAll()
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -807,7 +769,6 @@ end
 
 
 function client:backspaceGroup()
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -818,7 +779,6 @@ function client:backspaceGroup()
 	if line_ed.car_byte == 1 and line_ed.car_line > 1 then
 		line_left = line_ed.car_line  - 1
 		byte_left = #lines[line_left] + 1
-
 	else
 		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, true)
 	end
@@ -834,7 +794,6 @@ end
 
 
 function client:deleteGroup()
-
 	local line_ed = self.line_ed
 
 	line_ed:highlightCleanup()
@@ -845,7 +804,6 @@ function client:deleteGroup()
 	if line_ed.car_byte == #lines[line_ed.car_line] + 1 and line_ed.car_line < #lines then
 		line_right = line_ed.car_line + 1
 		byte_right = 0
-
 	else
 		local hit_non_ws = false
 		local peeked = lines:peekCodePoint(line_ed.car_line, line_ed.car_byte)
@@ -865,7 +823,6 @@ function client:deleteGroup()
 	--print("DEL", "|"..(del or "<nil>").."|")
 	if del ~= "" then
 		return del
-
 	else
 		return nil
 	end
@@ -876,7 +833,6 @@ end
 
 
 function client:caretStepLeft(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -890,7 +846,6 @@ function client:caretStepLeft(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -898,7 +853,6 @@ end
 
 
 function client:caretStepRight(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -912,7 +866,6 @@ function client:caretStepRight(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -920,7 +873,6 @@ end
 
 
 function client:caretJumpLeft(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -930,7 +882,6 @@ function client:caretJumpLeft(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -938,7 +889,6 @@ end
 
 
 function client:caretJumpRight(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -957,7 +907,6 @@ function client:caretJumpRight(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -968,7 +917,6 @@ end
 
 
 function client:caretFirst(clear_highlight)
-
 	local line_ed = self.line_ed
 
 	line_ed.car_line = 1
@@ -978,7 +926,6 @@ function client:caretFirst(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -986,7 +933,6 @@ end
 
 
 function client:caretLast(clear_highlight)
-
 	local line_ed = self.line_ed
 
 	line_ed.car_line = #line_ed.lines
@@ -996,7 +942,6 @@ function client:caretLast(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1004,7 +949,6 @@ end
 
 
 function client:caretLineFirst(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 	local disp = line_ed.disp
@@ -1019,7 +963,6 @@ function client:caretLineFirst(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1027,7 +970,6 @@ end
 
 
 function client:caretLineLast(clear_highlight)
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 	local disp = line_ed.disp
@@ -1042,7 +984,6 @@ function client:caretLineLast(clear_highlight)
 	line_ed:updateVertPosHint()
 	if clear_highlight then
 		line_ed:clearHighlight()
-
 	else
 		line_ed:updateDispHighlightRange()
 	end
@@ -1050,9 +991,7 @@ end
 
 
 function client:clickDragByWord(x, y, origin_line, origin_byte)
-
 	local line_ed = self.line_ed
-
 	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
 
 	-- Expand ranges to cover full words
@@ -1064,7 +1003,6 @@ function client:clickDragByWord(x, y, origin_line, origin_byte)
 
 	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
 		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
-
 	else
 		line_ed:caretAndHighlightToLineAndByte(ml2, mb2, ml1, mb1)
 	end
@@ -1072,7 +1010,6 @@ end
 
 
 function client:clickDragByLine(x, y, origin_line, origin_byte)
-
 	local line_ed = self.line_ed
 
 	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
@@ -1088,7 +1025,6 @@ function client:clickDragByLine(x, y, origin_line, origin_byte)
 	)
 	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
 		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
-
 	else
 		line_ed:caretAndHighlightToLineAndByte(ml2, mb2, ml1, mb1)
 	end
@@ -1100,7 +1036,6 @@ end
 -- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also EditAct.
 -- @return The results of bound_func(), in case they are helpful to the calling widget logic.
 function client:executeBoundAction(bound_func)
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 

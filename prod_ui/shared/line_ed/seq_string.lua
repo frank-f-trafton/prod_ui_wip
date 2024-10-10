@@ -58,7 +58,6 @@ end
 
 
 function _mt_seq:add(text, line_n, byte_pos)
-
 	-- Assertions
 	-- [[
 	if line_n > #self or line_n < 1 then
@@ -130,7 +129,6 @@ end
 
 
 function _mt_seq:delete(line_start, byte_start, line_end, byte_end)
-
 	-- Assertions
 	-- [[
 	if line_start < 1 or line_start > #self then
@@ -157,7 +155,6 @@ function _mt_seq:delete(line_start, byte_start, line_end, byte_end)
 
 	-- Spans multiple lines
 	else
-
 		-- Handle the last line.
 		local last_chunk
 		if byte_end < #self[line_end] then
@@ -181,7 +178,6 @@ end
 
 
 function _mt_seq:copy(line_start, byte_start, line_end, byte_end)
-
 	-- Assertions
 	-- [[
 	if line_start < 1 or line_start > #self then
@@ -224,15 +220,11 @@ end
 
 
 function _mt_seq:copyString(line_start, byte_start, line_end, byte_end)
-
-	local str = table.concat(self:copy(line_start, byte_start, line_end, byte_end), "\n")
-
-	return str
+	return table.concat(self:copy(line_start, byte_start, line_end, byte_end), "\n")
 end
 
 
 function _mt_seq:len()
-
 	-- Add phantom line feeds
 	local byte_count = math.max(0, #self - 1)
 
@@ -245,7 +237,6 @@ end
 
 
 function _mt_seq:uLen()
-
 	-- Add phantom line feeds
 	local u_count = math.max(0, #self - 1)
 
@@ -253,7 +244,7 @@ function _mt_seq:uLen()
 		u_count = u_count + utf8.len(line)
 	end
 
-	return u_count	
+	return u_count
 end
 
 
@@ -263,7 +254,6 @@ end
 
 
 function _mt_seq:offsetStepLeft(line_n, byte_n)
-
 	-- Assertions
 	-- [[
 	if line_n < 1 or line_n > #self then
@@ -288,7 +278,6 @@ function _mt_seq:offsetStepLeft(line_n, byte_n)
 		if byte_n == 0 then
 			if line_n == 1 then
 				return nil
-
 			else
 				line_n = line_n - 1
 				byte_n = #self[line_n] + 1
@@ -310,7 +299,6 @@ end
 
 
 function _mt_seq:offsetStepRight(line_n, byte_n)
-
 	local str = self[line_n]
 
 	-- Assertions
@@ -334,13 +322,11 @@ function _mt_seq:offsetStepRight(line_n, byte_n)
 	if byte_n == #str + 1 then
 		if line_n == #self then
 			return nil
-
 		else
 			line_n = line_n + 1
 			byte_n = 1
 			peeked = #self[line_n] > 0 and utf8.codepoint(self[line_n], byte_n) or 0x0a
 		end
-
 	else
 		local byte = string.byte(str, byte_n)
 
@@ -374,7 +360,6 @@ end
 
 
 function _mt_seq:peekCodePoint(line_n, byte_n)
-
 	-- Assertions
 	-- [[
 	if line_n < 1 or line_n > #self then
@@ -386,11 +371,9 @@ function _mt_seq:peekCodePoint(line_n, byte_n)
 	--]]
 
 	if byte_n == #self[line_n] + 1 then
-
 		-- End of document
 		if line_n == #self then
 			return nil
-
 		-- End of line
 		else
 			return 0x0a -- \n
@@ -403,7 +386,6 @@ end
 
 
 function _mt_seq:countUCharsLeft(line_n, byte_n, n_u_chars)
-
 	local count = 0
 
 	while count < n_u_chars do
@@ -412,7 +394,6 @@ function _mt_seq:countUCharsLeft(line_n, byte_n, n_u_chars)
 		-- Reached beginning of text
 		if not line_new then
 			break
-
 		else
 			line_n = line_new
 			byte_n = byte_new
@@ -425,9 +406,7 @@ end
 
 
 function _mt_seq:countUCharsRight(line_n, byte_n, n_u_chars)
-
 	local count = 0
-
 	while count < n_u_chars do
 		local line_new, byte_new = self:offsetStepRight(line_n, byte_n)
 

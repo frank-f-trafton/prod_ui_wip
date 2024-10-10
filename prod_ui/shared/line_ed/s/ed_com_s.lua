@@ -21,7 +21,6 @@ local lineManip = context:getLua("shared/line_ed/line_manip")
 --[=[
 -- XXX: to be used with single-line versions of text boxes.
 function edComS.getDisplayTextSingle(text, font, replace_missing, masked)
-
 	local display_text = text
 	if masked then
 		display_text = textUtil.getMaskedString(display_text, "*")
@@ -36,7 +35,6 @@ end
 
 
 function edComS.huntWordBoundary(code_groups, line, byte_n, dir, hit_non_ws, first_group)
-
 	print("(Single) huntWordBoundary", "line", line, "byte_n", byte_n, "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group)
 
 	-- If 'hit_non_ws' is true, this function skips over initial whitespace.
@@ -84,11 +82,9 @@ end
 
 --- Given an input line, an input byte offset, and an output line, return a byte offset suitable for the output line.
 function edComS.coreToDisplayOffsets(line_in, byte_n, line_out)
-
 	-- End of line
 	if byte_n == #line_in + 1 then
 		return #line_out + 1
-
 	else
 		local code_point_index = utf8.len(line_in, 1, byte_n)
 		local offset = utf8.offset(line_out, code_point_index)
@@ -99,7 +95,6 @@ end
 
 
 function edComS.displaytoUCharCount(str, byte)
-
 	-- 'byte' can be one past the end of the string to represent the caret being at the final position.
 	-- However, arg #3 to utf8.len() cannot exceed the size of the string (though arg #3 can handle offsets
 	-- on UTF-8 continuation bytes).
@@ -128,7 +123,6 @@ local number_ptn = {
 
 --- Check text input for number boxes.
 function edComS.checkNumberInput(str, number_mode)
-
 	assert(number_ptn[number_mode], "invalid number_mode.")
 
 	-- Strip leading and trailing whitespace.

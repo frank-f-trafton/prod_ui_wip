@@ -19,7 +19,6 @@ _mt_hist.__index = _mt_hist
 
 
 function editHistM.initEntry(entry, source_lines, car_line, car_byte, h_line, h_byte)
-
 	entry.lines = entry.lines or {}
 
 	for i = #entry.lines, #source_lines + 1, -1 do
@@ -37,7 +36,6 @@ end
 
 
 function editHistM.writeEntry(line_ed, do_advance)
-
 	local entry = line_ed.hist:writeEntry(do_advance)
 	editHistM.initEntry(entry, line_ed.lines, line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte)
 	return entry
@@ -45,7 +43,6 @@ end
 
 
 function editHistM.applyEntry(self, entry)
-
 	local line_ed = self.line_ed
 	local line_ed_lines = line_ed.lines
 	local entry_lines = entry.lines
@@ -65,7 +62,6 @@ end
 
 
 function editHistM.doctorCurrentCaretOffsets(hist, car_line, car_byte, h_line, h_byte)
-
 	local entry = hist.ledger[hist.pos]
 
 	if entry then

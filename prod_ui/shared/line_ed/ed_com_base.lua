@@ -16,7 +16,6 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 function edComBase.countUChars(text, u_char_room)
-
 	local i = 1
 	local byte_count = 0
 
@@ -36,7 +35,6 @@ end
 
 
 function edComBase.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed)
-
 	str = textUtil.sanitize(str, bad_byte_policy)
 
 	if not allow_line_feed then
@@ -56,7 +54,6 @@ end
 
 
 function edComBase.applyCaretAlignOffset(caret_x, line_str, align, font)
-
 	if align == "left" then
 		-- n/a
 

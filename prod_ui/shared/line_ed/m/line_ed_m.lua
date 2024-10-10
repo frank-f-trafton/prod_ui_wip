@@ -38,7 +38,6 @@ _mt_ed_m.__index = _mt_ed_m
 --- Creates a new Line Editor object.
 -- @return the LineEd table.
 function lineEdM.new(font)
-
 	if not font then
 		error("missing argument #1 (font) for new LineEditor (multi) object.")
 	end
@@ -126,7 +125,6 @@ end
 
 --- Gets caret and highlight lines and offsets in the correct order.
 function _mt_ed_m:getHighlightOffsets()
-
 	-- You may need to subtract 1 from byte_2 to get the correct range.
 	local line_1, byte_1, line_2, byte_2 = self.car_line, self.car_byte, self.h_line, self.h_byte
 
@@ -142,7 +140,6 @@ end
 
 
 function _mt_ed_m:updateVertPosHint()
-
 	local disp = self.disp
 	local font = disp.font
 
@@ -158,7 +155,6 @@ end
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
 function _mt_ed_m:getCharacterDetailsAtPosition(x, y, split_x)
-
 	local disp = self.disp
 	local paragraphs = disp.paragraphs
 	local font = disp.font
@@ -195,7 +191,6 @@ end
 --- Gets the top and bottom selected line indices and the selection bytes that go with them, in order.
 -- @param omit_empty_last_selection When true, exclude the bottom line if the selection is at the start.
 function _mt_ed_m:getSelectedLinesRange(omit_empty_last_selection)
-
 	local r1, r2, b1, b2 = self.car_line, self.h_line, self.car_byte, self.h_byte
 	if r1 > r2 then
 		r1, r2, b1, b2 = r2, r1, b2, b1
@@ -215,7 +210,6 @@ end
 
 
 function _mt_ed_m:updateDispHighlightRange()
-
 	local disp = self.disp
 
 	disp:updateHighlightDirtyRange(self.car_line, self.h_line)
@@ -225,7 +219,6 @@ end
 
 
 function _mt_ed_m:getWordRange(line_n, byte_n)
-
 	local lines = self.lines
 
 	-- If at the end of the last line, and it contains at least one code point, use that last code point.
@@ -244,7 +237,6 @@ function _mt_ed_m:getWordRange(line_n, byte_n)
 	if peeked == 0x0a then
 		line_left, byte_left = line_n, byte_n
 		line_right, byte_right = line_n + 1, 1
-
 	else
 		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, -1, true, first_group, true)
 		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, 1, true, first_group, true)
@@ -252,12 +244,11 @@ function _mt_ed_m:getWordRange(line_n, byte_n)
 
 	--print("line+byte left, line+byte right", line_left, byte_left, line_right, byte_right)
 
-	return line_left, byte_left, line_right, byte_right	
+	return line_left, byte_left, line_right, byte_right
 end
 
 
 function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
-
 	local lines = self.lines
 	local disp = self.disp
 
@@ -296,7 +287,6 @@ end
 -- @param text The string to insert.
 -- @return Nothing.
 function _mt_ed_m:insertText(text)
-
 	local lines = self.lines
 	local old_line = self.car_line
 	local disp = self.disp
@@ -321,7 +311,6 @@ end
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
 function _mt_ed_m:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
-
 	-- XXX Maybe write a line and/or uChar offset version for the client method collection.
 	local lines = self.lines
 
@@ -347,7 +336,6 @@ end
 
 
 local function fixCaretAfterIndent(self, line_n, offset)
-
 	if self.car_line == line_n then
 		self.car_byte = math.max(1, self.car_byte + offset)
 	end
@@ -359,7 +347,6 @@ end
 
 
 function _mt_ed_m:indentLine(line_n)
-
 	local old_line = self.lines[line_n]
 
 	self.lines:add("\t", line_n, 1)
@@ -378,7 +365,6 @@ end
 
 
 function _mt_ed_m:unindentLine(line_n)
-
 	local old_line = self.lines[line_n]
 
 	local offset
@@ -387,7 +373,6 @@ function _mt_ed_m:unindentLine(line_n)
 		print("line_n", line_n, "tabs codepath")
 		offset = 1
 		self.lines:delete(line_n, 1, line_n, 1)
-
 	else
 		print("line_n", line_n, "spaces codepath")
 		local space1, space2 = string.find(old_line, "^[\x20]+") -- (0x20 == space)
@@ -420,7 +405,6 @@ end
 
 
 function _mt_ed_m:clearHighlight()
-
 	self.h_line = self.car_line
 	self.h_byte = self.car_byte
 
@@ -445,7 +429,6 @@ function _mt_ed_m:caretToLineAndByte(clear_highlight, line_n, byte_n)
 	self:updateVertPosHint()
 	if clear_highlight then
 		self:clearHighlight()
-
 	else
 		self:updateDispHighlightRange()
 	end
@@ -486,7 +469,6 @@ end
 
 --- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
 function _mt_ed_m:displaySyncCaretOffsets()
-
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
 	local disp = self.disp
@@ -512,7 +494,6 @@ end
 
 
 function _mt_ed_m:displaySyncInsertion(line_1, line_2) -- XXX integrate into insertText directly
-
 	local lines = self.lines
 	local disp = self.disp
 
@@ -532,7 +513,6 @@ end
 
 
 function _mt_ed_m:displaySyncDeletion(line_1, line_2) -- XXX integrate into deleteText directly
-
 	local lines = self.lines
 	local disp = self.disp
 
@@ -550,7 +530,6 @@ end
 
 
 function _mt_ed_m:displaySyncAll(line_i)
-
 	local lines = self.lines
 	local disp = self.disp
 
@@ -582,7 +561,6 @@ end
 
 
 function _mt_ed_m:displaySyncAlign(line_i)
-
 	local disp = self.disp
 	line_i = line_i or 1
 

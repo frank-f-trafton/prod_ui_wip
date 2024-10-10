@@ -53,11 +53,9 @@ _mt_sub.__index = _mt_sub
 
 
 local function dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
-
 	--print("dispUpdateSubLineSyntaxColors", byte_1, byte_2, "colored_text", sub_line.colored_text, "syntax_colors", sub_line.syntax_colors)
 
 	if sub_line.colored_text and sub_line.syntax_colors then
-
 		local sub_str = sub_line.str
 		local col_text = sub_line.colored_text
 		local syn_col = sub_line.syntax_colors
@@ -82,7 +80,6 @@ local function dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
 
 			if k >= byte_1 and k < byte_2 then
 				col_text[i] = high_col
-
 			else
 				col_text[i] = syn_col[j] or def_col
 			end
@@ -96,14 +93,12 @@ end
 
 
 local function dispUpdateHighlight(self, i_para, i_sub, byte_1, byte_2)
-
 	local font = self.font
 	local paragraph = self.paragraphs[i_para]
 	local sub_line = paragraph[i_sub]
 
 	if byte_1 == byte_2 then
 		sub_line.highlighted = false
-
 	else
 		local sub_str = sub_line.str
 
@@ -154,7 +149,6 @@ end
 
 
 function editDispM.newLineContainer(font, color_t, color_h_t)
-
 	local self = {} -- AKA "disp"
 
 	self.paragraphs = {}
@@ -232,7 +226,6 @@ end
 
 
 function editDispM.newParagraph()
-
 	local self = {}
 
 	-- Paragraphs are basically just an array of sub-lines.
@@ -250,7 +243,6 @@ end
 
 
 function _mt_lc:getDocumentHeight()
-
 	-- Assumes the final sub-line is current.
 	local last_para = self.paragraphs[#self.paragraphs]
 	local last_sub = last_para[#last_para]
@@ -260,7 +252,6 @@ end
 
 
 function _mt_lc:getDocumentXBoundaries()
-
 	local x1, x2 = 0, 0
 
 	for i, paragraph in ipairs(self.paragraphs) do
@@ -276,7 +267,6 @@ end
 
 -- @param y Y position, relative to the line container start point.
 function _mt_lc:getOffsetsAtY(y)
-
 	local paragraphs = self.paragraphs
 
 	-- Find Paragraph and sub-line that are closest to the Y position.
@@ -291,7 +281,6 @@ function _mt_lc:getOffsetsAtY(y)
 		for j, sub_line in ipairs(paragraph) do
 			if y < sub_line.y then
 				break
-
 			else
 				para_i = i
 				sub_i = j
@@ -305,7 +294,6 @@ end
 
 -- @return Byte, X position and width of the glyph (if applicable).
 function _mt_lc:getSubLineInfoAtX(para_i, sub_i, x, split_x)
-
 	local paragraphs = self.paragraphs
 	local font = self.font
 
@@ -325,7 +313,6 @@ end
 
 --- Get the height of a Paragraph by comparing its first and last sub-lines. The positions must be up to date when calling. Includes lineHeight spacing, but not paragraph spacing.
 function _mt_lc:getParagraphHeight(para_i) -- XXX test
-
 	local paragraph = self.paragraphs[para_i]
 	local sub_first, sub_last = paragraph[1], paragraph[#paragraph]
 
@@ -334,7 +321,6 @@ end
 
 
 function _mt_lc:getSubLineUCharOffsetStart(para_i, sub_i)
-
 	local paragraph = self.paragraphs[para_i]
 	local u_count = 1
 
@@ -347,7 +333,6 @@ end
 
 
 function _mt_lc:getSubLineUCharOffsetEnd(para_i, sub_i)
-
 	local paragraph = self.paragraphs[para_i]
 	local u_count = 0
 
@@ -365,7 +350,6 @@ end
 
 
 function _mt_lc:getSubLineUCharOffsetStartEnd(para_i, sub_i)
-
 	local paragraph = self.paragraphs[para_i]
 	local u_count_1 = 1
 	local u_count_2
@@ -387,7 +371,6 @@ end
 --- Update sub-line Y offsets, beginning at the specified Paragraph index and continuing to the end of the `paragraphs` array.
 -- @param para_i The first Paragraph to check. All previous sub-lines in the container must have up-to-date Y offsets.
 function _mt_lc:refreshYOffsets(para_i)
-
 	local paragraphs = self.paragraphs
 	local y = 0
 
@@ -415,7 +398,6 @@ end
 -- @param i_para Index of the Paragraph. If not the first Paragraph, then all Paragraphs from 'index 1' to 'this index - 1' must be populated at time of call.
 -- @param str The source / input string.
 function _mt_lc:updateParagraph(i_para, str)
-
 	local paragraphs = self.paragraphs
 	local font = self.font
 
@@ -445,7 +427,6 @@ function _mt_lc:updateParagraph(i_para, str)
 	local final_index = 1
 	if not self.wrap_mode then
 		self:updateSubLine(i_para, 1, work_str, self.wip_syntax_colors, 1)
-
 	else
 		local width, wrapped = font:getWrap(work_str, self.view_w)
 		local start_code_point = 1
@@ -483,7 +464,6 @@ end
 
 -- Updates the alignment of sub-lines.
 function _mt_lc:updateParagraphAlign(line_1, line_2)
-
 	local paragraphs = self.paragraphs
 
 	line_1 = line_1 or 1
@@ -505,7 +485,6 @@ end
 -- @param i_sub Sub-line index.
 -- @param str The new string to use.
 function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
-
 	local font = self.font
 
 	-- All sub-lines from index 1 to this index - 1 must be populated at time of call.
@@ -549,7 +528,6 @@ function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
 
 		-- Debug
 		--textUtil.debugPrintColoredText(sub_line.colored_text)
-
 	else
 		sub_line.syntax_colors = false
 		sub_line.colored_text = false
@@ -579,7 +557,6 @@ end
 
 
 function _mt_lc:removeParagraphs(i_para, qty)
-
 	for i = 1, qty do
 		table.remove(self.paragraphs, i_para)
 	end
@@ -587,34 +564,29 @@ end
 
 
 function _mt_lc:clearHighlightDirtyRange()
-
 	self.h_line_min = math.huge
 	self.h_line_max = 0
 end
 
 function _mt_lc:setHighlightDirtyRange(car_line, h_line)
-
 	self.h_line_min = math.min(car_line, h_line)
 	self.h_line_max = math.max(car_line, h_line)
 end
 
 
 function _mt_lc:updateHighlightDirtyRange(car_line, h_line)
-
 	self.h_line_min = math.min(self.h_line_min, car_line, h_line)
 	self.h_line_max = math.max(self.h_line_max, car_line, h_line)
 end
 
 
 function _mt_lc:fullHighlightDirtyRange()
-
 	self.h_line_min = 1
 	self.h_line_max = math.huge
 end
 
 
 function _mt_lc:updateHighlights()
-
 	local paragraphs = self.paragraphs
 
 	local line_1 = math.max(self.h_line_min, 1)
@@ -646,7 +618,6 @@ function _mt_lc:updateHighlights()
 
 	for i = line_1, line_2 do
 		local paragraph = paragraphs[i]
-
 		for j, sub_line in ipairs(paragraph) do
 			-- Single highlighted line
 			if paint_mode == 0 and i == para_1 and j == sub_1 then
@@ -677,7 +648,6 @@ end
 
 
 function _mt_lc:clearHighlights()
-
 	for i, paragraph in ipairs(self.paragraphs) do
 		for j, sub_line in ipairs(paragraph) do
 			sub_line.highlighted = false
@@ -688,7 +658,6 @@ end
 
 
 function _mt_lc:updateCaretRect()
-
 	--print("disp:updateCaretRect()")
 
 	local font = self.font
@@ -712,7 +681,6 @@ end
 
 
 function _mt_lc:updateFont(font)
-
 	self.font = font
 	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
 
@@ -725,7 +693,6 @@ end
 
 
 function _mt_lc:refreshFontParams()
-
 	local font = self.font
 	local em_width = font:getWidth("M")
 	local line_height = font:getHeight() * font:getLineHeight()
