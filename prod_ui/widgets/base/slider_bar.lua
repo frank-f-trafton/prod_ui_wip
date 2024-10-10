@@ -12,30 +12,28 @@ This widget supports an optional text label, but a customized skin is required f
 --]]
 
 --[[
-
 Trough
   |   Thumb
   |   |
   v   v
-+--------------+
-| ----O------- |
-+--------------+
+┌──────────────┐
+│ ┅┅┅┅O┅┅┅┅┅┅┅ │
+└──────────────┘
 
-  |          |
-  +----------+
-       |
+  ║          ║
+  ╚════╦═════╝
+       ║
       VP2
 
 
-+---+
-|   |
-| | |
-| | |
-| O |  Vertical layout
-| | |
-|   |
-+---+
-
+┌───┐
+│   │
+│ ┇ │
+│ ┇ │
+│ O │  Vertical layout
+│ ┇ │
+│   │
+└───┘
 --]]
 
 
@@ -87,7 +85,6 @@ def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2 -- TODO: plug into w
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -111,7 +108,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 defines the trough bounding box (stored in self.trough_x|y|w|h).
 	-- Border applies to viewports: 1, 2
@@ -138,7 +134,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if self.context.mouse_pressed_button == button then
@@ -169,7 +164,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			if self.pressed then
@@ -184,7 +178,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			return lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
@@ -194,7 +187,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		if self.enabled then
 			return lgcSlider.mouseWheelLogic(self, x, y)
@@ -220,7 +212,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = uiTheme.pickButtonResource(self, skin)
 
@@ -256,7 +247,6 @@ def.skinners = {
 					)
 					--print("y1, y2", y1, y2)
 				end
-
 			else -- horizontal
 				local trough_y1 = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth/2 + 0.5)
 

@@ -36,7 +36,6 @@ def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -64,7 +63,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
 

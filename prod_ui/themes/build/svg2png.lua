@@ -35,7 +35,6 @@ local task_i = 1
 
 
 local function checkArgSourcePath()
-
 	if not arg_src_path then
 		error("missing argument: source path")
 	end
@@ -43,7 +42,6 @@ end
 
 
 local function checkArgDPI()
-
 	if not arg_dpi then
 		error("missing argument: DPI")
 	end
@@ -51,7 +49,6 @@ end
 
 
 function love.load(arguments)
-
 	if #arguments < 1 then
 		error("usage: " .. example_usage)
 	end
@@ -85,10 +82,8 @@ end
 
 
 local function tryScaleCoord(value, dpi)
-
 	if value ~= nil then
 		return scaleCoord(value, dpi)
-
 	else
 		return value
 	end
@@ -96,13 +91,11 @@ end
 
 
 local function assertAllOrNone(err_label, ...)
-
 	local has_nil, has_any
 
 	for i = 1, select("#", ...) do
 		if select(i, ...) == nil then
 			has_nil = true
-
 		else
 			has_any = true
 		end
@@ -115,7 +108,6 @@ end
 
 
 local tasks_export = {
-
 	-- 1
 	function()
 		checkArgSourcePath()
@@ -186,7 +178,6 @@ local tasks_export = {
 				end
 			end
 			src_i = src_i + 1
-
 		else
 			task_i = task_i + 1
 		end
@@ -197,13 +188,11 @@ local tasks_export = {
 
 
 function love.update(dt)
-
 	if not tasks_export[task_i] then
 		print("* Finished all tasks.")
 		print("task_i", task_i)
 		love.event.quit()
 		return
-
 	else
 		print("* Task #" .. task_i)
 		if not tasks_export[task_i]() then
@@ -213,4 +202,3 @@ function love.update(dt)
 		end
 	end
 end
-

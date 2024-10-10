@@ -6,23 +6,23 @@ The main body of a ComboBox (a Dropdown Box with text input).
 
 Closed:
 
-+-----------+-+
-| Foobar|   |v| --- Type and manipulate the text. To open the drawer, click the button to the side or press Alt+Down.
-+-----------+-+     To cycle through items without opening the drawer, press the up/down keys or turn the mouse-wheel.
+┌───────────┬─┐
+│ Foobar|   │v│ --- Type and manipulate the text. To open the drawer, click the button to the side or press Alt+Down.
+└───────────┴─┘     To cycle through items without opening the drawer, press the up/down keys or turn the mouse-wheel.
 
 
 Opened:
 
-+-----------+-+
-| Foobar    |v| --- Click to close the drawer and return keyboard focus to the text.
-+-----------+-+
-| Bazbop    |^| --\
-| Foobar    +-+   |
-|:Jingle::::| |   |
-| Bingo     | |   |--- Pop-up widget with list of selections.
-| Pogo      +-+   |
-| Stove     |v|   |
-+-----------+-+ --/
+┌───────────┬─┐
+│ Foobar    │v│ --- Click to close the drawer and return keyboard focus to the text.
+├───────────┼─┤
+│ Bazbop    │^│ ══╗
+│ Foobar    ├─┤   ║
+│:Jingle::::│ │   ║
+│ Bingo     │ │   ╠═══ Pop-up widget with list of selections.
+│ Pogo      ├─┤   ║
+│ Stove     │v│   ║
+└───────────┴─┘ ══╝
 
 
 The menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance and
@@ -123,7 +123,6 @@ end
 
 
 function def:addItem(text, pos)
-
 	local skin = self.skin
 	local font = skin.font
 
@@ -163,7 +162,6 @@ end
 
 
 function def:removeItem(item_t)
-
 	-- Assertions
 	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
@@ -179,7 +177,6 @@ end
 
 
 local function removeItemIndexCleanup(self, item_i, id)
-
 	-- Removed item was the last in the list, and was selected:
 	if self.menu[id] > #self.menu.items then
 		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
@@ -199,7 +196,6 @@ end
 
 
 function def:removeItemByIndex(item_i)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -225,7 +221,6 @@ end
 
 
 function def:setSelection(item_t, id)
-
 	-- Assertions
 	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
@@ -237,7 +232,6 @@ end
 
 
 function def:setSelectionByIndex(item_i, id)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -271,7 +265,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -318,7 +311,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is for text placement and offsetting.
 	-- Viewport #2 is the text scissor-box boundary.
 	-- Viewport #3 is the "open menu" button.
@@ -337,9 +329,7 @@ end
 
 
 function def:uiCall_update(dt) -- Copied from input/text_box_single.lua, 27 Feb 2024.
-
 	local line_ed = self.line_ed
-
 	local scr_x_old = self.scr_x
 
 	-- Handle update-time drag-scroll.
@@ -372,7 +362,6 @@ end
 
 
 function def:_openPopUpMenu()
-
 	if not self.wid_drawer then
 		if self:hasThimble() then
 			love.keyboard.setTextInput(false)
@@ -404,7 +393,6 @@ end
 
 
 function def:_closePopUpMenu(update_chosen)
-
 	local wid_drawer = self.wid_drawer
 	if wid_drawer and not wid_drawer._dead then
 		self.wid_drawer:_closeSelf(update_chosen)
@@ -413,10 +401,8 @@ end
 
 
 function def:_togglePopUpMenu(update_chosen)
-
 	if self.wid_drawer then
 		self:_closePopUpMenu(update_chosen)
-
 	else
 		self:_openPopUpMenu()
 	end
@@ -424,7 +410,6 @@ end
 
 
 function def:wid_popUpCleanup(reason_code)
-
 	-- Prevent instantly creating the drawer again when clicking on the dropdown body (with the intention of closing it).
 	if self.context.current_pressed == self then
 		self.context.current_pressed = false
@@ -444,7 +429,6 @@ end
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
-
 	local check_chosen = false
 	local chosen_i_old = self.menu.chosen_i
 
@@ -476,7 +460,6 @@ end
 
 
 function def:uiCall_thimbleTake(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(not self.wid_drawer)
 	end
@@ -484,7 +467,6 @@ end
 
 
 function def:uiCall_thimbleRelease(inst)
-
 	print("def:uiCall_thimbleRelease", self, inst, self == inst)
 
 	if self == inst then
@@ -500,7 +482,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		-- Destroy pop-up menu (either kind) if it exists in reference to this widget.
 		commonWimp.checkDestroyPopUp(self)
@@ -511,12 +492,10 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		-- Forward keyboard events to the pop-up menu.
 		if self.wid_drawer then
 			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
-
 		else
 
 			local items = self.menu.items
@@ -545,7 +524,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-
 	if self == inst then
 		lgcInputS.textInputLogic(self, text)
 	end
@@ -554,7 +532,6 @@ end
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst
 	and self.enabled
 	then
@@ -564,7 +541,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst
 	and self.enabled
 	then
@@ -572,7 +548,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if widShared.pointInViewport(self, 1, mx, my) then
 			self:setCursorLow(self.skin.cursor_on)
-
 		else
 			self:setCursorLow()
 		end
@@ -581,7 +556,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -592,7 +566,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -623,7 +596,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- XXX: text manipulation stuff.
 
 	-- If the cursor overlaps the pop-up drawer while not overlapping the body,
@@ -646,7 +618,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			self.press_busy = false
@@ -656,7 +627,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- Cycle menu options if the drawer is closed.
 		if not self.wid_drawer then
@@ -702,7 +672,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			--local font = skin.font
 			local line_ed = self.line_ed
@@ -710,7 +679,6 @@ def.skinners = {
 			local res
 			if self.enabled then
 				res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
-
 			else
 				res = skin.res_disabled
 			end

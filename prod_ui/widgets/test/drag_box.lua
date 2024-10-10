@@ -14,7 +14,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -48,7 +47,6 @@ end
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -59,7 +57,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -71,7 +68,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button == 1 then
@@ -81,7 +77,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				if self.center_on_pointer then
 					self.mouse_ox = self.w/2
 					self.mouse_oy = self.h/2
-
 				else
 					self.mouse_ox = x - a_x
 					self.mouse_oy = y - a_y
@@ -96,7 +91,6 @@ end
 
 
 function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
-
 	-- Update mouse position
 	self.context.mouse_x = x
 	self.context.mouse_y = y
@@ -119,7 +113,6 @@ end
 
 
 function def:uiCap_mouseReleased(x, y, button, istouch, presses)
-
 	if button == 1 then
 		self.context.current_pressed = false
 		self.context.mouse_pressed_button = false
@@ -134,7 +127,6 @@ end
 
 
 function def:render()
-
 	local r, g, b, a = 1, 1, 0, 1
 	if self.pressed then
 		r, g, b, a = 1, 0, 0, 1
@@ -151,4 +143,3 @@ end
 
 
 return def
-

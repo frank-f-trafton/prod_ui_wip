@@ -15,9 +15,7 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
-
 		-- Required:
 		if not self.font then
 			error("missing field: self.font")
@@ -54,14 +52,12 @@ end
 
 
 function def:refreshText()
-
 	local text_h
 
 	if self.formatted then
 		local lines
 		self.text_w, lines = font:getWrap(self.text)
 		text_h = self.font:getHeight() * #lines
-
 	else
 		text_h = self.font:getHeight() * (1 + textUtil.countStringPatterns(self.text, "\n", true))
 		self.text_w = self.font:getWidth(self.text)
@@ -83,7 +79,6 @@ end
 
 
 function def:setFont(font)
-
 	-- XXX Assertions
 	self.font = font
 
@@ -92,7 +87,6 @@ end
 
 
 function def:setText(text)
-
 	-- XXX Assertions
 	self.text = text
 
@@ -101,7 +95,6 @@ end
 
 
 function def:setFormatted(formatted)
-
 	-- XXX Assertions
 	self.formatted = formatted
 
@@ -110,7 +103,6 @@ end
 
 
 function def:setMargins(l, r, t, b)
-
 	-- XXX Assertions
 	self.margin_l = l
 	self.margin_r = r
@@ -122,7 +114,6 @@ end
 
 
 function def:setAlign(align)
-
 	-- XXX Assertions
 	self.align = align
 
@@ -131,7 +122,6 @@ end
 
 
 function def:setVerticalAlign(align_v)
-
 	-- XXX Assertions
 	self.align_v = align_v
 
@@ -140,7 +130,6 @@ end
 
 
 function def:setColor(r, g, b, a)
-
 	-- XXX Assertions
 	self.r = r
 	self.g = g
@@ -150,13 +139,11 @@ end
 
 
 function def:render()
-
 	love.graphics.setFont(self.font)
 	love.graphics.setColor(self.r, self.g, self.b, self.a)
 
 	if self.formatted then
 		love.graphics.printf(self.text, self.margin_l, self.text_y, self.w - self.margin_l - self.margin_r, self.align)
-
 	else
 		love.graphics.print(self.text, self.margin_l, self.text_y)
 	end
@@ -164,4 +151,3 @@ end
 
 
 return def
-

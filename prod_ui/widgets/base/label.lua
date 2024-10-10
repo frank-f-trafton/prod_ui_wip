@@ -22,7 +22,6 @@ def.setLabel = lgcLabel.widSetLabel
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 
@@ -42,7 +41,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
 	lgcLabel.reshapeLabel(self)
@@ -66,7 +64,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = (self.enabled) and skin.res_idle or skin.res_disabled
 

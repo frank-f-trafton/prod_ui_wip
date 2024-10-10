@@ -2,7 +2,6 @@
 
 
 return {
-
 	skinner_id = "tquad",
 
 	["*box"] = "style/boxes/button_small",

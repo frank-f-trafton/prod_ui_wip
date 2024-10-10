@@ -59,7 +59,6 @@ def.moveLast = commonMenu.widgetMoveLast
 
 
 function def:_closeSelf(update_chosen)
-
 	if not self._dead then
 		local wid_ref = self.wid_ref
 		if wid_ref and not wid_ref._dead then
@@ -170,7 +169,6 @@ def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 function def:menuChangeCleanup()
-
 	self.menu:setSelectionStep(0, false)
 	self:arrange()
 	self:cacheUpdate(true)
@@ -180,7 +178,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		if not self.wid_ref then
 			error("no owner widget assigned to this menu.")
@@ -246,7 +243,6 @@ end
 
 
 function def:uiCall_resize()
-
 	local skin = self.skin
 	local menu = self.menu
 	local wid_ref = self.wid_ref
@@ -271,7 +267,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -299,7 +294,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 
 	if refresh_dimensions then
@@ -313,7 +307,6 @@ end
 
 -- Used instead of 'uiCall_keypressed'. The dropdown body passes keyboard events through here.
 function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
-
 	local root = self:getTopWidgetInstance()
 
 	if scancode == "up" then
@@ -360,7 +353,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local rolled = false
 
@@ -391,7 +383,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -426,7 +417,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 	end
@@ -434,7 +424,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		local ax, ay = self:getAbsolutePosition()
 		local mouse_x = x - ax
@@ -451,7 +440,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 		if handled_scroll_bars then
 			self.context:clearClickSequence()
-
 		else
 			if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
 
@@ -472,7 +460,6 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
 		-- Repeat-press events for scroll bar buttons
 		if commonScroll.press_busy_codes[self.press_busy]
@@ -487,7 +474,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and button == self.context.mouse_pressed_button
 	then
@@ -512,7 +498,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -540,7 +525,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	-- This widget cannot operate if the owner which it extends is gone.
 	local wid_ref = self.wid_ref
 	if not wid_ref then
@@ -582,7 +566,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		self:_closeSelf(false)
 	end
@@ -606,7 +589,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local menu = self.menu
 

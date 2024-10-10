@@ -36,7 +36,6 @@ def.uiCall_pointerUnpress = lgcButtonBare.uiCall_pointerUnpress
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -57,7 +56,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- The label and trough both use the widget dimensions as bounding boxes.
 
 	self.trough_x = 0
@@ -71,7 +69,6 @@ function def:uiCall_reshape()
 		self.thumb_h = math.floor(math.max(1, 6 * self.context.resources.scale))
 
 		self.trough_h = self.trough_h - self.thumb_h
-
 	else
 		self.thumb_y = 0
 		self.thumb_w = math.floor(math.max(1, 6 * self.context.resources.scale))
@@ -90,7 +87,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if self.context.mouse_pressed_button == button then
@@ -112,7 +108,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			if self.pressed then
@@ -125,7 +120,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			return lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
@@ -135,7 +129,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		if self.enabled then
 			return lgcSlider.mouseWheelLogic(self, x, y)
@@ -145,7 +138,6 @@ end
 
 
 def.render = function(self, ox, oy)
-
 	love.graphics.push("all")
 
 	-- Outline

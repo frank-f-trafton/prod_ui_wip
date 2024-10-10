@@ -2,7 +2,6 @@
 
 
 return {
-
 	skinner_id = "default",
 
 	["*tq_px"] = "tex_quads/pixel",

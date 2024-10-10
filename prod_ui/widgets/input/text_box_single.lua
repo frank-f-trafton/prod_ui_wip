@@ -3,12 +3,12 @@
 A single-line text input box.
 
          Viewport #1
-  +-------------------------+
-  |                         |
+  ╔═════════════════════════╗
+  ║                         ║
 
-+-----------------------------+
-| The quick brown fox jumps   |
-+-----------------------------+
+┌─────────────────────────────┐
+│ The quick brown fox jumps   │
+└─────────────────────────────┘
 
 --]]
 
@@ -58,7 +58,6 @@ def.pop_up_def = lgcInputS.pop_up_def
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -92,7 +91,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is for text placement and offsetting.
 	-- Viewport #2 is the text scissor-box boundary.
 
@@ -108,7 +106,6 @@ end
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -119,7 +116,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -130,7 +126,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -154,7 +149,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			self.press_busy = false
@@ -169,7 +163,6 @@ end
 
 
 function def:uiCall_thimbleTake(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
@@ -177,7 +170,6 @@ end
 
 
 function def:uiCall_thimbleRelease(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -185,7 +177,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			self:wid_action()
@@ -195,7 +186,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-
 	if self == inst then
 		lgcInputS.textInputLogic(self, text)
 	end
@@ -204,7 +194,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	end
@@ -212,9 +201,7 @@ end
 
 
 function def:uiCall_update(dt)
-
 	local line_ed = self.line_ed
-
 	local scr_x_old = self.scr_x
 
 	-- Handle update-time drag-scroll.
@@ -247,7 +234,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		commonWimp.checkDestroyPopUp(self)
 	end
@@ -271,7 +257,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = uiTheme.pickButtonResource(self, skin)
 			local line_ed = self.line_ed

@@ -8,11 +8,11 @@ A widget container with a label and outline / perimeter.
      Label text
          |
          v
-+--- Some Group ---+  --\
-|         [BUTTON] |    |
-| [Button]         |    >-- Perimeter
-|          [Btn]   |    |
-+------------------+  --/
+╭─── Some Group ───╮  ══╗
+│         [BUTTON] │    ║
+│ [Button]         │    ╠══ Perimeter
+│          [Btn]   │    ║
+╰──────────────────╯  ══╝
 
 --]]
 
@@ -34,7 +34,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -66,7 +65,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local font = skin.font
 

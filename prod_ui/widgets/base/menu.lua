@@ -10,30 +10,30 @@ doc_w|h is the range containing menu items, and the range that Viewport 1 is all
 
 
 	       Viewport 2
-	           |
-	+----------+---------+
-	|                    |
-	
-	+--------------------+-+
-	|                    |^|
-	| :::::::::::::::::: +-+  --+
-	| :                : | |    |
-	| :                : | |    +-- Viewport 1 (overlapping document area)
-	| :                : | |    |
-	| :                : | |    |
-	| :................: +-+  --+
-	| '                ' |v|
-	+-+----------------+-+-+
-	|<|                |>| |
-	+-+----------------+-+-+
+	           ║
+	╔══════════╩═════════╗
+	║                    ║
+
+	┌────────────────────┬─┐
+	│                    │^│
+	│ :::::::::::::::::: ├─┤  ══╗
+	│ :                : │ │    ║
+	│ :                : │ │    ╠══ Viewport 1 (overlapping document area)
+	│ :                : │ │    ║
+	│ :                : │ │    ║
+	│ :................: ├─┤  ══╝
+	│ '                ' │v│
+	├─┬────────────────┬─┼─┤
+	│<│                │>│ │
+	└─┴────────────────┴─┴─┘
 	  '                '
 	  '                '
 	  '                '
 	  ''''''''''''''''''
-	
-	  |                |
-	  +-------+--------+
-	          |
+
+	  ║                ║
+	  ╚═══════╦════════╝
+	          ║
 	       doc_w|h
 --]]
 
@@ -84,7 +84,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		-- ...
 	end
@@ -149,7 +148,6 @@ def.moveLast = commonMenu.widgetMoveLast
 -- @param index (default: #items + 1) Where to add the item in the list.
 -- @return Nothing.
 function def:addItem(item_instance, index)
-
 	local items = self.menu.items
 	index = index or #items + 1
 
@@ -165,7 +163,6 @@ end
 -- @param index (default: #items) Index of the item to remove. Must point to a valid table.
 -- @return The removed item instance.
 function def:removeItem(index)
-
 	local items = self.menu.items
 	index = index or #items
 
@@ -187,7 +184,6 @@ end
 -- @param item The item table in the menu.
 -- @return The removed item. Raises an error if the item is not found in the menu.
 function def:removeItemTable(item) -- XXX untested
-
 	local index
 	for i, check in ipairs(self.menu.items) do
 		if check == item then
@@ -198,7 +194,6 @@ function def:removeItemTable(item) -- XXX untested
 
 	if not index then
 		error("couldn't find item table in menu.")
-
 	else
 		return self:removeItem(index)
 	end
@@ -223,7 +218,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 
@@ -259,7 +253,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Reset viewport and progressively carve out space for the scroll bars.
 	self.vp_x = 0
 	self.vp_y = 0
@@ -316,7 +309,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 
 	if refresh_dimensions then
@@ -342,7 +334,6 @@ def.wid_defaultKeyNav = commonMenu.keyNavTB
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
@@ -362,9 +353,7 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
-
 		-- Implement Drag-to-select and menuCall_pointerDrag.
 		if self.press_busy == "menu-drag" then
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
@@ -384,7 +373,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				self.menu:setSelectedIndex(item_i)
 				-- Turn off item_hover so that other items don't glow.
 				self.item_hover = false
-				
+
 				--self:selectionInView()
 
 				if item_t.menuCall_pointerDrag then
@@ -400,7 +389,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local ax, ay = self:getAbsolutePosition()
 		mouse_x = mouse_x - ax
@@ -420,7 +408,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		and mouse_y >= self.vp2_y
 		and mouse_y < self.vp2_y + self.vp2_h
 		then
-
 			local menu = self.menu
 
 			-- Update item hover
@@ -471,7 +458,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 
@@ -490,7 +476,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button <= 3 then
@@ -507,7 +492,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 
 			if not handled_scroll_bars then
-
 				local ax, ay = self:getAbsolutePosition()
 				local mouse_x = x - ax
 				local mouse_y = y - ay
@@ -521,7 +505,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				if not in_port_2 then
 					-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 					self.context:forceClickSequence(false, button, 1)
-
 				else
 
 					x = x - ax + self.scr_x - self.vp_x
@@ -554,9 +537,7 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
-
 		-- Repeat-press events for scroll bar buttons
 		if commonScroll.press_busy_codes[self.press_busy]
 		and button == 1
@@ -581,7 +562,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			commonScroll.widgetClearPress(self)
@@ -591,7 +571,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			-- If mouse is over the selected item and it has a pointerRelease callback, run it.
 			local item_selected = self.menu.items[self.menu.index]
 			if item_selected and item_selected.selectable then
-
 				local ax, ay = self:getAbsolutePosition()
 				local mouse_x = x - ax
 				local mouse_y = y - ay
@@ -611,7 +590,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -632,7 +610,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(false)
 			end
-			
+
 			-- Stop bubbling
 			return true
 		end
@@ -641,7 +619,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -713,7 +690,6 @@ end
 
 def.skinners = {
 	default = {
-
 		install = function(self, skinner, skin)
 			uiTheme.skinnerCopyMethods(self, skinner)
 		end,
@@ -729,7 +705,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 
 			local menu = self.menu

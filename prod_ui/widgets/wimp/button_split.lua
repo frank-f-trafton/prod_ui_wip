@@ -6,15 +6,15 @@ A button with a main part and a secondary part which performs a different action
  Main button part
        |
        v
-+------------+---+
-| New        | v |  <--- Auxiliary button part
-+---+------------+
-    | Dog        |
-    | Cat        |
-    | Hamster    |  <--- Pop-up menu, created by hitting the aux part
-    | Turtle     |
-    | Houseplant |
-    +------------+
+┌────────────┬───┐
+│ New        │ v │  <--- Auxiliary button part
+└───┬────────┴───┤
+    │ Dog        │
+    │ Cat        │
+    │ Hamster    │  <--- Pop-up menu, created by hitting the aux part
+    │ Turtle     │
+    │ Houseplant │
+    └────────────┘
 --]]
 
 
@@ -53,7 +53,6 @@ def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -81,7 +80,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the graphic drawing rectangle.
 

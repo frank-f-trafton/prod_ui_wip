@@ -1,14 +1,14 @@
 --[[
 wimp/menu_bar: A horizontal menu bar that sits at the top of the application or within a window frame.
 
-+-------------------------------+
-|File  Edit  View  Help         |  <--  Menu Bar Widget
-+-----------------+-------------+
-| New      ctrl+n |
-| Open     ctrl+o |                <--  Pop-up menu spawned by Menu Bar
-|-----------------|
-| Quit     ctrl+q |
-+-----------------+
+┌───────────────────────────────┐
+│File  Edit  View  Help         │  <--  Menu Bar Widget
+├─────────────────┬─────────────┘
+│ New      ctrl+n │
+│ Open     ctrl+o │                <--  Pop-up menu spawned by Menu Bar
+│┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄│
+│ Quit     ctrl+q │
+└─────────────────┘
 
 The menu bar may act strangely if it is too narrow to display all categories.
 
@@ -40,7 +40,6 @@ The reason is that these shortcuts should work even if the menu bar is destroyed
 
 
 local function determineItemColor(item, client)
-
 	if item.pop_up_def then
 		return client.skin.color_cat_enabled
 
@@ -56,7 +55,6 @@ end
 def._mt_category = {
 	type = "category",
 	reshape = function(item, client)
-
 		local font = client.skin.font_item
 
 		--item.h = client.h
@@ -69,7 +67,6 @@ def._mt_category = {
 		if not temp_str then
 			item.ul_on = false
 			item.text_int = item.text
-
 		else
 			item.ul_on = true
 			item.text_int = temp_str
@@ -82,7 +79,6 @@ def._mt_category = {
 		item.w = font:getWidth(item.text_int) + client.text_pad_x*2
 	end,
 	render = function(item, client, ox, oy)
-
 		love.graphics.setColor(determineItemColor(item, client))
 
 		-- Underlines are handled in a separate pass in the client.
@@ -95,7 +91,6 @@ def._mt_category.__index = def._mt_category
 
 
 function def:appendItem(item_type, info)
-
 	local item = {
 		x = 0,
 		y = 0,
@@ -115,7 +110,6 @@ function def:appendItem(item_type, info)
 		item.selectable = true
 
 		setmetatable(item, self._mt_category)
-
 	else
 		error("unknown item type: " .. tostring(item_type))
 	end
@@ -133,7 +127,6 @@ end
 
 
 local function setStateIdle(self)
-
 	self.chain_next = false
 	self.last_open = false
 	self.menu:setSelectedIndex(0)
@@ -148,7 +141,6 @@ end
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
 local function makePopUpMenu(item, client, bank_thimble, take_thimble, doctor_press, set_selection) -- XXX name is too similar to commonWimp.makePopUpMenu()
-
 	commonMenu.widgetConfigureMenuItems(item, item.pop_up_def)
 
 	-- Locate bottom of menu item in UI space.
@@ -193,7 +185,6 @@ end
 
 
 local function destroyPopUpMenu(client, reason_code, unbank_thimble)
-
 	local root = client:getTopWidgetInstance()
 
 	root:runStatement("rootCall_destroyPopUp", client, reason_code)
@@ -207,7 +198,6 @@ end
 
 
 function def:arrange()
-
 	local items = self.menu.items
 	local xx = 0
 
@@ -223,7 +213,6 @@ end
 
 
 function def:wid_popUpCleanup(reason_code)
-
 	print("wid_popUpCleanup", "reason_code", reason_code, "current_thimble", self.context.current_thimble, "s==t", self == self.context.current_thimble)
 
 	--print(debug.traceback())
@@ -277,7 +266,6 @@ def.moveNext = commonMenu.widgetMoveNext
 
 --- Call after adding or removing items. Side effect: resets menu bar state.
 function def:menuChangeCleanup()
-
 	setStateIdle(self)
 
 	self:arrange()
@@ -292,7 +280,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -351,13 +338,11 @@ end
 
 
 function def:uiCall_resize()
-
 	self.h = self.base_height
 end
 
 
 function def:uiCall_reshape()
-
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
 
@@ -375,7 +360,6 @@ end
 
 --- Updates cached display state.
 function def:cacheUpdate(refresh_dimensions)
-
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(self.menu.items)
 	end
@@ -383,7 +367,6 @@ end
 
 
 local function keyMnemonicSearch(items, key)
-
 	for i, item in ipairs(items) do
 		if key == item.key_mnemonic then
 			-- Return the first instance, even if not selectable, to avoid weird conflicts
@@ -397,7 +380,6 @@ end
 
 --- A callback function to use for keyPress hooks.
 function def:widHook_pressed(tbl, key, scancode, isrepeat)
-
 	local key_mgr = self.context.key_mgr
 
 	if not self.context.mouse_pressed_button then
@@ -414,7 +396,6 @@ function def:widHook_pressed(tbl, key, scancode, isrepeat)
 
 				return true
 			end
-
 		-- Check category key mnemonics (when idle, and only if alt is held)
 		else
 			local alt_state = key_mgr:getModAlt()
@@ -435,7 +416,6 @@ end
 
 --- A callback function to use for keyRelease hooks.
 function def:widHook_released(tbl, key, scancode, isrepeat)
-
 	local key_mgr = self.context.key_mgr
 
 	if not self.context.mouse_pressed_button then
@@ -449,7 +429,6 @@ end
 
 
 function def:widCall_keyboardRunItem(item_t)
-
 	-- Confirm item belongs to this menu
 	local item_i
 	for i, item in ipairs(self.menu.items) do
@@ -477,19 +456,16 @@ end
 
 --- Activate the menu bar, opening the first selectable category (if one exists).
 function def:widCall_keyboardActivate()
-
 	-- If there is already a pop-up menu (whether chained to the menu bar or just in general), destroy it
 	local root = self:getTopWidgetInstance()
 	if root.pop_up_menu then
 		destroyPopUpMenu(self, "concluded", true)
 		setStateIdle(self)
-
 	else
 		-- If the menu bar is currently active, blank out the current selection and restore thimble state if possible.
 		if self.state == "opened" then
 			self:bubbleStatement("rootCall_restoreThimble", self)
 			setStateIdle(self)
-
 		else
 			-- Find first selectable item
 			local item_i, item_t
@@ -515,7 +491,6 @@ end
 
 --- Code to handle stepping left and right through the menu bar, which is called from a couple of places.
 local function handleLeftRightKeys(self, key, scancode, isrepeat)
-
 	local selection_old = self.menu.index
 	local mod = self.context.key_mgr.mod
 
@@ -537,7 +512,6 @@ local function handleLeftRightKeys(self, key, scancode, isrepeat)
 
 			self.menu:setSelectedIndex(selection_new)
 			return true
-
 		else
 			destroyPopUpMenu(self, "concluded", false)
 			setStateIdle(self)
@@ -554,7 +528,6 @@ end
 
 --- Sent from a pop-up menu that hasn't handled left/right input.
 function def:widCall_keyPressedFallback(invoker, key, scancode, isrepeat)
-
 	if handleLeftRightKeys(self, key, scancode, isrepeat) then
 		return true
 	end
@@ -562,14 +535,12 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local rolled = false
 
 		--print("self.state", self.state, "self.press_busy", self.press_busy)
 		-- Handle press roll-over for menus in "opened" state.
 		if self.state == "opened" and self.press_busy == "menu-drag" then
-
 			local wid = widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 
 			if wid and wid ~= self then
@@ -599,12 +570,10 @@ end
 
 
 function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- Implement Drag-to-select.
 	-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
 	if self.state == "opened" then
-
 		-- Mouse position relative to viewport #1
 		local mx = mouse_x - self.vp_x
 		local my = mouse_y - self.vp_y
@@ -642,7 +611,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		--[[
 		-- XXX: Commented out 2023-Apr-07. I don't think this is necessary anymore. When active,
@@ -709,7 +677,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		self.item_hover = false
 	end
@@ -717,11 +684,9 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	--print("menu bar pointerPress", self, inst, x, y, button)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
-
 			local ax, ay = self:getAbsolutePosition()
 			local ms_x = x - ax
 			local ms_y = y - ay
@@ -737,7 +702,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					self.item_hover = false
 
 					self:cacheUpdate(true)
-
 				else
 					x = x - ax + self.scr_x - self.vp_x
 					y = y - ay + self.scr_y - self.vp_y
@@ -763,7 +727,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 								-- Halt propagation
 								return true
 							end
-
 						-- Clicked on bare or non-interactive part of widget: close any open category
 						-- and restore banked thimble state.
 						else
@@ -784,10 +747,8 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
-
 			self.press_busy = false
 
 			-- Mouse is over the selected item
@@ -814,21 +775,18 @@ end
 
 
 local function async_remove(self, _reserved, dt)
-
 	-- Tests async removal and pop-up menu cleanup.
 	self:remove()
 end
 
 
 function def:uiCall_update(dt)
-
 	--print(self.w, self.h, self.doc_w, self.doc_h, self.scr_x, self.scr_y)
 	--print("vp1", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
-
 	local needs_update = false
 
 	-- Handle update-time drag-scroll.
@@ -871,7 +829,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		-- If a pop-up menu exists that references this widget, destroy it.
 		-- Also try to unbank the thimble if it hasn't been done already.
@@ -907,7 +864,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 
 			local items = self.menu.items

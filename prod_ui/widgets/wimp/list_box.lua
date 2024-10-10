@@ -3,16 +3,16 @@
 
 A basic WIMP ListBox.
 
- +--------------------------+-+
- |[B] First item            |^| <--
- |[B] Second item           +-+ <--
- |[B] Third                 | | <-- List items
- |[B] Fourth                | | <--
- |[B] And so on             +-+ <--
- |                          |v|
- +-+----------------------+-+-+
- |<|                      |>| |
- +-+----------------------+-+-+
+ ┌──────────────────────────┬─┐
+ │[B] First item            │^│ ═╗
+ │[B] Second item           ├─┤  ║
+ │[B] Third                 │ │  ╠═ List items
+ │[B] Fourth                │ │  ║
+ │[B] And so on             ├─┤ ═╝
+ │                          │v│
+ ├─┬──────────────────────┬─┼─┤
+ │<│                      │>│ │
+ └─┴──────────────────────┴─┴─┘
 
    ^                         ^
    |                         |
@@ -127,7 +127,6 @@ end
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
-
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -164,7 +163,6 @@ end
 
 
 function def:addItem(text, pos, bijou_id)
-
 	-- XXX: Assertions.
 
 	local skin = self.skin
@@ -202,7 +200,6 @@ end
 
 
 function def:removeItem(item_t)
-
 	-- Assertions
 	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
@@ -216,7 +213,6 @@ end
 
 
 function def:removeItemByIndex(item_i)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -235,7 +231,6 @@ function def:removeItemByIndex(item_i)
 		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
 		if landing_i then
 			self:setSelectionByIndex(landing_i)
-
 		else
 			self:setSelectionByIndex(0)
 		end
@@ -252,7 +247,6 @@ end
 
 
 function def:setSelection(item_t)
-
 	-- Assertions
 	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
@@ -264,7 +258,6 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -275,7 +268,6 @@ end
 
 
 function def:setMarkedItem(item_t, marked)
-
 	-- Assertions
 	-- [[
 	uiShared.assertTable(1, item_t)
@@ -286,7 +278,6 @@ end
 
 
 function def:toggleMarkedItem(item_t)
-
 	-- Assertions
 	-- [[
 	uiShared.assertTable(1, item_t)
@@ -297,7 +288,6 @@ end
 
 
 function def:setMarkedItemByIndex(item_i, marked)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -310,7 +300,6 @@ end
 
 
 function def:getMarkedItem(item_t)
-
 	-- Assertions
 	-- [[
 	uiShared.assertTable(1, item_t)
@@ -322,7 +311,6 @@ end
 
 --- Produces a table that contains all items that are currently marked (multi-selected).
 function def:getAllMarkedItems()
-
 	local tbl = {}
 
 	for i, item in ipairs(self.menu.items) do
@@ -336,7 +324,6 @@ end
 
 
 function def:clearAllMarkedItems()
-
 	for i, item in ipairs(self.menu.items) do
 		item.marked = false
 	end
@@ -344,7 +331,6 @@ end
 
 
 function def:setMarkedItemRange(marked, first, last)
-
 	local menu = self.menu
 	local items = menu.items
 
@@ -363,7 +349,6 @@ end
 
 
 function def:countMarkedItems()
-
 	local count = 0
 
 	for i, item in ipairs(self.menu.items) do
@@ -377,7 +362,6 @@ end
 
 
 local function markItemsCursorMode(self, old_index)
-
 	if not self.mark_index then
 		self.mark_index = old_index
 	end
@@ -393,7 +377,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -471,7 +454,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -500,7 +482,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 	local skin = self.skin
 
@@ -551,7 +532,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		local items = self.menu.items
 		local old_index = self.menu.index
@@ -590,7 +570,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -627,7 +606,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 		self.item_hover = false
@@ -636,7 +614,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -656,7 +633,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 		if handled_scroll_bars then
 			self.context:clearClickSequence()
-
 		else
 			local mx, my = self:getRelativePosition(x, y)
 
@@ -741,7 +717,6 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
 		-- Repeat-press events for scroll bar buttons
 		if commonScroll.press_busy_codes[self.press_busy]
@@ -756,7 +731,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- drag_reorder is incompatible with drag_drop_mode, drag_select, and the "toggle" and "cursor"
 	-- mark modes.
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
@@ -787,7 +761,6 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				self:bubbleStatement("rootCall_setDragAndDropState", self, drop_state)
 			end
-
 		else
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
@@ -836,7 +809,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -848,7 +820,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
@@ -860,7 +831,6 @@ end
 
 
 function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		local root = self:getTopWidgetInstance()
 		local drop_state = root.drop_state
@@ -877,7 +847,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst
 	and self.enabled
 	then
@@ -892,7 +861,6 @@ end
 
 
 function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
-
 	if self == inst
 	and self.enabled
 	then
@@ -907,11 +875,9 @@ end
 
 
 function def:uiCall_update(dt)
-
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
-
 	local needs_update = false
 
 	-- Clear click-sequence item.
@@ -969,7 +935,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local data_icon = skin.data_icon
 
