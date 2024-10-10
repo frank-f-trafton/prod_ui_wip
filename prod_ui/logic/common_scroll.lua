@@ -35,7 +35,6 @@ end
 
 -- A default scroll bar style table, used in cases where a style table is not provided.
 commonScroll.default_scr_style = {
-
 	has_buttons = true,
 	trough_enabled = true,
 	thumb_enabled = true,
@@ -64,7 +63,6 @@ commonScroll.default_scr_style = {
 
 
 commonScroll.press_busy_codes = {
-
 	["v"] = true, -- vertical thumb (or trough->thumb)
 	["v1-pend"] = true, -- vertical button-less, pending repeat action
 	["v1-cont"] = true, -- vertical button-less, continuous scroll in update()
@@ -126,7 +124,6 @@ code_map_h["cont"]["b2"] = "h2-cont"
 -- @param scr_style The scroll bar style table (options and measurements). If not provided, a default will be used.
 -- @return The scroll bar table.
 function commonScroll.newBar(horizontal, scr_style)
-
 	-- XXX Assertions
 
 	horizontal = not not horizontal
@@ -232,7 +229,6 @@ end
 
 
 function _mt_bar:testPoint(px, py)
-
 	-- Broad check
 	if px >= self.x and px < self.x + self.w and py >= self.y and py < self.y + self.h then
 
@@ -269,7 +265,6 @@ end
 
 
 local function updateShapesH(self)
-
 	self.trough_valid = false
 	self.thumb_valid = false
 
@@ -290,7 +285,6 @@ local function updateShapesH(self)
 			self.b2_w = shortened_length
 			self.b2_h = self.h
 		end
-
 	-- Normal positioning.
 	else
 		local measure = 0
@@ -302,7 +296,7 @@ local function updateShapesH(self)
 			self.b1_w = self.button_size
 			self.b1_h = self.h
 
-			measure = measure + self.button_size		
+			measure = measure + self.button_size
 		end
 
 		-- Trough and thumb
@@ -343,7 +337,6 @@ end
 
 
 local function updateShapesV(self)
-
 	self.trough_valid = false
 	self.thumb_valid = false
 
@@ -364,7 +357,6 @@ local function updateShapesV(self)
 			self.b2_w = self.w
 			self.b2_h = shortened_length
 		end
-
 	-- Normal positioning.
 	else
 
@@ -377,7 +369,7 @@ local function updateShapesV(self)
 			self.b1_w = self.w
 			self.b1_h = self.button_size
 
-			measure = measure + self.button_size		
+			measure = measure + self.button_size
 		end
 
 		-- Trough and thumb
@@ -419,10 +411,8 @@ end
 
 --- Conditionally updates the boxes of buttons, trough and thumb based on the current scroll bar shape.
 function _mt_bar:updateShapes()
-
 	if self.horizontal then
 		updateShapesH(self)
-
 	else
 		updateShapesV(self)
 	end
@@ -431,7 +421,6 @@ end
 
 --- Update the thumb size and position in a scroll bar.
 function _mt_bar:updateThumb()
-
 	-- Thumb measurement requires:
 	-- * The trough to be active
 	-- * The 'max' register to be greater than zero (shorthand for invalid state)
@@ -448,7 +437,6 @@ function _mt_bar:updateThumb()
 			if self.max > 0 and self.th_w < self.tr_w then
 				self.thumb_valid = true
 			end
-
 		-- Vertical
 		else
 			self.th_w = self.w
@@ -473,7 +461,6 @@ end
 -- @param hori Horizontal bar (self.scr_h)
 -- @param vert Vertical bar (self.scr_v)
 function commonScroll.setScrollBars(self, hori, vert)
-
 	-- Scroll style priority: 1) Style in self, 2) Style in skin, 3) The application default style.
 	local scr_style = self.scr_style or (self.skin and self.skin.scr_style) or nil
 
@@ -492,7 +479,6 @@ end
 -- @param fixed_step How much to scroll if a button in fixed-step mode is activated.
 -- @return True if the scroll is considered activated by the click.
 function commonScroll.widgetScrollPress(self, x, y, fixed_step)
-
 	-- Don't override existing 'busy' state.
 	if self.press_busy then
 		return
@@ -505,7 +491,7 @@ function commonScroll.widgetScrollPress(self, x, y, fixed_step)
 
 	-- Give vertical bar priority in the event of overlap.
 	local scr_v = self.scr_v
-	
+
 	if scr_v and scr_v.active then
 		local test_code = scr_v:testPoint(x, y)
 
@@ -597,7 +583,6 @@ end
 
 --- Plug-in for client's uiCall_pointerPressRepeat(), which implements repeated 'pend' button motions.
 function commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
-
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
 
@@ -648,7 +633,6 @@ end
 
 
 function commonScroll.widgetProcessHover(self, mx, my)
-
 	local skip = false
 
 	local scr_v = self.scr_v
@@ -670,7 +654,6 @@ end
 --- A plug-in for 'uiCall_pointerHoverOff()', which just turns off the hover state.
 -- @param self The client widget.
 function commonScroll.widgetClearHover(self)
-
 	local scr_h = self.scr_h
 	if scr_h then
 		scr_h.hover = false
@@ -686,7 +669,6 @@ end
 --- A plug-in for 'uiCall_pointerUnpress()', which just turns off the press state.
 -- @param self The client widget.
 function commonScroll.widgetClearPress(self)
-
 	local scr_h = self.scr_h
 	if scr_h then
 		scr_h.press = false
@@ -707,7 +689,6 @@ end
 -- @param button_step If holding a less/more button, how far it should scroll on this frame.
 -- @return true if an action was taken, false if not.
 function commonScroll.widgetDragLogic(self, mx, my, button_step)
-
 	local mode = self.press_busy
 
 	if mode == "v" then
@@ -764,7 +745,6 @@ end
 --  be updated.
 -- @param self The widget to modify.
 function commonScroll.arrangeScrollBars(self)
-
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
 
@@ -856,7 +836,6 @@ end
 -- @param len The length of the viewport on the scrolling axis.
 -- @param max The document length, where the upper bound of pos is max - len.
 function commonScroll.updateRegisters(scr, pos, len, max)
-
 	-- Assertions -- XXX test
 	-- [[
 	if type(pos) ~= "number" then errArgBadType(1, pos, "number")
@@ -869,7 +848,6 @@ function commonScroll.updateRegisters(scr, pos, len, max)
 		scr.pos = 0
 		scr.len = 0
 		scr.max = 0
-
 	else
 		scr.pos = pos
 		scr.len = len
@@ -880,7 +858,6 @@ end
 
 --- Widget plug-in that updates scroll bar component shapes.
 function commonScroll.updateScrollBarShapes(self)
-
 	local scr_h, scr_v = self.scr_h, self.scr_v
 	if scr_h then
 		scr_h:updateShapes()
@@ -942,7 +919,6 @@ end
 -- @param viewport_len Length of the visible content viewport.
 -- @return Floored and clamped scroll position in the document that corresponds to this position in the trough.
 function commonScroll.getDocumentPosition(doc_len, trough_len, pos, thumb_len, viewport_len)
-
 	local doc_shortened = doc_len - viewport_len
 	local scroll_shortened = trough_len - thumb_len
 
@@ -957,7 +933,6 @@ end
 --- Get the scroll bar thumb position from the current scroll offset within the document.
 -- @param scroll_pos Scroll offset of the viewport (left or top side) within the document, in the range of 0 to doc_len - thumb_len.
 function commonScroll.getThumbPosition(viewport_len, scroll_pos, doc_len, trough_len, thumb_len)
-
 	local doc_shortened = doc_len - viewport_len
 	local scroll_shortened = trough_len - thumb_len
 
@@ -976,7 +951,6 @@ end
 --  top-left point.
 -- @param self The client widget.
 function commonScroll.debugRender(self)
-
 	local scr_h, scr_v = self.scr_h, self.scr_v
 
 	if scr_h and scr_h.active then

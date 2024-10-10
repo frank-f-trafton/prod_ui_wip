@@ -26,7 +26,6 @@ local commonTab = {}
 
 
 function commonTab._sortTempItemsAscending(a, b)
-
 	for i = 2, math.max(#a, #b) do
 		if a[i] ~= b[i] then
 			return a[i] < b[i]
@@ -38,7 +37,6 @@ end
 
 
 function commonTab._sortTempItemsDescending(a, b)
-
 	for i = 2, math.max(#a, #b) do
 		if a[i] ~= b[i] then
 			return a[i] > b[i]
@@ -50,7 +48,6 @@ end
 
 
 function commonTab.columnSortGeneric(wid, column)
-
 	local items = wid.menu.items
 	local sort_order = column.sort_order
 
@@ -60,7 +57,6 @@ function commonTab.columnSortGeneric(wid, column)
 		local entry = {item}
 		if not sort_order then
 			entry[#entry + 1] = item.cells[column.id][column.sort_cell_field]
-
 		else
 			for j, order_id in ipairs(sort_order) do
 				local this_col = wid.columns[order_id]
@@ -83,7 +79,6 @@ end
 
 
 function commonTab.setDefaultMeasurements(self)
-
 	local font = self.skin.cell_font
 	self.default_item_h = math.floor(font:getHeight() * 1.25)
 	self.default_item_text_x = math.floor(font:getWidth("M") / 4)
@@ -97,7 +92,6 @@ end
 
 
 function commonTab.getWidestColumnText(self, column_id)
-
 	local font = self.skin.cell_font
 	local w = 0
 	local index
@@ -116,7 +110,6 @@ end
 
 
 function commonTab.reverseSequence(seq)
-
 	local last = #seq
 	local i, j = 1, last
 	while i <= math.floor(last/2) do
@@ -127,4 +120,3 @@ end
 
 
 return commonTab
-

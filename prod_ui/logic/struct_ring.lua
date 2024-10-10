@@ -20,7 +20,6 @@ _mt_ring.__index = _mt_ring
 -- @param max (0) The initial maximum entries.
 -- @return The ring buffer table.
 function structRing.new(max)
-
 	local self = setmetatable({}, _mt_ring)
 
 	-- The structure owner is responsible for managing the contents of `self.buf`.
@@ -46,7 +45,6 @@ end
 -- Sets the max items for the ring buffer. The buffer contents are reordered, cutting excess items if the new max is smaller.
 -- @param max The new maximum.
 function _mt_ring:setMax(max)
-
 	-- XXX: Assertions.
 
 	-- Build a list of buffer items to rearrange.
@@ -78,10 +76,8 @@ end
 -- Move the "last" marker forward by one. After calling, if `max` is greater than zero, the caller must ensure that there
 -- is a non-nil value in `ring.buf[ring.last]`.
 function _mt_ring:advanceLast()
-
 	if self.max <= 0 then
 		self.last = 0
-
 	else
 		self.last = self.last + 1
 		if self.last > self.max then
@@ -95,7 +91,6 @@ end
 
 -- Gets the "first" position in the buffer.
 function _mt_ring:getFirst()
-
 	if self.max <= 0 then
 		return 0
 	end
@@ -109,7 +104,6 @@ end
 -- return index and table of the previous item. Exceptions: 1) If the buffer is empty, returns nil; 2) If this is
 -- the first item, the returned index is nil.
 function _mt_ring:getPrev(i)
-
 	-- XXX: Assertions, flooring
 
 	if self.max == 0 then
@@ -130,7 +124,6 @@ end
 -- @return index and table of the next item. Exceptions: 1) If the buffer is empty, returns nil; 2) If this is
 -- the last item, the returned index is nil.
 function _mt_ring:getNext(i)
-
 	-- Usage example:
 	--[[
 	local i, item = ring:getNext()

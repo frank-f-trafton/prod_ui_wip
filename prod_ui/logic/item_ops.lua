@@ -37,7 +37,6 @@ _mt_item.reshape = dummy
 
 --- The default keyPressed callback for menu items. Pressing enter/return or space activates the item, if it has 'actionable' set truthy.
 function _mt_item:menuCall_keyPressed(client, key, scancode, isrepeat)
-
 	if (scancode == "return" or scancode == "kpenter")
 	or (scancode == "space" and not isrepeat)
 	then
@@ -50,7 +49,6 @@ end
 
 --- The default pointerPress callback for menu items. It activates menu items upon click, if they have 'actionable' set truthy.
 function _mt_item:menuCall_pointerPress(client, button, n_presses)
-
 	if button == 1 and button == client.context.mouse_pressed_button then
 		if self.actionable and self.itemAction_use then
 			return self:itemAction_use(client)
@@ -71,7 +69,6 @@ end
 
 --- Use to activate an item on unpress. The item must have 'actionable' set truthy.
 function itemOps.item_menuCall_pointerRelease(self, client, button)
-
 	if button == 1 and button == client.context.mouse_pressed_button then
 		if self.actionable and self.itemAction_use then
 			return self:itemAction_use(client)
@@ -84,7 +81,6 @@ end
 -- @param def The def table.
 -- @return Nothing.
 function itemOps.initDef(def)
-
 	def._mt_inst = {}
 	setmetatable(def._mt_inst, def._mt_inst)
 	def._mt_inst.__index = def
@@ -95,14 +91,12 @@ end
 
 -- @param item You may set up an item instance table with pre-configured fields ahead of time and pass it here. Do not share in other calls to newItem(). 'x', 'y', 'w' and 'h' default to 0 and must be set after newItem().
 function itemOps.newItem(def, client, item)
-
 	item = item or {}
 	item.x, item.y, item.w, item.h = 0, 0, 16, 16
 
 	if def then
 		setmetatable(item, def._mt_inst)
 		def.initInstance(def, client, item)
-
 	else
 		setmetatable(item, _mt_item)
 	end

@@ -8,7 +8,6 @@ local utilTable = {}
 
 
 function utilTable.concatVarargs(...)
-
 	local str = ""
 	local len = select("#", ...)
 	for i = 1, len do
@@ -23,7 +22,6 @@ end
 
 
 function utilTable.concatSequence(seq)
-
 	local str = ""
 	for i, chunk in ipairs(seq) do
 		str = str .. tostring(seq[i])
@@ -44,7 +42,6 @@ end
 -- @param ... Varargs list of fields to check, in order. All but the final field must point to table values.
 -- @return The found value (can be nil), or nil plus index of where the search failed.
 function utilTable.tryDrillV(tbl, ...)
-
 	-- TODO: Assertions.
 
 	local len = select("#", ...)
@@ -75,7 +72,6 @@ end
 -- @param ... Varargs list of fields to check in order. All but the final field must point to table values.
 -- @return The found value. Raises a Lua error if the path was invalid or the final value is nil.
 function utilTable.drillV(tbl, ...)
-
 	-- TODO: Assertions. (will be handled in tryDrillV())
 
 	local ret, bad_index = utilTable.tryDrillV(tbl, ...)
@@ -92,7 +88,6 @@ end
 -- @param t2 Sequence (array) of fields to check in order. All but the final field must point to table values.
 -- @return The found value (can be nil).
 function utilTable.tryDrillT(tbl, t2)
-
 	-- TODO: Assertions.
 
 	for i = 1, #t2 do
@@ -119,7 +114,6 @@ end
 -- @param t2 Sequence (array) of fields to check in order. All but the final field must point to table values.
 -- @return The found value. Raises a Lua error if the path was invalid or the final value is nil.
 function utilTable.drillT(tbl, t2)
-
 	-- TODO: Assertions. (will be handled in tryDrillT())
 
 	local ret, bad_index = utilTable.tryDrillT(tbl, t2)
@@ -138,7 +132,6 @@ end
 -- @param str The string of fields to check in order.
 -- @return The found value (can be nil).
 function utilTable.tryDrillS(tbl, sep, str)
-
 	-- Assertions
 	-- [[
 	if type(tbl) ~= "table" then error("arg #1 must be a table.")
@@ -176,7 +169,6 @@ end
 
 
 function utilTable.drillS(tbl, sep, str)
-
 	-- Assertions handled in tryDrillS
 
 	local ret, bad_index = utilTable.tryDrillS(tbl, sep, str)
@@ -189,4 +181,3 @@ end
 
 
 return utilTable
-

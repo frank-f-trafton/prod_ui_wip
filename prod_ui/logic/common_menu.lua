@@ -27,7 +27,6 @@ end
 --  all menu widgets.
 -- @param self The widget to configure.
 function commonMenu.instanceSetup(self)
-
 	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
 
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
@@ -73,7 +72,6 @@ end
 --- Automatically set a widget's items_first and items_last values by checking their vertical positions.
 -- @param self The widget.
 function commonMenu.widgetAutoRangeV(self)
-
 	local menu = self.menu
 	local items = self.menu.items
 
@@ -110,7 +108,6 @@ end
 --- Automatically set a widget's items_first and items_last values by checking their horizontal positions.
 -- @param self The widget.
 function commonMenu.widgetAutoRangeH(self)
-
 	local menu = self.menu
 	local items = self.menu.items
 
@@ -152,7 +149,6 @@ end
 -- @param last Index of the last item in the list to check.
 -- @return The item index and table, if successful. Otherwise, returns nil.
 function commonMenu.widgetGetItemAtPoint(self, px, py, first, last)
-
 	-- NOTES:
 	-- * Does not check if the item is selectable or actionable.
 	-- * Assumes scroll bar intersect (if applicable) has been checked first.
@@ -179,7 +175,6 @@ end
 -- @param last Index of the last item in the list to check (ie #items).
 -- @return The item index and table, if successful. Otherwise, returns nil.
 function commonMenu.widgetGetItemAtPointV(self, px, py, first, last)
-
 	-- See widgetGetItemAtPoint() for notes.
 
 	local items = self.menu.items
@@ -198,7 +193,6 @@ end
 
 --- Clamped version of widgetGetItemAtPointV(). Checks items at indices `1` and `#items` separately.
 function commonMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
-
 	-- See widgetGetItemAtPoint() for notes.
 
 	local items = self.menu.items
@@ -231,7 +225,6 @@ end
 -- @param last Index of the last item in the list to check (ie #items).
 -- @return The item index and table, if successful. Otherwise, returns nil.
 function commonMenu.widgetGetItemAtPointH(self, px, py, first, last)
-
 	-- See widgetGetItemAtPoint() for notes.
 
 	local items = self.menu.items
@@ -252,7 +245,6 @@ end
 -- @param x Mouse X position, relative to widget top-left.
 -- @param y Mouse Y position, relative to widget top-left.
 function commonMenu.widgetTrySelectItemAtPoint(self, x, y, first, last)
-
 	-- Prerequisites: widget must have a 'getItemAtPoint()' method assigned.
 
 	local i, item = self:getItemAtPoint(x, y, first, last)
@@ -270,7 +262,6 @@ end
 
 --- Use when you've already located an item and confirmed that it is selectable.
 function commonMenu.widgetSelectItemByIndex(self, item_i)
-
 	self.menu:setSelectedIndex(item_i)
 
 	if self.selectionInView then
@@ -288,7 +279,6 @@ end
 
 -- Vertical list, top to bottom
 function commonMenu.arrangeListVerticalTB(self, first, last)
-
 	local menu = self.menu
 	local items = menu.items
 
@@ -321,7 +311,6 @@ end
 
 -- Vertical list, left-to-right then top-to-bottom.
 function commonMenu.arrangeListVerticalLRTB(self, first, last)
-
 	local menu = self.menu
 	local items = menu.items
 
@@ -360,7 +349,6 @@ end
 
 -- Horizontal list, left to right
 function commonMenu.arrangeListHorizontalLR(self, first, last)
-
 	local menu = self.menu
 	local items = menu.items
 
@@ -393,7 +381,6 @@ end
 
 -- Horizontal list, top to bottom then left to right.
 function commonMenu.arrangeListHorizontalTBLR(self, first, last)
-
 	local menu = self.menu
 	local items = menu.items
 
@@ -449,7 +436,6 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("index") Optional alternative index key to change.
 function commonMenu.widgetMovePrev(self, n, immediate, id)
-
 	self.menu:setPrev(n, self.wrap_selection, id)
 
 	if self.selectionInView then
@@ -468,7 +454,6 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("index") Optional alternative index key to change.
 function commonMenu.widgetMoveNext(self, n, immediate, id)
-
 	self.menu:setNext(n, self.wrap_selection, id)
 
 	if self.selectionInView then
@@ -486,7 +471,6 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("index") Optional alternative index key to change.
 function commonMenu.widgetMoveFirst(self, immediate, id)
-
 	self.menu:setFirstSelectableIndex(id)
 
 	if self.selectionInView then
@@ -504,7 +488,6 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("index") Optional alternative index key to change.
 function commonMenu.widgetMoveLast(self, immediate, id)
-
 	self.menu:setLastSelectableIndex(id)
 
 	if self.selectionInView then
@@ -530,7 +513,6 @@ end
 -- @param id ("index") Optional alternative index key to change.
 -- @param the isrepeat
 function commonMenu.keyNavTB(self, key, scancode, isrepeat, id)
-
 	if scancode == "up" then
 		self:movePrev(1, nil, id)
 		return true
@@ -560,7 +542,6 @@ end
 
 --- Default key navigation for left-to-right menus.
 function commonMenu.keyNavLR(self, key, scancode, isrepeat, id)
-
 	if scancode == "left" then
 		self:movePrev(1, nil, id)
 		return true
@@ -595,7 +576,6 @@ end
 -- @param self Presumably the client widget that owns the menu. (Could be something else depending on the implementation.)
 -- @param array The array containing menu-items or tables similar to menu-items.
 function commonMenu.widgetConfigureMenuItems(self, array)
-
 	for i, tbl in ipairs(array) do
 		if tbl.config then
 			tbl:config(self)
@@ -608,7 +588,6 @@ end
 -- @param items The table of menu-items to scan.
 -- @return The bounding width and height of all items.
 function commonMenu.getCombinedItemDimensions(items)
-
 	local dw, dh = 0, 0
 	for i, item in ipairs(items) do
 		dw = math.max(dw, item.x + item.w)
@@ -624,7 +603,6 @@ end
 -- @param item The item within the menu to get in view.
 -- @param immediate Skip scrolling animation when true.
 function commonMenu.getItemInBoundsRect(self, item, immediate)
-
 	--[[
 	Widget must have 'selection_extend_x' and 'selection_extend_y' set.
 	--]]
@@ -644,7 +622,6 @@ end
 -- @param item The item within the menu to get in view.
 -- @param immediate Skip scrolling animation when true.
 function commonMenu.getItemInBoundsX(self, item, immediate)
-
 	--[[
 	Widget must have 'selection_extend_x' set.
 	--]]
@@ -662,7 +639,6 @@ end
 -- @param item The item within the menu to get in view.
 -- @param immediate Skip scrolling animation when true.
 function commonMenu.getItemInBoundsY(self, item, immediate)
-
 	--[[
 	Widget must have 'selection_extend_y' set.
 	--]]
@@ -679,7 +655,6 @@ end
 -- @param self The menu widget with a current selection (or none).
 -- @param immediate When true, skip scrolling animation.
 function commonMenu.selectionInView(self, immediate)
-
 	--[[
 	Widget must have a 'getInBounds' method assigned. These methods usually require 'selection_extend_[x|y]' to be set.
 	--]]
@@ -692,7 +667,6 @@ function commonMenu.selectionInView(self, immediate)
 		-- XXX maybe scroll to top-left?
 		--self:scrollHV(0, 0)
 		return
-
 	else
 		self:getInBounds(item, immediate)
 	end

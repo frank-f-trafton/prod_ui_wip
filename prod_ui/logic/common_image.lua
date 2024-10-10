@@ -2,7 +2,6 @@ local commonImage = {}
 
 
 function commonImage.imageSet(self, image, quad)
-
 	self.image = image
 	self.image_w, self.image_h = image:getDimensions()
 
@@ -10,7 +9,6 @@ function commonImage.imageSet(self, image, quad)
 	if quad then
 		local _x, _y
 		_x, _y, self.quad_w, self.quad_h = quad:getViewport()
-
 	else
 		self.quad_w = nil
 		self.quad_h = nil
@@ -19,11 +17,9 @@ end
 
 
 function commonImage.imageAlignHorizontal(self, align_h)
-
 	local graphic_w
 	if self.quad then
 		graphic_w = self.quad_w
-
 	else
 		graphic_w = self.image_w
 	end
@@ -41,11 +37,9 @@ end
 
 
 function commonImage.imageAlignVertical(self, align_v)
-
 	local graphic_h
 	if self.quad then
 		graphic_h = self.quad_h
-
 	else
 		graphic_h = self.image_h
 	end
@@ -63,7 +57,6 @@ end
 
 
 function commonImage.imageRemove(self)
-
 	self.image = nil
 	self.image_w = nil
 	self.image_h = nil
