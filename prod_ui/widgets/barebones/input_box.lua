@@ -38,14 +38,12 @@ def.wid_action = uiShared.dummyFunc
 
 
 local function updateTextWidth(self)
-
 	local font = self.context.resources.fonts.internal
 	self.text_w = font:getWidth(self.text)
 end
 
 
 function def:setText(text)
-
 	-- Assertions
 	-- [[
 	if type(text) ~= "string" then uiShared.errBadType(1, text, "string") end
@@ -66,7 +64,6 @@ end
 
 -- @param max The maximum number of code points. Pass false or nil to effectively disable the limit.
 function def:setMaxCodePoints(max)
-
 	-- Assertions
 	-- [[
 	if max and type(max) ~= "number" then uiShared.errBadType(1, max, "false/nil/number") end
@@ -91,7 +88,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -111,7 +107,6 @@ end
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -121,7 +116,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -131,7 +125,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -147,7 +140,6 @@ end
 
 
 function def:uiCall_thimbleTake(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
@@ -155,7 +147,6 @@ end
 
 
 function def:uiCall_thimbleRelease(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -163,7 +154,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			self:wid_action()
@@ -173,7 +163,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-
 	if self == inst then
 		-- Input validation happens in the context before this event is called.
 
@@ -193,7 +182,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		local mod = self.context.key_mgr.mod
 
@@ -251,7 +239,6 @@ end
 
 
 def.render = function(self, ox, oy)
-
 	love.graphics.push("all")
 
 	local scale = self.context.resources.scale

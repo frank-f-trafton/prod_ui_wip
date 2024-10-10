@@ -3,22 +3,22 @@
 input/text_box_multi: A multi-line text input box.
 
          Viewport #1
-  +-----------------------+
-  |                       |
+  ╔═══════════════════════╗
+  ║                       ║
 
-+---------------------------+-+
-| ......................... |^|
-| .The quick brown fox    . +-+
-| .jumps over the lazy    . | |
-| .dog.|                  . | |
-| .                       . | |
-| .                       . | |
-| .                       . | |
-| ......................... +-+
-|                           |v|  ---+
-+-+-----------------------+-+-+     +- Optional scroll bars
-|<|                       |>| +  ---+
-+-+-----------------------+-+-+
+┌───────────────────────────┬─┐
+│ ......................... │^│
+│ .The quick brown fox    . ├─┤
+│ .jumps over the lazy    . │ │
+│ .dog.|                  . │ │
+│ .                       . │ │
+│ .                       . │ │
+│ .                       . │ │
+│ ......................... ├─┤
+│                           │v│  ═══╗
+├─┬───────────────────────┬─┼─┤     ╠═ Optional scroll bars
+│<│                       │>│ │  ═══╝
+└─┴───────────────────────┴─┴─┘
 
 --]]
 
@@ -68,7 +68,6 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 local function executeRemoteAction(self, item_t)
-
 	local ok, update_viewport, caret_in_view, write_history = self:executeBoundAction(item_t.bound_func)
 	if ok then
 		self.update_flag = true
@@ -82,28 +81,24 @@ end
 -- Pop-up menu definition.
 do
 	local function configItem_undo(item, client)
-
 		item.selectable = true
 		item.actionable = (client.line_ed.hist.pos > 1)
 	end
 
 
 	local function configItem_redo(item, client)
-
 		item.selectable = true
 		item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
 	end
 
 
 	local function configItem_cutCopyDelete(item, client)
-
 		item.selectable = true
 		item.actionable = client.line_ed:isHighlighted()
 	end
 
 
 	local function configItem_paste(item, client)
-
 		item.selectable = true
 
 		-- XXX: There is an SDL function to check if the clipboard has text: https://wiki.libsdl.org/SDL_HasClipboardText
@@ -120,7 +115,6 @@ do
 
 
 	local function configItem_selectAll(item, client)
-
 		item.selectable = true
 		item.actionable = (not client.line_ed.lines:isEmpty())
 	end
@@ -197,7 +191,6 @@ end
 
 		if i == wid_text_box.line_ed.hist.pos then
 			love.graphics.setColor(1, 1, 1, 1)
-
 		else
 			love.graphics.setColor(0.8, 0.8, 0.8, 1)
 		end
@@ -227,7 +220,6 @@ end
 -- Attach editing methods to def.
 -- XXX: Do not use client:setFont().
 for k, v in pairs(editMethodsM) do
-
 	if def[k] then
 		error("meta field already populated: " .. tostring(k))
 	end
@@ -237,7 +229,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -320,7 +311,6 @@ end
 
 --- Call after changing alignment, then update the alignment of all sub-lines.
 function def:updateAlignOffset()
-
 	local align = self.line_ed.disp.align
 
 	if align == "left" then
@@ -336,7 +326,6 @@ end
 
 
 function def:scrollGetCaretInBounds(immediate)
-
 	local disp = self.line_ed.disp
 
 	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
@@ -382,7 +371,6 @@ end
 
 
 function def:updateDocumentDimensions()
-	
 	local disp = self.line_ed.disp
 
 	disp.view_w = self.vp_w
@@ -397,7 +385,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the scrollable region.
 	-- Viewport #2 includes margins and excludes borders.
 
@@ -434,7 +421,6 @@ end
 
 --- Updates cached display state.
 function def:cacheUpdate()
-
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 	local disp = line_ed.disp
@@ -451,7 +437,6 @@ function def:cacheUpdate()
 
 	if line_ed.replace_mode then
 		self.caret_fill = "line"
-
 	else
 		self.caret_fill = "fill"
 		self.caret_w = disp.caret_line_width
@@ -485,7 +470,6 @@ function def:cacheUpdate()
 
 	-- Update the text object, if applicable
 	if self.text_object then
-
 		local text_object = self.text_object
 
 		text_object:clear()
@@ -510,7 +494,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if not self.press_busy then
 
@@ -524,7 +507,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			and mouse_y >= self.vp2_y and mouse_y < self.vp2_y + self.vp2_h
 			then
 				self:setCursorLow(self.skin.cursor_on)
-
 			else
 				self:setCursorLow()
 			end
@@ -534,7 +516,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 
@@ -544,7 +525,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -647,7 +627,6 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- XXX style/config
@@ -659,7 +638,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			commonScroll.widgetClearPress(self)
@@ -676,7 +654,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	-- Catch wheel events from descendants that did not block it.
 
 	self.scr_tx = self.scr_tx - x * self.context.mouse_wheel_scale -- XXX style/theme integration
@@ -692,7 +669,6 @@ end
 
 
 function def:uiCall_thimbleTake(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
@@ -700,7 +676,6 @@ end
 
 
 function def:uiCall_thimbleRelease(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -708,7 +683,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-
 	if self == inst then
 		local line_ed = self.line_ed
 		local disp = line_ed.disp
@@ -762,7 +736,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		local line_ed = self.line_ed
 		local disp = line_ed.disp
@@ -773,7 +746,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local input_intercepted = false
 
 		if scancode == "application" then
-
 			-- Locate caret in UI space
 			local ax, ay = self:getAbsolutePosition()
 			local caret_x = ax + self.vp_x - self.scr_x + disp.caret_box_x
@@ -913,7 +885,6 @@ end
 
 --- Updates selection based on the position of the mouse and the number of repeat mouse-clicks.
 local function mouseDragLogic(self)
-
 	local context = self.context
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
@@ -955,7 +926,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
@@ -1018,7 +988,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		-- Destroy pop-up menu if it exists in reference to this widget.
 		local root = self:getTopWidgetInstance()
@@ -1047,7 +1016,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 
 			local line_ed = self.line_ed
@@ -1128,7 +1096,6 @@ def.skinners = {
 			-- Draw ghost text, if applicable.
 			-- XXX: center and right ghost text alignment modes aren't working correctly.
 			if self.ghost_text and lines:isEmpty() then
-
 				local align = self.ghost_text_align or disp.align
 
 				love.graphics.setFont(skin.font_ghost)
@@ -1157,7 +1124,6 @@ def.skinners = {
 
 			if self.text_object then
 				love.graphics.draw(self.text_object)
-
 			else
 				love.graphics.setFont(skin.font)
 

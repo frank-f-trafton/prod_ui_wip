@@ -23,7 +23,6 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 -- Called when the internal progress counter or maximum value change.
 function def:wid_barChanged(old_pos, old_max, new_pos, new_max)
-
 	-- Warning: Do not call self:setCounter() or self:setCounterMax() from within this function.
 	-- It will overflow the stack.
 end
@@ -43,7 +42,6 @@ def.setLabel = lgcLabel.widSetLabel
 -- @param pos The position value. Clamped between 0 and max.
 -- @param max The maximum value. Clamped to 0 on the low end.
 function def:setCounter(pos, max)
-
 	-- Assertions
 	-- [[
 	if type(pos) ~= "number" then uiShared.errBadType(1, pos, "number")
@@ -71,7 +69,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 
@@ -103,7 +100,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 is the progress bar drawing rectangle.
 
@@ -135,7 +131,6 @@ def.skinners = {
 
 		-- XXX missing vertical mode.
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = (self.active) and skin.res_active or skin.res_inactive
 
@@ -146,7 +141,6 @@ def.skinners = {
 
 			-- Progress bar ichor.
 			if self.pos > 0 and self.max > 0 then
-
 				-- Orientation.
 				local px, py, pw, ph
 				if self.vertical then

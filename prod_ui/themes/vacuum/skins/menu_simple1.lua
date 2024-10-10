@@ -2,7 +2,6 @@
 
 
 return {
-
 	skinner_id = "default",
 
 	["*font"] = "fonts/p",

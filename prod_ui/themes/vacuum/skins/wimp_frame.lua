@@ -2,7 +2,6 @@
 
 
 return {
-
 	skinner_id = "default",
 
 	["*slc_body"] = "tex_slices/window_body",

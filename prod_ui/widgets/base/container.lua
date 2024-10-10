@@ -4,17 +4,17 @@
 
 	For a pared-down container, see: 'base/container_simple.lua'
 
-	+---------------------+-+
-	|`````````````````````|^|    [`] == Viewport 2
-	|`:::::::::::::::::::`+-+    [:] == Viewport 1
-	|`:                 :`| |
-	|`:                 :`| |
-	|`:                 :`| |
-	|`:::::::::::::::::::`+=+
-	|`````````````````````|v|
-	+-+-----------------+-+-+
-	|<|                 |>| |    <- Optional scroll bars
-	+-+-----------------+-+-+
+	┌┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┬┈┐
+	│`````````````````````│^│    [`] == Viewport 2
+	│`:::::::::::::::::::`├┈┤    [:] == Viewport 1
+	│`:                 :`│ │
+	│`:                 :`│ │
+	│`:                 :`│ │
+	│`:::::::::::::::::::`├┈┤
+	│`````````````````````│v│
+	├┈┬┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┬┈┼┈┤
+	│<│                 │>│ │    <- Optional scroll bars
+	└┈┴┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┴┈┴┈┘
 --]]
 
 
@@ -41,12 +41,11 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 --- Override to make something happen when the user clicks on blank space (no widgets, no embedded controls) in the container.
 function def:wid_pressed(x, y, button, istouch, presses)
-	
+
 end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -93,14 +92,12 @@ end
 
 -- Needs to be reachable from WIMP window-frames.
 function def:updateContentClipScissor()
-
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 end
 
 
 function def:keepWidgetInView(wid)
-
 	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
 	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
 
@@ -128,7 +125,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
@@ -170,7 +166,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if not self.press_busy then
 			mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
@@ -181,7 +176,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 	end
@@ -190,9 +184,7 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
-
 		local handled = false
 
 		-- Check for pressing on scroll bar components.
@@ -213,7 +205,6 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
@@ -225,7 +216,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == 1 then
 			commonScroll.widgetClearPress(self)
@@ -237,7 +227,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	-- Catch wheel events from descendants that did not block it.
 	local caught = widShared.checkScrollWheelScroll(self, x, y)
 	commonScroll.updateScrollBarShapes(self)
@@ -250,7 +239,6 @@ end
 -- Catch focus step actions so that we can ensure the hosted widget is in view.
 -- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
 function def:uiCall_thimbleTake(inst, keep_in_view)
-
 	if inst ~= self then -- don't try to center the container itself
 		if keep_in_view == "widget_in_view" then
 			self:keepWidgetInView(inst)
@@ -261,9 +249,7 @@ end
 
 
 function def:uiCall_update(dt)
-
 	dt = math.min(dt, 1.0)
-
 	if commonScroll.press_busy_codes[self.press_busy] then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
@@ -314,7 +300,6 @@ def.skinners = {
 
 
 		renderLast = function(self, ox, oy)
-
 			local skin = self.skin
 
 			-- Draw the embedded scroll bars, if present and active.

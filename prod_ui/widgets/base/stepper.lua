@@ -5,31 +5,30 @@ A stepper button.
 Horizontal layout:
 
             vp1
-    +------------------+
-    |                  |
+    ╔══════════════════╗
+    ║                  ║
 
-+---+------------------+---+
-| < |  Selection Text  | > |
-+---+------------------+---+
+┌───┬──────────────────┬───┐
+│ < │  Selection Text  │ > │
+└───┴──────────────────┴───┘
 
-|   |                  |   |
-+---+                  +---+
+║   ║                  ║   ║
+╚═══╝                  ╚═══╝
  vp2                    vp3
 
 
 
 Vertical layout:
 
-          +-------+  --+
-          |   ^   |    | vp2
-     +--  +-------+  --+
-     |    |       |
- vp1 |    | Text  |
-     |    |       |
-     +--  +-------+  --+
-          |   v   |    | vp3
-          +-------+  --+
-
+          ┌───────┐  ══╗
+          │   ^   │    ║ vp2
+     ╔══  ├───────┤  ══╝
+     ║    │       │
+ vp1 ║    │ Text  │
+     ║    │       │
+     ╚══  ├───────┤  ══╗
+          │   v   │    ║ vp3
+          └───────┘  ══╝
 --]]
 
 
@@ -70,7 +69,6 @@ def.setLabel = lgcLabel.widSetLabel
 
 
 function def:setOrientation(orientation)
-
 	local old_orientation = self.vertical
 
 	if orientation == "horizontal" then
@@ -78,6 +76,7 @@ function def:setOrientation(orientation)
 
 	elseif orientation == "vertical" then
 		self.vertical = true
+
 	else
 		error("invalid orientation: " .. tostring(orientation))
 	end
@@ -95,10 +94,8 @@ def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
 
 
 local function wrapSetLabel(self)
-
 	if self.index == 0 then
 		self:setLabel("", "single")
-
 	else
 		local option = self.options[self.index]
 		local label_text = (type(option) == "string" and option or type(option) == "table" and option.text)
@@ -115,7 +112,6 @@ end
 -- @param i (#options + 1) where to insert the option in the array. Must be between 1 and #options + 1. If not specified, the option will be added to the end of the array.
 -- @return The index of the newly-added option.
 function def:insertOption(option, i)
-
 	-- Assertions
 	-- [[
 	if type(option) ~= "string" and type(option) ~= "table" then uiShared.errBadType(1, option, "string/table") end
@@ -150,7 +146,6 @@ end
 -- @param i *(#options)* Index of the option to remove in the array. Must be between 1 and #options. If not specified, the last option in the array will be removed.
 -- @return The removed option value.
 function def:removeOption(i)
-
 	-- Assertions
 	-- [[
 	if i ~= nil then
@@ -193,7 +188,6 @@ end
 -- @param index The new index number. The value is clamped between 1 and the number of options, or is set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:setIndex(index)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumberNotNaN(1, index)
@@ -207,7 +201,6 @@ function def:setIndex(index)
 	if #self.options == 0 then
 		self.index = 0
 		wrapSetLabel(self)
-
 	else
 		self.index = math.max(1, math.min(index, #self.options))
 		local option = self.options[self.index]
@@ -226,7 +219,6 @@ end
 -- @param delta The amount to increment or decrement, expected to be -1, 0 or 1. The final index value will wrap around, or be set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:stepIndex(delta)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumberNotNaN(1, delta)
@@ -240,7 +232,6 @@ function def:stepIndex(delta)
 	if #self.options == 0 then
 		self.index = 0
 		wrapSetLabel(self)
-
 	else
 		self.index = self.index + delta
 		if self.index < 1 then
@@ -262,7 +253,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -305,7 +295,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 is the "prev" button component.
 	-- Viewport #3 is the "next" button component.
@@ -317,7 +306,6 @@ function def:uiCall_reshape()
 	if self.vertical then
 		widShared.partitionViewport(self, 1, 2, skin.prev_spacing, "top")
 		widShared.partitionViewport(self, 1, 3, skin.next_spacing, "bottom")
-
 	else
 		widShared.partitionViewport(self, 1, 2, skin.prev_spacing, "left")
 		widShared.partitionViewport(self, 1, 3, skin.next_spacing, "right")
@@ -330,7 +318,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -369,7 +356,6 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -390,7 +376,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -407,13 +392,11 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			local key_prev, key_next
 			if self.vertical then
 				key_prev, key_next = "up", "down"
-
 			else
 				key_prev, key_next = "left", "right"
 			end
@@ -430,7 +413,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		if self.enabled then
 			if self.b_prev_enabled and y > 0 then
@@ -461,7 +443,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = uiTheme.pickButtonResource(self, skin)
 
@@ -474,7 +455,6 @@ def.skinners = {
 			local tq_prev, tq_next
 			if self.vertical then
 				tq_prev, tq_next = res.tq_up, res.tq_down
-
 			else
 				tq_prev, tq_next = res.tq_left, res.tq_right
 			end
@@ -484,7 +464,6 @@ def.skinners = {
 			if self.b_pressing == "prev" then
 				button_ox, button_oy = res.button_ox, res.button_oy
 				sl_button = res.sl_button
-
 			else
 				button_ox, button_oy = 0, 0
 				sl_button = res.sl_button_up
@@ -496,7 +475,6 @@ def.skinners = {
 			if self.b_pressing == "next" then
 				button_ox, button_oy = res.button_ox, res.button_oy
 				sl_button = res.sl_button
-
 			else
 				button_ox, button_oy = 0, 0
 				sl_button = res.sl_button_up

@@ -2,7 +2,6 @@
 
 
 return {
-
 	skinner_id = "default",
 
 	["*box"] = "style/boxes/button_bijou",

@@ -17,7 +17,6 @@ def.setLabel = lgcLabelBare.widSetLabel
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 
@@ -30,7 +29,6 @@ end
 
 
 def.render = function(self, ox, oy)
-
 	local r, g, b, a
 	if self.enabled then
 		r, g, b, a = 1, 1, 1, 1

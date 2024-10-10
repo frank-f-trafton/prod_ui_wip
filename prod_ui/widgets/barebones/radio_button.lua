@@ -36,7 +36,6 @@ def.uiCall_thimbleAction2 = lgcButtonBare.uiCall_thimbleAction2
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true

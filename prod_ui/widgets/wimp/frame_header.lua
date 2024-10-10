@@ -6,9 +6,9 @@ dragging sensor for the window as a whole.
 
                      Title            Control buttons
                        v                     V
-+-----------------------------------------------+
-|             The Name Of The Frame       [#][X]|
-+-----------------------------------------------+
+┌───────────────────────────────────────────────┐
+│             The Name Of The Frame       [#][X]│
+└───────────────────────────────────────────────┘
 
 --]]
 
@@ -30,7 +30,6 @@ local def = {
 
 
 local function button_wid_maximize(self)
-
 	local frame = self:findAncestorByField("is_frame", true)
 
 	if frame then
@@ -54,7 +53,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -63,7 +61,7 @@ function def:uiCall_create(inst)
 		self.clip_hover = false
 		self.clip_scissor = false
 
-		--self.sort_id = 
+		--self.sort_id =
 
 		--[[
 		-- Content and frame controls are within this rectangle, while the frame border is outside.
@@ -150,13 +148,11 @@ end
 
 
 function def:setTitle(text)
-
 	self.text = text
 end
 
 
 function def:uiCall_reshape()
-
 	local button_pad = 2 -- XXX style/theme integration
 	local button_w = 32 - button_pad*2 -- XXX style/theme integration
 	local button_h = self.h - button_pad*2
@@ -192,7 +188,6 @@ function def:uiCall_reshape()
 		local frame = self:findAncestorByField("is_frame", true)
 		if frame then
 			button_max.graphic = frame.maximized and button_max.graphic_unmax or button_max.graphic_max
-
 		else
 			button_max.graphic = button_max.graphic_max
 		end
@@ -216,7 +211,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	if self.needs_update then
 		local skin = self.skin
 		local font = self.condensed and skin.font_cond or skin.font_norm
@@ -245,7 +239,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	-- Implements dragging and double-click-to-maximize/restore
 	if self == inst then
 		if button == 1 and self.context.mouse_pressed_button == button then
@@ -258,14 +251,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				if frame.wid_maximize and frame.wid_unmaximize then
 					if not frame.maximized then
 						frame:wid_maximize()
-
 					else
 						frame:wid_unmaximize()
 					end
 
 					frame:reshape(true)
 				end
-
 			else
 				-- Drag (reposition) action
 				frame.cap_mode = "drag"
@@ -300,7 +291,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local res = self.selected and skin.res_selected or skin.res_unselected
 

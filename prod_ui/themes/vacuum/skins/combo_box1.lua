@@ -2,7 +2,6 @@
 
 
 return {
-
 	skinner_id = "default",
 
 	-- The SkinDef ID for pop-ups made by this widget.

@@ -13,7 +13,6 @@ end
 
 
 function shared.nfsWrite(path, data)
-
 	local ok, err = nativefs.write(path, data)
 	if not ok then
 		error(err)
@@ -22,7 +21,6 @@ end
 
 
 function shared.nfsRemove(path)
-
 	local ok, err = nativefs.remove(path)
 
 	if not ok then
@@ -32,7 +30,6 @@ end
 
 
 function shared.recursiveEnumerate(folder, _file_list, _folder_list)
-
 	_file_list = _file_list or {}
 	_folder_list = _folder_list or {}
 
@@ -44,7 +41,6 @@ function shared.recursiveEnumerate(folder, _file_list, _folder_list)
 
 		if not info then
 			print("ERROR: failed to get file info for: " .. file)
-
 		else
 			if info.type == "file" then
 				table.insert(_file_list, file)
@@ -61,7 +57,6 @@ end
 
 
 function shared.recursiveDelete(folder)
-
 	local files, folders = shared.recursiveEnumerate(folder)
 	for i, file in ipairs(files) do
 		shared.nfsRemove(file)
@@ -74,7 +69,6 @@ end
 
 
 function shared.pathToRequire(path, omit_end)
-
 	path = path:gsub("/", "."):gsub("%.lua$", "")
 
 	if omit_end then
@@ -91,7 +85,6 @@ end
 
 
 function shared.nfsLoadLuaFile(...)
-
 	local file_path = select(1, ...)
 	local chunk, err = nativefs.load(file_path)
 

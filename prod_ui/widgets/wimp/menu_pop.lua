@@ -7,18 +7,18 @@ form a doubly-linked list, using the fields 'self.chain_next' and 'self.chain_pr
 The first item in the chain may be the client (invoking) widget.
 
 
-+---------------------+
-|    Client Widget    |
-|                     |
-|               +----------------------+
-|               |    Foobar    Ctrl+f  |
-+---------------|[/] Docked    Shift+d |
-                |----------------------|
-                |    Save      Ctrl+s  |+-------------------+
-                |    Export          > || As Foo...   Alt+f |
-                |----------------------|| As Bar...   Alt+b |
-                |    Quit      Ctrl+F4 |+-------------------+
-                +----------------------+
+┌─────────────────────┐
+│    Client Widget    │
+│                     │
+│               ┌──────────────────────┐
+│               │    Foobar    Ctrl+f  │
+└───────────────│[/] Docked    Shift+d │
+                │┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄│
+                │    Save      Ctrl+s  │┌───────────────────┐
+                │    Export          > ││ As Foo...   Alt+f │
+                │┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄││ As Bar...   Alt+b │
+                │    Quit      Ctrl+F4 │└───────────────────┘
+                └──────────────────────┘
 
       Chain #1   --->    Chain #2     --->     Chain #3
 
@@ -34,9 +34,9 @@ They may act strangely if the window is too small for the menu contents.
 
 Horizontal item padding (not including widget margins):
 
-+---------------------------+
-|   [B]   Text    Ctrl+t  > |
-+---------------------------+
+┌───────────────────────────┐
+│   [B]   Text    Ctrl+t  > │
+└───────────────────────────┘
   |  | | |    |*1|      |||| *2
   |  | | |    |  |      |||self.pad_arrow_x2
   |  | | |    |  |      |||
@@ -91,7 +91,6 @@ def.arrange = commonMenu.arrangeListVerticalTB
 
 
 local function destroySubMenus(self)
-
 	if self.chain_next then
 		widShared.chainRemovePost(self)
 		self.last_open_group = false
@@ -100,7 +99,6 @@ end
 
 
 local function assignSubMenu(item, client, set_selection)
-
 	-- Only create a sub-menu if the last-open doesn't match the current index (including if last-open is false).
 	local selected_item = client.menu.items[client.menu.index]
 	if selected_item ~= client.last_open_group then
@@ -156,7 +154,6 @@ end
 
 
 local function async_changeSubMenu(self, item_index, dt)
-
 	-- We assume that this async function is only called as a result of the mouse hovering over a group,
 	-- so the sub-menu defaults to no selection.
 
@@ -165,7 +162,6 @@ local function async_changeSubMenu(self, item_index, dt)
 
 		if item and item.type == "group" then
 			assignSubMenu(item, self, false)
-
 		else
 			destroySubMenus(self)
 		end
@@ -174,7 +170,6 @@ end
 
 
 local function activateGroup(client, item, set_selection)
-	
 	assignSubMenu(item, client, set_selection)
 	client.open_time = 0
 end
@@ -187,7 +182,6 @@ end
 
 
 local function activateCommand(client, item)
-
 	local wid_ref = client.wid_ref
 
 	if item.callback and wid_ref then -- XXX deal with cases where wid_ref is a dangling reference
@@ -204,7 +198,6 @@ end
 
 
 local function keyMnemonicSearch(items, key)
-
 	for i, item in ipairs(items) do
 		if key == item.key_mnemonic then
 			return i, item
@@ -217,7 +210,6 @@ end
 
 
 local function selectItemColor(item, client, skin)
-
 	if item.actionable then
 		return skin.color_actionable
 
@@ -237,7 +229,6 @@ def._mt_command = {
 	type = "command",
 
 	reshape = function(item, client)
-
 		local font = client.skin.font_item
 
 		item.text_x = (
@@ -259,7 +250,6 @@ def._mt_command = {
 		if not temp_str then
 			item.ul_on = false
 			item.text_int = item.text
-
 		else
 			item.ul_on = true
 			item.text_int = temp_str
@@ -276,7 +266,6 @@ def._mt_group = {
 	type = "group",
 
 	reshape = function(item, client)
-
 		local font = client.skin.font_item
 
 		item.text_x = (
@@ -292,7 +281,6 @@ def._mt_group = {
 		if not temp_str then
 			item.ul_on = false
 			item.text_int = item.text
-
 		else
 			item.ul_on = true
 			item.text_int = temp_str
@@ -327,7 +315,6 @@ def._mt_separator.__index = def._mt_separator
 -- @param item_info Table of default fields to assign to the fresh item.
 -- @return The new item table for additional tweaks.
 function def:appendItem(item_type, info)
-
 	local item = {
 		x = 0,
 		y = 0,
@@ -403,7 +390,6 @@ end
 
 --- Changes the widget dimensions based on its menu contents.
 function def:updateDimensions()
-
 	--[[
 	We need to:
 
@@ -424,7 +410,6 @@ function def:updateDimensions()
 
 		if item.type == "separator" then
 			item.h = self.pad_separator_y
-
 		else
 			local font = skin.font_item
 
@@ -487,7 +472,7 @@ function def:updateDimensions()
 	elseif has_groups then
 		w = w + add_group_pad
 	end
-	
+
 
 	-- (We assume that the top-level widget's dimensions match the display area.)
 	local wid_top = self:getTopWidgetInstance()
@@ -575,7 +560,6 @@ def.moveLast = commonMenu.widgetMoveLast
 -- @param index (default: #items + 1) Where to add the item in the list.
 -- @return Nothing.
 function def:addItem(item_instance, index)
-
 	local items = self.menu.items
 	index = index or #items + 1
 
@@ -591,7 +575,6 @@ end
 -- @param index (default: #items) Index of the item to remove. Must point to a valid table.
 -- @return The removed item instance.
 function def:removeItem(index)
-
 	local items = self.menu.items
 	index = index or #items
 
@@ -613,7 +596,6 @@ end
 -- @param item The item table in the menu.
 -- @return The removed item. Raises an error if the item is not found in the menu.
 function def:removeItemTable(item) -- XXX untested
-
 	local index
 	for i, check in ipairs(self.menu.items) do
 		if check == item then
@@ -624,7 +606,6 @@ function def:removeItemTable(item) -- XXX untested
 
 	if not index then
 		error("couldn't find item table in menu.")
-
 	else
 		return self:removeItem(index)
 	end
@@ -634,7 +615,6 @@ end
 
 
 function def:menuChangeCleanup()
-
 	self.menu:setSelectionStep(0, false)
 	self:arrange()
 	self:cacheUpdate(true)
@@ -647,7 +627,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -715,7 +694,7 @@ function def:uiCall_create(inst)
 		self.open_time = 0.0
 
 		-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
-		--self.origin_item = 
+		--self.origin_item =
 
 		self.menu = self.menu or commonMenu.new()
 		self.menu.default_deselect = true
@@ -730,7 +709,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	widShared.resetViewport(self, 1)
 
 	-- Apply edge padding.
@@ -747,7 +725,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 
 	if refresh_dimensions then
@@ -761,7 +738,6 @@ end
 
 --- The default navigational key input.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
-
 	local mod = self.context.key_mgr.mod
 
 	if key == "up" or (key == "tab" and mod["shift"]) then
@@ -777,9 +753,7 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
-
 		local root = self:getTopWidgetInstance()
 
 		if key == "escape" then
@@ -811,7 +785,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				root:runStatement("rootCall_clearThimbleBank", wid_ref)
 
 				return true
-
 			-- This pop-up is further down the menu chain.
 			-- We do not want to destroy the entire chain, just this one (and any others to the
 			-- right, which we took care of above) and move the thimble back.
@@ -905,7 +878,6 @@ end
 
 
 function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
-
 	local item_i, item = keyMnemonicSearch(self.menu.items, key)
 	if item and item.selectable then
 		self.menu:setSelectedIndex(item_i)
@@ -926,7 +898,6 @@ end
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		self:tryTakeThimble()
 	end
@@ -934,7 +905,6 @@ end
 
 
 local function pressedAndThimbleHandoff(self, wid)
-
 	if self.context.current_pressed == self and wid.allow_hover then
 		self.context:transferPressedState(wid)
 
@@ -954,7 +924,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local rolled = false
 
@@ -990,7 +959,6 @@ end
 
 
 local function findOriginItemIndex(c_prev, origin_item)
-
 	for i, c_item in ipairs(c_prev.menu.items) do
 		--print(i, c_item, #c_prev.menu.items)
 		if c_item == origin_item then
@@ -1003,7 +971,6 @@ end
 
 
 local function forceSuperMenuGroupSelection(self)
-
 	local w_prev = self.chain_prev
 
 	-- (Filter out menu-bars -> they don't have 'menu' populated)
@@ -1020,7 +987,6 @@ end
 
 
 function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- Implement Drag-to-select.
 	-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
@@ -1052,7 +1018,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		local xx = mx + self.scr_x - self.vp_x
@@ -1100,7 +1065,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		self.item_hover = false
 
@@ -1113,7 +1077,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button <= 3 then
 			self:tryTakeThimble()
@@ -1155,7 +1118,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			self.press_busy = false
@@ -1192,7 +1154,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -1211,7 +1172,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(true)
 			end
-			
+
 			-- Stop bubbling
 			return true
 		end
@@ -1220,11 +1181,9 @@ end
 
 
 function def:uiCall_update(dt)
-
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
-
 	local needs_update = false
 
 	-- Handle update-time drag-scroll.
@@ -1273,7 +1232,6 @@ function def:uiCall_update(dt)
 	or self.last_open_group and selected ~= self.last_open_group)
 	then
 		self.open_time = self.open_time + dt
-
 	else
 		self.open_time = 0
 	end
@@ -1290,7 +1248,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		-- If this widget is part of a chain and currently holds the context pressed and/or thimble state,
 		-- try to transfer it back to the previous menu in the chain.
@@ -1323,7 +1280,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local tq_px = skin.tq_px
 			local tq_arrow = skin.tq_arrow
@@ -1422,7 +1378,7 @@ def.skinners = {
 				if item.text_int then
 					local tbl_color = selectItemColor(item, self, skin)
 					love.graphics.setColor(tbl_color)
-					
+
 					love.graphics.print(
 						item.text_int,
 						item.x + item.text_x,

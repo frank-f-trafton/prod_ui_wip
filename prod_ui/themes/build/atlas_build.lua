@@ -43,7 +43,6 @@ local task_i = 1
 
 
 local function checkArgImagePath()
-
 	if not arg_img_path then
 		error("missing argument: source path")
 	end
@@ -51,7 +50,6 @@ end
 
 
 local function checkArgAtlasDest()
-
 	if not arg_dest_path then
 		error("missing argument: atlast destination path")
 	end
@@ -59,7 +57,6 @@ end
 
 
 local function checkArgBleed()
-
 	local n = tonumber(arg_bleed)
 	if not n then
 		error("optional argument `bleed`: invalid setting: " .. tostring(arg_bleed))
@@ -80,7 +77,6 @@ local tbl_premult = {
 
 
 local function checkArgPremult()
-
 	if not tbl_premult[arg_premult] then
 		error("optional argument `premult`: invalid setting: " .. tostring(arg_premult))
 	end
@@ -97,7 +93,6 @@ end
 
 
 function love.load(arguments)
-
 	if #arguments < 1 then
 		error("usage: " .. example_usage)
 	end
@@ -142,7 +137,6 @@ end
 
 
 local tasks_build = {
-
 	-- 1
 	function()
 		checkArgImagePath()
@@ -245,13 +239,11 @@ local tasks_build = {
 
 
 function love.update(dt)
-
 	if not tasks_build[task_i] then
 		print("* Finished all tasks.")
 		print("task_i", task_i)
 		love.event.quit()
 		return
-
 	else
 		print("* Task #" .. task_i)
 		if not tasks_build[task_i]() then
@@ -261,4 +253,3 @@ function love.update(dt)
 		end
 	end
 end
-

@@ -3,7 +3,6 @@
 -- Under construction. Copy of `skins/button1.lua`.
 
 return {
-
 	skinner_id = "default",
 
 	["*box"] = "style/boxes/button",

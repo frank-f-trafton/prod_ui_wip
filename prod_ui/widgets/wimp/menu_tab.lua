@@ -7,39 +7,39 @@
 	* Assumes that all column categories are left-to-right. (TODO: considerations for RTL)
 
 
-	+----------+----------+------------+-+
-	|Name    v |Size      |Date        |^|  -- Column header bar -- visibility optional
-	+----------+----------+------------+-+
-	|Foo               100   2023-01-02| |  -- Menu Items (one for each row)
-	|Bar                11   2018-05-14| |
-	|Baz              2400   2001-03-22| |
-	|Bop                55   2014-01-01| |
-	|                                  | |
-	|                                  +-+
-	|                                  |v|
-	+-+------------------------------+-+-+
-	|<|                              |>| |  -- Optional scroll bars
-	+-+------------------------------+-+-+
+	┌──────────┬──────────┬────────────┬─┐
+	│Name    v │Size      │Date        │^│  -- Column header bar -- visibility optional
+	├──────────┴──────────┴────────────┼─┤
+	│Foo               100   2023-01-02│ │  -- Menu Items (one for each row)
+	│Bar                11   2018-05-14│ │
+	│Baz              2400   2001-03-22│ │
+	│Bop                55   2014-01-01│ │
+	│                                  │ │
+	│                                  ├─┤
+	│                                  │v│
+	├─┬──────────────────────────────┬─┼─┤
+	│<│                              │>│ │  -- Optional scroll bars
+	└─┴──────────────────────────────┴─┴─┘
 
 
 	Column Header-box detail:
 
 	                     Indicates ascending/descending order
-                                          |
-                                          |
+                                         │
+                                         v
 
-	+-------------------------------------------+
-	| ####         #                            |
-	| #            #                            |
-	| ### ##   ##  ###   ##   # ##      #####   |
-	| #  #  # #  # #  # #  #  ##         ###    |
-	| #   ##   ##  ###   ## # #           #     |
-	+-------------------------------------------+
+	┌───────────────────────────────────────────┐
+	│ ╔══╡        ╥                             │
+	│ ║           ║                     ────    │
+	│ ╠═╡ ╔═╗ ╔═╗ ╠═╗ ╔═╗ ╔═╗           ╲  ╱    │
+	│ ║   ║ ║ ║ ║ ║ ║ ║ ║ ║              ╲╱     │
+	│ ╨   ╚═╝ ╚═╝ ╚═╝ ╚═╩ ╨                     │
+	└───────────────────────────────────────────┘
 
-	|                                        |     |
-	+----------------------------------------+-----+
-	                 |                          |
-	                 |                          |
+	║                                        ║     ║
+	╚════════════════╦═══════════════════════╩══╦══╝
+	                 ║                          ║
+	                 ║                          ║
 	         Left-click to sort      Left-click + drag to resize
 	   Left-click + drag to re-order
 
@@ -72,14 +72,12 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 local function pointInColumnBar(self, px, py)
-
 	return px >= self.col_bar_x and px < self.col_bar_x + self.col_bar_w
 		and py >= self.col_bar_y and py < self.col_bar_y + self.col_bar_h
 end
 
 
 function def:addColumn(label, visible, cb_sort)
-
 	local column = {}
 	table.insert(self.columns, column)
 
@@ -105,7 +103,6 @@ end
 
 
 function def:addRow()
-
 	local row = {}
 	row.selectable = true
 --[[ -- XXX is this stuff needed?
@@ -166,7 +163,6 @@ local cat_pop_up_def = {}
 
 
 local function callback_toggleCategoryVisibility(self, item)
-
 	local column = self.columns[item.column_index]
 	if column then
 		column.visible = not column.visible
@@ -178,7 +174,6 @@ end
 
 
 local function setupCategoryPopUp(self)
-
 	for i = #cat_pop_up_def, 1, -1 do
 		cat_pop_up_def[i] = nil
 	end
@@ -201,7 +196,6 @@ end
 
 
 local function invokePopUpMenu(self, x, y)
-
 	setupCategoryPopUp(self)
 
 	local root = self:getTopWidgetInstance()
@@ -219,7 +213,6 @@ end
 
 
 local function _findVisibleColumn(columns, first, last, delta)
-
 	for i = first, last, delta do
 		local column = columns[i]
 		if column.visible then
@@ -233,7 +226,6 @@ end
 
 -- Move a column within the array based on the column table and a destination index.
 local function _moveColumn(self, col, dest_i)
-
 	-- Locate column table in the array
 	local columns = self.columns
 	local src_i = false
@@ -254,7 +246,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 
@@ -276,7 +267,7 @@ function def:uiCall_create(inst)
 		self.columns = {}
 
 		-- Column bar visibility.
-		
+
 		-- Column bar rectangle. Column positions are not relative to these XY values, but they do define
 		-- placement and are used in broad intersect tests.
 		self.col_bar_visible = true
@@ -339,7 +330,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
 	commonScroll.arrangeScrollBars(self)
@@ -350,7 +340,6 @@ function def:uiCall_reshape()
 		self.col_bar_y = self.vp_y
 		self.col_bar_w = self.vp_w
 		self.col_bar_h = self.col_bar_h
-
 	else
 		self.col_bar_x = 0
 		self.col_bar_y = 0
@@ -386,7 +375,6 @@ end
 
 -- Updates the positions of column header boxes
 function def:refreshColumnBar()
-
 	local cx = self.vp_x
 	for i, column in ipairs(self.columns) do
 		if column.visible then
@@ -401,7 +389,6 @@ end
 
 
 function def:refreshRows()
-
 	--local column_bar_x2 = self.w
 	local column_bar_x2 = self.vp_x + self.vp_w
 	local last_column = self.columns[#self.columns]
@@ -430,7 +417,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 
 	if refresh_dimensions then
@@ -455,7 +441,6 @@ end
 
 
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
-
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -492,7 +477,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
@@ -506,7 +490,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		-- Run the default navigation checks.
 		elseif self.wid_defaultKeyNav and self:wid_defaultKeyNav(key, scancode, isrepeat) then
 			return true
-
 		end
 		--[[
 		-- Visibility pop-up menu
@@ -521,7 +504,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local mx, my, ax, ay = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -588,7 +570,6 @@ end
 
 
 local function testColumnMouseOverlapWithEdges(self, mx, my)
-
 	local drag_thresh = 4 -- XXX configurable edge threshold
 
 	-- Broad check
@@ -615,7 +596,6 @@ end
 
 -- Doesn't check the edges (for resizing).
 local function testColumnMouseOverlap(self, mx, my)
-
 	-- Assumes mx and my are relative to widget top-left.
 
 	-- Broad check
@@ -637,7 +617,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
 		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
@@ -674,7 +653,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		and mouse_y >= self.vp2_y
 		and mouse_y < self.vp2_y + self.vp2_h
 		then
-
 			local menu = self.menu
 
 			-- Update item hover
@@ -725,7 +703,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 
@@ -747,7 +724,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button <= 3 then
 			self:tryTakeThimble()
@@ -845,9 +821,7 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
-
 		-- Repeat-press events for scroll bar buttons
 		if commonScroll.press_busy_codes[self.press_busy]
 		and button == 1
@@ -872,7 +846,6 @@ end
 
 
 function def:sort()
-
 	local success = false
 	local column = self.column_primary
 	if column and column.cb_sort then
@@ -886,10 +859,8 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
-
 			commonScroll.widgetClearPress(self)
 
 			local old_press_busy = self.press_busy
@@ -933,7 +904,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 				if not old_selected_item then
 					self.menu:setSelectedIndex(0)
-
 				else
 					for i, item in ipairs(self.menu.items) do
 						if item == old_selected_item then
@@ -943,7 +913,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				end
 
 				self:selectionInView(true)
-
 			else
 				-- If mouse is over the selected item and it has a pointerRelease callback, run it.
 				local item_selected = self.menu.items[self.menu.index]
@@ -965,7 +934,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			and old_col_press.id > self.reorder_limit
 			and not self.col_click
 			then
-
 				local columns = self.columns
 
 				if #columns > 1 then
@@ -1004,7 +972,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -1023,7 +990,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(false)
 			end
-			
+
 			-- Stop bubbling
 			return true
 		end
@@ -1032,7 +999,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		-- ...
 	end
@@ -1043,7 +1009,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -1114,7 +1079,6 @@ end
 
 
 local function drawWholeColumn(self, column, backfill, ox, oy)
-
 	love.graphics.push("all")
 
 	--love.graphics.translate(self.vp_x - self.scr_x, 0)
@@ -1240,7 +1204,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 
 			local menu = self.menu

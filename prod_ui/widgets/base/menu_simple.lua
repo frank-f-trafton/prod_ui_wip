@@ -96,7 +96,6 @@ end
 
 
 function def:selectionInView()
-
 	local menu = self.menu
 
 	-- No selection: nothing to do.
@@ -119,7 +118,6 @@ function def:selectionInView()
 			if self.scroll_clamp then
 				clampScroll(self)
 			end
-
 		-- Normal circumstances
 		else
 			if menu.index < self.scroll_i + self.scroll_i_pad then
@@ -150,7 +148,6 @@ def.moveLast = commonMenu.widgetMoveLast
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -199,9 +196,8 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
-		if self.horizontal and scancode == "left" 
+		if self.horizontal and scancode == "left"
 		or not self.horizontal and scancode == "up" then
 			self:movePrev(1)
 
@@ -251,7 +247,6 @@ end
 -- @param x Mouse X position, relative to widget top-left.
 -- @param y Mouse Y position, relative to widget top-left.
 function def:trySelectItemAtPoint(x, y)
-
 	local i = getItemAtPoint(self, x, y)
 
 	if i then
@@ -265,7 +260,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button <= 3 then
@@ -289,7 +283,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 
@@ -303,7 +296,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		-- ...
 	end
@@ -320,7 +312,6 @@ end
 
 def.skinners = {
 	default = {
-
 		install = function(self, skinner, skin)
 			uiTheme.skinnerCopyMethods(self, skinner)
 		end,
@@ -336,7 +327,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 
 			local menu = self.menu
