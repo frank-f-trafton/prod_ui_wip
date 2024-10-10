@@ -14,7 +14,6 @@ local plan = {}
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame", {make_menu_bar = true})
@@ -31,7 +30,6 @@ function plan.make(parent)
 
 	local content = frame:findTag("frame_content")
 	if content then
-
 		content.w = 640
 		content.h = 480
 
@@ -92,7 +90,6 @@ function plan.make(parent)
 	-- Set up menu
 	local menu_bar = frame:findTag("frame_menu_bar")
 	if menu_bar then
-
 		local def_file = {
 			{
 				type = "command",

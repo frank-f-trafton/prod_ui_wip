@@ -9,7 +9,6 @@ local plan = {}
 
 
 local function makeLabel(content, x, y, w, h, text, label_mode)
-
 	label_mode = label_mode or "single"
 
 	local label = content:addChild("base/label")
@@ -21,7 +20,6 @@ end
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
@@ -33,11 +31,9 @@ function plan.make(parent)
 
 	local content = frame:findTag("frame_content")
 	if content then
-
 		content.layout_mode = "resize"
 
 		content:setScrollBars(false, false)
-
 
 		-- Make a one-off SkinDef Patch that we can adjust without changing all other buttons with the default skin.
 		local resources = content.context.resources

@@ -152,7 +152,7 @@
 
 	Viewports are typically set up in a reshape() callback by progressively carving out border
 	and margin data (stored in the skin), and space for components such as scroll bars.
-	
+
 	Up to eight viewports per widget are permitted by the support code that manages them.
 --]]
 
@@ -208,7 +208,6 @@ def.skinners = {
 -- Bubbles when the widget is created via context:addWidget() or widget:addChild().
 -- @param inst The newly-created widget instance. May have some fields already set by the caller.
 function def:uiCall_create(inst)
-
 	--[[
 	Recommendations:
 	In your documentation, please list:
@@ -262,7 +261,6 @@ end
 -- @param mouse_dx Relative mouse X delta from previous position, if applicable.
 -- @param mouse_dy Relative mouse Y delta from previous position, if applicable.
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- XXX: due to issues with widgets slipping out of the mouse cursor position, this is fired
 	-- continously, even if the mouse is idle.
 end
@@ -293,7 +291,6 @@ end
 -- @param istouch 'istouch' value from love.mousepressed.
 -- @param presses 'presses' value from love.mousepressed.
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	--[[
 	If you want to consider only one pressed button at a time, use:
 
@@ -310,7 +307,6 @@ end
 -- @param istouch True if this is a touch input
 -- @param reps The number of repetitions up to this point
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	--[[
 	The initial delay and repeat-rate are controlled by the UI Context.
 
@@ -355,13 +351,12 @@ end
 -- @param dy Mouse Y delta from previous position
 function def:uiCall_pointerDrag(inst, x, y, dx, dy)
 	-- The actual dragging has to be implemented here.
-
 end
 
 
 -- Bubbles when the mouse wheel is moved.
 function def:uiCall_pointerWheel(x, y)
-	
+
 end
 
 
@@ -414,7 +409,6 @@ end
 -- @param mouse_dx Relative mouse X delta from previous position, if applicable.
 -- @param mouse_dy Relative mouse Y delta from previous position, if applicable.
 function def:uiCall_pointerDragDestMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- XXX: like uiCall_pointerHoverMove, this is fired continuously, even if the
 	-- mouse is idle.
 end
@@ -591,9 +585,8 @@ end
 -- @param dt The delta time from love.update().
 -- @return truthy value to explicitly prevent updating the widget's children. (If uiCall_update doesn't exist in the widget, children will be updated.)
 function def:uiCall_update(dt)
-
 	--[[
-	There are many limitations to what can be done while the context is locked for updating. Anything
+	There are many limitations in effect when the context is locked for updating. Anything
 	that is likely to mess up tree traversal (remove or reorder widgets; change tree root) will raise
 	an error. You can defer these actions to after the update loop using context:appendAsyncAction().
 
@@ -609,14 +602,14 @@ end
 --- Runs on the tree root as a result of the love.focus() event.
 -- @param focus True if the window has focus, false if not.
 function def:uiCall_windowFocus(focus)
-	
+
 end
 
 
 --- Runs on the tree root as a result of the love.mousefocus() event.
 -- @param focus True if the mouse is in the window, false if not (with some exceptions when click-dragging out of frame).
 function def:uiCall_mouseFocus(focus)
-	
+
 end
 
 
@@ -708,4 +701,3 @@ end
 
 
 return def
-

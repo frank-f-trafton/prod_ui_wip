@@ -16,7 +16,6 @@ local def = {}
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		-- When true, renders a debug rectangle
 		self.visible = false
@@ -45,7 +44,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	if not self.parent then
 		return
 	end
@@ -60,10 +58,8 @@ function def:uiCall_reshape()
 		self.w = self.parent.w + self.sensor_pad*2
 		self.y = -self.sensor_pad
 		self.h = self.parent.h + self.sensor_pad*2
-
 	-- Smaller sensor along one side or corner
 	else
-
 		if axis_x < 0 then
 			self.x = -self.sensor_pad
 
@@ -94,7 +90,6 @@ end
 
 
 local function getCursorCode(a_x, a_y)
-
 	return (a_y == 0 and a_x ~= 0) and "sizewe" -- -
 	or (a_y ~= 0 and a_x == 0) and "sizens" -- |
 	or ((a_y == 1 and a_x == 1) or (a_y == -1 and a_x == -1)) and "sizenwse" -- \
@@ -109,7 +104,6 @@ end
 
 
 local function determineBigResizeMode(self, mouse_x, mouse_y)
-
 	local ax, ay = self:getAbsolutePosition()
 	local mx, my = mouse_x - ax, mouse_y - ay
 
@@ -128,7 +122,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		-- Update mouse cursor
 		local axis_x, axis_y
@@ -136,7 +129,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		-- Big sensor
 		if self.axis_x == 0 and self.axis_y == 0 then
 			axis_x, axis_y = determineBigResizeMode(self, mouse_x, mouse_y)
-
 		-- Little sensor
 		else
 			axis_x = self.axis_x
@@ -151,7 +143,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		-- Restore mouse cursor state.
 		self:setCursorLow()
@@ -162,12 +153,10 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	-- NOTE: when the parent is maximized, it should turn off 'allow_hover' in its resize sensors.
 	if self == inst then
 		if button == 1 and self.context.mouse_pressed_button == button then
 			local parent = self.parent
-
 			local axis_x, axis_y = self.axis_x, self.axis_y
 			if axis_x == 0 and axis_y == 0 then
 				axis_x, axis_y = determineBigResizeMode(self, x, y)
@@ -191,7 +180,6 @@ end
 
 -- Debug visualizer
 function def:render(os_x, os_y)
-
 	love.graphics.setScissor()
 
 	love.graphics.setColor(0.8, 0.1, 0.2, 0.8)

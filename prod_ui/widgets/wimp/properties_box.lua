@@ -7,36 +7,36 @@ A list of properties.
 Multiple categories:
 
               Drag to resize columns
-                        |
-Optional icons (bijoux) |
-     |                  |
-     | Labels           |   Controls
-     |   |              |      |
+                        │
+Optional icons (bijoux) │
+     │                  │
+     │ Labels           │   Controls
+     │   │              │      │
      V   V              V      V
-+----------------------------------------+-+
-| v [B] Category                         |^|  <-- Click '>'/'v' or press right/left to expand or collapse
-| +---------------------+--------------+ +-+
-| | [B] Foo             |     [x]      | | |
-| |:[B]:Bar:::::::::::::|:::[    0.02]:| | |
-| | [B] Baz             |   [ "Twist"] | | |
-| | [B] Bop             | [dir/ectory] | | |
-| +---------------------+--------------+ | |
-|                                        | |
-| > Collapsed Category                   +-+
-| -------------------------------------- |v|
-+----------------------------------------+-+
+┌────────────────────────────────────────┬─┐
+│ v [B] Category                         │^│  <-- Click '>'/'v' or press right/left to expand or collapse
+│ ┌─────────────────────┬──────────────┐ ├─┤
+│ │ [B] Foo             │     [x]      │ │ │
+│ │:[B]:Bar:::::::::::::│:::[    0.02]:│ │ │
+│ │ [B] Baz             │   [ "Twist"] │ │ │
+│ │ [B] Bop             │ [dir/ectory] │ │ │
+│ └─────────────────────┴──────────────┘ │ │
+│                                        │ │
+│ > Collapsed Category                   ├─┤
+│ ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ │v│
+└────────────────────────────────────────┴─┘
 
 
 Single category:
 
-+---------------------+--------------+-+
-| [B] Foo             |     [x]      |^|
-|:[B]:Bar:::::::::::::|:::[    0.02]:+-+
-| [B] Baz             |   [ "Twist"] | |
-| [B] Bop             | [dir/ectory] | |
-|                     |              +-+
-|                     |              |v|
-+---------------------+--------------+-+
+┌─────────────────────┬──────────────┬─┐
+│ [B] Foo             │     [x]      │^│
+│:[B]:Bar:::::::::::::│:::[    0.02]:├─┤
+│ [B] Baz             │   [ "Twist"] │ │
+│ [B] Bop             │ [dir/ectory] │ │
+│                     │              ├─┤
+│                     │              │v│
+└─────────────────────┴──────────────┴─┘
 
 
 In single category mode:
@@ -131,7 +131,6 @@ end
 
 
 function def:addCategory(text, category_pos, bijou_id)
-
 	-- XXX: Assertions.
 
 	category_pos = category_pos or #self.categories + 1
@@ -167,7 +166,6 @@ end
 
 
 function def:addProperty(category, text, property_type, property_pos, bijou_id)
-
 	-- XXX: Assertions.
 
 	property_pos = property_pos or #category.items + 1
@@ -198,7 +196,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -252,7 +249,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -286,7 +282,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 	local skin = self.skin
 
@@ -311,7 +306,6 @@ end
 
 
 function def:orderItems()
-
 	-- Clear the existing menu item layout.
 	local items = self.menu.items
 	for i = #items, 1, -1 do
@@ -325,7 +319,6 @@ function def:orderItems()
 				items[#items + 1] = item
 			end
 		end
-
 	else
 		for i, category in ipairs(self.categories) do
 			if category.expanded then
@@ -341,7 +334,6 @@ end
 
 def.skinners = {
 	default = {
-
 		install = function(self, skinner, skin)
 			uiTheme.skinnerCopyMethods(self, skinner)
 		end,
@@ -357,7 +349,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local menu = self.menu
 			local items = menu.items

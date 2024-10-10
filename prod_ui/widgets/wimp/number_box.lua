@@ -5,11 +5,11 @@
 
 A single-line text box with controls for incrementing and decrementing numeric values.
 
-+-----------------+---+
-| 11              | ^ | -- Increment value (or press up-arrow)
-|  1              +---+
-| 111             | v | -- Decrement value (or press down-arrow)
-------------------+---+
+┌─────────────────┬───┐
+│ ═╗              │ ^ │ -- Increment value (or press up-arrow)
+│  ║              ├───┤
+│ ═╩═             │ v │ -- Decrement value (or press down-arrow)
+└─────────────────┴───┘
 
 --]]
 
@@ -65,7 +65,6 @@ def.wid_buttonAction3 = uiShared.dummyFunc
 
 
 local function setLineEdText(self, value) -- replaces refreshLineEdText()
-
 	local line_ed = self.line_ed
 
 	-- XXX: convert value to string for LineEd.
@@ -110,7 +109,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -148,7 +146,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is for text placement and offsetting.
 	-- Viewport #2 is the text scissor-box boundary.
 	-- Viewport #3 is the increment and decrement buttons.
@@ -167,9 +164,7 @@ end
 
 
 function def:uiCall_update(dt)
-
 	local line_ed = self.line_ed
-
 	local scr_x_old = self.scr_x
 
 	-- Handle update-time drag-scroll.
@@ -202,7 +197,6 @@ end
 
 
 function def:uiCall_thimbleTake(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
@@ -210,7 +204,6 @@ end
 
 
 function def:uiCall_thimbleRelease(inst)
-
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -218,7 +211,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		if self.enabled then
 			--self:wid_action() -- XXX
@@ -228,7 +220,6 @@ end
 
 
 function def:uiCall_destroy(inst)
-
 	if self == inst then
 		commonWimp.checkDestroyPopUp(self)
 	end
@@ -236,7 +227,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		local check_value = false
 		local value_old = self.value
@@ -267,7 +257,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				--setLineEdText(self, value)
 			end
 			return true
-
 		-- Standard text box controls (caret navigation, etc.)
 		else
 			return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
@@ -277,7 +266,6 @@ end
 
 
 local function checkDecimal(self)
-
 	local str = self.line_ed.line
 
 	if string.find(str, "[%s%+e]") or not (str == "." or str == "-" or str == "-." or tonumber(str)) then
@@ -287,7 +275,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-
 	if self == inst then
 		lgcInputS.textInputLogic(self, text, checkDecimal)
 	end
@@ -296,7 +283,6 @@ end
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst
 	and self.enabled
 	then
@@ -306,7 +292,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst
 	and self.enabled
 	then
@@ -314,7 +299,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if widShared.pointInViewport(self, 1, mx, my) then
 			self:setCursorLow(self.skin.cursor_on)
-
 		else
 			self:setCursorLow()
 		end
@@ -323,7 +307,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -334,7 +317,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -367,7 +349,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			self.press_busy = false
@@ -377,7 +358,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		-- XXX: Increment/decrement?
 	end
@@ -401,7 +381,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			--local font = skin.font
 			local line_ed = self.line_ed
@@ -409,7 +388,6 @@ def.skinners = {
 			local res
 			if self.enabled then
 				res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
-
 			else
 				res = skin.res_disabled
 			end

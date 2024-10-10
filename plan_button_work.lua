@@ -14,7 +14,6 @@ end
 
 
 local function makeLabel(content, x, y, w, h, text, label_mode)
-
 	label_mode = label_mode or "single"
 
 	local label = content:addChild("base/label")
@@ -26,7 +25,6 @@ end
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
@@ -151,7 +149,6 @@ function plan.make(parent)
 		sticky:setLabel("Sticky Button")
 
 		sticky.wid_buttonAction = function(self)
-
 			self:setLabel("Stuck! Time: " .. timeFormatted())
 
 			local unsticker = self:findSiblingTag("button_unsticker")

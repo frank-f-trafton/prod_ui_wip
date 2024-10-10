@@ -5,19 +5,19 @@
 
 A WIMP TreeBox.
 
- +--------------------------+-+
- |   [B] Leaf               |^| <--
- | > [B] Node               +-+ <--
- | v [B] Node               | | <-- Items
- |       [B] Leaf           | | <--
- |    v  [B] Node           + + <--
- |          [B] Leaf        +-+ <--
- |   [B] Leaf               |v| <--
- +-+----------------------+-+-+
- |<|                      |>| |
- +-+----------------------+-+-+
+ ┌──────────────────────────┬─┐
+ │   [B] Leaf               │^│ <──
+ │ > [B] Node               ├─┤ <──
+ │ v [B] Node               │ │ <── Items
+ │       [B] Leaf           │ │ <──
+ │    v  [B] Node           │ │ <──
+ │          [B] Leaf        ├─┤ <──
+ │   [B] Leaf               │v│ <──
+ ├─┬──────────────────────┬─┼─┤
+ │<│                      │>│ │
+ └─┴──────────────────────┴─┴─┘
                              ^
-                             |
+                             │
                    Optional scroll bars
 
  [B]: Optional icons (bijoux)
@@ -50,7 +50,6 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 function def:arrange()
-
 	local skin = self.skin
 	local menu = self.menu
 	local items = menu.items
@@ -159,7 +158,6 @@ end
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
-
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -195,7 +193,6 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 			self:orderItems()
 			self:arrange()
 			self:cacheUpdate(true)
-
 		else
 			self:scrollDeltaH(-32) -- XXX config
 		end
@@ -212,7 +209,6 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 			self:orderItems()
 			self:arrange()
 			self:cacheUpdate(true)
-
 		else
 			self:scrollDeltaH(32) -- XXX config
 		end
@@ -222,7 +218,6 @@ end
 
 
 local function updateItemDimensions(self, skin, item)
-
 	-- Do not try to update the root node.
 	if not item.parent then
 		return
@@ -238,7 +233,6 @@ end
 
 
 local function updateAllItemDimensions(self, skin, node)
-
 	for i, item in ipairs(node.nodes) do
 		updateItemDimensions(self, skin, item)
 	end
@@ -246,7 +240,6 @@ end
 
 
 function def:setIconsEnabled(enabled)
-
 	self.show_icons = not not enabled
 
 	self:cacheUpdate(true)
@@ -255,7 +248,6 @@ end
 
 
 function def:setExpandersActive(active)
-
 	self.expanders_active = not not active
 
 	self:cacheUpdate(true)
@@ -264,7 +256,6 @@ end
 
 
 function def:addNode(text, parent_node, tree_pos, bijou_id)
-
 	print("add node", text, parent_node, tree_pos, bijou_id)
 	-- XXX: Assertions.
 
@@ -294,12 +285,10 @@ end
 
 
 local function _orderLoop(self, items, node)
-
 	if node.expanded then
 		local start, stop, delta
 		if self.skin.item_align_v == "top" then
 			start, stop, delta = 1, #node.nodes, 1
-
 		else -- "bottom"
 			start, stop, delta = #node.nodes, 1, -1
 		end
@@ -314,7 +303,6 @@ end
 
 
 function def:orderItems()
-
 	-- Clear the existing menu item layout.
 	local items = self.menu.items
 	for i = #items, 1, -1 do
@@ -327,7 +315,6 @@ end
 
 
 function def:removeNode(node, _depth)
-
 	-- XXX: Assertions
 
 	_depth = _depth or 1
@@ -357,7 +344,6 @@ end
 
 
 function def:setSelection(item_t)
-
 	-- Assertions
 	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
@@ -369,7 +355,6 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -380,7 +365,6 @@ end
 
 
 function def:setMarkedItem(item_t, marked)
-
 	-- Assertions
 	-- [[
 	uiShared.assertTable(1, item_t)
@@ -391,7 +375,6 @@ end
 
 
 function def:toggleMarkedItem(item_t)
-
 	-- Assertions
 	-- [[
 	uiShared.assertTable(1, item_t)
@@ -402,7 +385,6 @@ end
 
 
 function def:setMarkedItemByIndex(item_i, marked)
-
 	-- Assertions
 	-- [[
 	uiShared.assertNumber(1, item_i)
@@ -415,7 +397,6 @@ end
 
 
 function def:getMarkedItem(item_t)
-
 	-- Assertions
 	-- [[
 	uiShared.assertTable(1, item_t)
@@ -427,7 +408,6 @@ end
 
 --- Produces a table that contains all items that are currently marked (multi-selected).
 function def:getAllMarkedItems()
-
 	local tbl = {}
 
 	for i, item in ipairs(self.menu.items) do
@@ -441,7 +421,6 @@ end
 
 
 function def:clearAllMarkedItems()
-
 	for i, item in ipairs(self.menu.items) do
 		item.marked = false
 	end
@@ -449,7 +428,6 @@ end
 
 
 function def:setMarkedItemRange(marked, first, last)
-
 	local menu = self.menu
 	local items = menu.items
 
@@ -468,7 +446,6 @@ end
 
 
 function def:countMarkedItems()
-
 	local count = 0
 
 	for i, item in ipairs(self.menu.items) do
@@ -482,7 +459,6 @@ end
 
 
 local function markItemsCursorMode(self, old_index)
-
 	if not self.mark_index then
 		self.mark_index = old_index
 	end
@@ -498,7 +474,6 @@ end
 
 
 function def:uiCall_create(inst)
-
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
@@ -584,7 +559,6 @@ end
 
 
 function def:uiCall_reshape()
-
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -613,7 +587,6 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-
 	local menu = self.menu
 	local skin = self.skin
 
@@ -654,7 +627,6 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-
 	if self == inst then
 		local items = self.menu.items
 		local old_index = self.menu.index
@@ -693,7 +665,6 @@ end
 
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -730,7 +701,6 @@ end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 		self.item_hover = false
@@ -739,7 +709,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -759,7 +728,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 		if handled_scroll_bars then
 			self.context:clearClickSequence()
-
 		else
 			local mx, my = self:getRelativePosition(x, y)
 
@@ -856,9 +824,7 @@ end
 
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
 	if self == inst then
-
 		-- Repeat-press events for scroll bar buttons
 		if commonScroll.press_busy_codes[self.press_busy]
 		and button == 1
@@ -872,7 +838,6 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
 	-- drag_reorder is incompatible with drag_drop_mode, drag_select, and the "toggle" and "cursor"
 	-- mark modes.
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
@@ -903,7 +868,6 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				self:bubbleStatement("rootCall_setDragAndDropState", self, drop_state)
 			end
-
 		else
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
@@ -952,7 +916,6 @@ end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -964,7 +927,6 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-
 	if self == inst then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
@@ -976,7 +938,6 @@ end
 
 
 function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
-
 	if self == inst then
 		local root = self:getTopWidgetInstance()
 		local drop_state = root.drop_state
@@ -993,7 +954,6 @@ end
 
 
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-
 	if self == inst
 	and self.enabled
 	then
@@ -1008,7 +968,6 @@ end
 
 
 function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
-
 	if self == inst
 	and self.enabled
 	then
@@ -1023,7 +982,6 @@ end
 
 
 function def:uiCall_update(dt)
-
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -1068,7 +1026,6 @@ end
 
 
 local function _drawLongPipes(self, skin, root, tq_px, line_x_offset, line_y_shorten)
-
 	local y1 = self.scr_y
 	local y2 = y1 + self.vp2_h
 
@@ -1092,7 +1049,6 @@ end
 
 def.skinners = {
 	default = {
-
 		install = function(self, skinner, skin)
 			uiTheme.skinnerCopyMethods(self, skinner)
 		end,
@@ -1108,7 +1064,6 @@ def.skinners = {
 
 
 		render = function(self, ox, oy)
-
 			local skin = self.skin
 			local data_icon = skin.data_icon
 
@@ -1240,7 +1195,6 @@ def.skinners = {
 							local item_x
 							if skin.item_align_h == "left" then
 								item_x = item.x + self.expander_x
-
 							else -- "right"
 								item_x = item.x + item.w - self.expander_x - self.expander_w
 							end
@@ -1261,7 +1215,6 @@ def.skinners = {
 						local item_x
 						if skin.item_align_h == "left" then
 							item_x = item.x + self.icon_x
-
 						else -- "right"
 							item_x = item.x + item.w - self.icon_x - self.icon_w
 						end
@@ -1289,7 +1242,6 @@ def.skinners = {
 					local item_x
 					if skin.item_align_h == "left" then
 						item_x = item.x + self.text_x
-
 					else -- "right"
 						item_x = item.x + item.w - self.text_x - font:getWidth(item.text)
 						-- XXX: Maybe cache text width in each item table?

@@ -9,7 +9,6 @@ local plan = {}
 
 
 function plan.make(parent)
-
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
@@ -21,7 +20,6 @@ function plan.make(parent)
 
 	local content = frame:findTag("frame_content")
 	if content then
-
 		content.layout_mode = "resize"
 
 		content:setScrollBars(false, true)
@@ -45,7 +43,6 @@ function plan.make(parent)
 		bb_rep.usr_count = 0
 
 		bb_rep.wid_buttonAction = function(self)
-
 			self.usr_count = self.usr_count + 1
 			self:setLabel(">Repeat #" .. tostring(self.usr_count) .. "<")
 		end
