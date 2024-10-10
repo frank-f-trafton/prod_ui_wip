@@ -23,7 +23,7 @@ local shared = require("shared")
 local atlasB = require("lib.atlas_b.atlas_b")
 local idops = require("lib.idops.idops")
 local nativefs = require("lib.nativefs")
-local tableToString = require("lib.table_to_string")
+local t2s2 = require("lib.t2s2.t2s2")
 
 
 local arg_img_path
@@ -149,7 +149,7 @@ local tasks_build = {
 		checkArgAtlasDest()
 		checkArgPremult()
 		checkArgBleed()
-		
+
 
 		-- Strip trailing slashes from paths
 		arg_img_path = shared.stripTrailingSlash(arg_img_path)
@@ -235,7 +235,7 @@ local tasks_build = {
 			out_coords.slices[k] = v
 		end
 
-		local atlas_box_str = tableToString.convert(out_coords)
+		local atlas_box_str = t2s2.serialize(out_coords)
 		shared.nfsWrite(arg_dest_path .. "/atlas.lua", atlas_box_str)
 
 		task_i = task_i + 1
