@@ -11,7 +11,6 @@ local uiRes = {}
 -- @param ... An arbitrary set of arguments to pass to the Lua chunk. The first argument is the file path to the Lua file.
 -- @return The result of executing the chunk.
 function uiRes.loadLuaFile(...)
-
 	local file_path = select(1, ...)
 	local chunk, err = love.filesystem.load(file_path)
 
@@ -30,7 +29,6 @@ end
 -- @omit_end When true, clip off the last word in the path. ("path.to.file" becomes "path.to.")
 -- @return The converted path.
 function uiRes.pathToRequire(path, omit_end)
-
 	path = path:gsub("/", "."):gsub("%.lua$", "")
 
 	if omit_end then
@@ -45,7 +43,6 @@ end
 -- @param The file path to strip.
 -- @return The stripped path.
 function uiRes.pathStripFile(path)
-
 	-- "foo/bar" -> "foo/"
 	-- "" -> ""
 	-- "foo" -> ""
@@ -67,7 +64,6 @@ end
 
 
 local function _enumerate(folder, fileTree, ext, recursive, depth)
-
 	--- Based on the LÖVE Wiki example: https://love2d.org/wiki/love.filesystem.getDirectoryItems
 
 	if depth <= 0 then
@@ -107,7 +103,6 @@ end
 -- @param depth (1000) The maximum recursion depth permitted. Raises an error if exceeded. Must be at least 1.
 -- @return A table of enumerated files and folders/symlinks.
 function uiRes.enumerate(folder, ext, recursive, depth)
-
 	--[[
 	'ext' examples:
 
@@ -134,4 +129,3 @@ end
 
 
 return uiRes
-

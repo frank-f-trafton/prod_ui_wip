@@ -43,7 +43,6 @@ _mt_context.updateLast = dummyFunc
 
 -- (Key-down and key-up handling is fed through callbacks in a keyboard manager table.)
 local function cb_keyDown(self, kc, sc, rep, latest)
-
 	-- XXX not handling 'latest' for now.
 
 	-- Event capture
@@ -65,7 +64,6 @@ end
 
 
 local function cb_keyUp(self, kc, sc)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_keyReleased and cap_cur:uiCap_keyReleased(kc, sc) then
@@ -85,7 +83,6 @@ end
 
 
 local function depot_loader_lua(file_path, self)
-
 	local chunk = love.filesystem.load(file_path)
 	local result = chunk(self, file_path)
 	return result
@@ -101,7 +98,6 @@ end
 -- @param h Context viewport height.
 -- @return The UI context.
 function uiContext.newContext(prod_ui_path, x, y, w, h)
-
 	-- Assertions
 	-- [[
 	if type(prod_ui_path) ~= "string" then _errBadType(1, prod_ui_path, "string")
@@ -292,7 +288,6 @@ end
 
 
 local function _updateLoop(wid, dt, locks)
-
 	local skip_children
 
 	if wid.userUpdate then
@@ -304,7 +299,6 @@ local function _updateLoop(wid, dt, locks)
 	end
 
 	if not skip_children and #wid.children > 0 then
-
 		locks[wid] = true
 
 		local i = 1
@@ -323,7 +317,6 @@ end
 
 
 local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_virtualMouseRepeat and cap_cur:uiCap_virtualMouseRepeat(x, y, button, istouch, reps) then
@@ -389,7 +382,6 @@ end
 -- @param opt A value (presumably a table of parameters) for the function's arg #2. Nil is replaced with false.
 -- @return Nothing.
 function _mt_context:appendAsyncAction(wid, func, opt)
-
 	if self.async_lock then
 		error("async action creation is locked at time of call.")
 
@@ -412,7 +404,6 @@ end
 
 
 function _mt_context:love_update(dt)
-
 	-- Make virtual input events here.
 	-- Mouse
 	if self.mouse_pressed_button then
@@ -511,7 +502,6 @@ end
 
 --- Manually clear the mouse click-sequence state.
 function _mt_context:clearClickSequence()
-
 	self.cseq_button = false
 	self.cseq_presses = 0
 	self.cseq_time = 0
@@ -522,7 +512,6 @@ end
 --- Manually set the mouse click-sequence state. May be useful in cases where a widget contains arbitrary content, and
 -- guarding against accidental, drifting double-clicks is desired.
 function _mt_context:forceClickSequence(widget, button, n_presses)
-
 	self.cseq_button = button
 	self.cseq_presses = n_presses
 	self.cseq_time = 0
@@ -531,7 +520,6 @@ end
 
 
 function _mt_context:love_textinput(text)
-
 	local mod = self.key_mgr.mod
 
 	-- Discard textinput events if LÖVE TextInput is off. This can happen if TextInput was disabled while
@@ -571,7 +559,6 @@ end
 
 
 function _mt_context:love_focus(focus)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_windowFocus and cap_cur.uiCap_windowFocus(focus) then
@@ -587,7 +574,6 @@ end
 
 
 function _mt_context:love_visible(visible)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_windowVisible and cap_cur.uiCap_windowVisible(visible) then
@@ -603,7 +589,6 @@ end
 
 
 function _mt_context:love_mousefocus(focus)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_mouseFocus and cap_cur:uiCap_mouseFocus(focus) then
@@ -619,13 +604,11 @@ end
 
 
 function _mt_context:love_textedited(text, start, length)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_textEdited and cap_cur:uiCap_textEdited(text, start, length) then
 		return
 	end
-
 
 	-- XXX not handled yet
 end
@@ -642,7 +625,6 @@ end
 
 
 function _mt_context:love_wheelmoved(x, y)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_wheelMoved and cap_cur:uiCap_wheelMoved(x, y) then
@@ -659,7 +641,6 @@ end
 
 
 function _mt_context:love_mousereleased(x, y, button, istouch, presses)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_mouseReleased and cap_cur:uiCap_mouseReleased(x, y, button, istouch, presses) then
@@ -667,9 +648,9 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 	end
 
 	--[[
-		NOTE: The context mouse button state is updated after callbacks are fired.
-		This gives uiCall_pointerUnpress / uiCall_pointerRelease a chance to check 'mouse_current_pressed'
-		before it is potentially erased.
+	NOTE: The context mouse button state is updated after callbacks are fired.
+	This gives uiCall_pointerUnpress / uiCall_pointerRelease a chance to check 'mouse_current_pressed'
+	before it is potentially erased.
 	--]]
 
 	self.mouse_x = x
@@ -697,7 +678,6 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 	end
 
 	if self.mouse_pressed_button == button then
-
 		-- Clean up Drag-Dest state.
 		local old_drag_dest = self.current_drag_dest
 		if old_drag_dest then
@@ -731,7 +711,6 @@ end
 
 
 function _mt_context:love_mousepressed(x, y, button, istouch, presses)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_mousePressed and cap_cur:uiCap_mousePressed(x, y, button, istouch, presses) then
@@ -750,7 +729,6 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 	-- If there is, ignore it.
 
 	if self.mouse_pressed_button == false then
-
 		self.mouse_pressed_button = button
 		self.mouse_pressed_rep_n = 0
 		self.mouse_pressed_dt_acc = 0
@@ -773,7 +751,6 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 		then
 			self.cseq_presses = self.cseq_presses + 1
 			self.cseq_time = 0
-
 		else
 			self.cseq_button = button
 			self.cseq_presses = 1
@@ -826,7 +803,6 @@ end
 
 
 function _mt_context:love_resize(w, h)
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_windowResize and cap_cur:uiCap_windowResize(w, h) then
@@ -840,7 +816,6 @@ end
 
 
 function _mt_context:love_joystickadded(joystick) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_joystickAdded and cap_cur:uiCap_joystickAdded(joystick) then
@@ -854,7 +829,6 @@ end
 
 
 function _mt_context:love_joystickremoved(joystick) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_joystickRemoved and cap_cur:uiCap_joystickRemoved(joystick) then
@@ -868,7 +842,6 @@ end
 
 
 function _mt_context:love_joystickpressed(joystick, button) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_joystickPressed and cap_cur:uiCap_joystickPressed(joystick, button) then
@@ -888,7 +861,6 @@ end
 
 
 function _mt_context:love_joystickreleased(joystick, button) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_joystickReleased and cap_cur:uiCap_joystickReleased(joystick, button) then
@@ -908,7 +880,6 @@ end
 
 
 function _mt_context:love_joystickaxis(joystick, axis, value) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_joystickAxis and cap_cur:uiCap_joystickAxis(joystick, axis, value) then
@@ -928,7 +899,6 @@ end
 
 
 function _mt_context:love_joystickhat(joystick, hat, direction) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_joystickHat and cap_cur:uiCap_joystickHat(joystick, hat, direction) then
@@ -948,7 +918,6 @@ end
 
 
 function _mt_context:love_gamepadpressed(joystick, button) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_gamepadPressed and cap_cur:uiCap_gamepadPressed(joystick, button) then
@@ -968,7 +937,6 @@ end
 
 
 function _mt_context:love_gamepadreleased(joystick, button) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_gamepadReleased and cap_cur:uiCap_gamepadReleased(joystick, button) then
@@ -988,7 +956,6 @@ end
 
 
 function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
-
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_gamepadAxis and cap_cur:uiCap_gamepadAxis(joystick, axis, value) then
@@ -1016,7 +983,6 @@ end
 -- @param def_conf An arbitrary config table for the chunk function.
 -- @return The def table. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
-
 	-- Assertions
 	-- [[
 	if type(chunk) ~= "function" then _errBadType(1, chunk, "function")
@@ -1055,7 +1021,6 @@ end
 -- @param def_conf An arbitrary config table for the chunk function.
 -- @return The def table or fab function. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDef(file_path, id, def_conf)
-
 	-- Assertions
 	-- [[
 	if type(file_path) ~= "string" then _errBadType(1, file_path, "string")
@@ -1078,7 +1043,6 @@ end
 -- @param def_conf (false) An optional, arbitrary config table to pass to each chunk to help with configuration.
 -- @return Nothing.
 function _mt_context:loadWidgetDefsInDirectory(dir_path, recursive, id_prepend, def_conf)
-
 	id_prepend = id_prepend or ""
 	def_conf = def_conf or false
 
@@ -1111,11 +1075,9 @@ end
 local function _unloadFindWidgetByID(wid, id)
 	if wid.id == id then
 		return wid
-
 	else
 		for i, child in ipairs(wid.children) do
 			local found = findWidgetByID(child, id)
-
 			if found then
 				return found
 			end
@@ -1153,7 +1115,6 @@ end
 -- @param id The widget definition ID. Cannot be NaN.
 -- @return the definition table, or nil if nothing is registered by that ID.
 function _mt_context:getWidgetDef(id)
-
 	-- Assertions
 	-- [[
 	if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN") end
@@ -1177,7 +1138,6 @@ end
 --	#children + 1.
 -- @return A reference to the new instance. The function will raise an error in the event of a problem.
 function _mt_context:addWidget(id, init_t, pos)
-
 	-- Assertions
 	-- [[
 	if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN")
@@ -1227,7 +1187,6 @@ end
 --  Locked during update: yes (context)
 -- @param new_root The new root instance.
 function _mt_context:pushRoot(new_root)
-
 	-- Assertions
 	-- [[
 	if type(new_root) ~= "table" then
@@ -1270,7 +1229,6 @@ end
 --  Locked during update: yes (context)
 -- @return The popped root widget, or nothing if the stack was empty.
 function _mt_context:popRoot()
-
 	-- Assertions
 	-- [[
 	if self.locked then
@@ -1297,7 +1255,6 @@ function _mt_context:popRoot()
 		self.current_pressed = new_root._ctx_banked_current_pressed or false
 		self.current_thimble = new_root._ctx_banked_current_thimble or false
 		self.captured_focus = new_root._ctx_banked_captured_focus or false
-
 	else
 		self.current_hover = false
 		self.current_pressed = false
@@ -1318,7 +1275,6 @@ end
 -- @param instance The widget table which should become the new root (must be owned by the context). Pass nil/false to unset the current root.
 -- @return The old root widget, or nil if the stack was empty.
 function _mt_context:setRoot(instance)
-
 	local old_root = self:popRoot()
 	self:pushRoot(instance)
 
@@ -1328,7 +1284,6 @@ end
 
 --- Like wid:releaseThimble(), but with fewer restrictions.
 function _mt_context:clearThimble()
-
 	if self.current_thimble then
 		local temp_thimble = self.current_thimble
 		self.current_thimble = false
@@ -1339,11 +1294,9 @@ end
 
 -- Depth-first widget tag search.
 function _mt_context:findTag(str)
-
 	for i, instance in ipairs(self.instances) do
 		if instance.tag == str then
 			return instance, i
-
 		else
 			local ret1, ret2 = instance:findTag(str)
 			if ret1 then
@@ -1393,7 +1346,6 @@ end
 -- @param wid The widget to transfer hover and/or pressed state to.
 -- @return Nothing.
 function _mt_context:transferPressedState(wid)
-
 	--print(debug.traceback())
 
 	if not wid then

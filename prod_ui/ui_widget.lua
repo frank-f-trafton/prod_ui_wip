@@ -130,7 +130,6 @@ end
 
 --- Sets up a new widget instance table. Internal use.
 function uiWidget._initWidgetInstance(instance, def, context, parent)
-
 	-- Uncomment to assert that instance tables are not being reused.
 	-- [[
 	if not uiWidget._assert_dupe_tables then
@@ -167,7 +166,6 @@ end
 -- @param a, b, c, d Generic arguments. Usage depends on the ID.
 -- @return Nothing.
 function uiWidget._runUserEvent(wid, id, a, b, c, d)
-
 	local user_event = wid[id]
 
 	if user_event == nil then
@@ -189,20 +187,20 @@ end
 
 --- Check if the mouse pointer is hovering over the widget's contact box.
 function _mt_widget:checkHovered()
-	return (self.context.current_hover == self)
+	return self.context.current_hover == self
 end
 
 
 --- Check if the mouse pointer is currently pressing the widget.
 function _mt_widget:checkPressed()
-	return (self.context.current_pressed == self)
+	return self.context.current_pressed == self
 end
 
 
 --- Check if this widget currently has the thimble. This is effectively the same as 'wid == wid.context.current_thimble'.
 -- @return True if it has the thimble, false if not.
 function _mt_widget:hasThimble()
-	return self == self.context.current_thimble
+	return self.context.current_thimble == self
 end
 
 
@@ -213,7 +211,6 @@ end
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent. An example usage is to permit some thimble changes to center the selected widget within its container, while not doing so in other cases.
 -- @return Nothing.
 function _mt_widget:takeThimble(a, b, c, d)
-
 	--print("takeThimble", debug.traceback())
 
 	if not self.can_have_thimble then
@@ -243,7 +240,6 @@ end
 -- @param a, b, c, d Generic arguments (same as takeThimble()).
 -- @return Nothing.
 function _mt_widget:retakeThimble(a, b, c, d)
-
 	if not self.can_have_thimble then
 		error("this widget isn't allowed to be have the thimble (cursor).")
 	end
@@ -265,7 +261,6 @@ end
 -- @param a, b, c, d Generic arguments (same as takeThimble()).
 -- @return True if takeThimble() was called, false if not.
 function _mt_widget:tryTakeThimble(a, b, c, d)
-
 	if not self.can_have_thimble then
 		return false
 	end
@@ -280,7 +275,6 @@ end
 -- @param a, b, c, d Generic arguments (same as takeThimble()).
 -- @return True if retakeThimble() was called, false if not.
 function _mt_widget:tryRetakeThimble(a, b, c, d)
-
 	if not self.can_have_thimble then
 		return false
 	end
@@ -292,7 +286,6 @@ end
 
 
 function _mt_widget:tryAscendingThimble(a, b, c, d)
-
 	local wid = self
 	while wid do
 		if wid.can_have_thimble then
@@ -307,7 +300,6 @@ end
 
 
 function _mt_widget:releaseThimble()
-
 	if self.context.current_thimble ~= self then
 		error("this widget isn't currently holding the thimble.")
 	end
@@ -321,7 +313,6 @@ end
 --- Gets the top-level widget instance. In widget code, prefer this over referencing 'self.context.tree' because it can work outside of the current root (unless you really do want to interact with the current root).
 -- @return The root widget.
 function _mt_widget:getTopWidgetInstance()
-
 	-- This is safe for the root itself to run.
 
 	local wid = self
@@ -345,10 +336,8 @@ end
 --- Depth-first search for the first widget which can take the thimble.
 -- @return The found widget, or nil if the search was unsuccessful.
 function _mt_widget:getOpenThimbleDepthFirst()
-
 	if self.can_have_thimble then
 		return self
-
 	else
 		for i, child in ipairs(self.children) do
 			if child:getOpenThimbleDepthFirst() then
@@ -361,7 +350,6 @@ end
 
 --- Capture the focus. 'allow_focus_capture' must be true.
 function _mt_widget:captureFocus()
-
 	if not self.allow_focus_capture then
 		error("widget isn't allowed to capture the focus.")
 	end
@@ -378,7 +366,6 @@ end
 
 --- Release the captured focus. The focus must currently be captured by this widget.
 function _mt_widget:uncaptureFocus()
-
 	if self.context.captured_focus ~= self then
 		error("can't release focus as widget isn't currently capturing it.")
 	end
@@ -392,7 +379,6 @@ end
 --- Get the widget's absolute position by adding the coordinates of itself with those of its ancestors.
 -- @return X, Y position in the state's space.
 function _mt_widget:getAbsolutePosition()
-
 	local x, y = self.x, self.y
 	local ancestor = self.parent
 
@@ -412,7 +398,6 @@ end
 -- the tree root) and it must be in the widget's lineage. As a result, this function cannot be used on a root widget.
 -- @return X, Y position relative to the ancestor.
 function _mt_widget:getPositionInAncestor(ancestor)
-
 	local x, y = self.x, self.y
 	local middle_wid = self.parent -- ref to widgets between self and ancestor
 
@@ -439,14 +424,12 @@ end
 -- @param y The input absolute Y position.
 -- @return X and Y positions relative to the widget's top-left, and the widget's absolute X and Y positions.
 function _mt_widget:getRelativePosition(x, y)
-
 	local ax, ay = self:getAbsolutePosition()
 	return x - ax, y - ay, ax, ay
 end
 
 
 function _mt_widget:pointInRect(x, y)
-
 	local w_x, w_y = self:getAbsolutePosition()
 	return x >= w_x and y >= w_y and x < w_x + self.w and y < w_y + self.h
 end
@@ -464,7 +447,6 @@ end
 -- @param pos (default: #self.children + 1) Where to place the new widget in the children table.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, init_t, pos)
-
 	-- Assertions
 	-- [[
 		if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN")
@@ -489,7 +471,6 @@ function _mt_widget:addChild(id, init_t, pos)
 	-- Unsupported type. (Corrupt widget defs collection?)
 	if type(def) ~= "table" then
 		error("unregistered ID or unsupported type for widget def (id: " .. tostring(id) .. ", type: " .. type(def) .. ")")
-
 	else
 		init_t = init_t or {}
 		uiWidget._initWidgetInstance(init_t, def, self.context, self)
@@ -509,7 +490,6 @@ end
 --	Callbacks:
 --	* Bubble: uiCall_destroy()
 function _mt_widget:remove()
-
 	if self._dead then
 		error("attempted to remove widget that is already " .. tostring(self._dead) .. ".")
 	end
@@ -570,7 +550,6 @@ function _mt_widget:remove()
 		end
 
 		self.parent = false
-
 	-- No parent: top-level widget special handling
 	else
 		local context = self.context
@@ -643,7 +622,6 @@ end
 -- @param e Fifth argument to pass.
 -- @param f Sixth argument to pass. Additional content could be stored in a subtable if necessary.
 function _mt_widget:runStatement(field, a, b, c, d, e, f)
-
 	-- Uncomment to help catch ordering issues.
 	--[[
 	if wid._dead then
@@ -664,7 +642,6 @@ end
 
 --- Execute 'runStatement' on this widget, and then on each of its ancestors successively.
 function _mt_widget:bubbleStatement(field, a, b, c, d, e, f)
-
 	local wid = self
 
 	while wid do
@@ -682,7 +659,6 @@ end
 
 
 function _mt_widget:trickleStatement(field, a, b, c, d, e, f)
-
 	local retval = self:runStatement(field, a, b, c, d, e, f)
 
 	if not retval then
@@ -698,8 +674,7 @@ end
 
 
 function _mt_widget:getIndex(seq)
-
-	seq = (seq) or (self.parent and self.parent.children) or (self.context.instances)
+	seq = seq or (self.parent and self.parent.children) or (self.context.instances)
 
 	for i, child in ipairs(seq) do
 		if self == child then
@@ -712,7 +687,6 @@ end
 
 
 local function getSiblingDelta(self, delta, wrap)
-
 	if not self.parent then
 		error("can't get siblings for top-level (root) widget instances.")
 	end
@@ -749,7 +723,6 @@ local sort_count = {} -- sortChildren
 -- @param recurse If true, recursively sort children with the same function.
 -- @return Nothing. Children are sorted in-place.
 function _mt_widget:sortChildren(recurse)
-
 	-- More info on counting sort: https://en.wikipedia.org/wiki/Counting_sort
 
 	--[[
@@ -822,7 +795,6 @@ end
 --  Locked during update: yes (parent)
 -- @param var "first" to move to the beginning of the list, "last" to move to the end, or a number to move by a relative number of steps (clamped to the list boundaries.)
 function _mt_widget:reorder(var)
-
 	if self.context.locks[self.parent] then
 		uiShared.errLockedParent("reorder")
 	end
@@ -859,7 +831,6 @@ end
 --- Sets the widget's tag string.
 -- @param tag (string) The tag to assign.
 function _mt_widget:setTag(tag)
-
 	-- Assertions
 	-- [[
 	if type(tag) ~= "string" then _errBadType(1, tag, "string") end
@@ -871,13 +842,11 @@ end
 
 -- Depth-first tag search among descendants. Does not include self.
 function _mt_widget:findTag(str)
-
 	for i, child in ipairs(self.children) do
 		--print("findTag", self.id, i, child.id, child.tag)
 		if child.tag == str then
 			--print("findTag: MATCH")
 			return child, i
-
 		else
 			local ret1, ret2 = child:findTag(str)
 			if ret1 then
@@ -892,7 +861,6 @@ end
 
 -- Shallow tag search among descendants.
 function _mt_widget:findTagFlat(str, pos)
-
 	pos = pos or 1
 	local children = self.children
 
@@ -909,7 +877,6 @@ end
 
 -- Flat search of siblings for a specific string tag.
 function _mt_widget:findSiblingTag(str, i)
-
 	i = i or 1
 	local seq = (self.parent and self.parent.children) or (self.context.instances)
 	local instance = seq[i]
@@ -930,7 +897,6 @@ end
 -- @param wid The widget to check
 -- @return true if it is a child, grandchild, etc., or false if not found.
 function _mt_widget:hasThisDescendant(wid)
-
 	-- (Does not check if self == self)
 	for i, child in ipairs(self.children) do
 		if child == wid then
@@ -949,7 +915,6 @@ end
 -- @param wid The widget to check.
 -- @return true if it is a child, false if not. (Grandchild, great-grandchild, etc., don't count.)
 function _mt_widget:hasThisChild(wid)
-
 	for i, child in ipairs(self.children) do
 		if child == wid then
 			return true
@@ -961,7 +926,6 @@ end
 
 
 function _mt_widget:hasThisAncestor(wid)
-
 	-- (Does not check if self == self)
 	local ancestor = self.parent
 	while ancestor do
@@ -976,7 +940,6 @@ end
 
 
 function _mt_widget:descendantHasThimble()
-
 	local current_thimble = self.context.current_thimble
 
 	for _, child in ipairs(self.children) do
@@ -1000,7 +963,6 @@ end
 -- in the callback to halt further reshaping.
 -- @return Nothing.
 function _mt_widget:reshape(include_descendants)
-
 	local result = self:runStatement("uiCall_reshape", self)
 
 	-- Reshape children only if 'include_descendants' is truthy and the above statement returned falsy.
@@ -1016,7 +978,6 @@ end
 -- @param include_descendants When true, the caller's grandchildren and onwards are recursively reshaped.
 -- @return Nothing.
 function _mt_widget:reshapeChildren(include_descendants)
-
 	for i, child in ipairs(self.children) do
 		child:reshape(include_descendants)
 	end
@@ -1024,7 +985,6 @@ end
 
 
 function _mt_widget:setPosition(x, y) -- XXX under consideration
-
 	self.x = x
 	self.y = y
 
@@ -1033,7 +993,6 @@ end
 
 --[=[
 function _mt_widget:setDimensions(w, h) -- XXX under consideration
-
 	-- maybe disallow <0 width or height.
 	self.w = w
 	self.h = h
@@ -1043,7 +1002,6 @@ end
 --]=]
 --[=[
 function _mt_widget:setXYWH(x, y, w, h) -- XXX under consideration
-
 	self.x = x
 	self.y = y
 
@@ -1061,7 +1019,6 @@ end
 --  having to know internal details about the widget. For example, a bar containing one line of text would probably
 --  have a static height that is based on the size of the font used (plus maybe some padding).
 function _mt_widget:resize()
-
 	if self.uiCall_resize then
 		return self:uiCall_resize()
 	end
@@ -1071,7 +1028,6 @@ end
 --[[
 --- Applies fixed width and/or height to widgets.
 function _mt_widget:applyFixedSize()
-
 	if self.w_fixed then
 		self.w = self.w_fixed
 	end
@@ -1085,7 +1041,6 @@ end
 
 --- The default widget renderer.
 function _mt_widget:render(os_x, os_y)
-
 	-- Uncomment to draw a white rectangle for every widget that does not have a render method
 	-- assigned. (This won't affect widgets with a dummy render() attached.)
 	--[[
@@ -1121,7 +1076,6 @@ uiWidget.thimble_info = {
 
 --- The default renderer for when widgets have the thimble.
 function _mt_widget:renderThimble()
-
 	local thimble_t = self.thimble_info or uiWidget.thimble_info
 
 	love.graphics.setColor(thimble_t.color)
@@ -1223,7 +1177,6 @@ end
 
 
 function _mt_widget:skinInstall()
-
 	if self.skinner.install then
 		self.skinner.install(self, self.skinner, self.skin)
 	end
@@ -1231,7 +1184,6 @@ end
 
 
 function _mt_widget:skinRemove()
-
 	if self.skinner.remove then
 		self.skinner.remove(self, self.skinner, self.skin)
 	end
@@ -1243,7 +1195,6 @@ end
 --	Intended uses: during widget instance creation; when reloading resources.
 --@return The skinner (implementation) and skin (data) tables.
 function _mt_widget:skinSetRefs()
-
 	if not self.skin_id then
 		error("no skin ID assigned to widget.")
 	end
@@ -1271,7 +1222,6 @@ end
 
 
 function _mt_widget:skinRefresh()
-
 	if self.skinner.refresh then
 		self.skinner.refresh(self, self.skinner, self.skin)
 	end
@@ -1279,7 +1229,6 @@ end
 
 
 function _mt_widget:skinUpdate(dt)
-
 	if self.skinner.update then
 		self.skinner.update(self, self.skinner, self.skin, dt)
 	end
@@ -1287,7 +1236,6 @@ end
 
 
 function _mt_widget:getHierarchical(field)
-
 	local wid = self
 
 	while wid do
@@ -1305,14 +1253,12 @@ end
 
 
 function _mt_widget:drillHierarchical(...)
-
 	local wid = self
 
 	while wid do
 		local ret = utilTable.tryDrillV(self, ...)
 		if ret ~= nil then
 			return ret
-
 		else
 			wid = wid.parent
 		end
@@ -1331,7 +1277,6 @@ end
 
 --- Get a widget's parent, throwing an error if there is no reference (it's the root widget, or data corruption).
 function _mt_widget:getParent()
-
 	local parent = self.parent
 	if not parent then
 		error("missing parent reference in widget.")
@@ -1342,4 +1287,3 @@ end
 
 
 return uiWidget
-
