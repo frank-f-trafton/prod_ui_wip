@@ -34,7 +34,6 @@ _mt_ed_s.__index = _mt_ed_s
 
 
 local function updateCaretRect(self)
-
 	--print("updateCaretRect")
 	--print("", "d_car_byte", self.d_car_byte)
 
@@ -55,7 +54,6 @@ end
 
 
 local function updateDisplayLineHorizontal(self)
-
 	self.disp_text_w = self.font:getWidth(self.disp_text)
 
 	if self.align == "left" then
@@ -71,7 +69,6 @@ end
 
 
 local function dispUpdateLineSyntaxColors(self, byte_1, byte_2)
-
 	if self.colored_text and self.syntax_colors then
 
 		local disp_text = self.disp_text
@@ -114,7 +111,6 @@ end
 --- Creates a new Line Editor object.
 -- @return the edit_field table.
 function lineEdS.new(font)
-
 	if not font then
 		error("missing argument #1 (font) for new LineEditor (single) object.")
 	end
@@ -240,7 +236,6 @@ end
 
 --- Gets caret and highlight offsets in the correct order.
 function _mt_ed_s:getHighlightOffsets()
-
 	-- You may need to subtract 1 from byte_2 to get the correct range.
 	local byte_1, byte_2 = self.car_byte, self.h_byte
 	return math.min(byte_1, byte_2), math.max(byte_1, byte_2)
@@ -260,7 +255,6 @@ end
 
 -- @return Byte, X position and width of the glyph (if applicable).
 function _mt_ed_s:getLineInfoAtX(x, split_x)
-
 	local font = self.font
 	local line = self.line
 
@@ -274,12 +268,10 @@ end
 
 
 function _mt_ed_s:updateHighlightRect()
-
 	local byte_1, byte_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
 
 	if byte_1 == byte_2 then
 		self.disp_highlighted = false
-
 	else
 		local font = self.font
 		local disp_text = self.disp_text
@@ -301,7 +293,6 @@ end
 
 
 function _mt_ed_s:clearHighlight()
-
 	self.h_byte = self.car_byte
 
 	self:displaySyncCaretOffsets()
@@ -312,7 +303,6 @@ end
 
 
 function _mt_ed_s:updateFont(font)
-
 	self.font = font
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
@@ -322,7 +312,6 @@ end
 
 
 function _mt_ed_s:refreshFontParams()
-
 	local font = self.font
 	local em_width = font:getWidth("M")
 	local line_height = font:getHeight() * font:getLineHeight()
@@ -334,7 +323,6 @@ end
 
 
 function _mt_ed_s:highlightCleanup()
-
 	if self:isHighlighted() then
 		self:clearHighlight()
 	end
@@ -345,7 +333,6 @@ end
 -- @param text The string to insert.
 -- @return Nothing.
 function _mt_ed_s:insertText(text)
-
 	self:highlightCleanup()
 
 	self.line = lineManip.add(self.line, text, self.car_byte)
@@ -363,7 +350,6 @@ end
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
 function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2)
-
 	local deleted
 	if copy_deleted then
 		deleted = string.sub(self.line, byte_1, byte_2)
@@ -385,7 +371,6 @@ _mt_ed_s.updateCaretBlink = commonEd.updateCaretBlink
 
 
 function _mt_ed_s:getWordRange(byte_n)
-
 	--print("_mt_ed_s:getWordRange(): byte_n", byte_n)
 
 	local line = self.line
@@ -413,7 +398,6 @@ end
 
 --- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle. The display text must be current at time of call.
 function _mt_ed_s:displaySyncCaretOffsets()
-
 	local line = self.line
 
 	self.d_car_byte = edComS.coreToDisplayOffsets(line, self.car_byte, self.disp_text)
@@ -425,7 +409,6 @@ end
 
 --- Update the display text.
 function _mt_ed_s:updateDisplayText()
-
 	local font = self.font
 
 	-- Perform optional modifications on the string.
@@ -477,7 +460,6 @@ end
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
 function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
-
 	--print("_mt_ed_s:getCharacterDetailsAtPosition()", "x", x, "split_x", split_x)
 
 	local font = self.font
@@ -506,7 +488,6 @@ end
 
 
 function _mt_ed_s:caretToByte(clear_highlight, byte_n)
-
 	--print("_mt_ed_s:caretToByte()", "clear_highlight", clear_highlight, "byte_n", byte_n)
 
 	local line = self.line
@@ -527,7 +508,6 @@ end
 
 
 function _mt_ed_s:caretAndHighlightToByte(car_byte_n, h_byte_n)
-
 	local line = self.line
 	car_byte_n = math.max(1, math.min(car_byte_n, #line + 1))
 
@@ -548,7 +528,6 @@ end
 --- Copies the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
 -- @return The current internal string, the display text, the caret byte, the highlight byte, and the input category.
 function _mt_ed_s:copyState()
-
 	return self.line, self.disp_text, self.car_byte, self.h_byte, self.input_category
 end
 
@@ -556,7 +535,6 @@ end
 --- Sets the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
 -- @param line, disp_text, car_byte, h_byte, input_category The old internal state, as gotten from self:copyState().
 function _mt_ed_s:setState(line, disp_text, car_byte, h_byte, input_category)
-
 	self.line = line
 	self.disp_text = disp_text
 	self.car_byte = car_byte

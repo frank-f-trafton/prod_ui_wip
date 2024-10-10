@@ -5,7 +5,6 @@ local commonEd = {}
 
 
 function commonEd.setupCaretInfo(self, highlight, lines)
-
 	-- Current line and position (in bytes) of the text caret and the highlight selection.
 	-- The highlight can be greater or less than self.car_byte.
 	-- If (h_line == car_line and h_byte == car_byte), then highlighting is not active.
@@ -24,7 +23,6 @@ end
 
 
 function commonEd.setupCaretDisplayInfo(self, highlight, paragraphs)
-
 	self.caret_line_width = 1 -- XXX: skin
 	self.caret_is_showing = true
 
@@ -53,7 +51,6 @@ end
 
 
 function commonEd.setupCaretBox(self)
-
 	-- The position and dimensions of the currently selected character.
 	-- The client widget uses these values to determine the size and location of its caret.
 	self.caret_box_x = 0
@@ -64,7 +61,6 @@ end
 
 
 function commonEd.setupMaskedState(self)
-
 	-- Glyph masking mode, as used in password fields.
 	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
 	-- It does nothing else with respect to security.
@@ -80,7 +76,6 @@ end
 
 
 function commonEd.updateCaretBlink(self, dt)
-
 	-- Implement caret blinking.
 	self.caret_blink_time = self.caret_blink_time + dt
 	if self.caret_blink_time > self.caret_blink_on + self.caret_blink_off then
@@ -89,7 +84,6 @@ function commonEd.updateCaretBlink(self, dt)
 
 	if self.caret_blink_time < self.caret_blink_off then
 		self.caret_is_showing = true
-
 	else
 		self.caret_is_showing = false
 	end

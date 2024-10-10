@@ -35,10 +35,8 @@ local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
 -- Step left, right
 function editActS.caretLeft(self, line_ed)
-
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeLeft(true)
-
 	else
 		self:caretStepLeft(true)
 	end
@@ -48,10 +46,8 @@ end
 
 
 function editActS.caretRight(self, line_ed)
-
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(true)
-
 	else
 		self:caretStepRight(true)
 	end
@@ -62,7 +58,6 @@ end
 
 -- Step left, right while highlighting
 function editActS.caretLeftHighlight(self, line_ed)
-
 	self:caretStepLeft(not line_ed.allow_highlight)
 
 	return true, true, true, false
@@ -70,7 +65,6 @@ end
 
 
 function editActS.caretRightHighlight(self, line_ed)
-
 	self:caretStepRight(not line_ed.allow_highlight)
 
 	return true, true, true, false
@@ -79,11 +73,9 @@ end
 
 -- Jump left, right
 function editActS.caretJumpLeft(self, line_ed)
-
 	-- Don't leak details about the masked string.
 	if line_ed.masked then
 		self:caretFirst(true)
-
 	else
 		self:caretJumpLeft(true)
 	end
@@ -93,11 +85,9 @@ end
 
 
 function editActS.caretJumpRight(self, line_ed)
-
 	-- Don't leak details about the masked string.
 	if line_ed.masked then
 		self:caretLast(true)
-
 	else
 		self:caretJumpRight(true)
 	end
@@ -108,11 +98,9 @@ end
 
 -- Jump left, right with highlight
 function editActS.caretJumpLeftHighlight(self, line_ed)
-
 	-- Don't leak details about the masked string.
 	if line_ed.masked then
 		self:caretFirst(not line_ed.allow_highlight)
-
 	else
 		self:caretJumpLeft(not line_ed.allow_highlight)
 	end
@@ -122,11 +110,9 @@ end
 
 
 function editActS.caretJumpRightHighlight(self, line_ed)
-
 	-- Don't leak details about the masked string.
 	if line_ed.masked then
 		self:caretLast(not line_ed.allow_highlight)
-
 	else
 		self:caretJumpRight(not line_ed.allow_highlight)
 	end
@@ -137,7 +123,6 @@ end
 
 -- Jump to start, end of document
 function editActS.caretFirst(self, line_ed)
-
 	self:caretFirst(true)
 
 	return true, true, true, false
@@ -145,7 +130,6 @@ end
 
 
 function editActS.caretLast(self, line_ed)
-
 	self:caretLast(true)
 
 	return true, true, true, false
@@ -154,7 +138,6 @@ end
 
 -- Highlight to start, end of line
 function editActS.caretFirstHighlight(self, line_ed)
-
 	self:caretFirst(not line_ed.allow_highlight)
 
 	return true, true, true, false
@@ -162,7 +145,6 @@ end
 
 
 function editActS.caretLastHighlight(self, line_ed)
-
 	self:caretLast(not line_ed.allow_highlight)
 
 	return true, true, true, false
@@ -171,7 +153,6 @@ end
 
 -- Backspace, delete (or delete highlight)
 function editActS.backspace(self, line_ed)
-
 	--[[
 	Both backspace and delete support partial amendments to history, so they need some special handling here.
 	This logic is essentially a copy-and-paste of the code that handles amended text input.
@@ -184,7 +165,6 @@ function editActS.backspace(self, line_ed)
 
 		if line_ed:isHighlighted() then
 			deleted = self:deleteHighlightedText()
-
 		else
 			deleted = self:backspaceUChar(1)
 		end
@@ -216,7 +196,6 @@ end
 
 
 function editActS.delete(self, line_ed)
-
 	if line_ed.allow_input then
 		-- Need to handle history here.
 		local old_byte, old_h_byte = line_ed:getCaretOffsets()
@@ -224,7 +203,6 @@ function editActS.delete(self, line_ed)
 
 		if line_ed:isHighlighted() then
 			deleted = self:deleteHighlightedText()
-
 		else
 			deleted = self:deleteUChar(1)
 		end
@@ -257,7 +235,6 @@ end
 
 -- Delete highlighted text (for the pop-up menu)
 function editActS.deleteHighlighted(self, line_ed)
-
 	if line_ed.allow_input then
 		if line_ed:isHighlighted() then
 			self:deleteHighlightedText()
@@ -271,14 +248,12 @@ end
 
 -- Backspace, delete by group (unhighlights first)
 function editActS.deleteGroup(self, line_ed)
-
 	if line_ed.allow_input then
 		local write_hist = false
 
 		-- Don't leak masked info.
 		if line_ed.masked then
 			write_hist = not not self:deleteUChar(1)
-
 		else
 			line_ed.input_category = false
 			write_hist = not not self:deleteGroup()
@@ -290,7 +265,6 @@ end
 
 
 function editActS.deleteAll(self, line_ed)
-
 	if line_ed.allow_input then
 		local old_line = line_ed.line
 
@@ -303,14 +277,12 @@ end
 
 
 function editActS.backspaceGroup(self, line_ed)
-
 	if line_ed.allow_input then
 		local write_hist = false
 
 		-- Don't leak masked info.
 		if line_ed.masked then
 			write_hist = not not self:backspaceUChar(1)
-
 		else
 			write_hist = not not self:backspaceGroup()
 			line_ed.input_category = false
@@ -323,7 +295,6 @@ end
 
 -- Backspace, delete from caret to start/end of line, respectively (unhighlights first)
 function editActS.deleteCaretToEnd(self, line_ed)
-
 	if line_ed.allow_input then
 		self:deleteCaretToEnd()
 		line_ed.input_category = false
@@ -334,7 +305,6 @@ end
 
 
 function editActS.backspaceCaretToStart(self, line_ed)
-
 	if line_ed.allow_input then
 		-- [WARN] Will leak masked line feeds (or would, if line feeds were masked)
 		self:deleteCaretToStart()
@@ -347,7 +317,6 @@ end
 
 -- Tab key
 function editActS.typeTab(self, line_ed)
-
 	if line_ed.allow_input and line_ed.allow_tab then
 		local changed = false
 
@@ -366,7 +335,6 @@ end
 
 -- Return / Enter key
 function editActS.typeLineFeed(self, line_ed)
-
 	if line_ed.allow_input and line_ed.allow_line_feed and line_ed.allow_enter_line_feed then
 		line_ed.input_category = false
 
@@ -379,10 +347,8 @@ end
 
 -- Select all
 function editActS.selectAll(self, line_ed)
-
 	if line_ed.allow_highlight then
 		self:highlightAll()
-
 	else
 		self:clearHighlight()
 	end
@@ -392,10 +358,8 @@ end
 
 
 function editActS.selectCurrentWord(self, line_ed)
-
 	if line_ed.allow_highlight then
 		self:highlightCurrentWord()
-
 	else
 		self:clearHighlight()
 	end
@@ -406,7 +370,6 @@ end
 
 -- Copy, cut, paste
 function editActS.copy(self, line_ed)
-
 	if line_ed.allow_copy and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:copyHighlightedToClipboard() -- handles masking
 
@@ -416,7 +379,6 @@ end
 
 
 function editActS.cut(self, line_ed)
-
 	if line_ed.allow_input and line_ed.allow_cut and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:cutHighlightedToClipboard() -- handles masking, history, and blanking the input category.
 
@@ -426,7 +388,6 @@ end
 
 
 function editActS.paste(self, line_ed)
-
 	if line_ed.allow_input and line_ed.allow_paste then
 		self:pasteClipboardText() -- handles history, and blanking the input category.
 
@@ -437,7 +398,6 @@ end
 
 -- Toggle Insert / Replace mode
 function editActS.toggleReplaceMode(self, line_ed)
-
 	self:setReplaceMode(not self:getReplaceMode())
 
 	return true, true, false, false
@@ -446,7 +406,6 @@ end
 
 -- Undo / Redo
 function editActS.undo(self, line_ed)
-
 	self:stepHistory(-1)
 	line_ed.input_category = false
 
@@ -455,7 +414,6 @@ end
 
 
 function editActS.redo(self, line_ed)
-
 	self:stepHistory(1)
 	line_ed.input_category = false
 

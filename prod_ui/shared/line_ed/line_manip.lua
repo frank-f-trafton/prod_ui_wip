@@ -15,7 +15,6 @@ local utf8 = require("utf8")
 
 
 function lineManip.add(line, text, byte_pos)
-
 	-- Assertions.
 	-- [[
 	if byte_pos < 0 or byte_pos > #line + 1 then
@@ -34,7 +33,6 @@ end
 
 
 function lineManip.delete(text, byte_start, byte_end)
-
 	-- Assertions
 	-- [[
 	if byte_start < 0 or byte_start > #text + 1 then
@@ -50,7 +48,6 @@ end
 
 
 function lineManip.offsetStepLeft(text, byte_n)
-
 	print("text", text, "byte_n", byte_n)
 	-- Assertions
 	-- [[
@@ -81,7 +78,6 @@ end
 
 
 function lineManip.offsetStepRight(text, byte_n)
-
 	-- Assertions
 	-- [[
 	if byte_n < 1 or byte_n > #text + 1 then
@@ -124,7 +120,6 @@ end
 
 
 function lineManip.countUChars(text, dir, byte_n, n_u_chars)
-
 	local count = 0
 
 	while count < n_u_chars do
