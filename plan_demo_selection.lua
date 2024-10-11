@@ -19,16 +19,14 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 end
 
 
-local function _frame_launchFrame(self, id)
-
-end
-
-
 local function _button_launchFrame(self)
 	if type(self.usr_plan) ~= "string" then error("bad type or missing plan ID to launch") end
 	local plan = require(self.usr_plan)
 	local root = self:getTopWidgetInstance()
 	local frame = plan.make(root)
+
+	root:setSelectedFrame(frame, true)
+
 	return frame
 end
 
@@ -99,9 +97,17 @@ function plan.make(parent)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_file_select", "File Selector", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_g_list", "List of Globals", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_test_destroy_frame_from_user_update", "Test: Destroy Frame from userUpdate()", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_menu_test", "Menu Test", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_widget_tree", "Widget Tree View", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
 
 --[=====[
-
+	-- [[
+	do
+		local planWidgetTree = require("plan_wimp_widget_tree")
+		local frame = planWidgetTree.make(wimp_root)
+	end
+	--]]
 
 --]=====]
 
@@ -109,8 +115,6 @@ function plan.make(parent)
 
 	frame:reshape(true)
 	frame:center(true, true)
-
-	frame.launch = _frame_launchFrame
 
 	return frame
 end

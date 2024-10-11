@@ -38,6 +38,7 @@ end
 
 
 -- Libs: ProdUI
+local commonWimp = require("prod_ui.logic.common_wimp")
 local itemOps = require("prod_ui.logic.item_ops")
 local keyCombo = require("prod_ui.lib.key_combo")
 local uiContext = require("prod_ui.ui_context")
@@ -92,105 +93,6 @@ love.graphics.setFont(font_test)
 -- / LÖVE Setup
 
 
--- * ProdUI Menu-Item defs *
-
-
--- Menu item defs
-local idef_sep = {}
-
---idef_sep.initInstance = -- ...
-
-idef_sep.render = function(self, client, ox, oy)
-	love.graphics.setLineWidth(1)
-	love.graphics.line(self.x + 0.5, self.y + math.floor(self.h/2) + 0.5, self.w - 1, self.h - 1)
-end
-itemOps.initDef(idef_sep)
-
-local idef_text = {}
-idef_text.initInstance = function(def, client, self)
-	self.text = ""
-	self.text_x = 0
-	self.text_y = 0
-end
-idef_text.reshape = function(self, client)
-	local font = client.skin.font_item
-	self.text_x = math.floor(0.5 + self.w/2 - font:getWidth(self.text)/2)
-	self.text_y = math.floor(0.5 + self.h/2 - font:getHeight()/2)
-end
-idef_text.render = function(self, client, ox, oy)
-	if self.multi_select then -- test...
-		love.graphics.push("all")
-
-		love.graphics.setColor(0.2, 0.2, 0.5, 1.0)
-		love.graphics.setLineWidth(3)
-		love.graphics.setLineStyle("smooth")
-		love.graphics.setLineJoin("miter")
-		love.graphics.rectangle("line", self.x + 0.5, self.y + 0.5, self.w - 1, self.h - 1)
-
-		love.graphics.pop()
-	end
-	-- (font is set by client widget ahead of time)
-	love.graphics.print(self.text, self.x + self.text_x, self.y + self.text_y)
-end
-itemOps.initDef(idef_text)
-
-
-local function testMultiSelect(self, client) -- XXX test
-	self.multi_select = not self.multi_select
-
-	print("self.multi_select", self.multi_select)
-end
-
-
-local function testMultiSelectClick(self, client, button, multi_presses)
-	print("testMultiSelectClick", self, client, button, multi_presses)
-	testMultiSelect(self, client)
-end
-
-
-local function testMultiSelectKey(self, client, kc, sc, isrep)
-	testMultiSelect(self, client)
-end
-
-
-local function testMenuKeyPressed(self, key, scancode, isrepeat)
-	-- Debug
-	if scancode == "insert" then
-		local new_item = itemOps.newItem(idef_text, self)
-
-		new_item.x = 0
-		new_item.y = 0
-		new_item.w = 48--192
-		new_item.h = 48
-
-		new_item.text = "#" .. #self.menu.items + 1--"filler entry #" .. #self.menu.items + 1
-		new_item.selectable = true
-		new_item.type = "press_action"
-
-		new_item.itemAction_use = testMultiSelectClick
-
-		self:addItem(new_item, math.max(1, self.menu.index))
-		self:menuChangeCleanup()
-
-		return true
-
-	-- Debug
-	elseif scancode == "delete" then
-		if self.menu.index > 0 then
-			self:removeItem(self.menu.index)
-			self:menuChangeCleanup()
-		end
-
-		return true
-	end
-
-	return false
-end
-
-
--- * / ProdUI Menu-Item defs *
-
-
 local function newWimpContext()
 	local context = uiContext.newContext("prod_ui", 0, 0, love.graphics.getDimensions())
 
@@ -233,26 +135,16 @@ end
 -- Demo helper functions
 
 local function demo_digUpFrameAndHeader(self)
-	-- Travel up until we reach the frame
-	local wid = self
-	while wid do
-		if wid.is_frame then
-			break
-		end
-		wid = wid.parent
-	end
-
+	local wid = commonWimp.getFrame(self)
 	if not wid then
-		print("Demo Error: couldn't locate ancestor frame.")
-		return
+		print("Demo Error: couldn't locate ancestor frame")
 	end
-
 	local header = wid:findTag("frame_header")
 	if not header then
-		print("Demo Warning: no header widget found.")
+		print("Demo Error: no header widget found in window frame")
 	end
 
-	return wid, header -- calling code must check return values before using them. (Though if the header is okay, then so is the frame.)
+	return wid, header -- check the return values before accessing them
 end
 
 
@@ -344,52 +236,9 @@ function love.textinput(text)
 end
 
 
---function love.load(arguments, arguments_unfiltered)
 do
 	local wimp_root = context:findTag("wimp_workspace")
 	context:setRoot(wimp_root)
-
-	-- Generic text label
-	--[[
-	do
-		local txt = wimp_root:addChild("base/text", {font = love.graphics.newFont(20)})
-		txt.x = 32
-		txt.y = 0
-		txt.text = "Foo Unto Bar"
-		txt:refreshText()
-	end
-	--]]
-
-	-- Bare window frame test
-	--[[
-	do
-		local frame = wimp_root:addChild("wimp/window_frame")
-
-		frame:setFrameTitle("WIMP Demo")
-
-		local content = frame:findTag("frame_content")
-
-		local header = frame:findTag("frame_header")
-
-		if header then
-			header.selected = true
-		end
-
-		frame.w = 400
-		frame.h = 384
-		frame:reshape(true)
-
-		frame.x = 100
-		frame:center(false, true)
-	end
-	--]]
-
-	--[[
-	do
-		local planWidgetTree = require("plan_wimp_widget_tree")
-		local frame = planWidgetTree.make(wimp_root)
-	end
-	--]]
 
 	-- The main demo window.
 	do
@@ -519,17 +368,6 @@ do
 		end
 
 		local button_close = content:addChild("base/button")
-		button_close.x = 192
-		button_close.y = 64
-		button_close.w = 96
-		button_close.h = 24
-		button_close:setLabel("Close")
-
-		button_close.wid_buttonAction = function(self)
-			self:bubbleStatement("frameCall_close")
-		end
-
-		local button_close = content:addChild("base/button")
 		button_close.x = 0
 		button_close.y = 0
 		button_close.w = 96
@@ -550,36 +388,6 @@ of it.
 		end
 
 		local checkbox
-
-		checkbox = content:addChild("base/checkbox")
-		checkbox.checked = false
-		checkbox.bijou_side = "right"
-
-		checkbox.x = 64
-		checkbox.y = 128
-		checkbox.w = 192
-		checkbox.h = 32
-		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
-
-		checkbox.wid_buttonAction = function(self)
-			print("uiCall_controlAction", self, self.id)
-
-			local par = self.parent
-			while par do
-				if par.is_frame then
-					break
-				end
-				par = par.parent
-			end
-
-			print("self.checked", self.checked)
-
-			if par then
-				par:debugVisibleSensors(self.checked)
-			end
-		end
-
-		checkbox:reshape()
 
 		checkbox = content:addChild("base/checkbox")
 		checkbox.checked = true
@@ -615,7 +423,7 @@ of it.
 
 		do
 			-- Note on VSync: adaptive (-1) and per-frame (2+) may not be supported by graphics drivers.
-			-- Additionally, it's possible for the user to override VSync settings.
+			-- Additionally, it's possible for the user and/or video drivers to override VSync settings.
 			local current_vsync = love.window.getVSync()
 
 			local py = 244
@@ -721,211 +529,10 @@ of it.
 			end
 		end
 
-		do
-			local checkbox
-
-			checkbox = content:addChild("base/checkbox")
-			checkbox.checked = false
-			checkbox.bijou_side = "right"
-
-			checkbox.x = 300
-			checkbox.y = 128
-			checkbox.w = 192
-			checkbox.h = 32
-			checkbox:setLabel("Condensed Header")
-
-			checkbox.wid_buttonAction = function(self)
-				local frame, header = demo_digUpFrameAndHeader(self)
-
-				if header then
-					header.condensed = not not self.checked
-					frame:reshape(true)
-				end
-			end
-		end
-
-
-		do
-			local header = frame:findTag("frame_header")
-
-			local px = 312
-			local py = 244
-			local py_plus = 32
-
-			local text_vsync = content:addChild("base/text", {font = context.resources.fonts.p})
-			text_vsync.text = "Control Placement"
-			text_vsync.x = px + 9 -- XXX work on syncing padding with embedded widget labels
-			text_vsync.y = py
-			text_vsync:refreshText()
-
-			local r_action = function(self)
-				local frame, header = demo_digUpFrameAndHeader(self)
-				if header then
-					header.button_side = self.user_button_side
-					frame:reshape(true)
-				end
-			end
-
-			local radio_button
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = px
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_control_side"
-			radio_button:setLabel("Left")
-			radio_button.user_button_side = "left"
-			radio_button.wid_buttonAction = r_action
-			if header and header.button_side == radio_button.user_button_side then
-				radio_button:setChecked(true)
-			end
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = px
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_control_side"
-			radio_button:setLabel("Right")
-			radio_button.user_button_side = "right"
-			radio_button.wid_buttonAction = r_action
-			if header and header.button_side == radio_button.user_button_side then
-				radio_button:setChecked(true)
-			end
-		end
-
-
-		do
-			local header = frame:findTag("frame_header")
-
-			local px = 312
-			local py = 384
-			local py_plus = 32
-
-			local text_vsync = content:addChild("base/text", {font = context.resources.fonts.p})
-			text_vsync.text = "Header Text Align"
-			text_vsync.x = px + 9 -- XXX work on syncing padding with embedded widget labels
-			text_vsync.y = py
-			text_vsync:refreshText()
-
-			local r_action = function(self)
-				local frame, header = demo_digUpFrameAndHeader(self)
-				if header then
-					header.text_align = self.usr_text_align
-					frame:reshape(true)
-				end
-			end
-
-			local radio_button
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = px
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_header_text_align"
-			radio_button:setLabel("Left")
-			radio_button.usr_text_align = "left"
-			radio_button.wid_buttonAction = r_action
-			if header and header.text_align == radio_button.usr_text_align then
-				radio_button:setChecked(true)
-			end
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = px
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_header_text_align"
-			radio_button:setLabel("Center")
-			radio_button.usr_text_align = "center"
-			radio_button.wid_buttonAction = r_action
-			if header and header.text_align == radio_button.usr_text_align then
-				radio_button:setChecked(true)
-			end
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = px
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_header_text_align"
-			radio_button:setLabel("Right")
-			radio_button.usr_text_align = "right"
-			radio_button.wid_buttonAction = r_action
-			if header and header.text_align == radio_button.usr_text_align then
-				radio_button:setChecked(true)
-			end
-		end
-
 		content.w, content.h = widShared.getChildrenPerimeter(content)
 		content.doc_w, content.doc_h = content.w, content.h
 	end
 
-	-- [[
-	do
-		local frame_d
-		local header_d
-		local content_d
-
-		frame_d = wimp_root:addChild("wimp/window_frame")
-
-		frame_d.w = 640
-		frame_d.h = 480
-
-		frame_d:setFrameTitle("Menu Test")
-
-		header_d = frame_d:findTag("frame_header")
-		if header_d then
-			--header_d.condensed = true
-		end
-
-		content_d = frame_d:findTag("frame_content")
-		if content_d then
-
-			content_d.w = 640
-			content_d.h = 480
-
-			local menu1 = content_d:addChild("base/menu")
-			menu1.x = 16
-			menu1.y = 16
-			menu1.w = 400
-			menu1.h = 350
-
-			menu1.wid_keyPressed = testMenuKeyPressed
-
-			menu1.drag_select = true
-
-			menu1:setScrollBars(true, true)
-
-			menu1:reshape()
-		end
-
-		frame_d:reshape(true)
-		frame_d:center(true, true)
-	end
-	--]]
 
 	-- [[
 	do
