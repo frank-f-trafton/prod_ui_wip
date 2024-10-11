@@ -9,6 +9,20 @@ function commonWimp.async_widget_remove(self)
 end
 
 
+-- Gets the WIMP Window Frame that a widget belongs to.
+-- @param self Any widget descendent of a window frame, or the window frame itself.
+-- @return The Window Frame, or nil if a frame was not found.
+function commonWimp.getFrame(self)
+	local wid = self
+	while wid do
+		if wid.is_frame then
+			return wid
+		end
+		wid = wid.parent
+	end
+end
+
+
 --- Destroy the window frame that this widget belongs to. If called in update, the removal will be handled as an async action after the update loop is complete.
 -- @param self Any widget belonging to the current window frame, or the window frame itself.
 -- @return Nothing.
