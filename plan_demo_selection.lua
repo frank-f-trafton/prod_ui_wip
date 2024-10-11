@@ -95,9 +95,10 @@ function plan.make(parent)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_drag_box", "Drag Box", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_container_work", "Container work", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_slider_work", "Slider work", xx, yy, ww, hh)
-		--yy = yy + hh; bb_btn = _makeButton(content, "", "", xx, yy, ww, hh)
-		--yy = yy + hh; bb_btn = _makeButton(content, "", "", xx, yy, ww, hh)
-		--yy = yy + hh; bb_btn = _makeButton(content, "", "", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_menu_tab", "Tabular Menu", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_file_select", "File Selector", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_g_list", "List of Globals", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_test_destroy_frame_from_user_update", "Test: Destroy Frame from userUpdate()", xx, yy, ww, hh)
 
 --[=====[
 

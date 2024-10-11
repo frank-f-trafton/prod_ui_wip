@@ -883,7 +883,7 @@ of it.
 		content.doc_w, content.doc_h = content.w, content.h
 	end
 
-	--[[
+	-- [[
 	do
 		local frame_d
 		local header_d
@@ -926,43 +926,6 @@ of it.
 		frame_d:center(true, true)
 	end
 	--]]
-
-	--[[
-	do
-		local planTabularMenu = require("plan_wimp_menu_tab")
-		local frame_fc = planTabularMenu.make(wimp_root)
-
-		local planFileSelect = require("plan_wimp_file_select")
-		local frame_fs = planFileSelect.make(wimp_root)
-
-		--[=[
-		local plan_G = require("plan_wimp_g_list")
-		local frame_G = plan_G.make(wimp_root)
-		--]=]
-	end
-	--]]
-
-
-	-- [=[
-	do
-		-- Test destroying window frame from userUpdate.
-		-- XXX: this was attached to an unrelated plan/frame. Fill in the file later.
-		--local frame_ef
-		--local planDestroyFromUserUpdate = require("plan_test_destroy_from_user_update")
-		--frame_ef = planDestroyFromUserUpdate.make(wimp_root)
-		--]=]
-		--[[
-		frame_ef.userUpdate = function(self, dt)
-			self.DBG_TIME = self.DBG_TIME or 0
-			self.DBG_TIME = self.DBG_TIME + dt
-			if self.DBG_TIME >= 4 then
-				local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-				commonWimp.closeWindowFrame(self)
-				return true
-			end
-		end
-		--]]
-	end
 
 	-- [[
 	do

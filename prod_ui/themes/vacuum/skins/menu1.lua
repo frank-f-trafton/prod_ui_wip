@@ -4,6 +4,8 @@
 return {
 	skinner_id = "default",
 
+	["*box"] = "style/boxes/panel",
+
 	color_background = {0.2, 0.2, 0.2, 1.0},
 	color_outline = {0.5, 0.5, 0.5, 1.0},
 	color_item_text = {1.0, 1.0, 1.0, 1.0},

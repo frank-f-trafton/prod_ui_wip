@@ -44,6 +44,7 @@ local context = select(1, ...)
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
@@ -253,24 +254,17 @@ end
 
 
 function def:uiCall_reshape()
-	-- Reset viewport and progressively carve out space for the scroll bars.
-	self.vp_x = 0
-	self.vp_y = 0
-	self.vp_w = self.w
-	self.vp_h = self.h
+	widShared.resetViewport(self, 1)
 
+	-- Border and scroll bars
+	widShared.carveViewport(self, 1, "border")
 	commonScroll.arrangeScrollBars(self)
 
-	-- Assign the 'okay-to-click' rectangle, then carve out more viewport space for margin / padding.
-	self.vp2_x = self.vp_x
-	self.vp2_y = self.vp_y
-	self.vp2_w = self.vp_w
-	self.vp2_h = self.vp_h
+	-- 'Okay-to-click' rectangle.
+	widShared.copyViewport(self, 1, 2)
 
-	self.vp_x = self.vp_x + self.margin_x1
-	self.vp_y = self.vp_y + self.margin_y1
-	self.vp_w = self.vp_w - self.margin_x1 - self.margin_x2
-	self.vp_h = self.vp_h - self.margin_y1 - self.margin_y2
+	-- Margin.
+	widShared.carveViewport(self, 1, "margin")
 
 	-- Optional: reshape all menu items
 	if self.auto_reshape_items == true
@@ -294,14 +288,8 @@ function def:uiCall_reshape()
 		self.auto_reshape_h = self.h
 	end
 
-	-- Update scroll bar state
-	local scr_h, scr_v = self.scr_h, self.scr_v
-	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
-	end
-	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
-	end
+	self:scrollClampViewport()
+	commonScroll.updateScrollState(self)
 end
 
 
