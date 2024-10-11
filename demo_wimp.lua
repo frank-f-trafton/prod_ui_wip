@@ -942,77 +942,15 @@ of it.
 	end
 	--]]
 
-	do
-		local planSliderWork = require("plan_slider_work")
-		local frame_b = planSliderWork.make(wimp_root)
-	end
-
-	do
-		local planContainerWork = require("plan_container_work")
-		local frame_b = planContainerWork.make(wimp_root)
-	end
-
-	--[[
-	do
-		local planDragBox = require("plan_drag_box")
-		local frame_b = planDragBox.make(wimp_root)
-	end
-	--]]
-
-	do
-		local planLabelTest = require("plan_label_test")
-		local frame_b = planLabelTest.make(wimp_root)
-	end
-
-	do
-		local planStepper = require("plan_stepper")
-		local frame_b = planStepper.make(wimp_root)
-	end
-
-	do
-		local planProgressBar = require("plan_progress_bar")
-		local frame_b = planProgressBar.make(wimp_root)
-	end
-
-	do
-		local planButtonWork = require("plan_button_work")
-		local frame_b = planButtonWork.make(wimp_root)
-	end
-
-	-- [[
-	do
-		local planListBox = require("plan_wimp_list_box")
-		local frame_lb = planListBox.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planTreeBox = require("plan_wimp_tree_box")
-		local frame_lb = planTreeBox.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planBarebones = require("plan_barebones")
-		local frame_lb = planBarebones.make(wimp_root)
-	end
-	--]]
-
-	do
-		local planButtonSkinners = require("plan_button_skinners")
-		local frame_b = planButtonSkinners.make(wimp_root)
-	end
 
 	-- [=[
 	do
-		local frame_ef
-		local planTextBoxMulti = require("plan_text_box_multi")
-		frame_ef = planTextBoxMulti.make(wimp_root)
+		-- Test destroying window frame from userUpdate.
+		-- XXX: this was attached to an unrelated plan/frame. Fill in the file later.
+		--local frame_ef
+		--local planDestroyFromUserUpdate = require("plan_test_destroy_from_user_update")
+		--frame_ef = planDestroyFromUserUpdate.make(wimp_root)
 		--]=]
-
-		-- Test destroying window frame from userUpdate. XXX: move this somewhere more appropriate.
 		--[[
 		frame_ef.userUpdate = function(self, dt)
 			self.DBG_TIME = self.DBG_TIME or 0
@@ -1028,36 +966,8 @@ of it.
 
 	-- [[
 	do
-		local planTextBoxSingle = require("plan_text_box_single")
-		local frame_lb = planTextBoxSingle.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planDropdownBox = require("plan_dropdown_box")
-		local frame_lb = planDropdownBox.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planComboBox = require("plan_combo_box")
-		local frame_lb = planComboBox.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planPropertiesBox = require("plan_properties_box")
-		local frame_lb = planPropertiesBox.make(wimp_root)
-	end
-	--]]
-
-	-- [[
-	do
-		local planNumberBox = require("plan_number_box")
-		local frame_lb = planNumberBox.make(wimp_root)
+		local planDemoSelect = require("plan_demo_selection")
+		local frame_b = planDemoSelect.make(wimp_root)
 	end
 	--]]
 
