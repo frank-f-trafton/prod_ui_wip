@@ -1,7 +1,7 @@
 -- t2s2: A Lua table serializer.
 -- See README.md and LICENSE for more info.
 -- Uses code from Serpent by Paul Kulchenko: https://github.com/pkulchenko/serpent
--- Version: 1.0.2
+-- Version: 1.0.3
 
 
 --[[
@@ -30,9 +30,6 @@ SOFTWARE.
 ]]
 
 
-local _load = rawget(_G, "loadstring") and loadstring or load
-
-
 local M = {}
 
 
@@ -51,16 +48,13 @@ local _makeLUT, _isArrayOnly = pTable.makeLUT, pTable.isArrayOnly
 M.lang = {
 	err_bad_ser_key = "cannot serialize key of type: $1",
 	err_bad_ser_val = "cannot serialize value of type: $1",
-	err_call_fn = "cannot call functions",
-	err_call_str = "cannot call string methods",
 	err_max_bytes = "max bytes exceeded",
 	err_max_depth = "max table depth exceeded",
 	err_missing_pri = "missing or duplicate priority key in table: $1",
 	err_priority_key_type = "'pri_keys' must be false/nil or a table",
 	err_sep = "separator string must be either one comma or one semicolon",
 	err_sort_type = "unsupported type to be sorted: $1",
-	err_space = "space, indent and newline strings must contain only ASCII whitespace or be empty",
-	not_lone_t = "expected lone table"
+	err_space = "space, indent and newline strings must contain only ASCII whitespace or be empty"
 }
 local lang = M.lang
 
@@ -382,84 +376,6 @@ function M.serialize(t, pri_reg)
 	self:checkBuf(true)
 
 	return #self.rope > 1 and table.concat(self.rope) or self.rope[1]
-end
-
-
-local _i
-local function _whitespace(s) _i = s:match("^%s+()", _i) or _i end
-local function _comment2(s) local _i2, _ = _i; _, _i = s:match("^%-%-%[(=*)%[.-%]%1]()", _i); _i = _i or _i2 end
-local function _comment1(s) _i = s:match("^%-%-[^\n]*()", _i) or _i end
-local function _skipWS(s)
-	while true do
-		local _i2 = _i
-		_whitespace(s)
-		_comment2(s)
-		_comment1(s)
-		if _i == _i2 then
-			break
-		end
-	end
-end
-
-
-local function _isLoneTable(s)
-	_i = 1
-	_skipWS(s)
-	if s:find("^return", _i) then
-		_i = _i + #"return"
-		_skipWS(s)
-	end
-	if s:find("^{", _i) then
-		return true
-	end
-end
-
-
-local function _str__call()
-	error(lang.err_call_str)
-end
-
-
--- Based on 'deserialize()' from Serpent: https://github.com/pkulchenko/serpent
-local _deserialize
-do
-	local _mt_env = {
-		__index = function(t,k) return t end,
-		__call = function(t,...) error(lang.err_call_fn) end
-	}
-	_deserialize = function(data)
-		local env = setmetatable({}, _mt_env)
-		local f, res = _load(data, nil, "t", env)
-		if not f then return f, res end
-		if rawget(_G, "setfenv") then setfenv(f, env) end
-		return pcall(f)
-	end
-end
-
-
-function M.deserialize(s)
-	_argType(1, s, "string")
-
-	if not _isLoneTable(s) then
-		return nil, lang.not_lone_t
-	end
-
-	local str_mt__index
-	local str_mt = getmetatable("")
-	if str_mt then
-		str_mt__index, str_mt.__index = str_mt.__index, {}
-		for k, v in pairs(str_mt__index) do
-			str_mt.__index[k] = (type(v) == "function") and _str__call or v
-		end
-	end
-
-	local ok, res = _deserialize(s)
-
-	if str_mt then
-		str_mt.__index = str_mt__index
-	end
-
-	return ok, res
 end
 
 
