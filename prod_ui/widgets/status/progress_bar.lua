@@ -129,7 +129,6 @@ def.skinners = {
 		--update = function(self, skinner, skin, dt)
 
 
-		-- XXX missing vertical mode.
 		render = function(self, ox, oy)
 			local skin = self.skin
 			local res = (self.active) and skin.res_active or skin.res_inactive
@@ -148,7 +147,6 @@ def.skinners = {
 					px = self.vp2_x
 					ph = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_h))))
 					py = self.far_end and self.vp2_y + self.vp2_h - ph or self.vp2_y
-
 				else
 					pw = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_w))))
 					px = self.far_end and self.vp2_x + self.vp2_w - pw or self.vp2_x
