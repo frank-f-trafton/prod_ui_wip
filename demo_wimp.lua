@@ -64,13 +64,6 @@ local demo_perf -- assigned at the end of love.draw
 -- * / Demo State *
 
 
--- XXX: Replace this with a notification / toast system at some point.
-local notif_text = ""
-local notif_max = 10.0
-local notif_time = notif_max
-local notif_font = love.graphics.newFont(20)
-
-
 -- LÖVE Setup
 
 love.graphics.setDefaultFilter("nearest", "nearest")
@@ -240,298 +233,7 @@ do
 	local wimp_root = context:findTag("wimp_workspace")
 	context:setRoot(wimp_root)
 
-	-- The main demo window.
-	do
-		local frame = wimp_root:addChild("wimp/window_frame")
 
-		frame:setFrameTitle("WIMP Demo")
-
-		--print("frame", frame)
-		local content = frame:findTag("frame_content")
-		content.DEBUG = "dimensions"
-
-		--local inspect = require("lib.test.inspect")
-		--print("inspect frame:", inspect(frame))
-
-		-- Light up the front window.
-		-- XXX handle this properly (I guess by routing window creation through a root WIMP widget?)
-		do
-			local header = frame:findTag("frame_header")
-
-			if header then
-				header.selected = true
-			end
-		end
-
-		frame.w = 400--640
-		frame.h = 384--550
-
-		frame:reshape(true)
-
-		frame.x = 100
-		frame.y = 200
-		--frame:center(false, true)
-
-		local button
-
-		button = content:addChild("base/button")
-		button.x = 64
-		button.y = 64
-		button.w = 96
-		button.h = 24
-		button:setLabel("Prompt")
-
-		button.wid_buttonAction = function(self)
-			-- Test pushing a new instance onto the stack
-			--[=[
-			local root2 = context:addWidget("wimp/root_wimp")
-			--context:pushRoot(root2)
-			context:setRoot(root2)
-			local dialog = root2:addChild("wimp/window_frame")
-			dialog.userDestroy = function(self)
-				--self.context:popRoot()
-				self.context:setRoot(wimp_root)
-			end
-			--]=]
-
-			-- [==[
-			local frame, header = demo_digUpFrameAndHeader(self)
-			local dialog = wimp_root:addChild("wimp/window_frame")
-
-			if frame then
-
-				--[=[
-				-- Test frame-modal state.
-				dialog:setModal(frame)
-				--]=]
-
-				-- Test root-modal state.
-				-- [=[
-				--dialog.sort_id = 4
-				local root = self:getTopWidgetInstance()
-				root:runStatement("rootCall_setModalFrame", dialog)
-				--]=]
-			end
-			--]==]
-
-			dialog.w = 320--640
-			dialog.h = 224--320
-			dialog:reshape(true)
-
-			dialog:setFrameTitle("Sure about that?")
-
-			local d_content = dialog:findTag("frame_content")
-			if d_content then
-				if d_content.scr_h then
-					d_content.scr_h.auto_hide = true
-				end
-				if d_content.scr_v then
-					d_content.scr_v.auto_hide = true
-				end
-
-				local text = dialog:addChild("base/text", {font = context.resources.fonts.p})
-
-				text.x = 0
-				text.y = 32
-				text.w = d_content.w
-				text.h = 64
-
-				text.align = "center"
-				text.text = "Are you sure?"
-				text:refreshText()
-
-				local button_y = d_content:addChild("base/button")
-				button_y.x = 32
-				button_y.y = d_content.h - 48
-				button_y.w = 96
-				button_y.h = 32
-
-				button_y:setLabel("Sure")
-
-				local button_n = d_content:addChild("base/button")
-				button_n.x = 256
-				button_n.y = d_content.h - 48
-				button_n.w = 96
-				button_n.h = 32
-
-				button_n:setLabel("Unsure")
-			end
-
-			dialog:center(true, true)
-			local root = dialog:getTopWidgetInstance()
-			root:setSelectedFrame(dialog)
-
-			local try_host = dialog:getOpenThimbleDepthFirst()
-			if try_host then
-				try_host:takeThimble()
-			end
-		end
-
-		local button_close = content:addChild("base/button")
-		button_close.x = 0
-		button_close.y = 0
-		button_close.w = 96
-		button_close.h = 24
-		button_close:setLabel("Inspiration")
-		button_close.str_tool_tip = "Click for an inspiring quote."
-
-		button_close.wid_buttonAction = function(self)
-			-- XXX hook up to an actual toast system at some point.
-			notif_text = [[
-A person who doubts himself is like a man who would enlist in the
-ranks of his enemies and bear arms against himself. He makes his
-failure certain by himself being the first person to be convinced
-of it.
-
--Alexandre Dumas]]
-			notif_time = 0.0
-		end
-
-		local checkbox
-
-		checkbox = content:addChild("base/checkbox")
-		checkbox.checked = true
-		checkbox.bijou_side = "right"
-
-		checkbox.x = 64
-		checkbox.y = 160
-		checkbox.w = 192
-		checkbox.h = 32
-		checkbox:setLabel("Show state details")
-
-		checkbox.wid_buttonAction = function(self)
-			demo_show_details = not not self.checked
-			print("demo_show_details", demo_show_details)
-		end
-
-
-		checkbox = content:addChild("base/checkbox")
-		checkbox.checked = true
-		checkbox.bijou_side = "right"
-
-		checkbox.x = 64
-		checkbox.y = 192
-		checkbox.w = 192
-		checkbox.h = 32
-		checkbox:setLabel("Show perf info")
-
-		checkbox.wid_buttonAction = function(self)
-			demo_show_perf = not not self.checked
-			print("demo_show_perf", demo_show_perf)
-		end
-
-
-		do
-			-- Note on VSync: adaptive (-1) and per-frame (2+) may not be supported by graphics drivers.
-			-- Additionally, it's possible for the user and/or video drivers to override VSync settings.
-			local current_vsync = love.window.getVSync()
-
-			local py = 244
-			local py_plus = 32
-
-			local text_vsync = content:addChild("base/text", {font = context.resources.fonts.p})
-			text_vsync.text = "VSync Mode"
-			text_vsync.x = 64 + 9 -- XXX work on syncing padding with embedded widget labels
-			text_vsync.y = py
-			text_vsync:refreshText()
-
-			local r_action = function(self)
-				-- https://love2d.org/wiki/love.window.setVSync
-				love.window.setVSync(self.user_vsync_mode)
-			end
-
-			local radio_button
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = 64
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_vsync"
-			radio_button:setLabel("On")
-			radio_button.user_vsync_mode = 1
-			radio_button.wid_buttonAction = r_action
-			if current_vsync == radio_button.user_vsync_mode then
-				radio_button:setChecked(true)
-			end
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = 64
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_vsync"
-			radio_button:setLabel("Adaptive")
-			radio_button.user_vsync_mode = -1
-			radio_button.wid_buttonAction = r_action
-			if current_vsync == radio_button.user_vsync_mode then
-				radio_button:setChecked(true)
-			end
-
-			-- 2 or larger will wait that many frames before syncing.
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = 64
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_vsync"
-			radio_button:setLabel("Half")
-			radio_button.user_vsync_mode = 2
-			radio_button.wid_buttonAction = r_action
-			if current_vsync == radio_button.user_vsync_mode then
-				radio_button:setChecked(true)
-			end
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = 64
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_vsync"
-			radio_button:setLabel("Third")
-			radio_button.user_vsync_mode = 3
-			radio_button.wid_buttonAction = r_action
-			if current_vsync == radio_button.user_vsync_mode then
-				radio_button:setChecked(true)
-			end
-
-			py=py+py_plus
-			radio_button = content:addChild("base/radio_button")
-			radio_button.checked = false
-			radio_button.bijou_side = "right"
-
-			radio_button.x = 64
-			radio_button.y = py
-			radio_button.w = 192
-			radio_button.h = py_plus
-			radio_button.radio_group = "rg_vsync"
-			radio_button:setLabel("Off")
-			radio_button.user_vsync_mode = 0
-			radio_button.wid_buttonAction = r_action
-			if current_vsync == radio_button.user_vsync_mode then
-				radio_button:setChecked(true)
-			end
-		end
-
-		content.w, content.h = widShared.getChildrenPerimeter(content)
-		content.doc_w, content.doc_h = content.w, content.h
-	end
 
 
 	-- [[
@@ -797,7 +499,14 @@ function love.update(dt)
 
 	--print(collectgarbage("count"))
 
-	notif_time = notif_time + dt
+	-- Crappy hack intended to demonstrate a toast system, without having yet
+	-- written a proper toast system.
+	for i, frame in ipairs(context.tree.children) do
+		if frame.notif_time then
+			frame.notif_time = frame.notif_time + dt
+			break
+		end
+	end
 end
 
 
@@ -909,32 +618,37 @@ function love.draw()
 		love.graphics.pop()
 	end
 
-	-- XXX: need an actual notification system.
-	if notif_time < notif_max then
-		love.graphics.push("all")
+	-- XXX: really need an actual toast / notification system.
+	for i, frame in ipairs(context.tree.children) do
+		if frame.notif_time then
+			if frame.notif_time < frame.notif_max then
+				love.graphics.push("all")
 
-		local text_w = notif_font:getWidth(notif_text)
-		local text_h = notif_font:getHeight() * 6 -- Terrible.
+				local text_w = frame.notif_font:getWidth(frame.notif_text)
+				local text_h = frame.notif_font:getHeight() * 6 -- Terrible.
 
-		love.graphics.origin()
-		love.graphics.translate(
-			math.floor((love.graphics.getWidth() - text_w) / 2),
-			math.floor((love.graphics.getHeight() - text_h) / 2)
-		)
+				love.graphics.origin()
+				love.graphics.translate(
+					math.floor((love.graphics.getWidth() - text_w) / 2),
+					math.floor((love.graphics.getHeight() - text_h) / 2)
+				)
 
-		love.graphics.setColor(0, 0, 0.2, 0.75 * math.sin((notif_time / notif_max) * 4.0))
-		love.graphics.rectangle(
-			"fill",
-			-2^16,
-			-(text_h * 0.25),
-			2^17,
-			text_h * 1.50
-		)
-		love.graphics.setColor(1, 1, 1, math.sin((notif_time / notif_max) * 4.0))
+				love.graphics.setColor(0, 0, 0.2, 0.75 * math.sin((frame.notif_time / frame.notif_max) * 4.0))
+				love.graphics.rectangle(
+					"fill",
+					-2^16,
+					-(text_h * 0.25),
+					2^17,
+					text_h * 1.50
+				)
+				love.graphics.setColor(1, 1, 1, math.sin((frame.notif_time / frame.notif_max) * 4.0))
 
-		love.graphics.setFont(notif_font)
-		love.graphics.print(notif_text)
+				love.graphics.setFont(frame.notif_font)
+				love.graphics.print(frame.notif_text)
 
-		love.graphics.pop()
+				love.graphics.pop()
+			end
+			break
+		end
 	end
 end

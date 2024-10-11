@@ -1,10 +1,4 @@
 
--- ProdUI
-local commonMenu = require("prod_ui.logic.common_menu")
-local uiLayout = require("prod_ui.ui_layout")
-local widShared = require("prod_ui.logic.wid_shared")
-
-
 local plan = {}
 
 
@@ -75,6 +69,8 @@ function plan.make(parent)
 		end
 
 		yy = yy + hh
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_demo_main", "Main Demo Window", xx, yy, ww, hh)
+		yy = yy + hh
 
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_number_box", "Number Box", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_properties_box", "Properties Box", xx, yy, ww, hh)
@@ -100,17 +96,6 @@ function plan.make(parent)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_menu_test", "Menu Test", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_widget_tree", "Widget Tree View", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
-
---[=====[
-	-- [[
-	do
-		local planWidgetTree = require("plan_wimp_widget_tree")
-		local frame = planWidgetTree.make(wimp_root)
-	end
-	--]]
-
---]=====]
-
 	end
 
 	frame:reshape(true)
