@@ -146,12 +146,16 @@ function uiDraw.popLayer()
 		love.graphics.setCanvas(new_top.canvas)
 	end
 
-	love.graphics.setScissor(
-		entry.sx,
-		entry.sy,
-		math.max(0, entry.sw),
-		math.max(0, entry.sh)
-	)
+	if entry.sx then
+		love.graphics.setScissor(
+			entry.sx,
+			entry.sy,
+			math.max(0, entry.sw),
+			math.max(0, entry.sh)
+		)
+	else
+		love.graphics.setScissor()
+	end
 
 	return entry.canvas
 end
@@ -237,7 +241,7 @@ local function drawLoop(wid, os_x, os_y, current_thimble)
 		end
 
 		-- Finish up canvas layer rendering.
-		-- XXX current testing for this is in plan_wimp_g_list.lua.
+		-- XXX current testing for this is in plan_test_canvas_layer.lua.
 		if do_layering then
 			local canvas = uiDraw.popLayer()
 			-- ^ Restores old canvas and scissor box
@@ -267,7 +271,6 @@ local function drawLoop(wid, os_x, os_y, current_thimble)
 				temp_quad:setViewport(wid.ly_qx, wid.ly_qy, wid.ly_qw, wid.ly_qh, canvas:getDimensions())
 				wid:ly_fn_start(canvas, os_x, os_y, temp_transform, temp_quad)
 				love.graphics.draw(canvas, temp_quad, wid.ly_qx, wid.ly_qy)
-
 			else
 				wid:ly_fn_start(canvas, os_x, os_y, temp_transform)
 				love.graphics.draw(canvas)

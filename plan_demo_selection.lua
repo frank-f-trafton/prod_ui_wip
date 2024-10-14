@@ -96,6 +96,7 @@ function plan.make(parent)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_menu_test", "Menu Test", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_widget_tree", "Widget Tree View", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 	end
 
 	frame:reshape(true)
