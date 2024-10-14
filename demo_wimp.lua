@@ -233,13 +233,12 @@ do
 	local wimp_root = context:findTag("wimp_workspace")
 	context:setRoot(wimp_root)
 
-
-
-
 	-- [[
 	do
 		local planDemoSelect = require("plan_demo_selection")
-		local frame_b = planDemoSelect.make(wimp_root)
+		local fr_demo_select = planDemoSelect.make(wimp_root)
+		-- Auto-launch frames here:
+		--fr_demo_select:launch("plan_demo_main")
 	end
 	--]]
 
