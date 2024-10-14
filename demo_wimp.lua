@@ -56,8 +56,6 @@ local qp = quickPrint.new()
 -- * Demo State *
 
 
-local demo_show_details = true
-local demo_show_perf = true
 local demo_perf -- assigned at the end of love.draw
 
 
@@ -533,70 +531,82 @@ function love.draw()
 
 	love.graphics.setColor(1, 1, 1, 1)
 
-	if demo_show_details then
-		qp:reset()
-		qp:setOrigin(PAD, love.graphics.getHeight() - 150)
+	-- XXX: make proper links between the window frame where this is configured and here.
+	for i, frame in ipairs(context.tree.children) do
+		if frame.usr_demo_show_details ~= nil then
+			if frame.usr_demo_show_details then
+				qp:reset()
+				qp:setOrigin(PAD, love.graphics.getHeight() - 150)
 
-		qp:print("current_hover:\t", context.current_hover)
-		qp:print("current_pressed:\t", context.current_pressed)
-		qp:print("current_thimble:\t", context.current_thimble)
-		qp:print("captured_focus:\t", context.captured_focus)
+				qp:print("current_hover:\t", context.current_hover)
+				qp:print("current_pressed:\t", context.current_pressed)
+				qp:print("current_thimble:\t", context.current_thimble)
+				qp:print("captured_focus:\t", context.captured_focus)
 
-		qp:down()
+				qp:down()
 
-		qp:print("mouse_pressed_button: ", context.mouse_pressed_button)
-		qp:print("mouse_pressed_dt_acc: ", context.mouse_pressed_dt_acc)
-		qp:print("mouse_pressed_ticks: ", context.mouse_pressed_ticks)
-		qp:print("mouse_pressed_rep_n: ", context.mouse_pressed_rep_n)
+				qp:print("mouse_pressed_button: ", context.mouse_pressed_button)
+				qp:print("mouse_pressed_dt_acc: ", context.mouse_pressed_dt_acc)
+				qp:print("mouse_pressed_ticks: ", context.mouse_pressed_ticks)
+				qp:print("mouse_pressed_rep_n: ", context.mouse_pressed_rep_n)
 
-		qp:reset()
-		qp:moveOrigin(400, 0)
+				qp:reset()
+				qp:moveOrigin(400, 0)
 
-		qp:print("cseq_button: ", context.cseq_button)
-		qp:print("cseq_presses: ", context.cseq_presses)
-		qp:print("cseq_time: ", context.cseq_time)
-		qp:print("cseq_timeout: ", context.cseq_timeout)
-		qp:print("cseq_widget: ", context.cseq_widget)
-		qp:print("cseq_x: ", context.cseq_x)
-		qp:print("cseq_y: ", context.cseq_x)
-		qp:print("cseq_range: ", context.cseq_range)
+				qp:print("cseq_button: ", context.cseq_button)
+				qp:print("cseq_presses: ", context.cseq_presses)
+				qp:print("cseq_time: ", context.cseq_time)
+				qp:print("cseq_timeout: ", context.cseq_timeout)
+				qp:print("cseq_widget: ", context.cseq_widget)
+				qp:print("cseq_x: ", context.cseq_x)
+				qp:print("cseq_y: ", context.cseq_x)
+				qp:print("cseq_range: ", context.cseq_range)
 
-		--[[
-		qp:down()
+				--[[
+				qp:down()
 
-		qp:print("love.keyboard.hasTextInput(): ", love.keyboard.hasTextInput())
-		--]]
+				qp:print("love.keyboard.hasTextInput(): ", love.keyboard.hasTextInput())
+				--]]
+			end
+			break
+		end
 	end
 
 	--print([[collectgarbage("count")*1024]], collectgarbage("count")*1024)
 
-	if demo_show_perf then
-		qp:reset()
-		qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 160)
-		qp:print("FPS: ", love.timer.getFPS())
-		qp:print("avg.dt: ", love.timer.getAverageDelta())
+	-- XXX proper linkage between frame and here
+	for i, frame in ipairs(context.tree.children) do
+		if frame.usr_demo_show_perf ~= nil then
+			if frame.usr_demo_show_perf then
+				qp:reset()
+				qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 160)
+				qp:print("FPS: ", love.timer.getFPS())
+				qp:print("avg.dt: ", love.timer.getAverageDelta())
 
-		demo_perf = love.graphics.getStats(demo_perf)
-		qp:print("drawcalls: ", demo_perf.drawcalls)
-		if love_major < 12 then
-			qp:print("images: ", demo_perf.images)
-			qp:print("canvases: ", demo_perf.canvases)
+				demo_perf = love.graphics.getStats(demo_perf)
+				qp:print("drawcalls: ", demo_perf.drawcalls)
+				if love_major < 12 then
+					qp:print("images: ", demo_perf.images)
+					qp:print("canvases: ", demo_perf.canvases)
 
-		else
-			qp:print("textures: ", demo_perf.textures)
+				else
+					qp:print("textures: ", demo_perf.textures)
+				end
+
+				qp:print("fonts: ", demo_perf.fonts)
+				qp:print("shaderswitches: ", demo_perf.shaderswitches)
+				qp:print("drawcallsbatched: ", demo_perf.drawcallsbatched)
+
+				-- Uncomment to estimate the demo's current Lua memory usage.
+				-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
+				--[[
+				qp:down()
+				collectgarbage("collect"); collectgarbage("collect")
+				qp:print("Mem (MB): ", collectgarbage("count") / 1024)
+				--]]
+			end
+			break
 		end
-
-		qp:print("fonts: ", demo_perf.fonts)
-		qp:print("shaderswitches: ", demo_perf.shaderswitches)
-		qp:print("drawcallsbatched: ", demo_perf.drawcallsbatched)
-
-		-- Uncomment to estimate the demo's current Lua memory usage.
-		-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
-		--[[
-		qp:down()
-		collectgarbage("collect"); collectgarbage("collect")
-		qp:print("Mem (MB): ", collectgarbage("count") / 1024)
-		--]]
 	end
 
 	if MOUSE_CROSS then

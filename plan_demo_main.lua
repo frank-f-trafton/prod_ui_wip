@@ -64,6 +64,9 @@ function plan.make(parent)
 		frame:reshape(true)
 		frame:center(false, true)
 
+		frame.usr_demo_show_details = true
+		frame.usr_demo_show_perf = true
+
 		-- Prompt Frame
 		do
 			local btn = content:addChild("base/button", {x=64, y=64, x=96, h=24})
@@ -175,7 +178,12 @@ function plan.make(parent)
 			checkbox:setLabel("Show state details")
 
 			checkbox.wid_buttonAction = function(self)
-				demo_show_details = not not self.checked
+				local frame = commonWimp.getFrame(self)
+				print(frame)
+				if frame then
+					frame.usr_demo_show_details = not frame.usr_demo_show_details
+					print("frame.usr_demo_show_details", frame.usr_demo_show_details)
+				end
 			end
 		end
 
@@ -186,8 +194,10 @@ function plan.make(parent)
 			checkbox:setLabel("Show perf info")
 
 			checkbox.wid_buttonAction = function(self)
-				demo_show_perf = not not self.checked
-				print("demo_show_perf", demo_show_perf)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame.usr_demo_show_perf = not frame.usr_demo_show_perf
+				end
 			end
 		end
 
@@ -196,7 +206,7 @@ function plan.make(parent)
 			-- Additionally, it's possible for the user and/or video drivers to override VSync settings.
 			local current_vsync = love.window.getVSync()
 
-			local yy, hh = 224, 32
+			local yy, hh = 256, 32
 
 			local text_vsync = content:addChild("base/text", {font = context.resources.fonts.p})
 			text_vsync.text = "VSync Mode"
@@ -212,7 +222,7 @@ function plan.make(parent)
 			local rad_btn
 
 			yy=yy+hh
-			rad_btn = content:addChild("base/radio_button", {x=64, y=hh, w=192, h=hh})
+			rad_btn = content:addChild("base/radio_button", {x=64, y=yy, w=192, h=hh})
 			rad_btn.checked = false
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_vsync"
