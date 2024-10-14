@@ -13,15 +13,20 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 end
 
 
-local function _button_launchFrame(self)
-	if type(self.usr_plan) ~= "string" then error("bad type or missing plan ID to launch") end
-	local plan = require(self.usr_plan)
+local function _launchFrame(self, req_path)
+	local plan = require(req_path)
 	local root = self:getTopWidgetInstance()
 	local frame = plan.make(root)
 
 	root:setSelectedFrame(frame, true)
 
 	return frame
+end
+
+
+local function _button_launchFrame(self)
+	if type(self.usr_plan) ~= "string" then error("bad type or missing plan ID to launch") end
+	return _launchFrame(self, self.usr_plan)
 end
 
 
@@ -98,6 +103,9 @@ function plan.make(parent)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 	end
+
+	-- To launch a frame from the main demo file: frame:launch("path.to.file")
+	frame.launch = _launchFrame
 
 	frame:reshape(true)
 	frame:center(true, true)
