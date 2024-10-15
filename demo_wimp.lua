@@ -227,14 +227,19 @@ function love.textinput(text)
 end
 
 
+local function _launchSelector(root)
+	local planDemoSelect = require("plan_demo_selection")
+	return planDemoSelect.make(root)
+end
+
+
 do
 	local wimp_root = context:findTag("wimp_workspace")
 	context:setRoot(wimp_root)
 
 	-- [[
 	do
-		local planDemoSelect = require("plan_demo_selection")
-		local fr_demo_select = planDemoSelect.make(wimp_root)
+		local fr_demo_select = _launchSelector(wimp_root)
 		-- Auto-launch frames here:
 		--fr_demo_select:launch("plan_demo_main")
 	end
@@ -360,6 +365,24 @@ do
 			text = "_E_dit",
 			key_mnemonic = "e",
 			pop_up_def = def_edit,
+		})
+
+
+		local def_demo = {
+			{
+				type = "command",
+				text = "Open Selector",
+				callback = function(client, item)
+					local root = client:getTopWidgetInstance()
+					if root then
+						_launchSelector(root)
+					end
+				end,
+			},
+		}
+		bar_menu:appendItem("category", {
+			text = "Demo",
+			pop_up_def = def_demo,
 		})
 
 
