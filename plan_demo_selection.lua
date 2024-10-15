@@ -58,7 +58,7 @@ function plan.make(parent)
 
 		content:setScrollBars(false, false)
 
-		local xx, yy, ww, hh = 0, 0, 192, 40
+		local xx, yy, ww, hh = 0, 0, 256, 40
 
 		local bb_btn
 
