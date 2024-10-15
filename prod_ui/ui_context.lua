@@ -281,6 +281,9 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 	5: Context, low priority (idle pointer)
 	--]]
 
+	-- Fields beginning with 'app' or 'usr' are reserved for use by the
+	-- host application.
+
 	setmetatable(self, _mt_context)
 
 	return self

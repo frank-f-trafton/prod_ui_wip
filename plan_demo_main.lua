@@ -31,12 +31,6 @@ function plan.make(parent)
 
 	frame:setFrameTitle("WIMP Demo")
 
-	-- XXX: Replace this with a notification / toast system at some point.
-	frame.notif_text = ""
-	frame.notif_max = 10.0
-	frame.notif_time = frame.notif_max
-	frame.notif_font = love.graphics.newFont(20)
-
 	local content = frame:findTag("frame_content")
 	if content then
 		content.layout_mode = "resize"
@@ -63,9 +57,6 @@ function plan.make(parent)
 
 		frame:reshape(true)
 		frame:center(false, true)
-
-		frame.usr_demo_show_details = true
-		frame.usr_demo_show_perf = true
 
 		-- Prompt Frame
 		do
@@ -159,45 +150,52 @@ function plan.make(parent)
 					print("Demo Error: frame not found")
 				else
 					-- XXX hook up to an actual toast system at some point.
-					frame.notif_text = "\
-	A person who doubts himself is like a man who would enlist in the\
-	ranks of his enemies and bear arms against himself. He makes his\
-	failure certain by himself being the first person to be convinced\
-	of it.\
-	\
-	-Alexandre Dumas"
-					frame.notif_time = 0.0
+					local notif = self.context.app.notif
+					notif.text = "\
+A person who doubts himself is like a man who would enlist in the\
+ranks of his enemies and bear arms against himself. He makes his\
+failure certain by himself being the first person to be convinced\
+of it.\
+\
+-Alexandre Dumas"
+					notif.time = 0.0
 				end
 			end
 		end
 
 		do
 			local checkbox = content:addChild("base/checkbox", {x=64, y=160, w=192, h=32})
-			checkbox.checked = true
+			checkbox.checked = not not context.app.show_details
 			checkbox.bijou_side = "right"
 			checkbox:setLabel("Show state details")
 
 			checkbox.wid_buttonAction = function(self)
-				local frame = commonWimp.getFrame(self)
-				print(frame)
-				if frame then
-					frame.usr_demo_show_details = not frame.usr_demo_show_details
-					print("frame.usr_demo_show_details", frame.usr_demo_show_details)
-				end
+				local app = self.context.app
+				app.show_details = not not self.checked
 			end
 		end
 
 		do
 			local checkbox = content:addChild("base/checkbox",{x=64, y=192, w=192, h=32})
-			checkbox.checked = true
+			checkbox.checked = not not context.app.show_perf
 			checkbox.bijou_side = "right"
 			checkbox:setLabel("Show perf info")
 
 			checkbox.wid_buttonAction = function(self)
-				local frame = commonWimp.getFrame(self)
-				if frame then
-					frame.usr_demo_show_perf = not frame.usr_demo_show_perf
-				end
+				local app = self.context.app
+				app.show_perf = not not self.checked
+			end
+		end
+
+		do
+			local checkbox = content:addChild("base/checkbox",{x=64, y=224, w=192, h=32})
+			checkbox.checked = not not context.app.show_mouse_cross
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Show cross at mouse location")
+
+			checkbox.wid_buttonAction = function(self)
+				local app = self.context.app
+				app.show_mouse_cross = not not self.checked
 			end
 		end
 
@@ -206,7 +204,7 @@ function plan.make(parent)
 			-- Additionally, it's possible for the user and/or video drivers to override VSync settings.
 			local current_vsync = love.window.getVSync()
 
-			local yy, hh = 256, 32
+			local yy, hh = 292, 32
 
 			local text_vsync = content:addChild("base/text", {font = context.resources.fonts.p})
 			text_vsync.text = "VSync Mode"
