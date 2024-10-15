@@ -21,10 +21,6 @@ focus, then the " " textinput event wouldn't fire in the first place.
 love.keyboard.setTextInput(false)
 
 
-local MOUSE_CROSS
---MOUSE_CROSS = true
-
-
 local love_major = love.getVersion()
 
 
@@ -86,6 +82,22 @@ love.graphics.setFont(font_test)
 
 local function newWimpContext()
 	local context = uiContext.newContext("prod_ui", 0, 0, love.graphics.getDimensions())
+
+	-- Config/settings specific to this demo.
+	context.app = {
+		show_details = true,
+		show_perf = true,
+		show_mouse_cross = false,
+
+		-- A crappy toast / notification system.
+		-- XXX Write a proper one sometime.
+		notif = {
+			text = "",
+			max = 10.0,
+			time = 10.0,
+			font = love.graphics.newFont(20)
+		}
+	}
 
 	-- Assign resources ASAP.
 	local theme_main_path = "prod_ui/themes/vacuum/vacuum.lua"
@@ -521,12 +533,8 @@ function love.update(dt)
 
 	-- Crappy hack intended to demonstrate a toast system, without having yet
 	-- written a proper toast system.
-	for i, frame in ipairs(context.tree.children) do
-		if frame.notif_time then
-			frame.notif_time = frame.notif_time + dt
-			break
-		end
-	end
+	local notif = context.app.notif
+	notif.time = notif.time + dt
 end
 
 
@@ -554,85 +562,75 @@ function love.draw()
 
 	love.graphics.setColor(1, 1, 1, 1)
 
-	-- XXX: make proper links between the window frame where this is configured and here.
-	for i, frame in ipairs(context.tree.children) do
-		if frame.usr_demo_show_details ~= nil then
-			if frame.usr_demo_show_details then
-				qp:reset()
-				qp:setOrigin(PAD, love.graphics.getHeight() - 150)
+	local app = context.app
 
-				qp:print("current_hover:\t", context.current_hover)
-				qp:print("current_pressed:\t", context.current_pressed)
-				qp:print("current_thimble:\t", context.current_thimble)
-				qp:print("captured_focus:\t", context.captured_focus)
+	if app.show_details then
+		qp:reset()
+		qp:setOrigin(PAD, love.graphics.getHeight() - 150)
 
-				qp:down()
+		qp:print("current_hover:\t", context.current_hover)
+		qp:print("current_pressed:\t", context.current_pressed)
+		qp:print("current_thimble:\t", context.current_thimble)
+		qp:print("captured_focus:\t", context.captured_focus)
 
-				qp:print("mouse_pressed_button: ", context.mouse_pressed_button)
-				qp:print("mouse_pressed_dt_acc: ", context.mouse_pressed_dt_acc)
-				qp:print("mouse_pressed_ticks: ", context.mouse_pressed_ticks)
-				qp:print("mouse_pressed_rep_n: ", context.mouse_pressed_rep_n)
+		qp:down()
 
-				qp:reset()
-				qp:moveOrigin(400, 0)
+		qp:print("mouse_pressed_button: ", context.mouse_pressed_button)
+		qp:print("mouse_pressed_dt_acc: ", context.mouse_pressed_dt_acc)
+		qp:print("mouse_pressed_ticks: ", context.mouse_pressed_ticks)
+		qp:print("mouse_pressed_rep_n: ", context.mouse_pressed_rep_n)
 
-				qp:print("cseq_button: ", context.cseq_button)
-				qp:print("cseq_presses: ", context.cseq_presses)
-				qp:print("cseq_time: ", context.cseq_time)
-				qp:print("cseq_timeout: ", context.cseq_timeout)
-				qp:print("cseq_widget: ", context.cseq_widget)
-				qp:print("cseq_x: ", context.cseq_x)
-				qp:print("cseq_y: ", context.cseq_x)
-				qp:print("cseq_range: ", context.cseq_range)
+		qp:reset()
+		qp:moveOrigin(400, 0)
 
-				--[[
-				qp:down()
+		qp:print("cseq_button: ", context.cseq_button)
+		qp:print("cseq_presses: ", context.cseq_presses)
+		qp:print("cseq_time: ", context.cseq_time)
+		qp:print("cseq_timeout: ", context.cseq_timeout)
+		qp:print("cseq_widget: ", context.cseq_widget)
+		qp:print("cseq_x: ", context.cseq_x)
+		qp:print("cseq_y: ", context.cseq_x)
+		qp:print("cseq_range: ", context.cseq_range)
 
-				qp:print("love.keyboard.hasTextInput(): ", love.keyboard.hasTextInput())
-				--]]
-			end
-			break
-		end
+		--[[
+		qp:down()
+
+		qp:print("love.keyboard.hasTextInput(): ", love.keyboard.hasTextInput())
+		--]]
 	end
 
 	--print([[collectgarbage("count")*1024]], collectgarbage("count")*1024)
 
-	-- XXX proper linkage between frame and here
-	for i, frame in ipairs(context.tree.children) do
-		if frame.usr_demo_show_perf ~= nil then
-			if frame.usr_demo_show_perf then
-				qp:reset()
-				qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 160)
-				qp:print("FPS: ", love.timer.getFPS())
-				qp:print("avg.dt: ", love.timer.getAverageDelta())
+	if app.show_perf then
+		qp:reset()
+		qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 160)
+		qp:print("FPS: ", love.timer.getFPS())
+		qp:print("avg.dt: ", love.timer.getAverageDelta())
 
-				demo_perf = love.graphics.getStats(demo_perf)
-				qp:print("drawcalls: ", demo_perf.drawcalls)
-				if love_major < 12 then
-					qp:print("images: ", demo_perf.images)
-					qp:print("canvases: ", demo_perf.canvases)
+		demo_perf = love.graphics.getStats(demo_perf)
+		qp:print("drawcalls: ", demo_perf.drawcalls)
+		if love_major < 12 then
+			qp:print("images: ", demo_perf.images)
+			qp:print("canvases: ", demo_perf.canvases)
 
-				else
-					qp:print("textures: ", demo_perf.textures)
-				end
-
-				qp:print("fonts: ", demo_perf.fonts)
-				qp:print("shaderswitches: ", demo_perf.shaderswitches)
-				qp:print("drawcallsbatched: ", demo_perf.drawcallsbatched)
-
-				-- Uncomment to estimate the demo's current Lua memory usage.
-				-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
-				--[[
-				qp:down()
-				collectgarbage("collect"); collectgarbage("collect")
-				qp:print("Mem (MB): ", collectgarbage("count") / 1024)
-				--]]
-			end
-			break
+		else
+			qp:print("textures: ", demo_perf.textures)
 		end
+
+		qp:print("fonts: ", demo_perf.fonts)
+		qp:print("shaderswitches: ", demo_perf.shaderswitches)
+		qp:print("drawcallsbatched: ", demo_perf.drawcallsbatched)
+
+		-- Uncomment to estimate the demo's current Lua memory usage.
+		-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
+		--[[
+		qp:down()
+		collectgarbage("collect"); collectgarbage("collect")
+		qp:print("Mem (MB): ", collectgarbage("count") / 1024)
+		--]]
 	end
 
-	if MOUSE_CROSS then
+	if app.show_mouse_cross then
 		love.graphics.push("all")
 
 		love.graphics.setColor(1, 0, 0, 1)
@@ -651,36 +649,32 @@ function love.draw()
 	end
 
 	-- XXX: really need an actual toast / notification system.
-	for i, frame in ipairs(context.tree.children) do
-		if frame.notif_time then
-			if frame.notif_time < frame.notif_max then
-				love.graphics.push("all")
+	local notif = context.app.notif
+	if notif.time < notif.max then
+		love.graphics.push("all")
 
-				local text_w = frame.notif_font:getWidth(frame.notif_text)
-				local text_h = frame.notif_font:getHeight() * 6 -- Terrible.
+		local text_w = notif.font:getWidth(notif.text)
+		local text_h = notif.font:getHeight() * 6 -- Terrible.
 
-				love.graphics.origin()
-				love.graphics.translate(
-					math.floor((love.graphics.getWidth() - text_w) / 2),
-					math.floor((love.graphics.getHeight() - text_h) / 2)
-				)
+		love.graphics.origin()
+		love.graphics.translate(
+			math.floor((love.graphics.getWidth() - text_w) / 2),
+			math.floor((love.graphics.getHeight() - text_h) / 2)
+		)
 
-				love.graphics.setColor(0, 0, 0.2, 0.75 * math.sin((frame.notif_time / frame.notif_max) * 4.0))
-				love.graphics.rectangle(
-					"fill",
-					-2^16,
-					-(text_h * 0.25),
-					2^17,
-					text_h * 1.50
-				)
-				love.graphics.setColor(1, 1, 1, math.sin((frame.notif_time / frame.notif_max) * 4.0))
+		love.graphics.setColor(0, 0, 0.2, 0.75 * math.sin((notif.time / notif.max) * 4.0))
+		love.graphics.rectangle(
+			"fill",
+			-2^16,
+			-(text_h * 0.25),
+			2^17,
+			text_h * 1.50
+		)
+		love.graphics.setColor(1, 1, 1, math.sin((notif.time / notif.max) * 4.0))
 
-				love.graphics.setFont(frame.notif_font)
-				love.graphics.print(frame.notif_text)
+		love.graphics.setFont(notif.font)
+		love.graphics.print(notif.text)
 
-				love.graphics.pop()
-			end
-			break
-		end
+		love.graphics.pop()
 	end
 end
