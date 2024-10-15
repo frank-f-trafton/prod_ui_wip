@@ -54,7 +54,6 @@ local function clampIndex(self, pos)
 end
 
 
-
 -- * API *
 
 

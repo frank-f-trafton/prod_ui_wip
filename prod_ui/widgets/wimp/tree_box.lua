@@ -67,7 +67,6 @@ function def:arrange()
 
 		if skin.item_align_h == "left" then
 			item.x = item.depth * 16 -- XXX theming and scaling.
-
 		else -- "right"
 			item.x = self.doc_w - item.w - (item.depth * 16) -- XXX theming and scaling.
 		end
