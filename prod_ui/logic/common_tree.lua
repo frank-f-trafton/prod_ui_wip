@@ -37,7 +37,7 @@ function commonTree.new()
 	self.parent = false
 
 	-- When true, the node's children are visible and selectable.
-	-- For tree root nodes, this should always be true.
+	-- For top-level nodes, this should always be true.
 	self.expanded = true
 
 	self.nodes = {}

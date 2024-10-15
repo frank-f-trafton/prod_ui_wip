@@ -254,6 +254,9 @@ do
 		local fr_demo_select = _launchSelector(wimp_root)
 		-- Auto-launch frames here:
 		--fr_demo_select:launch("plan_demo_main")
+		local frame_w = fr_demo_select:launch("plan_wimp_widget_tree")
+		frame_w.x = 64
+		frame_w.y = 64
 	end
 	--]]
 
