@@ -6,7 +6,7 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-	frame.w, frame.h = 640, 480
+	frame.w, frame.h = 300, 300
 	frame:setFrameTitle("Frame Test")
 
 	local content = frame:findTag("frame_content")
