@@ -590,6 +590,8 @@ function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
+		updateAllItemDimensions(self, self.skin, self.tree)
+
 		-- Document height is based on the last item in the menu.
 		local last_item = menu.items[#menu.items]
 		if last_item then
@@ -603,14 +605,14 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w = math.max(self.doc_w, self.vp_w)
 
 		-- Get component widths.
-		self.expander_w = self.expanders_active and skin.expander_spacing or 0
+		self.expander_w = self.expanders_active and skin.first_col_spacing or 0
 		self.icon_w = self.show_icons and skin.icon_spacing or 0
 
 		-- Get component left positions. (These numbers asssume left alignment, and are
 		-- adjusted at render time for right alignment.)
 		local xx = 0
 		self.expander_x = xx
-		xx = self.expander_x + self.expander_w
+		xx = self.expander_x + skin.first_col_spacing
 
 		self.icon_x = xx
 		xx = xx + self.icon_w
@@ -1109,26 +1111,29 @@ def.skinners = {
 			if skin.draw_pipes then
 				love.graphics.setColor(skin.color_pipe)
 				local HACK_item_h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v) -- XXX: find a suitable way to get this directly
-				local line_x_offset = math.floor(skin.indent / 2)
+				local line_x_offset = math.floor(skin.first_col_spacing / 2)
 
 				for i = first, last do
 					local item = items[i]
 					for j = 0 , item.depth - 1 do
 						uiGraphics.quadXYWH(tq_px,
-							skin.indent * j + line_x_offset,
+							line_x_offset + skin.indent * j,
 							item.y,
 							skin.pipe_width,
-							item.y - item.y + HACK_item_h
+							HACK_item_h
 						)
 					end
-					if #item.nodes == 0 then
+					-- draw the final pipe if there is no expander sensor in the way
+					-- [[
+					if not self.expanders_active or #item.nodes == 0 then
 						uiGraphics.quadXYWH(tq_px,
-							skin.indent * item.depth + line_x_offset,
+							line_x_offset + skin.indent * item.depth,
 							item.y,
 							skin.pipe_width,
-							item.y - item.y + HACK_item_h
+							HACK_item_h
 						)
 					end
+					--]]
 				end
 			end
 
@@ -1136,7 +1141,12 @@ def.skinners = {
 			local item_hover = self.item_hover
 			if item_hover then
 				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(tq_px, item_hover.x + self.expander_w, item_hover.y, math.max(self.vp_w, self.doc_w) - item_hover.x, item_hover.h)
+				uiGraphics.quadXYWH(
+					tq_px,
+					item_hover.x + self.expander_w,
+					item_hover.y,
+					math.max(self.vp_w, self.doc_w) - item_hover.x, item_hover.h
+				)
 				--print(item_hover.w)
 
 				--[[

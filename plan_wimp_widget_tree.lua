@@ -126,9 +126,25 @@ function plan.make(root)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
+		local chk_highlight = content:addChild("base/checkbox")
+		chk_highlight:setLabel("Highlight Selected")
+		chk_highlight:setChecked(content.context.app.dbg_outline.active)
+
+		chk_highlight.wid_buttonAction = function(self)
+			local outline = self.context.app.dbg_outline
+			outline.active = not not self.checked
+			print(self.x, self.y, self.w, self.h)
+		end
+
+		chk_highlight.h = 32
+		chk_highlight.lc_func = uiLayout.fitBottom
+		uiLayout.register(content, chk_highlight)
+
+
 		local tree_box = content:addChild("wimp/tree_box")
 
-		tree_box:setExpandersActive(true)
+		--tree_box:setExpandersActive(true)
+		--tree_box:setIconsEnabled(true)
 
 		tree_box.lc_func = uiLayout.fitRemaining
 		uiLayout.register(content, tree_box)
@@ -141,9 +157,6 @@ function plan.make(root)
 		tree_box:setScrollBars(false, true)
 
 		tree_box:reshape()
-
-		--tree_box:setIconsEnabled(true)
-		--tree_box:setExpandersActive(false)
 
 		tree_box.drag_scroll = true
 		tree_box.drag_select = true
