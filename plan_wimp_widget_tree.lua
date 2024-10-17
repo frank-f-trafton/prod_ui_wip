@@ -150,7 +150,6 @@ function plan.make(root)
 		local tree_box = content:addChild("wimp/tree_box")
 
 		tree_box:setExpandersActive(true)
-		--tree_box:setIconsEnabled(true)
 
 		tree_box.lc_func = uiLayout.fitRemaining
 		uiLayout.register(content, tree_box)

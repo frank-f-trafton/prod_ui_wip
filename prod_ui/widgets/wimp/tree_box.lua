@@ -190,6 +190,10 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 			self:orderItems()
 			self:arrange()
 			self:cacheUpdate(true)
+
+		elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
+			self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
+
 		else
 			self:scrollDeltaH(-32) -- XXX config
 		end
@@ -206,6 +210,10 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 			self:orderItems()
 			self:arrange()
 			self:cacheUpdate(true)
+
+		elseif item and #item.nodes > 0 and item.expanded then
+			self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
+
 		else
 			self:scrollDeltaH(32) -- XXX config
 		end
