@@ -5,6 +5,7 @@
 
 
 -- ProdUI
+local commonWimp = require("prod_ui.logic.common_wimp")
 local dbg = require("prod_ui.debug.dbg")
 --local itemOps = require("prod_ui.logic.item_ops")
 --local keyCombo = require("prod_ui.lib.key_combo")
@@ -26,8 +27,8 @@ local function _deleteLoop(node)
 end
 
 
-local function _widgetToString(wid, thimble)
-	return wid.id .. " (" .. tostring(wid) .. ")" .. (wid == thimble and "*" or "")
+local function _widgetToString(wid, n, thimble)
+	return "[" .. n .. "] " .. wid.id .. " (" .. tostring(wid) .. ")" .. (wid == thimble and "*" or "")
 end
 
 
@@ -35,7 +36,7 @@ local function _buildLoop(tree_box, node, root, thimble)
 	print("_buildLoop() start", tree_box, root, thimble)
 	print(#root.children)
 	for i, child in ipairs(root.children) do
-		local n1 = tree_box:addNode(_widgetToString(child, thimble), node)
+		local n1 = tree_box:addNode(_widgetToString(child, i, thimble), node)
 		n1.usr_wid = child
 		_buildLoop(tree_box, n1, child, thimble)
 	end
@@ -58,7 +59,7 @@ local function _buildTree(tree_box, root)
 	print(wid_selected, thimble)
 
 	tree_box.tree.usr_wid = root
-	tree_box.tree.text = _widgetToString(root, thimble)
+	tree_box.tree.text = _widgetToString(root, 1, thimble)
 	_deleteLoop(tree_box.tree)
 	_buildLoop(tree_box, tree_box.tree, root, thimble)
 
@@ -87,6 +88,19 @@ local function tree_userUpdate(self, dt)
 		if self.usr_timer <= 0 then
 			self.usr_timer = self.usr_timer_max
 			_buildTree(self, root)
+			local frame = commonWimp.getFrame(self)
+			if frame then
+				frame:reshape(true)
+			end
+
+			local outline = context.app.dbg_outline
+			outline.wid = false
+			if outline then
+				local selected = self.menu:getSelectedItem()
+				if selected and selected.usr_wid then
+					outline.wid = selected.usr_wid
+				end
+			end
 		end
 	end
 end
