@@ -15,13 +15,15 @@ local uiLayout = require("prod_ui.ui_layout")
 local plan = {}
 
 
-local function _deleteLoop(node)
+local function _deleteLoop(node, _collapsed)
 	print("_deleteLoop() start", node)
 	for i = #node.nodes, 1, -1 do
 		local child_node = node.nodes[i]
-		child_node.usr_wid = nil
-		_deleteLoop(child_node)
-		node:removeNode(i)
+		if not child_node.expanded then
+			_collapsed[child_node.usr_wid] = child_node
+		end
+		_deleteLoop(child_node, _collapsed)
+		node.nodes[i] = nil
 	end
 	print("_deleteLoop() end", node)
 end
@@ -32,13 +34,16 @@ local function _widgetToString(wid, n, thimble)
 end
 
 
-local function _buildLoop(tree_box, node, root, thimble)
+local function _buildLoop(tree_box, node, root, thimble, _collapsed)
 	print("_buildLoop() start", tree_box, root, thimble)
 	print(#root.children)
 	for i, child in ipairs(root.children) do
 		local n1 = tree_box:addNode(_widgetToString(child, i, thimble), node)
 		n1.usr_wid = child
-		_buildLoop(tree_box, n1, child, thimble)
+		if _collapsed[child] then
+			n1.expanded = false
+		end
+		_buildLoop(tree_box, n1, child, thimble, _collapsed)
 	end
 	print("_buildLoop() end")
 end
@@ -60,8 +65,9 @@ local function _buildTree(tree_box, root)
 
 	tree_box.tree.usr_wid = root
 	tree_box.tree.text = _widgetToString(root, 1, thimble)
-	_deleteLoop(tree_box.tree)
-	_buildLoop(tree_box, tree_box.tree, root, thimble)
+	local _collapsed = {}
+	_deleteLoop(tree_box.tree, _collapsed)
+	_buildLoop(tree_box, tree_box.tree, root, thimble, _collapsed)
 
 	tree_box:orderItems()
 	tree_box:arrange()
@@ -143,7 +149,7 @@ function plan.make(root)
 
 		local tree_box = content:addChild("wimp/tree_box")
 
-		--tree_box:setExpandersActive(true)
+		tree_box:setExpandersActive(true)
 		--tree_box:setIconsEnabled(true)
 
 		tree_box.lc_func = uiLayout.fitRemaining
