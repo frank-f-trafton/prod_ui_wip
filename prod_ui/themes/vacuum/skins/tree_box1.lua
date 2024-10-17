@@ -30,15 +30,15 @@ return {
 
 	-- Vertical text alignment is centered.
 
-	-- "Indent" level for child nodes.
-	["$indent"] = 24,
+	-- Spacing for expanders, and half the initial width for the first pipe indentation.
+	["$first_col_spacing"] = 24,
+
+	-- The amount to indent child nodes.
+	["$indent"] = 12,
 
 	-- Draw vertical pipes that show the indentation of each node.
 	draw_pipes = true,
 	["$pipe_width"] = 1,
-
-	-- Expander sensor width and positioning, if active.
-	["$expander_spacing"] = 24,
 
 	-- Icon column width and positioning, if active.
 	["$icon_spacing"] = 24,
@@ -58,5 +58,5 @@ return {
 	color_hover_glow = {1.0, 1.0, 1.0, 0.16},
 	color_active_glow = {1.0, 1.0, 1.0, 0.33},
 	color_item_marked = {0.0, 0.0, 1.0, 0.33},
-	color_pipe = {0.5, 0.5, 0.5, 1.0},
+	color_pipe = {0.5, 0.5, 0.5, 1.0}--{1.0, 1.0, 1.0, 1.0}
 }

@@ -100,7 +100,7 @@ local function newWimpContext()
 
 		-- outlines one widget's rectangular area in love.draw()
 		dbg_outline = {
-			active = true,
+			active = false,
 			wid = false,
 			line_w = 2.0,
 			line_style = "rough",
@@ -266,9 +266,14 @@ do
 		local fr_demo_select = _launchSelector(wimp_root)
 		-- Auto-launch frames here:
 		--fr_demo_select:launch("plan_demo_main")
+		--[[
 		local frame_w = fr_demo_select:launch("plan_wimp_widget_tree")
 		frame_w.x = 64
 		frame_w.y = 64
+		--]]
+		local frame_wt = fr_demo_select:launch("plan_wimp_tree_box")
+		frame_wt.x = 64
+		frame_wt.y = 64
 	end
 	--]]
 
