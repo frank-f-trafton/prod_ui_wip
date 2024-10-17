@@ -96,6 +96,18 @@ local function newWimpContext()
 			max = 10.0,
 			time = 10.0,
 			font = love.graphics.newFont(20)
+		},
+
+		-- outlines one widget's rectangular area in love.draw()
+		dbg_outline = {
+			active = true,
+			wid = false,
+			line_w = 2.0,
+			line_style = "rough",
+			-- line
+			r = 0.9, g = 0.1, b = 0.1, a = 1.0,
+			-- fill
+			r2 = 1.0, g2 = 0.0, b2 = 0.0, a2 = 0.125
 		}
 	}
 
@@ -679,5 +691,25 @@ function love.draw()
 		love.graphics.print(notif.text)
 
 		love.graphics.pop()
+	end
+
+	-- Debug-outline
+	local outline = context.app.dbg_outline
+	if outline.active and outline.wid and not outline.wid._dead then
+		local wid = outline.wid
+
+		love.graphics.push("all")
+
+		love.graphics.setColor(outline.r, outline.g, outline.b, outline.a)
+		love.graphics.setLineStyle(outline.line_style)
+		love.graphics.setLineWidth(outline.line_w)
+		local wx, wy = wid:getAbsolutePosition()
+		love.graphics.rectangle("line", wx + 0.5, wy + 0.5, wid.w - 1, wid.h - 1)
+		love.graphics.setColor(outline.r2, outline.g2, outline.b2, outline.a2)
+		love.graphics.rectangle("fill", wx, wy, wid.w, wid.h)
+
+		love.graphics.pop()
+	else
+		outline.wid = false
 	end
 end
