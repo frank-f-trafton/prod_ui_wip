@@ -30,6 +30,13 @@ return {
 
 	-- Vertical text alignment is centered.
 
+	-- "Indent" level for child nodes.
+	["$indent"] = 24,
+
+	-- Draw vertical pipes that show the indentation of each node.
+	draw_pipes = true,
+	["$pipe_width"] = 1,
+
 	-- Expander sensor width and positioning, if active.
 	["$expander_spacing"] = 24,
 
@@ -37,8 +44,8 @@ return {
 	["$icon_spacing"] = 24,
 
 	-- Item components are always placed in these orders:
-	-- Left alignment: expander, icon, text.
-	-- Right alignment: text, icon, expander.
+	-- Left alignment: pipe decoration, expander, icon, text.
+	-- Right alignment: text, icon, expander, pipe decoration
 
 	-- Additional padding for icons.
 	["$pad_icon_x"] = 0,
@@ -46,15 +53,10 @@ return {
 	-- Additional padding for text.
 	["$pad_text_x"] = 0,
 
-	-- Draw small pipes that link sibling and child nodes together.
-	-- NOTE: Pipe rendering may be slow for very large trees.
-	draw_pipes = true,
-	["$pipe_width"] = 1,
-
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
 	color_select_glow = {1.0, 1.0, 1.0, 0.33},
 	color_hover_glow = {1.0, 1.0, 1.0, 0.16},
 	color_active_glow = {1.0, 1.0, 1.0, 0.33},
 	color_item_marked = {0.0, 0.0, 1.0, 0.33},
-	color_pipe = {1.0, 1.0, 1.0, 0.5},
+	color_pipe = {0.5, 0.5, 0.5, 1.0},
 }

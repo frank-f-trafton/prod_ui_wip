@@ -66,16 +66,14 @@ function def:arrange()
 		local item = items[i]
 
 		if skin.item_align_h == "left" then
-			item.x = item.depth * 16 -- XXX theming and scaling.
+			item.x = item.depth * skin.indent
 		else -- "right"
-			item.x = self.doc_w - item.w - (item.depth * 16) -- XXX theming and scaling.
+			item.x = self.doc_w - item.w - (item.depth * skin.indent)
 		end
 		item.y = yy
-
 		yy = item.y + item.h
 	end
 end
-
 
 
 -- * Scroll helpers *
@@ -224,7 +222,7 @@ local function updateItemDimensions(self, skin, item)
 
 	local font = skin.font
 
-	item.w = font:getWidth(item.text) + self.expander_w + self.icon_w
+	item.w = font:getWidth(item.text) + self.icon_w
 	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
 
 	print("new dimensions", "item.w", item.w, "gw(item.text)", font:getWidth(item.text), "self.expander_w", self.expander_w, "self.icon_w", self.icon_w)
@@ -605,14 +603,14 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w = math.max(self.doc_w, self.vp_w)
 
 		-- Get component widths.
-		self.expander_w = (self.expanders_active) and skin.expander_spacing or 0
-		self.icon_w = (self.show_icons) and skin.icon_spacing or 0
+		self.expander_w = self.expanders_active and skin.expander_spacing or 0
+		self.icon_w = self.show_icons and skin.icon_spacing or 0
 
 		-- Get component left positions. (These numbers asssume left alignment, and are
 		-- adjusted at render time for right alignment.)
 		local xx = 0
 		self.expander_x = xx
-		xx = xx + self.expander_w
+		xx = self.expander_x + self.expander_w
 
 		self.icon_x = xx
 		xx = xx + self.icon_w
@@ -1024,23 +1022,26 @@ function def:uiCall_update(dt)
 end
 
 
-local function _drawLongPipes(self, skin, root, tq_px, line_x_offset, line_y_shorten)
+local function _drawLongPipes(self, skin, node, tq_px, line_x_offset, item_h)
 	local y1 = self.scr_y
 	local y2 = y1 + self.vp2_h
 
-	local node_first, node_last = root.nodes[1], root.nodes[#root.nodes]
+	local node_first, node_last = node.nodes[1], node.nodes[#node.nodes]
 	if not node_first or node_first.y + node_first.h >= y2 then
 		return
 
 	elseif node_first.y < y2 and node_last.y + node_last.h >= y1 then
 		uiGraphics.quadXYWH(tq_px,
 			node_first.x + line_x_offset,
-			node_first.y + line_y_shorten,
+			node_first.y,
 			skin.pipe_width,
-			node_last.y - node_first.y - (line_y_shorten)
+			node_last.y - node_first.y + item_h
 		)
-		if node_first.expanded and #node_first.nodes > 1 then
-			_drawLongPipes(self, skin, node_first, tq_px, line_x_offset, line_y_shorten)
+		for i = 1, #node.nodes do
+			local node2 = node.nodes[i]
+			if node2.expanded then
+				_drawLongPipes(self, skin, node2, tq_px, line_x_offset, item_h)
+			end
 		end
 	end
 end
@@ -1073,7 +1074,6 @@ def.skinners = {
 			local items = menu.items
 
 			local font = skin.font
-
 			local font_h = font:getHeight()
 
 			local first = math.max(self.items_first, 1)
@@ -1109,35 +1109,26 @@ def.skinners = {
 			if skin.draw_pipes then
 				love.graphics.setColor(skin.color_pipe)
 				local HACK_item_h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v) -- XXX: find a suitable way to get this directly
-				local line_x_offset = math.floor(self.expander_x + (self.expander_w - skin.pipe_width) / 2)
-				local line_y_shorten = math.floor(HACK_item_h / 2)
+				local line_x_offset = math.floor(skin.indent / 2)
 
-				_drawLongPipes(self, skin, self.tree, tq_px, line_x_offset, line_y_shorten)
-
-				-- Short vertical pipes.
-				for i = math.max(first, 2), last do
-					local item = items[i]
-
-					if item.parent then
-						uiGraphics.quadXYWH(tq_px,
-							item.x + line_x_offset,
-							item.y,
-							skin.pipe_width,
-							math.floor(HACK_item_h / 2)
-						)
-					end
-				end
-
-				-- Horizontal pipes.
 				for i = first, last do
 					local item = items[i]
-
-					uiGraphics.quadXYWH(tq_px,
-						item.x + line_x_offset,
-						item.y + math.floor(HACK_item_h / 2),
-						line_y_shorten,
-						skin.pipe_width
-					)
+					for j = 0 , item.depth - 1 do
+						uiGraphics.quadXYWH(tq_px,
+							skin.indent * j + line_x_offset,
+							item.y,
+							skin.pipe_width,
+							item.y - item.y + HACK_item_h
+						)
+					end
+					if #item.nodes == 0 then
+						uiGraphics.quadXYWH(tq_px,
+							skin.indent * item.depth + line_x_offset,
+							item.y,
+							skin.pipe_width,
+							item.y - item.y + HACK_item_h
+						)
+					end
 				end
 			end
 
@@ -1145,7 +1136,7 @@ def.skinners = {
 			local item_hover = self.item_hover
 			if item_hover then
 				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(tq_px, item_hover.x, item_hover.y, math.max(self.vp_w, self.doc_w) - item_hover.x, item_hover.h)
+				uiGraphics.quadXYWH(tq_px, item_hover.x + self.expander_w, item_hover.y, math.max(self.vp_w, self.doc_w) - item_hover.x, item_hover.h)
 				--print(item_hover.w)
 
 				--[[
@@ -1160,7 +1151,7 @@ def.skinners = {
 			local sel_item = items[menu.index]
 			if sel_item then
 				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h)
+				uiGraphics.quadXYWH(tq_px, sel_item.x + self.expander_w, sel_item.y, math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h)
 			end
 
 			-- Menu items.

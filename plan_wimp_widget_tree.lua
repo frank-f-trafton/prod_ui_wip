@@ -143,12 +143,10 @@ function plan.make(root)
 		tree_box:reshape()
 
 		--tree_box:setIconsEnabled(true)
-		--tree_box:setExpandersActive(true)
+		--tree_box:setExpandersActive(false)
 
 		tree_box.drag_scroll = true
 		tree_box.drag_select = true
-		--tree_box.drag_reorder = true
-		--tree_box.drag_drop_mode = true
 
 		-- User code
 		tree_box.usr_timer_max = 0.5
