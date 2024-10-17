@@ -94,8 +94,8 @@ local function tree_userUpdate(self, dt)
 			end
 
 			local outline = context.app.dbg_outline
-			outline.wid = false
 			if outline then
+				outline.wid = false
 				local selected = self.menu:getSelectedItem()
 				if selected and selected.usr_wid then
 					outline.wid = selected.usr_wid
