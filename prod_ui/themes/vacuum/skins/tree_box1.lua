@@ -24,10 +24,6 @@ return {
 	-- Horizontal starting edge for the tree root.
 	item_align_h = "left", -- "left", "right"
 
-	-- Vertical starting edge for the tree root.
-	item_align_v = "top", -- "top", "bottom"
-	-- XXX: "bottom" alignment has the correct order but wrong vertical placement.
-
 	-- Vertical text alignment is centered.
 
 	-- Spacing for expanders, and half the initial width for the first pipe indentation.
