@@ -16,7 +16,6 @@ local plan = {}
 
 
 local function _deleteLoop(node, _collapsed)
-	print("_deleteLoop() start", node)
 	for i = #node.nodes, 1, -1 do
 		local child_node = node.nodes[i]
 		if not child_node.expanded then
@@ -25,7 +24,6 @@ local function _deleteLoop(node, _collapsed)
 		_deleteLoop(child_node, _collapsed)
 		node.nodes[i] = nil
 	end
-	print("_deleteLoop() end", node)
 end
 
 
@@ -35,8 +33,6 @@ end
 
 
 local function _buildLoop(tree_box, node, root, thimble, _collapsed)
-	print("_buildLoop() start", tree_box, root, thimble)
-	print(#root.children)
 	for i, child in ipairs(root.children) do
 		local n1 = tree_box:addNode(_widgetToString(child, i, thimble), node)
 		n1.usr_wid = child
@@ -45,12 +41,10 @@ local function _buildLoop(tree_box, node, root, thimble, _collapsed)
 		end
 		_buildLoop(tree_box, n1, child, thimble, _collapsed)
 	end
-	print("_buildLoop() end")
 end
 
 
 local function _buildTree(tree_box, root)
-	print("_buildTree() start")
 	assert(type(root) == "table" and not root._dead, "root widget is dead or corrupt")
 
 	-- TODO: Try preserving existing node tables at update intervals.
@@ -60,8 +54,6 @@ local function _buildTree(tree_box, root)
 	local wid_selected = item_selected and item_selected.usr_wid
 	item_selected = nil
 	local thimble = tree_box.context.current_thimble
-
-	print(wid_selected, thimble)
 
 	tree_box.tree.usr_wid = root
 	tree_box.tree.text = _widgetToString(root, 1, thimble)
@@ -81,7 +73,6 @@ local function _buildTree(tree_box, root)
 			end
 		end
 	end
-	print("_buildTree() end")
 end
 
 
@@ -108,6 +99,15 @@ local function tree_userUpdate(self, dt)
 				end
 			end
 		end
+	end
+end
+
+
+local function tree_userDestroy(self)
+	-- unsets the debug-outline reference
+	local outline = self.context.app.dbg_outline
+	if outline then
+		outline.wid = false
 	end
 end
 
@@ -139,7 +139,6 @@ function plan.make(root)
 		chk_highlight.wid_buttonAction = function(self)
 			local outline = self.context.app.dbg_outline
 			outline.active = not not self.checked
-			print(self.x, self.y, self.w, self.h)
 		end
 
 		chk_highlight.h = 32
@@ -170,6 +169,7 @@ function plan.make(root)
 		tree_box.usr_timer_max = 0.5
 		tree_box.usr_timer = tree_box.usr_timer_max
 		tree_box.userUpdate = tree_userUpdate
+		tree_box.userDestroy = tree_userDestroy
 	end
 
 	frame:reshape(true)

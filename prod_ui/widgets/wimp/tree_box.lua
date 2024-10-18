@@ -21,7 +21,7 @@ A WIMP TreeBox.
                    Optional scroll bars
 
  [B]: Optional icons (bijoux)
- >/v: Denotes if a node is expanded or not.
+ >/v: Optional expander sensors
 --]]
 
 
@@ -54,11 +54,6 @@ function def:arrange()
 	local menu = self.menu
 	local items = menu.items
 	local font = skin.font
-
-	-- Empty list: nothing to do.
-	if #items == 0 then
-		return
-	end
 
 	local yy = 0
 
@@ -149,6 +144,50 @@ function def:wid_dropped(drop_state)
 end
 
 
+local function _keyForward(self)
+	local item = self.menu.items[self.menu.index]
+	if item
+	and self.expanders_active
+	and #item.nodes > 0
+	and item.expanded
+	then
+		item.expanded = not item.expanded
+		self:orderItems()
+		self:arrange()
+		self:cacheUpdate(true)
+
+	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
+		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
+
+	else
+		self:scrollDeltaH(-32) -- XXX config
+	end
+	return true
+end
+
+
+local function _keyBackward(self)
+	local item = self.menu.items[self.menu.index]
+	if item
+	and self.expanders_active
+	and #item.nodes > 0
+	and not item.expanded
+	then
+		item.expanded = not item.expanded -- XXX: wrap into a local function
+		self:orderItems()
+		self:arrange()
+		self:cacheUpdate(true)
+
+	elseif item and #item.nodes > 0 and item.expanded then
+		self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
+
+	else
+		self:scrollDeltaH(32) -- XXX config
+	end
+	return true
+end
+
+
 --- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
 -- @param key The key code.
 -- @param scancode The scancode.
@@ -180,44 +219,12 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		local item = self.menu.items[self.menu.index]
-		if item
-		and self.expanders_active
-		and #item.nodes > 0
-		and item.expanded
-		then
-			item.expanded = not item.expanded -- XXX: wrap into a local function
-			self:orderItems()
-			self:arrange()
-			self:cacheUpdate(true)
-
-		elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
-			self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
-
-		else
-			self:scrollDeltaH(-32) -- XXX config
-		end
-		return true
+		return self.skin.item_align_h == "left" and _keyForward(self)
+			or self.skin.item_align_h == "right" and _keyBackward(self)
 
 	elseif scancode == "right" then
-		local item = self.menu.items[self.menu.index]
-		if item
-		and self.expanders_active
-		and #item.nodes > 0
-		and not item.expanded
-		then
-			item.expanded = not item.expanded -- XXX: wrap into a local function
-			self:orderItems()
-			self:arrange()
-			self:cacheUpdate(true)
-
-		elseif item and #item.nodes > 0 and item.expanded then
-			self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
-
-		else
-			self:scrollDeltaH(32) -- XXX config
-		end
-		return true
+		return self.skin.item_align_h == "left" and _keyBackward(self)
+			or self.skin.item_align_h == "right" and _keyForward(self)
 	end
 end
 
@@ -230,16 +237,18 @@ local function updateItemDimensions(self, skin, item)
 
 	local font = skin.font
 
-	item.w = font:getWidth(item.text) + self.icon_w
+	item.w = font:getWidth(item.text) + self.icon_w + skin.first_col_spacing
 	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-
-	print("new dimensions", "item.w", item.w, "gw(item.text)", font:getWidth(item.text), "self.expander_w", self.expander_w, "self.icon_w", self.icon_w)
+	--print("new dimensions", "item.w", item.w, "gw(item.text)", font:getWidth(item.text), "self.expander_w", self.expander_w, "self.icon_w", self.icon_w)
 end
 
 
 local function updateAllItemDimensions(self, skin, node)
 	for i, item in ipairs(node.nodes) do
 		updateItemDimensions(self, skin, item)
+		if #item.nodes > 0 then
+			updateAllItemDimensions(self, skin, item)
+		end
 	end
 end
 
@@ -291,15 +300,7 @@ end
 
 local function _orderLoop(self, items, node)
 	if node.expanded then
-		local start, stop, delta
-		if self.skin.item_align_v == "top" then
-			start, stop, delta = 1, #node.nodes, 1
-		else -- "bottom"
-			start, stop, delta = #node.nodes, 1, -1
-		end
-
-		for i = start, stop, delta do
-			local child_node = node.nodes[i]
+		for i, child_node in ipairs(node.nodes) do
 			items[#items + 1] = child_node
 			_orderLoop(self, items, child_node)
 		end
@@ -616,7 +617,7 @@ function def:cacheUpdate(refresh_dimensions)
 		self.expander_w = self.expanders_active and skin.first_col_spacing or 0
 		self.icon_w = self.show_icons and skin.icon_spacing or 0
 
-		-- Get component left positions. (These numbers asssume left alignment, and are
+		-- Get component left positions. (These numbers assume left alignment, and are
 		-- adjusted at render time for right alignment.)
 		local xx = 0
 		self.expander_x = xx
@@ -761,12 +762,15 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						self.mouse_clicked_item = item_t
 
 						if button == 1 then
-
 							-- Check for clicking on an expander sensor.
+							local skin = self.skin
+							local ex_x, ex_w = self.expander_x, self.expander_w
+							local it_x, it_w = item_t.x, item_t.w
+
 							if self.expanders_active
 							and #item_t.nodes > 0
-							and mx >= item_t.x + self.expander_x
-							and mx < item_t.x + self.expander_x + self.expander_w
+							and (skin.item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
+							or (skin.item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
 							then
 								item_t.expanded = not item_t.expanded
 								self:orderItems()
@@ -1032,31 +1036,6 @@ function def:uiCall_update(dt)
 end
 
 
-local function _drawLongPipes(self, skin, node, tq_px, line_x_offset, item_h)
-	local y1 = self.scr_y
-	local y2 = y1 + self.vp2_h
-
-	local node_first, node_last = node.nodes[1], node.nodes[#node.nodes]
-	if not node_first or node_first.y + node_first.h >= y2 then
-		return
-
-	elseif node_first.y < y2 and node_last.y + node_last.h >= y1 then
-		uiGraphics.quadXYWH(tq_px,
-			node_first.x + line_x_offset,
-			node_first.y,
-			skin.pipe_width,
-			node_last.y - node_first.y + item_h
-		)
-		for i = 1, #node.nodes do
-			local node2 = node.nodes[i]
-			if node2.expanded then
-				_drawLongPipes(self, skin, node2, tq_px, line_x_offset, item_h)
-			end
-		end
-	end
-end
-
-
 def.skinners = {
 	default = {
 		install = function(self, skinner, skin)
@@ -1118,27 +1097,33 @@ def.skinners = {
 			-- Vertical pipes.
 			if skin.draw_pipes then
 				love.graphics.setColor(skin.color_pipe)
-				local HACK_item_h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v) -- XXX: find a suitable way to get this directly
-				local line_x_offset = math.floor(skin.first_col_spacing / 2)
+				local line_x_offset, dir_h
+				if skin.item_align_h == "left" then
+					line_x_offset = math.floor((skin.first_col_spacing - skin.pipe_width) / 2)
+					dir_h = 1
+				else -- "right"
+					line_x_offset = math.floor(self.doc_w - (skin.first_col_spacing  - skin.pipe_width) / 2)
+					dir_h = -1
+				end
 
 				for i = first, last do
 					local item = items[i]
 					for j = 0 , item.depth - 1 do
 						uiGraphics.quadXYWH(tq_px,
-							line_x_offset + skin.indent * j,
+							line_x_offset + skin.indent * j * dir_h,
 							item.y,
 							skin.pipe_width,
-							HACK_item_h
+							item.h
 						)
 					end
 					-- draw the final pipe if there is no expander sensor in the way
 					-- [[
 					if not self.expanders_active or #item.nodes == 0 then
 						uiGraphics.quadXYWH(tq_px,
-							line_x_offset + skin.indent * item.depth,
+							line_x_offset + skin.indent * item.depth * dir_h,
 							item.y,
 							skin.pipe_width,
-							HACK_item_h
+							item.h
 						)
 					end
 					--]]
@@ -1149,18 +1134,27 @@ def.skinners = {
 			local item_hover = self.item_hover
 			if item_hover then
 				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(
-					tq_px,
-					item_hover.x + self.expander_w,
-					item_hover.y,
-					math.max(self.vp_w, self.doc_w) - item_hover.x, item_hover.h
-				)
-				--print(item_hover.w)
-
+				if skin.item_align_h == "left" then
+					uiGraphics.quadXYWH(
+						tq_px,
+						item_hover.x + skin.first_col_spacing,
+						item_hover.y,
+						math.max(self.vp_w, self.doc_w) - item_hover.x,
+						item_hover.h
+					)
+				else -- "right"
+					uiGraphics.quadXYWH(
+						tq_px,
+						self.vp_x,
+						item_hover.y,
+						-self.vp_x + item_hover.x + item_hover.w - skin.first_col_spacing,
+						item_hover.h
+					)
+				end
 				--[[
 				love.graphics.push("all")
 				love.graphics.setColor(1,0,0,1)
-				love.graphics.rectangle("line", 0.5 + item_hover.x, 0.5 + item_hover.y, item_hover.w - 1, item_hover.h - 1)
+				love.graphics.rectangle("line", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
 				love.graphics.pop()
 				--]]
 			end
@@ -1169,8 +1163,24 @@ def.skinners = {
 			local sel_item = items[menu.index]
 			if sel_item then
 				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quadXYWH(tq_px, sel_item.x + self.expander_w, sel_item.y, math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h)
+				if skin.item_align_h == "left" then
+					uiGraphics.quadXYWH(
+						tq_px,
+						sel_item.x + skin.first_col_spacing,
+						sel_item.y,
+						math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h
+					)
+				else -- "right"
+					uiGraphics.quadXYWH(
+						tq_px,
+						self.vp_x,
+						sel_item.y,
+						-self.vp_x + sel_item.x + sel_item.w - skin.first_col_spacing,
+						sel_item.h
+					)
+				end
 			end
+
 
 			-- Menu items.
 			love.graphics.setColor(skin.color_item_text)
@@ -1191,7 +1201,7 @@ def.skinners = {
 
 			-- 2: Expander sensors, if enabled.
 			if self.expanders_active then
-				local tq_on = (skin.item_align_v == "top") and skin.tq_expander_down or skin.tq_expander_up
+				local tq_on = skin.tq_expander_down
 				local tq_off = (skin.item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
 
 				for i = first, last do
