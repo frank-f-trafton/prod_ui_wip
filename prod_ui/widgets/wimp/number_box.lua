@@ -156,7 +156,7 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 1, "border")
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
-	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement)
+	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, true)
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")

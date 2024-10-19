@@ -1101,7 +1101,9 @@ end
 -- @param b Index of the Viewport which will be assigned the remainder.
 -- @param space How much space to allot to viewport B.
 -- @param place Where Viewport B should be placed. "left", "right", "top", "bottom", or "overlay" (default).
-function widShared.partitionViewport(self, a, b, space, place)
+-- @param allow_overlay When true, invalid values for 'place' become "overlay". When false, "overlay" and invalid
+--	values for 'place' raise an error.
+function widShared.partitionViewport(self, a, b, space, place, allow_overlay)
 	if place == "left" or place == "right" then
 		widShared.splitViewport(self, a, b, false, space, (place == "right"))
 
@@ -1109,9 +1111,15 @@ function widShared.partitionViewport(self, a, b, space, place)
 		widShared.splitViewport(self, a, b, true, space, (place == "bottom"))
 
 	-- Default:
-	else -- "overlay" -- viewports occupy the same area
+	elseif allow_overlay then -- "overlay" -- viewports occupy the same area
 		-- NOTE: 'space' is not used in this path.
 		widShared.copyViewport(self, a, b)
+
+	elseif place == "overlay" then
+		error("'overlay' placement is not allowed in this codepath")
+
+	else
+		error("invalid placement string")
 	end
 end
 

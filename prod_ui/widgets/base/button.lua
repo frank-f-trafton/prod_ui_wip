@@ -74,7 +74,7 @@ function def:uiCall_reshape()
 
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, "border")
-	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement)
+	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement, true)
 	widShared.carveViewport(self, 2, "margin")
 	lgcLabel.reshapeLabel(self)
 end

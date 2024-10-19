@@ -152,17 +152,6 @@ function lgcButton.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx
 end
 
 
---- Mouse callback for when the cursor leaves a sticky button.
-function lgcButton.uiCall_pointerHoverOffSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		if self.enabled then
-			self.hovered = false
-			self:setCursorLow()
-		end
-	end
-end
-
-
 --- Mouse callback for pressing normal buttons (whose primary actions don't activate just on click-down).
 function lgcButton.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
 	if self == inst then

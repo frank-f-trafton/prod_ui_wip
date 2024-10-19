@@ -37,26 +37,26 @@ Horizontal item padding (not including widget margins):
 ┌───────────────────────────┐
 │   [B]   Text    Ctrl+t  > │
 └───────────────────────────┘
-  |  | | |    |*1|      |||| *2
-  |  | | |    |  |      |||self.pad_arrow_x2
-  |  | | |    |  |      |||
-  |  | | |    |  |      ||self.arrow_draw_w
-  |  | | |    |  |      ||
-  |  | | |    |  |      |self.pad_arrow_x1
-  |  | | |    |  |      |
-  |  | | |    |  |      |
-  |  | | |    |  |      self.pad_shortcut_x2
-  |  | | |    |  |
-  |  | | |    |  self.pad_shortcut_x1
-  |  | | |    |
-  |  | | |    self.pad_text_x2
-  |  | | |
-  |  | | self.pad_text_x1
-  |  | |
-  |  | self.pad_bijou_x2
-  |  |
-  |  self.bijou_draw_w
-  |
+  │  │ │ │    │*1│      ││││ *2
+  │  │ │ │    │  │      │││self.pad_arrow_x2
+  │  │ │ │    │  │      │││
+  │  │ │ │    │  │      ││self.arrow_draw_w
+  │  │ │ │    │  │      ││
+  │  │ │ │    │  │      │self.pad_arrow_x1
+  │  │ │ │    │  │      │
+  │  │ │ │    │  │      │
+  │  │ │ │    │  │      self.pad_shortcut_x2
+  │  │ │ │    │  │
+  │  │ │ │    │  self.pad_shortcut_x1
+  │  │ │ │    │
+  │  │ │ │    self.pad_text_x2
+  │  │ │ │
+  │  │ │ self.pad_text_x1
+  │  │ │
+  │  │ self.pad_bijou_x2
+  │  │
+  │  self.bijou_draw_w
+  │
   self.pad_bijou_x1
 
 

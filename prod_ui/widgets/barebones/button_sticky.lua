@@ -25,7 +25,7 @@ def.setLabel = lgcLabelBare.widSetLabel
 
 
 def.uiCall_pointerHoverOn = lgcButtonBare.uiCall_pointerHoverOnSticky
-def.uiCall_pointerHoverOff = lgcButtonBare.uiCall_pointerHoverOffSticky
+def.uiCall_pointerHoverOff = lgcButtonBare.uiCall_pointerHoverOff
 def.uiCall_pointerPress = lgcButtonBare.uiCall_pointerPressSticky
 def.uiCall_thimbleAction = lgcButtonBare.uiCall_thimbleActionSticky
 def.uiCall_thimbleAction2 = lgcButtonBare.uiCall_thimbleAction2

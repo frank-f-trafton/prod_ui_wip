@@ -117,15 +117,6 @@ function lgcButtonBare.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mous
 end
 
 
-function lgcButtonBare.uiCall_pointerHoverOffSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		if self.enabled then
-			self.hovered = false
-		end
-	end
-end
-
-
 function lgcButtonBare.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
