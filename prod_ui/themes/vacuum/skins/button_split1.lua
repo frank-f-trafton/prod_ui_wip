@@ -1,6 +1,6 @@
 -- * Widget Skin: Split button.
 
--- Under construction. Copy of `skins/button1.lua`.
+-- Under construction.
 
 return {
 	skinner_id = "default",

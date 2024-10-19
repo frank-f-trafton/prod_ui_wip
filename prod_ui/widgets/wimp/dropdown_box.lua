@@ -266,7 +266,7 @@ function def:uiCall_reshape()
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
 
-	widShared.partitionViewport(self, 1, 2, button_spacing, skin.button_placement)
+	widShared.partitionViewport(self, 1, 2, button_spacing, skin.button_placement, true)
 end
 
 

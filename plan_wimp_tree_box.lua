@@ -107,9 +107,7 @@ function plan.make(parent)
 		tree_box:arrange()
 
 
-		makeLabel(content, 256, 0, 256, 48, "**NOTE**: some of these settings are horribly broken.", "multi")
-
-		local wx, wy, ww, wh = 256, 64, 256, 32
+		local wx, wy, ww, wh = 256, 0, 256, 32
 
 		makeLabel(content, wx, wy, ww, wh, "Item Horizontal Alignment", "single")
 

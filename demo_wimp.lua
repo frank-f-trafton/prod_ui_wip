@@ -267,13 +267,17 @@ do
 		-- Auto-launch frames here:
 		--fr_demo_select:launch("plan_demo_main")
 		--[[
-		local frame_w = fr_demo_select:launch("plan_wimp_widget_tree")
-		frame_w.x = 64
-		frame_w.y = 64
+		do
+			local frame = fr_demo_select:launch("plan_wimp_widget_tree")
+			frame.x = 64
+			frame.y = 64
+		end
 		--]]
-		local frame_wt = fr_demo_select:launch("plan_wimp_tree_box")
-		frame_wt.x = 64
-		frame_wt.y = 64
+		do
+			local frame = fr_demo_select:launch("plan_button_split")
+			frame.x = 64
+			frame.y = 64
+		end
 	end
 	--]]
 
