@@ -1,5 +1,3 @@
--- Under construction.
-
 --[[
 A button with a main part and a secondary part which performs a different action (typically opening a pop-up menu).
 
@@ -100,15 +98,22 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 							-- Press action
 							self:wid_buttonActionAux()
+
+							-- Halt propagation (to prevent snatching the thimble
+							-- from the newly-made pop-up menu).
+							return true
 						end
 					end
-				elseif button == 2 then
-					-- Instant second action.
-					self:wid_buttonAction2()
 
-				elseif button == 3 then
-					-- Instant tertiary action.
-					self:wid_buttonAction3()
+				elseif not self.aux_pressed then
+					if button == 2 then
+						-- Instant second action.
+						self:wid_buttonAction2()
+
+					elseif button == 3 then
+						-- Instant tertiary action.
+						self:wid_buttonAction3()
+					end
 				end
 			end
 		end
@@ -134,7 +139,6 @@ function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 end
 
 
-def.uiCall_pointerUnpress = lgcButton.uiCall_pointerUnpress
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
@@ -170,11 +174,9 @@ function def:uiCall_create(inst)
 		-- [XXX 8] (Optional) graphic associated with the button.
 		--self.graphic = <tq>
 
-		-- Aux button config
+		-- Aux button state
 		self.aux_enabled = true
 		self.aux_pressed = false
-		self.aux_placement = "right" -- "left", "right", "top", "bottom"
-		self.aux_size = 64
 
 		-- State flags
 		self.enabled = true
@@ -196,9 +198,20 @@ function def:uiCall_reshape()
 
 	local skin = self.skin
 
+	local aux_sz
+	if skin.aux_size == "auto" then
+		if skin.aux_placement == "right" or skin.aux_placement == "left" then
+			aux_sz = self.vp2_h
+		else -- "top", "bottom"
+			aux_sz = self.vp2_w
+		end
+	else
+		aux_sz = skin.aux_size
+	end
+
 	widShared.resetViewport(self, 1)
+	widShared.partitionViewport(self, 1, 3, aux_sz, skin.aux_placement, false) -- no "overlay"
 	widShared.carveViewport(self, 1, "border")
-	widShared.partitionViewport(self, 1, 3, self.aux_size, self.aux_placement, false) -- no "overlay"
 	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement, true)
 	widShared.carveViewport(self, 2, "margin")
 	lgcLabel.reshapeLabel(self)
@@ -206,6 +219,7 @@ end
 
 
 def.skinners = context:getLua("shared/skn_button")
+
 
 def.skinners = {
 	default = {
@@ -239,11 +253,22 @@ def.skinners = {
 			love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
 			-- (get coordinates for the line)
 			local vx, vy, vw, vh
-			if     self.aux_placement == "left"   then vx, vy, vw, vh = self.vp3_x + self.vp3_w - 1, self.vp3_y, 1, self.vp3_h - 1
-			elseif self.aux_placement == "right"  then vx, vy, vw, vh = self.vp3_x, self.vp3_y, 1, self.vp3_h
-			elseif self.aux_placement == "top"    then vx, vy, vw, vh = self.vp3_x, self.vp3_y + self.vp3_h - 1, self.vp3_w - 1, 1
-			elseif self.aux_placement == "bottom" then vx, vy, vw, vh = self.vp3_x, self.vp3_y, self.vp3_w - 1, 1 end
+			if     skin.aux_placement == "left"   then vx, vy, vw, vh = self.vp3_x + self.vp3_w - 1, self.vp3_y, 1, self.vp3_h - 1
+			elseif skin.aux_placement == "right"  then vx, vy, vw, vh = self.vp3_x, self.vp3_y, 1, self.vp3_h
+			elseif skin.aux_placement == "top"    then vx, vy, vw, vh = self.vp3_x, self.vp3_y + self.vp3_h - 1, self.vp3_w - 1, 1
+			elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = self.vp3_x, self.vp3_y, self.vp3_w - 1, 1 end
 			uiGraphics.quadXYWH(tq_px, vx + res.label_ox, vy + res.label_oy, vw, vh)
+
+			-- aux part icon
+			local aux_color = self.aux_enabled and res.color_aux_icon or skin.res_disabled.color_aux_icon
+			love.graphics.setColor(aux_color)
+			uiGraphics.quadShrinkOrCenterXYWH(
+				skin.tq_aux_glyph,
+				self.vp3_x + res.label_ox,
+				self.vp3_y + res.label_oy,
+				self.vp3_w,
+				self.vp3_h
+			)
 
 			love.graphics.pop()
 
@@ -255,15 +280,6 @@ def.skinners = {
 			if self.label_mode then
 				lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
 			end
-
-			-- WIP: draw an indicator on the aux part
-			love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
-			love.graphics.circle(
-				"line",
-				self.vp3_x + self.vp3_w/2 + res.label_ox,
-				self.vp3_y + self.vp3_h/2 + res.label_oy,
-				math.min(self.vp_w, self.vp_h) / 2
-			)
 
 			-- XXX: Debug border (viewport rectangle)
 			--[[

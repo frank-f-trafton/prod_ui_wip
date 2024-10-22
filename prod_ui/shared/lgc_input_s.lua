@@ -126,7 +126,6 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	line_ed:resetCaretBlink()
 
 	if scancode == "application" then
-
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
 		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x

@@ -224,7 +224,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		if scancode == "tab" and mods["ctrl"] then
 			if mods["shift"] then
 				self:stepSelectedFrame(1)
-
 			else
 				self:stepSelectedFrame(-1)
 			end
