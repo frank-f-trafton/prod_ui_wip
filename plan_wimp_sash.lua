@@ -21,6 +21,8 @@ Dr. Johnson gives us no less than eight different meanings for the word Shell. F
 
 -- https://gutenberg.org/cache/epub/73790/pg73790-images.html
 local _text2 = [[
+**NOTE**: The sash widget doesn't currently work yet.
+
 James Slough Zerbe: AUTOMOBILES [1915]
 
 This is a subject in which every boy is interested. While few mechanics have the opportunity to actually build an automobile, it is the knowledge, which he must acquire about every particular device used, that enables him to repair and put such machines in order. The aim of this book is to make the boy acquainted with each element, so that he may understand why it is made in that special way, and what the advantages and disadvantages are of the different types. To that end each structure is shown in detail as much as possible, and the parts separated so as to give a clear insight of the different functions, all of which are explained by original drawings specially prepared to aid the reader.]]
