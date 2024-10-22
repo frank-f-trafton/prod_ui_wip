@@ -1,5 +1,5 @@
 -- [XXX 15] This is very out-of-date. It was originally used with window frame headers, but they now have
--- the functionality built-in. But this could still be useful in other cases. Clean it up sometime.
+-- the functionality built-in. But it could still be useful in other cases. Clean it up sometime.
 
 
 local context = select(1, ...)

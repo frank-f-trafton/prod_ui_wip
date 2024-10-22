@@ -274,7 +274,7 @@ do
 		end
 		--]]
 		do
-			local frame = fr_demo_select:launch("plan_button_split")
+			local frame = fr_demo_select:launch("plan_wimp_sash")
 			frame.x = 64
 			frame.y = 64
 		end

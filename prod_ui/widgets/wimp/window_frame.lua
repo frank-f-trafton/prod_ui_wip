@@ -64,12 +64,7 @@ function def:debugVisibleSensors(enabled)
 	for i, child in ipairs(self.children) do
 		--print(self, i, child, enabled)
 		if child.is_frame_sensor then
-			if enabled then
-				child.visible = true
-
-			else
-				child.visible = false
-			end
+			child.visible = not not enabled
 			--print("new child.visible", child.visible)
 		end
 	end
@@ -205,10 +200,7 @@ function def:uiCall_create(inst)
 		self.border_breadth = 1
 
 		-- Content and frame controls are within this rectangle, while the frame border is outside.
-		self.vp_x = 0
-		self.vp_y = 0
-		self.vp_w = 1
-		self.vp_h = 1
+		widShared.setupViewport(self, 1)
 
 		-- Layout rectangle
 		self.lp_x = 0

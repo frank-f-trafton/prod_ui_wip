@@ -639,7 +639,6 @@ function uiLayout.applyLayout(parent)
 		-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
 		if wid.lo_command then
 			wid.lo_command(parent, wid)
-
 		-- Otherwise, treat as a widget.
 		else
 			if wid._dead == "dead" then
