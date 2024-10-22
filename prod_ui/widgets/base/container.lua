@@ -67,7 +67,7 @@ function def:uiCall_create(inst)
 		-- Layout mode for containers.
 		-- false: no effect
 		-- "auto": re-apply layout whenever uiCall_reshape() is fired.
-		-- "resize": re-apply layout whenever uiCall_reshape() is fired or the container dimensions have changed.
+		-- "resize": re-apply layout whenever uiCall_reshape() is fired, but only if the container dimensions have changed.
 		self.layout_mode = false
 
 		-- Used with "resize" layout_mode.

@@ -117,8 +117,8 @@ function plan.make(root)
 
 	local frame = root:addChild("wimp/window_frame")
 
-	frame.w = 400--640
-	frame.h = 384--500
+	frame.w = 400
+	frame.h = 384
 
 	frame:setFrameTitle("Widget Tree")
 

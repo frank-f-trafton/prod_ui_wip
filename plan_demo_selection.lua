@@ -77,6 +77,7 @@ function plan.make(parent)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_demo_main", "Main Demo Window", xx, yy, ww, hh)
 		yy = yy + hh
 
+		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_sash", "Window Sash", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_number_box", "Number Box", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_properties_box", "Properties Box", xx, yy, ww, hh)
 		yy = yy + hh; bb_btn = _makeButton(content, "plan_combo_box", "Combo Box", xx, yy, ww, hh)

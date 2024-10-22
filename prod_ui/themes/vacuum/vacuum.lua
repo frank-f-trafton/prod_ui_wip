@@ -22,7 +22,6 @@ local BASE_PATH = uiRes.pathStripFile(THIS_THEME_PATH)
 -- @param scale The desired scaling value for resources (fonts, etc.) May be clamped or rounded by the function.
 -- @return The new theme instance.
 function themeDef.newInstance(scale)
-
 	local inst = uiTheme.newThemeInstance()
 
 	-- General fonts
@@ -484,12 +483,12 @@ function themeDef.newInstance(scale)
 	inst.common.scroll_bar1.shared.idle.slice = inst.tex_slices["scroll_button"]
 	inst.common.scroll_bar1.shared.idle.col_body = {1.0, 1.0, 1.0, 1.0}
 	inst.common.scroll_bar1.shared.idle.col_symbol = {0.65, 0.65, 0.65, 1.0}
-	
+
 	inst.common.scroll_bar1.shared.hover = {}
 	inst.common.scroll_bar1.shared.hover.slice = inst.tex_slices["scroll_button_hover"]
 	inst.common.scroll_bar1.shared.hover.col_body = {1.0, 1.0, 1.0, 1.0}
 	inst.common.scroll_bar1.shared.hover.col_symbol = {0.75, 0.75, 0.75, 1.0}
-	
+
 	inst.common.scroll_bar1.shared.press = {}
 	inst.common.scroll_bar1.shared.press.slice = inst.tex_slices["scroll_button_press"]
 	inst.common.scroll_bar1.shared.press.col_body = {1.0, 1.0, 1.0, 1.0}
@@ -562,34 +561,46 @@ function themeDef.newInstance(scale)
 
 	local loadSkinDef = uiTheme.loadSkinDef
 
-	inst:loadSkinDef("container1", BASE_PATH .. "skins/container1.lua")
-	inst:loadSkinDef("wimp_frame", BASE_PATH .. "skins/wimp_frame.lua")
-	inst:loadSkinDef("wimp_frame_header", BASE_PATH .. "skins/wimp_frame_header.lua")
-	inst:loadSkinDef("wimp_frame_button", BASE_PATH .. "skins/wimp_frame_button.lua")
-	inst:loadSkinDef("label1", BASE_PATH .. "skins/label1.lua")
 	inst:loadSkinDef("button1", BASE_PATH .. "skins/button1.lua")
+	inst:loadSkinDef("button_split1", BASE_PATH .. "skins/button_split1.lua")
 	inst:loadSkinDef("button_tq1", BASE_PATH .. "skins/button_tq1.lua")
+
 	inst:loadSkinDef("checkbox1", BASE_PATH .. "skins/checkbox1.lua")
-	inst:loadSkinDef("radio1", BASE_PATH .. "skins/radio1.lua")
-	inst:loadSkinDef("slider1", BASE_PATH .. "skins/slider1.lua")
+	inst:loadSkinDef("combo_box1", BASE_PATH .. "skins/combo_box1.lua")
+	inst:loadSkinDef("container1", BASE_PATH .. "skins/container1.lua")
+
+	inst:loadSkinDef("dropdown_box1", BASE_PATH .. "skins/dropdown_box1.lua")
+	inst:loadSkinDef("dropdown_pop1", BASE_PATH .. "skins/dropdown_pop1.lua")
+
+	inst:loadSkinDef("icon_box1", BASE_PATH .. "skins/icon_box1.lua")
+
+	inst:loadSkinDef("label1", BASE_PATH .. "skins/label1.lua")
+	inst:loadSkinDef("list_box1", BASE_PATH .. "skins/list_box1.lua")
+
 	inst:loadSkinDef("menu1", BASE_PATH .. "skins/menu1.lua")
 	inst:loadSkinDef("menu_simple1", BASE_PATH .. "skins/menu_simple1.lua")
 	inst:loadSkinDef("menu_tab1", BASE_PATH .. "skins/menu_tab1.lua")
 	inst:loadSkinDef("menu_pop1", BASE_PATH .. "skins/menu_pop1.lua")
 	inst:loadSkinDef("menu_bar1", BASE_PATH .. "skins/menu_bar1.lua")
-	inst:loadSkinDef("list_box1", BASE_PATH .. "skins/list_box1.lua")
-	inst:loadSkinDef("tree_box1", BASE_PATH .. "skins/tree_box1.lua")
-	inst:loadSkinDef("progress_bar1", BASE_PATH .. "skins/progress_bar1.lua")
-	inst:loadSkinDef("stepper1", BASE_PATH .. "skins/stepper1.lua")
-	inst:loadSkinDef("text_box_s1", BASE_PATH .. "skins/text_box_s1.lua")
-	inst:loadSkinDef("text_box_m1", BASE_PATH .. "skins/text_box_m1.lua")
-	inst:loadSkinDef("dropdown_box1", BASE_PATH .. "skins/dropdown_box1.lua")
-	inst:loadSkinDef("dropdown_pop1", BASE_PATH .. "skins/dropdown_pop1.lua")
-	inst:loadSkinDef("combo_box1", BASE_PATH .. "skins/combo_box1.lua")
-	inst:loadSkinDef("properties_box1", BASE_PATH .. "skins/properties_box1.lua")
-	inst:loadSkinDef("icon_box1", BASE_PATH .. "skins/icon_box1.lua")
+
 	inst:loadSkinDef("number_box1", BASE_PATH .. "skins/number_box1.lua")
-	inst:loadSkinDef("button_split1", BASE_PATH .. "skins/button_split1.lua")
+
+	inst:loadSkinDef("progress_bar1", BASE_PATH .. "skins/progress_bar1.lua")
+	inst:loadSkinDef("properties_box1", BASE_PATH .. "skins/properties_box1.lua")
+
+	inst:loadSkinDef("radio1", BASE_PATH .. "skins/radio1.lua")
+
+	inst:loadSkinDef("sash1", BASE_PATH .. "skins/sash1.lua")
+	inst:loadSkinDef("slider1", BASE_PATH .. "skins/slider1.lua")
+	inst:loadSkinDef("stepper1", BASE_PATH .. "skins/stepper1.lua")
+
+	inst:loadSkinDef("text_box_m1", BASE_PATH .. "skins/text_box_m1.lua")
+	inst:loadSkinDef("text_box_s1", BASE_PATH .. "skins/text_box_s1.lua")
+	inst:loadSkinDef("tree_box1", BASE_PATH .. "skins/tree_box1.lua")
+
+	inst:loadSkinDef("wimp_frame", BASE_PATH .. "skins/wimp_frame.lua")
+	inst:loadSkinDef("wimp_frame_header", BASE_PATH .. "skins/wimp_frame_header.lua")
+	inst:loadSkinDef("wimp_frame_button", BASE_PATH .. "skins/wimp_frame_button.lua")
 
 	return inst
 end
