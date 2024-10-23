@@ -299,7 +299,7 @@ return {
     progress_back = {
       h = 8,
       w = 8,
-      x = 11,
+      x = 31,
       y = 153
     },
     progress_ichor = {
@@ -349,6 +349,18 @@ return {
       w = 24,
       x = 199,
       y = 1
+    },
+    sash_lr = {
+      h = 8,
+      w = 8,
+      x = 21,
+      y = 153
+    },
+    sash_tb = {
+      h = 8,
+      w = 8,
+      x = 11,
+      y = 153
     },
     scroll_button = {
       h = 12,
@@ -780,6 +792,28 @@ return {
       w1 = 1,
       w2 = 1,
       w3 = 1,
+      x = 0,
+      y = 0
+    },
+    sash_lr = {
+      draw_fn_id = "x0y1w3h1",
+      h1 = 3,
+      h2 = 2,
+      h3 = 3,
+      w1 = 3,
+      w2 = 2,
+      w3 = 3,
+      x = 0,
+      y = 0
+    },
+    sash_tb = {
+      draw_fn_id = "x1y0w1h3",
+      h1 = 3,
+      h2 = 2,
+      h3 = 3,
+      w1 = 3,
+      w2 = 2,
+      w3 = 3,
       x = 0,
       y = 0
     },
