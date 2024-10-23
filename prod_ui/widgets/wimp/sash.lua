@@ -43,6 +43,7 @@ function def:uiCall_create(inst)
 
 		-- length of the attached widget at start of drag state
 		self.att_len = 0
+
 		-- mouse cursor absolute position at start of drag state
 		self.att_ax, self.att_ay = 0, 0
 
