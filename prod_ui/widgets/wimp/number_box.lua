@@ -148,7 +148,8 @@ end
 function def:uiCall_reshape()
 	-- Viewport #1 is for text placement and offsetting.
 	-- Viewport #2 is the text scissor-box boundary.
-	-- Viewport #3 is the increment and decrement buttons.
+	-- Viewport #3 is the increment button.
+	-- Viewport #4 is the decrement button.
 
 	local skin = self.skin
 
@@ -156,7 +157,8 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 1, "border")
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
-	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, true)
+	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, false)
+	widShared.partitionViewport(self, 3, 4, self.vp3_h / 2, "bottom", false)
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")
@@ -265,7 +267,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-local function checkDecimal(self)
+local function fv(self)
 	local str = self.line_ed.line
 
 	if string.find(str, "[%s%+e]") or not (str == "." or str == "-" or str == "-." or tonumber(str)) then
@@ -334,10 +336,29 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				return true
 			end
 
-		-- Clicking the increment and decrement buttons:
+		-- Clicked on increment button:
 		elseif widShared.pointInViewport(self, 3, mx, my) then
-			if button == 1 and not self.wid_drawer then
+			if button == 1 then
 				-- XXX: WIP
+				local line_ed = self.line_ed
+				line_ed:deleteText(false, 1, #line_ed.line)
+				line_ed:insertText("clicked increment button")
+				line_ed.input_category = false
+				line_ed.hist:clearAll()
+				self.update_flag = true
+				return true
+			end
+
+		-- Clicking on decrement button:
+		elseif widShared.pointInViewport(self, 4, mx, my) then
+			if button == 1 then
+				-- XXX: WIP
+				local line_ed = self.line_ed
+				line_ed:deleteText(false, 1, #line_ed.line)
+				line_ed:insertText("clicked decrement button")
+				line_ed.input_category = false
+				line_ed.hist:clearAll()
+				self.update_flag = true
 				return true
 			end
 		end
@@ -398,13 +419,12 @@ def.skinners = {
 			love.graphics.setColor(res.color_body)
 			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
-			-- XXX: Increment and decrement buttons.
+			-- Increment and decrement buttons.
 			love.graphics.setColor(1, 1, 1, 1)
 			uiGraphics.drawSlice(res.slc_button_up, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-			-- XXX: ^ and res.slc_button_down
-
-			-- XXX: replace with tq_arrow_up, tq_arrow_down
-			--uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
+			uiGraphics.drawSlice(res.slc_button_down, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_arrow_up, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_arrow_down, self.vp4_x + res.deco_ox, self.vp4_y + res.deco_oy, self.vp4_w, self.vp4_h)
 
 			-- Crop item text.
 			uiGraphics.intersectScissor(
@@ -446,6 +466,7 @@ def.skinners = {
 			widDebug.debugDrawViewport(self, 1)
 			widDebug.debugDrawViewport(self, 2)
 			widDebug.debugDrawViewport(self, 3)
+			widDebug.debugDrawViewport(self, 4)
 			--]]
 		end,
 
