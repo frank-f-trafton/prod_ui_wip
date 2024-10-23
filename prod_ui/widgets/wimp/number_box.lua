@@ -276,6 +276,15 @@ local function fv(self)
 end
 
 
+local function checkDecimal(self)
+	local str = self.line_ed.line
+
+	if string.find(str, "[%s%+e]") or not (str == "." or str == "-" or str == "-." or tonumber(str)) then
+		return false
+	end
+end
+
+
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		lgcInputS.textInputLogic(self, text, checkDecimal)
