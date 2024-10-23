@@ -1,16 +1,17 @@
 
 -- XXX: Under construction. Combination of `wimp/dropdown_box.lua` and `input/text_box_single.lua`.
-
+-- XXX: Support commas for decimal place indicator
 --[[
 
 A single-line text box with controls for incrementing and decrementing numeric values.
 
 ┌─────────────────┬───┐
-│ ═╗              │ ^ │ -- Increment value (or press up-arrow)
+│ ═╗              │ + │ -- Increment value (or press up-arrow)
 │  ║              ├───┤
-│ ═╩═             │ v │ -- Decrement value (or press down-arrow)
+│ ═╩═             │ - │ -- Decrement value (or press down-arrow)
 └─────────────────┴───┘
 
+Important: The internal value can be boolean false when the text input is empty or partially complete (-.).
 --]]
 
 
@@ -32,6 +33,9 @@ local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 local def = {
 	skin_id = "number_box1",
 }
+
+
+def.click_repeat_oob = true -- for the inc/dec buttons
 
 
 widShared.scrollSetMethods(def)
@@ -56,37 +60,43 @@ def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
 
 
-def.wid_buttonAction = uiShared.dummyFunc
-def.wid_buttonAction2 = uiShared.dummyFunc
-def.wid_buttonAction3 = uiShared.dummyFunc
+-- Called when the user presses 'enter'
+def.wid_action = uiShared.dummyFunc
 
 
---def.uiCall_thimbleAction2
+-- For partial input.
+local function _decimalStringOK(s)
+	return s:match("%-?%d*%.?%d*") == s
+end
 
 
-local function setLineEdText(self, value) -- replaces refreshLineEdText()
-	local line_ed = self.line_ed
+-- For assigned input -- must be a full number.
+local function _decimalStringOKFull(s)
+	return s:match("%-?%d*%.?%d*") == s and s ~= "-" and s ~= "." and s ~= "-."
+end
 
-	-- XXX: convert value to string for LineEd.
-	local str = "WIP"
 
-	line_ed:deleteText(false, 1, #line_ed.line)
-	line_ed:insertText(str)
-	line_ed.input_category = false
-	line_ed.hist:clearAll()
-
-	if line_ed.allow_highlight then
-		self:highlightAll()
-	end
-
-	self.update_flag = true
+local function _checkDecimal(self)
+	return _decimalStringOK(self.line_ed.line)
 end
 
 
 --- Callback for a change in the NumberBox state.
-function def:wid_chosenSelection(value) -- XXX: change to def:wid_inputChanged(text)
+function def:wid_inputChanged(text)
 	-- ...
 end
+
+
+--- Callbacks that control the amount of addition and subtraction of the internal value.
+-- @param v The current value
+-- @param r Number of iterations for held buttons (ie mouse-repeat)
+-- @return The new value to assign.
+function def:wid_incrementButton(v, r) return v + 1 end
+function def:wid_decrementButton(v, r) return v - 1 end
+function def:wid_incrementArrowKey(v, r) return v + 1 end
+function def:wid_decrementArrowKey(v, r) return v - 1 end
+function def:wid_incrementPageKey(v, r) return v + 10 end
+function def:wid_decrementPageKey(v, r) return v - 10 end
 
 
 --- Gets the internal numeric value.
@@ -102,7 +112,7 @@ end
 
 
 --- Gets the display text string (which may not correspond exactly to the internal value, and which may be modified
---  to show different UTF-8 code points from the internal text).
+--  to show different characters from the internal text).
 function def:getDisplayText()
 	return self.line_ed.disp_text
 end
@@ -124,10 +134,18 @@ function def:uiCall_create(inst)
 		lgcInputS.setupInstance(self)
 
 		-- The internal value.
-		self.value = 0
-		self.value_min = 0
-		self.value_max = 0
+		self.value_default = 0
+		self.value = self.value_default
+		self.value_min = -math.huge
+		self.value_max = math.huge
 		-- XXX: formatting support (rigid increments, decimals, etc.)
+
+		-- repeat mouse-press state
+		self.repeat_btn = 1 -- -1 for decrement, 1 for increment
+
+		-- repeat key state
+		self.rep_sc = false
+		self.rep_sc_count = 0
 
 		-- State flags
 		self.enabled = true
@@ -158,7 +176,11 @@ function def:uiCall_reshape()
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
 	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, false)
-	widShared.partitionViewport(self, 3, 4, self.vp3_h / 2, "bottom", false)
+	if skin.button_alignment == "vertical" then
+		widShared.partitionViewport(self, 3, 4, self.vp3_h / 2, "bottom", false)
+	else
+		widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "left", false)
+	end
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")
@@ -228,66 +250,123 @@ function def:uiCall_destroy(inst)
 end
 
 
+local function _num2Str(n)
+	local fmt = math.floor(n) == n and "%d" or "%f"
+	local s = string.format(fmt, n)
+	if s:find("%.") then
+		s = s:match("(.-)[0]*$")
+	end
+	return s
+end
+
+
+-- @return true if the new text was accepted, false if it was rejected by the format check.
+function def:setText(text)
+	local line_ed = self.line_ed
+
+	if type(text) == "number" then
+		text = _num2Str(text)
+	end
+	if type(text) ~= "string" then
+		error("argument #1: expected string or number")
+	end
+
+	-- Reject invalid input.
+	if not _decimalStringOK(text) then
+		return false
+	end
+
+	line_ed:deleteText(false, 1, #line_ed.line)
+	line_ed:insertText(text)
+	line_ed.input_category = false
+	line_ed.hist:clearAll()
+
+	if line_ed.allow_highlight then
+		self:highlightAll()
+	end
+
+	self.value = tonumber(text) or false
+
+	self.update_flag = true
+	return true
+end
+
+
+local function _valueTextUpdate(self, value_old)
+	if self.value ~= false and type(self.value) ~= "number" then
+		error("expected false or number value from callback function, got " .. type(self))
+	end
+
+	if value_old ~= self.value then
+		local line_ed = self.line_ed
+
+		line_ed:deleteText(false, 1, #line_ed.line)
+		if self.value ~= false then
+			line_ed:insertText(_num2Str(self.value))
+		end
+		line_ed.input_category = false
+		line_ed.hist:clearAll()
+
+		if line_ed.allow_highlight then
+			self:highlightAll()
+		end
+
+		self.update_flag = true
+	end
+end
+
+
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		local check_value = false
+		if isrepeat then
+			if self.rep_sc ~= scancode then
+				self.rep_sc_count = 0
+			end
+			self.rep_sc = scancode
+			self.rep_sc_count = self.rep_sc_count + 1
+		end
+
 		local value_old = self.value
 
 		if key == "return" or key == "kpenter" then
-			-- XXX: tie 'enter' to a widget event (probably wid_action).
+			self:wid_action()
 			return true
 
 		elseif scancode == "up" then
-			-- XXX: increment value
-			check_value = true
+			self.value = self:wid_incrementArrowKey(self.value, self.rep_sc_count + 1)
+			_valueTextUpdate(self, value_old)
+			return true
 
 		elseif scancode == "down" then
-			-- XXX: decrement value
-			check_value = true
+			self.value = self:wid_decrementArrowKey(self.value, self.rep_sc_count + 1)
+			_valueTextUpdate(self, value_old)
+			return true
 
 		elseif scancode == "pageup" then
-			-- XXX: increment value (more?)
-			check_value = true
+			self.value = self:wid_incrementPageKey(self.value, self.rep_sc_count + 1)
+			_valueTextUpdate(self, value_old)
+			return true
 
 		elseif scancode == "pagedown" then
-			-- XXX: decrement value (more?)
-			check_value = true
-		end
-
-		if check_value then
-			if value_old ~= self.value then
-				--setLineEdText(self, value)
-			end
+			self.value = self:wid_decrementPageKey(self.value, self.rep_sc_count + 1)
+			_valueTextUpdate(self, value_old)
 			return true
+
 		-- Standard text box controls (caret navigation, etc.)
 		else
-			return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+			self.value = tonumber(self.line_ed.line) or false
+			return rv
 		end
-	end
-end
-
-
-local function fv(self)
-	local str = self.line_ed.line
-
-	if string.find(str, "[%s%+e]") or not (str == "." or str == "-" or str == "-." or tonumber(str)) then
-		return false
-	end
-end
-
-
-local function checkDecimal(self)
-	local str = self.line_ed.line
-
-	if string.find(str, "[%s%+e]") or not (str == "." or str == "-" or str == "-." or tonumber(str)) then
-		return false
 	end
 end
 
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		lgcInputS.textInputLogic(self, text, checkDecimal)
+		if lgcInputS.textInputLogic(self, text, _checkDecimal) then
+			self.value = tonumber(self.line_ed.line) or false
+		end
 	end
 end
 
@@ -307,7 +386,6 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	and self.enabled
 	then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-
 		if widShared.pointInViewport(self, 1, mx, my) then
 			self:setCursorLow(self.skin.cursor_on)
 		else
@@ -347,27 +425,21 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Clicked on increment button:
 		elseif widShared.pointInViewport(self, 3, mx, my) then
+			local value_old = self.value
 			if button == 1 then
-				-- XXX: WIP
-				local line_ed = self.line_ed
-				line_ed:deleteText(false, 1, #line_ed.line)
-				line_ed:insertText("clicked increment button")
-				line_ed.input_category = false
-				line_ed.hist:clearAll()
-				self.update_flag = true
+				self.repeat_btn = 1
+				self.value = self:wid_incrementButton(self.value, 1)
+				_valueTextUpdate(self, value_old)
 				return true
 			end
 
 		-- Clicking on decrement button:
 		elseif widShared.pointInViewport(self, 4, mx, my) then
+			local value_old = self.value
 			if button == 1 then
-				-- XXX: WIP
-				local line_ed = self.line_ed
-				line_ed:deleteText(false, 1, #line_ed.line)
-				line_ed:insertText("clicked decrement button")
-				line_ed.input_category = false
-				line_ed.hist:clearAll()
-				self.update_flag = true
+				self.repeat_btn = -1
+				self.value = self:wid_decrementButton(self.value, 1)
+				_valueTextUpdate(self, value_old)
 				return true
 			end
 		end
@@ -375,7 +447,26 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
---function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+	if self == inst then
+		if self.enabled then
+			if button == self.context.mouse_pressed_button then
+				local value_old = self.value
+				if button == 1 then
+					if self.repeat_btn == 1 then
+						self.value = self:wid_incrementButton(self.value, reps + 1)
+						_valueTextUpdate(self, value_old)
+						return true
+					else -- repeat_btn == -1
+						self.value = self:wid_decrementButton(self.value, reps + 1)
+						_valueTextUpdate(self, value_old)
+						return true
+					end
+				end
+			end
+		end
+	end
+end
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
@@ -432,8 +523,8 @@ def.skinners = {
 			love.graphics.setColor(1, 1, 1, 1)
 			uiGraphics.drawSlice(res.slc_button_up, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
 			uiGraphics.drawSlice(res.slc_button_down, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_arrow_up, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_arrow_down, self.vp4_x + res.deco_ox, self.vp4_y + res.deco_oy, self.vp4_w, self.vp4_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_inc, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
+			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_dec, self.vp4_x + res.deco_ox, self.vp4_y + res.deco_oy, self.vp4_w, self.vp4_h)
 
 			-- Crop item text.
 			uiGraphics.intersectScissor(
@@ -457,20 +548,6 @@ def.skinners = {
 			love.graphics.pop()
 
 			-- Debug
-
-			--[[
-			love.graphics.push()
-			-- Debug: Show text enable/disable state.
-			if love.keyboard.hasTextInput() then
-				love.graphics.setColor(1, 0, 0, 1)
-			else
-				love.graphics.setColor(0, 0, 1, 1)
-			end
-			love.graphics.circle("fill", 0, 0, 32)
-
-			love.graphics.pop()
-			--]]
-
 			--[[
 			widDebug.debugDrawViewport(self, 1)
 			widDebug.debugDrawViewport(self, 2)

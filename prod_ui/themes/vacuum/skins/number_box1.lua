@@ -8,16 +8,15 @@ return {
 	["*font"] = "fonts/p",
 	["*font_ghost"] = "fonts/p",
 
-	-- XXX: inc/dec button resources
-
 	cursor_on = "ibeam",
 
 	-- Horizontal size of the increment and decrement buttons.
 	-- "auto": use Viewport #?'s (XXX) height.
 	["$button_spacing"] = 24,
 
-	-- Placement of the increment and decrement buttons.
+	-- Inc/dec button positioning
 	button_placement = "right", -- "left", "right"
+	button_alignment = "vertical", -- "horizontal", "vertical"
 
 	["$item_pad_v"] = 2,
 
@@ -28,8 +27,8 @@ return {
 	color_insert = {1.0, 1.0, 1.0, 1.0},
 	--color_replace = {0.75, 0.75, 0.75, 1.0},
 
-	["*tq_arrow_up"] = "tex_quads/arrow_up",
-	["*tq_arrow_down"] = "tex_quads/arrow_down",
+	["*tq_inc"] = "tex_quads/ind_increment",
+	["*tq_dec"] = "tex_quads/ind_decrement",
 
 	res_idle = {
 		["*slice"] = "tex_slices/list_box_body", -- XXX: replace with a dedicated resource.

@@ -56,7 +56,7 @@ do
 		"j",
 		"k",
 		"l",
-		"m", 
+		"m",
 		"n",
 		"o",
 		"p",
@@ -419,7 +419,6 @@ keyMgr.scan_numlock = {
 
 
 function keyMgr.assertScancode(sc)
-
 	if not keyMgr.scancodes[sc] then
 		error("invalid Scancode: " .. tostring(sc), 2)
 	end
@@ -427,7 +426,6 @@ end
 
 
 function keyMgr.assertKeyConstant(kc)
-
 	-- NOTE: This assertion will miss some obscure Scancodes which also count as KeyConstants, like muteaudio.
 	if not keyMgr.key_constants[kc] then
 		error("invalid KeyConstant: " .. tostring(kc), 2)
@@ -436,12 +434,10 @@ end
 
 
 function keyMgr.assertKey(is_sc, code)
-
 	if is_sc then
 		if not keyMgr.scancodes[code] then
 			error("invalid Scancode: " .. tostring(code), 2)
 		end
-
 	else
 		if not keyMgr.key_constants[code] then
 			error("invalid KeyConstant: " .. tostring(code), 2)
@@ -451,7 +447,6 @@ end
 
 
 function keyMgr.newManager()
-
 	local self = {}
 
 	-- When true, handles virtual key-repeat events. This should be treated as mutually exclusive to
@@ -534,7 +529,6 @@ end
 
 --- Call after you are done with input polling.
 function _mt_mgr:clearActive()
-
 	local active = self.active
 	for k in pairs(active) do
 		active[k] = nil
@@ -551,7 +545,6 @@ end
 -- @param locked Whether to lock or unlock the recent scancode feature.
 -- @return Nothing.
 function _mt_mgr:setRecentLock(locked)
-
 	self.sc_recent_locked = not not locked
 	if locked then
 		self.sc_recent = false
@@ -576,14 +569,12 @@ end
 --- Converts getRecentScancode() to a KeyConstant. Not guaranteed to be up-to-date unless called as part of key-up callback logic.
 -- @return The recent KeyConstant string, or false if there has been no key pressed or it was blanked out.
 function _mt_mgr:getRecentKeyConstant()
-
 	local sc_recent = self.sc_recent
 	return sc_recent and _getKeyFromScancode(self.sc_recent) or false
 end
 
 
 function _mt_mgr:setDelayInterval(delay, interval)
-
 	-- Assertions
 	-- [[
 	if type(delay) ~= "number" or delay < 0 then
@@ -600,17 +591,11 @@ end
 
 
 function _mt_mgr:setVirtualRepeat(enabled)
-
-	-- No assertions.
-
 	self.virtual_repeat = not not enabled
 end
 
 
 function _mt_mgr:setRepeatAll(enabled)
-
-	-- No assertions.
-
 	self.repeat_all = not not enabled
 end
 
@@ -684,7 +669,6 @@ mods_up["rgui"] = mods_up["lgui"]
 -- @param isrepeat The 'isrepeat' argument provided by love.keypressed().
 -- @return The result of 'cb_keyDown', if defined, or nil otherwise.
 function _mt_mgr:keyDown(owner, kc, sc, isrepeat)
-
 	if sc == "unknown" then
 		return
 	end
@@ -727,7 +711,6 @@ function _mt_mgr:keyDown(owner, kc, sc, isrepeat)
 		if not isrepeat then
 			self.sc_recent = sc
 		end
-
 	else
 		self.sc_recent = false
 	end
@@ -735,10 +718,8 @@ function _mt_mgr:keyDown(owner, kc, sc, isrepeat)
 	-- Fire callback, if applicable
 	if self.cb_keyDown then
 		return self.cb_keyDown(owner, kc, sc, isrepeat, self.sc_last == sc)
-
-	else
-		return nil
 	end
+	-- return nil
 end
 
 
@@ -748,7 +729,6 @@ end
 -- @param sc The 'scancode' argument provided by love.keyreleased().
 -- @return The results of 'cb_keyUp', if defined, or nil otherwise.
 function _mt_mgr:keyUp(owner, kc, sc)
-
 	if sc == "unknown" then
 		return
 	end
@@ -785,7 +765,6 @@ end
 --- Per-frame update function. Currently handles virtual key-repeats only.
 -- @param time Time since the last update, usually the frame delta provided by love.update().
 function _mt_mgr:update(owner, time)
-
 	local seq = self.seq
 	local hash = self.hash
 
@@ -816,7 +795,6 @@ function _mt_mgr:update(owner, time)
 					end
 				end
 			end
-
 		-- Allow all held scancodes to repeat
 		else
 			for reps = 1, self.n_virt_reps do
@@ -893,7 +871,6 @@ end
 
 
 function _mt_mgr:isScanDown(...)
-
 	local hash = self.hash
 	local codes = keyMgr.scancodes
 
@@ -916,17 +893,13 @@ end
 
 
 function _mt_mgr:lastScanDown(sc)
-	-- Assertions
-	-- [[
 	keyMgr.assertScancode(sc)
-	--]]
 
 	return self.sc_last == sc
 end
 
 
 function _mt_mgr:isScanPressedOnce(...)
-
 	local pressed_once = self.pressed_once
 	local codes = keyMgr.scancodes
 
@@ -944,12 +917,11 @@ function _mt_mgr:isScanPressedOnce(...)
 		end
 	end
 
-	return false	
+	return false
 end
 
 
 function _mt_mgr:isScanPressedRep(...)
-
 	local active = self.active
 	local codes = keyMgr.scancodes
 
@@ -967,7 +939,7 @@ function _mt_mgr:isScanPressedRep(...)
 		end
 	end
 
-	return false	
+	return false
 end
 
 
@@ -979,7 +951,6 @@ end
 
 
 function _mt_mgr:isKeyDown(...)
-
 	local hash = self.hash
 
 	for i = 1, select("#", ...) do
@@ -1003,7 +974,6 @@ end
 
 
 function _mt_mgr:isKeyPressedOnce(...)
-
 	local pressed_once = self.pressed_once
 
 	for i = 1, select("#", ...) do
@@ -1020,7 +990,6 @@ end
 
 
 function _mt_mgr:isKeyPressedRep(...)
-
 	local active = self.active
 
 	for i = 1, select("#", ...) do
