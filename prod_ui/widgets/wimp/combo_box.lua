@@ -97,7 +97,6 @@ def.wid_buttonAction3 = uiShared.dummyFunc
 
 
 local function refreshLineEdText(self)
-
 	local chosen_tbl = self.menu.items[self.menu.chosen_i]
 	local line_ed = self.line_ed
 

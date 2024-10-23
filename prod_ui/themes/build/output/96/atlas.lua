@@ -206,6 +206,18 @@ return {
       x = 105,
       y = 113
     },
+    ind_decrement = {
+      h = 8,
+      w = 8,
+      x = 51,
+      y = 153
+    },
+    ind_increment = {
+      h = 8,
+      w = 8,
+      x = 41,
+      y = 153
+    },
     input_box = {
       h = 24,
       w = 24,

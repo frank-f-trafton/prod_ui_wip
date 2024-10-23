@@ -191,13 +191,13 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 end
 
 
+-- @return true if the input was accepted, false if it was rejected or input is not allowed
 function lgcInputS.textInputLogic(self, text, fn_check)
 	local line_ed = self.line_ed
 
 	print("textInputLogic", "allow_input", line_ed.allow_input)
 
 	if line_ed.allow_input then
-
 		local hist = line_ed.hist
 
 		line_ed:resetCaretBlink()
@@ -239,6 +239,8 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 
 		self:updateDocumentDimensions()
 		self:scrollGetCaretInBounds(true)
+
+		return true
 	end
 end
 
