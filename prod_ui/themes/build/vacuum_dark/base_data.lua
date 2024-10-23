@@ -169,6 +169,14 @@ return {
 		["progress_ichor"] = {
 			x = 0, y = 0, w1 = 1, h1 = 3, w2 = 1, h2 = 2, w3 = 1, h3 = 3,
 		},
+		["sash_lr"] = { -- (vertical bar)
+			draw_fn_id = "x0y1w3h1",
+			x = 0, y = 0, w1 = 3, h1 = 3, w2 = 2, h2 = 2, w3 = 3, h3 = 3,
+		},
+		["sash_tb"] = { -- (horizontal bar)
+			draw_fn_id = "x1y0w1h3",
+			x = 0, y = 0, w1 = 3, h1 = 3, w2 = 2, h2 = 2, w3 = 3, h3 = 3,
+		},
 		["scroll_button"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
 		},

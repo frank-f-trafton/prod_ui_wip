@@ -283,6 +283,28 @@ return {
       x = 0,
       y = 0
     },
+    sash_lr = {
+      draw_fn_id = "x0y1w3h1",
+      h1 = 3,
+      h2 = 2,
+      h3 = 3,
+      w1 = 3,
+      w2 = 2,
+      w3 = 3,
+      x = 0,
+      y = 0
+    },
+    sash_tb = {
+      draw_fn_id = "x1y0w1h3",
+      h1 = 3,
+      h2 = 2,
+      h3 = 3,
+      w1 = 3,
+      w2 = 2,
+      w3 = 3,
+      x = 0,
+      y = 0
+    },
     scroll_button = {
       h1 = 4,
       h2 = 4,
