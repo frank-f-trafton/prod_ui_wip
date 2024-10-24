@@ -31,7 +31,7 @@ return {
 	["*tq_dec"] = "tex_quads/ind_decrement",
 
 	res_idle = {
-		["*slice"] = "tex_slices/list_box_body", -- XXX: replace with a dedicated resource.
+		["*slice"] = "tex_slices/input_box",
 		["*slc_button_up"] = "tex_slices/button_minor",
 		["*slc_button_down"] = "tex_slices/button_minor",
 		color_body = {1.0, 1.0, 1.0, 1.0},
@@ -41,19 +41,30 @@ return {
 		["$deco_oy"] = 0,
 	},
 
-	res_pressed = {
-		["*slice"] = "tex_slices/list_box_body", -- XXX: replace with a dedicated resource.
-		["*slc_button_up"] = "tex_slices/button_minor_press",
-		["*slc_button_down"] = "tex_slices/button_minor_press",
+	res_hover = {
+		["*slice"] = "tex_slices/input_box_hover",
+		["*slc_button_up"] = "tex_slices/button_minor_hover",
+		["*slc_button_down"] = "tex_slices/button_minor_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
 		["$deco_ox"] = 0,
-		["$deco_oy"] = 1,
+		["$deco_oy"] = 0,
+	},
+
+	res_pressed = {
+		["*slice"] = "tex_slices/input_box_hover",
+		["*slc_button_up"] = "tex_slices/button_minor_hover",
+		["*slc_button_down"] = "tex_slices/button_minor_hover",
+		color_body = {1.0, 1.0, 1.0, 1.0},
+		color_text = {0.9, 0.9, 0.9, 1.0},
+		color_highlight = {0.5, 0.5, 0.5, 1.0},
+		["$deco_ox"] = 0,
+		["$deco_oy"] = 0,
 	},
 
 	res_disabled = {
-		["*slice"] = "tex_slices/list_box_body", -- XXX: replace with a dedicated resource.
+		["*slice"] = "tex_slices/input_box_disabled",
 		["*slc_button_up"] = "tex_slices/button_minor_disabled",
 		["*slc_button_down"] = "tex_slices/button_minor_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
