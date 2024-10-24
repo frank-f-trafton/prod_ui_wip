@@ -64,23 +64,6 @@ def.moveLast = commonMenu.widgetMoveLast
 def.wid_action = uiShared.dummyFunc
 
 
--- For partial input.
-local function _decimalStringOK(s)
-	return s:match("%-?%d*%.?%d*") == s
-end
-
-
--- For assigned input -- must be a full number.
-local function _decimalStringOKFull(s)
-	return s:match("%-?%d*%.?%d*") == s and s ~= "-" and s ~= "." and s ~= "-."
-end
-
-
-local function _checkDecimal(self)
-	return _decimalStringOK(self.line_ed.line)
-end
-
-
 --- Callback for a change in the NumberBox state.
 function def:wid_inputChanged(text)
 	-- ...
@@ -97,6 +80,53 @@ function def:wid_incrementArrowKey(v, r) return v + 1 end
 function def:wid_decrementArrowKey(v, r) return v - 1 end
 function def:wid_incrementPageKey(v, r) return v + 10 end
 function def:wid_decrementPageKey(v, r) return v - 10 end
+
+
+-- [comma][minus][decimal]
+local _ptn_in = {
+	[false] = {
+		[false] = {
+			[false] = "%d*",
+			[true] = "%d*%.?%d*"
+		}, [true] = {
+			[false] = "%-?%d*",
+			[true] = "%-?%d*%.?%d*"
+		}
+	}, [true] = {
+		[false] = {
+			[false] = "%d*",
+			[true] = "%d*,?%d*"
+		}, [true] = {
+			[false] = "%-?%d*",
+			[true] = "%-?%d*,?%d*"
+		}
+	}
+}
+
+
+-- For partial input.
+local function _decimalStringOK(s, comma, minus, decimal)
+	return s:match(_ptn_in[comma][minus][decimal]) == s
+end
+
+
+local function _checkDecimal(self)
+	return _decimalStringOK(self.line_ed.line, not not self.decimal_comma, self.value_min < 0, not not self.allow_decimal)
+end
+
+
+local function _num2Str(n, comma)
+	local fmt = math.floor(n) == n and "%d" or "%f"
+	local s = string.format(fmt, n)
+	if comma then
+		s = s:gsub("%.", ",")
+	end
+	if s:find("[%.,]") then
+		-- clip trailing zeros after decimal point
+		s = s:match("(.-)[0]*$")
+	end
+	return s
+end
 
 
 --- Gets the internal numeric value.
@@ -118,6 +148,48 @@ function def:getDisplayText()
 end
 
 
+function def:setValueToDefault()
+	self:setValue(self.value_default)
+end
+
+
+function def:setDefaultValue(v)
+
+end
+
+
+-- @return true if the new value was accepted, false if it was rejected by the format check, nil if the input value is already set.
+function def:setValue(v)
+	if type(v) ~= "number" then error("argument #1: expected string or number")
+	elseif v ~= v then error("value cannot be NaN") end
+
+	v = math.max(self.value_min, math.min(v, self.value_max))
+
+	local text = _num2Str(v, self.decimal_comma)
+
+	-- reject invalid input
+	if not _decimalStringOK(text, not not self.decimal_comma, self.value_min < 0, not not self.allow_decimal) then
+		return false
+	end
+
+	if self.value ~= v then
+		self.value = v
+
+		local line_ed = self.line_ed
+
+		line_ed:deleteText(false, 1, #line_ed.line)
+		line_ed:insertText(text)
+		line_ed.input_category = false
+		line_ed.hist:clearAll()
+
+		self:caretFirst(true)
+
+		self.update_flag = true
+		return true
+	end
+end
+
+
 function def:uiCall_create(inst)
 	if self == inst then
 		self.visible = true
@@ -135,10 +207,20 @@ function def:uiCall_create(inst)
 
 		-- The internal value.
 		self.value_default = 0
-		self.value = self.value_default
-		self.value_min = -math.huge
-		self.value_max = math.huge
-		-- XXX: formatting support (rigid increments, decimals, etc.)
+		self.value = false
+		self.value_min = 0
+		self.value_max = 999999
+
+		-- when false, rejects input with decimal points
+		self.allow_decimal = true
+
+		-- when true, use ',' for the decimal point
+		self.decimal_comma = false
+
+		-- padding of digits before and after the decimal point
+		self.digit_pad1 = 0
+		self.digit_pad2 = 0
+		self.decimals_max = 2^15
 
 		-- repeat mouse-press state
 		self.repeat_btn = 1 -- -1 for decrement, 1 for increment
@@ -159,6 +241,7 @@ function def:uiCall_create(inst)
 		self.line_ed = lineEdSingle.new(skin.font)
 
 		self:reshape()
+		self:setValueToDefault()
 	end
 end
 
@@ -250,70 +333,48 @@ function def:uiCall_destroy(inst)
 end
 
 
-local function _num2Str(n)
-	local fmt = math.floor(n) == n and "%d" or "%f"
-	local s = string.format(fmt, n)
-	if s:find("%.") then
-		s = s:match("(.-)[0]*$")
-	end
-	return s
-end
-
-
--- @return true if the new text was accepted, false if it was rejected by the format check.
-function def:setText(text)
-	local line_ed = self.line_ed
-
-	if type(text) == "number" then
-		text = _num2Str(text)
-	end
-	if type(text) ~= "string" then
-		error("argument #1: expected string or number")
-	end
-
-	-- Reject invalid input.
-	if not _decimalStringOK(text) then
-		return false
-	end
-
-	line_ed:deleteText(false, 1, #line_ed.line)
-	line_ed:insertText(text)
-	line_ed.input_category = false
-	line_ed.hist:clearAll()
-
-	if line_ed.allow_highlight then
-		self:highlightAll()
-	end
-
-	self.value = tonumber(text) or false
-
-	self.update_flag = true
-	return true
-end
-
-
-local function _valueTextUpdate(self, value_old)
-	if self.value ~= false and type(self.value) ~= "number" then
-		error("expected false or number value from callback function, got " .. type(self))
-	end
-
-	if value_old ~= self.value then
-		local line_ed = self.line_ed
-
-		line_ed:deleteText(false, 1, #line_ed.line)
-		if self.value ~= false then
-			line_ed:insertText(_num2Str(self.value))
-		end
-		line_ed.input_category = false
-		line_ed.hist:clearAll()
-
-		if line_ed.allow_highlight then
-			self:highlightAll()
-		end
-
-		self.update_flag = true
+local function _callback(self, cb, reps)
+	if self.value then
+		self:setValue(cb(self, self.value, reps))
+	else
+		self:setValue(self.value_min)
 	end
 end
+
+
+-- [[
+-- @return The new value (or false if the string doesn't convert to a number), and a boolean indicating if the value
+--  has been clamped.
+local function _str2Num(s, comma, v_min, v_max)
+	if comma then
+		s = s:gsub(",", ".")
+	end
+	local v = tonumber(s)
+	local v_old = v
+	if v then
+		v = math.max(v_min, math.min(v, v_max))
+	end
+	return v or false, v ~= v_old
+end
+--]]
+
+local function _textInputValue(self)
+	--if
+	local clamped
+	self.value, clamped = _str2Num(self.line_ed.line, self.decimal_comma, self.value_min, self.value_max)
+	-- If the value was modified, then we have to rewrite the input box text.
+	if clamped then
+		self:setValue(self.value)
+	end
+end
+
+--[[
+* Remember the old line_ed string
+* Reject the new line_ed string if:
+  * decimal points are disabled and a point/comma appears in the new string
+  * it doesn't convert to a number
+  * the number is out of bounds
+--]]
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
@@ -333,29 +394,25 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			return true
 
 		elseif scancode == "up" then
-			self.value = self:wid_incrementArrowKey(self.value, self.rep_sc_count + 1)
-			_valueTextUpdate(self, value_old)
+			_callback(self, self.wid_incrementArrowKey, self.rep_sc_count + 1)
 			return true
 
 		elseif scancode == "down" then
-			self.value = self:wid_decrementArrowKey(self.value, self.rep_sc_count + 1)
-			_valueTextUpdate(self, value_old)
+			_callback(self, self.wid_decrementArrowKey, self.rep_sc_count + 1)
 			return true
 
 		elseif scancode == "pageup" then
-			self.value = self:wid_incrementPageKey(self.value, self.rep_sc_count + 1)
-			_valueTextUpdate(self, value_old)
+			_callback(self, self.wid_incrementPageKey, self.rep_sc_count + 1)
 			return true
 
 		elseif scancode == "pagedown" then
-			self.value = self:wid_decrementPageKey(self.value, self.rep_sc_count + 1)
-			_valueTextUpdate(self, value_old)
+			_callback(self, self.wid_decrementPageKey, self.rep_sc_count + 1)
 			return true
 
 		-- Standard text box controls (caret navigation, etc.)
 		else
 			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
-			self.value = tonumber(self.line_ed.line) or false
+			_textInputValue(self)
 			return rv
 		end
 	end
@@ -365,7 +422,7 @@ end
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		if lgcInputS.textInputLogic(self, text, _checkDecimal) then
-			self.value = tonumber(self.line_ed.line) or false
+			_textInputValue(self)
 		end
 	end
 end
@@ -428,8 +485,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			local value_old = self.value
 			if button == 1 then
 				self.repeat_btn = 1
-				self.value = self:wid_incrementButton(self.value, 1)
-				_valueTextUpdate(self, value_old)
+				_callback(self, self.wid_incrementButton, 1)
 				return true
 			end
 
@@ -438,8 +494,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			local value_old = self.value
 			if button == 1 then
 				self.repeat_btn = -1
-				self.value = self:wid_decrementButton(self.value, 1)
-				_valueTextUpdate(self, value_old)
+				_callback(self, self.wid_decrementButton, 1)
 				return true
 			end
 		end
@@ -454,12 +509,10 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 				local value_old = self.value
 				if button == 1 then
 					if self.repeat_btn == 1 then
-						self.value = self:wid_incrementButton(self.value, reps + 1)
-						_valueTextUpdate(self, value_old)
+						_callback(self, self.wid_incrementButton, reps + 1)
 						return true
 					else -- repeat_btn == -1
-						self.value = self:wid_decrementButton(self.value, reps + 1)
-						_valueTextUpdate(self, value_old)
+						_callback(self, self.wid_decrementButton, reps + 1)
 						return true
 					end
 				end
@@ -554,6 +607,20 @@ def.skinners = {
 			widDebug.debugDrawViewport(self, 3)
 			widDebug.debugDrawViewport(self, 4)
 			--]]
+
+			-- Debug: show internal state
+			love.graphics.push("all")
+			love.graphics.setScissor()
+			love.graphics.print(
+				"value_default: " .. tostring(self.value_default)
+				.. "\nvalue: " .. tostring(self.value)
+				.. "\nvalue_min: " .. tostring(self.value_min)
+				.. "\nvalue_max: " .. tostring(self.value_max)
+				.. "\nallow_decimal: " .. tostring(self.allow_decimal)
+				.. "\ndecimal_comma: " .. tostring(self.decimal_comma)
+				, 0, 64
+			)
+			love.graphics.pop()
 		end,
 
 
