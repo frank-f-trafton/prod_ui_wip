@@ -118,6 +118,50 @@ function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
 end
 
 
+--- Helper that takes care of history changes following an action.
+-- @param self The client widget
+-- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
+-- @return The results of bound_func(), in case they are helpful to the calling widget logic.
+function lgcInputS.executeBoundAction(self, bound_func)
+	local line_ed = self.line_ed
+
+	local old_byte, old_h_byte = line_ed:getCaretOffsets()
+	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
+
+	--print("executeBoundAction()", "ok", ok, "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
+
+	if ok then
+		if update_viewport then
+			-- XXX refresh: update scroll bounds
+		end
+
+		if caret_in_view then
+			-- XXX refresh: tell client widget to get the caret in view
+		end
+
+		if write_history then
+			line_ed.input_category = false
+
+			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
+			editHistS.writeEntry(line_ed, true)
+		end
+
+		return true, update_viewport, caret_in_view, write_history
+	end
+end
+
+
+function lgcInputS.executeRemoteAction(self, item_t)
+	local ok, update_viewport, update_caret, write_history = lgcInputS.executeBoundAction(self, item_t.bound_func)
+	if ok then
+		self.update_flag = true
+	end
+
+	self:updateDocumentDimensions(self)
+	self:scrollGetCaretInBounds(true)
+end
+
+
 -- @return true if event propagation should halt.
 function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	local line_ed = self.line_ed
@@ -155,7 +199,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 
 	if bind_action then
 		-- NOTE: most history ledger changes are handled in executeBoundAction().
-		local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
+		local ok, update_scroll, caret_in_view, write_history = lgcInputS.executeBoundAction(self, bind_action)
 
 		if ok then
 			if update_scroll then
@@ -348,17 +392,6 @@ function lgcInputS.mouseDragLogic(self)
 	local mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
 
 	return widget_needs_update, mouse_drag_x
-end
-
-
-function lgcInputS.executeRemoteAction(self, item_t)
-	local ok, update_viewport, update_caret, write_history = self:executeBoundAction(item_t.bound_func)
-	if ok then
-		self.update_flag = true
-	end
-
-	self:updateDocumentDimensions(self)
-	self:scrollGetCaretInBounds(true)
 end
 
 

@@ -30,20 +30,52 @@ client.getReplaceMode = commonEd.client_getReplaceMode
 client.setReplaceMode = commonEd.client_setReplaceMode
 
 
+local function _checkClearHighlight(line_ed, clear_highlight)
+	if clear_highlight then
+		line_ed:clearHighlight()
+	end
+end
+
+
+local function _deleteHighlightedText(self)
+	local line_ed = self.line_ed
+
+	if line_ed:isHighlighted() then
+		local byte_1, byte_2 = line_ed:getHighlightOffsets()
+		line_ed:clearHighlight()
+		return line_ed:deleteText(true, byte_1, byte_2 - 1)
+	end
+end
+
+
+local function _deleteUChar(self, n_u_chars)
+	local line_ed = self.line_ed
+	local line = line_ed.line
+
+	line_ed:clearHighlight()
+
+	-- Nothing to delete at the last caret position.
+	if line_ed.car_byte > #line then
+		return
+	end
+
+	local byte_2, u_count = edComS.countUChars(line, 1, line_ed.car_byte, n_u_chars)
+	if u_count == 0 then
+		byte_2 = #line + 1
+	end
+
+	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
+	return line_ed:deleteText(true, line_ed.car_byte, byte_2 - 1)
+end
+
+
 --- Delete highlighted text from the field.
 -- @return Substring of the deleted text.
 function client:deleteHighlightedText()
 	local line_ed = self.line_ed
-
-	if not self:isHighlighted() then
-		return -- nil
-	end
-
-	-- Clean up display highlight beforehand. Much harder to determine the offsets after deleting things.
-	local byte_1, byte_2 = line_ed:getHighlightOffsets()
-	line_ed:highlightCleanup()
-
-	return line_ed:deleteText(true, byte_1, byte_2 - 1)
+	local rv = _deleteHighlightedText(self)
+	line_ed:updateDisplayText()
+	return rv
 end
 
 
@@ -52,25 +84,22 @@ end
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:backspaceUChar(n_u_chars)
 	local line_ed = self.line_ed
-	line_ed:highlightCleanup()
-
 	local line = line_ed.line
-	local byte_1, u_count = edComS.countUChars(line, -1, line_ed.car_byte, n_u_chars)
 
+	line_ed:clearHighlight()
+
+	local byte_1, u_count = edComS.countUChars(line, -1, line_ed.car_byte, n_u_chars)
+	local rv
 	if u_count > 0 then
-		return line_ed:deleteText(true, byte_1, line_ed.car_byte - 1)
+		rv = line_ed:deleteText(true, byte_1, line_ed.car_byte - 1)
 	end
 
-	return nil
+	line_ed:updateDisplayText()
+	return rv
 end
 
 
---- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
--- @param text The input text. It will be sanitized and possibly trimmed to fit into the uChar limit.
--- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
--- entering line feeds, typing at the end of a line (so as not to overwrite line feeds), etc.
--- @return The sanitized and trimmed text which was inserted into the field.
-function client:writeText(text, suppress_replace)
+local function _writeText(self, text, suppress_replace)
 	local line_ed = self.line_ed
 	local line = line_ed.line
 
@@ -83,11 +112,11 @@ function client:writeText(text, suppress_replace)
 
 	-- If there is a highlight selection, get rid of it and insert the new text. This overrides replace_mode.
 	if line_ed:isHighlighted() then
-		self:deleteHighlightedText()
+		_deleteHighlightedText(self)
 
 	elseif line_ed.replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		self:deleteUChar(utf8.len(text))
+		_deleteUChar(self, utf8.len(text))
 	end
 
 	-- Trim text to fit the allowed uChars limit.
@@ -95,15 +124,26 @@ function client:writeText(text, suppress_replace)
 	text = textUtil.trimString(text, line_ed.u_chars_max - line_ed.u_chars)
 
 	line_ed:insertText(text)
+	line_ed:updateDisplayText()
 
 	return text
 end
 
 
-function client:stepHistory(dir)
-	-- -1 == undo
-	-- 1 == redo
+--- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
+-- @param text The input text. It will be sanitized, and possibly trimmed to fit into the uChar limit.
+-- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
+-- entering line feeds, etc.
+-- @return The sanitized and trimmed text which was inserted into the field.
+function client:writeText(text, suppress_replace)
+	local rv = _writeText(self, text, suppress_replace)
+	self.line_ed:updateDisplayText()
+	return rv
+end
 
+
+-- -1 == undo, 1 == redo
+function client:stepHistory(dir)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
@@ -126,10 +166,8 @@ function client:getHighlightedText()
 
 	if line_ed:isHighlighted() then
 		local b1, b2 = self.line_ed:getHighlightOffsets()
-		return string.sub(line_ed.line, b1, b2 - 1)
+		return line_ed.line:sub(b1, b2 - 1)
 	end
-
-	return nil
 end
 
 
@@ -139,7 +177,11 @@ end
 
 
 function client:clearHighlight()
-	self.line_ed:clearHighlight()
+	local line_ed = self.line_ed
+
+	if line_ed:clearHighlight() then
+		line_ed:syncDisplayCaretHighlight()
+	end
 end
 
 
@@ -149,8 +191,7 @@ function client:highlightAll()
 	line_ed.car_byte = #line_ed.line + 1
 	line_ed.h_byte = 1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateHighlightRect()
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -159,12 +200,9 @@ function client:caretHighlightEdgeLeft()
 	local line_ed = self.line_ed
 
 	local byte_1, byte_2 = line_ed:getHighlightOffsets()
+	line_ed.car_byte, line_ed.h_byte = byte_1, byte_1
 
-	line_ed.car_byte = byte_1
-	line_ed.h_byte = byte_1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateHighlightRect()
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -173,12 +211,9 @@ function client:caretHighlightEdgeRight()
 	local line_ed = self.line_ed
 
 	local byte_1, byte_2 = line_ed:getHighlightOffsets()
+	line_ed.car_byte, line_ed.h_byte = byte_2, byte_2
 
-	line_ed.car_byte = byte_2
-	line_ed.h_byte = byte_2
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateHighlightRect()
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -187,57 +222,17 @@ function client:highlightCurrentWord()
 
 	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_byte)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateHighlightRect()
-end
-
-
---- Helper that takes care of history changes following an action.
--- @param self The client widget
--- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
--- @return The results of bound_func(), in case they are helpful to the calling widget logic.
-function client:executeBoundAction(bound_func)
-	local line_ed = self.line_ed
-
-	local old_byte, old_h_byte = line_ed:getCaretOffsets()
-	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
-
-	--print("executeBoundAction()", "ok", ok, "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
-
-	if ok then
-		if update_viewport then
-			-- XXX refresh: update scroll bounds
-		end
-
-		if caret_in_view then
-			-- XXX refresh: tell client widget to get the caret in view
-		end
-
-		if write_history then
-			line_ed.input_category = false
-
-			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-			editHistS.writeEntry(line_ed, true)
-		end
-
-		return true, update_viewport, caret_in_view, write_history
-	end
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
 function client:caretStepLeft(clear_highlight)
 	local line_ed = self.line_ed
 
-	local new_byte = edComS.offsetStepLeft(line_ed.line, line_ed.car_byte)
-	line_ed.car_byte = new_byte or 1
+	line_ed.car_byte = edComS.offsetStepLeft(line_ed.line, line_ed.car_byte) or 1
 
-	line_ed:displaySyncCaretOffsets()
-
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateHighlightRect()
-	end
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -247,13 +242,8 @@ function client:caretStepRight(clear_highlight)
 	local new_byte = edComS.offsetStepRight(line_ed.line, line_ed.car_byte)
 	line_ed.car_byte = new_byte or #line_ed.line + 1
 
- 	line_ed:displaySyncCaretOffsets()
-
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateHighlightRect()
-	end
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -262,13 +252,8 @@ function client:caretJumpLeft(clear_highlight)
 
 	line_ed.car_byte = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
 
-	line_ed:displaySyncCaretOffsets()
-
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateHighlightRect()
-	end
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -291,16 +276,8 @@ function client:caretJumpRight(clear_highlight)
 	--(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
 	line_ed.car_byte = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
 
-	line_ed:displaySyncCaretOffsets()
-
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateHighlightRect()
-	end
-
-	-- One more step to land on the right position. -- XXX okay to delete?
-	--self:caretStepRight(clear_highlight)
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -308,36 +285,19 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
-	local line_ed = self.line_ed
-	local line = line_ed.line
-
-	line_ed:highlightCleanup()
-
-	-- Nothing to delete at the last caret position.
-	if line_ed.car_byte > #line then
-		return -- nil
-	end
-
-	local byte_2, u_count = edComS.countUChars(line, 1, line_ed.car_byte, n_u_chars)
-	if u_count == 0 then
-		byte_2 = #line + 1
-	end
-
-	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
-	return line_ed:deleteText(true, line_ed.car_byte, byte_2 - 1)
+	local rv = _deleteUChar(self, n_u_chars)
+	self.line_ed:updateDisplayText()
+	return rv
 end
 
 
 function client:deleteGroup()
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
+	local rv
 
-	local byte_right
-
-	if line_ed.car_byte == #line_ed.line + 1 then
-		return -- nil
-	else
+	if line_ed.car_byte < #line_ed.line + 1 then
 		local hit_non_ws = false
 		local first_group = code_groups[utf8.codepoint(line_ed.line, line_ed.car_byte)]
 		if first_group ~= "whitespace" then
@@ -345,18 +305,17 @@ function client:deleteGroup()
 		end
 		--print("HIT_NON_WS", hit_non_ws, "FIRST_GROUP", first_group)
 
-		byte_right = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
+		local byte_right = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
 		byte_right = byte_right - 1
 		--print("deleteGroup: byte_right", byte_right)
-	end
 
-	--print("ranges:", line_ed.car_byte, byte_right)
-	local del = line_ed:deleteText(true, line_ed.car_byte, byte_right)
-	--print("DEL", "|"..(del or "<nil>").."|")
-	if del ~= "" then
-		return del
-	else
-		return -- nil
+		--print("ranges:", line_ed.car_byte, byte_right)
+		rv = line_ed:deleteText(true, line_ed.car_byte, byte_right)
+	end
+	line_ed:updateDisplayText()
+	--print("DEL", "|"..(rv or "<nil>").."|")
+	if rv ~= "" then
+		return rv
 	end
 end
 
@@ -364,39 +323,37 @@ end
 function client:backspaceGroup()
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
+	local rv
 
-	local byte_left
-
-	if line_ed.car_byte == 1 then
-		return -- nil
-	else
-		byte_left = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
+	if line_ed.car_byte > 1 then
+		local byte_left = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
+		if byte_left ~= line_ed.car_byte then
+			rv = line_ed:deleteText(true, byte_left, line_ed.car_byte - 1)
+		end
 	end
-
-	if byte_left and byte_left ~= line_ed.car_byte then
-		return line_ed:deleteText(true, byte_left, line_ed.car_byte - 1)
-	end
-
-	return nil
+	line_ed:updateDisplayText()
+	return rv
 end
 
 
 function client:deleteCaretToEnd()
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
-
-	return line_ed:deleteText(true, line_ed.car_byte, #line_ed.line)
+	line_ed:clearHighlight()
+	local rv = line_ed:deleteText(true, line_ed.car_byte, #line_ed.line)
+	line_ed:updateDisplayText()
+	return rv
 end
 
 
 function client:deleteCaretToStart()
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
-
-	return line_ed:deleteText(true, 1, line_ed.car_byte - 1)
+	line_ed:clearHighlight()
+	local rv = line_ed:deleteText(true, 1, line_ed.car_byte - 1)
+	self:updateDisplayText()
+	return rv
 end
 
 
@@ -405,13 +362,8 @@ function client:caretFirst(clear_highlight)
 
 	line_ed.car_byte = 1
 
-	line_ed:displaySyncCaretOffsets()
-
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateHighlightRect()
-	end
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -420,13 +372,8 @@ function client:caretLast(clear_highlight)
 
 	line_ed.car_byte = #line_ed.line + 1
 
-	line_ed:displaySyncCaretOffsets()
-
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateHighlightRect()
-	end
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -478,7 +425,7 @@ function client:pasteClipboardText()
 	local old_byte, old_h_byte = line_ed:getCaretOffsets()
 
 	if line_ed:isHighlighted() then
-		self:deleteHighlightedText()
+		_deleteHighlightedText(self)
 	end
 
 	local text = love.system.getClipboardText()
@@ -500,7 +447,10 @@ function client:caretToX(clear_highlight, x, split_x)
 	local line_ed = self.line_ed
 	local byte = line_ed:getCharacterDetailsAtPosition(x, split_x)
 
-	line_ed:caretToByte(clear_highlight, byte)
+	line_ed:caretToByte(byte)
+
+	_checkClearHighlight(line_ed, clear_highlight)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 
@@ -515,12 +465,13 @@ function client:clickDragByWord(x, origin_byte)
 
 	-- Merge the two ranges.
 	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
-
-	if drag_byte < origin_byte then
-		line_ed:caretAndHighlightToByte(mb1, mb2)
-	else
-		line_ed:caretAndHighlightToByte(mb2, mb1)
+	if origin_byte < drag_byte then
+		mb1, mb2 = mb2, mb1
 	end
+
+	line_ed:caretToByte(mb1)
+	line_ed:highlightToByte(mb2)
+	line_ed:syncDisplayCaretHighlight()
 end
 
 

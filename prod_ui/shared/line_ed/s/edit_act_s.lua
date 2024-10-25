@@ -268,6 +268,7 @@ function editActS.deleteAll(self, line_ed)
 
 		line_ed.input_category = false
 		line_ed:deleteText(false, 1, #line_ed.line)
+		line_ed:updateDisplayText()
 
 		return true, true, true, (old_line ~= line_ed.line)
 	end
@@ -304,7 +305,6 @@ end
 
 function editActS.backspaceCaretToStart(self, line_ed)
 	if line_ed.allow_input then
-		-- [WARN] Will leak masked line feeds (or would, if line feeds were masked)
 		self:deleteCaretToStart()
 		line_ed.input_category = false
 
@@ -316,15 +316,8 @@ end
 -- Tab key
 function editActS.typeTab(self, line_ed)
 	if line_ed.allow_input and line_ed.allow_tab then
-		local changed = false
-
-		-- Write a literal tab.
-		-- (Unhighlights first)
 		local written = self:writeText("\t", true)
-
-		if #written > 0 then
-			changed = true
-		end
+		local changed = #written > 0
 
 		return true, true, true, changed
 	end
@@ -332,11 +325,10 @@ end
 
 
 --- Return / Enter key
-function editActS.typeLineFeed(self, line_ed) -- XXX: unfinished
+function editActS.typeLineFeed(self, line_ed)
 	if line_ed.allow_input and line_ed.allow_line_feed and line_ed.allow_enter_line_feed then
 		line_ed.input_category = false
-
-		print("typeLineFeed(): writeText() result: ", "|" .. self:writeText("\n", true) .. "|")
+		self:writeText("\n", true)
 
 		return true, true, true, true
 	end
