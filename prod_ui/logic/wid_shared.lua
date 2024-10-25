@@ -485,7 +485,6 @@ function widShared.scrollTargetUpdate(scr_p, scr_t, snap, spd_min, spd_mul, dt)
 
 	if spd > 0 then
 		return math.min(scr_p + spd*dt, scr_t)
-
 	else
 		return math.max(scr_p + spd*dt, scr_t)
 	end

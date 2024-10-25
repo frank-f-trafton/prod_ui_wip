@@ -27,91 +27,21 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 lineEdS.code_groups = code_groups
 
 
+-- stand-in text colors
+local default_text_color = {1, 1, 1, 1}
+local default_text_h_color = {0, 0, 0, 1}
+
+
 local _mt_ed_s = {}
 _mt_ed_s.__index = _mt_ed_s
 
 
-local function updateCaretRect(self)
-	--print("updateCaretRect")
-	--print("", "d_car_byte", self.d_car_byte)
-
-	local font = self.font
-
-	-- Update cached caret info.
-	self.caret_box_x = textUtil.getCharacterX(self.disp_text, self.d_car_byte, font)
-
-	-- If we are at the end of the string + 1: use the width of the underscore character.
-	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
-
-	-- Apply horizontal alignment offsetting to caret.
-	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
-
-	self.caret_box_y = self.disp_text_y
-	self.caret_box_h = font:getHeight()
-end
-
-
-local function updateDisplayLineHorizontal(self)
-	self.disp_text_w = self.font:getWidth(self.disp_text)
-
-	if self.align == "left" then
-		self.disp_text_x = 0
-
-	elseif self.align == "center" then
-		self.disp_text_x = math.floor(0.5 - self.disp_text_w / 2)
-
-	elseif self.align == "right" then
-		self.disp_text_x = -self.disp_text_w
-	end
-end
-
-
-local function dispUpdateLineSyntaxColors(self, byte_1, byte_2)
-	if self.colored_text and self.syntax_colors then
-
-		local disp_text = self.disp_text
-		local col_text = self.colored_text
-		local syn_col = self.syntax_colors
-
-		local def_col = self.text_color
-		local high_col = self.text_h_color
-
-		-- Tweaks:
-		-- byte_1 == byte_2 means no highlight is currently active. If this is the case,
-		-- set them to out of bounds so that nothing is highlighted by mistake.
-		if byte_1 == byte_2 then
-			byte_1 = -1
-			byte_2 = -1
-		end
-
-		local i = 1 -- Color table index within coloredtext sequence (step: 2, always odd)
-		local j = 1 -- Color table index within syntax colors sequence (step: 1)
-		local k = 1 -- Byte position within source string (display, not internal)
-
-		while k <= #disp_text do
-			local k2 = utf8.offset(disp_text, 2, k)
-
-			if k >= byte_1 and k < byte_2 then
-				col_text[i] = high_col
-
-			else
-				col_text[i] = syn_col[j] or def_col
-			end
-
-			k = k2
-			i = i + 2
-			j = j + 1
-		end
-	end
-end
-
-
 --- Creates a new Line Editor object.
 -- @return the edit_field table.
-function lineEdS.new(font)
-	if not font then
-		error("missing argument #1 (font) for new LineEditor (single) object.")
-	end
+function lineEdS.new(font, text_color, text_h_color)
+	if not font then error("missing argument #1 (font) for new LineEditor (single) object.") end
+	assert(not text_color or type(text_color) == "table", "expected nil/false or table for 'text_color'")
+	assert(not text_h_color or type(text_h_color) == "table", "expected nil/false or table for 'text_h_color'")
 
 	local self = {}
 
@@ -186,8 +116,8 @@ function lineEdS.new(font)
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
-	self.text_color = {1, 1, 1, 1} -- XXX: skin
-	self.text_h_color = {0, 0, 0, 1} -- XXX: skin
+	self.text_color = text_color or default_text_color
+	self.text_h_color = text_h_color or default_text_h_color
 
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
@@ -219,9 +149,8 @@ function lineEdS.new(font)
 
 	setmetatable(self, _mt_ed_s)
 
-	self:refreshFontParams()
+	self:updateFont(self.font)
 	self:updateDisplayText()
-	updateCaretRect(self)
 
 	return self
 end
@@ -234,7 +163,6 @@ end
 
 --- Gets caret and highlight offsets in the correct order.
 function _mt_ed_s:getHighlightOffsets()
-	-- You may need to subtract 1 from byte_2 to get the correct range.
 	local byte_1, byte_2 = self.car_byte, self.h_byte
 	return math.min(byte_1, byte_2), math.max(byte_1, byte_2)
 end
@@ -242,7 +170,7 @@ end
 
 --- Returns if the field currently has a highlighted section (not whether highlighting itself is currently active.)
 function _mt_ed_s:isHighlighted()
-	return not (self.h_byte == self.car_byte)
+	return self.h_byte ~= self.car_byte
 end
 
 
@@ -265,38 +193,10 @@ function _mt_ed_s:getLineInfoAtX(x, split_x)
 end
 
 
-function _mt_ed_s:updateHighlightRect()
-	local byte_1, byte_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
-
-	if byte_1 == byte_2 then
-		self.disp_highlighted = false
-	else
-		local font = self.font
-		local disp_text = self.disp_text
-
-		local pixels_before = font:getWidth(string.sub(disp_text, 1, byte_1 - 1))
-		local pixels_highlight = font:getWidth(string.sub(disp_text, byte_1, byte_2 - 1))
-
-		self.disp_highlighted = true
-
-		self.highlight_x = pixels_before
-		self.highlight_y = 0
-		self.highlight_w = pixels_highlight
-		self.highlight_h = self.disp_text_h
-	end
-
-	-- If applicable, overwrite or restore syntax colors.
-	dispUpdateLineSyntaxColors(self, byte_1, byte_2)
-end
-
-
 function _mt_ed_s:clearHighlight()
+	local changed = self.h_byte ~= self.car_byte
 	self.h_byte = self.car_byte
-
-	self:displaySyncCaretOffsets()
-	self:updateHighlightRect()
-
-	dispUpdateLineSyntaxColors(self, -1, -1)
+	return changed
 end
 
 
@@ -304,41 +204,19 @@ function _mt_ed_s:updateFont(font)
 	self.font = font
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
-	self:refreshFontParams()
-	-- The display text needs to be updated after calling.
-end
-
-
-function _mt_ed_s:refreshFontParams()
-	local font = self.font
-	local em_width = font:getWidth("M")
-	local line_height = font:getHeight() * font:getLineHeight()
-
+	local em_width = self.font:getWidth("M")
 	self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-
-	-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
-end
-
-
-function _mt_ed_s:highlightCleanup()
-	if self:isHighlighted() then
-		self:clearHighlight()
-	end
+	-- The display text needs to be updated after calling.
 end
 
 
 --- Insert a string at the caret position.
 -- @param text The string to insert.
--- @return Nothing.
 function _mt_ed_s:insertText(text)
-	self:highlightCleanup()
-
+	self:clearHighlight()
 	self.line = edComS.add(self.line, text, self.car_byte)
 	self.car_byte = self.car_byte + #text
 	self.h_byte = self.car_byte
-
-	self:updateDisplayText()
-	self:displaySyncCaretOffsets()
 end
 
 
@@ -350,15 +228,10 @@ end
 function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2)
 	local deleted
 	if copy_deleted then
-		deleted = string.sub(self.line, byte_1, byte_2)
+		deleted = self.line:sub(byte_1, byte_2)
 	end
 	self.line = edComS.delete(self.line, byte_1, byte_2)
-
-	self.car_byte = byte_1
-	self.h_byte = self.car_byte
-
-	self:updateDisplayText()
-	self:displaySyncCaretOffsets()
+	self.car_byte, self.h_byte = byte_1, byte_1
 
 	return deleted
 end
@@ -369,18 +242,14 @@ _mt_ed_s.updateCaretBlink = commonEd.updateCaretBlink
 
 
 function _mt_ed_s:getWordRange(byte_n)
-	--print("_mt_ed_s:getWordRange(): byte_n", byte_n)
-
 	local line = self.line
-
 	if #line == 0 then
 		return 1, 1
 	end
 
-	-- If at the end of the line, and it contains at least one code point, then use that last code point.
+	-- If at the end of the line, and the line contains at least one code point, then use that last code point.
 	if byte_n >= #line + 1 then
 		byte_n = utf8.offset(line, -1)
-		--print("", "new byte_n", byte_n)
 	end
 
 	local first_group = code_groups[utf8.codepoint(line, byte_n)]
@@ -388,20 +257,7 @@ function _mt_ed_s:getWordRange(byte_n)
 	local byte_left = edComS.huntWordBoundary(code_groups, line, byte_n, -1, true, first_group)
 	local byte_right = edComS.huntWordBoundary(code_groups, line, byte_n, 1, true, first_group)
 
-	--print("byte left, byte right", byte_left, byte_right)
-
 	return byte_left, byte_right
-end
-
-
---- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle. The display text must be current at time of call.
-function _mt_ed_s:displaySyncCaretOffsets()
-	local line = self.line
-
-	self.d_car_byte = edComS.coreToDisplayOffsets(line, self.car_byte, self.disp_text)
-	self.d_h_byte = edComS.coreToDisplayOffsets(line, self.h_byte, self.disp_text)
-
-	updateCaretRect(self)
 end
 
 
@@ -412,7 +268,7 @@ function _mt_ed_s:updateDisplayText()
 	-- Perform optional modifications on the string.
 	local work_str = self.line
 
-	-- Replace some whitespace characters with code points that represent them.
+	-- Replace some whitespace characters with symbolic code points.
 	work_str = string.gsub(work_str, utf8.charpattern, textUtil.proxy_code_points)
 
 	if self.replace_missing then
@@ -434,23 +290,99 @@ function _mt_ed_s:updateDisplayText()
 	self.disp_text_w = font:getWidth(self.disp_text)
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
-	---------------------------------------------------------------------------
-
 	-- XXX: syntax coloring.
 	self.syntax_colors = false
 	self.colored_text = false
 
-	-- XXX: highlights.
-	self.disp_highlighted = false
+	-- apply display text alignment
+	self.disp_text_w = self.font:getWidth(self.disp_text)
+	if self.align == "left" then
+		self.disp_text_x = 0
 
-	self.highlight_x = 0
-	self.highlight_y = 0
-	self.highlight_w = 0
-	self.highlight_h = 0
+	elseif self.align == "center" then
+		self.disp_text_x = math.floor(0.5 - self.disp_text_w / 2)
 
-	updateDisplayLineHorizontal(self)
+	elseif self.align == "right" then
+		self.disp_text_x = -self.disp_text_w
+	end
 
-	self:displaySyncCaretOffsets()
+	self:syncDisplayCaretHighlight()
+end
+
+
+--- Updates the display caret offsets, the caret rectangle, and the highlight rectangle. The display text must be current at time of call.
+function _mt_ed_s:syncDisplayCaretHighlight()
+	local line = self.line
+	local font = self.font
+
+	self.d_car_byte = edComS.coreToDisplayOffsets(line, self.car_byte, self.disp_text)
+	self.d_h_byte = edComS.coreToDisplayOffsets(line, self.h_byte, self.disp_text)
+
+	-- Update cached caret info.
+	self.caret_box_x = textUtil.getCharacterX(self.disp_text, self.d_car_byte, font)
+
+	-- If we are at the end of the string + 1: use the width of the underscore character.
+	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
+
+	-- Apply horizontal alignment offsetting to caret.
+	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
+
+	self.caret_box_y = self.disp_text_y
+	self.caret_box_h = font:getHeight()
+
+	-- update highlight rect
+	local hi_1, hi_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
+	if hi_1 == hi_2 then
+		self.disp_highlighted = false
+	else
+		local font = self.font
+		local disp_text = self.disp_text
+
+		local pixels_before = font:getWidth(disp_text:sub(1, hi_1 - 1))
+		local pixels_highlight = font:getWidth(disp_text:sub(hi_1, hi_2 - 1))
+
+		self.disp_highlighted = true
+
+		self.highlight_x = pixels_before
+		self.highlight_y = 0
+		self.highlight_w = pixels_highlight
+		self.highlight_h = self.disp_text_h
+	end
+
+	-- If applicable, overwrite or restore syntax colors.
+	if self.colored_text and self.syntax_colors then
+		local disp_text = self.disp_text
+		local col_text = self.colored_text
+		local syn_col = self.syntax_colors
+
+		local def_col = self.text_color
+		local high_col = self.text_h_color
+
+		-- Tweaks:
+		-- hi_1 == hi_2 means no highlight is currently active. If this is the case,
+		-- set them to out of bounds so that nothing is highlighted by mistake.
+		if hi_1 == hi_2 then
+			hi_1, hi_2 = -1, -1
+		end
+
+		local i = 1 -- Color table index within coloredtext sequence (step: 2, always odd)
+		local j = 1 -- Color table index within syntax colors sequence (step: 1)
+		local k = 1 -- Byte position within source string (display, not internal)
+
+		while k <= #disp_text do
+			local k2 = utf8.offset(disp_text, 2, k)
+
+			if k >= hi_1 and k < hi_2 then
+				col_text[i] = high_col
+			else
+				col_text[i] = syn_col[j] or def_col
+			end
+
+			k = k2
+			i = i + 2
+			j = j + 1
+		end
+	end
 end
 
 
@@ -476,7 +408,7 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	--print("core_byte", core_byte, "#line", #line)
 	local core_char = false
 	if core_byte <= #line then
-		core_char = string.sub(line, core_byte, utf8.offset(line, 2, core_byte) - 1)
+		core_char = line:sub(core_byte, utf8.offset(line, 2, core_byte) - 1)
 	end
 
 	--print("", "core_byte", core_byte, "core_char", core_char)
@@ -485,41 +417,13 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 end
 
 
-function _mt_ed_s:caretToByte(clear_highlight, byte_n)
-	--print("_mt_ed_s:caretToByte()", "clear_highlight", clear_highlight, "byte_n", byte_n)
-
-	local line = self.line
-	byte_n = math.max(1, math.min(byte_n, #line + 1))
-
-	self.car_byte = byte_n
-
-	--print("", "self.car_byte", self.car_byte)
-
-	self:updateDisplayText()
-	if clear_highlight then
-		self:clearHighlight()
-
-	else
-		self:updateHighlightRect()
-	end
+function _mt_ed_s:caretToByte(byte_n)
+	self.car_byte = math.max(1, math.min(byte_n, #self.line + 1))
 end
 
 
-function _mt_ed_s:caretAndHighlightToByte(car_byte_n, h_byte_n)
-	local line = self.line
-	car_byte_n = math.max(1, math.min(car_byte_n, #line + 1))
-
-	self.car_byte = car_byte_n
-
-	h_byte_n = math.max(1, math.min(h_byte_n, #line + 1))
-
-	self.h_byte = h_byte_n
-
-	--print("self.car_byte", self.car_byte)
-	--print("self.h_byte", self.h_byte)
-
-	self:updateDisplayText()
-	self:updateHighlightRect()
+function _mt_ed_s:highlightToByte(h_byte_n)
+	self.h_byte = math.max(1, math.min(h_byte_n, #self.line + 1))
 end
 
 

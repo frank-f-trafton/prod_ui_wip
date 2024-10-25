@@ -23,7 +23,8 @@ end
 
 
 function commonEd.setupCaretDisplayInfo(self, highlight, paragraphs)
-	self.caret_line_width = 1 -- XXX: skin
+	-- XXX: skin or some other config system. Currently, 'caret_line_width' is based on the width of 'M' in the current font.
+	self.caret_line_width = 0
 	self.caret_is_showing = true
 
 	self.caret_blink_time = 0
@@ -82,11 +83,7 @@ function commonEd.updateCaretBlink(self, dt)
 		self.caret_blink_time = math.max(-(self.caret_blink_on + self.caret_blink_off), self.caret_blink_time - (self.caret_blink_on + self.caret_blink_off))
 	end
 
-	if self.caret_blink_time < self.caret_blink_off then
-		self.caret_is_showing = true
-	else
-		self.caret_is_showing = false
-	end
+	self.caret_is_showing = self.caret_blink_time < self.caret_blink_off
 end
 
 
