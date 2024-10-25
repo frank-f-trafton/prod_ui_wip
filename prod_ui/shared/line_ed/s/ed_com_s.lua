@@ -14,51 +14,31 @@ local edComS = {}
 local utf8 = require("utf8")
 
 
--- ProdUI
-local lineManip = context:getLua("shared/line_ed/line_manip")
-
-
---[=[
--- XXX: to be used with single-line versions of text boxes.
-function edComS.getDisplayTextSingle(text, font, replace_missing, masked)
-	local display_text = text
-	if masked then
-		display_text = textUtil.getMaskedString(display_text, "*")
-
-	elseif replace_missing then
-		display_text = textUtil.replaceMissingCodePointGlyphs(display_text, font, "□")
-	end
-
-	return display_text
-end
---]=]
-
-
 function edComS.huntWordBoundary(code_groups, line, byte_n, dir, hit_non_ws, first_group)
-	print("(Single) huntWordBoundary", "line", line, "byte_n", byte_n, "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group)
+	--print("(Single) huntWordBoundary", "line", line, "byte_n", byte_n, "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group)
 
 	-- If 'hit_non_ws' is true, this function skips over initial whitespace.
 
 	while true do
-		print("LOOP: huntWordBoundary")
+		--print("LOOP: huntWordBoundary")
 
-		print("line", line, "dir", dir, "byte_n", byte_n)
-		local byte_p, peeked = lineManip.offsetStep(line, dir, byte_n)
+		--print("line", line, "dir", dir, "byte_n", byte_n)
+		local byte_p, peeked = edComS.offsetStep(line, dir, byte_n)
 		local group = code_groups[peeked]
 
-		print("byte_p", byte_p, "peeked", peeked)
-		print("group", group)
+		--print("byte_p", byte_p, "peeked", peeked)
+		--print("group", group)
 
 		-- Beginning or end of document
 		if peeked == nil then
-			print("break: peeked == nil")
+			--print("break: peeked == nil")
 			byte_n = (dir == 1) and #line + 1 or 1
 			break
 
 		-- We're past the initial whitespace and have encountered our first group mismatch.
 		elseif hit_non_ws and group ~= first_group then
-			print("break: hit_non_ws and group ~= first_group")
-			print("hit_non_ws", hit_non_ws, "group", group, "first_group", first_group, "peeked: ", peeked)
+			--print("break: hit_non_ws and group ~= first_group")
+			--print("hit_non_ws", hit_non_ws, "group", group, "first_group", first_group, "peeked: ", peeked)
 			-- Correct right-dir offsets
 			if dir == 1 then
 				byte_n = byte_p
@@ -74,7 +54,7 @@ function edComS.huntWordBoundary(code_groups, line, byte_n, dir, hit_non_ws, fir
 		byte_n = byte_p
 	end
 
-	print("return byte_n", byte_n)
+	--print("return byte_n", byte_n)
 
 	return byte_n
 end
@@ -113,60 +93,100 @@ function edComS.displaytoUCharCount(str, byte)
 end
 
 
-local number_ptn = {
-	binary = "^[01]+$",
-	octal = "^[0-7]+$",
-	decimal = "^[0-9%.%-]+$",
-	hexadecimal = "^%x+$",
-}
+function edComS.add(line, added, pos)
+	if pos < 0 or pos > #line + 1 then error("position is out of range") end
 
+	-- empty string: nothing to do
+	if #added == 0 then return line, pos end
 
---- Check text input for number boxes.
-function edComS.checkNumberInput(str, number_mode)
-	assert(number_ptn[number_mode], "invalid number_mode.")
-
-	-- Strip leading and trailing whitespace.
-	str = string.match(str, "^%s*(.-)%s*$")
-
-	return string.find(str, number_ptn[number_mode])
+	return line:sub(1, pos - 1) .. added .. line:sub(pos), pos + #added
 end
 
 
---[[
-if true then
-	print("testing checkNumberInput()")
+function edComS.delete(line, byte_start, byte_end)
+	if byte_start < 0 or byte_start > #line + 1 then error("byte_start is out of bounds")
+	elseif byte_end < 0 or byte_end > #line + 1 then error("byte_end is out of bounds") end
 
-	local test = {
-		{"binary", "0"},
-		{"binary", "1"},
-		{"binary", "01"},
-		{"binary", "10"},
-		{"binary", " 10 "},
-		{"binary", "1 0"}, -- fail
-		{"octal", "-1"}, -- fail
-		{"octal", "0"},
-		{"octal", "1"},
-		{"octal", "2"},
-		{"octal", "3"},
-		{"octal", "4"},
-		{"octal", "5"},
-		{"octal", "6"},
-		{"octal", "7"},
-		{"octal", "8"}, -- fail
-		{"octal", " 01234567 "},
-		{"decimal", "0.0.0"}, -- pass
-		{"decimal", "-----1"}, -- pass
-		{"hexadecimal", "0123456789abcdefABCDEF"}, -- pass
-		{"hexadecimal", "1.1"}, -- fail
-	}
+	return line:sub(1, byte_start - 1) .. line:sub(byte_end + 1)
+end
 
-	for i, tbl in ipairs(test) do
-		print("mode", tbl[1], "input", tbl[2], "test", edComS.checkNumberInput(tbl[2], tbl[1]))
+
+function edComS.offsetStepLeft(line, byte_n)
+	if byte_n < 1 or byte_n > #line + 1 then error("byte_n is out of range") end
+
+	local peeked
+
+	while true do
+		byte_n = byte_n - 1
+		local byte = line:byte(byte_n)
+
+		if not byte then
+			return nil
+		end
+
+		-- Non-continuation byte
+		if not (byte >= 0x80 and byte <= 0xbf) then
+			peeked = utf8.codepoint(line, byte_n)
+			break
+		end
 	end
 
-	os.exit()
+	return byte_n, peeked
 end
---]]
+
+
+function edComS.offsetStepRight(line, byte_n)
+	if byte_n < 1 or byte_n > #line + 1 then error("byte_n is out of range.") end
+
+	local peeked
+	byte_n = byte_n + 1
+
+	while true do
+		local byte = line:byte(byte_n)
+
+		if not byte then
+			return nil
+
+		-- Continuation byte.
+		elseif (byte >= 0x80 and byte <= 0xbf) then
+			byte_n = byte_n + 1
+
+		-- Non-continuation byte.
+		else
+			break
+		end
+	end
+
+	peeked = utf8.codepoint(line, byte_n)
+
+	return byte_n, peeked
+end
+
+
+local offsetStep_fn = {}
+offsetStep_fn[-1] = "offsetStepLeft"
+offsetStep_fn[1] = "offsetStepRight"
+function edComS.offsetStep(line, dir, byte_n)
+	return edComS[offsetStep_fn[dir]](line, byte_n)
+end
+
+
+function edComS.countUChars(line, dir, byte_n, n_u_chars)
+	local count = 0
+	while count < n_u_chars do
+		local byte_new = edComS.offsetStep(line, dir, byte_n)
+
+		-- Reached beginning or end
+		if not byte_new then
+			break
+		else
+			byte_n = byte_new
+			count = count + 1
+		end
+	end
+
+	return byte_n, count
+end
 
 
 return edComS

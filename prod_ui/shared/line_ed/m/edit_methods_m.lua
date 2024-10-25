@@ -545,8 +545,7 @@ function client:writeText(text, suppress_replace)
 
 	elseif line_ed.replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		local n_to_delete = edComBase.countUChars(text, math.huge)
-		self:deleteUChar(n_to_delete)
+		self:deleteUChar(utf8.len(text))
 	end
 
 	-- Trim text to fit the allowed uChars limit.
@@ -581,7 +580,7 @@ function client:backspaceUChar(n_u_chars)
 	line_ed:highlightCleanup()
 
 	local lines = line_ed.lines
-	local line_1, byte_1, u_count = lines:countUCharsLeft(line_ed.car_line, line_ed.car_byte, n_u_chars)
+	local line_1, byte_1, u_count = lines:countUChars(-1, line_ed.car_line, line_ed.car_byte, n_u_chars)
 
 	if u_count > 0 then
 		return line_ed:deleteText(true, line_1, byte_1, line_ed.car_line, line_ed.car_byte - 1)
@@ -746,7 +745,7 @@ function client:deleteUChar(n_u_chars)
 	line_ed:highlightCleanup()
 
 	local lines = line_ed.lines
-	local line_2, byte_2, u_count = lines:countUCharsRight(line_ed.car_line, line_ed.car_byte, n_u_chars)
+	local line_2, byte_2, u_count = lines:countUChars(1, line_ed.car_line, line_ed.car_byte, n_u_chars)
 
 	if u_count > 0 then
 		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
