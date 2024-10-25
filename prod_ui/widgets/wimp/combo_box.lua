@@ -51,7 +51,7 @@ local context = select(1, ...)
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local lgcInputS = context:getLua("shared/lgc_input_s")
-local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
+local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -302,7 +302,7 @@ function def:uiCall_create(inst)
 
 		local skin = self.skin
 
-		self.line_ed = lineEdSingle.new(skin.font)
+		self.line_ed = lineEdS.new(skin.font)
 
 		self:reshape()
 	end

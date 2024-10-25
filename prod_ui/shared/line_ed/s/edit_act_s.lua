@@ -2,21 +2,19 @@
 
 
 --[[
-
 Bindable wrapper functions for common LineEditor actions.
 
 Function arguments:
-1) self: The client widget.
-2) line_ed: The LineEditor instance (self.line_ed). (Redundant but convenient.)
+1) self: The client widget
+2) line_ed: The LineEditor instance (self.line_ed)
 
-Return values: -- XXX update
+Return values:
 1) true: the action was successful, and event handling should be stopped.
 2) true: the display object's scrolling information should be updated.
 3) true: the caret should be kept in view.
-4) true: an explicit history entry should be written after the bound action completes. Note that some
-bound actions may handle history directly and return false.
+4) true: an explicit history entry should be written after the bound action completes.
 
-Return values 2, 3 and 4 depend on 1 being true.
+The validity of returned values 2, 3 and 4 depend on 1 being true.
 --]]
 
 
@@ -333,8 +331,8 @@ function editActS.typeTab(self, line_ed)
 end
 
 
--- Return / Enter key
-function editActS.typeLineFeed(self, line_ed)
+--- Return / Enter key
+function editActS.typeLineFeed(self, line_ed) -- XXX: unfinished
 	if line_ed.allow_input and line_ed.allow_line_feed and line_ed.allow_enter_line_feed then
 		line_ed.input_category = false
 

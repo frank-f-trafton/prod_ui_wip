@@ -17,11 +17,9 @@ local utf8 = require("utf8")
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
 local commonEd = context:getLua("shared/line_ed/common_ed")
-local dbg = require(context.conf.prod_ui_req .. "debug.dbg")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
-local lineManip = context:getLua("shared/line_ed/line_manip")
 local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
@@ -335,7 +333,7 @@ end
 function _mt_ed_s:insertText(text)
 	self:highlightCleanup()
 
-	self.line = lineManip.add(self.line, text, self.car_byte)
+	self.line = edComS.add(self.line, text, self.car_byte)
 	self.car_byte = self.car_byte + #text
 	self.h_byte = self.car_byte
 
@@ -354,7 +352,7 @@ function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2)
 	if copy_deleted then
 		deleted = string.sub(self.line, byte_1, byte_2)
 	end
-	self.line = lineManip.delete(self.line, byte_1, byte_2)
+	self.line = edComS.delete(self.line, byte_1, byte_2)
 
 	self.car_byte = byte_1
 	self.h_byte = self.car_byte

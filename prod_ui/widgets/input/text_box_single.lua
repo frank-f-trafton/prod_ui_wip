@@ -27,7 +27,7 @@ local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputS = context:getLua("shared/lgc_input_s")
-local lineEdSingle = context:getLua("shared/line_ed/s/line_ed_s")
+local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -83,7 +83,7 @@ function def:uiCall_create(inst)
 
 		local skin = self.skin
 
-		self.line_ed = lineEdSingle.new(skin.font)
+		self.line_ed = lineEdS.new(skin.font)
 
 		self:reshape()
 	end

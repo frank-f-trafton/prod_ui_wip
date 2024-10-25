@@ -40,11 +40,11 @@ editBindS["CS right"] = editActS.caretJumpRightHighlight
 editBindS["home"] = editActS.caretFirst
 editBindS["end"] = editActS.caretLast
 
---editBindS["C home"] = editActS.caretFirst
---editBindS["C end"] = editActS.caretLast
+editBindS["C home"] = editActS.caretFirst
+editBindS["C end"] = editActS.caretLast
 
---editBindS["CS home"] = editActS.caretFirst
---editBindS["CS end"] = editActS.caretLast
+editBindS["CS home"] = editActS.caretFirstHighlight
+editBindS["CS end"] = editActS.caretLastHighlight
 
 editBindS["S home"] = editActS.caretFirstHighlight
 editBindS["S end"] = editActS.caretLastHighlight

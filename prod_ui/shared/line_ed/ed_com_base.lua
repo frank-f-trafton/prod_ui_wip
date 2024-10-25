@@ -15,25 +15,6 @@ local utf8 = require("utf8")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-function edComBase.countUChars(text, u_char_room)
-	local i = 1
-	local byte_count = 0
-
-	while u_char_room > 0 do
-		local o1 = utf8.offset(text, i)
-		local o2 = utf8.offset(text, i + 1)
-		if not o2 then
-			break
-		end
-		u_char_room = u_char_room - 1
-		i = i + 1
-		byte_count = o2 - 1
-	end
-
-	return byte_count, i - 1
-end
-
-
 function edComBase.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed)
 	str = textUtil.sanitize(str, bad_byte_policy)
 

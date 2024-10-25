@@ -23,7 +23,6 @@ local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
-local lineManip = context:getLua("shared/line_ed/line_manip")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
@@ -56,7 +55,7 @@ function client:backspaceUChar(n_u_chars)
 	line_ed:highlightCleanup()
 
 	local line = line_ed.line
-	local byte_1, u_count = lineManip.countUChars(line, -1, line_ed.car_byte, n_u_chars)
+	local byte_1, u_count = edComS.countUChars(line, -1, line_ed.car_byte, n_u_chars)
 
 	if u_count > 0 then
 		return line_ed:deleteText(true, byte_1, line_ed.car_byte - 1)
@@ -88,8 +87,7 @@ function client:writeText(text, suppress_replace)
 
 	elseif line_ed.replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		local n_to_delete = edComBase.countUChars(text, math.huge)
-		self:deleteUChar(n_to_delete)
+		self:deleteUChar(utf8.len(text))
 	end
 
 	-- Trim text to fit the allowed uChars limit.
@@ -230,7 +228,7 @@ end
 function client:caretStepLeft(clear_highlight)
 	local line_ed = self.line_ed
 
-	local new_byte = lineManip.offsetStepLeft(line_ed.line, line_ed.car_byte)
+	local new_byte = edComS.offsetStepLeft(line_ed.line, line_ed.car_byte)
 	line_ed.car_byte = new_byte or 1
 
 	line_ed:displaySyncCaretOffsets()
@@ -246,7 +244,7 @@ end
 function client:caretStepRight(clear_highlight)
 	local line_ed = self.line_ed
 
-	local new_byte = lineManip.offsetStepRight(line_ed.line, line_ed.car_byte)
+	local new_byte = edComS.offsetStepRight(line_ed.line, line_ed.car_byte)
 	line_ed.car_byte = new_byte or #line_ed.line + 1
 
  	line_ed:displaySyncCaretOffsets()
@@ -320,7 +318,7 @@ function client:deleteUChar(n_u_chars)
 		return -- nil
 	end
 
-	local byte_2, u_count = lineManip.countUChars(line, 1, line_ed.car_byte, n_u_chars)
+	local byte_2, u_count = edComS.countUChars(line, 1, line_ed.car_byte, n_u_chars)
 	if u_count == 0 then
 		byte_2 = #line + 1
 	end

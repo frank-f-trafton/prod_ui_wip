@@ -28,7 +28,6 @@ textUtil.proxy_code_points = {
 -- @param plain Use plain mode (no magic characters).
 -- @return The number of appearances of the substring.
 function textUtil.countStringPatterns(str, sub, plain)
-
 	local i, c = 1, 0
 
 	while i <= #str do
@@ -47,7 +46,6 @@ end
 
 
 function textUtil.trimString(text, max_code_points)
-
 	max_code_points = math.max(0, math.min(max_code_points, utf8.len(text)))
 
 	return string.sub(text, 1, utf8.offset(text, max_code_points + 1) - 1)
@@ -55,7 +53,6 @@ end
 
 
 function textUtil.trimToFirstLine(text)
-
 --	if type(text) == "string" then
 		local i = string.find(text, "\n", i, true)
 		if i then
@@ -89,11 +86,7 @@ end
 -- @param text The coloredtext table to convert.
 -- @return The converted string.
 function textUtil.coloredTextTableToString(text)
-
-	-- Assertions
-	-- [[
 	if type(text) ~= "table" then error("argument #1: bad type (expected table, got " .. type(text)) end
-	--]]
 
 	local str = ""
 
@@ -104,7 +97,6 @@ function textUtil.coloredTextTableToString(text)
 				str = str .. chunk
 			end
 		end
-
 	else
 		local temp = {}
 
@@ -123,7 +115,6 @@ end
 --- Debug-print a coloredtext table, showing colors in the Lua table format ({r, g, b, a}).
 -- @param colored_text The coloredtext table to debug-print.
 function textUtil.debugPrintColoredText(colored_text)
-
 	for i, chunk in ipairs(colored_text) do
 		if type(chunk) == "table" then
 			io.write("{"
@@ -146,7 +137,6 @@ end
 -- @param max_lines (inf) The maximum number of wrapped lines to consider when calculating the text height.
 -- @return text width, height, and table of wrapped lines.
 function textUtil.getWrapInfo(font, text, limit, max_lines)
-
 	max_lines = max_lines or math.huge
 	local width, lines = font:getWrap(text, limit)
 
@@ -160,7 +150,6 @@ end
 -- @param font The LÖVE Font which will be used to render this text. Needed for measuring the underline.
 -- @return The string with underscores removed, an X coordinate, and a width value for rendering the underline, or all nil if the parsing failed.
 function textUtil.processUnderline(str, font)
-
 	-- NOTE: This has not been tested with ImageFonts or BMFonts.
 
 	-- This function can't handle multi-line strings or multiple underlines per string.
@@ -213,12 +202,9 @@ local replace_exempt = {"\t", "\n"}
 
 -- string.gsub function for textUtil.replaceMissingCodePointGlyphs().
 local function hof_replaceMissing(key)
-
 	if not replace_exempt[key] and not temp_font:hasGlyphs(key) then
 		return temp_default
 	end
-
-	-- return nil
 end
 
 
@@ -227,9 +213,8 @@ end
 -- @param font The LÖVE Font to check.
 -- @param lookup A table of strings to use in place of any missing code points. The strings can be multi-byte, but should contain exactly one code point if you want the resulting string to be the same code point length as the input string.
 -- @param default A default string to use for any code points which are not present in `lookup`. (Something like: "□")
--- @return The modified string, or the same string if the string was empty or all glyphs were covered by the font.
+-- @return The modified string, or the same string if it was empty or all glyphs were covered by the font.
 function textUtil.replaceMissingCodePointGlyphs(str, font, lookup, default)
-
 	--[[
 	NOTES:
 	* Font:hasGlyphs() returns false for empty strings.
@@ -238,7 +223,6 @@ function textUtil.replaceMissingCodePointGlyphs(str, font, lookup, default)
 	-- Nothing to do if the string is empty or all glyphs are covered by the font.
 	if #str == 0 or font:hasGlyphs(str) then
 		return str
-
 	else
 		-- Load upvalues
 		temp_font, temp_default = font, default
@@ -259,7 +243,6 @@ end
 -- @param width The maximum allowed width, in pixels.
 -- @return A trimmed version of 'str', or an empty string if nothing fit.
 function textUtil.trimStringToWidth(str, font, width)
-
 	-- XXX: I don't think this will work with LÖVE 12's advanced text shaping.
 
 	if font:getWidth(str) <= width then
@@ -273,7 +256,6 @@ function textUtil.trimStringToWidth(str, font, width)
 		local sub = string.sub(str, 1, byte)
 		if font:getWidth(sub) > width then
 			break
-
 		else
 			last_fit = sub
 			pos = pos + 1
@@ -290,7 +272,6 @@ end
 
 
 function textUtil.getCharacterX(str, byte, font)
-
 	local str_before = string.sub(str, 1, byte - 1)
 
 	return font:getWidth(str_before)
@@ -298,7 +279,6 @@ end
 
 
 function textUtil.getCharacterW(str, byte, font)
-
 	local cw
 	local offset = utf8.offset(str, 2, byte)
 
@@ -314,7 +294,6 @@ end
 -- @param x X position, starting at the leftmost side of the text.
 -- @param split_x When true, select the glyph to the right when the X position is on the right half of a glyph.
 function textUtil.getTextInfoAtX(text, font, x, split_x)
-
 	local byte, glyph_x, glyph_w
 
 	-- Empty string
@@ -389,7 +368,6 @@ end
 -- @param x The X position to check.
 -- @return The byte offset, count of code points, and the glyph's X position in the string. The result is clamped if the input X position is outside of the text area. If the string is empty, returns byte index 1, code point count 0, and pixels 0.
 function textUtil.getByteOffsetAtX(str, font, x)
-
 	local pixels = 0
 	local byte = 1
 	local u_char_count = 0
@@ -433,7 +411,6 @@ local color_seq_dummy = {}
 -- @param color_seq (nil) An optional table of existing color tables to apply to the code points.
 -- @return The coloredtext table.
 function textUtil.stringToColoredText(str, text_t, col_t, color_seq)
-
 	text_t = text_t or {}
 	col_t = col_t or {1, 1, 1, 1}
 	color_seq = color_seq or color_seq_dummy
@@ -462,17 +439,15 @@ function textUtil.stringToColoredText(str, text_t, col_t, color_seq)
 end
 
 
---- Validates a string.
+--- Sanitizes a string.
 -- @param bad_byte_policy Controls mitigation codepaths if the encoding is bad.
 --	"trim": Cut the string at the first bad byte.
 --	"replacement_char": Replace every unrecognized bye with the Unicode replacement code point.
 --	otherwise: return an empty string on bad unput.
 function textUtil.sanitize(str, bad_byte_policy)
-
 	-- Input is good: nothing to do.
 	if pUTF8.check(str) then
 		return str
-
 	else
 		local str_out = ""
 		local byte_n = 1
@@ -504,7 +479,6 @@ end
 
 
 function textUtil.utf8StartByteRight(str, pos)
-
 	pos = math.max(pos, 1)
 
 	while pos <= #str do
@@ -520,7 +494,6 @@ end
 
 
 function textUtil.utf8StartByteLeft(str, pos)
-
 	pos = math.min(pos, #str)
 
 	while pos >= 1 do
@@ -538,7 +511,6 @@ end
 --- Get an alignment offset for a single line of text. Use in cases where you want to align
 -- text without love.graphics.printf() wrapping it if the text width exceeds the limit.
 function textUtil.getAlignmentOffset(str, font, align, width)
-
 	if align == "left" then
 		assert(type(str) == "string") -- assert arg #1
 		font:getHeight() -- assert arg #2
