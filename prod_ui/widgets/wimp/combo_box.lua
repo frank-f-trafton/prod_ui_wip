@@ -109,7 +109,8 @@ local function refreshLineEdText(self)
 		if line_ed.allow_highlight then
 			self:highlightAll()
 		end
-		self.update_flag = true
+		line_ed:updateDisplayText()
+		lgcInputS.updateCaretShape(self)
 	end
 end
 
@@ -329,34 +330,19 @@ end
 
 function def:uiCall_update(dt) -- Copied from input/text_box_single.lua, 27 Feb 2024.
 	local line_ed = self.line_ed
-	local scr_x_old = self.scr_x
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
 		-- Need to continuously update the selection.
-		local needs_update, mouse_drag_x = lgcInputS.mouseDragLogic(self)
-		if needs_update then
-			self.update_flag = true
-		end
+		local mouse_drag_x = lgcInputS.mouseDragLogic(self)
 		if mouse_drag_x ~= 0 then
 			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
-			self.update_flag = true
 		end
 	end
 
 	line_ed:updateCaretBlink(dt)
 
 	self:scrollUpdate(dt)
-
-	-- Force a cache update if the external scroll position is different.
-	if scr_x_old ~= self.scr_x then
-		self.update_flag = true
-	end
-
-	if self.update_flag then
-		lgcInputS.updateCaretShape(self)
-		self.update_flag = false
-	end
 end
 
 
