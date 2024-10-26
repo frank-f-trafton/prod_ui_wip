@@ -31,6 +31,7 @@ local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
 
 
@@ -258,6 +259,8 @@ def.skinners = {
 				self.vp2_h
 			)
 
+			--love.graphics.setScissor()
+
 			-- Text editor component.
 			lgcInputS.draw(
 				self,
@@ -270,7 +273,13 @@ def.skinners = {
 
 			love.graphics.pop()
 
-			-- Debug renderer.
+			-- Debug (viewports)
+			--[[
+			widDebug.debugDrawViewport(self, 1)
+			widDebug.debugDrawViewport(self, 2)
+			--]]
+
+			-- Debug renderer
 			-- [[
 			love.graphics.print(
 				"line: " .. line_ed.line
