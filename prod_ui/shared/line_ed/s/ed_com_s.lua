@@ -84,6 +84,7 @@ function edComS.displaytoUCharCount(str, byte)
 		byte = byte - 1
 	end
 
+	print("|" .. str .. "|", byte)
 	local u_count = utf8.len(str, 1, byte)
 
 	--print("", "str", str)

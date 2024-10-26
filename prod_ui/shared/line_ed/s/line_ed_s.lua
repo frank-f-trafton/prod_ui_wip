@@ -4,6 +4,15 @@
 -- Single-line text editor core object.
 
 
+--[[
+WARNING: Functions tagged with the following comments require special attention:
+	[sync]: Must run self:syncDisplayCaretHighlight() when done making changes.
+	[update]: Must run self:updateDisplayText() when done making changes.
+
+Note that self:updateDisplayText() also calls self:syncDisplayCaretHighlight() internally.
+--]]
+
+
 local context = select(1, ...)
 
 
@@ -193,26 +202,23 @@ function _mt_ed_s:getLineInfoAtX(x, split_x)
 end
 
 
-function _mt_ed_s:clearHighlight()
-	local changed = self.h_byte ~= self.car_byte
+function _mt_ed_s:clearHighlight() -- [sync]
 	self.h_byte = self.car_byte
-	return changed
 end
 
 
-function _mt_ed_s:updateFont(font)
+function _mt_ed_s:updateFont(font) -- [update]
 	self.font = font
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
 	local em_width = self.font:getWidth("M")
 	self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-	-- The display text needs to be updated after calling.
 end
 
 
 --- Insert a string at the caret position.
 -- @param text The string to insert.
-function _mt_ed_s:insertText(text)
+function _mt_ed_s:insertText(text) -- [update]
 	self:clearHighlight()
 	self.line = edComS.add(self.line, text, self.car_byte)
 	self.car_byte = self.car_byte + #text
@@ -225,7 +231,7 @@ end
 -- @param byte_1 The first byte offset to delete from.
 -- @param byte_2 The final byte offset to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
-function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2)
+function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2) -- [update]
 	local deleted
 	if copy_deleted then
 		deleted = self.line:sub(byte_1, byte_2)
@@ -397,7 +403,7 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	local disp_text = self.disp_text
 
 	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
-	--print("", "byte", byte, "x_pos", x_pos, "width", width)
+	print("", "byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte.
 	local u_count = edComS.displaytoUCharCount(disp_text, byte)
@@ -417,12 +423,12 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 end
 
 
-function _mt_ed_s:caretToByte(byte_n)
+function _mt_ed_s:caretToByte(byte_n) -- [sync]
 	self.car_byte = math.max(1, math.min(byte_n, #self.line + 1))
 end
 
 
-function _mt_ed_s:highlightToByte(h_byte_n)
+function _mt_ed_s:highlightToByte(h_byte_n) -- [sync]
 	self.h_byte = math.max(1, math.min(h_byte_n, #self.line + 1))
 end
 
@@ -436,7 +442,7 @@ end
 
 --- Sets the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
 -- @param line, disp_text, car_byte, h_byte, input_category The old internal state, as gotten from self:copyState().
-function _mt_ed_s:setState(line, disp_text, car_byte, h_byte, input_category)
+function _mt_ed_s:setState(line, disp_text, car_byte, h_byte, input_category) -- [update]
 	self.line = line
 	self.disp_text = disp_text
 	self.car_byte = car_byte

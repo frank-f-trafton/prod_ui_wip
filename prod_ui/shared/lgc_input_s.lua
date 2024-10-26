@@ -154,7 +154,7 @@ end
 function lgcInputS.executeRemoteAction(self, item_t)
 	local ok, update_viewport, update_caret, write_history = lgcInputS.executeBoundAction(self, item_t.bound_func)
 	if ok then
-		self.update_flag = true
+		lgcInputS.updateCaretShape(self)
 	end
 
 	self:updateDocumentDimensions(self)
@@ -202,12 +202,9 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 		local ok, update_scroll, caret_in_view, write_history = lgcInputS.executeBoundAction(self, bind_action)
 
 		if ok then
-			if update_scroll then
-				self.update_flag = true
-			end
-
 			self:updateDocumentDimensions()
 			self:scrollGetCaretInBounds(true)
+			lgcInputS.updateCaretShape(self)
 
 			-- Stop event propagation
 			return true
@@ -256,8 +253,6 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 			return
 		end
 
-		self.update_flag = true
-
 		if line_ed.replace_mode then
 			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
 			if line_ed.car_byte < #line_ed.line + 1 then
@@ -281,6 +276,7 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 		editHistS.writeEntry(line_ed, do_advance)
 		line_ed.input_category = no_ws and "typing" or "typing-ws"
 
+		lgcInputS.updateCaretShape(self)
 		self:updateDocumentDimensions()
 		self:scrollGetCaretInBounds(true)
 
@@ -316,24 +312,21 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
 				self:caretToX(true, mouse_sx, true)
 
 				self.click_byte = line_ed.car_byte
-
-				self.update_flag = true
+				lgcInputS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 2 then
 				self.click_byte = line_ed.car_byte
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()
-
-				self.update_flag = true
+				lgcInputS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 3 then
 				self.click_byte = line_ed.car_byte
 
 				--- Highlight everything.
 				self:highlightAll()
-
-				self.update_flag = true
+				lgcInputS.updateCaretShape(self)
 			end
 		end
 
@@ -363,8 +356,6 @@ function lgcInputS.mouseDragLogic(self)
 	local context = self.context
 	local line_ed = self.line_ed
 
-	local widget_needs_update = false
-
 	line_ed:resetCaretBlink()
 
 	-- Mouse position relative to viewport #1.
@@ -380,18 +371,14 @@ function lgcInputS.mouseDragLogic(self)
 	-- Handle drag highlight actions.
 	if context.cseq_presses == 1 then
 		self:caretToX(false, s_mx, true)
-		widget_needs_update = true
 
 	elseif context.cseq_presses == 2 then
 		self:clickDragByWord(s_mx, self.click_byte)
-		widget_needs_update = true
 	end
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
 
 	-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
-	local mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
-
-	return widget_needs_update, mouse_drag_x
+	return (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
 end
 
 
