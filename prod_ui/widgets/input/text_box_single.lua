@@ -175,15 +175,6 @@ function def:uiCall_thimbleRelease(inst)
 end
 
 
-function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-	if self == inst then
-		if self.enabled then
-			self:wid_action()
-		end
-	end
-end
-
-
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		lgcInputS.textInputLogic(self, text)
@@ -191,10 +182,16 @@ function def:uiCall_textInput(inst, text)
 end
 
 
-
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+		if self.enabled then
+			if scancode == "return" or scancode == "kpenter" then
+				self:wid_action()
+				return true
+			else
+				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+			end
+		end
 	end
 end
 
@@ -281,7 +278,7 @@ def.skinners = {
 			--]]
 
 			-- Debug renderer
-			-- [[
+			--[[
 			love.graphics.print(
 				"line: " .. line_ed.line
 				.. "\n#line: " .. #line_ed.line

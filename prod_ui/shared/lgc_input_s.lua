@@ -1,5 +1,22 @@
 --[[
 Shared widget logic for single-line text input.
+
+Widgets using this system are not compatible with the following callbacks:
+
+* uiCall_thimbleAction: interferes with typing space bar and enter.
+Instead, check for enter (or space) in the widget's 'uiCall_keyPressed' callback.
+
+Example:
+----
+if scancode == "return" or scancode == "kpenter" then
+	self:wid_action()
+	return true
+else
+	return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+end
+----
+
+* uiCall_thimbleAction2: interferes with the pop-up menu (undo, etc.)
 --]]
 
 
@@ -174,9 +191,12 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
+	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+
 	lgcInputS.resetCaretBlink(self)
 
-	if scancode == "application" then
+	-- pop-up menu (undo, etc.)
+	if scancode == "application" or (shift_down and scancode == "f10") then
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
 		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x
@@ -192,8 +212,6 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 		-- Halt propagation
 		return true
 	end
-
-	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
 	-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
 	if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then

@@ -274,7 +274,7 @@ do
 		end
 		--]]
 		do
-			local frame = fr_demo_select:launch("plan_text_box_single")
+			local frame = fr_demo_select:launch("plan_combo_box")
 			frame.x = 64
 			frame.y = 64
 		end
