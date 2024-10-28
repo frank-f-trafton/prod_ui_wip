@@ -177,7 +177,7 @@ end
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		lgcInputS.textInputLogic(self, text)
+		return lgcInputS.textInputLogic(self, text)
 	end
 end
 
