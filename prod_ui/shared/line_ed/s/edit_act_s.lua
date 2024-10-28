@@ -9,12 +9,12 @@ Function arguments:
 2) line_ed: The LineEditor instance (self.line_ed)
 
 Return values:
-1) true: the action was successful, and event handling should be stopped.
-2) true: the display object's scrolling information should be updated.
-3) true: the caret should be kept in view.
-4) true: an explicit history entry should be written after the bound action completes.
+1) true: the action was successful, and event handling should be stopped
+2) true: update the widget (recalculate document dimensions, clamp scrolling offsets, etc.)
+3) true: keep the caret in view
+4) true: write a history entry
 
-The validity of returned values 2, 3 and 4 depend on 1 being true.
+Returned values 2, 3 and 4 are only valid when 1 is true.
 --]]
 
 
@@ -39,7 +39,7 @@ function editActS.caretLeft(self, line_ed)
 		self:caretStepLeft(true)
 	end
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -50,7 +50,7 @@ function editActS.caretRight(self, line_ed)
 		self:caretStepRight(true)
 	end
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -58,14 +58,14 @@ end
 function editActS.caretLeftHighlight(self, line_ed)
 	self:caretStepLeft(not line_ed.allow_highlight)
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
 function editActS.caretRightHighlight(self, line_ed)
 	self:caretStepRight(not line_ed.allow_highlight)
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -78,7 +78,7 @@ function editActS.caretJumpLeft(self, line_ed)
 		self:caretJumpLeft(true)
 	end
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -90,7 +90,7 @@ function editActS.caretJumpRight(self, line_ed)
 		self:caretJumpRight(true)
 	end
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -103,7 +103,7 @@ function editActS.caretJumpLeftHighlight(self, line_ed)
 		self:caretJumpLeft(not line_ed.allow_highlight)
 	end
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -115,7 +115,7 @@ function editActS.caretJumpRightHighlight(self, line_ed)
 		self:caretJumpRight(not line_ed.allow_highlight)
 	end
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -123,14 +123,14 @@ end
 function editActS.caretFirst(self, line_ed)
 	self:caretFirst(true)
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
 function editActS.caretLast(self, line_ed)
 	self:caretLast(true)
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -138,14 +138,14 @@ end
 function editActS.caretFirstHighlight(self, line_ed)
 	self:caretFirst(not line_ed.allow_highlight)
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
 function editActS.caretLastHighlight(self, line_ed)
 	self:caretLast(not line_ed.allow_highlight)
 
-	return true, true, true, false
+	return true, false, true, false
 end
 
 
@@ -343,7 +343,7 @@ function editActS.selectAll(self, line_ed)
 		self:clearHighlight()
 	end
 
-	return true, true, false, false
+	return true, false, false, false
 end
 
 
@@ -354,7 +354,7 @@ function editActS.selectCurrentWord(self, line_ed)
 		self:clearHighlight()
 	end
 
-	return true, true, false, false
+	return true, false, false, false
 end
 
 
@@ -363,7 +363,7 @@ function editActS.copy(self, line_ed)
 	if line_ed.allow_copy and line_ed.allow_highlight and line_ed:isHighlighted() then
 		self:copyHighlightedToClipboard() -- handles masking
 
-		return true, true, false, false
+		return true, false, false, false
 	end
 end
 
@@ -390,7 +390,7 @@ end
 function editActS.toggleReplaceMode(self, line_ed)
 	self:setReplaceMode(not self:getReplaceMode())
 
-	return true, true, false, false
+	return true, false, false, false
 end
 
 
