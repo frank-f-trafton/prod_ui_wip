@@ -51,8 +51,14 @@ function plan.make(parent)
 			combo_box:addItem(tostring(i))
 		end
 
-		combo_box.wid_chosenSelection = function(self, index, tbl)
-			print("ComboBox: New chosen selection: #" .. index .. ", Text: " .. tostring(tbl.text))
+		combo_box.wid_inputChanged = function(self, str)
+			print("ComboBox: Input changed: " .. str)
+		end
+		combo_box.wid_action = function(self)
+			print("ComboBox: user pressed enter")
+		end
+		combo_box.wid_thimbleOff = function(self)
+			print("ComboBox: user navigated away from this widget")
 		end
 	end
 

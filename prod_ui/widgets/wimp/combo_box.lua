@@ -84,11 +84,6 @@ def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
 
 
-def.wid_buttonAction = uiShared.dummyFunc
-def.wid_buttonAction2 = uiShared.dummyFunc
-def.wid_buttonAction3 = uiShared.dummyFunc
-
-
 local function refreshLineEdText(self)
 	local chosen_tbl = self.menu.items[self.menu.chosen_i]
 	local line_ed = self.line_ed
@@ -107,8 +102,20 @@ end
 
 
 --- Callback for a change in the ComboBox state.
-function def:wid_chosenSelection(index, tbl) -- XXX: change to def:wid_inputChanged(text)
+function def:wid_inputChanged(str)
 	-- ...
+end
+
+
+-- Callback for when the user types enter.
+function def:wid_action(str)
+
+end
+
+
+-- Callback for when the user navigates away from this widget
+function def:wid_thimbleOff(str)
+
 end
 
 
@@ -217,7 +224,7 @@ function def:setSelectionByIndex(item_i, id)
 
 	if id == "chosen_i" and chosen_i_old ~= self.menu.chosen_i then
 		refreshLineEdText(self)
-		self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+		self:wid_inputChanged(self.line_ed.line)
 	end
 
 	if self.wid_drawer then
@@ -411,7 +418,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	if check_chosen then
 		if chosen_i_old ~= self.menu.chosen_i then
 			refreshLineEdText(self)
-			self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+			self:wid_inputChanged(self.line_ed.line)
 		end
 		return true
 	end
@@ -436,6 +443,8 @@ function def:uiCall_thimbleRelease(inst)
 			self:_closePopUpMenu(false)
 			return true
 		end
+
+		self:wid_thimbleOff(self.line_ed.line)
 	end
 end
 
@@ -456,7 +465,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		if self.wid_drawer then
 			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
 		else
-
 			local items = self.menu.items
 			local old_index = self.menu.index
 			local old_item = items[old_index]
@@ -467,7 +475,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				return true
 
 			elseif key == "return" or key == "kpenter" then
-				-- XXX: tie 'enter' to a widget event (probably wid_action).
+				self:wid_action(self.line_ed.line)
 				return true
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then
@@ -475,7 +483,12 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 			-- Standard text box controls (caret navigation, etc.)
 			else
-				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+				local old_line = self.line_ed.line
+				local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+				if old_line ~= self.line_ed.line then
+					self:wid_inputChanged(self.line_ed.line)
+				end
+				return rv
 			end
 		end
 	end
@@ -484,10 +497,14 @@ end
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		lgcInputS.textInputLogic(self, text)
+		local old_line = self.line_ed.line
+		local rv = lgcInputS.textInputLogic(self, text)
+		if old_line ~= self.line_ed.line then
+			self:wid_inputChanged(self.line_ed.line)
+		end
+		return rv
 	end
 end
-
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -605,7 +622,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			if check_chosen then
 				if chosen_i_old ~= self.menu.chosen_i then
 					refreshLineEdText(self)
-					self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+					self:wid_inputChanged(self.line_ed.line)
 				end
 				return true
 			end

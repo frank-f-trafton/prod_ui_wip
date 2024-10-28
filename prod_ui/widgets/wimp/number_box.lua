@@ -1,4 +1,3 @@
-
 -- XXX: Under construction. Combination of `wimp/dropdown_box.lua` and `input/text_box_single.lua`.
 -- XXX: Support commas for decimal place indicator
 --[[
@@ -226,7 +225,7 @@ function def:uiCall_create(inst)
 		self.decimals_max = 2^15
 
 		-- repeat mouse-press state
-		self.repeat_btn = 1 -- -1 for decrement, 1 for increment
+		self.repeat_btn = false -- false for inactive, -1 for decrement, 1 for increment
 
 		-- repeat key state
 		self.rep_sc = false
@@ -285,7 +284,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	line_ed:updateCaretBlink(dt)
+	lgcInputS.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end
@@ -402,6 +401,7 @@ function def:uiCall_textInput(inst, text)
 	if self == inst then
 		if lgcInputS.textInputLogic(self, text, _checkDecimal) then
 			_textInputValue(self)
+			return true
 		end
 	end
 end
@@ -454,6 +454,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Clicking the text area:
 		if widShared.pointInViewport(self, 1, mx, my) then
+			self.repeat_btn = false
 			-- Propagation is halted when a context menu is created.
 			if lgcInputS.mousePressLogic(self, button, mx, my) then
 				return true
@@ -490,7 +491,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 					if self.repeat_btn == 1 then
 						_callback(self, self.wid_incrementButton, reps + 1)
 						return true
-					else -- repeat_btn == -1
+					elseif self.repeat_btn == -1 then
 						_callback(self, self.wid_decrementButton, reps + 1)
 						return true
 					end
