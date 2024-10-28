@@ -259,7 +259,8 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			love.graphics.setScissor()
+			--love.graphics.setScissor()
+			--love.graphics.translate(0, 16)
 
 			-- Text editor component.
 			lgcInputS.draw(

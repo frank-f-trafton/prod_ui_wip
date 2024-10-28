@@ -129,22 +129,6 @@ function lgcInputS.updateCaretBlink(self, dt)
 end
 
 
-function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
-	local line_ed = self.line_ed
-
-	-- get the extended caret rectangle
-	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
-	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
-	local car_x2 = self.align_offset + line_ed.caret_box_x + line_ed.caret_box_w + self.caret_extend_x
-	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
-
-	--print("self.scr_tx", self.scr_tx, "car_x1", car_x1, "car_x2", car_x2)
-	--print("self.scr_ty", self.scr_ty, "car_y1", car_y1, "car_y2", car_y2)
-
-	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
-end
-
-
 --- Helper that takes care of history changes following an action.
 -- @param self The client widget
 -- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
@@ -399,11 +383,27 @@ function lgcInputS.mouseDragLogic(self)
 end
 
 
+function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
+	local line_ed = self.line_ed
+
+	-- get the extended caret rectangle
+	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
+	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
+	local car_x2 = self.align_offset + line_ed.caret_box_x + math.max(line_ed.caret_box_w, line_ed.caret_box_w_edge) + self.caret_extend_x
+	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
+
+	--print("self.scr_tx", self.scr_tx, "car_x1", car_x1, "car_x2", car_x2)
+	--print("self.scr_ty", self.scr_ty, "car_y1", car_y1, "car_y2", car_y2)
+
+	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
+end
+
+
 function lgcInputS.method_updateDocumentDimensions(self)
 	local line_ed = self.line_ed
 	local font = line_ed.font
 
-	self.doc_w = font:getWidth(line_ed.disp_text)
+	self.doc_w = line_ed.disp_text_w + line_ed.caret_box_w_empty
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
 
 	self:updateAlignOffset()

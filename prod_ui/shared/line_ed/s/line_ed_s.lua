@@ -92,6 +92,9 @@ function lineEdS.new(font, text_color, text_h_color)
 	-- Width of the caret box when it is not placed over text (ie at the far end, or the Line Editor is empty)
 	self.caret_box_w_empty = 0
 
+	-- Width to use when keeping the caret in view against the far edge of the field.
+	self.caret_box_w_edge = 0
+
 	-- History state.
 	self.hist = structHistory.new()
 	editHistS.writeEntry(self, true)
@@ -165,11 +168,6 @@ function _mt_ed_s:isHighlighted()
 end
 
 
-function _mt_ed_s:getDocumentXBoundaries()
-	return self.disp_text_x, self.disp_text_x + self.disp_text_w
-end
-
-
 -- @return Byte, X position and width of the glyph (if applicable).
 function _mt_ed_s:getLineInfoAtX(x, split_x)
 	local font = self.font
@@ -194,6 +192,8 @@ function _mt_ed_s:updateFont(font) -- [update]
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 	self.caret_line_width = math.max(1, math.ceil(font:getWidth("M") / 16))
 	self.caret_box_w_empty = math.max(1, math.ceil(font:getWidth("_")))
+	--self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M") * 1.25))
+	self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M")))
 end
 
 
@@ -278,7 +278,6 @@ function _mt_ed_s:updateDisplayText()
 	self.colored_text = false
 
 	-- apply display text alignment
-	self.disp_text_w = self.font:getWidth(self.disp_text)
 	if self.align == "left" then
 		self.disp_text_x = 0
 
