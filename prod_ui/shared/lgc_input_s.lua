@@ -126,17 +126,19 @@ function lgcInputS.executeBoundAction(self, bound_func)
 	local line_ed = self.line_ed
 
 	local old_byte, old_h_byte = line_ed:getCaretOffsets()
-	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
+	local ok, update_widget, caret_in_view, write_history = bound_func(self, line_ed)
 
-	--print("executeBoundAction()", "ok", ok, "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
+	--print("executeBoundAction()", "ok", ok, "update_widget", update_widget, "caret_in_view", caret_in_view, "write_history", write_history)
 
 	if ok then
-		if update_viewport then
-			-- XXX refresh: update scroll bounds
+		lgcInputS.updateCaretShape(self)
+		if update_widget then
+			self:updateDocumentDimensions(self)
+			self:scrollClampViewport()
 		end
 
 		if caret_in_view then
-			-- XXX refresh: tell client widget to get the caret in view
+			self:scrollGetCaretInBounds(true)
 		end
 
 		if write_history then
@@ -146,19 +148,13 @@ function lgcInputS.executeBoundAction(self, bound_func)
 			editHistS.writeEntry(line_ed, true)
 		end
 
-		return true, update_viewport, caret_in_view, write_history
+		return true, update_widget, caret_in_view, write_history
 	end
 end
 
 
-function lgcInputS.executeRemoteAction(self, item_t)
-	local ok, update_viewport, update_caret, write_history = lgcInputS.executeBoundAction(self, item_t.bound_func)
-	if ok then
-		lgcInputS.updateCaretShape(self)
-	end
-
-	self:updateDocumentDimensions(self)
-	self:scrollGetCaretInBounds(true)
+function lgcInputS.cb_boundAction(self, item_t)
+	local ok, update_widget, update_caret, write_history = lgcInputS.executeBoundAction(self, item_t.bound_func)
 end
 
 
@@ -195,17 +191,11 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	end
 
 	local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
-	local bind_action = editBindS[key_string]
+	local bound_func = editBindS[key_string]
 
-	if bind_action then
-		-- NOTE: most history ledger changes are handled in executeBoundAction().
-		local ok, update_scroll, caret_in_view, write_history = lgcInputS.executeBoundAction(self, bind_action)
-
+	if bound_func then
+		local ok, update_widget, caret_in_view, write_history = lgcInputS.executeBoundAction(self, bound_func)
 		if ok then
-			self:updateDocumentDimensions()
-			self:scrollGetCaretInBounds(true)
-			lgcInputS.updateCaretShape(self)
-
 			-- Stop event propagation
 			return true
 		end
@@ -521,13 +511,13 @@ lgcInputS.pop_up_def = {
 	{
 		type = "command",
 		text = "Undo",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.undo,
 		config = lgcInputS.configItem_undo,
 	}, {
 		type = "command",
 		text = "Redo",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.redo,
 		config = lgcInputS.configItem_redo,
 	},
@@ -535,25 +525,25 @@ lgcInputS.pop_up_def = {
 	{
 		type = "command",
 		text = "Cut",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.cut,
 		config = lgcInputS.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Copy",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.copy,
 		config = lgcInputS.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Paste",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.paste,
 		config = lgcInputS.configItem_paste,
 	}, {
 		type = "command",
 		text = "Delete",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.deleteHighlighted,
 		config = lgcInputS.configItem_cutCopyDelete,
 	},
@@ -561,7 +551,7 @@ lgcInputS.pop_up_def = {
 	{
 		type = "command",
 		text = "Select All",
-		callback = lgcInputS.executeRemoteAction,
+		callback = lgcInputS.cb_boundAction,
 		bound_func = editActS.selectAll,
 		config = lgcInputS.configItem_selectAll,
 	},
