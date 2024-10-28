@@ -372,9 +372,11 @@ function lgcInputS.mouseDragLogic(self)
 	-- Handle drag highlight actions.
 	if context.cseq_presses == 1 then
 		self:caretToX(false, s_mx, true)
+		lgcInputS.updateCaretShape(self)
 
 	elseif context.cseq_presses == 2 then
 		self:clickDragByWord(s_mx, self.click_byte)
+		lgcInputS.updateCaretShape(self)
 	end
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
 
