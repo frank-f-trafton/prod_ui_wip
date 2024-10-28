@@ -37,6 +37,41 @@ end
 
 
 function lgcInputS.setupInstance(self)
+	-- When true, typing overwrites the current position instead of inserting.
+	self.replace_mode = false
+
+	-- What to do when there's a UTF-8 encoding problem.
+	-- Applies to input text, and also to clipboard get/set.
+	-- See 'textUtil.sanitize()' for options.
+	self.bad_input_rule = false
+
+	-- Enable/disable specific editing actions.
+	self.allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
+	self.allow_cut = true
+	self.allow_copy = true
+	self.allow_paste = true
+	self.allow_highlight = true
+
+	-- Allows '\n' as text input (including pasting from the clipboard).
+	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
+	-- stop at line feeds.
+	-- In the external display string, line feed code points (0xa) are substituted for U+23CE (⏎).
+	self.allow_line_feed = false
+
+	-- Allows typing a line feed by pressing enter/return. `self.allow_line_feed` must be true.
+	-- Note that this may override other uses of enter/return in the owning widget.
+	self.allow_enter_line_feed = false
+
+	self.allow_tab = false -- affects single presses of the tab key
+	self.allow_untab = false -- affects shift+tab (unindenting)
+	self.tabs_to_spaces = false -- affects '\t' in writeText()
+
+	-- Max number of Unicode characters (not bytes) permitted in the field.
+	self.u_chars_max = math.huge
+
+	-- Helps with amending vs making new history entries.
+	self.input_category = false
+
 	-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
 	self.caret_x = 0
 	self.caret_y = 0
@@ -67,54 +102,46 @@ function lgcInputS.setupInstance(self)
 	-- "left", "center", "right", "justify"
 	self.ghost_text_align = false
 
+	self.caret_is_showing = true
+	self.caret_blink_time = 0
+
+	-- XXX: skin or some other config system
+	self.caret_blink_reset = -0.5
+	self.caret_blink_on = 0.5
+	self.caret_blink_off = 0.5
+
 	-- Caller should create a single line editor object at `self.line_ed`.
+end
+
+
+function lgcInputS.resetCaretBlink(self)
+	self.caret_blink_time = self.caret_blink_reset
+end
+
+
+function lgcInputS.updateCaretBlink(self, dt)
+	self.caret_blink_time = self.caret_blink_time + dt
+	if self.caret_blink_time > self.caret_blink_on + self.caret_blink_off then
+		self.caret_blink_time = math.max(-(self.caret_blink_on + self.caret_blink_off), self.caret_blink_time - (self.caret_blink_on + self.caret_blink_off))
+	end
+
+	self.caret_is_showing = self.caret_blink_time < self.caret_blink_off
 end
 
 
 function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
 	local line_ed = self.line_ed
 
-	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
-
-	-- Get the extended caret rectangle.
+	-- get the extended caret rectangle
 	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
 	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
 	local car_x2 = self.align_offset + line_ed.caret_box_x + line_ed.caret_box_w + self.caret_extend_x
 	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
 
-	-- Clamp the scroll target.
-	print("self.scr_tx", self.scr_tx, "car_x2", car_x2, "car_x1", car_x1)
-	print("self.scr_ty", self.scr_ty, "car_y2", car_y2, "car_y1", car_y1)
-	self.scr_tx = math.max(car_x2 - self.vp_w, math.min(self.scr_tx, car_x1))
-	self.scr_ty = math.max(car_y2 - self.vp_h, math.min(self.scr_ty, car_y1))
+	--print("self.scr_tx", self.scr_tx, "car_x1", car_x1, "car_x2", car_x2)
+	--print("self.scr_ty", self.scr_ty, "car_y1", car_y1, "car_y2", car_y2)
 
-	if immediate then
-		self.scr_fx = self.scr_tx
-		self.scr_fy = self.scr_ty
-		self.scr_x = math.floor(0.5 + self.scr_fx)
-		self.scr_y = math.floor(0.5 + self.scr_fy)
-	end
-
-	--print("car_x1", car_x1, "car_y1", car_y1, "car_x2", car_x2, "car_y2", car_y2)
-	--print("scr tx ty", self.scr_tx, self.scr_ty)
-
---[[
-	print("BEFORE",
-		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
-		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
-		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
---]]
-	self:scrollClampViewport()
-
---[[
-	print("AFTER",
-		"scr_x", self.scr_x, "scr_y", self.scr_y, "scr_tx", self.scr_tx, "scr_ty", self.scr_ty,
-		"vp_x", self.vp_x, "vp_y", self.vp_y, "vp_w", self.vp_w, "vp_h", self.vp_h,
-		"vp2_x", self.vp2_x, "vp2_y", self.vp2_y, "vp2_w", self.vp2_w, "vp2_h", self.vp2_h)
---]]
-	--print("scrollGetCaretInBounds() AFTER", self.scr_tx, self.scr_ty)
-	--print("doc_w", self.doc_w, "doc_h", self.doc_h)
-	--print("vp xywh", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
 end
 
 
@@ -142,7 +169,7 @@ function lgcInputS.executeBoundAction(self, bound_func)
 		end
 
 		if write_history then
-			line_ed.input_category = false
+			self.input_category = false
 
 			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
 			editHistS.writeEntry(line_ed, true)
@@ -163,7 +190,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
-	line_ed:resetCaretBlink()
+	lgcInputS.resetCaretBlink(self)
 
 	if scancode == "application" then
 		-- Locate caret in UI space
@@ -226,27 +253,27 @@ end
 function lgcInputS.textInputLogic(self, text, fn_check)
 	local line_ed = self.line_ed
 
-	print("textInputLogic", "allow_input", line_ed.allow_input)
-
-	if line_ed.allow_input then
+	if self.allow_input then
 		local hist = line_ed.hist
 
-		line_ed:resetCaretBlink()
+		lgcInputS.resetCaretBlink(self)
 
-		local old_line, old_disp_text, old_byte, old_h_byte, old_input_category = line_ed:copyState()
+		local old_line, old_disp_text, old_byte, old_h_byte = line_ed:copyState()
+		local old_input_category = self.input_category
 
 		local written = self:writeText(text, false)
 
 		-- Allow the caller to discard the changed text.
 		if fn_check and fn_check(self) == false then
-			line_ed:setState(old_line, old_disp_text, old_byte, old_h_byte, old_input_category)
+			line_ed:setState(old_line, old_disp_text, old_byte, old_h_byte)
+			self.input_category = old_input_category
 			return
 		end
 
-		if line_ed.replace_mode then
+		if self.replace_mode then
 			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
 			if line_ed.car_byte < #line_ed.line + 1 then
-				line_ed.input_category = false
+				self.input_category = false
 			end
 		end
 
@@ -255,7 +282,7 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 		local do_advance = true
 
 		if (entry and entry.car_byte == old_byte)
-		and ((line_ed.input_category == "typing" and no_ws) or (line_ed.input_category == "typing-ws"))
+		and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
 		then
 			do_advance = false
 		end
@@ -264,7 +291,7 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 			editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
 		end
 		editHistS.writeEntry(line_ed, do_advance)
-		line_ed.input_category = no_ws and "typing" or "typing-ws"
+		self.input_category = no_ws and "typing" or "typing-ws"
 
 		lgcInputS.updateCaretShape(self)
 		self:updateDocumentDimensions()
@@ -281,7 +308,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
 	local line_ed = self.line_ed
 	local context = self.context
 
-	self.line_ed:resetCaretBlink()
+	lgcInputS.resetCaretBlink(self)
 
 	if button == 1 then
 		self.press_busy = "text-drag"
@@ -346,7 +373,7 @@ function lgcInputS.mouseDragLogic(self)
 	local context = self.context
 	local line_ed = self.line_ed
 
-	line_ed:resetCaretBlink()
+	lgcInputS.resetCaretBlink(self)
 
 	-- Mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -408,7 +435,7 @@ function lgcInputS.updateCaretShape(self)
 	self.caret_w = line_ed.caret_box_w
 	self.caret_h = line_ed.caret_box_h
 
-	if line_ed.replace_mode then
+	if self.replace_mode then
 		self.caret_fill = "line"
 	else
 		self.caret_fill = "fill"
@@ -459,7 +486,7 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 	end
 
 	-- Caret.
-	if color_caret and self == self.context.current_thimble and line_ed.caret_is_showing then
+	if color_caret and self == self.context.current_thimble and self.caret_is_showing then
 		love.graphics.setColor(color_caret)
 		love.graphics.rectangle(
 			self.caret_fill,

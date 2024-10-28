@@ -103,10 +103,10 @@ local function refreshLineEdText(self)
 	if chosen_tbl then
 		line_ed:deleteText(false, 1, #line_ed.line)
 		line_ed:insertText(chosen_tbl.text)
-		line_ed.input_category = false
+		self.input_category = false
 		line_ed.hist:clearAll()
 
-		if line_ed.allow_highlight then
+		if self.allow_highlight then
 			self:highlightAll()
 		end
 		line_ed:updateDisplayText()

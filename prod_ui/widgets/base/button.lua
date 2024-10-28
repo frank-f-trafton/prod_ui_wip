@@ -60,8 +60,6 @@ function def:uiCall_create(inst)
 		self:skinInstall()
 
 		self:reshape()
-
-		print("BUTTON", "margin_x1", self.margin_x1)
 	end
 end
 

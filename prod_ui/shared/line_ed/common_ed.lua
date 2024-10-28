@@ -64,7 +64,7 @@ end
 function commonEd.setupMaskedState(self)
 	-- Glyph masking mode, as used in password fields.
 	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
-	-- It does nothing else with respect to security.
+	-- It does nothing else in terms of security.
 
 	self.masked = false
 	self.mask_glyph = "*" -- Must be exactly one glyph.

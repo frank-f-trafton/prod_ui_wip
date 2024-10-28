@@ -46,8 +46,8 @@ function plan.make(parent)
 
 		--input_single:setText("Single-Line Text Box")
 
-		--input_single.line_ed.allow_line_feed = true
-		--input_single.line_ed.allow_enter_line_feed = true
+		--input_single.allow_line_feed = true
+		--input_single.allow_enter_line_feed = true
 
 		input_single.wid_action = function(self)
 			print("I've been actioned! " .. input_single.line_ed.line)

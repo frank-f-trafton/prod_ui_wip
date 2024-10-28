@@ -25,7 +25,6 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
@@ -72,47 +71,26 @@ function lineEdS.new(font, text_color, text_h_color)
 	-- The internal text.
 	self.line = ""
 
-	commonEd.setupCaretInfo(self, true, false)
-	commonEd.setupCaretDisplayInfo(self, true, false)
-	commonEd.setupCaretBox(self)
+	-- bytes for internal caret and highlight
+	self.car_byte = 1
+	self.h_byte = 1
 
-	-- When true, typing overwrites the current position instead of inserting.
-	self.replace_mode = false
+	-- bytes for display caret and highlight
+	self.d_car_byte = 1
+	self.d_h_byte = 1
 
-	-- What to do when there's a UTF-8 encoding problem.
-	-- Applies to input text, and also to clipboard get/set.
-	-- See 'textUtil.sanitize()' for options.
-	self.bad_input_rule = false
+	-- XXX: skin or some other config system. Currently, 'caret_line_width' is based on the width of 'M' in the current font.
+	self.caret_line_width = 0
 
-	-- Enable/disable specific editing actions.
-	self.allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
-	self.allow_cut = true
-	self.allow_copy = true
-	self.allow_paste = true
-	self.allow_highlight = true
+	-- The position and dimensions of the currently selected character.
+	-- The client widget uses these values to determine the size and location of its caret.
+	self.caret_box_x = 0
+	self.caret_box_y = 0
+	self.caret_box_w = 0
+	self.caret_box_h = 0
 
-	-- Allows '\n' as text input (including pasting from the clipboard).
-	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
-	-- stop at line feeds.
-	-- In the external display string, line feed code points (0xa) are substituted for U+23CE (⏎).
-	self.allow_line_feed = false
-
-	-- Allows typing a line feed by pressing enter/return. `self.allow_line_feed` must be true.
-	-- Note that this may override other uses of enter/return in the owning widget.
-	self.allow_enter_line_feed = false
-
-	self.allow_tab = false -- affects single presses of the tab key
-	self.allow_untab = false -- affects shift+tab (unindenting)
-	self.tabs_to_spaces = false -- affects '\t' in writeText()
-
-	-- Helps with amending vs making new history entries.
-	self.input_category = false
-
-	-- Cached copy of text length in Unicode code points.
-	self.u_chars = utf8.len(self.line)
-
-	-- Max number of Unicode characters (not bytes) permitted in the field.
-	self.u_chars_max = math.huge
+	-- Width of the caret box when it is not placed over text (ie at the far end, or the Line Editor is empty)
+	self.caret_box_w_empty = 0
 
 	-- History state.
 	self.hist = structHistory.new()
@@ -132,7 +110,11 @@ function lineEdS.new(font, text_color, text_h_color)
 	-- The internal contents (and results of clipboard actions) remain the same.
 	self.replace_missing = true
 
-	commonEd.setupMaskedState(self)
+	-- Glyph masking mode, as used in password fields.
+	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
+	-- It does nothing else in terms of security.
+	self.masked = false
+	self.mask_glyph = "*" -- Must be exactly one glyph.
 
 	-- Set true to create a coloredtext table for the display text. Each coloredtext
 	-- table contains a color table and a code point string for every code point in the base
@@ -210,9 +192,8 @@ end
 function _mt_ed_s:updateFont(font) -- [update]
 	self.font = font
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
-
-	local em_width = self.font:getWidth("M")
-	self.caret_line_width = math.max(1, math.ceil(em_width / 16))
+	self.caret_line_width = math.max(1, math.ceil(font:getWidth("M") / 16))
+	self.caret_box_w_empty = math.max(1, math.ceil(font:getWidth("_")))
 end
 
 
@@ -241,10 +222,6 @@ function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2) -- [update]
 
 	return deleted
 end
-
-
-_mt_ed_s.resetCaretBlink = commonEd.resetCaretBlink
-_mt_ed_s.updateCaretBlink = commonEd.updateCaretBlink
 
 
 function _mt_ed_s:getWordRange(byte_n)
@@ -433,20 +410,16 @@ end
 
 
 --- Copies the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
--- @return The current internal string, the display text, the caret byte, the highlight byte, and the input category.
+-- @return The current internal string, the display text, and the caret and highlight bytes.
 function _mt_ed_s:copyState()
-	return self.line, self.disp_text, self.car_byte, self.h_byte, self.input_category
+	return self.line, self.disp_text, self.car_byte, self.h_byte
 end
 
 
 --- Sets the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
--- @param line, disp_text, car_byte, h_byte, input_category The old internal state, as gotten from self:copyState().
-function _mt_ed_s:setState(line, disp_text, car_byte, h_byte, input_category) -- [update]
-	self.line = line
-	self.disp_text = disp_text
-	self.car_byte = car_byte
-	self.h_byte = h_byte
-	self.input_category = input_category
+-- @param line, disp_text, car_byte, h_byte, The old internal state, as collected from self:copyState().
+function _mt_ed_s:setState(line, disp_text, car_byte, h_byte) -- [update]
+	self.line, self.disp_text, self.car_byte, self.h_byte = line, disp_text, car_byte, h_byte
 end
 
 
