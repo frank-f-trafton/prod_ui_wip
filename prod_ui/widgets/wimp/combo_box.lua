@@ -1,13 +1,10 @@
-
--- XXX: Under construction. Combination of `wimp/dropdown_box.lua` and `input/text_box_single.lua`.
-
 --[[
 The main body of a ComboBox (a Dropdown Box with text input).
 
 Closed:
 
 ┌───────────┬─┐
-│ Foobar|   │v│ --- Type and manipulate the text. To open the drawer, click the button to the side or press Alt+Down.
+│ Foobar|   │v│ --- Behaves like a text box. To open the drawer, click the button to the side, or press Alt+Down.
 └───────────┴─┘     To cycle through items without opening the drawer, press the up/down keys or turn the mouse-wheel.
 
 
@@ -41,7 +38,7 @@ instead.
 
 Two kinds of pop-up menu are associated with this widget: the drawer, and also the standard context menu
 when right-clicking on the editable text area. Only one of these may be active at a time, and you cannot
-invoke another context menu a selection in the drawer.
+invoke another context menu on the selection in the drawer.
 --]]
 
 
@@ -92,24 +89,18 @@ def.wid_buttonAction2 = uiShared.dummyFunc
 def.wid_buttonAction3 = uiShared.dummyFunc
 
 
---def.uiCall_thimbleAction
---def.uiCall_thimbleAction2
-
-
 local function refreshLineEdText(self)
 	local chosen_tbl = self.menu.items[self.menu.chosen_i]
 	local line_ed = self.line_ed
 
 	if chosen_tbl then
-		line_ed:deleteText(false, 1, #line_ed.line)
-		line_ed:insertText(chosen_tbl.text)
-		self.input_category = false
+		self:replaceText(chosen_tbl.text)
 		line_ed.hist:clearAll()
+		self.input_category = false
 
 		if self.allow_highlight then
 			self:highlightAll()
 		end
-		line_ed:updateDisplayText()
 		lgcInputS.updateCaretShape(self)
 	end
 end
@@ -121,7 +112,6 @@ function def:wid_chosenSelection(index, tbl) -- XXX: change to def:wid_inputChan
 end
 
 
-
 function def:addItem(text, pos)
 	local skin = self.skin
 	local font = skin.font
@@ -130,13 +120,9 @@ function def:addItem(text, pos)
 
 	pos = pos or #items + 1
 
-	-- Assertions.
-	-- [[
 	if type(text) ~= "string" then uiShared.errBadType(1, text, "string")
 	elseif type(pos) ~= "number" then uiShared.errBadType(2, pos, "nil/number") end
-
 	uiShared.assertIntRange(2, pos, 1, #items + 1)
-	--]]
 
 	local item = {}
 
@@ -162,10 +148,7 @@ end
 
 
 function def:removeItem(item_t)
-	-- Assertions
-	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
-	--]]
 
 	local item_i = self.menu:getItemIndex(item_t)
 
@@ -196,10 +179,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	-- Assertions
-	-- [[
 	uiShared.assertNumber(1, item_i)
-	--]]
 
 	local items = self.menu.items
 	local removed_item = items[item_i]
@@ -221,10 +201,7 @@ end
 
 
 function def:setSelection(item_t, id)
-	-- Assertions
-	-- [[
 	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
-	--]]
 
 	local item_i = self.menu:getItemIndex(item_t)
 	self:setSelectionByIndex(item_i, id)
@@ -232,10 +209,7 @@ end
 
 
 function def:setSelectionByIndex(item_i, id)
-	-- Assertions
-	-- [[
 	uiShared.assertNumber(1, item_i)
-	--]]
 
 	local chosen_i_old = self.menu.chosen_i
 
@@ -325,12 +299,12 @@ function def:uiCall_reshape()
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")
+
+	self:scrollClampViewport()
 end
 
 
-function def:uiCall_update(dt) -- Copied from input/text_box_single.lua, 27 Feb 2024.
-	local line_ed = self.line_ed
-
+function def:uiCall_update(dt)
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
 		-- Need to continuously update the selection.
@@ -340,7 +314,7 @@ function def:uiCall_update(dt) -- Copied from input/text_box_single.lua, 27 Feb 
 		end
 	end
 
-	line_ed:updateCaretBlink(dt)
+	lgcInputS.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end

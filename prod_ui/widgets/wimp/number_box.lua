@@ -305,15 +305,6 @@ function def:uiCall_thimbleRelease(inst)
 end
 
 
-function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
-	if self == inst then
-		if self.enabled then
-			--self:wid_action() -- XXX
-		end
-	end
-end
-
-
 function def:uiCall_destroy(inst)
 	if self == inst then
 		commonWimp.checkDestroyPopUp(self)

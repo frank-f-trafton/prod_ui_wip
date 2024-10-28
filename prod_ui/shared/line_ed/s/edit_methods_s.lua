@@ -141,6 +141,14 @@ function client:writeText(text, suppress_replace)
 end
 
 
+function client:replaceText(text)
+	local line_ed = self.line_ed
+
+	line_ed:deleteText(false, 1, #line_ed.line)
+	return self:writeText(text, true)
+end
+
+
 -- -1 == undo, 1 == redo
 function client:stepHistory(dir)
 	local line_ed = self.line_ed
