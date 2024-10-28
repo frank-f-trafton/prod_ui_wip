@@ -104,9 +104,9 @@ local function _writeText(self, text, suppress_replace)
 	local line = line_ed.line
 
 	-- Sanitize input
-	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, line_ed.allow_line_feed)
+	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
 
-	if not line_ed.allow_highlight then
+	if not self.allow_highlight then
 		line_ed:clearHighlight()
 	end
 
@@ -114,14 +114,13 @@ local function _writeText(self, text, suppress_replace)
 	if line_ed:isHighlighted() then
 		_deleteHighlightedText(self)
 
-	elseif line_ed.replace_mode and not suppress_replace then
+	elseif self.replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
 		_deleteUChar(self, utf8.len(text))
 	end
 
 	-- Trim text to fit the allowed uChars limit.
-	line_ed.u_chars = utf8.len(line_ed.line)
-	text = textUtil.trimString(text, line_ed.u_chars_max - line_ed.u_chars)
+	text = textUtil.trimString(text, self.u_chars_max - utf8.len(line_ed.line))
 
 	line_ed:insertText(text)
 	line_ed:updateDisplayText()
@@ -387,7 +386,7 @@ function client:copyHighlightedToClipboard()
 		copied = string.rep(line_ed.mask_glyph, utf8.len(copied))
 	end
 
-	copied = textUtil.sanitize(copied, line_ed.bad_input_rule)
+	copied = textUtil.sanitize(copied, self.bad_input_rule)
 
 	love.system.setClipboardText(copied)
 end
@@ -434,7 +433,7 @@ function client:pasteClipboardText()
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		line_ed.input_category = false
+		self.input_category = false
 		self:writeText(text, true)
 
 		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
@@ -472,6 +471,17 @@ function client:clickDragByWord(x, origin_byte)
 	line_ed:caretToByte(mb1)
 	line_ed:highlightToByte(mb2)
 	line_ed:syncDisplayCaretHighlight()
+end
+
+
+function client:getReplaceMode()
+	return self.replace_mode
+end
+
+
+--- When Replace Mode is active, new text overwrites existing characters under the caret.
+function client:setReplaceMode(enabled)
+	self.replace_mode = not not enabled
 end
 
 

@@ -515,7 +515,7 @@ do
 	--love.mouse.setRelativeMode(true)
 
 	-- Start with the top-most window selected, if any.
-	print("uh?", wimp_root:selectTopWindowFrame())
+	wimp_root:selectTopWindowFrame()
 
 	-- Refresh everything.
 	wimp_root:reshape(true)

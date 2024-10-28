@@ -211,7 +211,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	line_ed:updateCaretBlink(dt)
+	lgcInputS.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end
@@ -259,7 +259,7 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			--love.graphics.setScissor()
+			love.graphics.setScissor()
 
 			-- Text editor component.
 			lgcInputS.draw(
@@ -286,9 +286,11 @@ def.skinners = {
 				.. "\n#line: " .. #line_ed.line
 				.. "\ncar_byte: " .. line_ed.car_byte
 				.. "\nh_byte: " .. line_ed.h_byte
-				.. "\ncaret_is_showing: " .. tostring(line_ed.caret_is_showing)
-				.. "\ncaret_blink_time: " .. tostring(line_ed.caret_blink_time)
+				.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
+				.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
 				.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+				.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
+				--.. "\ndoc_w: " .. self.doc_w
 				,
 				0, 64
 			)

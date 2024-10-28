@@ -56,14 +56,14 @@ end
 
 -- Step left, right while highlighting
 function editActS.caretLeftHighlight(self, line_ed)
-	self:caretStepLeft(not line_ed.allow_highlight)
+	self:caretStepLeft(not self.allow_highlight)
 
 	return true, false, true, false
 end
 
 
 function editActS.caretRightHighlight(self, line_ed)
-	self:caretStepRight(not line_ed.allow_highlight)
+	self:caretStepRight(not self.allow_highlight)
 
 	return true, false, true, false
 end
@@ -98,9 +98,9 @@ end
 function editActS.caretJumpLeftHighlight(self, line_ed)
 	-- Don't leak details about the masked string.
 	if line_ed.masked then
-		self:caretFirst(not line_ed.allow_highlight)
+		self:caretFirst(not self.allow_highlight)
 	else
-		self:caretJumpLeft(not line_ed.allow_highlight)
+		self:caretJumpLeft(not self.allow_highlight)
 	end
 
 	return true, false, true, false
@@ -110,9 +110,9 @@ end
 function editActS.caretJumpRightHighlight(self, line_ed)
 	-- Don't leak details about the masked string.
 	if line_ed.masked then
-		self:caretLast(not line_ed.allow_highlight)
+		self:caretLast(not self.allow_highlight)
 	else
-		self:caretJumpRight(not line_ed.allow_highlight)
+		self:caretJumpRight(not self.allow_highlight)
 	end
 
 	return true, false, true, false
@@ -136,14 +136,14 @@ end
 
 -- Highlight to start, end of line
 function editActS.caretFirstHighlight(self, line_ed)
-	self:caretFirst(not line_ed.allow_highlight)
+	self:caretFirst(not self.allow_highlight)
 
 	return true, false, true, false
 end
 
 
 function editActS.caretLastHighlight(self, line_ed)
-	self:caretLast(not line_ed.allow_highlight)
+	self:caretLast(not self.allow_highlight)
 
 	return true, false, true, false
 end
@@ -156,7 +156,7 @@ function editActS.backspace(self, line_ed)
 	This logic is essentially a copy-and-paste of the code that handles amended text input.
 	--]]
 
-	if line_ed.allow_input then
+	if self.allow_input then
 		-- Need to handle history here.
 		local old_byte, old_h_byte = line_ed:getCaretOffsets()
 		local deleted
@@ -176,7 +176,7 @@ function editActS.backspace(self, line_ed)
 
 			if utf8.len(deleted) == 1
 			and (entry and entry.car_byte == old_byte)
-			and ((line_ed.input_category == "backspacing" and no_ws) or (line_ed.input_category == "backspacing-ws"))
+			and ((self.input_category == "backspacing" and no_ws) or (self.input_category == "backspacing-ws"))
 			then
 				do_advance = false
 			end
@@ -185,7 +185,7 @@ function editActS.backspace(self, line_ed)
 				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
 			end
 			editHistS.writeEntry(line_ed, do_advance)
-			line_ed.input_category = no_ws and "backspacing" or "backspacing-ws"
+			self.input_category = no_ws and "backspacing" or "backspacing-ws"
 		end
 
 		return true, true, true, false
@@ -194,7 +194,7 @@ end
 
 
 function editActS.delete(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		-- Need to handle history here.
 		local old_byte, old_h_byte = line_ed:getCaretOffsets()
 		local deleted
@@ -214,7 +214,7 @@ function editActS.delete(self, line_ed)
 
 			if utf8.len(deleted) == 1 and deleted ~= "\n"
 			and (entry and entry.car_byte == old_byte)
-			and ((line_ed.input_category == "deleting" and no_ws) or (line_ed.input_category == "deleting-ws"))
+			and ((self.input_category == "deleting" and no_ws) or (self.input_category == "deleting-ws"))
 			then
 				do_advance = false
 			end
@@ -223,7 +223,7 @@ function editActS.delete(self, line_ed)
 				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
 			end
 			editHistS.writeEntry(line_ed, do_advance)
-			line_ed.input_category = no_ws and "deleting" or "deleting-ws"
+			self.input_category = no_ws and "deleting" or "deleting-ws"
 		end
 
 		return true, true, true, false
@@ -233,7 +233,7 @@ end
 
 -- Delete highlighted text (for the pop-up menu)
 function editActS.deleteHighlighted(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		if line_ed:isHighlighted() then
 			self:deleteHighlightedText()
 
@@ -246,14 +246,14 @@ end
 
 -- Backspace, delete by group (unhighlights first)
 function editActS.deleteGroup(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		local write_hist = false
 
 		-- Don't leak masked info.
 		if line_ed.masked then
 			write_hist = not not self:deleteUChar(1)
 		else
-			line_ed.input_category = false
+			self.input_category = false
 			write_hist = not not self:deleteGroup()
 		end
 
@@ -263,10 +263,10 @@ end
 
 
 function editActS.deleteAll(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		local old_line = line_ed.line
 
-		line_ed.input_category = false
+		self.input_category = false
 		line_ed:deleteText(false, 1, #line_ed.line)
 		line_ed:updateDisplayText()
 
@@ -276,7 +276,7 @@ end
 
 
 function editActS.backspaceGroup(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		local write_hist = false
 
 		-- Don't leak masked info.
@@ -284,7 +284,7 @@ function editActS.backspaceGroup(self, line_ed)
 			write_hist = not not self:backspaceUChar(1)
 		else
 			write_hist = not not self:backspaceGroup()
-			line_ed.input_category = false
+			self.input_category = false
 		end
 
 		return true, true, true, write_hist
@@ -294,9 +294,9 @@ end
 
 -- Backspace, delete from caret to start/end of line, respectively (unhighlights first)
 function editActS.deleteCaretToEnd(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		self:deleteCaretToEnd()
-		line_ed.input_category = false
+		self.input_category = false
 
 		return true, true, true, true
 	end
@@ -304,9 +304,9 @@ end
 
 
 function editActS.backspaceCaretToStart(self, line_ed)
-	if line_ed.allow_input then
+	if self.allow_input then
 		self:deleteCaretToStart()
-		line_ed.input_category = false
+		self.input_category = false
 
 		return true, true, true, true
 	end
@@ -315,7 +315,7 @@ end
 
 -- Tab key
 function editActS.typeTab(self, line_ed)
-	if line_ed.allow_input and line_ed.allow_tab then
+	if self.allow_input and self.allow_tab then
 		local written = self:writeText("\t", true)
 		local changed = #written > 0
 
@@ -326,8 +326,8 @@ end
 
 --- Return / Enter key
 function editActS.typeLineFeed(self, line_ed)
-	if line_ed.allow_input and line_ed.allow_line_feed and line_ed.allow_enter_line_feed then
-		line_ed.input_category = false
+	if self.allow_input and self.allow_line_feed and self.allow_enter_line_feed then
+		self.input_category = false
 		self:writeText("\n", true)
 
 		return true, true, true, true
@@ -337,7 +337,7 @@ end
 
 -- Select all
 function editActS.selectAll(self, line_ed)
-	if line_ed.allow_highlight then
+	if self.allow_highlight then
 		self:highlightAll()
 	else
 		self:clearHighlight()
@@ -348,7 +348,7 @@ end
 
 
 function editActS.selectCurrentWord(self, line_ed)
-	if line_ed.allow_highlight then
+	if self.allow_highlight then
 		self:highlightCurrentWord()
 	else
 		self:clearHighlight()
@@ -360,7 +360,7 @@ end
 
 -- Copy, cut, paste
 function editActS.copy(self, line_ed)
-	if line_ed.allow_copy and line_ed.allow_highlight and line_ed:isHighlighted() then
+	if self.allow_copy and self.allow_highlight and line_ed:isHighlighted() then
 		self:copyHighlightedToClipboard() -- handles masking
 
 		return true, false, false, false
@@ -369,7 +369,7 @@ end
 
 
 function editActS.cut(self, line_ed)
-	if line_ed.allow_input and line_ed.allow_cut and line_ed.allow_highlight and line_ed:isHighlighted() then
+	if self.allow_input and self.allow_cut and self.allow_highlight and line_ed:isHighlighted() then
 		self:cutHighlightedToClipboard() -- handles masking, history, and blanking the input category.
 
 		return true, true, true, false
@@ -378,7 +378,7 @@ end
 
 
 function editActS.paste(self, line_ed)
-	if line_ed.allow_input and line_ed.allow_paste then
+	if self.allow_input and self.allow_paste then
 		self:pasteClipboardText() -- handles history, and blanking the input category.
 
 		return true, true, true, false
@@ -397,7 +397,7 @@ end
 -- Undo / Redo
 function editActS.undo(self, line_ed)
 	self:stepHistory(-1)
-	line_ed.input_category = false
+	self.input_category = false
 
 	return true, true, true, false
 end
@@ -405,7 +405,7 @@ end
 
 function editActS.redo(self, line_ed)
 	self:stepHistory(1)
-	line_ed.input_category = false
+	self.input_category = false
 
 	return true, true, true, false
 end

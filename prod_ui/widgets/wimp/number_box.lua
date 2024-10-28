@@ -182,7 +182,7 @@ function def:setValue(v)
 
 		line_ed:deleteText(false, 1, #line_ed.line)
 		line_ed:insertText(text)
-		line_ed.input_category = false
+		self.input_category = false
 		line_ed.hist:clearAll()
 		self:caretFirst(true)
 		line_ed:updateDisplayText()
