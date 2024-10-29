@@ -132,22 +132,14 @@ end
 
 
 --- Gets the internal numeric value.
-function def:getInternalValue()
+function def:getValue()
 	return self.value
 end
 
 
---- Gets the internal text string (which may not correspond exactly to the internal value).
-function def:getInternalText()
-	return self.line_ed.line
-end
-
-
---- Gets the display text string (which may not correspond exactly to the internal value, and which may be modified
---  to show different characters from the internal text).
-function def:getDisplayText()
-	return self.line_ed.disp_text
-end
+-- To get the internal or display text:
+-- self:getText()
+-- self:getDisplayText()
 
 
 function def:setValueToDefault()
@@ -156,7 +148,10 @@ end
 
 
 function def:setDefaultValue(v)
+	if type(v) ~= "number" then error("argument #1: expected string or number")
+	elseif v ~= v then error("value cannot be NaN") end
 
+	self.value_default = v
 end
 
 
@@ -179,13 +174,10 @@ function def:setValue(v)
 
 		local line_ed = self.line_ed
 
-		line_ed:deleteText(false, 1, #line_ed.line)
-		line_ed:insertText(text)
-		self.input_category = false
+		self:replaceText(text)
 		line_ed.hist:clearAll()
+		self.input_category = false
 		self:caretFirst(true)
-		line_ed:updateDisplayText()
-		lgcInputS.updateCaretShape(self)
 
 		return true
 	end
@@ -242,8 +234,8 @@ function def:uiCall_create(inst)
 
 		self.line_ed = lineEdS.new(skin.font)
 
-		self:reshape()
 		self:setValueToDefault()
+		self:reshape()
 	end
 end
 
@@ -269,6 +261,8 @@ function def:uiCall_reshape()
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")
+
+	self:scrollClampViewport()
 end
 
 
@@ -315,7 +309,7 @@ local function _callback(self, cb, reps)
 	if self.value then
 		self:setValue(cb(self, self.value, reps))
 	else
-		self:setValue(self.value_min)
+		self:setValueToDefault()
 	end
 end
 
@@ -336,8 +330,8 @@ local function _str2Num(s, comma, v_min, v_max)
 end
 --]]
 
+
 local function _textInputValue(self)
-	--if
 	local clamped
 	self.value, clamped = _str2Num(self.line_ed.line, self.decimal_comma, self.value_min, self.value_max)
 	-- If the value was modified, then we have to rewrite the input box text.
@@ -387,9 +381,9 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			_callback(self, self.wid_decrementPageKey, self.rep_sc_count + 1)
 			return true
 
-		-- Standard text box controls (caret navigation, etc.)
+		-- Standard text box controls (caret navigation, backspace, etc.)
 		else
-			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, _checkDecimal)
 			_textInputValue(self)
 			return rv
 		end
