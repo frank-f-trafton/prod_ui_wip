@@ -486,4 +486,18 @@ function client:setReplaceMode(enabled)
 end
 
 
+function client:getTextAlignment()
+	return self.line_ed.align
+end
+
+
+function client:setTextAlignment(align)
+	local line_ed = self.line_ed
+	if line_ed:setAlign(align) then
+		line_ed:updateDisplayText()
+		return true
+	end
+end
+
+
 return editMethodsS

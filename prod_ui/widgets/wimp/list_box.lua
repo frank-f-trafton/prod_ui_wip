@@ -268,30 +268,21 @@ end
 
 
 function def:setMarkedItem(item_t, marked)
-	-- Assertions
-	-- [[
-	uiShared.assertTable(1, item_t)
-	--]]
+	uiShared.type1(1, item_t, "table")
 
 	item_t.marked = not not marked
 end
 
 
 function def:toggleMarkedItem(item_t)
-	-- Assertions
-	-- [[
-	uiShared.assertTable(1, item_t)
-	--]]
+	uiShared.type1(1, item_t, "table")
 
 	item_t.marked = not item_t.marked
 end
 
 
 function def:setMarkedItemByIndex(item_i, marked)
-	-- Assertions
-	-- [[
-	uiShared.assertNumber(1, item_i)
-	--]]
+	uiShared.type1(1, item_i, "number")
 
 	local item_t = self.menu.items[item_i]
 
@@ -300,10 +291,7 @@ end
 
 
 function def:getMarkedItem(item_t)
-	-- Assertions
-	-- [[
-	uiShared.assertTable(1, item_t)
-	--]]
+	uiShared.type1(1, item_t, "table")
 
 	return item_t.marked
 end
@@ -335,12 +323,8 @@ function def:setMarkedItemRange(marked, first, last)
 	local items = menu.items
 
 	marked = not not marked
-
-	-- Assertions
-	-- [[
-	uiShared.assertIntRange(2, first, 1, #items)
-	uiShared.assertIntRange(3, last, 1, #items)
-	--]]
+	uiShared.intRange(2, first, 1, #items)
+	uiShared.intRange(3, last, 1, #items)
 
 	for i = first, last do
 		items[i].marked = marked

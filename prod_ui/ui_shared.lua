@@ -1,6 +1,12 @@
 local uiShared = {}
 
 
+local PATH = ... and (...):match("(.-)[^%.]+$") or ""
+
+
+local pileArgCheck = require(PATH .. "lib.pile_arg_check")
+
+
 -- * Dummies *
 
 
@@ -62,6 +68,33 @@ end
 -- * Assertions *
 
 
+uiShared.type = pileArgCheck.type -- (n, v, ...)
+uiShared.type1 = pileArgCheck.type1 -- (n, v, e)
+uiShared.typeEval = pileArgCheck.typeEval -- typeEval(n, v, ...)
+uiShared.typeEval1 = pileArgCheck.typeEval1 -- (n, v, e)
+uiShared.int = pileArgCheck.int -- (n, v)
+uiShared.evalInt = pileArgCheck.evalInt -- (n, v)
+uiShared.intGE = pileArgCheck.intGE -- (n, v, min)
+uiShared.evalIntGE = pileArgCheck.evalIntGE -- (n, v, min)
+uiShared.intRange = pileArgCheck.intRange -- (n, v, min, max)
+uiShared.evalIntRange = pileArgCheck.evalIntRange -- (n, v, min, max)
+uiShared.notNaN = pileArgCheck.notNaN -- (n, v)
+
+
+function uiShared.assertLoveType(n, obj, typ)
+	if obj:type() ~= typ then
+		error("argument #" .. n .. ": bad LÖVE object type (expected " .. typ .. ", got " .. obj:type() .. ")", 2)
+	end
+end
+
+
+function uiShared.assertLoveTypeOf(n, obj, typ)
+	if not obj:typeOf(typ) then
+		error("argument #" .. n .. ": expected LÖVE object type '" .. typ .. "' in class hierarchy", 2)
+	end
+end
+
+
 --- Argument is a string or coloredtext sequence.
 function uiShared.assertText(n, text)
 	if type(text) ~= "string" and type(text) ~= "table" then
@@ -74,66 +107,6 @@ end
 function uiShared.assertNumber(n, num)
 	if type(num) ~= "number" then
 		uiShared.errBadType(n, num, "number")
-	end
-end
-
-
---- Argument is a table.
-function uiShared.assertTable(n, tbl)
-	if type(tbl) ~= "table" then
-		uiShared.errBadType(n, tbl, "table")
-	end
-end
-
-
---- Argument is a number which is not NaN.
-function uiShared.assertNumberNotNaN(n, num)
-	if type(num) ~= "number" then
-		uiShared.errBadType(n, num, "number")
-
-	elseif num ~= num then
-		error("argument #" .. n .. ": value cannot be NaN.")
-	end
-end
-
-
---- Argument is an integer which is not NaN.
-function uiShared.assertNumberIntNotNaN(n, num)
-	if type(num) ~= "number" then
-		uiShared.errBadType(n, num, "number")
-
-	elseif math.floor(num) ~= num then
-		error("argument #" .. n .. ": value must be an integer.")
-
-	elseif num ~= num then
-		error("argument #" .. n .. ": value cannot be NaN.")
-	end
-end
-
-
---- Argument is an integer, within a certain range.
-function uiShared.assertIntRange(n, num, first, last)
-	if type(num) ~= "number" then
-		uiShared.errBadType(n, num, "number")
-
-	elseif math.floor(num) ~= num then
-		error("argument #" .. n .. ": value must be an integer.")
-
-	elseif num < first or num > last then
-		error("argument #" .. n .. ": value is out of range.")
-	end
-end
-
-
-function uiShared.assertIntMinNotNaN(n, num, first)
-	if type(num) ~= "number" then
-		uiShared.errBadType(n, num, "number")
-
-	elseif math.floor(num) ~= num then
-		error("argument #" .. n .. ": value must be an integer.")
-
-	elseif num < first then
-		error("argument #" .. n .. ": value must be at least " .. n .. ".")
 	end
 end
 

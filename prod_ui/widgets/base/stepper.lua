@@ -112,16 +112,8 @@ end
 -- @param i (#options + 1) where to insert the option in the array. Must be between 1 and #options + 1. If not specified, the option will be added to the end of the array.
 -- @return The index of the newly-added option.
 function def:insertOption(option, i)
-	-- Assertions
-	-- [[
-	if type(option) ~= "string" and type(option) ~= "table" then uiShared.errBadType(1, option, "string/table") end
-	if i ~= nil then
-		uiShared.assertNumberIntNotNaN(1, i)
-		if i < 1 or i > #self.options + 1 then
-			error("argument #2: index is out of range.")
-		end
-	end
-	--]]
+	uiShared.type(1, option, "string", "table")
+	uiShared.evalIntRange(2, i, 1, #self.options + 1)
 
 	i = i or #self.options + 1
 
@@ -146,15 +138,7 @@ end
 -- @param i *(#options)* Index of the option to remove in the array. Must be between 1 and #options. If not specified, the last option in the array will be removed.
 -- @return The removed option value.
 function def:removeOption(i)
-	-- Assertions
-	-- [[
-	if i ~= nil then
-		uiShared.assertNumberIntNotNaN(1, i)
-		if i < 1 or i > #self.options then
-			error("argument #2: index is out of range.")
-		end
-	end
-	--]]
+	uiShared.evalIntRange(1, i, 1, #self.options)
 
 	i = i or #self.options
 
@@ -188,10 +172,7 @@ end
 -- @param index The new index number. The value is clamped between 1 and the number of options, or is set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:setIndex(index)
-	-- Assertions
-	-- [[
-	uiShared.assertNumberNotNaN(1, index)
-	--]]
+	uiShared.numberNotNaN(1, index)
 
 	index = math.floor(index)
 
@@ -219,10 +200,7 @@ end
 -- @param delta The amount to increment or decrement, expected to be -1, 0 or 1. The final index value will wrap around, or be set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:stepIndex(delta)
-	-- Assertions
-	-- [[
-	uiShared.assertNumberNotNaN(1, delta)
-	--]]
+	uiShared.numberNotNaN(1, delta)
 
 	delta = math.floor(delta)
 
