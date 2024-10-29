@@ -13,8 +13,15 @@ Return values:
 2) true: update the widget (recalculate document dimensions, clamp scrolling offsets, etc.)
 3) true: keep the caret in view
 4) true: write a history entry
+   "del": write a conditional history entry for deleting text
+   "bsp": write a conditional history entry for backspacing text
+5) string: The deleted or backspaced text, if 4 was "del" or "bsp"
 
-Returned values 2, 3 and 4 are only valid when 1 is true.
+When return value 1 is not true, all other return values are invalid.
+
+Do not make changes to the history ledger from this codepath, as the
+caller might reject the updated state. Always use the return values
+to signal that the history ledger should be updated.
 --]]
 
 
@@ -22,13 +29,6 @@ local context = select(1, ...)
 
 
 local editActS = {}
-
-
--- LÖVE Supplemental
-local utf8 = require("utf8")
-
-
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 
 
 -- Step left, right
@@ -151,82 +151,39 @@ end
 
 -- Backspace, delete (or delete highlight)
 function editActS.backspace(self, line_ed)
-	--[[
-	Both backspace and delete support partial amendments to history, so they need some special handling here.
-	This logic is essentially a copy-and-paste of the code that handles amended text input.
-	--]]
-
 	if self.allow_input then
-		-- Need to handle history here.
-		local old_byte, old_h_byte = line_ed:getCaretOffsets()
-		local deleted
+		local backspaced
 
 		if line_ed:isHighlighted() then
-			deleted = self:deleteHighlightedText()
+			backspaced = self:deleteHighlightedText()
+			if backspaced then
+				return true, true, true, true
+			end
 		else
-			deleted = self:backspaceUChar(1)
-		end
-
-		if deleted then
-			local hist = line_ed.hist
-
-			local no_ws = string.find(deleted, "%S")
-			local entry = hist:getCurrentEntry()
-			local do_advance = true
-
-			if utf8.len(deleted) == 1
-			and (entry and entry.car_byte == old_byte)
-			and ((self.input_category == "backspacing" and no_ws) or (self.input_category == "backspacing-ws"))
-			then
-				do_advance = false
+			backspaced = self:backspaceUChar(1)
+			if backspaced then
+				return true, true, true, "bsp", backspaced
 			end
-
-			if do_advance then
-				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
-			end
-			editHistS.writeEntry(line_ed, do_advance)
-			self.input_category = no_ws and "backspacing" or "backspacing-ws"
 		end
-
-		return true, true, true, false
 	end
 end
 
 
 function editActS.delete(self, line_ed)
 	if self.allow_input then
-		-- Need to handle history here.
-		local old_byte, old_h_byte = line_ed:getCaretOffsets()
 		local deleted
 
 		if line_ed:isHighlighted() then
 			deleted = self:deleteHighlightedText()
+			if deleted then
+				return true, true, true, true
+			end
 		else
 			deleted = self:deleteUChar(1)
-		end
-
-		if deleted then
-			local hist = line_ed.hist
-			local entry = hist:getCurrentEntry()
-
-			local no_ws = string.find(deleted, "%S")
-			local do_advance = true
-
-			if utf8.len(deleted) == 1 and deleted ~= "\n"
-			and (entry and entry.car_byte == old_byte)
-			and ((self.input_category == "deleting" and no_ws) or (self.input_category == "deleting-ws"))
-			then
-				do_advance = false
+			if deleted then
+				return true, true, true, "del", deleted
 			end
-
-			if do_advance then
-				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
-			end
-			editHistS.writeEntry(line_ed, do_advance)
-			self.input_category = no_ws and "deleting" or "deleting-ws"
 		end
-
-		return true, true, true, false
 	end
 end
 
@@ -370,18 +327,20 @@ end
 
 function editActS.cut(self, line_ed)
 	if self.allow_input and self.allow_cut and self.allow_highlight and line_ed:isHighlighted() then
-		self:cutHighlightedToClipboard() -- handles masking, history, and blanking the input category.
+		if self:cutHighlightedToClipboard() then -- handles masking
+			self.input_category = false
 
-		return true, true, true, false
+			return true, true, true, true
+		end
 	end
 end
 
 
 function editActS.paste(self, line_ed)
-	if self.allow_input and self.allow_paste then
-		self:pasteClipboardText() -- handles history, and blanking the input category.
+	if self.allow_input and self.allow_paste and self:pasteClipboardText() then
+		self.input_category = false
 
-		return true, true, true, false
+		return true, true, true, true
 	end
 end
 

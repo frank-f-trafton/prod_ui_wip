@@ -26,6 +26,10 @@ local context = select(1, ...)
 local lgcInputS = {}
 
 
+-- LÖVE Supplemental
+local utf8 = require("utf8")
+
+
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
@@ -146,48 +150,95 @@ function lgcInputS.updateCaretBlink(self, dt)
 end
 
 
+local function _partialHistForDeletions(self, line_ed, old_car, old_h, deleted, cat1, cat2)
+	local hist = line_ed.hist
+	local non_ws = string.find(deleted, "%S")
+	local entry = hist:getCurrentEntry()
+	local do_advance = true
+
+	if utf8.len(deleted) == 1
+	and (entry and entry.car_byte == old_car)
+	and ((self.input_category == cat1 and non_ws) or (self.input_category == cat2))
+	then
+		do_advance = false
+	end
+
+	if do_advance then
+		editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
+	end
+	editHistS.writeEntry(line_ed, do_advance)
+	self.input_category = non_ws and cat1 or cat2
+end
+
+
 --- Helper that takes care of history changes following an action.
 -- @param self The client widget
 -- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
--- @return The results of bound_func(), in case they are helpful to the calling widget logic.
-function lgcInputS.executeBoundAction(self, bound_func)
+-- @param fn_check A function that can reject the changes (for example, if the new text would be invalid for the widget).
+-- @return true if the function reported success.
+function lgcInputS.executeBoundAction(self, bound_func, fn_check)
 	local line_ed = self.line_ed
 
-	local old_byte, old_h_byte = line_ed:getCaretOffsets()
-	local ok, update_widget, caret_in_view, write_history = bound_func(self, line_ed)
+	local old_line, old_disp, old_car, old_h = line_ed:copyState()
+	local old_input_category = self.input_category
+	local ok, update_widget, caret_in_view, write_history, deleted = bound_func(self, line_ed)
 
-	--print("executeBoundAction()", "ok", ok, "update_widget", update_widget, "caret_in_view", caret_in_view, "write_history", write_history)
+	--[[
+	print("executeBoundAction()",
+		"ok", ok,
+		"update_widget", update_widget,
+		"caret_in_view", caret_in_view,
+		"write_history", write_history,
+		"deleted", deleted
+	)
+	--]]
 
 	if ok then
-		lgcInputS.updateCaretShape(self)
-		if update_widget then
-			self:updateDocumentDimensions(self)
-			self:scrollClampViewport()
+		-- Allow the caller to discard the changed text.
+		if fn_check and fn_check(self) == false then
+			line_ed:setState(old_line, old_disp, old_car, old_h)
+			self.input_category = old_input_category
+			return
+		else
+			lgcInputS.updateCaretShape(self)
+			if update_widget then
+				self:updateDocumentDimensions(self)
+				self:scrollClampViewport()
+			end
+
+			if caret_in_view then
+				self:scrollGetCaretInBounds(true)
+			end
+
+			-- 'Delete' and 'backspace' can amend history entries.
+			if type(write_history) == "string" then -- "del", "bsp"
+				assert(type(deleted) == "string", "expected string for deleted text")
+				local cat1, cat2
+				if write_history == "bsp" then cat1, cat2 = "backspacing", "backspacing-ws"
+				elseif write_history == "del" then cat1, cat2 = "deleting", "deleting-ws" end
+				_partialHistForDeletions(self, line_ed, old_car, old_h, deleted, cat1, cat2)
+
+			-- Unconditional new history entry:
+			elseif write_history then
+				self.input_category = false
+
+				editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_car, old_h)
+				editHistS.writeEntry(line_ed, true)
+			end
+
+			return true
 		end
-
-		if caret_in_view then
-			self:scrollGetCaretInBounds(true)
-		end
-
-		if write_history then
-			self.input_category = false
-
-			editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-			editHistS.writeEntry(line_ed, true)
-		end
-
-		return true, update_widget, caret_in_view, write_history
 	end
 end
 
 
 function lgcInputS.cb_boundAction(self, item_t)
-	local ok, update_widget, update_caret, write_history = lgcInputS.executeBoundAction(self, item_t.bound_func)
+	return lgcInputS.executeBoundAction(self, item_t.bound_func)
 end
 
 
 -- @return true if event propagation should halt.
-function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, fn_check)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
@@ -223,8 +274,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	local bound_func = editBindS[key_string]
 
 	if bound_func then
-		local ok, update_widget, caret_in_view, write_history = lgcInputS.executeBoundAction(self, bound_func)
-		if ok then
+		if lgcInputS.executeBoundAction(self, bound_func, fn_check) then
 			-- Stop event propagation
 			return true
 		end
@@ -279,12 +329,12 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 			end
 		end
 
-		local no_ws = string.find(written, "%S")
+		local non_ws = string.find(written, "%S")
 		local entry = hist:getCurrentEntry()
 		local do_advance = true
 
 		if (entry and entry.car_byte == old_byte)
-		and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
+		and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
 		then
 			do_advance = false
 		end
@@ -293,7 +343,7 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 			editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
 		end
 		editHistS.writeEntry(line_ed, do_advance)
-		self.input_category = no_ws and "typing" or "typing-ws"
+		self.input_category = non_ws and "typing" or "typing-ws"
 
 		lgcInputS.updateCaretShape(self)
 		self:updateDocumentDimensions()

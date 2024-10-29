@@ -101,7 +101,6 @@ end
 
 local function _writeText(self, text, suppress_replace)
 	local line_ed = self.line_ed
-	local line = line_ed.line
 
 	-- Sanitize input
 	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
@@ -165,6 +164,11 @@ end
 
 function client:getText()
 	return self.line_ed.line
+end
+
+
+function client:getDisplayText()
+	return self.line_ed.disp_text
 end
 
 
@@ -403,8 +407,6 @@ end
 function client:cutHighlightedToClipboard()
 	local line_ed = self.line_ed
 
-	local old_byte, old_h_byte = line_ed:getCaretOffsets()
-
 	local cut = self:deleteHighlightedText()
 
 	if cut then
@@ -417,19 +419,13 @@ function client:cutHighlightedToClipboard()
 		end
 
 		love.system.setClipboardText(cut)
-
-		self.input_category = false
-
-		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-		editHistS.writeEntry(line_ed, true)
+		return cut
 	end
 end
 
 
 function client:pasteClipboardText()
 	local line_ed = self.line_ed
-
-	local old_byte, old_h_byte = line_ed:getCaretOffsets()
 
 	if line_ed:isHighlighted() then
 		_deleteHighlightedText(self)
@@ -441,11 +437,8 @@ function client:pasteClipboardText()
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		self.input_category = false
 		self:writeText(text, true)
-
-		editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_byte, old_h_byte)
-		editHistS.writeEntry(line_ed, true)
+		return true
 	end
 end
 

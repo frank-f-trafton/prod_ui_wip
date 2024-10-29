@@ -121,10 +121,7 @@ end
 function _mt_hist:writeEntry(do_advance)
 	--print("writeEntry", "do_advance", do_advance)
 
-	-- Assertions
-	-- [[
 	_assertEntryPosition(self)
-	--]]
 
 	if not self.enabled then
 		return
@@ -138,7 +135,6 @@ function _mt_hist:writeEntry(do_advance)
 
 		if self.pos >= #ledger and #ledger >= self.max then
 			self.pos = self.pos - 1
-
 			table.remove(ledger, 1)
 		end
 	end
