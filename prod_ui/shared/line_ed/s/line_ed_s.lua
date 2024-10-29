@@ -28,11 +28,15 @@ local code_groups = context:getLua("shared/line_ed/code_groups")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local pileArgCheck = require(context.conf.prod_ui_req .. "lib.pile_arg_check")
+local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 lineEdS.code_groups = code_groups
+lineEdS.enum_align = pileTable.makeLUT({"left", "center", "right"})
 
 
 -- stand-in text colors
@@ -44,10 +48,24 @@ local _mt_ed_s = {}
 _mt_ed_s.__index = _mt_ed_s
 
 
+local function _checkAlign(align)
+	if not lineEdS.enum_align[align] then error("invalid align mode for single-line text input") end
+end
+
+
+
 --- Creates a new Line Editor object.
 -- @return the edit_field table.
-function lineEdS.new(font, text_color, text_h_color)
-	if not font then error("missing argument #1 (font) for new LineEditor (single) object.") end
+function lineEdS.new(font, align, text_color, text_h_color)
+	print("font:typeOf()", font:typeOf())
+	uiShared.assertLoveType(1, font, "font")
+	pileArgCheck.typeEval(2, align, "string")
+	align = align or "left"
+	_checkAlign(align)
+
+	pileArgCheck.typeEval(3, text_color, "table")
+	pileArgCheck.typeEval(3, text_h_color, "table")
+
 	assert(not text_color or type(text_color) == "table", "expected nil/false or table for 'text_color'")
 	assert(not text_h_color or type(text_h_color) == "table", "expected nil/false or table for 'text_h_color'")
 
@@ -147,6 +165,16 @@ function lineEdS.new(font, text_color, text_h_color)
 	self:updateDisplayText()
 
 	return self
+end
+
+
+function _mt_ed_s:setAlign(align)
+	if not lineEdS.enum_align[align] then error("invalid align mode for single-line text input") end
+
+	if align ~= self.align then
+		self.align = align
+		return true
+	end
 end
 
 

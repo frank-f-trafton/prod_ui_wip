@@ -18,8 +18,6 @@ return {
 	button_placement = "right", -- "left", "right"
 	button_alignment = "vertical", -- "horizontal", "vertical"
 
-	["$item_pad_v"] = 2,
-
 	text_align = "left", -- "left", "center", "right"
 
 	--color_cursor = {1.0, 1.0, 1.0, 1.0},

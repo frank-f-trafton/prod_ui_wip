@@ -122,14 +122,12 @@ end
 function def:addItem(text, pos)
 	local skin = self.skin
 	local font = skin.font
-
 	local items = self.menu.items
 
-	pos = pos or #items + 1
+	uiShared.type1(1, text, "string")
+	uiShared.evalIntRange(2, pos, 1, #items + 1)
 
-	if type(text) ~= "string" then uiShared.errBadType(1, text, "string")
-	elseif type(pos) ~= "number" then uiShared.errBadType(2, pos, "nil/number") end
-	uiShared.assertIntRange(2, pos, 1, #items + 1)
+	pos = pos or #items + 1
 
 	local item = {}
 

@@ -10,7 +10,7 @@ A single-line text box with controls for incrementing and decrementing numeric v
 │ ═╩═             │ - │ -- Decrement value (or press down-arrow)
 └─────────────────┴───┘
 
-Important: The internal value can be boolean false when the text input is empty or partially complete (-.).
+Important: The internal value can be boolean false when the text input is empty or partially complete.
 --]]
 
 
@@ -177,7 +177,8 @@ function def:setValue(v)
 		self:replaceText(text)
 		line_ed.hist:clearAll()
 		self.input_category = false
-		self:caretFirst(true)
+		self:caretLast(true)
+		lgcInputS.updateCaretShape(self)
 
 		return true
 	end
@@ -233,6 +234,7 @@ function def:uiCall_create(inst)
 		local skin = self.skin
 
 		self.line_ed = lineEdS.new(skin.font)
+		self.line_ed.align = self:setTextAlignment(skin.text_align)
 
 		self:setValueToDefault()
 		self:reshape()
@@ -314,7 +316,6 @@ local function _callback(self, cb, reps)
 end
 
 
--- [[
 -- @return The new value (or false if the string doesn't convert to a number), and a boolean indicating if the value
 --  has been clamped.
 local function _str2Num(s, comma, v_min, v_max)
@@ -328,7 +329,6 @@ local function _str2Num(s, comma, v_min, v_max)
 	end
 	return v or false, v ~= v_old
 end
---]]
 
 
 local function _textInputValue(self)
@@ -339,6 +339,7 @@ local function _textInputValue(self)
 		self:setValue(self.value)
 	end
 end
+
 
 --[[
 * Remember the old line_ed string
@@ -594,6 +595,33 @@ def.skinners = {
 				.. "\ndecimal_comma: " .. tostring(self.decimal_comma)
 				, 0, 64
 			)
+
+
+			-- Debug renderer
+			-- [[
+			love.graphics.print(
+				"line: " .. line_ed.line
+				.. "\n#line: " .. #line_ed.line
+				.. "\ncar_byte: " .. line_ed.car_byte
+				.. "\nh_byte: " .. line_ed.h_byte
+				.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
+				.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
+				.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+				.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
+				--.. "\ndoc_w: " .. self.doc_w
+				,
+				0, 256
+			)
+
+			local yy, hh = 240, line_ed.font:getHeight()
+			love.graphics.print("History state:", 0, 216)
+
+			for i, entry in ipairs(line_ed.hist.ledger) do
+				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
+				yy = yy + hh
+			end
+			--]]
+
 			love.graphics.pop()
 		end,
 

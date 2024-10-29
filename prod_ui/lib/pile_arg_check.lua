@@ -1,4 +1,4 @@
--- PILE argCheck v1.1.2
+-- PILE argCheck v1.1.2 (modified)
 -- (C) 2024 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -32,6 +32,14 @@ function M.type(n, v, ...)
 end
 
 
+lang.err_type1_bad = "argument #$1: bad type (expected $2, got $3)"
+function M.type1(n, v, e)
+	if type(v) ~= e then
+		error(interp(lang.err_type_bad, n, type(v), e), 2)
+	end
+end
+
+
 lang.err_eval_bad = "argument #$1: bad type (expected false/nil or [$2], got $3)"
 function M.typeEval(n, v, ...)
 	if v then
@@ -46,9 +54,17 @@ function M.typeEval(n, v, ...)
 end
 
 
+lang.err_type_eval1_bad = "argument #$1: bad type (expected false/nil or $2, got $3)"
+function M.typeEval1(n, v, e)
+	if v and type(v) ~= e then
+		error(interp(lang.err_type_eval1_bad, n, type(v), e), 2)
+	end
+end
+
+
 lang.err_int_bad = "argument #$1: expected integer"
 function M.int(n, v)
-	if type(v) ~= "number" or math.floor(v) ~= v then
+	if type(v) ~= "number" or math.floor(v) ~= v or v ~= v then
 		error(interp(lang.err_int_bad, n))
 	end
 end
@@ -56,7 +72,7 @@ end
 
 lang.err_eval_int_bad = "argument #$1: expected false/nil or integer"
 function M.evalInt(n, v)
-	if v and type(v) ~= "number" or math.floor(v) ~= v then
+	if v and (type(v) ~= "number" or math.floor(v) ~= v or v ~= v) then
 		error(interp(lang.err_int_bad, n))
 	end
 end
@@ -64,7 +80,7 @@ end
 
 lang.err_int_ge_bad = "argument #$1: expected integer greater or equal to $2"
 function M.intGE(n, v, min)
-	if type(v) ~= "number" or math.floor(v) ~= v or v < min then
+	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v ~= v then
 		error(interp(lang.err_int_ge_bad, n, min))
 	end
 end
@@ -72,7 +88,7 @@ end
 
 lang.err_eval_int_ge_bad = "argument #$1: expected false/nil or integer greater or equal to $2"
 function M.evalIntGE(n, v, min)
-	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min) then
+	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v ~= v) then
 		error(interp(lang.err_eval_int_ge_bad, n, min))
 	end
 end
@@ -80,7 +96,7 @@ end
 
 lang.err_int_range_bad = "argument #$1: expected integer within the range of $2 to $3"
 function M.intRange(n, v, min, max)
-	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max then
+	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v then
 		error(interp(lang.err_int_range_bad, n, min, max))
 	end
 end
@@ -88,8 +104,20 @@ end
 
 lang.err_eval_int_range_bad = "argument #$1: expected false/nil or integer within the range of $2 to $3"
 function M.evalIntRange(n, v, min, max)
-	if v and type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max then
+	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v) then
 		error(interp(lang.err_int_range_bad, n, min, max))
+	end
+end
+
+
+lang.err_nan1 = "argument #$1: unexpected non-NaN number, got $2"
+lang.err_nan2 = "argument #$1: unexpected non-NaN number, got NaN"
+function M.numberNotNaN(n, v)
+	if type(v) ~= "number" then
+		error(interp(lang.err_nan1, n, type(v)))
+
+	elseif v ~= v then
+		error(interp(lang.err_nan2, n))
 	end
 end
 

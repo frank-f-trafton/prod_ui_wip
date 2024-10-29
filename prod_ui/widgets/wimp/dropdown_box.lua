@@ -87,14 +87,10 @@ function def:addItem(text, pos, bijou_id)
 
 	local items = self.menu.items
 
+	uiShared.type1(1, text, "string")
+	uiShared.evalIntRange(2, pos, 1, #items + 1)
+
 	pos = pos or #items + 1
-
-	-- Assertions.
-	-- [[
-	if type(text) ~= "string" then uiShared.errBadType(1, text, "string")
-	elseif type(pos) ~= "number" then uiShared.errBadType(2, pos, "nil/number") end
-
-	uiShared.assertIntRange(2, pos, 1, #items + 1)
 
 	-- XXX: bijou_id
 	--]]
