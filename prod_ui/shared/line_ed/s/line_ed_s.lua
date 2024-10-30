@@ -27,6 +27,7 @@ local utf8 = require("utf8")
 local code_groups = context:getLua("shared/line_ed/code_groups")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -195,16 +196,18 @@ end
 -- @param copy_deleted If true, return the deleted text as a string.
 -- @param byte_1 The first byte offset to delete from.
 -- @param byte_2 The final byte offset to delete to.
--- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
+-- @return The deleted text as a string, if 'copy_deleted' was true and any text was removed, or nil.
 function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2) -- [update]
-	local deleted
-	if copy_deleted then
-		deleted = self.line:sub(byte_1, byte_2)
-	end
-	self.line = edComS.delete(self.line, byte_1, byte_2)
-	self.car_byte, self.h_byte = byte_1, byte_1
+	if byte_1 < byte_2 then
+		local deleted
+		if copy_deleted then
+			deleted = self.line:sub(byte_1, byte_2)
+		end
+		self.line = edComS.delete(self.line, byte_1, byte_2)
+		self.car_byte, self.h_byte = byte_1, byte_1
 
-	return deleted
+		return deleted
+	end
 end
 
 
@@ -339,8 +342,6 @@ end
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
 function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
-	--print("_mt_ed_s:getCharacterDetailsAtPosition()", "x", x, "split_x", split_x)
-
 	local font = self.font
 	local line = self.line
 	local disp_text = self.disp_text
@@ -348,19 +349,13 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
 
 	-- Convert display offset to core byte.
-
 	local u_count = edComS.utf8LenPlusOne(disp_text, byte)
 
-	--print("", "u_count", u_count)
-
 	local core_byte = utf8.offset(line, u_count)
-	--print("core_byte", core_byte, "#line", #line)
 	local core_char = false
 	if core_byte <= #line then
 		core_char = line:sub(core_byte, utf8.offset(line, 2, core_byte) - 1)
 	end
-
-	--print("", "core_byte", core_byte, "core_char", core_char)
 
 	return core_byte, core_char
 end
@@ -373,20 +368,6 @@ end
 
 function _mt_ed_s:highlightToByte(h_byte_n) -- [sync]
 	self.h_byte = math.max(1, math.min(h_byte_n, #self.line + 1))
-end
-
-
---- Copies the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
--- @return The current internal string, the display text, and the caret and highlight bytes.
-function _mt_ed_s:copyState()
-	return self.line, self.disp_text, self.car_byte, self.h_byte
-end
-
-
---- Sets the LineEditor's internal state. Used when incoming text is invalid and must be backed out.
--- @param line, disp_text, car_byte, h_byte, The old internal state, as collected from self:copyState().
-function _mt_ed_s:setState(line, disp_text, car_byte, h_byte) -- [update]
-	self.line, self.disp_text, self.car_byte, self.h_byte = line, disp_text, car_byte, h_byte
 end
 
 

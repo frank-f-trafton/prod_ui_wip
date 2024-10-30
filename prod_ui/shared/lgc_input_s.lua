@@ -133,6 +133,12 @@ function lgcInputS.setupInstance(self)
 	self.caret_blink_on = 0.5
 	self.caret_blink_off = 0.5
 
+	--[[
+	'self.fn_check': a function that can reject changes made to the text.
+	* Arguments: self (the widget)
+	* Returns: false/nil if the new text should be backed out, any other value otherwise.
+	--]]
+
 	-- Caller should create a single line editor object at `self.line_ed`.
 end
 
@@ -155,7 +161,7 @@ end
 local function _partialHistForDeletions(self, line_ed, old_car, old_h, deleted, cat1, cat2)
 	local hist = line_ed.hist
 	local non_ws = string.find(deleted, "%S")
-	local entry = hist:getCurrentEntry()
+	local entry = hist:getEntry()
 	local do_advance = true
 
 	if utf8.len(deleted) == 1
@@ -175,16 +181,15 @@ end
 
 --- Helper that takes care of history changes following an action.
 -- @param self The client widget
--- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
--- @param fn_check A function that can reject the changes (for example, if the new text would be invalid for the widget).
+-- @param bound_func The wrapper function to call. It should take 'self' as its first argument and the LineEditor core as the second. It should return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
 -- @return true if the function reported success.
-function lgcInputS.executeBoundAction(self, bound_func, fn_check)
+function lgcInputS.executeBoundAction(self, bound_func)
 	local line_ed = self.line_ed
 
-	local old_line, old_disp, old_car, old_h = line_ed:copyState()
+	local old_car, old_h = line_ed.car_byte, line_ed.h_byte
 	local old_input_category = self.input_category
 
-	local ok, update_widget, caret_in_view, write_history, deleted = bound_func(self, line_ed, fn_check)
+	local ok, update_widget, caret_in_view, write_history, deleted = bound_func(self, line_ed)
 
 	--[[
 	print("executeBoundAction()",
@@ -235,7 +240,7 @@ end
 
 
 -- @return true if event propagation should halt.
-function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, fn_check)
+function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	local line_ed = self.line_ed
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
@@ -270,7 +275,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, fn_check)
 	local bound_func = editBindS[key_string]
 
 	if bound_func then
-		if lgcInputS.executeBoundAction(self, bound_func, fn_check) then
+		if lgcInputS.executeBoundAction(self, bound_func) then
 			-- Stop event propagation
 			return true
 		end
@@ -298,7 +303,7 @@ end
 
 
 -- @return true if the input was accepted, false if it was rejected or input is not allowed
-function lgcInputS.textInputLogic(self, text, fn_check)
+function lgcInputS.textInputLogic(self, text)
 	local line_ed = self.line_ed
 
 	if self.allow_input then
@@ -306,17 +311,10 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 
 		lgcInputS.resetCaretBlink(self)
 
-		local old_line, old_disp_text, old_byte, old_h_byte = line_ed:copyState()
+		local old_car, old_h = line_ed.car_byte, line_ed.h_byte
 		local old_input_category = self.input_category
 
 		local written = self:writeText(text, false)
-
-		-- Allow the caller to discard the changed text.
-		if fn_check and fn_check(self) == false then
-			line_ed:setState(old_line, old_disp_text, old_byte, old_h_byte)
-			self.input_category = old_input_category
-			return
-		end
 
 		if self.replace_mode then
 			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
@@ -327,17 +325,17 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 
 		if hist.enabled then
 			local non_ws = string.find(written, "%S")
-			local entry = hist:getCurrentEntry()
+			local entry = hist:getEntry()
 			local do_advance = true
 
-			if (entry and entry.car_byte == old_byte)
+			if (entry and entry.car_byte == old_car)
 			and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
 			then
 				do_advance = false
 			end
 
 			if do_advance then
-				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
+				editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
 			end
 			editHistS.writeEntry(line_ed, do_advance)
 			self.input_category = non_ws and "typing" or "typing-ws"

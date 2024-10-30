@@ -359,7 +359,7 @@ function editActM.backspace(self, line_ed)
 			local hist = line_ed.hist
 
 			local no_ws = string.find(deleted, "%S")
-			local entry = hist:getCurrentEntry()
+			local entry = hist:getEntry()
 			local do_advance = true
 
 			if utf8.len(deleted) == 1 and deleted ~= "\n"
@@ -397,7 +397,7 @@ function editActM.delete(self, line_ed)
 			local hist = line_ed.hist
 
 			local no_ws = string.find(deleted, "%S")
-			local entry = hist:getCurrentEntry()
+			local entry = hist:getEntry()
 			local do_advance = true
 
 			if utf8.len(deleted) == 1 and deleted ~= "\n"

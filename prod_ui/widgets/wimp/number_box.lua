@@ -11,10 +11,10 @@ A single-line text box with controls for incrementing and decrementing numeric v
 └─────────────────┴───┘
 
 Important: The internal value can be boolean false when the text input is empty or partially complete.
+
+Scientific notation is not supported; use a plain text box instead.
+Fractional parts are not supported for hexadecimal, octal and binary.
 --]]
-
-
--- XXX TODO: hex, octal, binary numbers
 
 
 local context = select(1, ...)
@@ -26,8 +26,10 @@ local utf8 = require("utf8")
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -88,85 +90,146 @@ function def:wid_incrementPageKey(v, r) return v + 10 end
 function def:wid_decrementPageKey(v, r) return v - 10 end
 
 
--- [comma][minus][decimal]
-local _ptn_in = {
-	[false] = {
-		[false] = {
-			[false] = "%d*",
-			[true] = "%d*%.?%d*"
-		}, [true] = {
-			[false] = "%-?%d*",
-			[true] = "%-?%d*%.?%d*"
-		}
-	}, [true] = {
-		[false] = {
-			[false] = "%d*",
-			[true] = "%d*,?%d*"
-		}, [true] = {
-			[false] = "%-?%d*",
-			[true] = "%-?%d*,?%d*"
-		}
-	}
+-- (integer == decimal with no fractional part)
+local _enum_value_mode = {
+	decimal = 10,
+	integer = 10,
+	hexadecimal = 16,
+	octal = 8,
+	binary = 2
 }
 
 
--- For partial input.
-local function _decimalStringOK(s, comma, minus, decimal)
-	return s:match(_ptn_in[comma][minus][decimal]) == s
+-- string characters for various base conversions (0-9, a-z)
+local _nums = {}
+for i = 0, 9 do
+	_nums[i] = string.char(i + 48)
+end
+for i = 10, 36 do -- a-z
+	_nums[i] = string.char(i + 87)
 end
 
 
-local function _checkDecimal(self)
-	return _decimalStringOK(self.line_ed.line, not not self.decimal_comma, self.value_min < 0, not not self.allow_decimal)
-end
+local function _checker(self)
+	local value_mode = self.value_mode
+	local ptn
 
+	if value_mode == "integer" then
+		if self.value_min < 0 then
+			if self.value_max < 0 then -- integer, mandatory negative
+				ptn = "%-%d*"
+			else -- integer, optional negative
+				ptn = "%-?%d*"
+			end
+		else -- integer, no negative
+			ptn = "%d*"
+		end
 
-local function _num2Str(n, comma)
-	local fmt = math.floor(n) == n and "%d" or "%f"
-	local s = string.format(fmt, n)
-	if comma then
-		s = s:gsub("%.", ",")
+	elseif value_mode == "decimal" then
+		if self.value_min < 0 then
+			if self.value_max < 0 then -- decimal, mandatory negative
+				ptn = "%-%d*%.?%d*"
+			else -- decimal, optional negative
+				ptn = "%-?%d*%.?%d*"
+			end
+		else -- decimal, no negative
+			ptn = "%d*%.?%d*"
+		end
+
+	elseif value_mode == "hexadecimal" then
+		if self.value_min < 0 then
+			if self.value_max < 0 then -- hexadecimal, mandatory negative
+				ptn = "%-%x*"
+			else -- hexadecimal, optional negative
+				ptn = "%-?%x*"
+			end
+		else -- hexadecimal, no negative
+			ptn = "%x*"
+		end
+
+	elseif value_mode == "octal" then
+		if self.value_min < 0 then
+			if self.value_max < 0 then -- octal, mandatory negative
+				ptn = "%-[0-7]*"
+			else -- octal, optional negative
+				ptn = "%-?[0-7]*"
+			end
+		else -- octal, no negative
+			ptn = "[0-7]*"
+		end
+
+	elseif value_mode == "binary" then
+		if self.value_min < 0 then
+			if self.value_max < 0 then -- binary, mandatory negative
+				ptn = "%-[0-1]*"
+			else -- binary, optional negative
+				ptn = "%-?[0-1]*"
+			end
+		else -- binary, no negative
+			ptn = "[0-1]*"
+		end
 	end
-	if s:find("[%.,]") then
-		-- clip trailing zeros after decimal point
-		s = s:match("(.-)[0]*$")
+
+	if not ptn then
+		error("couldn't match 'value_mode' to a search pattern")
 	end
-	return s
+
+	return self.line_ed.line:match(ptn) == s
 end
 
 
---- Gets the internal numeric value.
-function def:getValue()
-	return self.value
-end
+local jit = jit
+local function _baseToString(n, base)
+	-- Fractional parts are supported only for base 10.
+	-- TODO: test usage of table.concat()
+	if base == 10 then
+		return tostring(n)
+	end
 
+	local s = ""
+	local n2 = math.abs(n)
+	while n2 > 1 do
+		s = _nums[n2 % base] .. s
+		n2 = math.floor(n2 * .5)
+	end
+	s = (n < 0 and "-" or "") .. s
 
--- To get the internal or display text:
--- self:getText()
--- self:getDisplayText()
-
-
-function def:setDefaultValue(v)
-	uiShared.numberNotNaN(1, v)
-
-	self.value_default = v
+	return s == "" and "0" or s
 end
 
 
 local function _setValue(self, v, update_text, preserve_caret)
 	v = math.max(self.value_min, math.min(v, self.value_max))
-	if not self.allow_decimal then
+	if self.value_mode ~= "decimal" then
 		v = math.floor(v)
 	end
 	local line_ed = self.line_ed
 	local old_car_u = edComS.utf8LenPlusOne(line_ed.line, line_ed.car_byte)
 
 	if update_text then
-		local text = _num2Str(v, self.decimal_comma)
-		self:replaceText(text)
+		local s = _baseToString(math.abs(v), _enum_value_mode[self.value_mode])
+
+		-- leading, trailing zeros
+		local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
+		s = string.rep("0", math.max(0, #s1 - self.digit_pad1)) .. s
+		if #s2 > 0 then
+			s = s .. string.rep("0", math.max(0, #s3 - self.digit_pad2))
+		end
+
+		-- comma for fractional part
+		if self.fractional_comma then
+			s = s:gsub("%.", ",")
+		end
+
+		-- minus
+		if v < 0 then
+			s = "-" .. s
+		end
+
+		self:replaceText(s)
 	end
 
-	if preserve_caret then
+	if preserve_caret then -- untested
 		local max_car_u = utf8.len(line_ed.line) + 1
 		line_ed.car_byte = utf8.offset(line_ed.line, math.min(old_car_u, max_car_u))
 	end
@@ -188,26 +251,55 @@ local function _callback(self, cb, reps)
 end
 
 
--- @return The new value (or false if the string doesn't convert to a number).
-local function _str2Num(s, comma)
-	if comma then
-		s = s:gsub(",", ".")
-	end
-	return tonumber(s) or false
-end
-
-
 -- codepath for value changes through direct text input, copy+paste, etc.
 local function _textInputValue(self)
-	local v = _str2Num(self.line_ed.line, self.decimal_comma)
+	local s = self.line_ed.line
+	if self.fractional_comma then
+		s = s:gsub(",", ".")
+	end
+
+	local v = tonumber(s, _enum_value_mode[self.value_mode]) or false
+
 	if v and self.value ~= v then
 		_setValue(self, v, false, false)
-		self:setValue(v)
 	end
 end
 
 
--- Programmatically set the NumberBox value.
+function def:getValueMode()
+	return self.value_mode
+end
+
+
+function def:setValueMode(mode)
+	uiShared.enum(1, mode, "ValueMode", _enum_value_mode)
+
+	self.value_mode = mode
+end
+
+
+-- To get the internal or display text:
+-- self:getText()
+-- self:getDisplayText()
+
+
+function def:getDefaultValue()
+	return self.value_default
+end
+
+
+function def:setDefaultValue(v)
+	uiShared.numberNotNaN(1, v)
+
+	self.value_default = v
+end
+
+
+function def:getValue()
+	return self.value
+end
+
+
 function def:setValue(v)
 	uiShared.numberNotNaN(1, v)
 
@@ -218,7 +310,6 @@ end
 function def:setValueToDefault()
 	_setValue(self, self.value_default, true)
 end
-
 
 
 function def:uiCall_create(inst)
@@ -242,16 +333,16 @@ function def:uiCall_create(inst)
 		self.value_min = 0
 		self.value_max = 999999
 
-		-- when false, rejects input with decimal points
-		self.allow_decimal = true
+		self.value_mode = "decimal"
 
-		-- when true, use ',' for the decimal point
-		self.decimal_comma = false
+		-- when true, use ',' to mark the fractional part
+		self.fractional_comma = false
 
-		-- padding of digits before and after the decimal point
+		-- padding of digits before and after the fractional part
 		self.digit_pad1 = 0
 		self.digit_pad2 = 0
-		self.decimals_max = 2^15
+		-- maximum digits in the fractional part
+		self.fractional_max = 2^15
 
 		-- repeat mouse-press state
 		self.repeat_btn = false -- false for inactive, -1 for decrement, 1 for increment
@@ -271,8 +362,10 @@ function def:uiCall_create(inst)
 
 		self.line_ed = lineEdS.new(skin.font)
 
-		-- turn off undo/redo
-		self.line_ed.hist:setEnabled(false)
+		-- special history configuration
+		self.line_ed.hist:setLockedFirst(true)
+		self.line_ed.hist:setMaxEntries(2)
+		editHistS.writeEntry(self, true)
 
 		self:setTextAlignment(skin.text_align)
 
@@ -382,7 +475,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- Standard text box controls (caret navigation, backspace, etc.)
 		else
-			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, _checkDecimal)
+			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 			_textInputValue(self)
 			return rv
 		end
@@ -392,7 +485,7 @@ end
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		if lgcInputS.textInputLogic(self, text, _checkDecimal) then
+		if lgcInputS.textInputLogic(self, text) then
 			_textInputValue(self)
 			return true
 		end
@@ -592,8 +685,7 @@ def.skinners = {
 				.. "\nvalue: " .. tostring(self.value)
 				.. "\nvalue_min: " .. tostring(self.value_min)
 				.. "\nvalue_max: " .. tostring(self.value_max)
-				.. "\nallow_decimal: " .. tostring(self.allow_decimal)
-				.. "\ndecimal_comma: " .. tostring(self.decimal_comma)
+				.. "\nfractional_comma: " .. tostring(self.fractional_comma)
 				, 0, 64
 			)
 

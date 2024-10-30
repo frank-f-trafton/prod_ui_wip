@@ -122,4 +122,28 @@ function M.numberNotNaN(n, v)
 end
 
 
+lang.err_enum1 = "argument #$1: invalid '$2' enum (got $3)"
+lang.err_enum2 = "argument #$1: invalid '$2' enum (got non-number, non-string value)"
+function M.enum(n, v, id, e)
+	if not e[v] then
+		if type(v) == "string" or type(v) == "number" then
+			error(interp(lang.err_enum1, n, id, v))
+		else
+			error(interp(lang.err_enum2, n, id))
+		end
+	end
+end
+
+
+function M.enumEval(n, v, id, e)
+	if v and not e[v] then
+		if type(v) == "string" or type(v) == "number" then
+			error(interp(lang.err_enum1, n, id, v))
+		else
+			error(interp(lang.err_enum2, n, id))
+		end
+	end
+end
+
+
 return M

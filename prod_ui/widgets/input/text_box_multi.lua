@@ -713,7 +713,7 @@ function def:uiCall_textInput(inst, text)
 			self.update_flag = true
 
 			local no_ws = string.find(written, "%S")
-			local entry = hist:getCurrentEntry()
+			local entry = hist:getEntry()
 			local do_advance = true
 
 			if (entry and entry.car_line == old_line and entry.car_byte == old_byte)

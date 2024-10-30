@@ -79,6 +79,8 @@ uiShared.evalIntGE = pileArgCheck.evalIntGE -- (n, v, min)
 uiShared.intRange = pileArgCheck.intRange -- (n, v, min, max)
 uiShared.evalIntRange = pileArgCheck.evalIntRange -- (n, v, min, max)
 uiShared.numberNotNaN = pileArgCheck.numberNotNaN -- (n, v)
+uiShared.enum = pileArgCheck.enum -- (n, v, id, e)
+uiShared.enumEval = pileArgCheck.enumEval -- (n, v, id, e)
 
 
 function uiShared.loveType(n, obj, typ)
