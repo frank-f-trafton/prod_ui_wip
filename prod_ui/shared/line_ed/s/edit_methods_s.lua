@@ -35,10 +35,38 @@ local function _checkAlign(align)
 end
 
 
+-- Helper functions to save and restore the internal state of the Line Editor.
+local _line, _disp_text, _car_byte, _h_byte
+
+
+local function _save(line_ed)
+	return line_ed.line, line_ed.disp_text, line_ed.car_byte, line_ed.h_byte
+end
+
+
+local function _load(line_ed)
+	line_ed.line, line_ed.disp_text, line_ed.car_byte, line_ed.h_byte = _line, _disp_text, _car_byte, _h_byte
+	_line, _disp_text, _car_byte, _h_byte = nil
+end
+
+
+local function _erase()
+	_line, _disp_text, _car_byte, _h_byte = nil
+end
+
+
+local function _check(self)
+	local rv = not self.fn_check and true or self.fn_check(self)
+	_line, _disp_text, _car_byte, _h_byte = nil
+	return rv
+end
+
+
 client.getReplaceMode = commonEd.client_getReplaceMode
 client.setReplaceMode = commonEd.client_setReplaceMode
 
 
+-- Do not use with methods that change the internal text.
 local function _checkClearHighlight(line_ed, clear_highlight)
 	if clear_highlight then
 		line_ed:clearHighlight()
@@ -46,9 +74,7 @@ local function _checkClearHighlight(line_ed, clear_highlight)
 end
 
 
-local function _deleteHighlightedText(self)
-	local line_ed = self.line_ed
-
+local function _deleteHighlightedText(line_ed)
 	if line_ed:isHighlighted() then
 		local byte_1, byte_2 = line_ed:getHighlightOffsets()
 		line_ed:clearHighlight()
@@ -57,8 +83,7 @@ local function _deleteHighlightedText(self)
 end
 
 
-local function _deleteUChar(self, n_u_chars)
-	local line_ed = self.line_ed
+local function _deleteUChar(line_ed, n_u_chars)
 	local line = line_ed.line
 
 	line_ed:clearHighlight()
@@ -78,13 +103,46 @@ local function _deleteUChar(self, n_u_chars)
 end
 
 
+local function _writeText(self, line_ed, text, suppress_replace)
+	-- Sanitize input
+	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
+
+	if not self.allow_highlight then
+		line_ed:clearHighlight()
+	end
+
+	-- If there is a highlight selection, get rid of it and insert the new text. This overrides replace_mode.
+	if line_ed:isHighlighted() then
+		_deleteHighlightedText(line_ed)
+
+	elseif self.replace_mode and not suppress_replace then
+		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
+		_deleteUChar(line_ed, utf8.len(text))
+	end
+
+	-- Trim text to fit the allowed uChars limit.
+	text = textUtil.trimString(text, self.u_chars_max - utf8.len(line_ed.line))
+
+	line_ed:insertText(text)
+
+	return text
+end
+
+
 --- Delete highlighted text from the field.
 -- @return Substring of the deleted text.
 function client:deleteHighlightedText()
 	local line_ed = self.line_ed
-	local rv = _deleteHighlightedText(self)
-	line_ed:updateDisplayText()
-	return rv
+
+	_save(line_ed)
+
+	local rv = _deleteHighlightedText(line_ed)
+	if rv and _check(self) then
+		line_ed:updateDisplayText()
+		return rv
+	end
+
+	_erase()
 end
 
 
@@ -95,45 +153,22 @@ function client:backspaceUChar(n_u_chars)
 	local line_ed = self.line_ed
 	local line = line_ed.line
 
+	_save(line_ed)
+
 	line_ed:clearHighlight()
 
 	local byte_1, u_count = edComS.countUChars(line, -1, line_ed.car_byte, n_u_chars)
 	local rv
 	if u_count > 0 then
 		rv = line_ed:deleteText(true, byte_1, line_ed.car_byte - 1)
+
+		if rv and _check(self) then
+			line_ed:updateDisplayText()
+			return rv
+		end
 	end
 
-	line_ed:updateDisplayText()
-	return rv
-end
-
-
-local function _writeText(self, text, suppress_replace)
-	local line_ed = self.line_ed
-
-	-- Sanitize input
-	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
-
-	if not self.allow_highlight then
-		line_ed:clearHighlight()
-	end
-
-	-- If there is a highlight selection, get rid of it and insert the new text. This overrides replace_mode.
-	if line_ed:isHighlighted() then
-		_deleteHighlightedText(self)
-
-	elseif self.replace_mode and not suppress_replace then
-		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		_deleteUChar(self, utf8.len(text))
-	end
-
-	-- Trim text to fit the allowed uChars limit.
-	text = textUtil.trimString(text, self.u_chars_max - utf8.len(line_ed.line))
-
-	line_ed:insertText(text)
-	line_ed:updateDisplayText()
-
-	return text
+	_erase()
 end
 
 
@@ -143,17 +178,30 @@ end
 -- entering line feeds, etc.
 -- @return The sanitized and trimmed text which was inserted into the field.
 function client:writeText(text, suppress_replace)
-	local rv = _writeText(self, text, suppress_replace)
-	self.line_ed:updateDisplayText()
-	return rv
+	local line_ed = self.line_ed
+
+	_save(line_ed)
+
+	local rv = _writeText(self, line_ed, text, suppress_replace)
+	if _check(self) then
+		line_ed:updateDisplayText()
+		return rv
+	end
 end
 
 
 function client:replaceText(text)
 	local line_ed = self.line_ed
 
+	_save(line_ed)
+
 	line_ed:deleteText(false, 1, #line_ed.line)
-	return self:writeText(text, true)
+	local rv = _writeText(self, line_ed, text, true)
+
+	if _check(self) then
+		line_ed:updateDisplayText()
+		return rv
+	end
 end
 
 
@@ -162,14 +210,25 @@ function client:stepHistory(dir)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
+	_save(line_ed)
+	local old_pos = hist:getPosition()
+
 	if hist.enabled then
 		local changed, entry = hist:moveToEntry(hist.pos + dir)
 
 		if changed then
 			editHistS.applyEntry(self, entry)
-			line_ed:updateDisplayText()
+
+			if not _check(self) then
+				hist.pos = old_pos
+			else
+				line_ed:updateDisplayText()
+				return true
+			end
 		end
 	end
+
+	_erase()
 end
 
 
@@ -307,14 +366,25 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
-	local rv = _deleteUChar(self, n_u_chars)
-	self.line_ed:updateDisplayText()
-	return rv
+	local line_ed = self.line_ed
+
+	_save(line_ed)
+
+	local rv = _deleteUChar(line_ed, n_u_chars)
+
+	if rv and _check(self) then
+		line_ed:updateDisplayText()
+		return rv
+	end
+
+	_erase()
 end
 
 
 function client:deleteGroup()
 	local line_ed = self.line_ed
+
+	_save(line_ed)
 
 	line_ed:clearHighlight()
 	local rv
@@ -334,48 +404,69 @@ function client:deleteGroup()
 		--print("ranges:", line_ed.car_byte, byte_right)
 		rv = line_ed:deleteText(true, line_ed.car_byte, byte_right)
 	end
-	line_ed:updateDisplayText()
-	--print("DEL", "|"..(rv or "<nil>").."|")
-	if rv ~= "" then
+
+	if rv and _check(self) then
+		line_ed:updateDisplayText()
 		return rv
 	end
+
+	_erase()
 end
 
 
 function client:backspaceGroup()
 	local line_ed = self.line_ed
 
+	_save(line_ed)
+
 	line_ed:clearHighlight()
 	local rv
 
 	if line_ed.car_byte > 1 then
 		local byte_left = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
-		if byte_left ~= line_ed.car_byte then
-			rv = line_ed:deleteText(true, byte_left, line_ed.car_byte - 1)
-		end
+		rv = line_ed:deleteText(true, byte_left, line_ed.car_byte - 1)
 	end
-	line_ed:updateDisplayText()
-	return rv
+
+	if rv and _check(self) then
+		line_ed:updateDisplayText()
+		return rv
+	end
+
+	_erase()
 end
 
 
 function client:deleteCaretToEnd()
 	local line_ed = self.line_ed
 
+	_save(line_ed)
+
 	line_ed:clearHighlight()
 	local rv = line_ed:deleteText(true, line_ed.car_byte, #line_ed.line)
-	line_ed:updateDisplayText()
-	return rv
+
+	if rv and _check(self) then
+		line_ed:updateDisplayText()
+		return rv
+	end
+
+	_erase()
 end
 
 
 function client:deleteCaretToStart()
 	local line_ed = self.line_ed
 
+	_save(line_ed)
+
 	line_ed:clearHighlight()
 	local rv = line_ed:deleteText(true, 1, line_ed.car_byte - 1)
-	self:updateDisplayText()
-	return rv
+
+	if rv and _check(self) then
+		self:updateDisplayText()
+		return rv
+	end
+
+	_erase()
 end
 
 
@@ -418,28 +509,36 @@ end
 function client:cutHighlightedToClipboard()
 	local line_ed = self.line_ed
 
-	local cut = self:deleteHighlightedText()
+	_save(line_ed)
+
+	local cut = _deleteHighlightedText(line_ed)
 
 	if cut then
 		cut = textUtil.sanitize(cut, self.bad_input_rule)
 
 		-- Don't leak masked string info.
 		if line_ed.masked then
-			cut = table.concat(cut, "\n")
-			cut = string.rep(line_ed.mask_glyph, utf8.len(cut))
+			cut = line_ed.mask_glyph:rep(utf8.len(cut))
 		end
 
-		love.system.setClipboardText(cut)
-		return cut
+		if _check(self) then
+			love.system.setClipboardText(cut)
+			self:updateDisplayText()
+			return cut
+		end
 	end
+
+	_erase()
 end
 
 
 function client:pasteClipboardText()
 	local line_ed = self.line_ed
 
+	_save(line_ed)
+
 	if line_ed:isHighlighted() then
-		_deleteHighlightedText(self)
+		_deleteHighlightedText(line_ed)
 	end
 
 	local text = love.system.getClipboardText()
@@ -448,9 +547,14 @@ function client:pasteClipboardText()
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		self:writeText(text, true)
-		return true
+		_writeText(self, line_ed, text, true)
+		if _check(self) then
+			line_ed:updateDisplayText()
+			return true
+		end
 	end
+
+	_erase()
 end
 
 
