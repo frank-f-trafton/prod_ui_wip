@@ -180,6 +180,8 @@ end
 
 local jit = jit
 local function _baseToString(n, base)
+	assert(base >= 2 and base <= 36, "unsupported base")
+
 	-- Fractional parts are supported only for base 10.
 	-- TODO: test usage of table.concat()
 	if base == 10 then
@@ -188,13 +190,15 @@ local function _baseToString(n, base)
 
 	local s = ""
 	local n2 = math.abs(n)
-	while n2 > 1 do
+	while n2 >= 1 do
 		s = _nums[n2 % base] .. s
-		n2 = math.floor(n2 * .5)
+		n2 = math.floor(n2 / base)
 	end
 	s = (n < 0 and "-" or "") .. s
-
-	return s == "" and "0" or s
+	if s == "" then
+		s = "0"
+	end
+	return s
 end
 
 
@@ -211,9 +215,9 @@ local function _setValue(self, v, update_text, preserve_caret)
 
 		-- leading, trailing zeros
 		local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
-		s = string.rep("0", math.max(0, #s1 - self.digit_pad1)) .. s
+		s = string.rep("0", math.max(0, self.digit_pad1 - #s1)) .. s
 		if #s2 > 0 then
-			s = s .. string.rep("0", math.max(0, #s3 - self.digit_pad2))
+			s = s .. string.rep("0", math.max(0, self.digit_pad2 - #s3))
 		end
 
 		-- comma for fractional part
@@ -365,7 +369,7 @@ function def:uiCall_create(inst)
 		-- special history configuration
 		self.line_ed.hist:setLockedFirst(true)
 		self.line_ed.hist:setMaxEntries(2)
-		editHistS.writeEntry(self, true)
+		editHistS.writeEntry(self.line_ed, true)
 
 		self:setTextAlignment(skin.text_align)
 
