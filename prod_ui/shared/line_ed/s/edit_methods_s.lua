@@ -23,7 +23,16 @@ local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+
+
+local _enum_align = pileTable.makeLUT({"left", "center", "right"})
+
+
+local function _checkAlign(align)
+	if not _enum_align[align] then error("invalid align mode for single-line text input") end
+end
 
 
 client.getReplaceMode = commonEd.client_getReplaceMode
@@ -487,14 +496,15 @@ end
 
 
 function client:getTextAlignment()
-	return self.line_ed.align
+	return self.align
 end
 
 
 function client:setTextAlignment(align)
-	local line_ed = self.line_ed
-	if line_ed:setAlign(align) then
-		line_ed:updateDisplayText()
+	_checkAlign(align)
+
+	if align ~= self.align then
+		self.align = align
 		return true
 	end
 end

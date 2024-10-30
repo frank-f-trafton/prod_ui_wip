@@ -112,6 +112,8 @@ function lgcInputS.setupInstance(self)
 	-- This is only valid when a mouse action is in progress.
 	self.click_byte = 1
 
+	self.align = "left" -- "left", "center", "right"
+
 	-- How far to offset the line X position depending on the alignment.
 	self.align_offset = 0
 
@@ -473,25 +475,21 @@ function lgcInputS.method_updateDocumentDimensions(self)
 	local line_ed = self.line_ed
 	local font = line_ed.font
 
-	self.doc_w = line_ed.disp_text_w + line_ed.caret_box_w_empty
+	-- The document width is the larger of: 1) viewport width, 2) text width (plus an empty caret slot).
+	-- When alignment is center or right and the text is smaller than the viewport, the text, caret,
+	-- etc. are transposed.
+	self.doc_w = math.max(self.vp_w, line_ed.disp_text_w)
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
 
-	self:updateAlignOffset()
-end
-
-
---- Call after changing alignment.
-function lgcInputS.method_updateAlignOffset(self)
-	local align = self.line_ed.align
-
+	local align = self.align
 	if align == "left" then
 		self.align_offset = 0
 
 	elseif align == "center" then
-		self.align_offset = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
+		self.align_offset = math.max(0, (self.vp_w - line_ed.disp_text_w) * .5)
 
 	else -- align == "right"
-		self.align_offset = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
+		self.align_offset = math.max(0, self.vp_w - line_ed.disp_text_w)
 	end
 end
 

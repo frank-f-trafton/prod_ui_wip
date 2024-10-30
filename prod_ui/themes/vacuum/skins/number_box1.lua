@@ -18,7 +18,7 @@ return {
 	button_placement = "right", -- "left", "right"
 	button_alignment = "vertical", -- "horizontal", "vertical"
 
-	text_align = "left", -- "left", "center", "right"
+	text_align = "right", -- "left", "center", "right"
 
 	--color_cursor = {1.0, 1.0, 1.0, 1.0},
 	["$caret_w"] = 2,
