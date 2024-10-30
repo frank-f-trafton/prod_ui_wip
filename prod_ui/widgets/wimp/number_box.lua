@@ -20,6 +20,9 @@ Important: The internal value can be boolean false when the text input is empty 
 local context = select(1, ...)
 
 
+local utf8 = require("utf8")
+
+
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local lgcInputS = context:getLua("shared/lgc_input_s")
@@ -157,6 +160,7 @@ end
 
 -- @return true if the new value was accepted, false if it was rejected by the format check, nil if the input value is already set.
 function def:setValue(v)
+	print("self.align", self.align, "self.align_offset", self.align_offset)
 	if type(v) ~= "number" then error("argument #1: expected string or number")
 	elseif v ~= v then error("value cannot be NaN") end
 
@@ -170,15 +174,17 @@ function def:setValue(v)
 	end
 
 	if self.value ~= v then
-		self.value = v
-
 		local line_ed = self.line_ed
+
+		self.value = v
 
 		self:replaceText(text)
 		line_ed.hist:clearAll()
 		self.input_category = false
 		self:caretLast(true)
 		lgcInputS.updateCaretShape(self)
+		self:updateDocumentDimensions()
+		self:scrollGetCaretInBounds(true)
 
 		return true
 	end
@@ -234,7 +240,7 @@ function def:uiCall_create(inst)
 		local skin = self.skin
 
 		self.line_ed = lineEdS.new(skin.font)
-		self.line_ed.align = self:setTextAlignment(skin.text_align)
+		self:setTextAlignment(skin.text_align)
 
 		self:setValueToDefault()
 		self:reshape()
@@ -264,6 +270,7 @@ function def:uiCall_reshape()
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, "margin")
 
+	self:updateDocumentDimensions()
 	self:scrollClampViewport()
 end
 
@@ -554,7 +561,7 @@ def.skinners = {
 			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_inc, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
 			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_dec, self.vp4_x + res.deco_ox, self.vp4_y + res.deco_oy, self.vp4_w, self.vp4_h)
 
-			-- Crop item text.
+			-- Crop text
 			uiGraphics.intersectScissor(
 				ox + self.x + self.vp2_x,
 				oy + self.y + self.vp2_y,
@@ -562,7 +569,10 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			-- Text editor component.
+			-- Debug
+			love.graphics.setScissor()
+
+			-- Text editor component
 			lgcInputS.draw(
 				self,
 				res.color_highlight,

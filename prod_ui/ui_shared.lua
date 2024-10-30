@@ -81,14 +81,14 @@ uiShared.evalIntRange = pileArgCheck.evalIntRange -- (n, v, min, max)
 uiShared.notNaN = pileArgCheck.notNaN -- (n, v)
 
 
-function uiShared.assertLoveType(n, obj, typ)
+function uiShared.loveType(n, obj, typ)
 	if obj:type() ~= typ then
 		error("argument #" .. n .. ": bad LÖVE object type (expected " .. typ .. ", got " .. obj:type() .. ")", 2)
 	end
 end
 
 
-function uiShared.assertLoveTypeOf(n, obj, typ)
+function uiShared.loveTypeOf(n, obj, typ)
 	if not obj:typeOf(typ) then
 		error("argument #" .. n .. ": expected LÖVE object type '" .. typ .. "' in class hierarchy", 2)
 	end

@@ -25,18 +25,15 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
-local pileArgCheck = require(context.conf.prod_ui_req .. "lib.pile_arg_check")
-local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 lineEdS.code_groups = code_groups
-lineEdS.enum_align = pileTable.makeLUT({"left", "center", "right"})
+
 
 
 -- stand-in text colors
@@ -48,34 +45,18 @@ local _mt_ed_s = {}
 _mt_ed_s.__index = _mt_ed_s
 
 
-local function _checkAlign(align)
-	if not lineEdS.enum_align[align] then error("invalid align mode for single-line text input") end
-end
-
-
-
 --- Creates a new Line Editor object.
 -- @return the edit_field table.
-function lineEdS.new(font, align, text_color, text_h_color)
-	print("font:typeOf()", font:typeOf())
-	uiShared.assertLoveType(1, font, "font")
-	pileArgCheck.typeEval(2, align, "string")
-	align = align or "left"
-	_checkAlign(align)
-
-	pileArgCheck.typeEval(3, text_color, "table")
-	pileArgCheck.typeEval(3, text_h_color, "table")
-
-	assert(not text_color or type(text_color) == "table", "expected nil/false or table for 'text_color'")
-	assert(not text_h_color or type(text_h_color) == "table", "expected nil/false or table for 'text_h_color'")
+function lineEdS.new(font, text_color, text_h_color)
+	uiShared.loveType(1, font, "Font")
+	uiShared.typeEval(2, text_color, "table")
+	uiShared.typeEval(3, text_h_color, "table")
 
 	local self = {}
 
 	self.font = font
 
-	-- Position and dimensions of the display text and highlight box.
-	self.disp_text_x = 0
-	self.disp_text_y = 0
+	-- dimensions of the display text and highlight box
 	self.disp_text_w = 0
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
@@ -119,8 +100,6 @@ function lineEdS.new(font, align, text_color, text_h_color)
 
 	-- External display text.
 	self.disp_text = ""
-
-	self.align = "left" -- "left", "center", "right"
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
@@ -168,21 +147,6 @@ function lineEdS.new(font, align, text_color, text_h_color)
 end
 
 
-function _mt_ed_s:setAlign(align)
-	if not lineEdS.enum_align[align] then error("invalid align mode for single-line text input") end
-
-	if align ~= self.align then
-		self.align = align
-		return true
-	end
-end
-
-
-function _mt_ed_s:getCaretOffsets()
-	return self.car_byte, self.h_byte
-end
-
-
 --- Gets caret and highlight offsets in the correct order.
 function _mt_ed_s:getHighlightOffsets()
 	local byte_1, byte_2 = self.car_byte, self.h_byte
@@ -198,15 +162,7 @@ end
 
 -- @return Byte, X position and width of the glyph (if applicable).
 function _mt_ed_s:getLineInfoAtX(x, split_x)
-	local font = self.font
-	local line = self.line
-
-	-- Temporarily make X relative to the start of the line.
-	x = x - self.disp_text_x
-
-	local byte, glyph_x, glyph_w = textUtil.getTextInfoAtX(line, font, x, split_x)
-
-	return byte, glyph_x + self.disp_text_x, glyph_w
+	return textUtil.getTextInfoAtX(self.line, self.font, x, split_x)
 end
 
 
@@ -295,26 +251,12 @@ function _mt_ed_s:updateDisplayText()
 	end
 
 	self.disp_text = work_str
-
-	self.disp_text_x = 0
-	self.disp_text_y = 0
-	self.disp_text_w = font:getWidth(self.disp_text)
+	self.disp_text_w = font:getWidth(self.disp_text) + self.caret_box_w_empty
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
 	-- XXX: syntax coloring.
 	self.syntax_colors = false
 	self.colored_text = false
-
-	-- apply display text alignment
-	if self.align == "left" then
-		self.disp_text_x = 0
-
-	elseif self.align == "center" then
-		self.disp_text_x = math.floor(0.5 - self.disp_text_w / 2)
-
-	elseif self.align == "right" then
-		self.disp_text_x = -self.disp_text_w
-	end
 
 	self:syncDisplayCaretHighlight()
 end
@@ -334,10 +276,7 @@ function _mt_ed_s:syncDisplayCaretHighlight()
 	-- If we are at the end of the string + 1: use the width of the underscore character.
 	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
 
-	-- Apply horizontal alignment offsetting to caret.
-	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, self.disp_text, self.align, font)
-
-	self.caret_box_y = self.disp_text_y
+	self.caret_box_y = 0
 	self.caret_box_h = font:getHeight()
 
 	-- update highlight rect
