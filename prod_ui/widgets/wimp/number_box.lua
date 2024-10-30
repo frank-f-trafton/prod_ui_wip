@@ -207,7 +207,10 @@ local function _setValue(self, v, update_text, preserve_caret)
 	if self.value_mode ~= "decimal" then
 		v = math.floor(v)
 	end
+	self.value = v
+
 	local line_ed = self.line_ed
+	local old_len = utf8.len(line_ed.line)
 	local old_car_u = edComS.utf8LenPlusOne(line_ed.line, line_ed.car_byte)
 
 	if update_text then
@@ -233,9 +236,12 @@ local function _setValue(self, v, update_text, preserve_caret)
 		self:replaceText(s)
 	end
 
-	if preserve_caret then -- untested
+	if preserve_caret then
+		local delta = utf8.len(line_ed.line) - old_len
 		local max_car_u = utf8.len(line_ed.line) + 1
-		line_ed.car_byte = utf8.offset(line_ed.line, math.min(old_car_u, max_car_u))
+		line_ed:caretToByte(utf8.offset(line_ed.line, math.min(old_car_u + delta, max_car_u)))
+		line_ed:clearHighlight()
+		line_ed:syncDisplayCaretHighlight()
 	end
 	line_ed:clearHighlight()
 
@@ -263,9 +269,9 @@ local function _textInputValue(self)
 	end
 
 	local v = tonumber(s, _enum_value_mode[self.value_mode]) or false
-
+	print("self.value", self.value, "v", v)
 	if v and self.value ~= v then
-		_setValue(self, v, false, false)
+		_setValue(self, v)
 	end
 end
 
@@ -307,7 +313,7 @@ end
 function def:setValue(v)
 	uiShared.numberNotNaN(1, v)
 
-	_setValue(self, v)
+	_setValue(self, v, true)
 end
 
 
