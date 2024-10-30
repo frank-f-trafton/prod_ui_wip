@@ -30,6 +30,15 @@ local context = select(1, ...)
 
 local editActS = {}
 
+--[[
+	-- WIP WIP WIP WIP WIP WIP
+		-- Allow the caller to discard the changed text.
+		if fn_check and fn_check(self) == false then
+			line_ed:setState(old_line, old_disp, old_car, old_h)
+			self.input_category = old_input_category
+			return
+--]]
+
 
 -- Step left, right
 function editActS.caretLeft(self, line_ed)
@@ -355,18 +364,22 @@ end
 
 -- Undo / Redo
 function editActS.undo(self, line_ed)
-	self:stepHistory(-1)
-	self.input_category = false
+	if line_ed.hist.enabled then
+		self:stepHistory(-1)
+		self.input_category = false
 
-	return true, true, true, false
+		return true, true, true, false
+	end
 end
 
 
 function editActS.redo(self, line_ed)
-	self:stepHistory(1)
-	self.input_category = false
+	if line_ed.hist.enabled then
+		self:stepHistory(1)
+		self.input_category = false
 
-	return true, true, true, false
+		return true, true, true, false
+	end
 end
 
 

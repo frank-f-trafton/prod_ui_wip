@@ -183,7 +183,8 @@ function lgcInputS.executeBoundAction(self, bound_func, fn_check)
 
 	local old_line, old_disp, old_car, old_h = line_ed:copyState()
 	local old_input_category = self.input_category
-	local ok, update_widget, caret_in_view, write_history, deleted = bound_func(self, line_ed)
+
+	local ok, update_widget, caret_in_view, write_history, deleted = bound_func(self, line_ed, fn_check)
 
 	--[[
 	print("executeBoundAction()",
@@ -196,22 +197,17 @@ function lgcInputS.executeBoundAction(self, bound_func, fn_check)
 	--]]
 
 	if ok then
-		-- Allow the caller to discard the changed text.
-		if fn_check and fn_check(self) == false then
-			line_ed:setState(old_line, old_disp, old_car, old_h)
-			self.input_category = old_input_category
-			return
-		else
-			lgcInputS.updateCaretShape(self)
-			if update_widget then
-				self:updateDocumentDimensions(self)
-				self:scrollClampViewport()
-			end
+		lgcInputS.updateCaretShape(self)
+		if update_widget then
+			self:updateDocumentDimensions(self)
+			self:scrollClampViewport()
+		end
 
-			if caret_in_view then
-				self:scrollGetCaretInBounds(true)
-			end
+		if caret_in_view then
+			self:scrollGetCaretInBounds(true)
+		end
 
+		if line_ed.hist.enabled then
 			-- 'Delete' and 'backspace' can amend history entries.
 			if type(write_history) == "string" then -- "del", "bsp"
 				assert(type(deleted) == "string", "expected string for deleted text")
@@ -227,9 +223,8 @@ function lgcInputS.executeBoundAction(self, bound_func, fn_check)
 				editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_car, old_h)
 				editHistS.writeEntry(line_ed, true)
 			end
-
-			return true
 		end
+		return true
 	end
 end
 
@@ -242,7 +237,6 @@ end
 -- @return true if event propagation should halt.
 function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, fn_check)
 	local line_ed = self.line_ed
-	local hist = line_ed.hist
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
@@ -331,21 +325,23 @@ function lgcInputS.textInputLogic(self, text, fn_check)
 			end
 		end
 
-		local non_ws = string.find(written, "%S")
-		local entry = hist:getCurrentEntry()
-		local do_advance = true
+		if hist.enabled then
+			local non_ws = string.find(written, "%S")
+			local entry = hist:getCurrentEntry()
+			local do_advance = true
 
-		if (entry and entry.car_byte == old_byte)
-		and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
-		then
-			do_advance = false
-		end
+			if (entry and entry.car_byte == old_byte)
+			and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
+			then
+				do_advance = false
+			end
 
-		if do_advance then
-			editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
+			if do_advance then
+				editHistS.doctorCurrentCaretOffsets(hist, old_byte, old_h_byte)
+			end
+			editHistS.writeEntry(line_ed, do_advance)
+			self.input_category = non_ws and "typing" or "typing-ws"
 		end
-		editHistS.writeEntry(line_ed, do_advance)
-		self.input_category = non_ws and "typing" or "typing-ws"
 
 		lgcInputS.updateCaretShape(self)
 		self:updateDocumentDimensions()
@@ -572,13 +568,15 @@ end
 
 function lgcInputS.configItem_undo(item, client)
 	item.selectable = true
-	item.actionable = (client.line_ed.hist.pos > 1)
+	local hist = client.line_ed.hist
+	item.actionable = (hist.enabled and hist.pos > 1)
 end
 
 
 function lgcInputS.configItem_redo(item, client)
 	item.selectable = true
-	item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
+	local hist = client.line_ed.hist
+	item.actionable = (hist.enabled and hist.pos < #hist.ledger)
 end
 
 

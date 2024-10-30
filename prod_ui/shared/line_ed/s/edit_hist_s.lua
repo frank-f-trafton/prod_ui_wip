@@ -26,9 +26,11 @@ end
 
 
 function editHistS.writeEntry(line_ed, do_advance)
-	local entry = line_ed.hist:writeEntry(do_advance)
-	editHistS.initEntry(entry, line_ed.line, line_ed.car_byte, line_ed.h_byte)
-	return entry
+	if line_ed.hist.enabled then
+		local entry = line_ed.hist:writeEntry(do_advance)
+		editHistS.initEntry(entry, line_ed.line, line_ed.car_byte, line_ed.h_byte)
+		return entry
+	end
 end
 
 
