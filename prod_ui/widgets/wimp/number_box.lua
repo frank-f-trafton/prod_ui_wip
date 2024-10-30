@@ -160,7 +160,6 @@ end
 
 -- @return true if the new value was accepted, false if it was rejected by the format check, nil if the input value is already set.
 function def:setValue(v)
-	print("self.align", self.align, "self.align_offset", self.align_offset)
 	if type(v) ~= "number" then error("argument #1: expected string or number")
 	elseif v ~= v then error("value cannot be NaN") end
 
