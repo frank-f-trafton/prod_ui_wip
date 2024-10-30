@@ -348,7 +348,8 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
 
 	-- Convert display offset to core byte.
-	local u_count = edComS.displaytoUCharCount(disp_text, byte)
+
+	local u_count = edComS.utf8LenPlusOne(disp_text, byte)
 
 	--print("", "u_count", u_count)
 

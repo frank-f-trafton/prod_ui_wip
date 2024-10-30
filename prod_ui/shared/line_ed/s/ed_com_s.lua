@@ -74,7 +74,7 @@ function edComS.coreToDisplayOffsets(line_in, byte_n, line_out)
 end
 
 
-function edComS.displaytoUCharCount(str, byte)
+function edComS.utf8LenPlusOne(str, byte)
 	-- 'byte' can be one past the end of the string to represent the caret being at the final position.
 	-- However, arg #3 to utf8.len() cannot exceed the size of the string (though arg #3 can handle offsets
 	-- on UTF-8 continuation bytes).
@@ -84,12 +84,7 @@ function edComS.displaytoUCharCount(str, byte)
 		byte = byte - 1
 	end
 
-	local u_count = utf8.len(str, 1, byte)
-
-	--print("", "str", str)
-	--print("", "u_count", u_count, "plus_one", plus_one)
-
-	return u_count + plus_one
+	return utf8.len(str, 1, byte) + plus_one
 end
 
 

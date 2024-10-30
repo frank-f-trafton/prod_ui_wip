@@ -162,11 +162,13 @@ function client:stepHistory(dir)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
 
-	local changed, entry = hist:moveToEntry(hist.pos + dir)
+	if hist.enabled then
+		local changed, entry = hist:moveToEntry(hist.pos + dir)
 
-	if changed then
-		editHistS.applyEntry(self, entry)
-		line_ed:updateDisplayText()
+		if changed then
+			editHistS.applyEntry(self, entry)
+			line_ed:updateDisplayText()
+		end
 	end
 end
 

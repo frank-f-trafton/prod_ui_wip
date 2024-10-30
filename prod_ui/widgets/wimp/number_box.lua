@@ -25,6 +25,7 @@ local utf8 = require("utf8")
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
@@ -145,49 +146,79 @@ end
 -- self:getDisplayText()
 
 
-function def:setValueToDefault()
-	self:setValue(self.value_default)
-end
-
-
 function def:setDefaultValue(v)
-	if type(v) ~= "number" then error("argument #1: expected string or number")
-	elseif v ~= v then error("value cannot be NaN") end
+	uiShared.numberNotNaN(1, v)
 
 	self.value_default = v
 end
 
 
--- @return true if the new value was accepted, false if it was rejected by the format check, nil if the input value is already set.
-function def:setValue(v)
-	if type(v) ~= "number" then error("argument #1: expected string or number")
-	elseif v ~= v then error("value cannot be NaN") end
-
+local function _setValue(self, v, update_text, preserve_caret)
 	v = math.max(self.value_min, math.min(v, self.value_max))
+	if not self.allow_decimal then
+		v = math.floor(v)
+	end
+	local line_ed = self.line_ed
+	local old_car_u = edComS.utf8LenPlusOne(line_ed.line, line_ed.car_byte)
 
-	local text = _num2Str(v, self.decimal_comma)
-
-	-- reject invalid input
-	if not _decimalStringOK(text, not not self.decimal_comma, self.value_min < 0, not not self.allow_decimal) then
-		return false
+	if update_text then
+		local text = _num2Str(v, self.decimal_comma)
+		self:replaceText(text)
 	end
 
-	if self.value ~= v then
-		local line_ed = self.line_ed
+	if preserve_caret then
+		local max_car_u = utf8.len(line_ed.line) + 1
+		line_ed.car_byte = utf8.offset(line_ed.line, math.min(old_car_u, max_car_u))
+	end
+	line_ed:clearHighlight()
 
-		self.value = v
+	lgcInputS.updateCaretShape(self)
+	self:updateDocumentDimensions()
+	self:scrollGetCaretInBounds(true)
+end
 
-		self:replaceText(text)
-		line_ed.hist:clearAll()
-		self.input_category = false
-		self:caretLast(true)
-		lgcInputS.updateCaretShape(self)
-		self:updateDocumentDimensions()
-		self:scrollGetCaretInBounds(true)
 
-		return true
+-- codepath for value changes through key up/down, pageup/pagedown and mouse clicks
+local function _callback(self, cb, reps)
+	if self.value then
+		_setValue(self, (cb(self, self.value, reps)), true, true)
+	else
+		self:setValueToDefault()
 	end
 end
+
+
+-- @return The new value (or false if the string doesn't convert to a number).
+local function _str2Num(s, comma)
+	if comma then
+		s = s:gsub(",", ".")
+	end
+	return tonumber(s) or false
+end
+
+
+-- codepath for value changes through direct text input, copy+paste, etc.
+local function _textInputValue(self)
+	local v = _str2Num(self.line_ed.line, self.decimal_comma)
+	if v and self.value ~= v then
+		_setValue(self, v, false, false)
+		self:setValue(v)
+	end
+end
+
+
+-- Programmatically set the NumberBox value.
+function def:setValue(v)
+	uiShared.numberNotNaN(1, v)
+
+	_setValue(self, v)
+end
+
+
+function def:setValueToDefault()
+	_setValue(self, self.value_default, true)
+end
+
 
 
 function def:uiCall_create(inst)
@@ -239,6 +270,10 @@ function def:uiCall_create(inst)
 		local skin = self.skin
 
 		self.line_ed = lineEdS.new(skin.font)
+
+		-- turn off undo/redo
+		self.line_ed.hist:setEnabled(false)
+
 		self:setTextAlignment(skin.text_align)
 
 		self:setValueToDefault()
@@ -311,49 +346,6 @@ function def:uiCall_destroy(inst)
 		commonWimp.checkDestroyPopUp(self)
 	end
 end
-
-
-local function _callback(self, cb, reps)
-	if self.value then
-		self:setValue(cb(self, self.value, reps))
-	else
-		self:setValueToDefault()
-	end
-end
-
-
--- @return The new value (or false if the string doesn't convert to a number), and a boolean indicating if the value
---  has been clamped.
-local function _str2Num(s, comma, v_min, v_max)
-	if comma then
-		s = s:gsub(",", ".")
-	end
-	local v = tonumber(s)
-	local v_old = v
-	if v then
-		v = math.max(v_min, math.min(v, v_max))
-	end
-	return v or false, v ~= v_old
-end
-
-
-local function _textInputValue(self)
-	local clamped
-	self.value, clamped = _str2Num(self.line_ed.line, self.decimal_comma, self.value_min, self.value_max)
-	-- If the value was modified, then we have to rewrite the input box text.
-	if clamped then
-		self:setValue(self.value)
-	end
-end
-
-
---[[
-* Remember the old line_ed string
-* Reject the new line_ed string if:
-  * decimal points are disabled and a point/comma appears in the new string
-  * it doesn't convert to a number
-  * the number is out of bounds
---]]
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
