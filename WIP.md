@@ -1,9 +1,123 @@
-# ProdUI Work List
+# ProdUI Road Map
 
-A rough list of development tasks for ProdUI. (Subject to change!)
+# Stage 1
+
+* Get the WIMP shell and widgets up and running.
+* Layout, scaling and (re)-skinning are left incomplete.
+
+## Widgets
+
+Note that I am using a charitable definition of 'Working' here.
+
+### Barebones
+
+Basic, unskinned widgets that are intended for developer-facing tools and debugging.
+
+| Widget | Status |
+| - | - |
+| barebones/button | Working |
+| barebones/button_instant | Working |
+| barebones/button_repeat | Working |
+| barebones/button_sticky | Working |
+| barebones/checkbox | Working |
+| barebones/input_box | Working |
+| barebones/label | Working |
+| barebones/radio_button | Working |
+| barebones/slider_bar | Working |
 
 
-# Functionality
+### Base
+
+This category was planned to be used across all interfaces (WIMP, gamepad, touchscreen), but most of these widgets may be moved to the WIMP category in the future.
+
+| Widget | Status |
+| - | - |
+| base/button | Working |
+| base/button_double_click | Working |
+| base/button_instant | Working |
+| base/button_repeat | Working |
+| base/button_sticky | Working |
+| base/checkbox | Working |
+| base/container | Working |
+| base/container_simple | Working |
+| base/generic | Working (*1)|
+| base/label | Working |
+| base/log | **Unstarted** |
+| base/map2d | **Unstarted** |
+| base/menu | **Broken** |
+| base/menu_simple | **Untested, likely broken** |
+| base/radial | **Unstarted** |
+| base/radio_button | Working |
+| base/slider_bar | Working |
+| base/stepper | Working |
+| base/text | **Unskinned, probably outdated** |
+| base/tribox (*2) | **Unstarted** |
+
+(*1): Does nothing on its own.
+
+(*2): Three-state checkbox.
+
+
+### Input
+
+Text input widgets.
+
+| Widget | Status |
+| - | - |
+| input/text_box_multi | **Outdated and buggy** |
+| input/text_box_single | Working |
+
+
+### Status
+
+Status display widgets.
+
+| Widget | Status |
+| - | - |
+| status/progress_bar | Working |
+
+
+### Test
+
+Test widgets. These serve no practical purpose for the end user, and are not tracked here.
+
+
+### WIMP
+
+WIMP widgets.
+
+| Widget | Status |
+| - | - |
+| wimp/button_split | Working |
+| wimp/combo_box | Working |
+| wimp/dropdown_box | Working |
+| wimp/dropdown_pop | Working |
+| wimp/frame_header | Working |
+| wimp/group | **Barely started** |
+| wimp/icon_box | **Barely started** |
+| wimp/list_box | Working |
+| wimp/menu_bar | Working |
+| wimp/menu_pop | Working |
+| wimp/menu_tab | **Buggy** |
+| wimp/number_box | Working |
+| wimp/properties_box | **Barely started** |
+| wimp/root_wimp | Working |
+| wimp/sash | **Partial** |
+| wimp/tree_box | Working |
+| wimp/window_frame | Working |
+
+
+## Compound Objects
+
+* Colour picker window.
+
+
+# Stage 2
+
+**TBD**
+
+
+# Future Concerns
 
 * Scaling and rescaling
 * "outpad" in layout arrangement code (similar to CSS margins)
@@ -13,57 +127,17 @@ A rough list of development tasks for ProdUI. (Subject to change!)
 * Rich text integration:
 	* Rich Text widget
 	* Rich Text labels
-* RTL text flow (wait and see what happens with LÖVE 12)
+* RTL text flow
 * Animation
 * Sound effects handling (?)
 * Bilingual label support (?)
-* Mac tailoring (expected hotkeys, etc.) (need hardware)
-* Touchscreen support; mobile support in general (need hardware)
+* Mac tailoring (expected hotkeys, etc.)
+* Touchscreen support; mobile support in general
 * Stencil support?
 * Toast / notification system (see the ad hoc toast overlay in `demo_wimp.lua`)
-
-
-# Documentation
-
-* Tutorials, etc.
-
-
-# Demo and Test Programs
-
-
-# Example Programs
-
-
-## Widget Roots
-
-* wimp (Window, Icon, Menu, Pointer)
-* fend (gamepad-centric Front-End)
-* touch (mobile / touchscreen)
-
-
-# Widgets
-
-* `wimp/properties_box` (#1): A two-column list of properties, with labels in one column and controls in the other.
-* `base/sash` (#2): A drag-sensor that resizes two adjacent containers.
-* `wimp/group` (#3): A labelled container of widgets.
-* `wimp/combo_box` (#4): A Dropdown box with built-in text input.
-* `wimp/icon_box` (#5): A list or menu of selectable, labelled icons.
-* `base/radial` (#6): A dial, or radial slider.
-* (#7) Tri-state support for `base/checkbox`.
-* `base/button_split` (#8): A button with main and auxiliary sides. Clicking the auxiliary side activates different callbacks (typical use case is to open a menu).
-* `base/map2d` (#9): A box with a crosshair that is repositioned by clicking and dragging. (Use case: colour picker.)
-* (#10) (WIMP compound object) Colour picker.
-* `base/log` (#11): Log (lines of text that roll over)
-* `wimp/number_box` (#12): A single-line text box with controls for incrementing and decrementing numeric values.
-
-
-# Style
-
+* Documentation
+  * Tutorials
+* Demo, example and test programs
 * Source code style
 * Reducing file size bloat
-
-
-# Repositories
-
-* Split repos: ProdUI, documentation, theme builder...
-* All dependency licenses should be in one easy-to-find text file.
+* Split repositories: ProdUI, documentation, theme builder...
