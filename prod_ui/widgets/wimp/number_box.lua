@@ -294,7 +294,7 @@ local function _textInputValue(self, hist_changed)
 	local v = tonumber(s, _enum_value_mode[self.value_mode]) or false
 	print("self.value", self.value, "v", v)
 	if v ~= nil and self.value ~= v then
-		_setValue(self, v, false, true)
+		_setValue(self, v, false, true, true)
 		if not hist_changed then
 			line_ed.hist:moveToEntry(2)
 		end
