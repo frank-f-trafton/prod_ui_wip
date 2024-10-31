@@ -26,8 +26,29 @@ end
 
 
 function editHistS.writeEntry(line_ed, do_advance)
-	if line_ed.hist.enabled then
-		local entry = line_ed.hist:writeEntry(do_advance)
+	local hist = line_ed.hist
+	if hist.enabled then
+		local entry
+		if hist.locked_first then
+			hist.ledger[1] = hist.ledger[1] or {}
+			hist.ledger[2] = hist.ledger[2] or {}
+			entry = hist.ledger[2]
+		else
+			entry = line_ed.hist:writeEntry(do_advance)
+		end
+
+		editHistS.initEntry(entry, line_ed.line, line_ed.car_byte, line_ed.h_byte)
+		return entry
+	end
+end
+
+
+function editHistS.writeLockedFirst(line_ed)
+	local hist = line_ed.hist
+	assert(hist.locked_first, "called on a history struct without a locked first entry")
+	if hist.enabled then
+		hist.ledger[1] = hist.ledger[1] or {}
+		local entry = hist.ledger[1]
 		editHistS.initEntry(entry, line_ed.line, line_ed.car_byte, line_ed.h_byte)
 		return entry
 	end
@@ -35,6 +56,8 @@ end
 
 
 function editHistS.applyEntry(self, entry)
+	print("editHistS.applyEntry", "|"..entry.line.."|", entry.car_byte, entry.h_byte)
+
 	local line_ed = self.line_ed
 
 	line_ed.line = entry.line
@@ -44,11 +67,15 @@ end
 
 
 function editHistS.doctorCurrentCaretOffsets(hist, car_byte, h_byte)
-	local entry = hist.ledger[hist.pos]
+	if hist.enabled then
+		if not hist.locked_first or (hist.locked_first and hist.pos > 1) then
+			local entry = hist.ledger[hist.pos]
 
-	if entry then
-		entry.car_byte = car_byte
-		entry.h_byte = h_byte
+			if entry then
+				entry.car_byte = car_byte
+				entry.h_byte = h_byte
+			end
+		end
 	end
 end
 

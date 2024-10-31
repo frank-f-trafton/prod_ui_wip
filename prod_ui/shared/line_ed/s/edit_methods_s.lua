@@ -39,26 +39,8 @@ end
 local _line, _disp_text, _car_byte, _h_byte
 
 
-local function _save(line_ed)
-	return line_ed.line, line_ed.disp_text, line_ed.car_byte, line_ed.h_byte
-end
-
-
-local function _load(line_ed)
-	line_ed.line, line_ed.disp_text, line_ed.car_byte, line_ed.h_byte = _line, _disp_text, _car_byte, _h_byte
-	_line, _disp_text, _car_byte, _h_byte = nil
-end
-
-
-local function _erase()
-	_line, _disp_text, _car_byte, _h_byte = nil
-end
-
-
 local function _check(self)
-	local rv = not self.fn_check and true or self.fn_check(self)
-	_line, _disp_text, _car_byte, _h_byte = nil
-	return rv
+	return not self.fn_check and true or self:fn_check()
 end
 
 
@@ -133,8 +115,7 @@ end
 -- @return Substring of the deleted text.
 function client:deleteHighlightedText()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	local rv = _deleteHighlightedText(line_ed)
 	if rv and _check(self) then
@@ -142,7 +123,7 @@ function client:deleteHighlightedText()
 		return rv
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -151,9 +132,7 @@ end
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:backspaceUChar(n_u_chars)
 	local line_ed = self.line_ed
-	local line = line_ed.line
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	line_ed:clearHighlight()
 
@@ -168,7 +147,7 @@ function client:backspaceUChar(n_u_chars)
 		end
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -179,21 +158,21 @@ end
 -- @return The sanitized and trimmed text which was inserted into the field.
 function client:writeText(text, suppress_replace)
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	local rv = _writeText(self, line_ed, text, suppress_replace)
 	if _check(self) then
 		line_ed:updateDisplayText()
 		return rv
 	end
+
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
 function client:replaceText(text)
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	line_ed:deleteText(false, 1, #line_ed.line)
 	local rv = _writeText(self, line_ed, text, true)
@@ -202,6 +181,8 @@ function client:replaceText(text)
 		line_ed:updateDisplayText()
 		return rv
 	end
+
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -209,8 +190,7 @@ end
 function client:stepHistory(dir)
 	local line_ed = self.line_ed
 	local hist = line_ed.hist
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 	local old_pos = hist:getPosition()
 
 	if hist.enabled then
@@ -228,7 +208,7 @@ function client:stepHistory(dir)
 		end
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -367,8 +347,7 @@ end
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	local rv = _deleteUChar(line_ed, n_u_chars)
 
@@ -377,14 +356,13 @@ function client:deleteUChar(n_u_chars)
 		return rv
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
 function client:deleteGroup()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	line_ed:clearHighlight()
 	local rv
@@ -410,14 +388,13 @@ function client:deleteGroup()
 		return rv
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
 function client:backspaceGroup()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	line_ed:clearHighlight()
 	local rv
@@ -432,14 +409,13 @@ function client:backspaceGroup()
 		return rv
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
 function client:deleteCaretToEnd()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	line_ed:clearHighlight()
 	local rv = line_ed:deleteText(true, line_ed.car_byte, #line_ed.line)
@@ -449,24 +425,23 @@ function client:deleteCaretToEnd()
 		return rv
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
 function client:deleteCaretToStart()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	line_ed:clearHighlight()
 	local rv = line_ed:deleteText(true, 1, line_ed.car_byte - 1)
 
 	if rv and _check(self) then
-		self:updateDisplayText()
+		line_ed:updateDisplayText()
 		return rv
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -508,8 +483,7 @@ end
 
 function client:cutHighlightedToClipboard()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	local cut = _deleteHighlightedText(line_ed)
 
@@ -523,19 +497,18 @@ function client:cutHighlightedToClipboard()
 
 		if _check(self) then
 			love.system.setClipboardText(cut)
-			self:updateDisplayText()
+			line_ed:updateDisplayText()
 			return cut
 		end
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
 function client:pasteClipboardText()
 	local line_ed = self.line_ed
-
-	_save(line_ed)
+	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	if line_ed:isHighlighted() then
 		_deleteHighlightedText(line_ed)
@@ -554,7 +527,7 @@ function client:pasteClipboardText()
 		end
 	end
 
-	_erase()
+	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
