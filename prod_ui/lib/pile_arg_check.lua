@@ -35,7 +35,7 @@ end
 lang.err_type1_bad = "argument #$1: bad type (expected $2, got $3)"
 function M.type1(n, v, e)
 	if type(v) ~= e then
-		error(interp(lang.err_type_bad, n, type(v), e), 2)
+		error(interp(lang.err_type1_bad, n, type(v), e), 2)
 	end
 end
 
@@ -73,7 +73,7 @@ end
 lang.err_eval_int_bad = "argument #$1: expected false/nil or integer"
 function M.evalInt(n, v)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v ~= v) then
-		error(interp(lang.err_int_bad, n))
+		error(interp(lang.err_eval_int_bad, n))
 	end
 end
 
@@ -135,9 +135,9 @@ function M.numberNotNaN(n, v)
 end
 
 
-lang.err_enum1 = "argument #$1: invalid '$2' enum (got $3)"
-lang.err_enum2 = "argument #$1: invalid '$2' enum (got non-number, non-string value)"
-local function _enumErr(v) return type(v) == "string" or type(v) == "number" and lang.err_enum1 or lang.err_enum2 end
+lang.err_enum1 = "argument #$1: invalid $2 (got $3)"
+lang.err_enum2 = "argument #$1: invalid $2 (got non-number, non-string value)"
+local function _enumErr(v) return (type(v) == "string" or type(v) == "number") and lang.err_enum1 or lang.err_enum2 end
 function M.enum(n, v, id, e)
 	if not e[v] then
 		error(interp(_enumErr(v), n, id, v))
