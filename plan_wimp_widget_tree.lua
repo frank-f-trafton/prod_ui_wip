@@ -132,6 +132,20 @@ function plan.make(root)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
+		local chk_vp = content:addChild("base/checkbox")
+		chk_vp:setLabel("Show Viewports")
+		chk_vp:setChecked(content.context.app.dbg_vp.active)
+
+		chk_vp.wid_buttonAction = function(self)
+			local vp = self.context.app.dbg_vp
+			vp.active = not not self.checked
+		end
+
+		chk_vp.h = 32
+		chk_vp.lc_func = uiLayout.fitBottom
+		uiLayout.register(content, chk_vp)
+
+
 		local chk_highlight = content:addChild("base/checkbox")
 		chk_highlight:setLabel("Highlight Selected")
 		chk_highlight:setChecked(content.context.app.dbg_outline.active)
