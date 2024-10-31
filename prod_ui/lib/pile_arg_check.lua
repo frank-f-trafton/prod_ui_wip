@@ -1,4 +1,4 @@
--- PILE argCheck v1.1.2 (modified)
+-- PILE argCheck v1.1.3
 -- (C) 2024 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -94,18 +94,31 @@ function M.evalIntGE(n, v, min)
 end
 
 
-lang.err_int_range_bad = "argument #$1: expected integer within the range of $2 to $3"
+lang.err_int_range_bad = "argument #$1: integer is out of range"
 function M.intRange(n, v, min, max)
 	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v then
 		error(interp(lang.err_int_range_bad, n, min, max))
 	end
 end
-
-
-lang.err_eval_int_range_bad = "argument #$1: expected false/nil or integer within the range of $2 to $3"
 function M.evalIntRange(n, v, min, max)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v) then
 		error(interp(lang.err_int_range_bad, n, min, max))
+	end
+end
+
+
+lang.err_int_range_static_bad = "argument #$1: expected integer within the range of $2 to $3"
+function M.intRangeStatic(n, v, min, max)
+	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v then
+		error(interp(lang.err_int_range_static_bad, n, min, max))
+	end
+end
+
+
+lang.err_eval_int_range_static_bad = "argument #$1: expected false/nil or integer within the range of $2 to $3"
+function M.evalIntRangeStatic(n, v, min, max)
+	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v) then
+		error(interp(lang.err_eval_int_range_static_bad, n, min, max))
 	end
 end
 
@@ -124,24 +137,15 @@ end
 
 lang.err_enum1 = "argument #$1: invalid '$2' enum (got $3)"
 lang.err_enum2 = "argument #$1: invalid '$2' enum (got non-number, non-string value)"
+local function _enumErr(v) return type(v) == "string" or type(v) == "number" and lang.err_enum1 or lang.err_enum2 end
 function M.enum(n, v, id, e)
 	if not e[v] then
-		if type(v) == "string" or type(v) == "number" then
-			error(interp(lang.err_enum1, n, id, v))
-		else
-			error(interp(lang.err_enum2, n, id))
-		end
+		error(interp(_enumErr(v), n, id, v))
 	end
 end
-
-
 function M.enumEval(n, v, id, e)
 	if v and not e[v] then
-		if type(v) == "string" or type(v) == "number" then
-			error(interp(lang.err_enum1, n, id, v))
-		else
-			error(interp(lang.err_enum2, n, id))
-		end
+		error(interp(_enumErr(v), n, id, v))
 	end
 end
 
