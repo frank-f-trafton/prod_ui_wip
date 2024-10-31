@@ -110,7 +110,9 @@ for i = 10, 36 do -- a-z
 end
 
 
-local function _checker(self)
+-- Blocks various non-numeric strings, while allowing partially complete input
+-- (like a single '-' when negative numbers are enabled).
+function def:fn_check()
 	local value_mode = self.value_mode
 	local ptn
 
@@ -174,7 +176,8 @@ local function _checker(self)
 		error("couldn't match 'value_mode' to a search pattern")
 	end
 
-	return self.line_ed.line:match(ptn) == s
+	local s = self.line_ed.line
+	return s:match(ptn) == s
 end
 
 
@@ -202,38 +205,51 @@ local function _baseToString(n, base)
 end
 
 
-local function _setValue(self, v, update_text, preserve_caret)
-	v = math.max(self.value_min, math.min(v, self.value_max))
-	if self.value_mode ~= "decimal" then
-		v = math.floor(v)
+-- @param self The widget.
+-- @param v The new numeric value, or false.
+-- @param write_history true to force a history update to ledger entry #2.
+-- @param update_text true to update the lineEdS text.
+-- @param preserve_caret true to (try to) keep the text input caret in the same place as before.
+local function _setValue(self, v, write_history, update_text, preserve_caret)
+	if v then
+		v = math.max(self.value_min, math.min(v, self.value_max))
+		if self.value_mode ~= "decimal" then
+			v = math.floor(v)
+		end
+		self.value = v
+	else
+		self.value = false
 	end
-	self.value = v
 
 	local line_ed = self.line_ed
 	local old_len = utf8.len(line_ed.line)
 	local old_car_u = edComS.utf8LenPlusOne(line_ed.line, line_ed.car_byte)
 
 	if update_text then
-		local s = _baseToString(math.abs(v), _enum_value_mode[self.value_mode])
+		if v then
+			local s = _baseToString(math.abs(v), _enum_value_mode[self.value_mode])
 
-		-- leading, trailing zeros
-		local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
-		s = string.rep("0", math.max(0, self.digit_pad1 - #s1)) .. s
-		if #s2 > 0 then
-			s = s .. string.rep("0", math.max(0, self.digit_pad2 - #s3))
+			-- leading, trailing zeros
+			local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
+			s = string.rep("0", math.max(0, self.digit_pad1 - #s1)) .. s
+			if #s2 > 0 then
+				s = s .. string.rep("0", math.max(0, self.digit_pad2 - #s3))
+			end
+
+			-- comma for fractional part
+			if self.fractional_comma then
+				s = s:gsub("%.", ",")
+			end
+
+			-- minus
+			if v < 0 then
+				s = "-" .. s
+			end
+
+			self:replaceText(s)
+		else
+			self:replaceText("")
 		end
-
-		-- comma for fractional part
-		if self.fractional_comma then
-			s = s:gsub("%.", ",")
-		end
-
-		-- minus
-		if v < 0 then
-			s = "-" .. s
-		end
-
-		self:replaceText(s)
 	end
 
 	if preserve_caret then
@@ -248,13 +264,18 @@ local function _setValue(self, v, update_text, preserve_caret)
 	lgcInputS.updateCaretShape(self)
 	self:updateDocumentDimensions()
 	self:scrollGetCaretInBounds(true)
+
+	if write_history then
+		line_ed.hist:moveToEntry(2)
+		editHistS.writeEntry(line_ed, false)
+	end
 end
 
 
 -- codepath for value changes through key up/down, pageup/pagedown and mouse clicks
 local function _callback(self, cb, reps)
 	if self.value then
-		_setValue(self, (cb(self, self.value, reps)), true, true)
+		_setValue(self, (cb(self, self.value, reps)), true, true, true)
 	else
 		self:setValueToDefault()
 	end
@@ -262,16 +283,21 @@ end
 
 
 -- codepath for value changes through direct text input, copy+paste, etc.
-local function _textInputValue(self)
-	local s = self.line_ed.line
+-- @param hist_changed If true, the action was a direct undo/redo, so we shouldn't meddle with the ledger.
+local function _textInputValue(self, hist_changed)
+	local line_ed = self.line_ed
+	local s = line_ed.line
 	if self.fractional_comma then
 		s = s:gsub(",", ".")
 	end
 
 	local v = tonumber(s, _enum_value_mode[self.value_mode]) or false
 	print("self.value", self.value, "v", v)
-	if v and self.value ~= v then
-		_setValue(self, v)
+	if v ~= nil and self.value ~= v then
+		_setValue(self, v, false, true)
+		if not hist_changed then
+			line_ed.hist:moveToEntry(2)
+		end
 	end
 end
 
@@ -313,12 +339,23 @@ end
 function def:setValue(v)
 	uiShared.numberNotNaN(1, v)
 
-	_setValue(self, v, true)
+	local line_ed = self.line_ed
+
+	_setValue(self, v, false, true)
+	line_ed.hist:clearAll()
+	line_ed.hist:moveToEntry(1)
+	editHistS.writeLockedFirst(line_ed)
 end
 
 
 function def:setValueToDefault()
-	_setValue(self, self.value_default, true)
+	local line_ed = self.line_ed
+
+	_setValue(self, self.value_default, false, true)
+
+	line_ed.hist:clearAll()
+	line_ed.hist:moveToEntry(1)
+	editHistS.writeLockedFirst(line_ed)
 end
 
 
@@ -375,7 +412,7 @@ function def:uiCall_create(inst)
 		-- special history configuration
 		self.line_ed.hist:setLockedFirst(true)
 		self.line_ed.hist:setMaxEntries(2)
-		editHistS.writeEntry(self.line_ed, true)
+		editHistS.writeLockedFirst(self.line_ed)
 
 		self:setTextAlignment(skin.text_align)
 
@@ -440,6 +477,15 @@ end
 function def:uiCall_thimbleRelease(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
+
+		-- Forget history state when the user nagivates away from the NumberBox.
+		local line_ed = self.line_ed
+		local hist = line_ed.hist
+		if hist.pos == 2 then
+			line_ed.hist:clearAll()
+			line_ed.hist:moveToEntry(1)
+			editHistS.writeLockedFirst(line_ed)
+		end
 	end
 end
 
@@ -485,9 +531,11 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- Standard text box controls (caret navigation, backspace, etc.)
 		else
-			local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
-			_textInputValue(self)
-			return rv
+			local ok, hist_changed = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+			if ok then
+				_textInputValue(self, hist_changed)
+			end
+			return ok
 		end
 	end
 end
@@ -501,7 +549,6 @@ function def:uiCall_textInput(inst, text)
 		end
 	end
 end
-
 
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -587,6 +634,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 					if self.repeat_btn == 1 then
 						_callback(self, self.wid_incrementButton, reps + 1)
 						return true
+
 					elseif self.repeat_btn == -1 then
 						_callback(self, self.wid_decrementButton, reps + 1)
 						return true
@@ -717,10 +765,15 @@ def.skinners = {
 			)
 
 			local yy, hh = 240, line_ed.font:getHeight()
-			love.graphics.print("History state:", 0, 216)
+			love.graphics.print("History state:", 256, 216)
 
 			for i, entry in ipairs(line_ed.hist.ledger) do
-				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
+				if i == line_ed.hist.pos then
+					love.graphics.setColor(1, 1, 0, 1)
+				else
+					love.graphics.setColor(1, 1, 1, 1)
+				end
+				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: |" .. entry.line .. "|", 256, yy)
 				yy = yy + hh
 			end
 			--]]

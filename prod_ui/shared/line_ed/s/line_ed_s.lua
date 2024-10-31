@@ -371,4 +371,14 @@ function _mt_ed_s:highlightToByte(h_byte_n) -- [sync]
 end
 
 
+function _mt_ed_s:copyState()
+	return self.line, self.disp_text, self.car_byte, self.h_byte
+end
+
+
+function _mt_ed_s:setState(line, disp_text, car_byte, h_byte)
+	self.line, self.disp_text, self.car_byte, self.h_byte = line, disp_text, car_byte, h_byte
+end
+
+
 return lineEdS

@@ -182,14 +182,14 @@ end
 --- Helper that takes care of history changes following an action.
 -- @param self The client widget
 -- @param bound_func The wrapper function to call. It should take 'self' as its first argument and the LineEditor core as the second. It should return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
--- @return true if the function reported success.
+-- @return true if the function reported success, and a boolean indicating if the action was undo/redo.
 function lgcInputS.executeBoundAction(self, bound_func)
 	local line_ed = self.line_ed
 
 	local old_car, old_h = line_ed.car_byte, line_ed.h_byte
 	local old_input_category = self.input_category
 
-	local ok, update_widget, caret_in_view, write_history, deleted = bound_func(self, line_ed)
+	local ok, update_widget, caret_in_view, write_history, deleted, hist_change = bound_func(self, line_ed)
 
 	--[[
 	print("executeBoundAction()",
@@ -197,7 +197,8 @@ function lgcInputS.executeBoundAction(self, bound_func)
 		"update_widget", update_widget,
 		"caret_in_view", caret_in_view,
 		"write_history", write_history,
-		"deleted", deleted
+		"deleted", deleted,
+		"hist_change", hist_change
 	)
 	--]]
 
@@ -229,7 +230,7 @@ function lgcInputS.executeBoundAction(self, bound_func)
 				editHistS.writeEntry(line_ed, true)
 			end
 		end
-		return true
+		return true, hist_change
 	end
 end
 
@@ -275,9 +276,11 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	local bound_func = editBindS[key_string]
 
 	if bound_func then
-		if lgcInputS.executeBoundAction(self, bound_func) then
+		-- XXX: cleanup (just do a return) once the old debug stuff is removed below.
+		local r1, r2 = lgcInputS.executeBoundAction(self, bound_func)
+		if r1 then
 			-- Stop event propagation
-			return true
+			return r1, r2
 		end
 	end
 
@@ -316,36 +319,38 @@ function lgcInputS.textInputLogic(self, text)
 
 		local written = self:writeText(text, false)
 
-		if self.replace_mode then
-			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-			if line_ed.car_byte < #line_ed.line + 1 then
-				self.input_category = false
+		if written then
+			if self.replace_mode then
+				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
+				if line_ed.car_byte < #line_ed.line + 1 then
+					self.input_category = false
+				end
 			end
+
+			if hist.enabled then
+				local non_ws = string.find(written, "%S")
+				local entry = hist:getEntry()
+				local do_advance = true
+
+				if (entry and entry.car_byte == old_car)
+				and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
+				then
+					do_advance = false
+				end
+
+				if do_advance then
+					editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
+				end
+				editHistS.writeEntry(line_ed, do_advance)
+				self.input_category = non_ws and "typing" or "typing-ws"
+			end
+
+			lgcInputS.updateCaretShape(self)
+			self:updateDocumentDimensions()
+			self:scrollGetCaretInBounds(true)
+
+			return true
 		end
-
-		if hist.enabled then
-			local non_ws = string.find(written, "%S")
-			local entry = hist:getEntry()
-			local do_advance = true
-
-			if (entry and entry.car_byte == old_car)
-			and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
-			then
-				do_advance = false
-			end
-
-			if do_advance then
-				editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
-			end
-			editHistS.writeEntry(line_ed, do_advance)
-			self.input_category = non_ws and "typing" or "typing-ws"
-		end
-
-		lgcInputS.updateCaretShape(self)
-		self:updateDocumentDimensions()
-		self:scrollGetCaretInBounds(true)
-
-		return true
 	end
 end
 

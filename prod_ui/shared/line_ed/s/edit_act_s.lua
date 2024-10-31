@@ -16,12 +16,9 @@ Return values:
    "del": write a conditional history entry for deleting text
    "bsp": write a conditional history entry for backspacing text
 5) string: The deleted or backspaced text, if 4 was "del" or "bsp"
+6) true: the action involved changing the history position (undo/redo)
 
 When return value 1 is not true, all other return values are invalid.
-
-Do not make changes to the history ledger from this codepath, as the
-caller might reject the updated state. Always use the return values
-to signal that the history ledger should be updated.
 --]]
 
 
@@ -39,7 +36,7 @@ function editActS.caretLeft(self, line_ed)
 		self:caretStepLeft(true)
 	end
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -50,7 +47,7 @@ function editActS.caretRight(self, line_ed)
 		self:caretStepRight(true)
 	end
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -58,14 +55,14 @@ end
 function editActS.caretLeftHighlight(self, line_ed)
 	self:caretStepLeft(not self.allow_highlight)
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
 function editActS.caretRightHighlight(self, line_ed)
 	self:caretStepRight(not self.allow_highlight)
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -78,7 +75,7 @@ function editActS.caretJumpLeft(self, line_ed)
 		self:caretJumpLeft(true)
 	end
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -90,7 +87,7 @@ function editActS.caretJumpRight(self, line_ed)
 		self:caretJumpRight(true)
 	end
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -103,7 +100,7 @@ function editActS.caretJumpLeftHighlight(self, line_ed)
 		self:caretJumpLeft(not self.allow_highlight)
 	end
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -115,7 +112,7 @@ function editActS.caretJumpRightHighlight(self, line_ed)
 		self:caretJumpRight(not self.allow_highlight)
 	end
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -123,14 +120,14 @@ end
 function editActS.caretFirst(self, line_ed)
 	self:caretFirst(true)
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
 function editActS.caretLast(self, line_ed)
 	self:caretLast(true)
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -138,14 +135,14 @@ end
 function editActS.caretFirstHighlight(self, line_ed)
 	self:caretFirst(not self.allow_highlight)
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
 function editActS.caretLastHighlight(self, line_ed)
 	self:caretLast(not self.allow_highlight)
 
-	return true, false, true, false
+	return true, nil, true
 end
 
 
@@ -300,7 +297,7 @@ function editActS.selectAll(self, line_ed)
 		self:clearHighlight()
 	end
 
-	return true, false, false, false
+	return true
 end
 
 
@@ -311,7 +308,7 @@ function editActS.selectCurrentWord(self, line_ed)
 		self:clearHighlight()
 	end
 
-	return true, false, false, false
+	return true
 end
 
 
@@ -320,7 +317,7 @@ function editActS.copy(self, line_ed)
 	if self.allow_copy and self.allow_highlight and line_ed:isHighlighted() then
 		self:copyHighlightedToClipboard() -- handles masking
 
-		return true, false, false, false
+		return true
 	end
 end
 
@@ -349,7 +346,7 @@ end
 function editActS.toggleReplaceMode(self, line_ed)
 	self:setReplaceMode(not self:getReplaceMode())
 
-	return true, false, false, false
+	return true
 end
 
 
@@ -359,7 +356,7 @@ function editActS.undo(self, line_ed)
 		if self:stepHistory(-1) then
 			self.input_category = false
 
-			return true, true, true, false
+			return true, true, true, nil, nil, true
 		end
 	end
 end
@@ -370,7 +367,7 @@ function editActS.redo(self, line_ed)
 		if self:stepHistory(1) then
 			self.input_category = false
 
-			return true, true, true, false
+			return true, true, true, nil, nil, true
 		end
 	end
 end
