@@ -94,13 +94,17 @@ local function tree_userUpdate(self, dt)
 				frame:reshape(true)
 			end
 
+			-- Debug view stuff for the demo.
+			local selected = self.menu:getSelectedItem()
+			local selected_wid = selected and selected.usr_wid or false
+
 			local outline = context.app.dbg_outline
 			if outline then
-				outline.wid = false
-				local selected = self.menu:getSelectedItem()
-				if selected and selected.usr_wid then
-					outline.wid = selected.usr_wid
-				end
+				outline.wid = selected_wid
+			end
+			local dbg_vp = context.app.dbg_vp
+			if dbg_vp then
+				dbg_vp.wid = selected_wid
 			end
 		end
 	end
