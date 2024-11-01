@@ -70,6 +70,30 @@ function lgcButton.setChecked(self, checked)
 end
 
 
+--- Sets the value of a multi-state checkbox.
+function lgcButton.setValue(self, value)
+	uiShared.intRange(2, value, 1, self.value_max)
+
+	self.value = value
+end
+
+
+--- Increments or decrements the value of a multi-state checkbox, wrapping when the first or last state is passed.
+function lgcButton.rollValue(self, dir)
+	dir = dir or 1
+	if dir ~= -1 and dir ~= 1 then error("invalid roll direction") end
+	self.value = ((self.value-1 + dir) % self.value_max) + 1
+end
+
+
+--- Sets the maximum value for multi-state checkboxes.
+function lgcButton.setMaxValue(self, max)
+	uiShared.intGE(1, max, 1)
+
+	self.value_max = max
+end
+
+
 --- Turns off a radio button, plus all sibling radio buttons with the same group ID.
 function lgcButton.uncheckAllRadioSiblings(self)
 	local parent = self.parent
@@ -339,6 +363,21 @@ function lgcButton.uiCall_pointerReleaseCheck(self, inst, x, y, button, istouch,
 end
 
 
+function lgcButton.uiCall_pointerReleaseCheckMulti(self, inst, x, y, button, istouch, presses)
+	if self == inst then
+		if self.enabled then
+			if button == self.context.mouse_pressed_button then
+				if button == 1 then
+					self.pressed = false
+					self:rollValue(1)
+					self:wid_buttonAction()
+				end
+			end
+		end
+	end
+end
+
+
 --- Mouse callback for releasing radio buttons. Upon click-up, they turn on, while turning off all siblings with the same group ID.
 function lgcButton.uiCall_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
 	if self == inst then
@@ -401,6 +440,17 @@ function lgcButton.uiCall_thimbleActionCheck(self, inst, key, scancode, isrepeat
 	if self == inst then
 		if self.enabled then
 			self:setChecked(not self.checked)
+			self:wid_buttonAction()
+		end
+	end
+end
+
+
+--- Primary thimble action for multi-state checkboxes.
+function lgcButton.uiCall_thimbleActionCheckMulti(self, inst, key, scancode, isrepeat)
+	if self == inst then
+		if self.enabled then
+			self:rollValue(1)
 			self:wid_buttonAction()
 		end
 	end

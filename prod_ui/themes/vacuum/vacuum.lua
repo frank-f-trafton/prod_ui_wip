@@ -566,6 +566,7 @@ function themeDef.newInstance(scale)
 	inst:loadSkinDef("button_tq1", BASE_PATH .. "skins/button_tq1.lua")
 
 	inst:loadSkinDef("checkbox1", BASE_PATH .. "skins/checkbox1.lua")
+	inst:loadSkinDef("checkbox_multi1", BASE_PATH .. "skins/checkbox_multi1.lua")
 	inst:loadSkinDef("combo_box1", BASE_PATH .. "skins/combo_box1.lua")
 	inst:loadSkinDef("container1", BASE_PATH .. "skins/container1.lua")
 

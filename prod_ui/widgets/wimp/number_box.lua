@@ -735,6 +735,7 @@ def.skinners = {
 			widDebug.debugDrawViewport(self, 4)
 			--]]
 
+			--[=====[
 			-- Debug: show internal state
 			love.graphics.push("all")
 			love.graphics.setScissor()
@@ -779,6 +780,7 @@ def.skinners = {
 			--]]
 
 			love.graphics.pop()
+			--]=====]
 		end,
 
 

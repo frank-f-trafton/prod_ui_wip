@@ -7,7 +7,7 @@
    viewBox="0 0 24 24"
    version="1.1"
    id="svg13547"
-   sodipodi:docname="checkbox_on_hover.svg"
+   sodipodi:docname="checkbox_tri_hover.svg"
    inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
    inkscape:export-filename="checkmark_on.png"
    inkscape:export-xdpi="96"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="21.916671"
-     inkscape:cx="11.999998"
-     inkscape:cy="11.977184"
+     inkscape:zoom="30.994853"
+     inkscape:cx="11.743885"
+     inkscape:cy="12.082651"
      inkscape:window-width="1920"
      inkscape:window-height="1003"
      inkscape:window-x="0"
@@ -71,8 +71,9 @@
        inkscape:label="body" />
     <path
        style="font-variation-settings:'wght' 700;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:3.77953;stroke-linecap:square;stroke-linejoin:miter"
-       d="M 4,13 10,19 20,8 17,5 10,13 7,10 Z"
-       id="path15629"
-       inkscape:label="mark" />
+       d="m 8,8 v 8 h 8 V 8 Z"
+       id="path15629-6"
+       inkscape:label="mark"
+       sodipodi:nodetypes="ccccc" />
   </g>
 </svg>

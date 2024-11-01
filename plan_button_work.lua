@@ -71,6 +71,14 @@ function plan.make(parent)
 			print("Check it!")
 		end
 
+		-- Multi-state checkbox
+		local chk_m = content:addChild("base/checkbox_multi", {x=160, y=96, w=256, h=64})
+		chk_m:setMaxValue(3)
+		chk_m:setLabel("Multi-State Checkbox", "single")
+		chk_m.wid_buttonAction = function(self)
+			print("Multi-Check state: " .. chk_m.value)
+		end
+
 		-- Button with a quad graphic
 		local btn_q = content:addChild("base/button", {
 			skin_id = "button_tq1",
