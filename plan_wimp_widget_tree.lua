@@ -52,7 +52,6 @@ local function _buildTree(tree_box, root)
 	-- Note the last selection and the UI thimble.
 	local item_selected = tree_box.menu:getSelectedItem()
 	local wid_selected = item_selected and item_selected.usr_wid
-	item_selected = nil
 	local thimble = tree_box.context.current_thimble
 
 	tree_box.tree.usr_wid = root
@@ -65,13 +64,18 @@ local function _buildTree(tree_box, root)
 	tree_box:arrange()
 
 	-- Restore the selection, if any.
+	local restored
 	if wid_selected then
 		for i, item in ipairs(tree_box.menu.items) do
 			if item.usr_wid == wid_selected then
 				tree_box.menu:setSelectedIndex(i)
+				restored = true
 				break
 			end
 		end
+	end
+	if not restored then
+		tree_box.menu:setSelectedIndex(0)
 	end
 end
 

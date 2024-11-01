@@ -270,7 +270,7 @@ end
 
 
 function def:addNode(text, parent_node, tree_pos, bijou_id)
-	print("add node", text, parent_node, tree_pos, bijou_id)
+	--print("add node", text, parent_node, tree_pos, bijou_id)
 	-- XXX: Assertions.
 
 	local skin = self.skin
