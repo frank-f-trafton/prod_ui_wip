@@ -117,6 +117,10 @@ local function tree_userDestroy(self)
 	if outline then
 		outline.wid = false
 	end
+	local dbg_vp = self.context.app.dbg_vp
+	if dbg_vp then
+		dbg_vp.wid = false
+	end
 end
 
 
