@@ -2,12 +2,12 @@
 
 # Stage 1
 
-* Get the WIMP shell and widgets up and running.
-* Layout, scaling and (re)-skinning are left incomplete.
+* Get the WIMP shell and core widgets up and running.
+* Do not worry about layout, scaling and (re)-skinning at this point.
 
 ## Widgets
 
-Note that I am using a charitable definition of 'Working' here.
+I am using a charitable definition of 'Working' here.
 
 ### Barebones
 
@@ -109,7 +109,10 @@ WIMP widgets.
 
 ## Compound Objects
 
-* Colour picker window.
+| Object | Status |
+| - | - |
+| Colour picker window | **Not Started** |
+| File Selector | **Not Started** |
 
 
 # Stage 2
