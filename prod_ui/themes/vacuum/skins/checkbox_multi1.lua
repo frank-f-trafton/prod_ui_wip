@@ -1,7 +1,7 @@
 -- * Widget skin: Application checkbox with configurable multiple states.
 
 --[[
-This skin provides three graphical states.
+This skin provides graphics for states 1-3.
 --]]
 
 return {
