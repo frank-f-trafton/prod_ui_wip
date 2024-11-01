@@ -1,7 +1,14 @@
 --[[
 	A skinned, multi-state checkbox.
-	The skin provides graphics for each state.
-	The library user must set an appropriate max value for this widget.
+
+	States are represented as an integer in 'self.value', from 1 to 'self.value_max'.
+
+	The widget starts with a default max value of 1, so the library user needs
+	to set an appropriate maximum.
+
+	The skin must provide graphics for each state; the default skins include graphics
+	for three states. For any states which do not have a graphic, the widget will
+	debug-print 'self.value' using the theme's internal font.
 --]]
 
 
@@ -132,11 +139,20 @@ def.skinners = { -- (2024-11-01 copied from shared/skn_button_bijou.lua)
 			end
 
 			-- Draw the bijou.
-			-- State values without a matching quad will render no graphic.
 			-- XXX: Scissor to Viewport #2?
+
 			if tex_quad then
 				love.graphics.setColor(res.color_bijou)
 				uiGraphics.quadXYWH(tex_quad, box_x, box_y, skin.bijou_w, skin.bijou_h)
+			else
+				-- Debug-print state values that do not have a matching quad.
+				love.graphics.push("all")
+
+				love.graphics.setColor(1, 1, 1, 1)
+				love.graphics.setFont(self.context.resources.fonts.internal)
+				love.graphics.print(tostring(self.value), box_x, box_y)
+
+				love.graphics.pop()
 			end
 
 			-- Draw the text label.

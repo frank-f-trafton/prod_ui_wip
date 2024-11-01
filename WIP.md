@@ -38,6 +38,7 @@ This category was planned to be used across all interfaces (WIMP, gamepad, touch
 | base/button_repeat | Working |
 | base/button_sticky | Working |
 | base/checkbox | Working |
+| base/checkbox_multi | Working |
 | base/container | Working |
 | base/container_simple | Working |
 | base/generic | Working (*1)|
@@ -51,7 +52,6 @@ This category was planned to be used across all interfaces (WIMP, gamepad, touch
 | base/slider_bar | Working |
 | base/stepper | Working |
 | base/text | **Unskinned, probably outdated** |
-| base/tribox (*2) | **Unstarted** |
 
 (*1): Does nothing on its own.
 
