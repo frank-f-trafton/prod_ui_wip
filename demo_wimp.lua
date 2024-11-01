@@ -114,7 +114,8 @@ local function newWimpContext()
 		-- Shows the widget's viewport rectangles in love.draw()
 		-- widDebug.debugDrawViewport(self, v, r, g, b, a)
 		dbg_vp = {
-			active = false
+			active = false,
+			wid = false
 		}
 	}
 
@@ -729,15 +730,15 @@ function love.draw()
 		outline.wid = false
 	end
 	local dbg_vp = context.app.dbg_vp
-	if dbg_vp and dbg_vp.active and outline and outline.wid and not outline.wid._dead then
-		local wid = outline.wid
+	if dbg_vp and dbg_vp.active and dbg_vp.wid and not dbg_vp.wid._dead then
+		local wid = dbg_vp.wid
 		love.graphics.translate(wid:getAbsolutePosition())
-		if outline.wid.vp_x then
-			widDebug.debugDrawViewport(outline.wid, 1)
+		if dbg_vp.wid.vp_x then
+			widDebug.debugDrawViewport(dbg_vp.wid, 1)
 		end
 		for i = 2, 8 do
-			if outline.wid["vp" .. i .. "_x"] then
-				widDebug.debugDrawViewport(outline.wid, i)
+			if dbg_vp.wid["vp" .. i .. "_x"] then
+				widDebug.debugDrawViewport(dbg_vp.wid, i)
 			end
 		end
 	end
