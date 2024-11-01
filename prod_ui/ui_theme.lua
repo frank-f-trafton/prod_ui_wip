@@ -162,8 +162,6 @@ _mt_themeDataPack.drillS = _mt_themeInst.drillS
 function _mt_themeInst:applyResource(tbl, id)
 	local symbol = string.sub(id, 1, 1)
 
-	print("applyResource()", id)
-
 	-- Pull in resources from the main theme table.
 	if symbol == "*" then
 		if type(tbl[id]) == "table" then
