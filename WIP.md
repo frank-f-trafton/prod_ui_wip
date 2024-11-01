@@ -112,7 +112,7 @@ WIMP widgets.
 | Object | Status |
 | - | - |
 | Colour picker window | **Not Started** |
-| File Selector | **Not Started** |
+| File Selector | **Buggy** |
 
 
 # Stage 2
