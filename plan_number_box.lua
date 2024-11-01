@@ -36,7 +36,6 @@ function plan.make(parent)
 		content:setScrollBars(false, false)
 
 		-- [=[
-		makeLabel(content, 32, 0, 512, 32, "**NOTE** This widget is still being developed.", "single")
 		local num_box = content:addChild("wimp/number_box")
 
 		num_box.x = 32

@@ -9,7 +9,10 @@ particular resource can be found within the theme instance's table hierarchy. Th
 is assigned to a copy of the field without the leading asterisk:
 
 self["*foobar"] = "path/to/foobar"
-self.foobar = <reference pulled in from `resources.path.to.foobar`>
+self.foobar = <resource pulled in from `resources.path.to.foobar`>
+
+self["*bazbop"] = {"multiple/paths", "to/various", "textures/used"}
+self.bazbop = <array containing three resources>
 
 This is used when refreshing the contents of skin tables or widget instances.
 
@@ -18,6 +21,9 @@ scaled:
 
 self["$foobar"] = 32
 self.foobar = <math.floor(32 * theme.scale)>
+
+self["$bazbop"] = {32, 64}
+self.bazbop = <{math.floor(32 * theme.scale), math.floor(64 * theme.scale)}>
 --]]
 
 
@@ -156,13 +162,31 @@ _mt_themeDataPack.drillS = _mt_themeInst.drillS
 function _mt_themeInst:applyResource(tbl, id)
 	local symbol = string.sub(id, 1, 1)
 
-	-- Pull in a resource from the main theme table.
-	if symbol == "*" then
-		tbl[id:sub(2)] = self:drillS(tbl[id])
+	print("applyResource()", id)
 
-	-- Scale and floor a number.
+	-- Pull in resources from the main theme table.
+	if symbol == "*" then
+		if type(tbl[id]) == "table" then
+			local t2 = {}
+			for i, s in ipairs(tbl[id]) do
+				t2[i] = self:drillS(s)
+			end
+			tbl[id:sub(2)] = t2
+		else
+			tbl[id:sub(2)] = self:drillS(tbl[id])
+		end
+
+	-- Scale and floor numbers.
 	elseif symbol == "$" then
-		tbl[id:sub(2)] = math.floor(tbl[id] * self.scale)
+		if type(tbl[id]) == "table" then
+			local t2 = {}
+			for i, n in ipairs(tbl[id]) do
+				t2[i] = math.floor(n * self.scale)
+			end
+			tbl[id:sub(2)] = t2
+		else
+			tbl[id:sub(2)] = math.floor(tbl[id] * self.scale)
+		end
 
 	-- Invalid.
 	else

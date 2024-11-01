@@ -7,9 +7,9 @@
    viewBox="0 0 24 24"
    version="1.1"
    id="svg13547"
-   sodipodi:docname="checkbox_on_hover.svg"
+   sodipodi:docname="checkbox_tri_press.svg"
    inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
-   inkscape:export-filename="checkmark_on.png"
+   inkscape:export-filename="gui_checkmark_on_press.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="21.916671"
-     inkscape:cx="11.999998"
-     inkscape:cy="11.977184"
+     inkscape:zoom="33.346154"
+     inkscape:cx="12.295271"
+     inkscape:cy="11.020761"
      inkscape:window-width="1920"
      inkscape:window-height="1003"
      inkscape:window-x="0"
@@ -60,19 +60,20 @@
   <defs
      id="defs13544" />
   <g
-     inkscape:label="checkbox_on_hover"
+     inkscape:label="checkbox_tri_press"
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="display:inline;fill:#6c6c6c;fill-opacity:1;stroke:#444444;stroke-width:2.01522;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       style="display:inline;fill:#333333;fill-opacity:1;stroke:#222222;stroke-width:2.01522;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        d="M 1,1 V 22.984775 H 22.984774 V 1 Z"
        id="path4632-3-6"
        sodipodi:nodetypes="ccccc"
        inkscape:label="body" />
     <path
-       style="font-variation-settings:'wght' 700;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:3.77953;stroke-linecap:square;stroke-linejoin:miter"
-       d="M 4,13 10,19 20,8 17,5 10,13 7,10 Z"
-       id="path15629"
-       inkscape:label="mark" />
+       style="font-variation-settings:'wght' 700;fill:#ababab;fill-opacity:1;stroke:none;stroke-width:3.77953;stroke-linecap:square;stroke-linejoin:miter"
+       d="m 8,8 v 8 h 8 V 8 Z"
+       id="path15629-3"
+       inkscape:label="mark"
+       sodipodi:nodetypes="ccccc" />
   </g>
 </svg>
