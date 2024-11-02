@@ -111,7 +111,8 @@ WIMP widgets.
 
 | Object | Status |
 | - | - |
-| Colour picker window | **Not Started** |
+| Colour Picker | **Not Started** |
+| Confirmation Prompt | **Broken** |
 | File Selector | **Buggy** |
 
 
