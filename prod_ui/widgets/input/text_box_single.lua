@@ -260,13 +260,14 @@ def.skinners = {
 			--love.graphics.translate(0, 16)
 
 			-- Text editor component.
+			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
 			lgcInputS.draw(
 				self,
 				res.color_highlight,
 				skin.font_ghost,
 				res.color_text,
 				line_ed.font,
-				skin.color_insert -- XXX: color_replace
+				color_caret
 			)
 
 			love.graphics.pop()

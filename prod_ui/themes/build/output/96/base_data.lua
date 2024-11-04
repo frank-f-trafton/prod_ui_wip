@@ -18,16 +18,6 @@ return {
       x = 0,
       y = 0
     },
-    button_depressed = {
-      h1 = 4,
-      h2 = 16,
-      h3 = 4,
-      w1 = 4,
-      w2 = 16,
-      w3 = 4,
-      x = 0,
-      y = 0
-    },
     button_disabled = {
       h1 = 4,
       h2 = 16,
@@ -49,16 +39,6 @@ return {
       y = 0
     },
     button_minor = {
-      h1 = 2,
-      h2 = 8,
-      h3 = 2,
-      w1 = 2,
-      w2 = 8,
-      w3 = 2,
-      x = 0,
-      y = 0
-    },
-    button_minor_depressed = {
       h1 = 2,
       h2 = 8,
       h3 = 2,

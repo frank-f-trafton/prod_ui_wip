@@ -255,7 +255,7 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 	if preserve_caret then
 		local delta = utf8.len(line_ed.line) - old_len
 		local max_car_u = utf8.len(line_ed.line) + 1
-		line_ed:caretToByte(utf8.offset(line_ed.line, math.min(old_car_u + delta, max_car_u)))
+		line_ed:caretToByte(utf8.offset(line_ed.line, old_car_u + delta) or max_car_u)
 		line_ed:clearHighlight()
 		line_ed:syncDisplayCaretHighlight()
 	end
@@ -391,8 +391,10 @@ function def:uiCall_create(inst)
 		-- maximum digits in the fractional part
 		self.fractional_max = 2^15
 
-		-- repeat mouse-press state
-		self.repeat_btn = false -- false for inactive, -1 for decrement, 1 for increment
+		-- hover and repeat-press state for inc/dec sensors
+		-- false for N/A, 1 for increment, 2 for decrement
+		self.btn_hov = false
+		self.btn_rep = false
 
 		-- repeat key state
 		self.rep_sc = false
@@ -570,6 +572,10 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		else
 			self:setCursorLow()
 		end
+
+		self.btn_hov = widShared.pointInViewport(self, 3, mx, my) and 1
+			or widShared.pointInViewport(self, 4, mx, my) and 2
+			or false
 	end
 end
 
@@ -579,6 +585,8 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if self.enabled then
 			self.hovered = false
 			self:setCursorLow()
+
+			self.btn_hov = false
 		end
 	end
 end
@@ -597,7 +605,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Clicking the text area:
 		if widShared.pointInViewport(self, 1, mx, my) then
-			self.repeat_btn = false
+			self.btn_rep = false
+			self.btn_hov = false
 			-- Propagation is halted when a context menu is created.
 			if lgcInputS.mousePressLogic(self, button, mx, my) then
 				return true
@@ -607,7 +616,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		elseif widShared.pointInViewport(self, 3, mx, my) then
 			local value_old = self.value
 			if button == 1 then
-				self.repeat_btn = 1
+				self.btn_rep = 1
+				self.btn_hov = 1
 				_callback(self, self.wid_incrementButton, 1)
 				return true
 			end
@@ -616,7 +626,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		elseif widShared.pointInViewport(self, 4, mx, my) then
 			local value_old = self.value
 			if button == 1 then
-				self.repeat_btn = -1
+				self.btn_rep = 2
+				self.btn_hov = 2
 				_callback(self, self.wid_decrementButton, 1)
 				return true
 			end
@@ -631,11 +642,11 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 			if button == self.context.mouse_pressed_button then
 				local value_old = self.value
 				if button == 1 then
-					if self.repeat_btn == 1 then
+					if self.btn_rep == 1 then
 						_callback(self, self.wid_incrementButton, reps + 1)
 						return true
 
-					elseif self.repeat_btn == -1 then
+					elseif self.btn_rep == 2 then
 						_callback(self, self.wid_decrementButton, reps + 1)
 						return true
 					end
@@ -650,6 +661,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			self.press_busy = false
+			self.btn_rep = false
 		end
 	end
 end
@@ -683,11 +695,16 @@ def.skinners = {
 			--local font = skin.font
 			local line_ed = self.line_ed
 
-			local res
+			-- b1: increment sensor, b2: decrement sensor
+			local res, res_b1, res_b2
 			if self.enabled then
-				res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
+				res = self.hovered and skin.res_hover or skin.res_idle
+				res_b1 = self.btn_rep == 1 and skin.res_pressed or self.btn_hov == 1 and skin.res_hover or skin.res_idle
+				res_b2 = self.btn_rep == 2 and skin.res_pressed or self.btn_hov == 2 and skin.res_hover or skin.res_idle
 			else
 				res = skin.res_disabled
+				res_b1 = skin.res_disabled
+				res_b2 = skin.res_disabled
 			end
 
 			love.graphics.push("all")
@@ -698,12 +715,12 @@ def.skinners = {
 
 			-- Increment and decrement buttons.
 			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(res.slc_button_up, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-			uiGraphics.drawSlice(res.slc_button_down, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_inc, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_dec, self.vp4_x + res.deco_ox, self.vp4_y + res.deco_oy, self.vp4_w, self.vp4_h)
+			uiGraphics.drawSlice(res_b1.slc_button_inc, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+			uiGraphics.drawSlice(res_b2.slc_button_dec, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+			uiGraphics.quadShrinkOrCenterXYWH(res_b1.tq_inc, self.vp3_x + res_b1.deco_ox, self.vp3_y + res_b1.deco_oy, self.vp3_w, self.vp3_h)
+			uiGraphics.quadShrinkOrCenterXYWH(res_b2.tq_dec, self.vp4_x + res_b2.deco_ox, self.vp4_y + res_b2.deco_oy, self.vp4_w, self.vp4_h)
 
-			-- Crop text
+			-- Crop text and caret
 			uiGraphics.intersectScissor(
 				ox + self.x + self.vp2_x,
 				oy + self.y + self.vp2_y,
@@ -711,18 +728,18 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			-- Debug
-			love.graphics.setScissor()
+			-- debug
+			--love.graphics.setScissor()
 
-			-- Text editor component
+			-- Text editor component.
+			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
 			lgcInputS.draw(
 				self,
 				res.color_highlight,
 				skin.font_ghost,
 				res.color_text,
 				line_ed.font,
-				(not self.wid_drawer) and skin.color_insert or false -- Don't draw caret if drawer is pulled out. It's annoying.
-				-- XXX: color_replace
+				color_caret
 			)
 
 			love.graphics.pop()

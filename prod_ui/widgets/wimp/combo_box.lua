@@ -666,7 +666,7 @@ def.skinners = {
 			-- XXX: "Open menu" button.
 			love.graphics.setColor(1, 1, 1, 1)
 			uiGraphics.drawSlice(res.slc_deco_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
+			uiGraphics.quadShrinkOrCenterXYWH(res.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
 
 			-- Crop item text.
 			uiGraphics.intersectScissor(
@@ -680,14 +680,14 @@ def.skinners = {
 			-- and there is no drawer.)
 
 			-- Text editor component.
+			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
 			lgcInputS.draw(
 				self,
 				res.color_highlight,
 				skin.font_ghost,
 				res.color_text,
 				line_ed.font,
-				(not self.wid_drawer) and skin.color_insert or false -- Don't draw caret if drawer is pulled out. It's annoying.
-				-- XXX: color_replace
+				(not self.wid_drawer) and color_caret or false -- Don't draw caret if drawer is pulled out. It's annoying.
 			)
 
 			love.graphics.pop()
