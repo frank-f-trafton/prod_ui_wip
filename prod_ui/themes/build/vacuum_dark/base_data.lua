@@ -86,9 +86,6 @@ return {
 		["button"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
-		["button_depressed"] = {
-			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
-		},
 		["button_disabled"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
@@ -99,9 +96,6 @@ return {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
 		["button_minor"] = {
-			x = 0, y = 0, w1 = 2, h1 = 2, w2 = 8, h2 = 8, w3 = 2, h3 = 2,
-		},
-		["button_minor_depressed"] = {
 			x = 0, y = 0, w1 = 2, h1 = 2, w2 = 8, h2 = 8, w3 = 2, h3 = 2,
 		},
 		["button_minor_disabled"] = {

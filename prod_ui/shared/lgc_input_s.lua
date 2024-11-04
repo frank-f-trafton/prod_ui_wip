@@ -511,12 +511,12 @@ function lgcInputS.updateCaretShape(self)
 end
 
 
--- Draw the text component.
--- @param color_caret Table of colors for the text caret, or nil/false to not draw the caret.
+--- Draw the text component.
+-- @param color_highlight Table of colors for the text highlight, or nil/false to not draw the highlight.
 -- @param font_ghost Font to use for optional "Ghost Text", or nil/false to not draw it.
 -- @param color_text Table of colors to use for the body text, or nil/false to not draw it.
 -- @param font Font to use when printing the main text (required, even if printing is disabled by color_text being false).
--- @param color_highlight Table of colors for the text highlight, or nil/false to not draw the highlight.
+-- @param color_caret Table of colors for the text caret, or nil/false to not draw the caret.
 function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
 	-- Call after setting up the text area scissor box, within `love.graphics.push("all")` and `pop()`.
 
