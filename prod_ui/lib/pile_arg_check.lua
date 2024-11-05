@@ -109,7 +109,7 @@ end
 lang.int = "argument #$1: expected integer"
 function M.int(n, v)
 	if type(v) ~= "number" or math.floor(v) ~= v or v ~= v then
-		error(interp(lang.int, n))
+		error(interp(lang.int, n), 2)
 	end
 end
 
@@ -117,7 +117,7 @@ end
 lang.int_eval = "argument #$1: expected false/nil or integer"
 function M.intEval(n, v)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v ~= v) then
-		error(interp(lang.int_eval, n))
+		error(interp(lang.int_eval, n), 2)
 	end
 end
 
@@ -125,7 +125,7 @@ end
 lang.int_ge = "argument #$1: expected integer greater or equal to $2"
 function M.intGE(n, v, min)
 	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v ~= v then
-		error(interp(lang.int_ge, n, min))
+		error(interp(lang.int_ge, n, min), 2)
 	end
 end
 
@@ -133,7 +133,7 @@ end
 lang.int_ge_eval = "argument #$1: expected false/nil or integer greater or equal to $2"
 function M.intGEEval(n, v, min)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v ~= v) then
-		error(interp(lang.int_ge_eval, n, min))
+		error(interp(lang.int_ge_eval, n, min), 2)
 	end
 end
 
@@ -141,12 +141,12 @@ end
 lang.int_range = "argument #$1: integer is out of range"
 function M.intRange(n, v, min, max)
 	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v then
-		error(interp(lang.int_range, n, min, max))
+		error(interp(lang.int_range, n, min, max), 2)
 	end
 end
 function M.intRangeEval(n, v, min, max)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v) then
-		error(interp(lang.int_range, n, min, max))
+		error(interp(lang.int_range, n, min, max), 2)
 	end
 end
 
@@ -154,7 +154,7 @@ end
 lang.int_range_static = "argument #$1: expected integer within the range of $2 to $3"
 function M.intRangeStatic(n, v, min, max)
 	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v then
-		error(interp(lang.int_range_static, n, min, max))
+		error(interp(lang.int_range_static, n, min, max), 2)
 	end
 end
 
@@ -162,31 +162,33 @@ end
 lang.int_range_static_eval = "argument #$1: expected false/nil or integer within the range of $2 to $3"
 function M.intRangeStaticEval(n, v, min, max)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v > max or v ~= v) then
-		error(interp(lang.int_range_static_eval, n, min, max))
+		error(interp(lang.int_range_static_eval, n, min, max), 2)
 	end
 end
 
 
-lang.nan_a = "argument #$1: unexpected non-NaN number, got $2"
-lang.nan_b = "argument #$1: unexpected non-NaN number, got NaN"
+lang.nan_a = "argument #$1: expected non-NaN number, got $2"
+lang.nan_b = "argument #$1: expected non-NaN number, got NaN"
 function M.numberNotNaN(n, v)
 	if type(v) ~= "number" then
-		error(interp(lang.nan_a, n, type(v)))
+		error(interp(lang.nan_a, n, type(v)), 2)
 
 	elseif v ~= v then
-		error(interp(lang.nan_b, n))
+		error(interp(lang.nan_b, n), 2)
 	end
 end
 
 
-lang.nan_eval_a = "argument #$1: unexpected false/nil or non-NaN number, got $2"
-lang.nan_eval_b = "argument #$1: unexpected false/nil or non-NaN number, got NaN"
+lang.nan_eval_a = "argument #$1: expected false/nil or non-NaN number, got $2"
+lang.nan_eval_b = "argument #$1: expected false/nil or non-NaN number, got NaN"
 function M.numberNotNaNEval(n, v)
-	if type(v) ~= "number" then
-		error(interp(lang.nan_eval_a, n, type(v)))
+	if v then
+		if type(v) ~= "number" then
+			error(interp(lang.nan_eval_a, n, type(v)), 2)
 
-	elseif v ~= v then
-		error(interp(lang.nan_eval_b, n))
+		elseif v ~= v then
+			error(interp(lang.nan_eval_b, n), 2)
+		end
 	end
 end
 
@@ -196,12 +198,12 @@ lang.enum_b = "argument #$1: invalid $2 (got non-number, non-string value)"
 local function _enumErr(v) return (type(v) == "string" or type(v) == "number") and lang.enum_a or lang.enum_b end
 function M.enum(n, v, id, e)
 	if not e[v] then
-		error(interp(_enumErr(v), n, id, v))
+		error(interp(_enumErr(v), n, id, v), 2)
 	end
 end
 function M.enumEval(n, v, id, e)
 	if v and not e[v] then
-		error(interp(_enumErr(v), n, id, v))
+		error(interp(_enumErr(v), n, id, v), 2)
 	end
 end
 
@@ -209,7 +211,7 @@ end
 lang.something = "argument #$1: expected non-false, non-nil value, got type $2"
 function M.something(n, v)
 	if not v then
-		error(interp(lang.something, n, type(v)))
+		error(interp(lang.something, n, type(v)), 2)
 	end
 end
 
@@ -218,10 +220,10 @@ lang.something_not_nan_a = "argument #$1: expected non-false, non-nil, non-NaN v
 lang.something_not_nan_b = "argument #$1: expected non-false, non-nil, non-NaN value, got NaN"
 function M.somethingNotNaN(n, v)
 	if not v then
-		error(interp(lang.something_not_nan_a, n, type(v)))
+		error(interp(lang.something_not_nan_a, n, type(v)), 2)
 
 	elseif v ~= v then
-		error(interp(lang.something_not_nan_b, n))
+		error(interp(lang.something_not_nan_b, n), 2)
 	end
 end
 
