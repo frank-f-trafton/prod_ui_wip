@@ -27,6 +27,7 @@ local context = select(1, ...)
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local commonTree = require(context.conf.prod_ui_req .. "logic.common_tree")
 local structTree = require(context.conf.prod_ui_req .. "logic.struct_tree")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -140,216 +141,18 @@ function def:wid_dropped(drop_state)
 end
 
 
-local function _keyForward(self)
-	local item = self.menu.items[self.menu.index]
-	if item
-	and self.expanders_active
-	and #item.nodes > 0
-	and item.expanded
-	then
-		item.expanded = not item.expanded
-		self:orderItems()
-		self:arrange()
-		self:cacheUpdate(true)
-
-	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
-		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
-
-	else
-		self:scrollDeltaH(-32) -- XXX config
-	end
-	return true
-end
+def.wid_defaultKeyNav = commonTree.wid_defaultKeyNav
 
 
-local function _keyBackward(self)
-	local item = self.menu.items[self.menu.index]
-	if item
-	and self.expanders_active
-	and #item.nodes > 0
-	and not item.expanded
-	then
-		item.expanded = not item.expanded -- XXX: wrap into a local function
-		self:orderItems()
-		self:arrange()
-		self:cacheUpdate(true)
-
-	elseif item and #item.nodes > 0 and item.expanded then
-		self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
-
-	else
-		self:scrollDeltaH(32) -- XXX config
-	end
-	return true
-end
-
-
---- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
--- @param key The key code.
--- @param scancode The scancode.
--- @param isrepeat Whether this is a key-repeat event.
--- @return true to halt keynav and further bubbling of the keyPressed event.
-function def:wid_defaultKeyNav(key, scancode, isrepeat)
-	if scancode == "up" then
-		self:movePrev(1, true)
-		return true
-
-	elseif scancode == "down" then
-		self:moveNext(1, true)
-		return true
-
-	elseif scancode == "home" then
-		self:moveFirst(true)
-		return true
-
-	elseif scancode == "end" then
-		self:moveLast(true)
-		return true
-
-	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
-		return true
-
-	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
-		return true
-
-	elseif scancode == "left" then
-		return self.skin.item_align_h == "left" and _keyForward(self)
-			or self.skin.item_align_h == "right" and _keyBackward(self)
-
-	elseif scancode == "right" then
-		return self.skin.item_align_h == "left" and _keyBackward(self)
-			or self.skin.item_align_h == "right" and _keyForward(self)
-	end
-end
-
-
-local function updateItemDimensions(self, skin, item)
-	-- Do not try to update the root node.
-	if not item.parent then
-		return
-	end
-
-	local font = skin.font
-
-	item.w = font:getWidth(item.text) + self.icon_w + skin.first_col_spacing
-	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-	--print("new dimensions", "item.w", item.w, "gw(item.text)", font:getWidth(item.text), "self.expander_w", self.expander_w, "self.icon_w", self.icon_w)
-end
-
-
-local function updateAllItemDimensions(self, skin, node)
-	for i, item in ipairs(node.nodes) do
-		updateItemDimensions(self, skin, item)
-		if #item.nodes > 0 then
-			updateAllItemDimensions(self, skin, item)
-		end
-	end
-end
-
-
-function def:setIconsEnabled(enabled)
-	self.show_icons = not not enabled
-
-	self:cacheUpdate(true)
-	updateAllItemDimensions(self, self.skin, self.tree)
-end
-
-
-function def:setExpandersActive(active)
-	self.expanders_active = not not active
-
-	self:cacheUpdate(true)
-	updateAllItemDimensions(self, self.skin, self.tree)
-end
-
-
-function def:addNode(text, parent_node, tree_pos, bijou_id)
-	--print("add node", text, parent_node, tree_pos, bijou_id)
-	-- XXX: Assertions.
-
-	local skin = self.skin
-	local font = skin.font
-
-	parent_node = parent_node or self.tree
-	local node = parent_node:addNode(tree_pos)
-
-	node.depth = node:getNodeDepth() - 1
-
-	-- Nodes function as menu items.
-	local item = node
-
-	item.selectable = true
-	item.marked = false -- multi-select
-
-	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
-
-	item.x, item.y = 0, 0
-	updateItemDimensions(self, skin, item)
-
-	return item
-end
-
-
-local function _orderLoop(self, items, node)
-	if node.expanded then
-		for i, child_node in ipairs(node.nodes) do
-			items[#items + 1] = child_node
-			_orderLoop(self, items, child_node)
-		end
-	end
-end
-
-
-function def:orderItems()
-	-- Clear the existing menu item layout.
-	local items = self.menu.items
-	for i = #items, 1, -1 do
-		items[i] = nil
-	end
-
-	-- Repopulate the menu based on the tree order.
-	_orderLoop(self, items, self.tree)
-end
-
-
-function def:removeNode(node, _depth)
-	-- XXX: Assertions
-
-	_depth = _depth or 1
-
-	local node_i = node:getNodeIndex()
-	local node_parent = node.parent
-	if not node_parent then
-		error("cannot remove the root tree node.")
-	end
-
-	-- Remove all child nodes first.
-	for i, child_node in ipairs(node.nodes) do
-		self:removeNode(child_node, _depth + 1)
-		node:removeNode(node_i)
-	end
-
-	local item = node.item
-	node.item = nil
-	local item_i = self.menu:getItemIndex(item)
-	table.remove(self.menu.items, item_i)
-
-	if _depth == 1 then
-		self:orderItems()
-		self:arrange()
-	end
-end
+def.setIconsEnabled = commonTree.setIconsEnabled
+def.setExpandersActive = commonTree.setExpandersActive
+def.addNode = commonTree.addNode
+def.orderItems = commonTree.orderItems
+def.removeNode = commonTree.removeNode
 
 
 function def:setSelection(item_t)
-	-- Assertions
-	-- [[
-	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
-	--]]
+	uiShared.type1(1, item_t, "table")
 
 	local item_i = self.menu:getItemIndex(item_t)
 	self:setSelectionByIndex(item_i)
@@ -357,10 +160,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	-- Assertions
-	-- [[
-	uiShared.assertNumber(1, item_i)
-	--]]
+	uiShared.intGE(1, item_i, 0)
 
 	self.menu:setSelectedIndex(item_i)
 end
@@ -473,31 +273,15 @@ function def:uiCall_create(inst)
 		self.press_busy = false
 
 		commonMenu.instanceSetup(self)
+		commonTree.instanceSetup(self)
 
 		self.tree = structTree.new()
 		self.menu = commonMenu.new()
 
-		self.wrap_selection = false
-
-		-- X positions and widths of components within menu items.
-		-- The X positions are reversed when right alignment is used.
-		self.expander_x = 0
-		self.expander_w = 0
-
-		self.icon_x = 0
-		self.icon_w = 0
-
-		self.text_x = 0
+		self.wrap_selection = false -- menu
 
 		-- State flags.
 		self.enabled = true
-
-		-- When true, allows the user to expand and compress items with child items (click the icon or
-		-- press left/right arrow keys).
-		self.expanders_active = false
-
-		-- Shows item icons.
-		self.show_icons = false
 
 		-- Mouse drag behavior.
 		-- NOTE: Some of these settings are mutually incompatible. Use the widget methods (TODO) to
@@ -508,9 +292,6 @@ function def:uiCall_create(inst)
 
 		-- Select new items while dragging.
 		self.drag_select = false
-
-		-- Reorder the current selected item while dragging.
-		self.drag_reorder = false
 
 		-- Support drag-and-drop transactions.
 		-- false: disabled.
@@ -525,7 +306,7 @@ function def:uiCall_create(inst)
 		"toggle": Behaves like a set of checkboxes.
 		"cursor": Behaves (somewhat) like selections in a file browser GUI.
 
-		`item.marked` is used to denote an item that is selected independent of the current
+		`item.marked` denotes an item that is selected independent of the current
 		menu index.
 		--]]
 		self.mark_mode = false
@@ -579,7 +360,7 @@ function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
-		updateAllItemDimensions(self, self.skin, self.tree)
+		commonTree.updateAllItemDimensions(self, self.skin, self.tree)
 
 		-- Document height is based on the last item in the menu.
 		local last_item = menu.items[#menu.items]
@@ -637,7 +418,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					if mods["shift"] then
 						self:clearAllMarkedItems()
 						markItemsCursorMode(self, old_index)
-
 					else
 						self.mark_index = false
 						self:clearAllMarkedItems()

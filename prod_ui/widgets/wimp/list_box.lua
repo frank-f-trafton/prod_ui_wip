@@ -200,10 +200,7 @@ end
 
 
 function def:removeItem(item_t)
-	-- Assertions
-	-- [[
-	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
-	--]]
+	uiShared.type1(1, item_t, "table")
 
 	local item_i = self.menu:getItemIndex(item_t)
 
@@ -213,10 +210,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	-- Assertions
-	-- [[
-	uiShared.assertNumber(1, item_i)
-	--]]
+	uiShared.numberNotNaN(1, item_i)
 
 	local items = self.menu.items
 	local removed_item = items[item_i]
@@ -247,10 +241,7 @@ end
 
 
 function def:setSelection(item_t)
-	-- Assertions
-	-- [[
-	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
-	--]]
+	uiShared.type1(1, item_t, "table")
 
 	local item_i = self.menu:getItemIndex(item_t)
 	self:setSelectionByIndex(item_i)
@@ -258,10 +249,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	-- Assertions
-	-- [[
-	uiShared.assertNumber(1, item_i)
-	--]]
+	uiShared.intGE(1, item_i, 0)
 
 	self.menu:setSelectedIndex(item_i)
 end
@@ -538,7 +526,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					if mods["shift"] then
 						self:clearAllMarkedItems()
 						markItemsCursorMode(self, old_index)
-
 					else
 						self.mark_index = false
 						self:clearAllMarkedItems()
