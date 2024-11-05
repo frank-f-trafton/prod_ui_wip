@@ -10,6 +10,7 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local structMenu = require(REQ_PATH .. "struct_menu")
+--local uiShared = require(REQ_PATH .. "struct_menu") -- WIP
 local widShared = require(REQ_PATH .. "wid_shared")
 
 
@@ -674,6 +675,99 @@ function commonMenu.selectionInView(self, immediate)
 	if immediate then
 		self:cacheUpdate(false)
 	end
+end
+
+
+function commonMenu.setMarkedItem(self, item_t, marked)
+	--uiShared.type1(1, item_t, "table") -- WIP
+
+	item_t.marked = not not marked
+end
+
+
+function commonMenu.toggleMarkedItem(self, item_t)
+	--uiShared.type1(1, item_t, "table") -- WIP
+
+	item_t.marked = not item_t.marked
+end
+
+
+function commonMenu.setMarkedItemByIndex(self, item_i, marked)
+	--uiShared.type1(1, item_i, "number") -- WIP
+
+	local item_t = self.menu.items[item_i]
+
+	self:setMarkedItem(item_t, marked)
+end
+
+
+function commonMenu.getMarkedItem(self, item_t)
+	--uiShared.type1(1, item_t, "table") -- WIP
+
+	return item_t.marked
+end
+
+
+--- Produces a table that contains all items that are currently marked (multi-selected).
+function commonMenu.getAllMarkedItems(self)
+	local tbl = {}
+
+	for i, item in ipairs(self.menu.items) do
+		if item.marked then
+			table.insert(tbl, item)
+		end
+	end
+
+	return tbl
+end
+
+
+function commonMenu.clearAllMarkedItems(self)
+	for i, item in ipairs(self.menu.items) do
+		item.marked = false
+	end
+end
+
+
+function commonMenu.setMarkedItemRange(self, marked, first, last)
+	local menu = self.menu
+	local items = menu.items
+
+	marked = not not marked
+	--uiShared.intRange(2, first, 1, #items) -- WIP
+	--uiShared.intRange(3, last, 1, #items) -- WIP
+
+	for i = first, last do
+		items[i].marked = marked
+	end
+end
+
+
+function commonMenu.countMarkedItems(self)
+	local count = 0
+
+	for i, item in ipairs(self.menu.items) do
+		if item.marked then
+			count = count + 1
+		end
+	end
+
+	return count
+end
+
+
+function commonMenu.markItemsCursorMode(self, old_index)
+	if not self.mark_index then
+		self.mark_index = old_index
+	end
+
+	local menu = self.menu
+	local items = menu.items
+
+	local first, last = math.min(self.mark_index, menu.index), math.max(self.mark_index, menu.index)
+	first, last = math.max(1, math.min(first, #items)), math.max(1, math.min(last, #items))
+
+	self:setMarkedItemRange(true, first, last)
 end
 
 

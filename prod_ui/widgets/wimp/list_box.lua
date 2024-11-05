@@ -255,97 +255,14 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-function def:setMarkedItem(item_t, marked)
-	uiShared.type1(1, item_t, "table")
-
-	item_t.marked = not not marked
-end
-
-
-function def:toggleMarkedItem(item_t)
-	uiShared.type1(1, item_t, "table")
-
-	item_t.marked = not item_t.marked
-end
-
-
-function def:setMarkedItemByIndex(item_i, marked)
-	uiShared.type1(1, item_i, "number")
-
-	local item_t = self.menu.items[item_i]
-
-	self:setMarkedItem(item_t, marked)
-end
-
-
-function def:getMarkedItem(item_t)
-	uiShared.type1(1, item_t, "table")
-
-	return item_t.marked
-end
-
-
---- Produces a table that contains all items that are currently marked (multi-selected).
-function def:getAllMarkedItems()
-	local tbl = {}
-
-	for i, item in ipairs(self.menu.items) do
-		if item.marked then
-			table.insert(tbl, item)
-		end
-	end
-
-	return tbl
-end
-
-
-function def:clearAllMarkedItems()
-	for i, item in ipairs(self.menu.items) do
-		item.marked = false
-	end
-end
-
-
-function def:setMarkedItemRange(marked, first, last)
-	local menu = self.menu
-	local items = menu.items
-
-	marked = not not marked
-	uiShared.intRange(2, first, 1, #items)
-	uiShared.intRange(3, last, 1, #items)
-
-	for i = first, last do
-		items[i].marked = marked
-	end
-end
-
-
-function def:countMarkedItems()
-	local count = 0
-
-	for i, item in ipairs(self.menu.items) do
-		if item.marked then
-			count = count + 1
-		end
-	end
-
-	return count
-end
-
-
-local function markItemsCursorMode(self, old_index)
-	if not self.mark_index then
-		self.mark_index = old_index
-	end
-
-	local menu = self.menu
-	local items = menu.items
-
-	local first, last = math.min(self.mark_index, menu.index), math.max(self.mark_index, menu.index)
-	first, last = math.max(1, math.min(first, #items)), math.max(1, math.min(last, #items))
-
-	self:setMarkedItemRange(true, first, last)
-end
+def.setMarkedItem = commonMenu.setMarkedItem
+def.toggleMarkedItem = commonMenu.toggleMarkedItem
+def.setMarkedItemByIndex = commonMenu.setMarkedItemByIndex
+def.getMarkedItem = commonMenu.getMarkedItem
+def.getAllMarkedItems = commonMenu.getAllMarkedItems
+def.clearAllMarkedItems = commonMenu.clearAllMarkedItems
+def.setMarkedItemRange = commonMenu.setMarkedItemRange
+def.countMarkedItems = commonMenu.countMarkedItems
 
 
 function def:uiCall_create(inst)
@@ -525,7 +442,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
 						self:clearAllMarkedItems()
-						markItemsCursorMode(self, old_index)
+						commonMenu.markItemsCursorMode(self, old_index)
 					else
 						self.mark_index = false
 						self:clearAllMarkedItems()
@@ -640,7 +557,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 								if mods["shift"] then
 									-- Unmark all items, then mark the range between the previous and current selections.
 									self:clearAllMarkedItems()
-									markItemsCursorMode(self, old_index)
+									commonMenu.markItemsCursorMode(self, old_index)
 
 								elseif mods["ctrl"] then
 									item_t.marked = not item_t.marked
@@ -753,7 +670,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 						local mods = self.context.key_mgr.mod
 						if self.mark_mode == "cursor" and self.mark_index then
 							self:clearAllMarkedItems()
-							markItemsCursorMode(self, old_index)
+							commonMenu.markItemsCursorMode(self, old_index)
 
 						elseif self.mark_mode == "toggle" then
 							local first, last = math.min(old_index, item_i), math.max(old_index, item_i)
