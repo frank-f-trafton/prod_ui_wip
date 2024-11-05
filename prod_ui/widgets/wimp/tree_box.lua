@@ -47,25 +47,7 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-function def:arrange()
-	local skin, menu = self.skin, self.menu
-	local items = menu.items
-	local font = skin.font
-
-	local yy = 0
-
-	for i = 1, #items do
-		local item = items[i]
-
-		if skin.item_align_h == "left" then
-			item.x = item.depth * skin.indent
-		else -- "right"
-			item.x = self.doc_w - item.w - (item.depth * skin.indent)
-		end
-		item.y = yy
-		yy = item.y + item.h
-	end
-end
+def.arrange = commonTree.arrange
 
 
 -- * Scroll helpers *
