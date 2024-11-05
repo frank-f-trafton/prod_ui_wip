@@ -23,27 +23,6 @@ end
 setmetatable(uiShared.dummy_table, uiShared.dummy_table)
 
 
--- * Generic type errors *
-
-
---- Type error in a function argument.
-function uiShared.errBadType(num, var, type_string)
-	error("argument #" .. num .. " bad type (expected " .. type_string .. ", got " .. type(var) .. ")", 2)
-end
-
-
---- Type error in a table field.
-function uiShared.errBadFieldType(field_str, var, type_string)
-	error("Table field '" .. field_str .. "' bad type (expected " .. type_string .. ", got " .. type(var) .. ")", 2)
-end
-
-
---- Type error in a sequence.
-function uiShared.errBadSeq(num, var, type_string)
-	error("sequence entry #" .. num .. " bad type (expected " .. type_string .. ", got " .. type(var) .. ")", 2)
-end
-
-
 -- * Lock errors *
 
 
@@ -88,6 +67,7 @@ uiShared.numberNotNaNEval = pileArgCheck.numberNotNaNEval -- (n, v)
 uiShared.enum = pileArgCheck.enum -- (n, v, id, e)
 uiShared.enumEval = pileArgCheck.enumEval -- (n, v, id, e)
 uiShared.something = pileArgCheck.something -- (n, v)
+uiShared.somethingNotNaN = pileArgCheck.somethingNotNaN -- (n, v)
 
 
 function uiShared.loveType(n, obj, typ)

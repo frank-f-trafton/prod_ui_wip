@@ -214,4 +214,16 @@ function M.something(n, v)
 end
 
 
+lang.something_not_nan_a = "argument #$1: expected non-false, non-nil, non-NaN value, got type $2"
+lang.something_not_nan_b = "argument #$1: expected non-false, non-nil, non-NaN value, got NaN"
+function M.somethingNotNaN(n, v)
+	if not v then
+		error(interp(lang.something_not_nan_a, n, type(v)))
+
+	elseif v ~= v then
+		error(interp(lang.something_not_nan_b, n))
+	end
+end
+
+
 return M

@@ -24,10 +24,6 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 local uiWidget = require(REQ_PATH .. "ui_widget")
 
 
--- Error functions
-local _errBadType = uiShared.errBadType -- num, var, expected
-
-
 local dummyFunc = function() end
 
 
@@ -98,16 +94,14 @@ end
 -- @param h Context viewport height.
 -- @return The UI context.
 function uiContext.newContext(prod_ui_path, x, y, w, h)
-	-- Assertions
-	-- [[
-	if type(prod_ui_path) ~= "string" then _errBadType(1, prod_ui_path, "string")
-	elseif type(x) ~= "number" then _errBadType(2, x, "number")
-	elseif type(y) ~= "number" then _errBadType(3, y, "number")
-	elseif type(w) ~= "number" then _errBadType(4, w, "number")
-	elseif w < 1 then error("context viewport width must be greater than zero.")
-	elseif type(h) ~= "number" then _errBadType(5, h, "number")
+	uiShared.type1(1, prod_ui_path, "string")
+	uiShared.numberNotNaN(2, x)
+	uiShared.numberNotNaN(3, y)
+	uiShared.numberNotNaN(4, w)
+	uiShared.numberNotNaN(5, h)
+
+	if w < 1 then error("context viewport width must be greater than zero.")
 	elseif h < 1 then error("context viewport height must be greater than zero.") end
-	--]]
 
 	-- Default to non-empty paths having a slash on the end.
 	if prod_ui_path ~= "" and string.sub(prod_ui_path, -1) ~= "/" then
@@ -986,11 +980,8 @@ end
 -- @param def_conf An arbitrary config table for the chunk function.
 -- @return The def table. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
-	-- Assertions
-	-- [[
-	if type(chunk) ~= "function" then _errBadType(1, chunk, "function")
-	elseif id == nil or id ~= id then _errBadType(2, id, "not nil, not NaN") end
-	--]]
+	uiShared.type1(1, chunk, "function")
+	uiShared.somethingNotNaN(2, id)
 
 	if self.widget_defs[id] then
 		error("widget ID " .. id .. " is already loaded.")
@@ -1024,11 +1015,8 @@ end
 -- @param def_conf An arbitrary config table for the chunk function.
 -- @return The def table or fab function. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDef(file_path, id, def_conf)
-	-- Assertions
-	-- [[
-	if type(file_path) ~= "string" then _errBadType(1, file_path, "string")
-	elseif id == nil or id ~= id then _errBadType(2, id, "not nil, not NaN") end
-	--]]
+	uiShared.type1(1, file_path, "string")
+	uiShared.somethingNotNaN(2, id)
 
 	local chunk, err = love.filesystem.load(file_path)
 	if not chunk then
@@ -1118,10 +1106,7 @@ end
 -- @param id The widget definition ID. Cannot be NaN.
 -- @return the definition table, or nil if nothing is registered by that ID.
 function _mt_context:getWidgetDef(id)
-	-- Assertions
-	-- [[
-	if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN") end
-	--]]
+	uiShared.somethingNotNaN(1, id)
 
 	return self.widget_defs[id]
 end
@@ -1141,12 +1126,9 @@ end
 --	#children + 1.
 -- @return A reference to the new instance. The function will raise an error in the event of a problem.
 function _mt_context:addWidget(id, init_t, pos)
-	-- Assertions
-	-- [[
-	if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN")
-	elseif init_t and type(init_t) ~= "table" then _errBadType(2, init_t, "nil or table")
-	elseif pos and type(pos) ~= "number" then _errBadType(3, pos, "nil or number") end
-	--]]
+	uiShared.somethingNotNaN(1, id)
+	uiShared.typeEval1(2, init_t, "table")
+	uiShared.numberNotNaNEval(3, pos)
 
 	if self.locked then
 		uiShared.errLockedContext("add top-level instance widget")
@@ -1190,12 +1172,9 @@ end
 --  Locked during update: yes (context)
 -- @param new_root The new root instance.
 function _mt_context:pushRoot(new_root)
-	-- Assertions
-	-- [[
-	if type(new_root) ~= "table" then
-		_errBadType(1, new_root, "table")
+	uiShared.type1(1, new_root, "table")
 
-	elseif self.locked then
+	if self.locked then
 		uiShared.errLockedContext("push top-level root instance")
 
 	elseif new_root.context ~= self then
@@ -1204,7 +1183,6 @@ function _mt_context:pushRoot(new_root)
 	elseif new_root.parent then
 		error("only top-level widget instances can become the context root.")
 	end
-	--]]
 
 	local old_root = self.tree
 

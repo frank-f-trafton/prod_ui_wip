@@ -42,11 +42,8 @@ def.setLabel = lgcLabel.widSetLabel
 -- @param pos The position value. Clamped between 0 and max.
 -- @param max The maximum value. Clamped to 0 on the low end.
 function def:setCounter(pos, max)
-	-- Assertions
-	-- [[
-	if type(pos) ~= "number" then uiShared.errBadType(1, pos, "number")
-	elseif max and type(max) ~= "number" then uiShared.errBadType(2, max, "number") end
-	--]]
+	uiShared.numberNotNaN(1, pos)
+	uiShared.numberNotNaNEval(2, max)
 
 	local old_pos = self.pos
 	local old_max = self.max

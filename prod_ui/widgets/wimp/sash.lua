@@ -60,12 +60,11 @@ end
 
 -- @param wid The widget to attach, or false/nil to remove any attached widget. The widget to attach must not be in a dying or dead state.
 function def:setAttachedWidget(wid)
+	uiShared.typeEval1(1, wid, "table")
+
 	if not wid then
 		self.att_ref = false
 		return
-
-	elseif type(wid) ~= "table" then
-		uiShared.errBadType(1, wid, "table (ProdUI Widget)")
 
 	elseif wid._dead then
 		error("attempted to attach a dead or dying widget")

@@ -44,10 +44,7 @@ end
 
 
 function def:setText(text)
-	-- Assertions
-	-- [[
-	if type(text) ~= "string" then uiShared.errBadType(1, text, "string") end
-	--]]
+	uiShared.type1(1, text, "string")
 
 	if self.max_code_points then
 		-- Trim text if it exceeds the max code point count.
@@ -64,10 +61,7 @@ end
 
 -- @param max The maximum number of code points. Pass false or nil to effectively disable the limit.
 function def:setMaxCodePoints(max)
-	-- Assertions
-	-- [[
-	if max and type(max) ~= "number" then uiShared.errBadType(1, max, "false/nil/number") end
-	--]]
+	uiShared.numberNotNaNEval(1, max)
 
 	if max then
 		max = math.floor(math.max(0, max))
