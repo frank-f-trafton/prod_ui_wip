@@ -1,6 +1,5 @@
 
 -- ProdUI
-local commonMenu = require("prod_ui.logic.common_menu")
 local commonWimp = require("prod_ui.logic.common_wimp")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.logic.wid_shared")
@@ -57,7 +56,9 @@ local function _createPopUpMenu(self)
 		self.pressed = true
 		self.aux_pressed = true
 
-		commonMenu.widgetConfigureMenuItems(self, _pop_up_def)
+		local lgcMenu = context:getLua("shared/lgc_menu.lua")
+		lgcMenu.widgetConfigureMenuItems(self, _pop_up_def)
+
 		local root = self:getTopWidgetInstance()
 		local ax, ay = self:getAbsolutePosition()
 		local menu_x

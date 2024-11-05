@@ -16,8 +16,8 @@ The menu bar may act strangely if it is too narrow to display all categories.
 
 local context = select(1, ...)
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -141,7 +141,7 @@ end
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
 local function makePopUpMenu(item, client, bank_thimble, take_thimble, doctor_press, set_selection) -- XXX name is too similar to commonWimp.makePopUpMenu()
-	commonMenu.widgetConfigureMenuItems(item, item.pop_up_def)
+	lgcMenu.widgetConfigureMenuItems(item, item.pop_up_def)
 
 	-- Locate bottom of menu item in UI space.
 	local ax, ay = client:getAbsolutePosition()
@@ -232,8 +232,8 @@ end
 -- * Scroll helpers *
 
 
-def.getInBounds = commonMenu.getItemInBoundsRect
-def.selectionInView = commonMenu.selectionInView
+def.getInBounds = lgcMenu.getItemInBoundsRect
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * / Scroll helpers *
@@ -242,8 +242,8 @@ def.selectionInView = commonMenu.selectionInView
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
 -- * / Spatial selection *
@@ -252,10 +252,10 @@ def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, 
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
---def.moveFirst = commonMenu.widgetMoveFirst
---def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+--def.moveFirst = lgcMenu.widgetMoveFirst
+--def.moveLast = lgcMenu.widgetMoveLast
 
 
 -- * / Selection movement *
@@ -324,7 +324,7 @@ function def:uiCall_create(inst)
 		self.show_underlines = true
 		self.underline_width = 1
 
-		self.menu = self.menu or commonMenu.new()
+		self.menu = self.menu or lgcMenu.new()
 
 		self:skinSetRefs()
 		self:skinInstall()
@@ -361,7 +361,7 @@ end
 --- Updates cached display state.
 function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(self.menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.menu.items)
 	end
 end
 

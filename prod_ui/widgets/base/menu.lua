@@ -41,9 +41,9 @@ doc_w|h is the range containing menu items, and the range that Viewport 1 is all
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -62,10 +62,10 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 --- Override this to control how menu items are arranged.
 --function def:arrange(first, last)
-def.arrange = commonMenu.arrangeListVerticalTB
---def.arrange = commonMenu.arrangeListVerticalLRTB
---def.arrange = commonMenu.arrangeListHorizontalLR
---def.arrange = commonMenu.arrangeListHorizontalTBLR
+def.arrange = lgcMenu.arrangeListVerticalTB
+--def.arrange = lgcMenu.arrangeListVerticalLRTB
+--def.arrange = lgcMenu.arrangeListHorizontalLR
+--def.arrange = lgcMenu.arrangeListHorizontalTBLR
 
 
 
@@ -103,8 +103,8 @@ end
 -- * Scroll helpers *
 
 
-def.getInBounds = commonMenu.getItemInBoundsRect
-def.selectionInView = commonMenu.selectionInView
+def.getInBounds = lgcMenu.getItemInBoundsRect
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * / Scroll helpers *
@@ -113,8 +113,8 @@ def.selectionInView = commonMenu.selectionInView
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
 -- * / Spatial selection *
@@ -123,10 +123,10 @@ def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y,
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 -- * / Selection movement *
@@ -233,7 +233,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self)
 
 		self.auto_range = "v"
 
@@ -245,7 +245,7 @@ function def:uiCall_create(inst)
 		--self.auto_reshape_w = 0
 		--self.auto_reshape_h = 0
 
-		self.menu = self.menu or commonMenu.new()
+		self.menu = self.menu or lgcMenu.new()
 
 		self:skinSetRefs()
 		self:skinInstall()
@@ -300,16 +300,16 @@ function def:cacheUpdate(refresh_dimensions)
 	local menu = self.menu
 
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
 	end
 
 	-- Option: automatically set the draw ranges for items.
 	local auto_range = self.auto_range -- XXX untested
 	if auto_range == "h" then
-		commonMenu.widgetAutoRangeH(self)
+		lgcMenu.widgetAutoRangeH(self)
 
 	elseif auto_range == "v" then
-		commonMenu.widgetAutoRangeV(self)
+		lgcMenu.widgetAutoRangeV(self)
 	end
 end
 
@@ -318,7 +318,7 @@ end
 --function def:wid_keyPressed(key, scancode, isrepeat)
 
 --- The default navigational key input.
-def.wid_defaultKeyNav = commonMenu.keyNavTB
+def.wid_defaultKeyNav = lgcMenu.keyNavTB
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)

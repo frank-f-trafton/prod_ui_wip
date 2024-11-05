@@ -42,8 +42,8 @@ should still work when clicking on the body, however.
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -56,13 +56,13 @@ local def = {
 }
 
 
-def.arrange = commonMenu.arrangeListVerticalTB
+def.arrange = lgcMenu.arrangeListVerticalTB
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 def.wid_buttonAction = uiShared.dummyFunc
@@ -218,12 +218,12 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 1)
 		widShared.setupViewport(self, 2)
 
-		-- -> commonMenu.instanceSetup(self)
+		-- -> lgcMenu.instanceSetup(self)
 		self.page_jump_size = 4
 		self.wheel_jump_size = 64
 		self.wrap_selection = false
 
-		self.menu = commonMenu.new()
+		self.menu = lgcMenu.new()
 
 		-- XXX: dropdown button icon.
 

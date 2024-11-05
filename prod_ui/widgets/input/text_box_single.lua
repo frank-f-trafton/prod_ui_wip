@@ -19,7 +19,6 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")

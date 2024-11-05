@@ -14,8 +14,8 @@ See `wimp/dropdown_box.lua` for more notes.
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -31,30 +31,30 @@ local def = {
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
-def.arrange = commonMenu.arrangeListVerticalTB
+def.arrange = lgcMenu.arrangeListVerticalTB
 
 
 -- * Scroll helpers *
 
 
-def.getInBounds = commonMenu.getItemInBoundsY
-def.selectionInView = commonMenu.selectionInView
+def.getInBounds = lgcMenu.getItemInBoundsY
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPointVClamp -- (self, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPointVClamp -- (self, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 
@@ -151,7 +151,7 @@ function def:updateDimensions()
 	end
 
 	-- Refresh document size.
-	self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(menu.items)
+	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
 
 	print(
 		"self.w", self.w,
@@ -202,7 +202,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self)
 
 		self.wrap_selection = false
 
@@ -297,11 +297,11 @@ function def:cacheUpdate(refresh_dimensions)
 	local menu = self.menu
 
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
 	end
 
 	-- Set the draw ranges for items.
-	commonMenu.widgetAutoRangeV(self)
+	lgcMenu.widgetAutoRangeV(self)
 end
 
 

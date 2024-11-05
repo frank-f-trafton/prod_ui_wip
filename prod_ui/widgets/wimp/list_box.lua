@@ -26,8 +26,8 @@ Optional           Optional scroll bars
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -45,30 +45,30 @@ widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
-def.arrange = commonMenu.arrangeListVerticalTB
+def.arrange = lgcMenu.arrangeListVerticalTB
 
 
 -- * Scroll helpers *
 
 
-def.getInBounds = commonMenu.getItemInBoundsY
-def.selectionInView = commonMenu.selectionInView
+def.getInBounds = lgcMenu.getItemInBoundsY
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 --- Called when user double-clicks on the widget or presses "return" or "kpenter".
@@ -255,14 +255,14 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setMarkedItem = commonMenu.setMarkedItem
-def.toggleMarkedItem = commonMenu.toggleMarkedItem
-def.setMarkedItemByIndex = commonMenu.setMarkedItemByIndex
-def.getMarkedItem = commonMenu.getMarkedItem
-def.getAllMarkedItems = commonMenu.getAllMarkedItems
-def.clearAllMarkedItems = commonMenu.clearAllMarkedItems
-def.setMarkedItemRange = commonMenu.setMarkedItemRange
-def.countMarkedItems = commonMenu.countMarkedItems
+def.setMarkedItem = lgcMenu.setMarkedItem
+def.toggleMarkedItem = lgcMenu.toggleMarkedItem
+def.setMarkedItemByIndex = lgcMenu.setMarkedItemByIndex
+def.getMarkedItem = lgcMenu.getMarkedItem
+def.getAllMarkedItems = lgcMenu.getAllMarkedItems
+def.clearAllMarkedItems = lgcMenu.clearAllMarkedItems
+def.setMarkedItemRange = lgcMenu.setMarkedItemRange
+def.countMarkedItems = lgcMenu.countMarkedItems
 
 
 function def:uiCall_create(inst)
@@ -278,9 +278,9 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self)
 
-		self.menu = commonMenu.new()
+		self.menu = lgcMenu.new()
 
 		self.wrap_selection = false
 
@@ -416,7 +416,7 @@ function def:cacheUpdate(refresh_dimensions)
 	end
 
 	-- Set the draw ranges for items.
-	commonMenu.widgetAutoRangeV(self)
+	lgcMenu.widgetAutoRangeV(self)
 end
 
 
@@ -442,7 +442,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
 						self:clearAllMarkedItems()
-						commonMenu.markItemsCursorMode(self, old_index)
+						lgcMenu.markItemsCursorMode(self, old_index)
 					else
 						self.mark_index = false
 						self:clearAllMarkedItems()
@@ -543,7 +543,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					-- Buttons 1, 2 and 3 all select an item.
 					-- Only button 1 updates the item mark state.
 					if button <= 3 then
-						commonMenu.widgetSelectItemByIndex(self, item_i)
+						lgcMenu.widgetSelectItemByIndex(self, item_i)
 						self.mouse_clicked_item = item_t
 
 						if button == 1 then
@@ -557,7 +557,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 								if mods["shift"] then
 									-- Unmark all items, then mark the range between the previous and current selections.
 									self:clearAllMarkedItems()
-									commonMenu.markItemsCursorMode(self, old_index)
+									lgcMenu.markItemsCursorMode(self, old_index)
 
 								elseif mods["ctrl"] then
 									item_t.marked = not item_t.marked
@@ -670,7 +670,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 						local mods = self.context.key_mgr.mod
 						if self.mark_mode == "cursor" and self.mark_index then
 							self:clearAllMarkedItems()
-							commonMenu.markItemsCursorMode(self, old_index)
+							lgcMenu.markItemsCursorMode(self, old_index)
 
 						elseif self.mark_mode == "toggle" then
 							local first, last = math.min(old_index, item_i), math.max(old_index, item_i)

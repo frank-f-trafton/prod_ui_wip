@@ -1,3 +1,6 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 Shared widget logic for single-line text input.
 
@@ -30,7 +33,6 @@ local lgcInputS = {}
 local utf8 = require("utf8")
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
@@ -39,6 +41,7 @@ local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -255,7 +258,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x
 		local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
 
-		commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
 		local root = self:getTopWidgetInstance()
 		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
@@ -401,7 +404,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
 		end
 
 	elseif button == 2 then
-		commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
 		local root = self:getTopWidgetInstance()
 

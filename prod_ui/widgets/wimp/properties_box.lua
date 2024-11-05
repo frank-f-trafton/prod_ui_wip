@@ -33,8 +33,8 @@ Optional icons (bijoux)  │
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local structTree = require(context.conf.prod_ui_req .. "logic.struct_tree")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -73,24 +73,24 @@ end
 -- * Scroll helpers *
 
 
-def.getInBounds = commonMenu.getItemInBoundsY
-def.selectionInView = commonMenu.selectionInView
+def.getInBounds = lgcMenu.getItemInBoundsY
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 function def:setMultipleCategories(enabled)
@@ -185,7 +185,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self)
 
 		-- When true, the menu items list is populated with the contents of `self.categories`.
 		-- When false, `self.category` is used instead.
@@ -193,7 +193,7 @@ function def:uiCall_create(inst)
 
 		self.category = false
 		self.categories = {}
-		self.menu = commonMenu.new()
+		self.menu = lgcMenu.new()
 
 		self.wrap_selection = false
 
@@ -278,7 +278,7 @@ function def:cacheUpdate(refresh_dimensions)
 	end
 
 	-- Set the draw ranges for items.
-	commonMenu.widgetAutoRangeV(self)
+	lgcMenu.widgetAutoRangeV(self)
 end
 
 

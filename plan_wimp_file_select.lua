@@ -1,7 +1,6 @@
 
 
 -- ProdUI
-local commonMenu = require("prod_ui.logic.common_menu")
 local commonTab = require("prod_ui.logic.common_tab")
 local commonWimp = require("prod_ui.logic.common_wimp")
 local keyCombo = require("prod_ui.lib.key_combo")

@@ -35,7 +35,6 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 
 -- ProdUI
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
@@ -45,6 +44,7 @@ local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -603,7 +603,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				end
 
 			elseif button == 2 then
-				commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+				lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
 				local root = self:getTopWidgetInstance()
 
@@ -751,7 +751,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			local caret_x = ax + self.vp_x - self.scr_x + disp.caret_box_x
 			local caret_y = ay + self.vp_y - self.scr_y + disp.caret_box_y + disp.caret_box_h
 
-			commonMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+			lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
 			local root = self:getTopWidgetInstance()
 			local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
