@@ -2,61 +2,30 @@
 --[[
 XXX: Under construction.
 
-A list of properties.
+A hierarchical list of properties.
 
-Multiple categories:
 
               Drag to resize columns
-                        │
-Optional icons (bijoux) │
-     │                  │
-     │ Labels           │   Controls
-     │   │              │      │
-     V   V              V      V
-┌────────────────────────────────────────┬─┐
-│ v [B] Category                         │^│  <-- Click '>'/'v' or press right/left to expand or collapse
-│ ┌─────────────────────┬──────────────┐ ├─┤
-│ │ [B] Foo             │     [x]      │ │ │
-│ │:[B]:Bar:::::::::::::│:::[    0.02]:│ │ │
-│ │ [B] Baz             │   [ "Twist"] │ │ │
-│ │ [B] Bop             │ [dir/ectory] │ │ │
-│ └─────────────────────┴──────────────┘ │ │
-│                                        │ │
-│ > Collapsed Category                   ├─┤
-│ ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ │v│
-└────────────────────────────────────────┴─┘
+                         │
+Optional icons (bijoux)  │
+     │                   │
+     │ Labels            │   Controls
+     │   │               │      │
+     V   V               V      V
+┌───────────────────────────────────────────────┬─┐
+│ v [B] Category                                │^│  <-- Click '>'/'v' or press right/left to expand or collapse
+│    [B] Foo             │                  [x] ├─┤
+│::::[B]:Bar:::::::::::::│:[              0.02]:│ │
+│    [B] Baz             │ ["Twist"           ] │ │
+│  v [B] Color           │ [0.5, 0.5, 0.5, 1.0] │ │
+│     [B] R              │ [               0.5] │ │
+│     [B] G              │ [               0.5] │ │
+│     [B] B              │ [               0.5] │ │
+│     [B] A              │ [               1.0] │ │
+│    [B] Bop             │ [dir/ectory        ] ├─┤
+│ > [B] Collapsed Category                      │v│
+└───────────────────────────────────────────────┴─┘
 
-
-Single category:
-
-┌─────────────────────┬──────────────┬─┐
-│ [B] Foo             │     [x]      │^│
-│:[B]:Bar:::::::::::::│:::[    0.02]:├─┤
-│ [B] Baz             │   [ "Twist"] │ │
-│ [B] Bop             │ [dir/ectory] │ │
-│                     │              ├─┤
-│                     │              │v│
-└─────────────────────┴──────────────┴─┘
-
-
-In single category mode:
-	* Only items from `self.category` are shown.
-	* `category.expanded` has no effect.
-
-
-category = {
-	text = "Foobar",
-	<icon_id>,
-	items = {
-		{
-			_type = "checkbox",
-			text = "Bazbop",
-			<icon_id>,
-			enabled = true,
-			-- (checkbox-specific state)
-		},
-	},
-}
 
 --]]
 
@@ -66,6 +35,7 @@ local context = select(1, ...)
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local structTree = require(context.conf.prod_ui_req .. "logic.struct_tree")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -84,7 +54,20 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
--- XXX: function def:arrange()
+function def:arrange()
+	local skin, menu = self.skin, self.menu
+	local items = menu.items
+	local font = skin.font
+
+	local yy = 0
+
+	for i = 1, #items do
+		local item = items[i]
+		item.x = 0
+		item.y = yy
+		yy = item.y + item.h
+	end
+end
 
 
 -- * Scroll helpers *
@@ -97,7 +80,7 @@ def.selectionInView = commonMenu.selectionInView
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPoint -- (self, px, py, first, last)
+def.getItemAtPoint = commonMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
 def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
@@ -108,12 +91,6 @@ def.movePrev = commonMenu.widgetMovePrev
 def.moveNext = commonMenu.widgetMoveNext
 def.moveFirst = commonMenu.widgetMoveFirst
 def.moveLast = commonMenu.widgetMoveLast
-
-
--- XXX: wid_action*()
--- XXX: wid_select()
--- XXX: wid_dropped()
--- XXX: wid_defaultKeyNav()
 
 
 function def:setMultipleCategories(enabled)

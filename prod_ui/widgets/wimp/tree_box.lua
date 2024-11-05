@@ -1,8 +1,5 @@
 
 --[[
-
-(XXX: Not finished!)
-
 A WIMP TreeBox.
 
  ┌──────────────────────────┬─┐
@@ -30,7 +27,7 @@ local context = select(1, ...)
 
 local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
-local commonTree = require(context.conf.prod_ui_req .. "logic.common_tree")
+local structTree = require(context.conf.prod_ui_req .. "logic.struct_tree")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -50,8 +47,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 function def:arrange()
-	local skin = self.skin
-	local menu = self.menu
+	local skin, menu = self.skin, self.menu
 	local items = menu.items
 	local font = skin.font
 
@@ -478,7 +474,7 @@ function def:uiCall_create(inst)
 
 		commonMenu.instanceSetup(self)
 
-		self.tree = commonTree.new()
+		self.tree = structTree.new()
 		self.menu = commonMenu.new()
 
 		self.wrap_selection = false

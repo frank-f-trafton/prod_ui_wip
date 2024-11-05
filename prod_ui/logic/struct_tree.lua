@@ -1,7 +1,7 @@
 -- Provides the guts of a tree structure, suitable for use in a TreeBox widget.
 
 
-local commonTree = {}
+local structTree = {}
 
 
 local _mt_tree = {}
@@ -31,7 +31,7 @@ local function getRightmostNode(node)
 end
 
 
-function commonTree.new()
+function structTree.new()
 	local self = setmetatable({}, _mt_tree)
 
 	self.parent = false
@@ -49,7 +49,7 @@ end
 function _mt_tree:addNode(pos)
 	pos = pos or #self.nodes + 1
 
-	local node = commonTree.new()
+	local node = structTree.new()
 	node.parent = self
 
 	table.insert(self.nodes, pos, node)
@@ -172,4 +172,4 @@ function _mt_tree:getNodeDepth()
 end
 
 
-return commonTree
+return structTree
