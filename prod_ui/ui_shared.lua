@@ -67,22 +67,27 @@ end
 
 -- * Assertions *
 
-
 uiShared.type = pileArgCheck.type -- (n, v, ...)
-uiShared.type1 = pileArgCheck.type1 -- (n, v, e)
 uiShared.typeEval = pileArgCheck.typeEval -- typeEval(n, v, ...)
+uiShared.type1 = pileArgCheck.type1 -- (n, v, e)
 uiShared.typeEval1 = pileArgCheck.typeEval1 -- (n, v, e)
+uiShared.fieldType = pileArgCheck.fieldType -- (n, t, id, ...)
+uiShared.fieldType1 = pileArgCheck.fieldType1 -- (n, t, id, e)
+uiShared.fieldTypeEval = pileArgCheck.fieldTypeEval -- (n, t, id, ...)
+uiShared.fieldTypeEval1 = pileArgCheck.fieldTypeEval1 -- (n, t, id, e)
 uiShared.int = pileArgCheck.int -- (n, v)
-uiShared.evalInt = pileArgCheck.evalInt -- (n, v)
+uiShared.intEval = pileArgCheck.intEval -- (n, v)
 uiShared.intGE = pileArgCheck.intGE -- (n, v, min)
-uiShared.evalIntGE = pileArgCheck.evalIntGE -- (n, v, min)
+uiShared.intGEEval = pileArgCheck.intGEEval -- (n, v, min)
 uiShared.intRange = pileArgCheck.intRange -- (n, v, min, max)
-uiShared.evalIntRange = pileArgCheck.evalIntRange -- (n, v, min, max)
+uiShared.intRangeEval = pileArgCheck.intRangeEval -- (n, v, min, max)
 uiShared.intRangeStatic = pileArgCheck.intRangeStatic -- (n, v, min, max)
-uiShared.evalIntRangeStatic = pileArgCheck.evalIntRangeStatic -- (n, v, min, max)
+uiShared.intRangeStaticEval = pileArgCheck.intRangeStaticEval -- (n, v, min, max)
 uiShared.numberNotNaN = pileArgCheck.numberNotNaN -- (n, v)
+uiShared.numberNotNaNEval = pileArgCheck.numberNotNaNEval -- (n, v)
 uiShared.enum = pileArgCheck.enum -- (n, v, id, e)
 uiShared.enumEval = pileArgCheck.enumEval -- (n, v, id, e)
+uiShared.something = pileArgCheck.something -- (n, v)
 
 
 function uiShared.loveType(n, obj, typ)

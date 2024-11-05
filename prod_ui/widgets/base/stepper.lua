@@ -113,7 +113,7 @@ end
 -- @return The index of the newly-added option.
 function def:insertOption(option, i)
 	uiShared.type(1, option, "string", "table")
-	uiShared.evalIntRange(2, i, 1, #self.options + 1)
+	uiShared.intRangeEval(2, i, 1, #self.options + 1)
 
 	i = i or #self.options + 1
 
@@ -138,7 +138,7 @@ end
 -- @param i *(#options)* Index of the option to remove in the array. Must be between 1 and #options. If not specified, the last option in the array will be removed.
 -- @return The removed option value.
 function def:removeOption(i)
-	uiShared.evalIntRange(1, i, 1, #self.options)
+	uiShared.intRangeEval(1, i, 1, #self.options)
 
 	i = i or #self.options
 

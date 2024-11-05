@@ -125,7 +125,7 @@ function def:addItem(text, pos)
 	local items = self.menu.items
 
 	uiShared.type1(1, text, "string")
-	uiShared.evalIntRange(2, pos, 1, #items + 1)
+	uiShared.intRangeEval(2, pos, 1, #items + 1)
 
 	pos = pos or #items + 1
 
