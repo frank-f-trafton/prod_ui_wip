@@ -16,10 +16,6 @@ local utilTable = require(REQ_PATH .. "logic.util_table")
 local widShared = require(REQ_PATH .. "logic.wid_shared")
 
 
--- Error functions
-local _errBadType = uiShared.errBadType -- num, var, type_string
-
-
 local dummyFunc = function() end
 local dummy_table = {}
 
@@ -447,12 +443,9 @@ end
 -- @param pos (default: #self.children + 1) Where to place the new widget in the children table.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, init_t, pos)
-	-- Assertions
-	-- [[
-		if id == nil or id ~= id then _errBadType(1, id, "not nil, not NaN")
-		elseif init_t and type(init_t) ~= "table" then _errBadType(2, init_t, "nil or table")
-		elseif pos and type(pos) ~= "number" then _errBadType(3, pos, "nil or number") end
-	--]]
+	uiShared.somethingNotNaN(1, id)
+	uiShared.typeEval1(2, init_t, "table")
+	uiShared.numberNotNaNEval(3, pos)
 
 	if self.context.locks[self] then
 		uiShared.errLocked("add child")
@@ -831,10 +824,7 @@ end
 --- Sets the widget's tag string.
 -- @param tag (string) The tag to assign.
 function _mt_widget:setTag(tag)
-	-- Assertions
-	-- [[
-	if type(tag) ~= "string" then _errBadType(1, tag, "string") end
-	--]]
+	uiShared.type1(1, tag, "string")
 
 	self.tag = tag
 end

@@ -23,7 +23,7 @@ local intersect = require(context.conf.prod_ui_req .. "logic.intersect")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
-local slider_axes = {horizontal = true, vertical = true}
+local _slider_axes = {horizontal = true, vertical = true}
 
 
 local slider_keys = {
@@ -373,12 +373,9 @@ end
 
 
 function lgcSlider.widSetSliderPosition(self, pos)
-	-- Does not check `self.enabled` or `self.slider_allow_changes`.
+	uiShared.numberNotNaN(1, pos)
 
-	-- Assertions
-	-- [[
-	if type(pos) ~= "number" then uiShared.errBadType(1, pos, "number") end
-	--]]
+	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
 	local slider_pos_old = self.slider_pos
 
@@ -393,12 +390,9 @@ end
 
 
 function lgcSlider.widSetSliderMax(self, max)
-	-- Does not check `self.enabled` or `self.slider_allow_changes`.
+	uiShared.numberNotNaN(1, max)
 
-	-- Assertions
-	-- [[
-	if type(max) ~= "number" then uiShared.errBadType(1, max, "number") end
-	--]]
+	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
 	local slider_pos_old = self.slider_pos
 
@@ -413,24 +407,18 @@ end
 
 
 function lgcSlider.widSetSliderDefault(self, def)
-	-- Does not check `self.enabled` or `self.slider_allow_changes`.
+	uiShared.numberNotNaN(1, def)
 
-	-- Assertions
-	-- [[
-	if type(def) ~= "number" then uiShared.errBadType(1, def, "number") end
-	--]]
+	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
 	self.slider_def = math.max(0, math.min(def, max))
 end
 
 
 function lgcSlider.widSetSliderHome(self, home)
-	-- Does not check `self.enabled` or `self.slider_allow_changes`.
+	uiShared.numberNotNaN(1, home)
 
-	-- Assertions
-	-- [[
-	if type(home) ~= "number" then uiShared.errBadType(1, home, "number") end
-	--]]
+	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
 	self.slider_home = math.max(0, math.min(home, max))
 	lgcSlider.updateTroughHome(self)
@@ -438,12 +426,7 @@ end
 
 
 function lgcSlider.widSetSliderAxis(self, axis)
-	-- Assertions
-	-- [[
-	if not slider_axes[axis] then
-		error("invalid slider axis: " .. tostring(axis))
-	end
-	--]]
+	uiShared.enum(1, axis, "sliderAxis", _slider_axes)
 
 	self.trough_vertical = (axis == "vertical") and true or false
 	self:reshape()

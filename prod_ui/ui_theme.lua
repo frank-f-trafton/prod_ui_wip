@@ -212,6 +212,8 @@ end
 -- @param skin A pre-filled table to use for the SkinDef. This table must not be shared among other SkinDefs.
 -- @return The new skin table.
 function _mt_themeInst:newSkinDef(extends, skin)
+	uiShared.typeEval(1, extends, "string", "table")
+
 	-- WARNING: Avoid making very deep __index chains.
 
 	skin = skin or {}
@@ -231,15 +233,12 @@ function _mt_themeInst:newSkinDef(extends, skin)
 		skin.__index = extends_tbl
 		setmetatable(skin, skin)
 
-	elseif type(extends) == "table" then
+	else -- type(extends) == "table"
 		if not self.skins[extends] then
 			error("skin table not found in the theme registry. Address: " .. tostring(extends))
 		end
 		skin.__index = extends
 		setmetatable(skin, skin)
-
-	else
-		uiShared.errBadType(1, extends, "false/nil/string/table")
 	end
 
 	return skin
@@ -253,11 +252,8 @@ end
 -- @param preserve When true, the SkinDef is added to a table which prevents it from being automatically
 -- garbage-collected. (Use false for SkinDefs which will only be used for a single widget in an ad hoc manner.)
 function _mt_themeInst:registerSkinDef(skin, id, preserve)
-	-- Assertions
-	-- [[
-	if type(skin) ~= "table" then uiShared.errBadType(1, skin, "table")
-	elseif type(id) ~= "string" and type(id) ~= "number" and type(id) ~= "table" then uiShared.errBadType(2, skin, "string/number/table") end
-	--]]
+	uiShared.type1(1, skin, "table")
+	uiShared.type(1, id, "string", "number", "table")
 
 	if type(id) == "table" and skin ~= id then
 		error("when registering a table-based ID, its table reference must match the skin table (skin == id).")

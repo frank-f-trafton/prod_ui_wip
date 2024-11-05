@@ -153,7 +153,7 @@ end
 
 
 function def:removeItem(item_t)
-	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
+	uiShared.type1(1, item_t, "table")
 
 	local item_i = self.menu:getItemIndex(item_t)
 
@@ -206,7 +206,7 @@ end
 
 
 function def:setSelection(item_t, id)
-	if type(item_t) ~= "table" then uiShared.errBadType(1, item_t, "table") end
+	uiShared.type1(1, item_t, "table")
 
 	local item_i = self.menu:getItemIndex(item_t)
 	self:setSelectionByIndex(item_i, id)
