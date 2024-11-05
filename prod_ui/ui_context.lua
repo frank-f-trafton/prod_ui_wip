@@ -13,12 +13,12 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
-local depot = require(REQ_PATH .. "lib.depot")
 local eventHandlers = require(REQ_PATH .. "logic.event_handlers")
 local hoverLogic = require(REQ_PATH .. "logic.hover_logic")
 local intersect = require(REQ_PATH .. "logic.intersect")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
+local uiLoad = require(REQ_PATH .. "ui_load")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
 local uiWidget = require(REQ_PATH .. "ui_widget")
@@ -82,7 +82,7 @@ local function cb_keyUp(self, kc, sc)
 end
 
 
-local function depot_loader_lua(file_path, self)
+local function _loader_lua(file_path, self)
 	local chunk = love.filesystem.load(file_path)
 	local result = chunk(self, file_path)
 	return result
@@ -128,15 +128,15 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 		prod_ui_path = prod_ui_path,
 	}
 
-	-- Depot cache for shared Lua source files.
+	-- Loader cache for shared Lua source files.
 	-- For convenience, cache:get() and cache:try() are wrapped as context:getLua() and
 	-- context:tryLua().
-	local depot_opts = {
+	local cache_opts = {
 		paths = {prod_ui_path},
 		extensions = {"lua"},
 		owner = self,
 	}
-	self._shared = depot.new(depot_loader_lua, depot_opts)
+	self._shared = uiLoad.new(_loader_lua, cache_opts)
 
 	-- Cache of loaded and prepped widget defs.
 	-- defs are of type "table" and serve as the metatable for instances.
