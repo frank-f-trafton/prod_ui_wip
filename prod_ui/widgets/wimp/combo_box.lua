@@ -184,7 +184,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiShared.assertNumber(1, item_i)
+	uiShared.intGE(1, item_i, 0)
 
 	local items = self.menu.items
 	local removed_item = items[item_i]
@@ -214,7 +214,7 @@ end
 
 
 function def:setSelectionByIndex(item_i, id)
-	uiShared.assertNumber(1, item_i)
+	uiShared.intGE(1, item_i, 0)
 
 	local chosen_i_old = self.menu.chosen_i
 

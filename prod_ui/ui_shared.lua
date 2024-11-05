@@ -107,14 +107,6 @@ function uiShared.assertText(n, text)
 end
 
 
---- Argument is a number.
-function uiShared.assertNumber(n, num)
-	if type(num) ~= "number" then
-		uiShared.errBadType(n, num, "number")
-	end
-end
-
-
 -- * / Assertions *
 
 

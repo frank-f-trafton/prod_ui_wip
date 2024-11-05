@@ -4,13 +4,13 @@
 	Menu items are contained in the array `menu.items`. Each item is a table, and the menu checks
 	the following variables when making selections:
 
-	item.selectable (boolean): This item can be selected by a menu cursor.
+	> item.selectable (boolean): This item can be selected by a menu cursor.
 		* When moving the cursor, non-selectable items are skipped.
 		* If no items are selectable, then the selection index is 0 (no selection).
 
-	menu.default_deselect (boolean): When true, the default menu item is nothing (index 0).
+	> menu.default_deselect (boolean): When true, the default menu item is nothing (index 0).
 
-	item.is_default_selection (boolean): The item to select by default, if 'menu.default_deselect' is false.
+	> item.is_default_selection (boolean): The item to select by default, if 'menu.default_deselect' is false.
 		* If multiple items have this set, then only the first selectable item in the list is considered.
 		* If no item has this set, then the default is the first selectable item (or if there are no
 		  selectable items, then the cursor is set to no selection.)
@@ -31,10 +31,6 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 local _mt_menu = {}
 _mt_menu.__index = _mt_menu
-
-
--- Used with 2D selection functions.
-_mt_menu.items_per_row = 1
 
 
 -- * Internal *
@@ -369,7 +365,7 @@ function _mt_menu:setLastSelectableIndex(id)
 end
 
 
---- Move to the previous selectable menu item, wrapping depending on the menu config.
+--- Move to the previous selectable menu item.
 function _mt_menu:setPrev(n, wrap, id)
 	id = id or "index"
 
@@ -378,7 +374,7 @@ function _mt_menu:setPrev(n, wrap, id)
 end
 
 
---- Move to the next selectable menu item, wrapping depending on the menu config.
+--- Move to the next selectable menu item.
 function _mt_menu:setNext(n, wrap, id)
 	id = id or "index"
 
