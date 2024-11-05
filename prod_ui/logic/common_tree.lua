@@ -231,4 +231,25 @@ function commonTree.removeNode(self, node)
 end
 
 
+function commonTree.arrange(self)
+	local skin, menu = self.skin, self.menu
+	local items = menu.items
+	local font = skin.font
+
+	local yy = 0
+
+	for i = 1, #items do
+		local item = items[i]
+
+		if skin.item_align_h == "left" then
+			item.x = item.depth * skin.indent
+		else -- "right"
+			item.x = self.doc_w - item.w - (item.depth * skin.indent)
+		end
+		item.y = yy
+		yy = item.y + item.h
+	end
+end
+
+
 return commonTree
