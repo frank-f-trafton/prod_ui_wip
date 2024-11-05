@@ -282,7 +282,7 @@ do
 		end
 		--]]
 		do
-			local frame = fr_demo_select:launch("plan_number_box")
+			local frame = fr_demo_select:launch("plan_properties_box")
 			frame.x = 64
 			frame.y = 64
 		end
