@@ -12,7 +12,7 @@
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -138,10 +138,10 @@ end
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 -- * / Selection movement *
@@ -187,7 +187,7 @@ function def:uiCall_create(inst)
 		-- overhead in some use cases.
 		-- self.item_render
 
-		self.menu = self.menu or commonMenu.new()
+		self.menu = self.menu or lgcMenu.new()
 
 		self:skinSetRefs()
 		self:skinInstall()

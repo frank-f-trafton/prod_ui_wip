@@ -1,7 +1,6 @@
 -- The main / old WIMP demo window.
 
 -- ProdUI
-local commonMenu = require("prod_ui.logic.common_menu")
 local commonWimp = require("prod_ui.logic.common_wimp")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.logic.wid_shared")

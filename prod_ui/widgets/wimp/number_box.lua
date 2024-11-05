@@ -23,11 +23,11 @@ local context = select(1, ...)
 local utf8 = require("utf8")
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
@@ -59,13 +59,13 @@ def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
 
 
-def.arrange = commonMenu.arrangeListVerticalTB
+def.arrange = lgcMenu.arrangeListVerticalTB
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 -- Called when the user presses 'enter'

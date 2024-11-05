@@ -4,7 +4,6 @@ Sash development and testing.
 
 
 -- ProdUI
-local commonMenu = require("prod_ui.logic.common_menu")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.logic.wid_shared")
 

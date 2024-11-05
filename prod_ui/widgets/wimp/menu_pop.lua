@@ -70,8 +70,8 @@ Horizontal item padding (not including widget margins):
 local context = select(1, ...)
 
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -84,7 +84,7 @@ local def = {
 
 
 widShared.scrollSetMethods(def)
-def.arrange = commonMenu.arrangeListVerticalTB
+def.arrange = lgcMenu.arrangeListVerticalTB
 
 
 -- * Internal: Sub-menu creation and teardown *
@@ -118,7 +118,7 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.wid_ref = client.wid_ref
 
 			-- Configure menu defs.
-			commonMenu.widgetConfigureMenuItems(client_sub, group_def)
+			lgcMenu.widgetConfigureMenuItems(client_sub, group_def)
 
 			-- Append items to fresh menu
 			if group_def then
@@ -489,7 +489,7 @@ function def:updateDimensions()
 	end
 
 	-- Refresh document size.
-	self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(menu.items)
+	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
 
 	print(
 		"self.w", self.w,
@@ -514,8 +514,8 @@ def.keepInBounds = widShared.keepInBoundsOfParent
 -- * Scroll helpers *
 
 
-def.getInBounds = commonMenu.getItemInBoundsRect
-def.selectionInView = commonMenu.selectionInView
+def.getInBounds = lgcMenu.getItemInBoundsRect
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * / Scroll helpers *
@@ -524,8 +524,8 @@ def.selectionInView = commonMenu.selectionInView
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
 -- * / Spatial selection *
@@ -534,10 +534,10 @@ def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, 
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 -- * / Selection movement *
@@ -643,7 +643,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self)
 
 		-- Do not block this widget while a modal frame is active.
 		self.modal_level = math.huge
@@ -696,7 +696,7 @@ function def:uiCall_create(inst)
 		-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
 		--self.origin_item =
 
-		self.menu = self.menu or commonMenu.new()
+		self.menu = self.menu or lgcMenu.new()
 		self.menu.default_deselect = true
 
 		self:skinSetRefs()
@@ -728,11 +728,11 @@ function def:cacheUpdate(refresh_dimensions)
 	local menu = self.menu
 
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = commonMenu.getCombinedItemDimensions(menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
 	end
 
 	-- Set the draw ranges for items.
-	commonMenu.widgetAutoRangeV(self)
+	lgcMenu.widgetAutoRangeV(self)
 end
 
 

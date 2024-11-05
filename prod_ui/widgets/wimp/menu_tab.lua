@@ -50,11 +50,11 @@
 
 local context = select(1, ...)
 
-local commonMenu = require(context.conf.prod_ui_req .. "logic.common_menu")
 local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
 local commonTab = require(context.conf.prod_ui_req .. "logic.common_tab")
 local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
 local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
@@ -125,9 +125,9 @@ end
 -- * Scroll helpers *
 
 
---def.getInBounds = commonMenu.getItemInBoundsRect
-def.getInBounds = commonMenu.getItemInBoundsY
-def.selectionInView = commonMenu.selectionInView
+--def.getInBounds = lgcMenu.getItemInBoundsRect
+def.getInBounds = lgcMenu.getItemInBoundsY
+def.selectionInView = lgcMenu.selectionInView
 
 
 -- * / Scroll helpers *
@@ -136,8 +136,8 @@ def.selectionInView = commonMenu.selectionInView
 -- * Spatial selection *
 
 
-def.getItemAtPoint = commonMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
 -- * / Spatial selection *
@@ -146,10 +146,10 @@ def.trySelectItemAtPoint = commonMenu.widgetTrySelectItemAtPoint -- (<self>, x, 
 -- * Selection movement *
 
 
-def.movePrev = commonMenu.widgetMovePrev
-def.moveNext = commonMenu.widgetMoveNext
-def.moveFirst = commonMenu.widgetMoveFirst
-def.moveLast = commonMenu.widgetMoveLast
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+def.moveFirst = lgcMenu.widgetMoveFirst
+def.moveLast = lgcMenu.widgetMoveLast
 
 
 -- * / Selection movement *
@@ -259,9 +259,9 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		commonMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self)
 
-		self.menu = self.menu or commonMenu.new()
+		self.menu = self.menu or lgcMenu.new()
 
 		-- Array of header category columns.
 		self.columns = {}
@@ -436,7 +436,7 @@ function def:cacheUpdate(refresh_dimensions)
 	end
 
 	-- Set the draw ranges for items.
-	commonMenu.widgetAutoRangeV(self)
+	lgcMenu.widgetAutoRangeV(self)
 end
 
 
