@@ -1,4 +1,4 @@
--- PILE argCheck v1.1.3 (modified)
+-- PILE argCheck v1.1.4
 -- (C) 2024 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -208,22 +208,50 @@ function M.enumEval(n, v, id, e)
 end
 
 
-lang.something = "argument #$1: expected non-false, non-nil value, got type $2"
-function M.something(n, v)
-	if not v then
-		error(interp(lang.something, n, type(v)), 2)
+lang.not_nil = "argument #$1: expected non-nil value, got type $2"
+function M.notNil(n, v)
+	if v == nil then
+		error(interp(lang.not_nil, n, type(v)), 2)
 	end
 end
 
 
-lang.something_not_nan_a = "argument #$1: expected non-false, non-nil, non-NaN value, got type $2"
-lang.something_not_nan_b = "argument #$1: expected non-false, non-nil, non-NaN value, got NaN"
-function M.somethingNotNaN(n, v)
-	if not v then
-		error(interp(lang.something_not_nan_a, n, type(v)), 2)
+lang.not_nil_not_nan_a = "argument #$1: expected non-nil, non-NaN value, got type $2"
+lang.not_nil_not_nan_b = "argument #$1: expected non-nil, non-NaN value, got NaN"
+function M.notNilNotNaN(n, v)
+	if v == nil then
+		error(interp(lang.not_nil_not_nan_a, n, type(v)), 2)
 
 	elseif v ~= v then
-		error(interp(lang.something_not_nan_b, n), 2)
+		error(interp(lang.not_nil_not_nan_b, n, type(v)), 2)
+	end
+end
+
+
+lang.not_nil_not_false = "argument #$1: expected non-nil, non-false value, got type $2"
+function M.notNilNotFalse(n, v)
+	if not v then
+		error(interp(lang.not_nil_not_false, n, type(v)), 2)
+	end
+end
+
+
+lang.not_nil_not_false_not_nan_a = "argument #$1: expected non-nil, non-false, non-NaN value, got type $2"
+lang.not_nil_not_false_not_nan_b = "argument #$1: expected non-nil, non-false, non-NaN value, got NaN"
+function M.notNilNotFalseNotNaN(n, v)
+	if not v then
+		error(interp(lang.not_nil_not_false_not_nan_a, n, type(v)), 2)
+
+	elseif v ~= v then
+		error(interp(lang.not_nil_not_false_not_nan_b, n, type(v)), 2)
+	end
+end
+
+
+lang.not_nan = "argument #$1: expected non-NaN value, got NaN"
+function M.notNaN(n, v)
+	if v ~= v then
+		error(interp(lang.not_nan, n, type(v)), 2)
 	end
 end
 

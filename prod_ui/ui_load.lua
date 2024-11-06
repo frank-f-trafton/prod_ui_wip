@@ -271,7 +271,7 @@ end
 
 function _mt_cache:assign(id, value)
 	uiShared.type1(1, id, "string")
-	uiShared.something(2, value)
+	uiShared.notNilNotFalseNotNaN(2, value)
 
 	if self.loaded[id] then
 		error("cache already has a " .. self.msg_label .. " with ID: " .. tostring(id))

@@ -981,7 +981,7 @@ end
 -- @return The def table. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	uiShared.type1(1, chunk, "function")
-	uiShared.somethingNotNaN(2, id)
+	uiShared.notNilNotFalseNotNaN(2, id)
 
 	if self.widget_defs[id] then
 		error("widget ID " .. id .. " is already loaded.")
@@ -1016,7 +1016,7 @@ end
 -- @return The def table or fab function. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDef(file_path, id, def_conf)
 	uiShared.type1(1, file_path, "string")
-	uiShared.somethingNotNaN(2, id)
+	uiShared.notNilNotFalseNotNaN(2, id)
 
 	local chunk, err = love.filesystem.load(file_path)
 	if not chunk then
@@ -1106,7 +1106,7 @@ end
 -- @param id The widget definition ID. Cannot be NaN.
 -- @return the definition table, or nil if nothing is registered by that ID.
 function _mt_context:getWidgetDef(id)
-	uiShared.somethingNotNaN(1, id)
+	uiShared.notNilNotFalseNotNaN(1, id)
 
 	return self.widget_defs[id]
 end
@@ -1126,7 +1126,7 @@ end
 --	#children + 1.
 -- @return A reference to the new instance. The function will raise an error in the event of a problem.
 function _mt_context:addWidget(id, init_t, pos)
-	uiShared.somethingNotNaN(1, id)
+	uiShared.notNilNotFalseNotNaN(1, id)
 	uiShared.typeEval1(2, init_t, "table")
 	uiShared.numberNotNaNEval(3, pos)
 

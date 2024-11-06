@@ -66,8 +66,11 @@ uiShared.numberNotNaN = pileArgCheck.numberNotNaN -- (n, v)
 uiShared.numberNotNaNEval = pileArgCheck.numberNotNaNEval -- (n, v)
 uiShared.enum = pileArgCheck.enum -- (n, v, id, e)
 uiShared.enumEval = pileArgCheck.enumEval -- (n, v, id, e)
-uiShared.something = pileArgCheck.something -- (n, v)
-uiShared.somethingNotNaN = pileArgCheck.somethingNotNaN -- (n, v)
+uiShared.notNil = pileArgCheck.notNil -- (n, v)
+uiShared.notNilNotNaN = pileArgCheck.notNilNotNaN -- (n, v)
+uiShared.notNilNotFalse = pileArgCheck.notNilNotFalse -- (n, v)
+uiShared.notNilNotFalseNotNaN = pileArgCheck.notNilNotFalseNotNaN -- (n, v)
+uiShared.notNaN = pileArgCheck.notNaN -- (n, v)
 
 
 function uiShared.loveType(n, obj, typ)
