@@ -443,7 +443,7 @@ end
 -- @param pos (default: #self.children + 1) Where to place the new widget in the children table.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, init_t, pos)
-	uiShared.somethingNotNaN(1, id)
+	uiShared.notNilNotFalseNotNaN(1, id)
 	uiShared.typeEval1(2, init_t, "table")
 	uiShared.numberNotNaNEval(3, pos)
 
