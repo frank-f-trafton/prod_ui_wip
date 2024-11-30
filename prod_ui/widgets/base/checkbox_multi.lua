@@ -1,14 +1,13 @@
 --[[
 	A skinned, multi-state checkbox.
 
-	States are represented as an integer in 'self.value', from 1 to 'self.value_max'.
+	States are represented as an integer in 'self.value', from 1 to 'self.value_max'. The default
+	max value is 3, because it is assumed that this widget will most likely be used to implement
+	tri-state checkboxes.
 
-	The widget starts with a default max value of 1, so the library user needs
-	to set an appropriate maximum.
-
-	The skin must provide graphics for each state; the default skins include graphics
-	for three states. For any states which do not have a graphic, the widget will
-	debug-print 'self.value' using the theme's internal font.
+	The skin must provide graphics for each state; the default skins include graphics for three
+	states. For any states which do not have a graphic, the widget will debug-print 'self.value'
+	using the theme's internal font.
 --]]
 
 
@@ -62,7 +61,7 @@ function def:uiCall_create(inst)
 		lgcLabel.setup(self)
 
 		self.value = 1
-		self.value_max = 1
+		self.value_max = 3
 
 		-- [XXX 8] (Optional) image associated with the button.
 		--self.graphic = <tq>

@@ -72,7 +72,6 @@ function plan.make(parent)
 
 		-- Multi-state checkbox
 		local chk_m = content:addChild("base/checkbox_multi", {x=160, y=96, w=256, h=64})
-		chk_m:setMaxValue(3)
 		chk_m:setLabel("Multi-State Checkbox", "single")
 		chk_m.wid_buttonAction = function(self)
 			print("Multi-Check state: " .. chk_m.value)
