@@ -730,7 +730,7 @@ def.skinners = {
 			-- XXX: pick resources for enabled or disabled state, etc.
 			--local res = (self.active) and skin.res_active or skin.res_inactive
 
-			-- ListBox body.
+			-- TreeBox body
 			love.graphics.setColor(1, 1, 1, 1)
 			uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
