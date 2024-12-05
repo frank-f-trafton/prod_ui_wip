@@ -50,14 +50,14 @@
 
 local context = select(1, ...)
 
-local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
-local commonTab = require(context.conf.prod_ui_req .. "logic.common_tab")
-local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local commonTab = require(context.conf.prod_ui_req .. "common.common_tab")
+local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {

@@ -34,16 +34,16 @@ end
 
 
 -- Libs: ProdUI
-local commonWimp = require("prod_ui.logic.common_wimp")
-local itemOps = require("prod_ui.logic.item_ops")
+local commonWimp = require("prod_ui.common.common_wimp")
+local itemOps = require("prod_ui.common.item_ops")
 local keyCombo = require("prod_ui.lib.key_combo")
 local uiContext = require("prod_ui.ui_context")
 local uiDraw = require("prod_ui.ui_draw")
 local uiGraphics = require("prod_ui.ui_graphics")
 local uiLayout = require("prod_ui.ui_layout")
 local uiRes = require("prod_ui.ui_res")
-local widDebug = require("prod_ui.logic.wid_debug")
-local widShared = require("prod_ui.logic.wid_shared")
+local widDebug = require("prod_ui.common.wid_debug")
+local widShared = require("prod_ui.common.wid_shared")
 
 -- Libs: QuickPrint
 local quickPrint = require("lib.quick_print") -- (Helps with debug-printing to the framebuffer.)

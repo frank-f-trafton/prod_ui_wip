@@ -12,9 +12,9 @@ local context = select(1, ...)
 local lgcMenu = {}
 
 
-local structMenu = require(context.conf.prod_ui_req .. "logic.struct_menu")
+local structMenu = require(context.conf.prod_ui_req .. "common.struct_menu")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 function lgcMenu.new()

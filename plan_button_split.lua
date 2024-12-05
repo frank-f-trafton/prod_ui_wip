@@ -1,8 +1,8 @@
 
 -- ProdUI
-local commonWimp = require("prod_ui.logic.common_wimp")
+local commonWimp = require("prod_ui.common.common_wimp")
 local uiLayout = require("prod_ui.ui_layout")
-local widShared = require("prod_ui.logic.wid_shared")
+local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}

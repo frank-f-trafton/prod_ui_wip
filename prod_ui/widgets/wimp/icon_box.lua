@@ -80,12 +80,12 @@ B2T_R2L: Bottom to top, right to left
 local context = select(1, ...)
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
+local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {

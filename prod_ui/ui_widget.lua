@@ -10,10 +10,10 @@ local uiWidget = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local intersect = require(REQ_PATH .. "logic.intersect")
+local intersect = require(REQ_PATH .. "common.intersect")
 local uiShared = require(REQ_PATH .. "ui_shared")
-local utilTable = require(REQ_PATH .. "logic.util_table")
-local widShared = require(REQ_PATH .. "logic.wid_shared")
+local utilTable = require(REQ_PATH .. "common.util_table")
+local widShared = require(REQ_PATH .. "common.wid_shared")
 
 
 local dummyFunc = function() end

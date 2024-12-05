@@ -13,7 +13,7 @@ local lgcGraphic = {}
 
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, ox, oy)

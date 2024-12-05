@@ -28,7 +28,7 @@ local code_groups = context:getLua("shared/line_ed/code_groups")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
-local structHistory = require(context.conf.prod_ui_req .. "logic.struct_history")
+local structHistory = require(context.conf.prod_ui_req .. "common.struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
