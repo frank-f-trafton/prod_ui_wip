@@ -20,7 +20,7 @@ local uiLayout = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local widShared = require(REQ_PATH .. "logic.wid_shared")
+local widShared = require(REQ_PATH .. "common.wid_shared")
 
 
 -- Stack of layout rectangles

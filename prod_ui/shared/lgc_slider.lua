@@ -19,7 +19,7 @@ local context = select(1, ...)
 local lgcSlider = {}
 
 
-local intersect = require(context.conf.prod_ui_req .. "logic.intersect")
+local intersect = require(context.conf.prod_ui_req .. "common.intersect")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 

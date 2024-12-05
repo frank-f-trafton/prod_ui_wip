@@ -43,7 +43,7 @@ local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
-local utilTable = require(REQ_PATH .. "logic.util_table")
+local utilTable = require(REQ_PATH .. "common.util_table")
 
 
 function uiTheme.dummyFunc() end

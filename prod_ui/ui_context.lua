@@ -13,9 +13,9 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
-local eventHandlers = require(REQ_PATH .. "logic.event_handlers")
-local hoverLogic = require(REQ_PATH .. "logic.hover_logic")
-local intersect = require(REQ_PATH .. "logic.intersect")
+local eventHandlers = require(REQ_PATH .. "common.event_handlers")
+local hoverLogic = require(REQ_PATH .. "common.hover_logic")
+local intersect = require(REQ_PATH .. "common.intersect")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
 local uiLoad = require(REQ_PATH .. "ui_load")

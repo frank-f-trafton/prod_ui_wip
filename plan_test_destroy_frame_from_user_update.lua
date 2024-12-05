@@ -22,7 +22,7 @@ function plan.make(parent)
 	frame.userUpdate = function(self, dt)
 		self.usr_time = (self.usr_time or 0) + dt
 		if self.usr_time >= 4 then
-			local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+			local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 			commonWimp.closeWindowFrame(self)
 			return true
 		end

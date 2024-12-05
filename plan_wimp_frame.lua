@@ -2,7 +2,7 @@
 local plan = {}
 
 
-local commonWimp = require("prod_ui.logic.common_wimp")
+local commonWimp = require("prod_ui.common.common_wimp")
 
 
 local function _getFrameAndHeader(self)

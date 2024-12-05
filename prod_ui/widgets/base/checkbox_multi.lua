@@ -19,8 +19,8 @@ local lgcLabel = context:getLua("shared/lgc_label")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {

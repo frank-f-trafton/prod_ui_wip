@@ -2,7 +2,7 @@
 local plan = {}
 
 
-local itemOps = require("prod_ui.logic.item_ops")
+local itemOps = require("prod_ui.common.item_ops")
 
 
 -- Menu item defs

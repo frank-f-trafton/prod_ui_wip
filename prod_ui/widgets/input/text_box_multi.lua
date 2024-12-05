@@ -35,21 +35,21 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 
 -- ProdUI
-local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
-local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
-local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local function dummy() end

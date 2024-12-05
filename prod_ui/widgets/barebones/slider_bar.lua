@@ -10,8 +10,8 @@ local lgcButtonBare = context:getLua("shared/lgc_button_bare")
 local lgcLabelBare = context:getLua("shared/lgc_label_bare")
 local lgcSlider = context:getLua("shared/lgc_slider")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local widDebug = require(context.conf.prod_ui_req .. "logic.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {}

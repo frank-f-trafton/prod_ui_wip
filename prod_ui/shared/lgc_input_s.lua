@@ -33,18 +33,18 @@ local lgcInputS = {}
 local utf8 = require("utf8")
 
 
-local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
-local itemOps = require(context.conf.prod_ui_req .. "logic.item_ops")
+local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 -- LÖVE 12 compatibility.

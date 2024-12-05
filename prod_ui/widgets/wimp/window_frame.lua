@@ -42,13 +42,13 @@ frame's children (header bar, content, etc.), so you can't manage that directly.
 
 local context = select(1, ...)
 
-local commonScroll = require(context.conf.prod_ui_req .. "logic.common_scroll")
-local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
-local intersect = require(context.conf.prod_ui_req .. "logic.intersect")
+local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local intersect = require(context.conf.prod_ui_req .. "common.intersect")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local function dummy_renderThimble() end

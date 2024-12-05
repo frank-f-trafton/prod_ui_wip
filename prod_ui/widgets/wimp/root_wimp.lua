@@ -7,9 +7,9 @@
 local context = select(1, ...)
 
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
-local stepHandlers = require(context.conf.prod_ui_req .. "logic.step_handlers")
+local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {}

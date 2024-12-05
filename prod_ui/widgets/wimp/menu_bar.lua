@@ -16,12 +16,12 @@ The menu bar may act strangely if it is too narrow to display all categories.
 
 local context = select(1, ...)
 
-local commonWimp = require(context.conf.prod_ui_req .. "logic.common_wimp")
+local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widShared = require(context.conf.prod_ui_req .. "logic.wid_shared")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
