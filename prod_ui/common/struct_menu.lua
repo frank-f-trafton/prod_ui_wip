@@ -132,10 +132,9 @@ function _mt_menu:getDefaultSelection()
 	if not self.default_deselect then
 		local first_sel_i, first_sel = false, false
 
-		-- Prefer the first item marked as the default.
+		-- Prefer the first item with 'is_default_selection'.
 		-- If no default is set, fall back to the first selectable item.
 		for i, item in ipairs(self.items) do
-
 			if item.selectable then
 				if item.is_default_selection then
 					return i, item
