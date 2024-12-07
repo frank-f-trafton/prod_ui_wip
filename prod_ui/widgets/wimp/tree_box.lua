@@ -148,16 +148,6 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setMarkedItem = lgcMenu.setMarkedItem
-def.toggleMarkedItem = lgcMenu.toggleMarkedItem
-def.setMarkedItemByIndex = lgcMenu.setMarkedItemByIndex
-def.getMarkedItem = lgcMenu.getMarkedItem
-def.getAllMarkedItems = lgcMenu.getAllMarkedItems
-def.clearAllMarkedItems = lgcMenu.clearAllMarkedItems
-def.setMarkedItemRange = lgcMenu.setMarkedItemRange
-def.countMarkedItems = lgcMenu.countMarkedItems
-
-
 function def:uiCall_create(inst)
 	if self == inst then
 		self.visible = true
@@ -304,7 +294,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		if self.mark_mode == "toggle" and key == "space" then
 			if old_index > 0 and self.menu:canSelect(old_index) then
-				self:toggleMarkedItem(self.menu.items[old_index])
+				self.menu:toggleMarkedItem(self.menu.items[old_index])
 				return true
 			end
 
@@ -315,12 +305,12 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				if self.mark_mode == "cursor" then
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
-						self:clearAllMarkedItems()
+						self.menu:clearAllMarkedItems()
 						lgcMenu.markItemsCursorMode(self, old_index)
 					else
 						self.mark_index = false
-						self:clearAllMarkedItems()
-						self:setMarkedItemByIndex(self.menu.index, true)
+						self.menu:clearAllMarkedItems()
+						self.menu:setMarkedItemByIndex(self.menu.index, true)
 					end
 				end
 				self:wid_select(items[self.menu.index], self.menu.index)
@@ -445,7 +435,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 								if mods["shift"] then
 									-- Unmark all items, then mark the range between the previous and current selections.
-									self:clearAllMarkedItems()
+									self.menu:clearAllMarkedItems()
 									lgcMenu.markItemsCursorMode(self, old_index)
 
 								elseif mods["ctrl"] then
@@ -453,7 +443,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 									self.mark_index = false
 
 								else
-									self:clearAllMarkedItems()
+									self.menu:clearAllMarkedItems()
 									item_t.marked = not item_t.marked
 									self.mark_index = false
 								end
@@ -530,8 +520,8 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				drop_state.item = self.menu.items[self.menu.index]
 				-- menu index could be outdated by the time the drag-and-drop action is completed.
 
-				if self:countMarkedItems() > 0 then
-					drop_state.marked_items = self:getAllMarkedItems()
+				if self.menu:hasMarkedItems() then
+					drop_state.marked_items = self.menu:getAllMarkedItems()
 				end
 
 				-- XXX: cursor, icon or render callback...?
@@ -558,13 +548,13 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 						local mods = self.context.key_mgr.mod
 						if self.mark_mode == "cursor" and self.mark_index then
-							self:clearAllMarkedItems()
+							self.menu:clearAllMarkedItems()
 							lgcMenu.markItemsCursorMode(self, old_index)
 
 						elseif self.mark_mode == "toggle" then
 							local first, last = math.min(old_index, item_i), math.max(old_index, item_i)
 							first, last = math.max(1, first), math.max(1, last)
-							self:setMarkedItemRange(self.mark_state, first, last)
+							self.menu:setMarkedItemRange(self.mark_state, first, last)
 							print("old", old_index, "item_i", item_i, "first", first, "last", last)
 						end
 
