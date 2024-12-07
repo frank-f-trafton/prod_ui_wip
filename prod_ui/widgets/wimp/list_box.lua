@@ -268,7 +268,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		lgcMenu.instanceSetup(self, true) -- with mark state (multi-select)
+		lgcMenu.instanceSetup(self, true, true) -- with mark and drag state
 
 		self.menu = lgcMenu.new()
 
@@ -286,25 +286,6 @@ function def:uiCall_create(inst)
 
 		-- Shows a column of icons when true.
 		self.show_icons = false
-
-		-- Mouse drag behavior.
-		-- NOTE: Some of these settings are mutually incompatible. Use the widget methods (TODO) to
-		-- configure dragging.
-
-		-- Scroll the view while dragging.
-		self.drag_scroll = false
-
-		-- Select new items while dragging.
-		self.drag_select = false
-
-		-- Reorder the current selected item while dragging.
-		self.drag_reorder = false
-
-		-- Support drag-and-drop transactions.
-		-- false: disabled.
-		-- true: when dragging the mouse outside of `context.mouse_pressed_range`.
-		-- "edge": when dragging the mouse outside of the widget bounding box.
-		self.drag_drop_mode = false
 
 		self:skinSetRefs()
 		self:skinInstall()
