@@ -12,13 +12,13 @@ local context = select(1, ...)
 local lgcMenu = {}
 
 
-local structMenu = require(context.conf.prod_ui_req .. "common.struct_menu")
+local stMenu = context:getLua("shared/st_menu")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 function lgcMenu.new()
-	return structMenu.new()
+	return stMenu.new()
 end
 
 
@@ -681,82 +681,6 @@ function lgcMenu.selectionInView(self, immediate)
 end
 
 
-function lgcMenu.setMarkedItem(self, item_t, marked)
-	uiShared.type1(1, item_t, "table")
-
-	item_t.marked = not not marked
-end
-
-
-function lgcMenu.toggleMarkedItem(self, item_t)
-	uiShared.type1(1, item_t, "table")
-
-	item_t.marked = not item_t.marked
-end
-
-
-function lgcMenu.setMarkedItemByIndex(self, item_i, marked)
-	uiShared.type1(1, item_i, "number")
-
-	local item_t = self.menu.items[item_i]
-
-	self:setMarkedItem(item_t, marked)
-end
-
-
-function lgcMenu.getMarkedItem(self, item_t)
-	uiShared.type1(1, item_t, "table")
-
-	return item_t.marked
-end
-
-
---- Produces a table that contains all items that are currently marked (multi-selected).
-function lgcMenu.getAllMarkedItems(self)
-	local tbl = {}
-
-	for i, item in ipairs(self.menu.items) do
-		if item.marked then
-			table.insert(tbl, item)
-		end
-	end
-
-	return tbl
-end
-
-
-function lgcMenu.clearAllMarkedItems(self)
-	for i, item in ipairs(self.menu.items) do
-		item.marked = false
-	end
-end
-
-
-function lgcMenu.setMarkedItemRange(self, marked, first, last)
-	local menu = self.menu
-	local items = menu.items
-	uiShared.intRange(2, first, 1, #items)
-	uiShared.intRange(3, last, 1, #items)
-	marked = not not marked
-
-	for i = first, last do
-		items[i].marked = marked
-	end
-end
-
-
-function lgcMenu.countMarkedItems(self)
-	local count = 0
-
-	for i, item in ipairs(self.menu.items) do
-		if item.marked then
-			count = count + 1
-		end
-	end
-
-	return count
-end
-
 
 function lgcMenu.markItemsCursorMode(self, old_index)
 	if not self.mark_index then
@@ -769,7 +693,7 @@ function lgcMenu.markItemsCursorMode(self, old_index)
 	local first, last = math.min(self.mark_index, menu.index), math.max(self.mark_index, menu.index)
 	first, last = math.max(1, math.min(first, #items)), math.max(1, math.min(last, #items))
 
-	self:setMarkedItemRange(true, first, last)
+	self.menu:setMarkedItemRange(true, first, last)
 end
 
 

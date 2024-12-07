@@ -1,3 +1,6 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 --[[
 	Provides the basic guts of a 1D menu.
 
@@ -11,43 +14,34 @@
 	> menu.default_deselect (boolean): When true, the default menu item is nothing (index 0).
 
 	> item.is_default_selection (boolean): The item to select by default, if 'menu.default_deselect' is false.
-		* If multiple items have this set, then only the first selectable item in the list is considered.
+		* When multiple items have this set, the first such item that is selectable is chosen.
 		* If no item has this set, then the default is the first selectable item (or if there are no
 		  selectable items, then the cursor is set to no selection.)
 
 	The main selection is tracked in `menu.index`. Additional indices can be used by passing in different
-	`id` keys to menu methods. However, `menu.index` gets "camera" priority by higher-level logic.
+	`id` keys to menu methods. `menu.index` gets "camera priority" by higher-level logic.
 
-	To make menus with multiple arbitrary selections, use the selected / index state as a cursor position,
-	and store a secondary selected state in each menu item table.
+	Arbitrary multiple selection is implemented by setting the field `marked` on a per-item basis.
+	Not all menu widgets support multiple selection.
 --]]
 
 
-local structMenu = {}
+local context = select(1, ...)
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+local stMenu = {}
+
+
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 local _mt_menu = {}
 _mt_menu.__index = _mt_menu
 
 
--- * Internal *
-
-
-local function sign(n)
-	-- Treats zero as positive.
-	return n < 0 and -1 or 1
-end
-
-
-local function clampIndex(self, pos)
-	-- Assumes the menu has at least one item, and does not account for no selection (index 0).
-	-- Check that the index is acceptable after calling.
-
-	return math.max(1, math.min(math.floor(pos), #self.items))
-end
+local _sign = commonMath.sign
+local _clamp = commonMath.clamp
 
 
 -- * API *
@@ -55,7 +49,7 @@ end
 
 --- Makes a new menu.
 -- @return The menu table.
-function structMenu.new()
+function stMenu.new()
 	local self = {}
 
 	self.items = {}
@@ -90,9 +84,11 @@ end
 
 
 --- Check if an item index is selectable, and if not, provide a string explaining why.
--- @param index The item index to check.
+-- @param index The item index to check. Must be an integer (or else the method throws an error).
 -- @param return true if selectable, false plus string if not.
 function _mt_menu:canSelect(index)
+	uiShared.int(1, index)
+
 	-- Permit deselection
 	if index == 0 then
 		return true
@@ -189,7 +185,7 @@ function _mt_menu:getSelectionStep(pos, delta, wrap)
 		end
 	-- Normal selection handling:
 	else
-		pos = clampIndex(self, pos)
+		pos = _clamp(math.floor(pos), 1, #self.items)
 
 		-- Special handling for wrap-around. Wrapping only happens if the selection is at the edge
 		-- of the list, and it always puts the selector at the first selectable item on the opposite
@@ -207,9 +203,9 @@ function _mt_menu:getSelectionStep(pos, delta, wrap)
 
 		-- Advance.
 		pos = pos + delta
-		pos = clampIndex(self, pos)
+		pos = _clamp(math.floor(pos), 1, #self.items)
 
-		local dir = sign(delta)
+		local dir = _sign(delta)
 
 		-- If the new item is not selectable, then we need to hunt for the closest one nearby that is.
 		pos = self:findSelectableLanding(pos, dir) or self:findSelectableLanding(pos - dir, -dir) or 0
@@ -382,4 +378,84 @@ function _mt_menu:setNext(n, wrap, id)
 end
 
 
-return structMenu
+function _mt_menu:setMarkedItem(item_t, marked)
+	uiShared.type1(1, item_t, "table")
+
+	item_t.marked = not not marked
+end
+
+
+function _mt_menu:toggleMarkedItem(item_t)
+	uiShared.type1(1, item_t, "table")
+
+	item_t.marked = not item_t.marked
+end
+
+
+function _mt_menu:setMarkedItemByIndex(item_i, marked)
+	uiShared.type1(1, item_i, "number")
+
+	local item_t = self.items[item_i]
+
+	stMenu.setMarkedItem(item_t, marked)
+end
+
+
+--- Produces a table that contains all items that are currently marked (multi-selected).
+function _mt_menu:getAllMarkedItems()
+	local tbl = {}
+
+	for i, item in ipairs(self.items) do
+		if item.marked then
+			table.insert(tbl, item)
+		end
+	end
+
+	return tbl
+end
+
+
+function _mt_menu:clearAllMarkedItems()
+	for i, item in ipairs(self.items) do
+		item.marked = false
+	end
+end
+
+
+function _mt_menu:setMarkedItemRange(marked, first, last)
+	local items = self.items
+	uiShared.intRange(2, first, 1, #items)
+	uiShared.intRange(3, last, 1, #items)
+	marked = not not marked
+
+	for i = first, last do
+		items[i].marked = marked
+	end
+end
+
+
+function _mt_menu:hasMarkedItems()
+	for _, item in ipairs(self.items) do
+		if item.marked then
+			return true
+		end
+	end
+
+	return false
+end
+
+
+function _mt_menu:countMarkedItems()
+	local c = 0
+
+	for _, item in ipairs(self.items) do
+		if item.marked then
+			c = c + 1
+		end
+	end
+
+	return c
+end
+
+
+return stMenu
