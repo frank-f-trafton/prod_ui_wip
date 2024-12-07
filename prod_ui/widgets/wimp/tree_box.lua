@@ -161,7 +161,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		lgcMenu.instanceSetup(self, true) -- with mark state (multi-select)
+		lgcMenu.instanceSetup(self, true, true) -- with mark and drag state
 		commonTree.instanceSetup(self)
 
 		self.tree = structTree.new()
@@ -171,22 +171,6 @@ function def:uiCall_create(inst)
 
 		-- State flags.
 		self.enabled = true
-
-		-- Mouse drag behavior.
-		-- NOTE: Some of these settings are mutually incompatible. Use the widget methods (TODO) to
-		-- configure dragging.
-
-		-- Scroll the view while dragging.
-		self.drag_scroll = false
-
-		-- Select new items while dragging.
-		self.drag_select = false
-
-		-- Support drag-and-drop transactions.
-		-- false: disabled.
-		-- true: when dragging the mouse outside of `context.mouse_pressed_range`.
-		-- "edge": when dragging the mouse outside of the widget bounding box.
-		self.drag_drop_mode = false
 
 		self:skinSetRefs()
 		self:skinInstall()

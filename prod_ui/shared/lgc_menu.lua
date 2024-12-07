@@ -31,7 +31,8 @@ end
 --  all menu widgets.
 -- @param self The widget to configure.
 -- @param setup_mark When true, setup marking state (for multiple selections).
-function lgcMenu.instanceSetup(self, setup_mark)
+-- @param setup_drag When true, setup drag-and-drop state.
+function lgcMenu.instanceSetup(self, setup_mark, setup_drag)
 	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
 
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
@@ -64,7 +65,26 @@ function lgcMenu.instanceSetup(self, setup_mark)
 	-- Wrap selection when pressing against the last selectable item.
 	self.wrap_selection = true
 
-	-- Multi-Selection modes.
+	-- Drag-and-drop state.
+	-- Note that some mark and drag settings are mutually incompatible. TODO: config methods.
+	if setup_drag then
+		-- Scroll the view while dragging.
+		self.drag_scroll = false
+
+		-- Select new items while dragging.
+		self.drag_select = false
+
+		-- Reorder the current selected item while dragging.
+		self.drag_reorder = false
+
+		-- Support drag-and-drop transactions.
+		-- false: disabled.
+		-- true: when dragging the mouse outside of `context.mouse_pressed_range`.
+		-- "edge": when dragging the mouse outside of the widget bounding box.
+		self.drag_drop_mode = false
+	end
+
+	-- Multi-Selection state.
 	if setup_mark then
 		--[[
 		false: No built-in handling of multi-selection.
