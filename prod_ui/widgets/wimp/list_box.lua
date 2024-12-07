@@ -268,7 +268,7 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		lgcMenu.instanceSetup(self)
+		lgcMenu.instanceSetup(self, true) -- with mark state (multi-select)
 
 		self.menu = lgcMenu.new()
 
@@ -305,26 +305,6 @@ function def:uiCall_create(inst)
 		-- true: when dragging the mouse outside of `context.mouse_pressed_range`.
 		-- "edge": when dragging the mouse outside of the widget bounding box.
 		self.drag_drop_mode = false
-
-		--[[
-		Multi-Selection modes.
-
-		false: No built-in handling of multi-selection.
-		"toggle": Behaves like a set of checkboxes.
-		"cursor": Behaves (somewhat) like selections in a file browser GUI.
-
-		`item.marked` is used to denote an item that is selected independent of the current
-		menu index.
-		--]]
-		self.mark_mode = false
-
-		-- When mark_mode is "toggle": Which marking state is being applied to items as the
-		-- mouse sweeps over them.
-		self.mark_state = false
-
-		-- When mark_mode is "cursor": The old selection index when Shift+Click dragging started.
-		-- false when Shift+Click dragging is not active.
-		self.mark_index = false
 
 		self:skinSetRefs()
 		self:skinInstall()

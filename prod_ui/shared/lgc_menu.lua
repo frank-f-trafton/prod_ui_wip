@@ -30,7 +30,8 @@ end
 --  may not support all of the features that are implied by these fields, so calling this is not a requirement of
 --  all menu widgets.
 -- @param self The widget to configure.
-function lgcMenu.instanceSetup(self)
+-- @param setup_mark When true, setup marking state (for multiple selections).
+function lgcMenu.instanceSetup(self, setup_mark)
 	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
 
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
@@ -62,6 +63,27 @@ function lgcMenu.instanceSetup(self)
 
 	-- Wrap selection when pressing against the last selectable item.
 	self.wrap_selection = true
+
+	-- Multi-Selection modes.
+	if setup_mark then
+		--[[
+		false: No built-in handling of multi-selection.
+		"toggle": Behaves like a set of checkboxes.
+		"cursor": Behaves (somewhat) like selections in a file browser GUI.
+
+		`item.marked` is used to denote an item that is selected independent of the current
+		menu index.
+		--]]
+		self.mark_mode = false
+
+		-- When mark_mode is "toggle": Which marking state is being applied to items as the
+		-- mouse sweeps over them.
+		self.mark_state = false
+
+		-- When mark_mode is "cursor": The old selection index when Shift+Click dragging started.
+		-- false when Shift+Click dragging is not active.
+		self.mark_index = false
+	end
 
 	-- Optional:
 	-- self.auto_range ("h" or "v") -> sets items_first and items_last.
