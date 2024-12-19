@@ -22,7 +22,6 @@ local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
-local intersect = require(context.conf.prod_ui_req .. "common.intersect") -- lerp
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")

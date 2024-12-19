@@ -4,7 +4,7 @@ local hoverLogic = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local intersect = require(REQ_PATH .. "intersect")
+local commonMath = require(REQ_PATH .. "common_math")
 
 
 --- Recursive loop for determining hover-over state for widgets.
@@ -51,7 +51,7 @@ local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
 
 		-- No child responded, children are excluded, or widget has no children.
 		if (x >= x1 and y >= y1 and x < x2 and y < y2)
-		and intersect.pointToRect(x, y, os_x + widget.x, os_y + widget.y, os_x + widget.x + widget.w, os_y + widget.y + widget.h)
+		and commonMath.pointToRect(x, y, os_x + widget.x, os_y + widget.y, os_x + widget.x + widget.w, os_y + widget.y + widget.h)
 		and widget:ui_evaluateHover(x, y) -- XXX untested. Maybe would be better to pass XY relative to parent?
 		then
 			return widget
@@ -101,7 +101,7 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 
 		-- No child responded, children are excluded, or widget has no children.
 		if (x >= x1 and y >= y1 and x < x2 and y < y2)
-		and intersect.pointToRect(x, y, os_x + widget.x, os_y + widget.y, os_x + widget.x + widget.w, os_y + widget.y + widget.h)
+		and commonMath.pointToRect(x, y, os_x + widget.x, os_y + widget.y, os_x + widget.x + widget.w, os_y + widget.y + widget.h)
 		and widget:ui_evaluatePress(x, y, button, istouch, presses)
 		then
 			return widget

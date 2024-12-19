@@ -19,7 +19,7 @@ local context = select(1, ...)
 local lgcSlider = {}
 
 
-local intersect = require(context.conf.prod_ui_req .. "common.intersect")
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
@@ -165,7 +165,7 @@ function lgcSlider.updateTroughHome(self)
 
 	else
 		local trough_length = (self.trough_vertical) and self.trough_h or self.trough_w
-		self.trough_home = math.floor(0.5 + intersect.lerp(0, trough_length, self.slider_home / self.slider_max))
+		self.trough_home = math.floor(0.5 + commonMath.lerp(0, trough_length, self.slider_home / self.slider_max))
 	end
 end
 
@@ -195,7 +195,7 @@ function lgcSlider.updateThumb(self, vertical)
 	if self.slider_max == 0 then
 		self[thumb_key] = 0
 	else
-		self[thumb_key] = math.floor(0.5 + intersect.lerp(0, self[trough_key], resolved_pos / self.slider_max))
+		self[thumb_key] = math.floor(0.5 + commonMath.lerp(0, self[trough_key], resolved_pos / self.slider_max))
 		--print("trough_key", trough_key)
 		--print("self[trough_key]", self[trough_key])
 		--print("resolved_pos / self.slider_max", resolved_pos / self.slider_max)
