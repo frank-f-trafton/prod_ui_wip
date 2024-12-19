@@ -567,78 +567,8 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	-- MN_drag_reorder is incompatible with MN_drag_drop_mode, MN_drag_select, and the "toggle" and "cursor"
-	-- mark modes.
-	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
-	-- "cursor" mark mode overrides MN_drag_drop_mode when active (hold shift while clicking and dragging).
-
-	if self == inst
-	and self.press_busy == "menu-drag"
-	then
-		if self.MN_drag_drop_mode and self.MN_mark_mode ~= "toggle" and not self.MN_mark_index then
-			local context = self.context
-			local mpx, mpy, mpr = context.mouse_pressed_x, context.mouse_pressed_y, context.mouse_pressed_range
-			if mouse_x > mpx + mpr or mouse_x < mpx - mpr or mouse_y > mpy + mpr or mouse_y < mpy - mpr then
-				self.press_busy = "drag-drop"
-				--print("Drag it!")
-
-				local drop_state = {}
-
-				drop_state.from = self
-				drop_state.id = "menu"
-				drop_state.item = self.menu.items[self.menu.index]
-				-- menu index could be outdated by the time the drag-and-drop action is completed.
-
-				if self.menu:hasMarkedItems() then
-					drop_state.marked_items = self.menu:getAllMarkedItems()
-				end
-
-				-- XXX: cursor, icon or render callback...?
-
-				self:bubbleStatement("rootCall_setDragAndDropState", self, drop_state)
-			end
-		else
-			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
-
-			-- Mouse position with scroll offsets.
-			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-			mx = mx + self.scr_x
-			my = my + self.scr_y
-
-			local item_i, item_t = self:getItemAtPoint(mx, my, 1, #self.menu.items)
-			if item_i and item_t.selectable then
-				local items = self.menu.items
-				local old_index = self.menu.index
-				local old_item = items[old_index]
-
-				if old_item ~= item_t then
-					if self.MN_drag_select then
-						self.menu:setSelectedIndex(item_i)
-
-						local mods = self.context.key_mgr.mod
-						if self.MN_mark_mode == "cursor" and self.MN_mark_index then
-							self.menu:clearAllMarkedItems()
-							lgcMenu.markItemsCursorMode(self, old_index)
-
-						elseif self.MN_mark_mode == "toggle" then
-							local first, last = math.min(old_index, item_i), math.max(old_index, item_i)
-							first, last = math.max(1, first), math.max(1, last)
-							self.menu:setMarkedItemRange(self.MN_mark_state, first, last)
-						end
-
-						self:wid_select(item_t, item_i)
-
-					elseif self.MN_drag_reorder then
-						items[old_index], items[item_i] = item_t, old_item
-						self.menu.index = item_i
-						self:arrange()
-					end
-				end
-
-				-- Turn off item_hover so that other items don't glow.
-				self.MN_item_hover = false
-			end
-		end
+	if self == inst and self.press_busy == "menu-drag" then
+		lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	end
 end
 
