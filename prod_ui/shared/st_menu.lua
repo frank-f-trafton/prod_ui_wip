@@ -397,7 +397,7 @@ function _mt_menu:setMarkedItemByIndex(item_i, marked)
 
 	local item_t = self.items[item_i]
 
-	stMenu.setMarkedItem(item_t, marked)
+	self:setMarkedItem(item_t, marked)
 end
 
 

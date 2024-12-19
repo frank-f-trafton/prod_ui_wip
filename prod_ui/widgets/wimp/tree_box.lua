@@ -383,7 +383,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 							lgcMenu.widgetSelectItemByIndex(self, item_i)
 							self.MN_mouse_clicked_item = item_t
 							if button == 1 then
-								lgcMenu.pointerPressButton1(self)
+								lgcMenu.pointerPressButton1(self, item_t, old_index)
 							end
 						end
 
