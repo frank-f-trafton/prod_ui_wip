@@ -477,28 +477,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						self.MN_mouse_clicked_item = item_t
 
 						if button == 1 then
-							if self.MN_mark_mode == "toggle" then
-								item_t.marked = not item_t.marked
-								self.MN_mark_state = item_t.marked
-
-							elseif self.MN_mark_mode == "cursor" then
-								local mods = self.context.key_mgr.mod
-
-								if mods["shift"] then
-									-- Unmark all items, then mark the range between the previous and current selections.
-									self.menu:clearAllMarkedItems()
-									lgcMenu.markItemsCursorMode(self, old_index)
-
-								elseif mods["ctrl"] then
-									item_t.marked = not item_t.marked
-									self.MN_mark_index = false
-
-								else
-									self.menu:clearAllMarkedItems()
-									item_t.marked = not item_t.marked
-									self.MN_mark_index = false
-								end
-							end
+							lgcMenu.pointerPressButton1(self, item_t, old_index)
 						end
 
 						if old_item ~= item_t then

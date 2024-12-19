@@ -751,7 +751,7 @@ end
 
 
 -- For uiCall_pointerPress().
-function lgcMenu.pointerPressButton1(self)
+function lgcMenu.pointerPressButton1(self, item_t, old_index)
 	if self.MN_mark_mode == "toggle" then
 		item_t.marked = not item_t.marked
 		self.MN_mark_state = item_t.marked
