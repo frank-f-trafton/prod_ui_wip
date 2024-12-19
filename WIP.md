@@ -55,8 +55,6 @@ This category was planned to be used across all interfaces (WIMP, gamepad, touch
 
 (*1): Does nothing on its own.
 
-(*2): Three-state checkbox.
-
 
 ### Input
 
