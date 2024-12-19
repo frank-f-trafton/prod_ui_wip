@@ -12,6 +12,7 @@ local context = select(1, ...)
 local lgcMenu = {}
 
 
+local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local stMenu = context:getLua("shared/st_menu")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
@@ -733,6 +734,45 @@ function lgcMenu.markItemsCursorMode(self, old_index)
 	first, last = math.max(1, math.min(first, #items)), math.max(1, math.min(last, #items))
 
 	self.menu:setMarkedItemRange(true, first, last)
+end
+
+
+function lgcMenu.pointerPressScrollBars(self, x, y, button)
+	-- Check for pressing on scroll bar components.
+	if button == 1 then
+		local fixed_step = 24 -- XXX style/config
+		if commonScroll.widgetScrollPress(self, x, y, fixed_step) then
+			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
+			self.context:clearClickSequence()
+			return true
+		end
+	end
+end
+
+
+function lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
+	-- Repeat-press events for scroll bar buttons
+	if commonScroll.press_busy_codes[self.press_busy]
+	and button == 1
+	and button == self.context.mouse_pressed_button
+	then
+		local fixed_step = 24 -- XXX style/config
+		commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+	end
+end
+
+
+function lgcMenu.dragDropReleaseLogic(self)
+	local root = self:getTopWidgetInstance()
+	local drop_state = root.drop_state
+
+	if type(drop_state) == "table" then
+		local halt = self:wid_dropped(drop_state)
+		if halt then
+			root.drop_state = false
+			return true
+		end
+	end
 end
 
 

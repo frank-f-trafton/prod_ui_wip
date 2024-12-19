@@ -340,18 +340,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble()
 		end
 
-		local handled_scroll_bars = false
-
-		-- Check for pressing on scroll bar components.
-		if button == 1 then
-			local fixed_step = 24 -- XXX style/config
-			handled_scroll_bars = commonScroll.widgetScrollPress(self, x, y, fixed_step)
-		end
-
-		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
-		if handled_scroll_bars then
-			self.context:clearClickSequence()
-		else
+		if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
 			local mx, my = self:getRelativePosition(x, y)
 
 			if widShared.pointInViewport(self, 2, mx, my) then
@@ -451,14 +440,7 @@ end
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
-		-- Repeat-press events for scroll bar buttons
-		if commonScroll.press_busy_codes[self.press_busy]
-		and button == 1
-		and button == self.context.mouse_pressed_button
-		then
-			local fixed_step = 24 -- XXX style/config
-			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
-		end
+		lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
@@ -494,16 +476,7 @@ end
 
 function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 	if self == inst then
-		local root = self:getTopWidgetInstance()
-		local drop_state = root.drop_state
-
-		if type(drop_state) == "table" then
-			local halt = self:wid_dropped(drop_state)
-			if halt then
-				root.drop_state = false
-				return true
-			end
-		end
+		return lgcMenu.dragDropReleaseLogic(self)
 	end
 end
 
