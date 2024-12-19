@@ -458,14 +458,7 @@ end
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
-		-- Repeat-press events for scroll bar buttons
-		if commonScroll.press_busy_codes[self.press_busy]
-		and button == 1
-		and button == self.context.mouse_pressed_button
-		then
-			local fixed_step = 24 -- XXX style/config
-			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
-		end
+		lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
