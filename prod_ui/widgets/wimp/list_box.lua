@@ -468,13 +468,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				mx = mx + self.scr_x
 				my = my + self.scr_y
 
-				-- Check for the cursor intersecting with a clickable item.
-				local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
-
-				-- Reset click-sequence if clicking on a different item.
-				if self.MN_mouse_clicked_item ~= item_t then
-					self.context:forceClickSequence(self, button, 1)
-				end
+				local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
 
 				if item_t and item_t.selectable then
 					local old_index = self.menu.index
@@ -487,28 +481,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						self.MN_mouse_clicked_item = item_t
 
 						if button == 1 then
-							if self.MN_mark_mode == "toggle" then
-								item_t.marked = not item_t.marked
-								self.MN_mark_state = item_t.marked
-
-							elseif self.MN_mark_mode == "cursor" then
-								local mods = self.context.key_mgr.mod
-
-								if mods["shift"] then
-									-- Unmark all items, then mark the range between the previous and current selections.
-									self.menu:clearAllMarkedItems()
-									lgcMenu.markItemsCursorMode(self, old_index)
-
-								elseif mods["ctrl"] then
-									item_t.marked = not item_t.marked
-									self.MN_mark_index = false
-
-								else
-									self.menu:clearAllMarkedItems()
-									item_t.marked = not item_t.marked
-									self.MN_mark_index = false
-								end
-							end
+							lgcMenu.pointerPressButton1(self)
 						end
 
 						if old_item ~= item_t then

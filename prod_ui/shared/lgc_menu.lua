@@ -737,6 +737,46 @@ function lgcMenu.markItemsCursorMode(self, old_index)
 end
 
 
+-- For uiCall_pointerPress().
+function lgcMenu.checkItemIntersect(self, mx, my, button)
+	-- Check for the cursor intersecting with a clickable item.
+	local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
+
+	-- Reset click-sequence if clicking on a different item.
+	if self.MN_mouse_clicked_item ~= item_t then
+		self.context:forceClickSequence(self, button, 1)
+	end
+	return item_i, item_t
+end
+
+
+-- For uiCall_pointerPress().
+function lgcMenu.pointerPressButton1(self)
+	if self.MN_mark_mode == "toggle" then
+		item_t.marked = not item_t.marked
+		self.MN_mark_state = item_t.marked
+
+	elseif self.MN_mark_mode == "cursor" then
+		local mods = self.context.key_mgr.mod
+
+		if mods["shift"] then
+			-- Unmark all items, then mark the range between the previous and current selections.
+			self.menu:clearAllMarkedItems()
+			lgcMenu.markItemsCursorMode(self, old_index)
+
+		elseif mods["ctrl"] then
+			item_t.marked = not item_t.marked
+			self.MN_mark_index = false
+
+		else
+			self.menu:clearAllMarkedItems()
+			item_t.marked = not item_t.marked
+			self.MN_mark_index = false
+		end
+	end
+end
+
+
 function lgcMenu.pointerPressScrollBars(self, x, y, button)
 	-- Check for pressing on scroll bar components.
 	if button == 1 then
