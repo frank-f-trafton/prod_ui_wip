@@ -213,9 +213,9 @@ function def:uiCall_create(inst)
 		widShared.setupViewport(self, 2)
 
 		-- -> lgcMenu.instanceSetup(self)
-		self.page_jump_size = 4
-		self.wheel_jump_size = 64
-		self.wrap_selection = false
+		self.MN_page_jump_size = 4
+		self.MN_wheel_jump_size = 64
+		self.MN_wrap_selection = false
 
 		self.menu = lgcMenu.new()
 
@@ -333,11 +333,11 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		check_chosen = true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true, "chosen_i")
+		self:movePrev(self.MN_page_jump_size, true, "chosen_i")
 		check_chosen = true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true, "chosen_i")
+		self:moveNext(self.MN_page_jump_size, true, "chosen_i")
 		check_chosen = true
 	end
 

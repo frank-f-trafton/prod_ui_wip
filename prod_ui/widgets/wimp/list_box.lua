@@ -144,11 +144,11 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
+		self:movePrev(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
+		self:moveNext(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "left" then
@@ -268,11 +268,11 @@ function def:uiCall_create(inst)
 
 		self.press_busy = false
 
-		lgcMenu.instanceSetup(self, true, true) -- with mark and drag state
+		lgcMenu.instanceSetup(self, true, true) -- with mark and drag+drop state
+
+		self.MN_wrap_selection = false
 
 		self.menu = lgcMenu.new()
-
-		self.wrap_selection = false
 
 		-- Column X positions and widths.
 		self.col_icon_x = 0
@@ -379,7 +379,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- wid_action() is handled in the 'thimbleAction()' callback.
 
-		if self.mark_mode == "toggle" and key == "space" then
+		if self.MN_mark_mode == "toggle" and key == "space" then
 			if old_index > 0 and self.menu:canSelect(old_index) then
 				self.menu:toggleMarkedItem(self.menu.items[old_index])
 				return true
@@ -389,13 +389,13 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		or self:wid_defaultKeyNav(key, scancode, isrepeat)
 		then
 			if old_item ~= items[self.menu.index] then
-				if self.mark_mode == "cursor" then
+				if self.MN_mark_mode == "cursor" then
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
 						self.menu:clearAllMarkedItems()
 						lgcMenu.markItemsCursorMode(self, old_index)
 					else
-						self.mark_index = false
+						self.MN_mark_index = false
 						self.menu:clearAllMarkedItems()
 						self.menu:setMarkedItemByIndex(self.menu.index, true)
 					end
@@ -425,20 +425,20 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local menu = self.menu
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.items_first), math.min(#menu.items, self.items_last))
+			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
-				if self.item_hover ~= item then
-					self.item_hover = item
+				if self.MN_item_hover ~= item then
+					self.MN_item_hover = item
 				end
 
 				hover_ok = true
 			end
 		end
 
-		if self.item_hover and not hover_ok then
-			self.item_hover = false
+		if self.MN_item_hover and not hover_ok then
+			self.MN_item_hover = false
 		end
 	end
 end
@@ -447,7 +447,7 @@ end
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		commonScroll.widgetClearHover(self)
-		self.item_hover = false
+		self.MN_item_hover = false
 	end
 end
 
@@ -480,10 +480,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				my = my + self.scr_y
 
 				-- Check for the cursor intersecting with a clickable item.
-				local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
+				local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
 
 				-- Reset click-sequence if clicking on a different item.
-				if self.mouse_clicked_item ~= item_t then
+				if self.MN_mouse_clicked_item ~= item_t then
 					self.context:forceClickSequence(self, button, 1)
 				end
 
@@ -495,14 +495,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					-- Only button 1 updates the item mark state.
 					if button <= 3 then
 						lgcMenu.widgetSelectItemByIndex(self, item_i)
-						self.mouse_clicked_item = item_t
+						self.MN_mouse_clicked_item = item_t
 
 						if button == 1 then
-							if self.mark_mode == "toggle" then
+							if self.MN_mark_mode == "toggle" then
 								item_t.marked = not item_t.marked
-								self.mark_state = item_t.marked
+								self.MN_mark_state = item_t.marked
 
-							elseif self.mark_mode == "cursor" then
+							elseif self.MN_mark_mode == "cursor" then
 								local mods = self.context.key_mgr.mod
 
 								if mods["shift"] then
@@ -512,12 +512,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 								elseif mods["ctrl"] then
 									item_t.marked = not item_t.marked
-									self.mark_index = false
+									self.MN_mark_index = false
 
 								else
 									self.menu:clearAllMarkedItems()
 									item_t.marked = not item_t.marked
-									self.mark_index = false
+									self.MN_mark_index = false
 								end
 							end
 						end
@@ -570,15 +570,15 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	-- drag_reorder is incompatible with drag_drop_mode, drag_select, and the "toggle" and "cursor"
+	-- MN_drag_reorder is incompatible with MN_drag_drop_mode, MN_drag_select, and the "toggle" and "cursor"
 	-- mark modes.
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
-	-- "cursor" mark mode overrides drag_drop_mode when active (hold shift while clicking and dragging).
+	-- "cursor" mark mode overrides MN_drag_drop_mode when active (hold shift while clicking and dragging).
 
 	if self == inst
 	and self.press_busy == "menu-drag"
 	then
-		if self.drag_drop_mode and self.mark_mode ~= "toggle" and not self.mark_index then
+		if self.MN_drag_drop_mode and self.MN_mark_mode ~= "toggle" and not self.MN_mark_index then
 			local context = self.context
 			local mpx, mpy, mpr = context.mouse_pressed_x, context.mouse_pressed_y, context.mouse_pressed_range
 			if mouse_x > mpx + mpr or mouse_x < mpx - mpr or mouse_y > mpy + mpr or mouse_y < mpy - mpr then
@@ -615,24 +615,24 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				local old_item = items[old_index]
 
 				if old_item ~= item_t then
-					if self.drag_select then
+					if self.MN_drag_select then
 						self.menu:setSelectedIndex(item_i)
 
 						local mods = self.context.key_mgr.mod
-						if self.mark_mode == "cursor" and self.mark_index then
+						if self.MN_mark_mode == "cursor" and self.MN_mark_index then
 							self.menu:clearAllMarkedItems()
 							lgcMenu.markItemsCursorMode(self, old_index)
 
-						elseif self.mark_mode == "toggle" then
+						elseif self.MN_mark_mode == "toggle" then
 							local first, last = math.min(old_index, item_i), math.max(old_index, item_i)
 							first, last = math.max(1, first), math.max(1, last)
-							self.menu:setMarkedItemRange(self.mark_state, first, last)
+							self.menu:setMarkedItemRange(self.MN_mark_state, first, last)
 							print("old", old_index, "item_i", item_i, "first", first, "last", last)
 						end
 
 						self:wid_select(item_t, item_i)
 
-					elseif self.drag_reorder then
+					elseif self.MN_drag_reorder then
 						items[old_index], items[item_i] = item_t, old_item
 						self.menu.index = item_i
 						self:arrange()
@@ -640,7 +640,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				end
 
 				-- Turn off item_hover so that other items don't glow.
-				self.item_hover = false
+				self.MN_item_hover = false
 			end
 		end
 	end
@@ -720,12 +720,12 @@ function def:uiCall_update(dt)
 	local needs_update = false
 
 	-- Clear click-sequence item.
-	if self.mouse_clicked_item and self.context.cseq_widget ~= self then
-		self.mouse_clicked_item = false
+	if self.MN_mouse_clicked_item and self.context.cseq_widget ~= self then
+		self.MN_mouse_clicked_item = false
 	end
 
 	-- Handle update-time drag-scroll.
-	if self.drag_scroll
+	if self.MN_drag_scroll
 	and self.press_busy == "menu-drag"
 	and widShared.dragToScroll(self, dt)
 	then
@@ -810,7 +810,7 @@ def.skinners = {
 			love.graphics.translate(-self.scr_x, -self.scr_y)
 
 			-- Hover glow.
-			local item_hover = self.item_hover
+			local item_hover = self.MN_item_hover
 			if item_hover then
 				love.graphics.setColor(skin.color_hover_glow)
 				uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.doc_w, item_hover.h)
@@ -829,8 +829,8 @@ def.skinners = {
 			love.graphics.setFont(font)
 			local font_h = font:getHeight()
 
-			local first = math.max(self.items_first, 1)
-			local last = math.min(self.items_last, #items)
+			local first = math.max(self.MN_items_first, 1)
+			local last = math.min(self.MN_items_last, #items)
 
 			-- 1: Item markings
 			local rr, gg, bb, aa = love.graphics.getColor()

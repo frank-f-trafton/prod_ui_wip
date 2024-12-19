@@ -204,10 +204,7 @@ function def:uiCall_create(inst)
 
 		lgcMenu.instanceSetup(self)
 
-		self.wrap_selection = false
-
-		-- Ref to currently-hovered item, or false if not hovering over any items.
-		self.item_hover = false
+		self.MN_wrap_selection = false
 
 		-- Padding values. -- XXX style/config, scale
 		--[[
@@ -326,11 +323,11 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
+		self:movePrev(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
+		self:moveNext(self.MN_page_jump_size, true)
 		return true
 
 	-- Suppress stepping the thimble while a menu is open.
@@ -396,10 +393,10 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local menu = self.menu
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.items_first), math.min(#menu.items, self.items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
 
 			if item and item.selectable then
-				self.item_hover = item
+				self.MN_item_hover = item
 
 				--print("item", item, "index", menu.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
 
@@ -448,7 +445,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				-- Check for click-able items.
 				if not self.press_busy then
-					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
+					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
 
 					self.press_busy = "menu-drag"
 					self:cacheUpdate(true)
@@ -511,7 +508,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 			-- Scroll about 1/4 of the visible items.
 			--local n = self.h / self.item_h * 4
-			self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
+			self:scrollDeltaV(math.floor(self.MN_wheel_jump_size * -y + 0.5))
 
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(true)
@@ -628,7 +625,7 @@ def.skinners = {
 			love.graphics.setColor(skin.color_text)
 			love.graphics.setFont(font)
 
-			for i = math.max(1, self.items_first), math.min(#menu.items, self.items_last) do
+			for i = math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last) do
 				local item = menu.items[i]
 				local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
 				love.graphics.print(item.text, xx, item.y)

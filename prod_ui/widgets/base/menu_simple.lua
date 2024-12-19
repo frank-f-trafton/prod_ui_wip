@@ -286,7 +286,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 
-		self.menu:setSelectionStep(4 * -y, self.wrap_selection)
+		self.menu:setSelectionStep(4 * -y, self.MN_wrap_selection)
 		self:selectionInView()
 
 		-- Block bubbling if event was handled.

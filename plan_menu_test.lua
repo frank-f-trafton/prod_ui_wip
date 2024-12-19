@@ -135,7 +135,7 @@ function plan.make(parent)
 
 			menu1.wid_keyPressed = testMenuKeyPressed
 
-			menu1.drag_select = true
+			menu1.MN_drag_select = true
 
 			menu1:setScrollBars(true, true)
 

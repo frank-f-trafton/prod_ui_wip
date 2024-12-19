@@ -1030,10 +1030,10 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local menu = self.menu
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.items_first), math.min(#menu.items, self.items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
 
 			if item and item.selectable then
-				self.item_hover = item
+				self.MN_item_hover = item
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
@@ -1047,8 +1047,8 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			end
 		end
 
-		if self.item_hover and not hover_ok then
-			self.item_hover = false
+		if self.MN_item_hover and not hover_ok then
+			self.MN_item_hover = false
 
 			-- Only remove the selection if it is not a group that is currently opened.
 			if not restingOnOpenGroup(self) then
@@ -1066,7 +1066,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		self.item_hover = false
+		self.MN_item_hover = false
 
 		-- Only remove the selection if it is not a group that is currently opened.
 		if not restingOnOpenGroup(self) then
@@ -1093,7 +1093,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 			-- Check for click-able items.
 			if not self.press_busy then
-				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
+				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
 
 				self.press_busy = "menu-drag"
 
@@ -1167,7 +1167,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 			-- Scroll about 1/4 of the visible items.
 			--local n = self.h / self.item_h * 4
-			self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
+			self:scrollDeltaV(math.floor(self.MN_wheel_jump_size * -y + 0.5))
 
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(true)
@@ -1289,7 +1289,7 @@ def.skinners = {
 
 			local font = skin.font_item
 
-			local items_first, items_last = math.max(self.items_first, 1), math.min(self.items_last, #items)
+			local items_first, items_last = math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items)
 
 			-- Don't draw menu contents outside of the widget bounding box.
 			love.graphics.push("all")

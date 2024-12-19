@@ -129,10 +129,10 @@ local function makeListBox1(content, x, y)
 
 	list_box.show_icons = true
 
-	list_box.drag_scroll = true
-	list_box.drag_select = true
-	--list_box.drag_reorder = true
-	--list_box.drag_drop_mode = true
+	list_box.MN_drag_scroll = true
+	list_box.MN_drag_select = true
+	--list_box.MN_drag_reorder = true
+	--list_box.MN_drag_drop_mode = true
 
 	list_box:setScrollBars(false, true)
 
@@ -316,10 +316,10 @@ local function makeListBox2(content, x, y)
 
 	list_box.show_icons = true
 
-	list_box.drag_scroll = true
-	--list_box.drag_select = true
-	list_box.drag_reorder = true
-	--list_box.drag_drop_mode = true
+	list_box.MN_drag_scroll = true
+	--list_box.MN_drag_select = true
+	list_box.MN_drag_reorder = true
+	--list_box.MN_drag_drop_mode = true
 
 	list_box:setScrollBars(false, true)
 
@@ -356,10 +356,10 @@ local function makeListBox3(content, x, y)
 
 	lb1.show_icons = true
 
-	lb1.drag_scroll = true
-	lb1.drag_select = true
-	--lb1.drag_reorder = true
-	--lb1.drag_drop_mode = true
+	lb1.MN_drag_scroll = true
+	lb1.MN_drag_select = true
+	--lb1.MN_drag_reorder = true
+	--lb1.MN_drag_drop_mode = true
 
 	lb1:addItem("One (Mark test (Toggle))")
 	lb1:addItem("Two")
@@ -367,7 +367,7 @@ local function makeListBox3(content, x, y)
 	lb1:addItem("Four")
 	lb1:addItem("Five")
 
-	lb1.mark_mode = "toggle" -- false, "toggle", "cursor"
+	lb1.MN_mark_mode = "toggle" -- false, "toggle", "cursor"
 
 	lb1:setScrollBars(false, true)
 
@@ -389,10 +389,10 @@ local function makeListBox3(content, x, y)
 
 	lb2.show_icons = true
 
-	lb2.drag_scroll = true
-	lb2.drag_select = true
-	--lb2.drag_reorder = true
-	--lb2.drag_drop_mode = true
+	lb2.MN_drag_scroll = true
+	lb2.MN_drag_select = true
+	--lb2.MN_drag_reorder = true
+	--lb2.MN_drag_drop_mode = true
 
 	lb2:addItem("One (Shift/Ctrl+Click)")
 	lb2:addItem("Two")
@@ -400,7 +400,7 @@ local function makeListBox3(content, x, y)
 	lb2:addItem("Four")
 	lb2:addItem("Five")
 
-	lb2.mark_mode = "cursor" -- false, "toggle", "cursor"
+	lb2.MN_mark_mode = "cursor" -- false, "toggle", "cursor"
 
 	lb2:setScrollBars(false, true)
 
@@ -424,10 +424,10 @@ local function makeListBox4(content, x, y)
 
 	lb1.show_icons = true
 
-	lb1.drag_scroll = true
-	lb1.drag_select = true
-	--lb1.drag_reorder = true
-	lb1.drag_drop_mode = true
+	lb1.MN_drag_scroll = true
+	lb1.MN_drag_select = true
+	--lb1.MN_drag_reorder = true
+	lb1.MN_drag_drop_mode = true
 	lb1.wid_dropped = wid_dropped
 
 	lb1:addItem("Drag (Left)")
@@ -436,7 +436,7 @@ local function makeListBox4(content, x, y)
 	lb1:addItem("C")
 	lb1:addItem("D")
 
-	--lb1.mark_mode = "cursor" -- false, "toggle", "cursor"
+	--lb1.MN_mark_mode = "cursor" -- false, "toggle", "cursor"
 
 	lb1:setScrollBars(false, true)
 
@@ -503,10 +503,10 @@ local function makeListBox4(content, x, y)
 
 	lb2.show_icons = true
 
-	lb2.drag_scroll = true
-	lb2.drag_select = true
-	--lb2.drag_reorder = true
-	lb2.drag_drop_mode = true
+	lb2.MN_drag_scroll = true
+	lb2.MN_drag_select = true
+	--lb2.MN_drag_reorder = true
+	lb2.MN_drag_drop_mode = true
 	lb2.wid_dropped = wid_dropped
 
 	lb2:addItem("Drag (right)")
@@ -515,7 +515,7 @@ local function makeListBox4(content, x, y)
 	lb2:addItem("G")
 	lb2:addItem("H")
 
-	--lb2.mark_mode = "cursor" -- false, "toggle", "cursor"
+	--lb2.MN_mark_mode = "cursor" -- false, "toggle", "cursor"
 
 	lb2:setScrollBars(false, true)
 

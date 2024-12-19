@@ -62,8 +62,8 @@ function plan.make(parent)
 
 		menu_tab.renderThimble = widShared.dummy
 
-		menu_tab.drag_select = true
-		menu_tab.wrap_selection = false
+		menu_tab.MN_drag_select = true
+		menu_tab.MN_wrap_selection = false
 
 		menu_tab:setScrollBars(true, true)
 
