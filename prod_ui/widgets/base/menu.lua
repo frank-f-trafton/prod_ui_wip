@@ -235,7 +235,7 @@ function def:uiCall_create(inst)
 
 		lgcMenu.instanceSetup(self)
 
-		self.auto_range = "v"
+		self.MN_auto_range = "v"
 
 		-- When true, reshapes and arranges menu-items when this widget is reshaped.
 		-- When "conditional", only do so if the widget dimensions have changed.
@@ -304,7 +304,7 @@ function def:cacheUpdate(refresh_dimensions)
 	end
 
 	-- Option: automatically set the draw ranges for items.
-	local auto_range = self.auto_range -- XXX untested
+	local auto_range = self.MN_auto_range -- XXX untested
 	if auto_range == "h" then
 		lgcMenu.widgetAutoRangeH(self)
 
@@ -360,7 +360,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			if item_i and item_t.selectable then
 				self.menu:setSelectedIndex(item_i)
 				-- Turn off item_hover so that other items don't glow.
-				self.item_hover = false
+				self.MN_item_hover = false
 
 				--self:selectionInView()
 
@@ -368,7 +368,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 					item_t:menuCall_pointerDrag(self, self.context.mouse_pressed_button)
 				end
 
-			elseif self.drag_select == "auto-off" then
+			elseif self.MN_drag_select == "auto-off" then
 				self.menu:setSelectedIndex(0)
 			end
 		end
@@ -399,16 +399,16 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local menu = self.menu
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.items_first), math.min(#menu.items, self.items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
-				if self.item_hover ~= item then
-					if self.item_hover and self.item_hover.menuCall_hoverOff then
-						self.item_hover:menuCall_hoverOff(self, mouse_x, mouse_y)
+				if self.MN_item_hover ~= item then
+					if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
+						self.MN_item_hover:menuCall_hoverOff(self, mouse_x, mouse_y)
 					end
 
-					self.item_hover = item
+					self.MN_item_hover = item
 
 					if item.menuCall_hoverOn then
 						item:menuCall_hoverOn(self, mouse_x, mouse_y)
@@ -420,7 +420,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				end
 
 				-- Implement mouse hover-to-select.
-				if self.hover_to_select and (mouse_dx ~= 0 or mouse_dy ~= 0) then
+				if self.MN_hover_to_select and (mouse_dx ~= 0 or mouse_dy ~= 0) then
 					local selected_item = self.menu.items[self.menu.index]
 					if item ~= selected_item then
 						self.menu:setSelectedIndex(i)
@@ -431,13 +431,13 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			end
 		end
 
-		if self.item_hover and not hover_ok then
-			if self.item_hover.menuCall_hoverOff then
-				self.item_hover:menuCall_hoverOff(self, mouse_x, mouse_y)
+		if self.MN_item_hover and not hover_ok then
+			if self.MN_item_hover.menuCall_hoverOff then
+				self.MN_item_hover:menuCall_hoverOff(self, mouse_x, mouse_y)
 			end
-			self.item_hover = false
+			self.MN_item_hover = false
 
-			if self.hover_to_select == "auto-off" then
+			if self.MN_hover_to_select == "auto-off" then
 				self.menu:setSelectedIndex(0)
 			end
 		end
@@ -449,14 +449,14 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 
-		if self.item_hover and self.item_hover.menuCall_hoverOff then
+		if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
 			local ax, ay = self:getAbsolutePosition()
-			self.item_hover:menuCall_hoverOff(self, mouse_x - ax, mouse_y - ay)
+			self.MN_item_hover:menuCall_hoverOff(self, mouse_x - ax, mouse_y - ay)
 		end
 
-		self.item_hover = false
+		self.MN_item_hover = false
 
-		if self.hover_to_select == "auto-off" then
+		if self.MN_hover_to_select == "auto-off" then
 			self.menu:setSelectedIndex(0)
 		end
 	end
@@ -500,18 +500,18 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					-- Check for click-able items.
 					if not self.press_busy then
-						local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.items_first), math.min(#self.menu.items, self.items_last))
+						local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
 
-						if self.drag_select then
+						if self.MN_drag_select then
 							self.press_busy = "menu-drag"
 						end
 
 						-- Reset click-sequence if clicking on a different item.
-						if self.mouse_clicked_item ~= item_t then
+						if self.MN_mouse_clicked_item ~= item_t then
 							self.context:forceClickSequence(self, button, 1)
 						end
 
-						self.mouse_clicked_item = item_t
+						self.MN_mouse_clicked_item = item_t
 
 						if item_t and item_t.menuCall_pointerPress then
 							item_t.menuCall_pointerPress(item_t, self, button, self.context.cseq_presses)
@@ -536,14 +536,14 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
 
 		-- Repeat-press events for items
-		elseif self.mouse_clicked_item and self.mouse_clicked_item.menuCall_pointerPressRepeat then
+		elseif self.MN_mouse_clicked_item and self.MN_mouse_clicked_item.menuCall_pointerPressRepeat then
 			local ax, ay = self:getAbsolutePosition()
 			local mouse_x = x - ax
 			local mouse_y = y - ay
 
 			local context = self.context
 
-			self.mouse_clicked_item:menuCall_pointerPressRepeat(self, button, context.cseq_presses, context.mouse_pressed_rep_n)
+			self.MN_mouse_clicked_item:menuCall_pointerPressRepeat(self, button, context.cseq_presses, context.mouse_pressed_rep_n)
 		end
 	end
 end
@@ -593,7 +593,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 			-- Scroll about 1/4 of the visible items.
 			--local n = self.h / self.item_h * 4
-			self:scrollDeltaV(math.floor(self.wheel_jump_size * -y + 0.5))
+			self:scrollDeltaV(math.floor(self.MN_wheel_jump_size * -y + 0.5))
 
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(false)
@@ -614,8 +614,8 @@ function def:uiCall_update(dt)
 	local needs_update = false
 
 	-- Clear click-sequence item
-	if self.mouse_clicked_item and self.context.cseq_widget ~= self then
-		self.mouse_clicked_item = false
+	if self.MN_mouse_clicked_item and self.context.cseq_widget ~= self then
+		self.MN_mouse_clicked_item = false
 	end
 
 	-- Handle update-time drag-scroll.
@@ -712,7 +712,7 @@ def.skinners = {
 			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
 
 			-- Draw hover glow, if applicable
-			local item_hover = self.item_hover
+			local item_hover = self.MN_item_hover
 			if item_hover then
 				love.graphics.setColor(skin.color_hover_glow)
 				love.graphics.rectangle("fill", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
@@ -729,9 +729,9 @@ def.skinners = {
 			love.graphics.setColor(skin.color_item_text)
 			love.graphics.setFont(font)
 
-			--print("self.items_first", self.items_first, "self.items_last", self.items_last)
+			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 
-			self:renderItems(items, math.max(self.items_first, 1), math.min(self.items_last, #items), ox, oy)
+			self:renderItems(items, math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items), ox, oy)
 
 			love.graphics.pop()
 

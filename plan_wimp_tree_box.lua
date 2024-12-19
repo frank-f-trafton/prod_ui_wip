@@ -84,10 +84,10 @@ function plan.make(parent)
 		tree_box:setIconsEnabled(true)
 		tree_box:setExpandersActive(true)
 
-		tree_box.drag_scroll = true
-		tree_box.drag_select = true
-		--tree_box.drag_reorder = true
-		--tree_box.drag_drop_mode = true
+		tree_box.MN_drag_scroll = true
+		tree_box.MN_drag_select = true
+		--tree_box.MN_drag_reorder = true
+		--tree_box.MN_drag_drop_mode = true
 
 		-- (text, parent_node, tree_pos, bijou_id)
 		local node_top = tree_box:addNode("Top", nil, nil, "icon_folder")

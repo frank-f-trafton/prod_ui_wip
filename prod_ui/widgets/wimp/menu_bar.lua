@@ -301,15 +301,15 @@ function def:uiCall_create(inst)
 		self.last_open = false
 
 		-- Ref to currently-hovered item, or false if not hovering over any items.
-		self.item_hover = false
+		self.MN_item_hover = false
 
 		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
 		self.selection_extend_x = 0
 		self.selection_extend_y = 0
 
 		-- Range of items that are visible and should be checked for press/hover state.
-		self.items_first = 0 -- max(first, 1)
-		self.items_last = 2^53 -- min(last, #items)
+		self.MN_items_first = 0 -- max(first, 1)
+		self.MN_items_last = 2^53 -- min(last, #items)
 
 		self.text_pad_x = 12
 
@@ -643,9 +643,9 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local i, item = self:getItemAtPoint(xx, yy, 1, #self.menu.items)
 
 			if item and item.selectable then
-				local old_hover = self.item_hover
-				self.item_hover = item
-				--print("self.item_hover 1", self.item_hover)
+				local old_hover = self.MN_item_hover
+				self.MN_item_hover = item
+				--print("self.MN_item_hover 1", self.MN_item_hover)
 
 				if self.state == "opened" then
 					-- Hover-to-select
@@ -667,18 +667,18 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				hover_ok = true
 			end
 			if not hover_ok then
-				self.item_hover = false
+				self.MN_item_hover = false
 			end
 		end
 	end
 
-	--print("self.item_hover 2", self.item_hover)
+	--print("self.MN_item_hover 2", self.MN_item_hover)
 end
 
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		self.item_hover = false
+		self.MN_item_hover = false
 	end
 end
 
@@ -699,7 +699,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				if self.state == "opened" then
 					destroyPopUpMenu(self, "concluded", true)
 					setStateIdle(self)
-					self.item_hover = false
+					self.MN_item_hover = false
 
 					self:cacheUpdate(true)
 				else
@@ -885,7 +885,7 @@ def.skinners = {
 
 			-- Draw selection or hover glow (just one or the other).
 			local sel_item = items[selected_index]
-			local item_hover = self.item_hover
+			local item_hover = self.MN_item_hover
 
 			if sel_item then
 				love.graphics.setColor(skin.color_select_glow)
@@ -915,7 +915,7 @@ def.skinners = {
 				end
 			end
 
-			--print("self.items_first", self.items_first, "self.items_last", self.items_last)
+			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 
 			for i = 1, #items do
 				items[i]:render(self, ox, oy)
@@ -935,7 +935,7 @@ def.skinners = {
 			love.graphics.print("state: " .. self.state
 			.. "\nthimbled: " .. tostring(self == self.context.current_thimble)
 			.. "\npressed: " .. tostring(self == self.context.current_pressed)
-			.. "\nitem_hover: " .. tostring(self.item_hover)
+			.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
 			.. "\nself.menu.index: " .. tostring(self.menu.index)
 			.. "\n\nbanked thimble: " .. tostring(root.banked_thimble)
 			,

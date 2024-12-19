@@ -188,8 +188,8 @@ function plan.make(root)
 
 		tree_box:reshape()
 
-		tree_box.drag_scroll = true
-		tree_box.drag_select = true
+		tree_box.MN_drag_scroll = true
+		tree_box.MN_drag_select = true
 
 		-- User code
 		tree_box.usr_timer_max = 0.5

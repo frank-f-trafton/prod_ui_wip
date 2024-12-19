@@ -113,11 +113,11 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
+		self:movePrev(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
+		self:moveNext(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "left" then
@@ -315,8 +315,8 @@ function plan.make(parent)
 		commonTab.setDefaultMeasurements(menu_tab)
 		menu_tab.renderThimble = widShared.dummy
 
-		menu_tab.drag_select = true
-		menu_tab.wrap_selection = false
+		menu_tab.MN_drag_select = true
+		menu_tab.MN_wrap_selection = false
 
 		--[[
 		menu_tab.x = 16

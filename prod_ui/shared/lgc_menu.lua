@@ -32,58 +32,46 @@ end
 -- @param self The widget to configure.
 -- @param setup_mark When true, setup marking state (for multiple selections).
 -- @param setup_drag When true, setup drag-and-drop state.
-function lgcMenu.instanceSetup(self, setup_mark, setup_drag)
+function lgcMenu.instanceSetup(self, setup_mark, setup_drag_drop)
 	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
 
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
-	self.selection_extend_x = 0
-	self.selection_extend_y = 0
+	self.MN_selection_extend_x = 0
+	self.MN_selection_extend_y = 0
 
 	-- Used with click-sequence (cseq) state to prevent drifting double-clicks.
-	self.mouse_clicked_item = false
+	self.MN_mouse_clicked_item = false
 
 	-- Ref to currently-hovered item, or false if not hovering over any items.
-	self.item_hover = false
-
-	-- When true, clicking+dragging continuously selects new items.
-	-- When "auto-off", dragging outside of any item box deselects.
-	self.drag_select = false
+	self.MN_item_hover = false
 
 	-- When truthy, mouse-hover continuously selects the current hovered item.
 	-- Only happens when mouse DX and DY are non-zero.
 	-- When "auto-off", hover-off deselects any current selection.
-	self.hover_to_select = false
+	self.MN_hover_to_select = false
 
 	-- How many items to jump when pressing pageup or pagedown, or equivalent gamepad buttons.
-	self.page_jump_size = 4
-	self.wheel_jump_size = 64 -- pixels
+	self.MN_page_jump_size = 4
+	self.MN_wheel_jump_size = 64 -- pixels
 
 	-- Range of items that are visible and should be checked for press/hover state.
-	self.items_first = 0 -- max(first, 1)
-	self.items_last = 2^53 -- min(last, #items)
+	self.MN_items_first = 0 -- max(first, 1)
+	self.MN_items_last = 2^53 -- min(last, #items)
 
 	-- Wrap selection when pressing against the last selectable item.
-	self.wrap_selection = true
+	self.MN_wrap_selection = true
 
-	-- Drag-and-drop state.
+	-- Scroll the view while dragging the mouse.
+	self.MN_drag_scroll = false
+
+	-- When true, clicking+dragging continuously selects new items.
+	-- When "auto-off", dragging outside of any item box deselects.
+	self.MN_drag_select = false
+
+	-- Reorder the current selected item while dragging.
+	self.MN_drag_reorder = false
+
 	-- Note that some mark and drag settings are mutually incompatible. TODO: config methods.
-	if setup_drag then
-		-- Scroll the view while dragging.
-		self.drag_scroll = false
-
-		-- Select new items while dragging.
-		self.drag_select = false
-
-		-- Reorder the current selected item while dragging.
-		self.drag_reorder = false
-
-		-- Support drag-and-drop transactions.
-		-- false: disabled.
-		-- true: when dragging the mouse outside of `context.mouse_pressed_range`.
-		-- "edge": when dragging the mouse outside of the widget bounding box.
-		self.drag_drop_mode = false
-	end
-
 	-- Multi-Selection state.
 	if setup_mark then
 		--[[
@@ -94,19 +82,28 @@ function lgcMenu.instanceSetup(self, setup_mark, setup_drag)
 		`item.marked` is used to denote an item that is selected independent of the current
 		menu index.
 		--]]
-		self.mark_mode = false
+		self.MN_mark_mode = false
 
-		-- When mark_mode is "toggle": Which marking state is being applied to items as the
+		-- When MN_mark_mode is "toggle": Which marking state is being applied to items as the
 		-- mouse sweeps over them.
-		self.mark_state = false
+		self.MN_mark_state = false
 
-		-- When mark_mode is "cursor": The old selection index when Shift+Click dragging started.
+		-- When MN_mark_mode is "cursor": The old selection index when Shift+Click dragging started.
 		-- false when Shift+Click dragging is not active.
-		self.mark_index = false
+		self.MN_mark_index = false
+	end
+
+	-- Drag-and-drop state.
+	if setup_drag_drop then
+		-- Support drag-and-drop transactions.
+		-- false: disabled.
+		-- true: when dragging the mouse outside of `context.mouse_pressed_range`.
+		-- "edge": when dragging the mouse outside of the widget bounding box.
+		self.MN_drag_drop_mode = false
 	end
 
 	-- Optional:
-	-- self.auto_range ("h" or "v") -> sets items_first and items_last.
+	-- self.MN_auto_range: sets items_first and items_last. Values: "h", "v", or false/nil.
 
 	-- Also used by other integrated components:
 	-- self.press_busy
@@ -146,8 +143,8 @@ function lgcMenu.widgetAutoRangeV(self)
 	end
 
 	-- Assign values or 1..#items.
-	self.items_first = first or 1
-	self.items_last = last or #menu.items
+	self.MN_items_first = first or 1
+	self.MN_items_last = last or #menu.items
 end
 
 
@@ -182,8 +179,8 @@ function lgcMenu.widgetAutoRangeH(self)
 	end
 
 	-- Assign values or 1..#items.
-	self.items_first = first or 1
-	self.items_last = last or #menu.items
+	self.MN_items_first = first or 1
+	self.MN_items_last = last or #menu.items
 end
 
 
@@ -482,7 +479,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("index") Optional alternative index key to change.
 function lgcMenu.widgetMovePrev(self, n, immediate, id)
-	self.menu:setPrev(n, self.wrap_selection, id)
+	self.menu:setPrev(n, self.MN_wrap_selection, id)
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -500,7 +497,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("index") Optional alternative index key to change.
 function lgcMenu.widgetMoveNext(self, n, immediate, id)
-	self.menu:setNext(n, self.wrap_selection, id)
+	self.menu:setNext(n, self.MN_wrap_selection, id)
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -576,11 +573,11 @@ function lgcMenu.keyNavTB(self, key, scancode, isrepeat, id)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, nil, id)
+		self:movePrev(self.MN_page_jump_size, nil, id)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, nil, id)
+		self:moveNext(self.MN_page_jump_size, nil, id)
 		return true
 	end
 end
@@ -605,11 +602,11 @@ function lgcMenu.keyNavLR(self, key, scancode, isrepeat, id)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, nil, id)
+		self:movePrev(self.MN_page_jump_size, nil, id)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, nil, id)
+		self:moveNext(self.MN_page_jump_size, nil, id)
 		return true
 	end
 end
@@ -650,14 +647,14 @@ end
 -- @param immediate Skip scrolling animation when true.
 function lgcMenu.getItemInBoundsRect(self, item, immediate)
 	--[[
-	Widget must have 'selection_extend_x' and 'selection_extend_y' set.
+	Widget must have 'MN_selection_extend_x' and 'MN_selection_extend_y' set.
 	--]]
 
 	self:scrollRectInBounds(
-		item.x - self.selection_extend_x,
-		item.y - self.selection_extend_y,
-		item.x + item.w + self.selection_extend_x,
-		item.y + item.h + self.selection_extend_y,
+		item.x - self.MN_selection_extend_x,
+		item.y - self.MN_selection_extend_y,
+		item.x + item.w + self.MN_selection_extend_x,
+		item.y + item.h + self.MN_selection_extend_y,
 		immediate
 	)
 end
@@ -669,12 +666,12 @@ end
 -- @param immediate Skip scrolling animation when true.
 function lgcMenu.getItemInBoundsX(self, item, immediate)
 	--[[
-	Widget must have 'selection_extend_x' set.
+	Widget must have 'MN_selection_extend_x' set.
 	--]]
 
 	self:scrollXInBounds(
-		item.x - self.selection_extend_x,
-		item.x + item.w + self.selection_extend_x,
+		item.x - self.MN_selection_extend_x,
+		item.x + item.w + self.MN_selection_extend_x,
 		immediate
 	)
 end
@@ -686,12 +683,12 @@ end
 -- @param immediate Skip scrolling animation when true.
 function lgcMenu.getItemInBoundsY(self, item, immediate)
 	--[[
-	Widget must have 'selection_extend_y' set.
+	Widget must have 'MN_selection_extend_y' set.
 	--]]
 
 	self:scrollYInBounds(
-		item.y - self.selection_extend_y,
-		item.y + item.h + self.selection_extend_y,
+		item.y - self.MN_selection_extend_y,
+		item.y + item.h + self.MN_selection_extend_y,
 		immediate
 	)
 end
@@ -702,7 +699,7 @@ end
 -- @param immediate When true, skip scrolling animation.
 function lgcMenu.selectionInView(self, immediate)
 	--[[
-	Widget must have a 'getInBounds' method assigned. These methods usually require 'selection_extend_[x|y]' to be set.
+	Widget must have a 'getInBounds' method assigned. These methods usually require 'MN_selection_extend_[x|y]' to be set.
 	--]]
 
 	local menu = self.menu
@@ -725,14 +722,14 @@ end
 
 
 function lgcMenu.markItemsCursorMode(self, old_index)
-	if not self.mark_index then
-		self.mark_index = old_index
+	if not self.MN_mark_index then
+		self.MN_mark_index = old_index
 	end
 
 	local menu = self.menu
 	local items = menu.items
 
-	local first, last = math.min(self.mark_index, menu.index), math.max(self.mark_index, menu.index)
+	local first, last = math.min(self.MN_mark_index, menu.index), math.max(self.MN_mark_index, menu.index)
 	first, last = math.max(1, math.min(first, #items)), math.max(1, math.min(last, #items))
 
 	self.menu:setMarkedItemRange(true, first, last)

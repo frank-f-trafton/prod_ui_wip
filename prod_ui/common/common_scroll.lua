@@ -62,6 +62,7 @@ commonScroll.default_scr_style = {
 }
 
 
+-- Widgets may implement other press_busy codes (ie for dragging the mouse cursor through a menu).
 commonScroll.press_busy_codes = {
 	["v"] = true, -- vertical thumb (or trough->thumb)
 	["v1-pend"] = true, -- vertical button-less, pending repeat action
@@ -892,26 +893,25 @@ you can typically (though not always) click and drag the thumb to scroll the vie
 thumb size to ensure that it's easy to see and click, and in some games, it is always the same size. Therefore, don't
 count on this being an accurate indication of the document size.
 
-Trough: Area in which the thumb can be moved. For these functions, this excludes any additional buttons on the far
+Trough: the area in which the thumb can be moved. For these functions, this excludes any additional buttons on the far
 edges.
 
 Document: An axis-aligned rectangle (format: XYWH) that represents the scrollable area, not including margins.
 --]]
 
 
---- Get the length of the scroll bar thumb.
+--- Gets the length of the scroll bar thumb.
 -- @param viewport_len Length of the viewport.
 -- @param doc_len Length of the scrollable document area. Must be greater than zero.
 -- @param trough_len Length of the scroll bar trough.
 -- @param thumb_min Minimum permitted thumb size.
 -- @param thumb_max Maximum permitted thumb size.
 function commonScroll.getThumbLength(viewport_len, doc_len, trough_len, thumb_min, thumb_max)
-	--return math.max(thumb_min, math.min(trough_len, math.floor(viewport_len / doc_len * trough_len)))
 	return math.max(thumb_min, math.min(trough_len, math.min(thumb_max, math.floor(viewport_len / doc_len * trough_len))))
 end
 
 
---- Get the document scroll position from the thumb position (or any arbitrary location) within the trough, clamped from 0 to trough length minus thumb length. (If thumb length isn't applicable, pass in zero.)
+--- Gets the document scroll position from the thumb position (or any arbitrary location) within the trough, clamped from 0 to trough length minus thumb length. (If thumb length isn't applicable, pass in zero.)
 -- @param doc_len Length of the document's scrollable area.
 -- @param trough_len Length of the scroll bar trough.
 -- @param pos Position of the thumb (or other arbitrary) position within the trough.
@@ -930,7 +930,7 @@ function commonScroll.getDocumentPosition(doc_len, trough_len, pos, thumb_len, v
 end
 
 
---- Get the scroll bar thumb position from the current scroll offset within the document.
+--- Gets the scroll bar thumb position from the current scroll offset within the document.
 -- @param scroll_pos Scroll offset of the viewport (left or top side) within the document, in the range of 0 to doc_len - thumb_len.
 function commonScroll.getThumbPosition(viewport_len, scroll_pos, doc_len, trough_len, thumb_len)
 	local doc_shortened = doc_len - viewport_len

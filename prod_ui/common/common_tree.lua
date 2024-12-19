@@ -93,11 +93,11 @@ function commonTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.page_jump_size, true)
+		self:movePrev(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.page_jump_size, true)
+		self:moveNext(self.MN_page_jump_size, true)
 		return true
 
 	elseif scancode == "left" then
