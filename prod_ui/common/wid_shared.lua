@@ -7,8 +7,8 @@ local widShared = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
+local commonMath = require(REQ_PATH .. "common_math")
 local eventHandlers = require(REQ_PATH .. "event_handlers")
-local intersect = require(REQ_PATH .. "intersect")
 
 
 -- A common dummy function for widgets.
@@ -257,8 +257,8 @@ function widShared.uiCapEvent_drag_mouseMoved(self, x, y, dx, dy, istouch)
 			local mouse_rel_y = self.context.mouse_y - a_y
 
 			-- 0.0 == left or top, 1.0 == bottom or right
-			local lerp_x = intersect.lerp(0, self.w, mouse_rel_x / self.w) / self.w
-			local lerp_y = intersect.lerp(0, self.h, mouse_rel_y / self.h) / self.h
+			local lerp_x = commonMath.lerp(0, self.w, mouse_rel_x / self.w) / self.w
+			local lerp_y = commonMath.lerp(0, self.h, mouse_rel_y / self.h) / self.h
 
 			self:wid_unmaximize()
 			self:reshape(true)

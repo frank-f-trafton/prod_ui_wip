@@ -15,7 +15,7 @@ local utf8 = require("utf8")
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
 local eventHandlers = require(REQ_PATH .. "common.event_handlers")
 local hoverLogic = require(REQ_PATH .. "common.hover_logic")
-local intersect = require(REQ_PATH .. "common.intersect")
+local commonMath = require(REQ_PATH .. "common.common_math")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
 local uiLoad = require(REQ_PATH .. "ui_load")
@@ -665,7 +665,7 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 		old_current_pressed:bubbleStatement("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
 
 		local old_x, old_y = old_current_pressed:getAbsolutePosition()
-		if intersect.pointToRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
+		if commonMath.pointToRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
 			old_current_pressed:bubbleStatement("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
 		end
 
