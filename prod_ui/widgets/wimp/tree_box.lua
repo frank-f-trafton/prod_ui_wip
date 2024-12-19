@@ -347,61 +347,43 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				mx = mx + self.scr_x
 				my = my + self.scr_y
 
-				-- Check for the cursor intersecting with a clickable item.
-				local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
-
-				-- Reset click-sequence if clicking on a different item.
-				if self.MN_mouse_clicked_item ~= item_t then
-					self.context:forceClickSequence(self, button, 1)
-				end
+				local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
 
 				if item_t and item_t.selectable then
 					local old_index = self.menu.index
 					local old_item = self.menu.items[old_index]
 
-					-- Buttons 1, 2 and 3 all select an item.
+					-- Button 1 selects an item only if the mouse didn't land on an expander sensor.
+					-- Buttons 2 and 3 always select an item.
 					-- Only button 1 updates the item mark state.
+
+					-- First, check for clicking on an expander sensor.
+					local clicked_expander = false
+					if button == 1 then
+						local skin = self.skin
+						local ex_x, ex_w = self.expander_x, self.expander_w
+						local it_x, it_w = item_t.x, item_t.w
+
+						if self.expanders_active
+						and #item_t.nodes > 0
+						and (skin.item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
+						or (skin.item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
+						then
+							item_t.expanded = not item_t.expanded
+							self:orderItems()
+							self:arrange()
+							self:cacheUpdate(true)
+
+							clicked_expander = true
+						end
+					end
+
 					if button <= 3 then
-						lgcMenu.widgetSelectItemByIndex(self, item_i)
-						self.MN_mouse_clicked_item = item_t
-
-						if button == 1 then
-							-- Check for clicking on an expander sensor.
-							local skin = self.skin
-							local ex_x, ex_w = self.expander_x, self.expander_w
-							local it_x, it_w = item_t.x, item_t.w
-
-							if self.expanders_active
-							and #item_t.nodes > 0
-							and (skin.item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
-							or (skin.item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
-							then
-								item_t.expanded = not item_t.expanded
-								self:orderItems()
-								self:arrange()
-								self:cacheUpdate(true)
-
-							elseif self.MN_mark_mode == "toggle" then
-								item_t.marked = not item_t.marked
-								self.MN_mark_state = item_t.marked
-
-							elseif self.MN_mark_mode == "cursor" then
-								local mods = self.context.key_mgr.mod
-
-								if mods["shift"] then
-									-- Unmark all items, then mark the range between the previous and current selections.
-									self.menu:clearAllMarkedItems()
-									lgcMenu.markItemsCursorMode(self, old_index)
-
-								elseif mods["ctrl"] then
-									item_t.marked = not item_t.marked
-									self.MN_mark_index = false
-
-								else
-									self.menu:clearAllMarkedItems()
-									item_t.marked = not item_t.marked
-									self.MN_mark_index = false
-								end
+						if not clicked_expander then
+							lgcMenu.widgetSelectItemByIndex(self, item_i)
+							self.MN_mouse_clicked_item = item_t
+							if button == 1 then
+								lgcMenu.pointerPressButton1(self)
 							end
 						end
 
@@ -410,9 +392,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						end
 					end
 
-					-- All Button 1 clicks initiate click-drag.
-					if button == 1 then
+					-- TODO: fix selections and marked items when items are no longer visible.
 
+					-- Button 1 clicks that did not land on the expander buttons initiate click-drag.
+					if button == 1 and not clicked_expander then
 						self.press_busy = "menu-drag"
 
 						-- Double-clicking Button 1 invokes action 1.

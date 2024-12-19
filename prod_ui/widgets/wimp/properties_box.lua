@@ -462,16 +462,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			local mx, my = self:getRelativePosition(x, y)
 
 			if widShared.pointInViewport(self, 2, mx, my) then
-				mx = mx + self.scr_x
-				my = my + self.scr_y
+				mx, my = mx + self.scr_x, my + self.scr_y
 
-				-- Check for the cursor intersecting with a clickable item.
-				local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
-
-				-- Reset click-sequence if clicking on a different item.
-				if self.MN_mouse_clicked_item ~= item_t then
-					self.context:forceClickSequence(self, button, 1)
-				end
+				local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
 
 				if item_t and item_t.selectable then
 					local old_index = self.menu.index
