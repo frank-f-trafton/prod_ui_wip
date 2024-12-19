@@ -120,7 +120,7 @@ function _mt_menu:findSelectableLanding(i, dir)
 		i = i + dir
 	until not item
 
-	-- return nil
+	-- Nothing is selectable.
 end
 
 
@@ -147,7 +147,7 @@ function _mt_menu:getDefaultSelection()
 		end
 	end
 
-	-- Nothing selectable.
+	-- Nothing is selectable.
 	return 0
 end
 
