@@ -374,14 +374,12 @@ end
 --- Get the widget's absolute position by adding the coordinates of itself with those of its ancestors.
 -- @return X, Y position in the state's space.
 function _mt_widget:getAbsolutePosition()
-	local x, y = self.x, self.y
-	local ancestor = self.parent
+	local x, y, wid = self.x, self.y, self.parent
 
-	while ancestor do
-		x = x + ancestor.x - ancestor.scr_x
-		y = y + ancestor.y - ancestor.scr_y
-
-		ancestor = ancestor.parent
+	while wid do
+		x = x + wid.x - wid.scr_x
+		y = y + wid.y - wid.scr_y
+		wid = wid.parent
 	end
 
 	return x, y
@@ -390,31 +388,28 @@ end
 
 --- Get a widget's position relative to a specific ancestor.
 -- @param ancestor A parent, grandparent, great-grandparent, etc., of this widget. This is required (it won't default to
--- the tree root) and it must be in the widget's lineage. As a result, this function cannot be used on a root widget.
+-- the tree root) and it must be in the widget's lineage. As a result, the root widget cannot use this method.
 -- @return X, Y position relative to the ancestor.
 function _mt_widget:getPositionInAncestor(ancestor)
-	local x, y = self.x, self.y
-	local middle_wid = self.parent -- ref to widgets between self and ancestor
+	local x, y, wid = self.x, self.y, self.parent
 
-	while middle_wid do
-		if middle_wid == ancestor then
+	while wid do
+		if wid == ancestor then
 			return x, y
 		end
 
-		x = x + middle_wid.x - middle_wid.scr_x
-		y = y + middle_wid.y - middle_wid.scr_y
+		x = x + wid.x - wid.scr_x
+		y = y + wid.y - wid.scr_y
 
-		middle_wid = middle_wid.parent
+		wid = wid.parent
 	end
 
 	error("ancestor not found in the widget's lineage.")
 end
 
 
---- Convenience wrapper for converting an absolute position to one that is relative to a widget's top-left corner.
---	This is frequently used to convert context-level mouse coordinates to widget-relative coords. The widget's
---	absolute position is also returned, since it has to be calculated to get the correct offsets. This does not
---	include scroll registers in the calculation.
+--- Converts an absolute position to one that is relative to a widget's top-left corner. Does not include the widget's
+--	scroll offsets. The widget's absolute position is returned as well.
 -- @param x The input absolute X position.
 -- @param y The input absolute Y position.
 -- @return X and Y positions relative to the widget's top-left, and the widget's absolute X and Y positions.
@@ -424,9 +419,14 @@ function _mt_widget:getRelativePosition(x, y)
 end
 
 
-function _mt_widget:pointInRect(x, y)
-	local w_x, w_y = self:getAbsolutePosition()
-	return x >= w_x and y >= w_y and x < w_x + self.w and y < w_y + self.h
+--- Converts an absolute position to one that is relative to a widget's top-left corner. Includes the widget's scroll
+--	offsets.The widget's absolute position is returned as well.
+-- @param x The input absolute X position.
+-- @param y The input absolute Y position.
+-- @return X and Y positions relative to the widget's top-left, with scrolling, and the widget's absolute X and Y positions.
+function _mt_widget:getRelativePositionScrolled(x, y)
+	local ax, ay = self:getAbsolutePosition()
+	return x - ax + self.scr_x, y - ay + self.scr_y, ax, ay
 end
 
 

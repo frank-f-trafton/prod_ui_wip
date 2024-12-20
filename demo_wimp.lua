@@ -7,6 +7,7 @@ print("Start WIMP Demo.")
 local demo_quick_launch = {
 	"plan_properties_box",
 	"plan_wimp_tree_box",
+	"plan_wimp_list_box",
 }
 
 

@@ -13,7 +13,7 @@ function commonMath.clamp(n, a, b) -- test
 end
 
 
-function commonMath.pointToRect(px, py, x1, y1, x2, y2)
+function commonMath.pointInRect(px, py, x1, y1, x2, y2)
 	return px >= x1 and py >= y1 and px < x2 and py < y2
 end
 

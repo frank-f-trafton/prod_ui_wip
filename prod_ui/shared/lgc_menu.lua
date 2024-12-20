@@ -69,9 +69,6 @@ function lgcMenu.instanceSetup(self, setup_mark, setup_drag_drop)
 	-- When "auto-off", dragging outside of any item box deselects.
 	self.MN_drag_select = false
 
-	-- Reorder the current selected item while dragging.
-	self.MN_drag_reorder = false
-
 	-- Note that some mark and drag settings are mutually incompatible. TODO: config methods.
 	-- Multi-Selection state.
 	if setup_mark then
@@ -820,8 +817,6 @@ end
 function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	-- Confirm 'self.press_busy == "menu-drag"' before calling.
 
-	-- MN_drag_reorder is incompatible with MN_drag_drop_mode, MN_drag_select, and the "toggle" and "cursor"
-	-- mark modes.
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
 	-- "cursor" mark mode overrides MN_drag_drop_mode when active (hold shift while clicking and dragging).
 	if self.MN_drag_drop_mode and self.MN_mark_mode ~= "toggle" and not self.MN_mark_index then
@@ -877,11 +872,6 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 					end
 
 					self:wid_select(item_t, item_i)
-
-				elseif self.MN_drag_reorder then
-					items[old_index], items[item_i] = item_t, old_item
-					self.menu.index = item_i
-					self:arrange()
 				end
 			end
 

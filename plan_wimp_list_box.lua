@@ -64,6 +64,23 @@ local function keyPressed_swapItems(self, key, scancode, isrepeat)
 end
 
 
+--[[
+elseif self.MN_drag_reorder then
+	items[old_index], items[item_i] = item_t, old_item
+	self.menu.index = item_i
+	self:arrange()
+--]]
+
+
+local function wid_droppedReorder(self, drop_state)
+	local from = drop_state.from
+	local item = drop_state.item
+
+	if self == from then
+
+	end
+end
+
 
 local function transferItem(item, from, to)
 	-- XXX: Need to work on a solution for transferring menu items between widgets.
@@ -78,7 +95,7 @@ local function transferItem(item, from, to)
 end
 
 
-local function wid_dropped(self, drop_state)
+local function wid_droppedTransfer(self, drop_state)
 	-- * Only accept drop events with ID "menu" from demo_listbox3a or demo_listbox3b.
 	-- * For this example, do not allow the ListBoxes to drop onto themselves.
 
@@ -131,7 +148,6 @@ local function makeListBox1(content, x, y)
 
 	list_box.MN_drag_scroll = true
 	list_box.MN_drag_select = true
-	--list_box.MN_drag_reorder = true
 	--list_box.MN_drag_drop_mode = true
 
 	list_box:setScrollBars(false, true)
@@ -428,7 +444,7 @@ local function makeListBox4(content, x, y)
 	lb1.MN_drag_select = true
 	--lb1.MN_drag_reorder = true
 	lb1.MN_drag_drop_mode = true
-	lb1.wid_dropped = wid_dropped
+	lb1.wid_dropped = wid_droppedTransfer
 
 	lb1:addItem("Drag (Left)")
 	lb1:addItem("A")
@@ -507,7 +523,7 @@ local function makeListBox4(content, x, y)
 	lb2.MN_drag_select = true
 	--lb2.MN_drag_reorder = true
 	lb2.MN_drag_drop_mode = true
-	lb2.wid_dropped = wid_dropped
+	lb2.wid_dropped = wid_droppedTransfer
 
 	lb2:addItem("Drag (right)")
 	lb2:addItem("E")
