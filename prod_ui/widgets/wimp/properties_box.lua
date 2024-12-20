@@ -149,7 +149,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		self:DeltaH(-32) -- XXX config
+		self:scrollDeltaH(-32) -- XXX config
 		return true
 
 	elseif scancode == "right" then

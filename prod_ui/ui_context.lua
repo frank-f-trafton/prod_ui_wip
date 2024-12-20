@@ -665,7 +665,7 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 		old_current_pressed:bubbleStatement("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
 
 		local old_x, old_y = old_current_pressed:getAbsolutePosition()
-		if commonMath.pointToRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
+		if commonMath.pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
 			old_current_pressed:bubbleStatement("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
 		end
 
