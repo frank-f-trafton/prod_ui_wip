@@ -25,7 +25,7 @@ function commonTree.instanceSetup(self)
 end
 
 
-local function setExpanded(self, item, exp)
+function commonTree.setExpanded(self, item, exp)
 	item.expanded = exp
 	self:orderItems()
 	self:arrange()
@@ -40,7 +40,7 @@ function commonTree.keyForward(self, dir)
 	and #item.nodes > 0
 	and not item.expanded
 	then
-		setExpanded(self, item, true)
+		commonTree.setExpanded(self, item, true)
 
 	elseif item and #item.nodes > 0 and item.expanded then
 		self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
@@ -60,7 +60,7 @@ function commonTree.keyBackward(self, dir)
 	and #item.nodes > 0
 	and item.expanded
 	then
-		setExpanded(self, item, false)
+		commonTree.setExpanded(self, item, false)
 
 	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
 		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
@@ -167,6 +167,10 @@ function commonTree.addNode(self, text, parent_node, tree_pos, bijou_id)
 	-- Nodes function as menu items.
 	local item = node
 
+	-- Is true when the node is visible as a menu item.
+	-- Needed to simplify the clearing of marks and the menu selection when unexpanding a node.
+	item.presented = false
+
 	item.selectable = true
 	item.marked = false -- multi-select
 
@@ -183,23 +187,66 @@ end
 
 local function _orderLoop(self, items, node)
 	if node.expanded then
-		for i, child_node in ipairs(node.nodes) do
-			items[#items + 1] = child_node
-			_orderLoop(self, items, child_node)
+		for i, child in ipairs(node.nodes) do
+			items[#items + 1] = child
+			child.presented = true
+			_orderLoop(self, items, child)
 		end
 	end
 end
 
 
+local function _unmarkLoop(self, node, _depth)
+	_depth = _depth or 1
+	for i, child in ipairs(node.nodes) do
+		if not child.presented then
+			child.marked = false
+		end
+		_unmarkLoop(self, child, _depth + 1)
+	end
+end
+
+
+local function _selectionLoop(self, node)
+	local menu = self.menu
+
+	while node do
+		if node.presented and node.selectable then
+			menu:setSelectedItem(node)
+			return
+		else
+			node = node.parent
+		end
+	end
+
+	menu:setSelectedIndex(0)
+end
+
+
 function commonTree.orderItems(self)
-	-- Clear the existing menu item layout.
-	local items = self.menu.items
+	local menu = self.menu
+	local items = menu.items
+
+	-- Note the current selected item, if any.
+	local item_sel = menu.items[menu.index]
+
+	-- Clear the existing menu layout.
 	for i = #items, 1, -1 do
+		items[i].presented = false
 		items[i] = nil
 	end
 
 	-- Repopulate the menu based on the tree order.
 	_orderLoop(self, items, self.tree)
+
+	-- Unmark any items that are now hidden from the menu.
+	_unmarkLoop(self, self.tree)
+
+	-- If the selected item is now hidden, find the next selectable ancestor, or select nothing if there is
+	-- no suitable candidate.
+	if item_sel and not item_sel.presented then
+		_selectionLoop(self, item_sel)
+	end
 end
 
 
@@ -217,6 +264,7 @@ local function _removeNode(self, node, depth)
 	end
 
 	local item = node.item
+	item.presented = nil
 	node.item = nil
 	local item_i = self.menu:getItemIndex(item)
 	table.remove(self.menu.items, item_i)
