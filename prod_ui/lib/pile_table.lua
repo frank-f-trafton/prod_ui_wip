@@ -65,8 +65,8 @@ end
 lang.err_i_empty = "table element at index 'i' is nil"
 lang.err_j_empty = "table element at index 'j' is nil"
 function M.moveElement(t, i, j)
-	if t[i] == nil then error(lang.err_i_empty) end
-	if t[j] == nil then error(lang.err_j_empty) end
+	if t[i] == nil then error(lang.err_i_empty)
+	elseif t[j] == nil then error(lang.err_j_empty) end
 
 	if i ~= j then
 		table.insert(t, j, table.remove(t, i))
@@ -75,8 +75,8 @@ end
 
 
 function M.swapElements(t, i, j)
-	if t[i] == nil then error(lang.err_i_empty) end
-	if t[j] == nil then error(lang.err_j_empty) end
+	if t[i] == nil then error(lang.err_i_empty)
+	elseif t[j] == nil then error(lang.err_j_empty) end
 
 	t[i], t[j] = t[j], t[i]
 end
