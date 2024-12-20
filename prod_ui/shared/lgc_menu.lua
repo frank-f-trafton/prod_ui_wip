@@ -182,63 +182,50 @@ function lgcMenu.widgetAutoRangeH(self)
 end
 
 
---- Get the first item in a range that intersects the point at (px,py). The item's 'selectable' state is not checked.
+--[[
+Implementations for 'wid:getItemAtPoint(px, py, first, last)'
+
+These methods get the first item in a range that intersects the point at (px, py). Variations are provided for
+checking only one axis, and to clamp to the first and last items.
+
+Some arguments may not be checked in certain variations, but should be supplied anyways for API compatibility.
+
+The functions do not check the item's 'selectable' state, and they assume that scroll bar intersection tests
+(if applicable) have already bee checked.
+
 -- @param items The 'client.menu.items' table.
 -- @param px X coordinate to check, relative to widget top-left.
 -- @param py Y coordinate to check, relative to widget top-left.
 -- @param first Index of the first item in the list to check.
 -- @param last Index of the last item in the list to check.
 -- @return The item index and table, if successful. Otherwise, returns nil.
+--]]
 function lgcMenu.widgetGetItemAtPoint(self, px, py, first, last)
-	-- NOTES:
-	-- * Does not check if the item is selectable or actionable.
-	-- * Assumes scroll bar intersect (if applicable) has been checked first.
-
 	local items = self.menu.items
-
 	for i = first, last do
 		local item = items[i]
-
-		if  px >= item.x and px < item.x + item.w and py >= item.y and py < item.y + item.h then
+		if px >= item.x and px < item.x + item.w and py >= item.y and py < item.y + item.h then
 			return i, item
 		end
 	end
-
-	-- return nil
 end
 
 
---- Like widgetGetItemAtPoint(), but checks only the vertical axis. Intended for vertically oriented menus.
--- @param items The 'client.menu.items' table.
--- @param px Unused. Included for compatibility with variant functions.
--- @param py Y coordinate to check, relative to widget top.
--- @param first Index of the first item in the list to check (ie 1).
--- @param last Index of the last item in the list to check (ie #items).
--- @return The item index and table, if successful. Otherwise, returns nil.
 function lgcMenu.widgetGetItemAtPointV(self, px, py, first, last)
-	-- See widgetGetItemAtPoint() for notes.
-
 	local items = self.menu.items
-
 	for i = first, last do
 		local item = items[i]
-
 		if py >= item.y and py < item.y + item.h then
 			return i, item
 		end
 	end
-
-	return nil
 end
 
 
---- Clamped version of widgetGetItemAtPointV(). Checks items at indices `1` and `#items` separately.
 function lgcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
-	-- See widgetGetItemAtPoint() for notes.
-
 	local items = self.menu.items
-
 	local i1, i2 = items[1], items[#items]
+
 	if i1 and py < i1.y + i1.h then
 		return 1, i1
 
@@ -248,37 +235,21 @@ function lgcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
 
 	for i = math.max(2, first), math.min(#items - 1, last) do
 		local item = items[i]
-
 		if py >= item.y and py < item.y + item.h then
 			return i, item
 		end
 	end
-
-	return nil
 end
 
 
---- Like widgetGetItemAtPoint(), but checks only the horizontal axis. Intended for horizontally oriented menus.
--- @param items The 'client.menu.items' table.
--- @param px X coordinate to check, relative to widget left.
--- @param py Unused. Included for compatibility with variant functions.
--- @param first Index of the first item in the list to check (ie 1).
--- @param last Index of the last item in the list to check (ie #items).
--- @return The item index and table, if successful. Otherwise, returns nil.
 function lgcMenu.widgetGetItemAtPointH(self, px, py, first, last)
-	-- See widgetGetItemAtPoint() for notes.
-
 	local items = self.menu.items
-
 	for i = first, last do
 		local item = items[i]
-
 		if px >= item.x and px < item.x + item.w then
 			return i, item
 		end
 	end
-
-	return nil
 end
 
 
@@ -879,6 +850,11 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 			self.MN_item_hover = false
 		end
 	end
+end
+
+
+function lgcMenu.getHoveredItem(self, mx, my)
+
 end
 
 
