@@ -348,7 +348,8 @@ local function makeListBox2(content, x, y)
 
 	list_box.MN_drag_scroll = true
 	--list_box.MN_drag_select = true
-	--list_box.MN_drag_drop_mode = true
+	list_box.MN_drag_drop_mode = true
+	list_box.wid_dropped = wid_droppedReorder
 
 	list_box:setScrollBars(false, true)
 
