@@ -1,4 +1,4 @@
--- PILE Table Helpers v1.1.4
+-- PILE Table Helpers v1.1.5 (prerelease, needs testing)
 -- (C) 2024 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -7,9 +7,7 @@
 local M = {}
 
 
-M.lang = {
-	err_dupe = "duplicate values in source table"
-}
+M.lang = {}
 local lang = M.lang
 
 
@@ -51,6 +49,7 @@ function M.makeLUT(t)
 end
 
 
+lang.err_dupe = "duplicate values in source table"
 function M.invertLUT(t)
 	local lut = {}
 	for k, v in pairs(t) do
@@ -60,6 +59,26 @@ function M.invertLUT(t)
 		lut[v] = k
 	end
 	return lut
+end
+
+
+lang.err_i_empty = "table element at index 'i' is nil"
+lang.err_j_empty = "table element at index 'j' is nil"
+function M.moveElement(t, i, j)
+	if t[i] == nil then error(lang.err_i_empty) end
+	if t[j] == nil then error(lang.err_j_empty) end
+
+	if i ~= j then
+		table.insert(t, j, table.remove(t, i))
+	end
+end
+
+
+function M.swapElements(t, i, j)
+	if t[i] == nil then error(lang.err_i_empty) end
+	if t[j] == nil then error(lang.err_j_empty) end
+
+	t[i], t[j] = t[j], t[i]
 end
 
 
