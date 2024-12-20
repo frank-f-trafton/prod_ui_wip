@@ -409,7 +409,7 @@ end
 
 
 --- Converts an absolute position to one that is relative to a widget's top-left corner. Does not include the widget's
---	scroll offsets. The widget's absolute position is returned as well.
+--	scroll offsets. Also returns the widget's absolute position.
 -- @param x The input absolute X position.
 -- @param y The input absolute Y position.
 -- @return X and Y positions relative to the widget's top-left, and the widget's absolute X and Y positions.
@@ -420,7 +420,7 @@ end
 
 
 --- Converts an absolute position to one that is relative to a widget's top-left corner. Includes the widget's scroll
---	offsets.The widget's absolute position is returned as well.
+--	offsets. Also returns the widget's absolute position.
 -- @param x The input absolute X position.
 -- @param y The input absolute Y position.
 -- @return X and Y positions relative to the widget's top-left, with scrolling, and the widget's absolute X and Y positions.
