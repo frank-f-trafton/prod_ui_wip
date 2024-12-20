@@ -198,11 +198,11 @@ function plan.make(parent)
 		local chk = content:addChild("barebones/checkbox")
 		chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 		chk:setLabel("Expanders enabled")
-		chk:setChecked(tree_box.expanders_active)
+		chk:setChecked(tree_box.TR_expanders_active)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.expanders_active = not not self.checked
+				tb.TR_expanders_active = not not self.checked
 				_refreshTreeBox(tb)
 			end
 		end
