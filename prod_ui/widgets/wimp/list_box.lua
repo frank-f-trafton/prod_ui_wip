@@ -419,8 +419,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if not self.press_busy
 		and widShared.pointInViewport(self, 2, mx, my)
 		then
-			mx = mx + self.scr_x
-			my = my + self.scr_y
+			mx, my = mx + self.scr_x, my + self.scr_y
 
 			local menu = self.menu
 

@@ -188,17 +188,18 @@ Implementations for 'wid:getItemAtPoint(px, py, first, last)'
 These methods get the first item in a range that intersects the point at (px, py). Variations are provided for
 checking only one axis, and to clamp to the first and last items.
 
-Some arguments may not be checked in certain variations, but should be supplied anyways for API compatibility.
+Some arguments may not be checked in certain variations, but they should be supplied anyways for API compatibility.
 
 The functions do not check the item's 'selectable' state, and they assume that scroll bar intersection tests
-(if applicable) have already bee checked.
+(if applicable) have already been checked.
 
 -- @param items The 'client.menu.items' table.
--- @param px X coordinate to check, relative to widget top-left.
--- @param py Y coordinate to check, relative to widget top-left.
+-- @param px X position (relative to widget, with scroll offset).
+-- @param py Y position (relative to widget, with scroll offset).
 -- @param first Index of the first item in the list to check.
 -- @param last Index of the last item in the list to check.
--- @return The item index and table, if successful. Otherwise, returns nil.
+-- @return If successful: the item index and table, and a number indicating if clamping occurred (-1, 1 or nil).
+--	If not successful: nil.
 --]]
 function lgcMenu.widgetGetItemAtPoint(self, px, py, first, last)
 	local items = self.menu.items
@@ -227,10 +228,10 @@ function lgcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
 	local i1, i2 = items[1], items[#items]
 
 	if i1 and py < i1.y + i1.h then
-		return 1, i1
+		return 1, i1, -1
 
 	elseif i2 and py >= i2.y then
-		return #items, i2
+		return #items, i2, 1
 	end
 
 	for i = math.max(2, first), math.min(#items - 1, last) do
@@ -254,8 +255,8 @@ end
 
 
 --- Call the getItemAtPoint method, and if a selectable item is found, select it, update scrolling, etc.
--- @param x Mouse X position, relative to widget top-left.
--- @param y Mouse Y position, relative to widget top-left.
+-- @param x X position (relative to widget, with scroll offset).
+-- @param y Y position (relative to widget, with scroll offset).
 function lgcMenu.widgetTrySelectItemAtPoint(self, x, y, first, last)
 	-- Prerequisites: widget must have a 'getItemAtPoint()' method assigned.
 
@@ -850,11 +851,6 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 			self.MN_item_hover = false
 		end
 	end
-end
-
-
-function lgcMenu.getHoveredItem(self, mx, my)
-
 end
 
 

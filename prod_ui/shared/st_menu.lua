@@ -33,6 +33,7 @@ local stMenu = {}
 
 
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
+local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
@@ -456,6 +457,17 @@ function _mt_menu:countMarkedItems()
 
 	return c
 end
+
+
+function _mt_menu:moveItem(i, j)
+	pileTable.moveElement(self.items, i, j)
+end
+
+
+function _mt_menu:swapItems(i, j)
+	pileTable.swapElements(self.items, i, j)
+end
+
 
 
 return stMenu

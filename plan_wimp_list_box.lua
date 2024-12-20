@@ -33,18 +33,6 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 end
 
 
-local function swapItems(menu, index_1, index_2)
-	local items = menu.items
-
-	if index_1 < 1 or index_1 > #items or index_2 < 1 or index_2 > #items then
-		return false
-	end
-
-	items[index_1], items[index_2] = items[index_2], items[index_1]
-	return true
-end
-
-
 local function keyPressed_swapItems(self, key, scancode, isrepeat)
 	local mods = self.context.key_mgr.mod
 	local menu = self.menu
@@ -53,7 +41,7 @@ local function keyPressed_swapItems(self, key, scancode, isrepeat)
 		local dest_i = (key == "up") and menu.index - 1 or (key == "down") and menu.index + 1 or nil
 		if dest_i and dest_i >= 1 and dest_i <= #menu.items then
 			if menu:canSelect(dest_i) and menu:canSelect(menu.index) then
-				swapItems(menu, menu.index, dest_i)
+				menu:swapItems(menu.index, dest_i)
 				menu:setSelectedIndex(dest_i)
 				self:arrange()
 
@@ -64,20 +52,35 @@ local function keyPressed_swapItems(self, key, scancode, isrepeat)
 end
 
 
---[[
-elseif self.MN_drag_reorder then
-	items[old_index], items[item_i] = item_t, old_item
-	self.menu.index = item_i
-	self:arrange()
---]]
-
-
 local function wid_droppedReorder(self, drop_state)
-	local from = drop_state.from
-	local item = drop_state.item
+	if drop_state.id == "menu" then
+		local from = drop_state.from
+		local item = drop_state.item
+		local menu = self.menu
 
-	if self == from then
+		if from and self == from and #menu.items > 1 and menu:hasItem(item) then
+			local mx, my = self:getRelativePositionScrolled(self.context.mouse_x, self.context.mouse_y)
+			local old_i = menu:getItemIndex(item)
+			local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.menu.items)
 
+			-- Dropped item on itself: nothing to do
+			if old_i == overlap_i then
+				return
+
+			-- Dropped after the last item (if clamping), or on no item (if not clamping): move item to the end
+			elseif not overlap_i or clamped == 1 then
+				table.remove(menu, old_i)
+				table.insert(menu, item)
+				menu:moveItem(overlap_i, old_i)
+
+			-- Dropped on an item
+			else
+				menu:moveItem(overlap_i, old_i)
+				--menu:swapItems(overlap_i, old_i)
+			end
+			menu.index = overlap_i
+			self:arrange()
+		end
 	end
 end
 
@@ -334,7 +337,6 @@ local function makeListBox2(content, x, y)
 
 	list_box.MN_drag_scroll = true
 	--list_box.MN_drag_select = true
-	list_box.MN_drag_reorder = true
 	--list_box.MN_drag_drop_mode = true
 
 	list_box:setScrollBars(false, true)
@@ -374,7 +376,6 @@ local function makeListBox3(content, x, y)
 
 	lb1.MN_drag_scroll = true
 	lb1.MN_drag_select = true
-	--lb1.MN_drag_reorder = true
 	--lb1.MN_drag_drop_mode = true
 
 	lb1:addItem("One (Mark test (Toggle))")
@@ -407,7 +408,6 @@ local function makeListBox3(content, x, y)
 
 	lb2.MN_drag_scroll = true
 	lb2.MN_drag_select = true
-	--lb2.MN_drag_reorder = true
 	--lb2.MN_drag_drop_mode = true
 
 	lb2:addItem("One (Shift/Ctrl+Click)")
@@ -442,7 +442,6 @@ local function makeListBox4(content, x, y)
 
 	lb1.MN_drag_scroll = true
 	lb1.MN_drag_select = true
-	--lb1.MN_drag_reorder = true
 	lb1.MN_drag_drop_mode = true
 	lb1.wid_dropped = wid_droppedTransfer
 
@@ -521,7 +520,6 @@ local function makeListBox4(content, x, y)
 
 	lb2.MN_drag_scroll = true
 	lb2.MN_drag_select = true
-	--lb2.MN_drag_reorder = true
 	lb2.MN_drag_drop_mode = true
 	lb2.wid_dropped = wid_droppedTransfer
 
