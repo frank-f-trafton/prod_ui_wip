@@ -2,6 +2,14 @@ require("lib.test.strict")
 
 print("Start WIMP Demo.")
 
+
+-- Plans to launch upon starting the demo.
+local demo_quick_launch = {
+	"plan_properties_box",
+	"plan_wimp_tree_box",
+}
+
+
 -- Setting up a ProdUI project:
 
 --[[
@@ -272,19 +280,11 @@ do
 	-- [[
 	do
 		local fr_demo_select = _launchSelector(wimp_root)
-		-- Auto-launch frames here:
-		--fr_demo_select:launch("plan_demo_main")
-		--[[
-		do
-			local frame = fr_demo_select:launch("plan_wimp_widget_tree")
-			frame.x = 64
-			frame.y = 64
-		end
-		--]]
-		do
-			local frame = fr_demo_select:launch("plan_properties_box")
-			frame.x = 64
-			frame.y = 64
+		-- Quick-launch frames here:
+		for i, str in ipairs(demo_quick_launch) do
+			local frame = fr_demo_select:launch(str)
+			frame.x = 64 + (i-1) * 32
+			frame.y = 64 + (i-1) * 32
 		end
 	end
 	--]]
