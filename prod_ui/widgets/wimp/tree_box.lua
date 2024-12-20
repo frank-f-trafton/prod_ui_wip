@@ -367,10 +367,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						and (skin.item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
 						or (skin.item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
 						then
-							item_t.expanded = not item_t.expanded
-							self:orderItems()
-							self:arrange()
-							self:cacheUpdate(true)
+							commonTree.setExpanded(self, item_t, not item_t.expanded)
 
 							clicked_expander = true
 						end

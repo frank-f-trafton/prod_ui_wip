@@ -329,6 +329,15 @@ function _mt_menu:setSelectedIndex(index, id)
 end
 
 
+--- Sets the menu selection by item table; a wrapper for getItemIndex() and setSelectedIndex().
+-- @param item_t The item table to select. It must be present in the menu items array.
+-- @param id ("index") Specify an alternative table key, if applicable.
+function _mt_menu:setSelectedItem(item_t, id)
+	local item_i = self:getItemIndex(item_t)
+	self:setSelectedIndex(item_i, id)
+end
+
+
 --- Sets the current menu selection to the default.
 function _mt_menu:setDefaultSelection(id)
 	local i, tbl = self:getDefaultSelection()

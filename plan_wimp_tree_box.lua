@@ -105,7 +105,7 @@ function plan.make(parent)
 		tree_box:arrange()
 
 		-- test marked item cleanup when toggling expanders
-		tree_box.MN_mark_mode = "toggle"
+		--tree_box.MN_mark_mode = "toggle"
 
 		local wx, wy, ww, wh = 256, 0, 256, 32
 
