@@ -25,46 +25,48 @@ function commonTree.instanceSetup(self)
 end
 
 
-
-function commonTree.keyForward(self)
-	local item = self.menu.items[self.menu.index]
-	if item
-	and self.TR_expanders_active
-	and #item.nodes > 0
-	and item.expanded
-	then
-		item.expanded = not item.expanded
-		self:orderItems()
-		self:arrange()
-		self:cacheUpdate(true)
-
-	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
-		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
-
-	else
-		self:scrollDeltaH(-32) -- XXX config
-	end
-	return true
+local function setExpanded(self, item, exp)
+	item.expanded = exp
+	self:orderItems()
+	self:arrange()
+	self:cacheUpdate(true)
 end
 
 
-function commonTree.keyBackward(self)
+function commonTree.keyForward(self, dir)
 	local item = self.menu.items[self.menu.index]
 	if item
 	and self.TR_expanders_active
 	and #item.nodes > 0
 	and not item.expanded
 	then
-		item.expanded = not item.expanded -- XXX: wrap into a local function
-		self:orderItems()
-		self:arrange()
-		self:cacheUpdate(true)
+		setExpanded(self, item, true)
 
 	elseif item and #item.nodes > 0 and item.expanded then
 		self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
 
 	else
-		self:scrollDeltaH(32) -- XXX config
+		self:scrollDeltaH(32 * dir) -- XXX config
+	end
+	return true
+end
+
+
+function commonTree.keyBackward(self, dir)
+	local item = self.menu.items[self.menu.index]
+
+	if item
+	and self.TR_expanders_active
+	and #item.nodes > 0
+	and item.expanded
+	then
+		setExpanded(self, item, false)
+
+	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
+		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
+
+	else
+		self:scrollDeltaH(32 * dir) -- XXX config
 	end
 	return true
 end
@@ -101,12 +103,12 @@ function commonTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		return self.skin.item_align_h == "left" and commonTree.keyForward(self)
-			or self.skin.item_align_h == "right" and commonTree.keyBackward(self)
+		return self.skin.item_align_h == "left" and commonTree.keyBackward(self, -1)
+			or self.skin.item_align_h == "right" and commonTree.keyForward(self, -1)
 
 	elseif scancode == "right" then
-		return self.skin.item_align_h == "left" and commonTree.keyBackward(self)
-			or self.skin.item_align_h == "right" and commonTree.keyForward(self)
+		return self.skin.item_align_h == "left" and commonTree.keyForward(self, 1)
+			or self.skin.item_align_h == "right" and commonTree.keyBackward(self, 1)
 	end
 end
 

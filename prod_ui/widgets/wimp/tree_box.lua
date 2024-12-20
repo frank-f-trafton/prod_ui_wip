@@ -230,7 +230,7 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w = math.max(self.doc_w, self.vp_w)
 
 		-- Get component widths.
-		self.TR_expander_w = self.expanders_active and skin.first_col_spacing or 0
+		self.TR_expander_w = self.TR_expanders_active and skin.first_col_spacing or 0
 		self.TR_icon_w = self.TR_show_icons and skin.icon_spacing or 0
 
 		-- Get component left positions. (These numbers assume left alignment, and are
@@ -362,7 +362,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						local ex_x, ex_w = self.TR_expander_x, self.TR_expander_w
 						local it_x, it_w = item_t.x, item_t.w
 
-						if self.expanders_active
+						if self.TR_expanders_active
 						and #item_t.nodes > 0
 						and (skin.item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
 						or (skin.item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
@@ -616,7 +616,7 @@ def.skinners = {
 					end
 					-- draw the final pipe if there is no expander sensor in the way
 					-- [[
-					if not self.expanders_active or #item.nodes == 0 then
+					if not self.TR_expanders_active or #item.nodes == 0 then
 						uiGraphics.quadXYWH(tq_px,
 							line_x_offset + skin.indent * item.depth * dir_h,
 							item.y,
@@ -698,7 +698,7 @@ def.skinners = {
 			love.graphics.setColor(rr, gg, bb, aa)
 
 			-- 2: Expander sensors, if enabled.
-			if self.expanders_active then
+			if self.TR_expanders_active then
 				local tq_on = skin.tq_expander_down
 				local tq_off = (skin.item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
 
