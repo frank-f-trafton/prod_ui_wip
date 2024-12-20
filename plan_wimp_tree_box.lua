@@ -104,6 +104,8 @@ function plan.make(parent)
 		tree_box:orderItems()
 		tree_box:arrange()
 
+		-- test marked item cleanup when toggling expanders
+		tree_box.MN_mark_mode = "toggle"
 
 		local wx, wy, ww, wh = 256, 0, 256, 32
 
@@ -182,11 +184,11 @@ function plan.make(parent)
 		local chk = content:addChild("barebones/checkbox")
 		chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 		chk:setLabel("Draw icons")
-		chk:setChecked(tree_box.show_icons)
+		chk:setChecked(tree_box.TR_show_icons)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.show_icons = not not self.checked
+				tb.TR_show_icons = not not self.checked
 				_refreshTreeBox(tb)
 			end
 		end

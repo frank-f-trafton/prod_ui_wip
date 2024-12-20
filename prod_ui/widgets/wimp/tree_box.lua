@@ -230,19 +230,19 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w = math.max(self.doc_w, self.vp_w)
 
 		-- Get component widths.
-		self.expander_w = self.expanders_active and skin.first_col_spacing or 0
-		self.icon_w = self.show_icons and skin.icon_spacing or 0
+		self.TR_expander_w = self.expanders_active and skin.first_col_spacing or 0
+		self.TR_icon_w = self.TR_show_icons and skin.icon_spacing or 0
 
 		-- Get component left positions. (These numbers assume left alignment, and are
 		-- adjusted at render time for right alignment.)
 		local xx = 0
-		self.expander_x = xx
-		xx = self.expander_x + skin.first_col_spacing
+		self.TR_expander_x = xx
+		xx = self.TR_expander_x + skin.first_col_spacing
 
-		self.icon_x = xx
-		xx = xx + self.icon_w
+		self.TR_icon_x = xx
+		xx = xx + self.TR_icon_w
 
-		self.text_x = xx
+		self.TR_text_x = xx
 	end
 
 	-- Set the draw ranges for items.
@@ -359,7 +359,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					local clicked_expander = false
 					if button == 1 then
 						local skin = self.skin
-						local ex_x, ex_w = self.expander_x, self.expander_w
+						local ex_x, ex_w = self.TR_expander_x, self.TR_expander_w
 						local it_x, it_w = item_t.x, item_t.w
 
 						if self.expanders_active
@@ -710,12 +710,12 @@ def.skinners = {
 						if tq_expander then
 							local item_x
 							if skin.item_align_h == "left" then
-								item_x = item.x + self.expander_x
+								item_x = item.x + self.TR_expander_x
 							else -- "right"
-								item_x = item.x + item.w - self.expander_x - self.expander_w
+								item_x = item.x + item.w - self.TR_expander_x - self.TR_expander_w
 							end
 
-							uiGraphics.quadShrinkOrCenterXYWH(tq_expander, item_x, item.y, self.expander_w, item.h)
+							uiGraphics.quadShrinkOrCenterXYWH(tq_expander, item_x, item.y, self.TR_expander_w, item.h)
 						end
 					end
 				end
@@ -723,19 +723,19 @@ def.skinners = {
 
 
 			-- 3: Bijou icons, if enabled
-			if self.show_icons then
+			if self.TR_show_icons then
 				for i = first, last do
 					local item = items[i]
 					local tq_bijou = item.tq_bijou
 					if tq_bijou then
 						local item_x
 						if skin.item_align_h == "left" then
-							item_x = item.x + self.icon_x
+							item_x = item.x + self.TR_icon_x
 						else -- "right"
-							item_x = item.x + item.w - self.icon_x - self.icon_w
+							item_x = item.x + item.w - self.TR_icon_x - self.TR_icon_w
 						end
 
-						uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item_x, item.y, self.icon_w, item.h)
+						uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item_x, item.y, self.TR_icon_w, item.h)
 					end
 				end
 			end
@@ -757,9 +757,9 @@ def.skinners = {
 				if item.text then
 					local item_x
 					if skin.item_align_h == "left" then
-						item_x = item.x + self.text_x
+						item_x = item.x + self.TR_text_x
 					else -- "right"
-						item_x = item.x + item.w - self.text_x - font:getWidth(item.text)
+						item_x = item.x + item.w - self.TR_text_x - font:getWidth(item.text)
 						-- XXX: Maybe cache text width in each item table?
 					end
 					love.graphics.print(
