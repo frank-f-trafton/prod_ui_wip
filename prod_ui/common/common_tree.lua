@@ -242,10 +242,15 @@ function commonTree.orderItems(self)
 	-- Unmark any items that are now hidden from the menu.
 	_unmarkLoop(self, self.tree)
 
-	-- If the selected item is now hidden, find the next selectable ancestor, or select nothing if there is
-	-- no suitable candidate.
-	if item_sel and not item_sel.presented then
-		_selectionLoop(self, item_sel)
+	-- Fix the selected item.
+	if item_sel then
+		-- If the item is still visible, update the selected index.
+		-- If not, find the next selectable ancestor, or select nothing if there is no suitable candidate.
+		if item_sel.presented then
+			menu:setSelectedItem(item_sel)
+		else
+			_selectionLoop(self, item_sel)
+		end
 	end
 end
 
