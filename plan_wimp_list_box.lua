@@ -52,43 +52,10 @@ local function keyPressed_swapItems(self, key, scancode, isrepeat)
 end
 
 
-local function wid_droppedReorder(self, drop_state)
-	if drop_state.id == "menu" then
-		local from = drop_state.from
-		local item = drop_state.item
-		local menu = self.menu
-
-		if from and self == from and #menu.items > 1 and menu:hasItem(item) then
-			local mx, my = self:getRelativePositionScrolled(self.context.mouse_x, self.context.mouse_y)
-			local old_i = menu:getItemIndex(item)
-			local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.menu.items)
-
-			-- Dropped item on itself: nothing to do
-			if old_i == overlap_i then
-				return
-
-			-- Dropped after the last item (if clamping), or on no item (if not clamping): move item to the end
-			elseif not overlap_i or clamped == 1 then
-				table.remove(menu, old_i)
-				table.insert(menu, item)
-				menu:moveItem(overlap_i, old_i)
-
-			-- Dropped on an item
-			else
-				menu:moveItem(overlap_i, old_i)
-				--menu:swapItems(overlap_i, old_i)
-			end
-			menu.index = overlap_i
-			self:arrange()
-		end
-	end
-end
-
-
-local function transferItem(item, from, to)
+local function transferItem(item, from, to, i)
 	-- XXX: Need to work on a solution for transferring menu items between widgets.
 	-- As written, this won't preserve additional user data tied to the item.
-	local new_item = to:addItem(item.text, nil, item.bijou_id)
+	local new_item = to:addItem(item.text, i, item.bijou_id)
 
 	from:removeItem(item)
 	to:setSelection(new_item)
@@ -98,23 +65,67 @@ local function transferItem(item, from, to)
 end
 
 
+local function getDropPoint(self)
+	local mx, my = self:getRelativePositionScrolled(self.context.mouse_x, self.context.mouse_y)
+	local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.menu.items)
+	return overlap_i, overlap_t, clamped
+end
+
+
+local function wid_droppedReorder(self, drop_state)
+	if drop_state.id == "menu" then
+		local from = drop_state.from
+		local item = drop_state.item
+		local menu = self.menu
+
+		if self == from and #menu.items > 1 and menu:hasItem(item) then
+			local overlap_i, overlap_t, clamped = getDropPoint(self)
+			local old_i = menu:getItemIndex(item)
+
+			-- Dropped item on itself: nothing to do
+			if old_i == overlap_i then
+				return true
+
+			-- Dropped after the last item (if clamping), or on no item (if not clamping): move item to the end
+			elseif not overlap_i or clamped == 1 then
+				menu:moveItem(old_i, #menu.items)
+				--menu:swapItems(old_i, #menu.items)
+
+			-- Dropped on an item
+			else
+				menu:moveItem(old_i, overlap_i)
+				--menu:swapItems(old_i, overlap_i)
+			end
+			menu.index = overlap_i
+			self:arrange()
+			return true
+		end
+	end
+end
+
+
 local function wid_droppedTransfer(self, drop_state)
 	-- * Only accept drop events with ID "menu" from demo_listbox3a or demo_listbox3b.
 	-- * For this example, do not allow the ListBoxes to drop onto themselves.
 
-	local from = drop_state.from
-	local item = drop_state.item
+	if self == drop_state.from then
+		return wid_droppedReorder(self, drop_state)
+	else
+		local from = drop_state.from
+		local item = drop_state.item
 
-	if drop_state.id == "menu"
-	and from
-	and self ~= from
-	and (self.tag == "demo_listbox4a" or self.tag == "demo_listbox4b")
-	and (from.tag == "demo_listbox4a" or from.tag == "demo_listbox4b")
-	and from.menu:hasItem(item)
-	then
-		transferItem(item, from, self)
+		if drop_state.id == "menu"
+		and from
+		and self ~= from
+		and (self.tag == "demo_listbox4a" or self.tag == "demo_listbox4b")
+		and (from.tag == "demo_listbox4a" or from.tag == "demo_listbox4b")
+		and from.menu:hasItem(item)
+		then
+			local overlap_i, overlap_t, clamped = getDropPoint(self)
+			transferItem(item, from, self, overlap_i)
 
-		return true
+			return true
+		end
 	end
 end
 
@@ -472,7 +483,7 @@ local function makeListBox4(content, x, y)
 		if l1 and l2 then
 			local item = l1.menu.items[l1.menu.index]
 			if item then
-				transferItem(item, l1, l2)
+				transferItem(item, l1, l2, nil)
 			end
 		end
 	end
@@ -495,7 +506,7 @@ local function makeListBox4(content, x, y)
 		if l1 and l2 then
 			local item = l2.menu.items[l2.menu.index]
 			if item then
-				transferItem(item, l2, l1)
+				transferItem(item, l2, l1, nil)
 			end
 		end
 	end
