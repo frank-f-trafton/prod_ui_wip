@@ -1009,12 +1009,6 @@ function widShared.resetViewport(self, v)
 end
 
 
---- Point-in-rectangle test.
-function widShared.pointInRect(self, px, py, rx, ry, rw, rh)
-	return px >= rx and px < rx + rw and py >= ry and py < ry + rh
-end
-
-
 --- Assigns minimum and maximum dimension fields. Usage depends on the widget. (See:
 --  widShared.enforceLimitedDimensions().)
 function widShared.setupMinMaxDimensions(self)

@@ -9,6 +9,7 @@ local context = select(1, ...)
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
@@ -198,7 +199,7 @@ end
 
 
 function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
-	-- DropState cleanup.
+	-- DropState cleanup
 	self.drop_state = false
 end
 
@@ -587,8 +588,9 @@ end
 
 
 function def:rootCall_setDragAndDropState(inst, drop_state)
-	print("hello?")
-	-- XXX: Assertions
+	uiShared.type(1, inst, "table")
+	uiShared.type(2, drop_state, "table")
+
 	self.drop_state = drop_state
 end
 

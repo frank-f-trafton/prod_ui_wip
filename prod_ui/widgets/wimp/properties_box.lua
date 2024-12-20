@@ -426,9 +426,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
-				if self.MN_item_hover ~= item then
-					self.MN_item_hover = item
-				end
+				self.MN_item_hover = item
 
 				hover_ok = true
 			end
