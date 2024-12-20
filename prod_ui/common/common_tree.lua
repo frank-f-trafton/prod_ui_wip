@@ -8,20 +8,20 @@ local commonTree = {}
 function commonTree.instanceSetup(self)
 	-- When true, allows the user to expand and compress items with child items (click the icon or
 	-- press left/right arrow keys).
-	self.expanders_active = false
+	self.TR_expanders_active = false
 
 	-- Shows item icons.
-	self.show_icons = false
+	self.TR_show_icons = false
 
 	-- X positions and widths of components within menu items.
 	-- The X positions are reversed when right alignment is used.
-	self.expander_x = 0
-	self.expander_w = 0
+	self.TR_expander_x = 0
+	self.TR_expander_w = 0
 
-	self.icon_x = 0
-	self.icon_w = 0
+	self.TR_icon_x = 0
+	self.TR_icon_w = 0
 
-	self.text_x = 0
+	self.TR_text_x = 0
 end
 
 
@@ -29,7 +29,7 @@ end
 function commonTree.keyForward(self)
 	local item = self.menu.items[self.menu.index]
 	if item
-	and self.expanders_active
+	and self.TR_expanders_active
 	and #item.nodes > 0
 	and item.expanded
 	then
@@ -51,7 +51,7 @@ end
 function commonTree.keyBackward(self)
 	local item = self.menu.items[self.menu.index]
 	if item
-	and self.expanders_active
+	and self.TR_expanders_active
 	and #item.nodes > 0
 	and not item.expanded
 	then
@@ -119,7 +119,7 @@ function commonTree.updateItemDimensions(self, skin, item)
 
 	local font = skin.font
 
-	item.w = font:getWidth(item.text) + self.icon_w + skin.first_col_spacing
+	item.w = font:getWidth(item.text) + self.TR_icon_w + skin.first_col_spacing
 	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
 end
 
@@ -135,7 +135,7 @@ end
 
 
 function commonTree.setIconsEnabled(self, enabled)
-	self.show_icons = not not enabled
+	self.TR_show_icons = not not enabled
 
 	self:cacheUpdate(true)
 	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
@@ -143,7 +143,7 @@ end
 
 
 function commonTree.setExpandersActive(self, active)
-	self.expanders_active = not not active
+	self.TR_expanders_active = not not active
 
 	self:cacheUpdate(true)
 	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
