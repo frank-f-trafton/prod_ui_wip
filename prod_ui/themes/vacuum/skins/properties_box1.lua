@@ -11,6 +11,8 @@ return {
 	["*font"] = "fonts/p",
 	["*data_icon"] = "style/icons/p",
 
+	["$sash_w"] = 12,
+
 	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 	["$item_pad_v"] = 2,
 

@@ -236,8 +236,7 @@ function def:uiCall_create(inst)
 		self.clip_hover = false
 		self.clip_scissor = true
 
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
+		widShared.setupViewports(self, 2)
 
 		widShared.setupScroll(self)
 		widShared.setupDoc(self)

@@ -365,12 +365,9 @@ function def:uiCall_create(inst)
 		self.allow_hover = true
 		self.can_have_thimble = true
 
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
-		widShared.setupViewport(self, 3)
-
 		widShared.setupScroll(self)
 		widShared.setupDoc(self)
+		widShared.setupViewports(self, 3)
 
 		lgcInputS.setupInstance(self)
 

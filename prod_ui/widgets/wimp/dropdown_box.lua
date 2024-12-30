@@ -209,8 +209,7 @@ function def:uiCall_create(inst)
 		self.allow_hover = true
 		self.can_have_thimble = true
 
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
+		widShared.setupViewports(self, 2)
 
 		-- -> lgcMenu.instanceSetup(self)
 		self.MN_page_jump_size = 4

@@ -12,9 +12,7 @@ local eventHandlers = require(REQ_PATH .. "event_handlers")
 
 
 -- A common dummy function for widgets.
-function widShared.dummy()
-	-- n/a
-end
+function widShared.dummy() end
 
 
 -- Viewport key lookup.
@@ -493,6 +491,7 @@ end
 
 --- Viewport scroll clamping for containers and other widgets which have embedded scroll bars.
 function widShared.scrollClampViewport(self)
+	print(self.id) -- debug
 	self.scr_fx = math.max(-self.vp_x, math.min(self.scr_fx, -self.vp_x + self.doc_w - self.vp_w))
 	self.scr_fy = math.max(-self.vp_y, math.min(self.scr_fy, -self.vp_y + self.doc_h - self.vp_h))
 
@@ -950,23 +949,22 @@ end
 -- @param self The widget to set up.
 -- @return Nothing.
 function widShared.setupDoc(self)
-	self.doc_w = 0
-	self.doc_h = 0
+	self.doc_w, self.doc_h = 0, 0
 end
 
 
 --- Assigns viewport fields to a widget.
 -- @param self The widget.
--- @param v Index of the viewport fields to assign.
-function widShared.setupViewport(self, v)
-	v = vp_keys[v]
-
-	self[v.x] = 0
-	self[v.y] = 0
-	self[v.w] = 0
-	self[v.h] = 0
+-- @param n The number of viewports to assign, from 1 to `n`, up to `#widShared.vp_keys`.
+function widShared.setupViewports(self, n)
+	if n > #vp_keys then
+		error("attempted to set too many viewports (max " .. #vp_keys .. ")")
+	end
+	for i = 1, n do
+		local v = vp_keys[i]
+		self[v.x], self[v.y], self[v.w], self[v.h] = 0, 0, 0, 0
+	end
 end
-
 
 
 --- Carve an edge out of a viewport.
@@ -1058,7 +1056,7 @@ end
 -- @param self The widget.
 -- @param a Index of the viewport to split.
 -- @param b Index of the viewport to assign the remainder to.
--- @param vertical `true` to split the viewport vertically, false to split horizontally.
+-- @param vertical `true` to split the viewport vertically, `false` to split horizontally.
 -- @param amount The desired length of the first viewport.
 -- @param far `true` to place Viewport B on the "far" end (right for horizontal, bottom for vertical).
 function widShared.splitViewport(self, a, b, vertical, amount, far)
@@ -1113,6 +1111,43 @@ function widShared.partitionViewport(self, a, b, space, place, allow_overlay)
 
 	else
 		error("invalid placement string")
+	end
+end
+
+
+--- Places a viewport onto the edge of another viewport.
+-- @param self The widget.
+-- @param a Index of the reference viewport.
+-- @param b Index of the viewport to move.
+-- @param side Where Viewport B should be placed. "left", "right", "top" or "bottom".
+-- @param coverage A number from 0.0 to 1.0 which controls how far in or out Viewport B is placed,
+--	0.0 is behind the edge, 0.5 is in the middle, and 1.0 is ahead of it. Default: 0.5
+function widShared.straddleViewport(self, a, b, side, coverage)
+	a, b = vp_keys[a], vp_keys[b]
+	coverage = coverage or 0.5
+
+	if side == "left" then
+		self[b.x] = self[a.x] - math.floor(self[b.w] * coverage)
+		self[b.y] = self[a.y]
+		self[b.h] = self[a.h]
+
+	elseif side == "right" then
+		self[b.x] = self[a.x] + self[a.w] - math.floor(self[b.w] * coverage)
+		self[b.y] = self[a.y]
+		self[b.h] = self[a.h]
+
+	elseif side == "top" then
+		self[b.y] = self[a.y] - math.floor(self[b.h] * coverage)
+		self[b.x] = self[a.x]
+		self[b.w] = self[a.w]
+
+	elseif side == "bottom" then
+		self[b.y] = self[a.y] + self[a.h] - math.floor(self[b.h] * coverage)
+		self[b.x] = self[a.x]
+		self[b.w] = self[a.w]
+
+	else
+		error("invalid side string")
 	end
 end
 

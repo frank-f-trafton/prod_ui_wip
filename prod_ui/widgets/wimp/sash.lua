@@ -31,7 +31,7 @@ function def:uiCall_create(inst)
 		self.visible = true
 		self.allow_hover = true
 
-		widShared.setupViewport(self, 1)
+		widShared.setupViewports(self, 1)
 
 		self.enabled = true
 		self.hovered = false
