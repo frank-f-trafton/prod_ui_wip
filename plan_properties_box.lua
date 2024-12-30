@@ -43,11 +43,9 @@ function plan.make(parent)
 		properties_box.w = 400
 		properties_box.h = 300
 
-		--[[
-		local cat_foobar = properties_box:addCategory("Foobar")
-		local pro_dummy = properties_box:addProperty(cat_foobar, "dummy", "BopBaz")
-		properties_box:orderItems()
-		--]]
+		properties_box:addItem("Foobar")
+		properties_box:addItem("Cat")
+		properties_box:addItem("Dog")
 
 		properties_box:setScrollBars(false, true)
 		properties_box:reshape()
