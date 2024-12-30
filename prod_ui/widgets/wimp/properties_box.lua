@@ -1,6 +1,6 @@
 -- XXX: Under construction.
 --[[
-A flat list of properties with built-in controls.
+A flat list of properties with embedded controls.
 
                Drag to resize columns
                          │
@@ -192,7 +192,7 @@ function def:addItem(text, pos, bijou_id)
 
 	self:arrange(pos, #items)
 
-	print("addItem text:", item.text, "y: ", item.y)
+	print("addItem text:", item.text, "xywh: ", item.x, item.y, item.w, item.h)
 
 	return item
 end
@@ -272,6 +272,8 @@ function def:uiCall_create(inst)
 
 		self.menu = lgcMenu.new()
 
+		self.sash_enabled = true
+
 		-- Column X positions and widths.
 		self.col_icon_x = 0
 		self.col_icon_w = 0
@@ -298,9 +300,8 @@ function def:uiCall_reshape()
 	-- Viewport #4 is the area for item controls.
 	-- Viewport #5 is a sash that is placed between the labels and controls.
 
-	-- The sash viewport overlaps the ones for labels and controls, so cursor intersection
-	-- tests should check the sash first.
-	-- When not enabled, the sash viewport has an area of zero.
+	-- The sash viewport overlaps labels and controls, so cursor intersection
+	-- tests should check it first.
 
 	local skin = self.skin
 
@@ -321,6 +322,7 @@ function def:uiCall_reshape()
 	widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "right")
 
 	-- Sash.
+	self.vp5_w = skin.sash_w
 	widShared.straddleViewport(self, 3, 5, "right", 0.5)
 
 	self:scrollClampViewport()
@@ -349,7 +351,6 @@ function def:cacheUpdate(refresh_dimensions)
 		-- Calculate column widths.
 		if self.show_icons then
 			self.col_icon_w = skin.icon_spacing
-
 		else
 			self.col_icon_w = 0
 		end
@@ -363,7 +364,7 @@ function def:cacheUpdate(refresh_dimensions)
 		-- Additional text padding.
 		self.col_text_w = self.col_text_w + skin.pad_text_x
 
-		self.col_text_w = math.max(self.col_text_w, self.vp_w - self.col_icon_w)
+		self.col_text_w = math.max(self.col_text_w, self.vp3_w - self.col_icon_w)
 
 		-- Get column left positions.
 		if skin.icon_side == "left" then
@@ -428,27 +429,38 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		local hover_ok = false
 
-		if not self.press_busy
-		and widShared.pointInViewport(self, 2, mx, my)
-		then
-			mx = mx + self.scr_x
-			my = my + self.scr_y
+		if not self.press_busy then
+			-- Hovering over an active sash
+			if self.sash_enabled and widShared.pointInViewport(self, 5, mx, my) then
+				self:setCursorLow(self.skin.cursor_sash)
 
-			local menu = self.menu
+			-- Hovering over labels and controls
+			elseif widShared.pointInViewport(self, 2, mx, my) then
+				self:setCursorLow()
 
-			-- Update item hover
-			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+				mx = mx + self.scr_x
+				my = my + self.scr_y
 
-			if item and item.selectable then
-				-- Un-hover any existing hovered item
-				self.MN_item_hover = item
+				local menu = self.menu
 
-				hover_ok = true
+				-- Update item hover
+				local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+
+				if item and item.selectable then
+					-- Un-hover any existing hovered item
+					self.MN_item_hover = item
+
+					hover_ok = true
+				end
+
+			else
+				-- Clear the sash cursor
+				self:setCursorLow()
 			end
-		end
 
-		if self.MN_item_hover and not hover_ok then
-			self.MN_item_hover = false
+			if self.MN_item_hover and not hover_ok then
+				self.MN_item_hover = false
+			end
 		end
 	end
 end
@@ -457,6 +469,7 @@ end
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		commonScroll.widgetClearHover(self)
+		self:setCursorLow()
 		self.MN_item_hover = false
 	end
 end
@@ -772,6 +785,22 @@ def.skinners = {
 					)
 				end
 			end
+
+			love.graphics.pop()
+
+			love.graphics.push("all")
+
+			-- (WIP) Label area
+			love.graphics.setColor(0.5, 0.1, 0.1, 0.5)
+			love.graphics.rectangle("fill", self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+
+			-- (WIP) Control area
+			love.graphics.setColor(0.1, 0.1, 0.5, 0.5)
+			love.graphics.rectangle("fill", self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+
+			-- (WIP) Sash
+			love.graphics.setColor(1.0, 1.0, 1.0, 0.5)
+			love.graphics.rectangle("fill", self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
 
 			love.graphics.pop()
 

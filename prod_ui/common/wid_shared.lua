@@ -491,7 +491,6 @@ end
 
 --- Viewport scroll clamping for containers and other widgets which have embedded scroll bars.
 function widShared.scrollClampViewport(self)
-	print(self.id) -- debug
 	self.scr_fx = math.max(-self.vp_x, math.min(self.scr_fx, -self.vp_x + self.doc_w - self.vp_w))
 	self.scr_fy = math.max(-self.vp_y, math.min(self.scr_fy, -self.vp_y + self.doc_h - self.vp_h))
 
