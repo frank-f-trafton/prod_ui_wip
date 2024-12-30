@@ -304,8 +304,8 @@ function def:uiCall_create(inst)
 		self.MN_item_hover = false
 
 		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
-		self.selection_extend_x = 0
-		self.selection_extend_y = 0
+		self.MN_selection_extend_x = 0
+		self.MN_selection_extend_y = 0
 
 		-- Range of items that are visible and should be checked for press/hover state.
 		self.MN_items_first = 0 -- max(first, 1)
