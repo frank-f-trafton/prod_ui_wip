@@ -163,7 +163,9 @@ end
 
 
 function def:addItem(text, pos, bijou_id)
-	-- XXX: Assertions.
+	uiShared.type1(1, text, "string")
+	uiShared.intEval(2, pos, "number")
+	uiShared.typeEval1(1, bijou_id, "string")
 
 	local skin = self.skin
 	local font = skin.font
@@ -263,8 +265,7 @@ function def:uiCall_create(inst)
 
 		widShared.setupDoc(self)
 		widShared.setupScroll(self)
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
+		widShared.setupViewports(self, 2)
 
 		self.press_busy = false
 

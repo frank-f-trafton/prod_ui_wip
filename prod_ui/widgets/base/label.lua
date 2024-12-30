@@ -25,7 +25,7 @@ function def:uiCall_create(inst)
 	if self == inst then
 		self.visible = true
 
-		widShared.setupViewport(self, 1)
+		widShared.setupViewports(self, 1)
 
 		lgcLabel.setup(self)
 

@@ -36,7 +36,7 @@ function def:uiCall_create(inst)
 		self.sort_max = 6
 
 		-- Viewport #2 is used as the boundary for window-frame placement.
-		widShared.setupViewport(self, 2)
+		widShared.setupViewports(self, 2)
 
 		-- Widget layout sequence for children.
 		uiLayout.initLayoutSequence(self)

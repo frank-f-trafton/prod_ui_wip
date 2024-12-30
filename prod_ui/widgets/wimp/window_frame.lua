@@ -199,7 +199,7 @@ function def:uiCall_create(inst)
 		self.border_breadth = 1
 
 		-- Content and frame controls are within this rectangle, while the frame border is outside.
-		widShared.setupViewport(self, 1)
+		widShared.setupViewports(self, 1)
 
 		-- Layout rectangle
 		self.lp_x = 0

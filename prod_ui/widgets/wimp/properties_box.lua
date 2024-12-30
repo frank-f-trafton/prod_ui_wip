@@ -160,7 +160,9 @@ end
 
 
 function def:addItem(text, pos, bijou_id)
-	-- XXX: Assertions.
+	uiShared.type1(1, text, "string")
+	uiShared.intEval(2, pos, "number")
+	uiShared.typeEval1(1, bijou_id, "string")
 
 	local skin = self.skin
 	local font = skin.font
@@ -260,8 +262,7 @@ function def:uiCall_create(inst)
 
 		widShared.setupDoc(self)
 		widShared.setupScroll(self)
-		widShared.setupViewport(self, 1)
-		widShared.setupViewport(self, 2)
+		widShared.setupViewports(self, 5)
 
 		self.press_busy = false
 
@@ -293,6 +294,13 @@ end
 function def:uiCall_reshape()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
+	-- Viewport #3 is the area for item labels.
+	-- Viewport #4 is the area for item controls.
+	-- Viewport #5 is a sash that is placed between the labels and controls.
+
+	-- The sash viewport overlaps the ones for labels and controls, so cursor intersection
+	-- tests should check the sash first.
+	-- When not enabled, the sash viewport has an area of zero.
 
 	local skin = self.skin
 
@@ -307,6 +315,13 @@ function def:uiCall_reshape()
 
 	-- Margin.
 	widShared.carveViewport(self, 1, "margin")
+
+	-- Label and control areas.
+	widShared.copyViewport(self, 1, 3)
+	widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "right")
+
+	-- Sash.
+	widShared.straddleViewport(self, 3, 5, "right", 0.5)
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollState(self)
