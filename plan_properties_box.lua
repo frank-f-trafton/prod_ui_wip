@@ -47,6 +47,13 @@ function plan.make(parent)
 		properties_box:addItem("Cat")
 		properties_box:addItem("Dog")
 
+		local cbox = properties_box:addChild("base/checkbox")
+		--local cbox = properties_box:addChild("wimp/embed/checkbox")
+		cbox.x = 200
+		cbox.y = 0
+		cbox.w = 64
+		cbox.h = 64
+
 		properties_box:setScrollBars(false, true)
 		properties_box:reshape()
 	end
