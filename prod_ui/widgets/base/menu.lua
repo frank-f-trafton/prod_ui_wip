@@ -389,8 +389,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local hover_ok = false
 
 		-- Inside of viewport #2
-		if not self.press_busy
-		and mouse_x >= self.vp2_x
+		if mouse_x >= self.vp2_x
 		and mouse_x < self.vp2_x + self.vp2_w
 		and mouse_y >= self.vp2_y
 		and mouse_y < self.vp2_y + self.vp2_h

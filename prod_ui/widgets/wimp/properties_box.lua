@@ -429,38 +429,36 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		local hover_ok = false
 
-		if not self.press_busy then
-			-- Hovering over an active sash
-			if self.sash_enabled and widShared.pointInViewport(self, 5, mx, my) then
-				self:setCursorLow(self.skin.cursor_sash)
+		-- Hovering over an active sash
+		if self.sash_enabled and widShared.pointInViewport(self, 5, mx, my) then
+			self:setCursorLow(self.skin.cursor_sash)
 
-			-- Hovering over labels and controls
-			elseif widShared.pointInViewport(self, 2, mx, my) then
-				self:setCursorLow()
+		-- Hovering over labels and controls
+		elseif widShared.pointInViewport(self, 2, mx, my) then
+			self:setCursorLow()
 
-				mx = mx + self.scr_x
-				my = my + self.scr_y
+			mx = mx + self.scr_x
+			my = my + self.scr_y
 
-				local menu = self.menu
+			local menu = self.menu
 
-				-- Update item hover
-				local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			-- Update item hover
+			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
 
-				if item and item.selectable then
-					-- Un-hover any existing hovered item
-					self.MN_item_hover = item
+			if item and item.selectable then
+				-- Un-hover any existing hovered item
+				self.MN_item_hover = item
 
-					hover_ok = true
-				end
-
-			else
-				-- Clear the sash cursor
-				self:setCursorLow()
+				hover_ok = true
 			end
 
-			if self.MN_item_hover and not hover_ok then
-				self.MN_item_hover = false
-			end
+		else
+			-- Clear the sash cursor
+			self:setCursorLow()
+		end
+
+		if self.MN_item_hover and not hover_ok then
+			self.MN_item_hover = false
 		end
 	end
 end

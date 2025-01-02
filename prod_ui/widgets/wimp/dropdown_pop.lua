@@ -387,8 +387,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local xx = mx + self.scr_x - self.vp_x
 		local yy = my + self.scr_y - self.vp_y
 
-		if not self.press_busy and widShared.pointInViewport(self, 2, mx, my) then
-
+		if widShared.pointInViewport(self, 2, mx, my) then
 			local menu = self.menu
 
 			-- Update item hover

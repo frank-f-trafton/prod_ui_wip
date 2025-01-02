@@ -494,21 +494,18 @@ end
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		if not self.press_busy then
+		local ax, ay = self:getAbsolutePosition()
+		mouse_x = mouse_x - ax
+		mouse_y = mouse_y - ay
 
-			local ax, ay = self:getAbsolutePosition()
-			mouse_x = mouse_x - ax
-			mouse_y = mouse_y - ay
+		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
 
-			commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
-
-			if mouse_x >= self.vp2_x and mouse_x < self.vp2_x + self.vp2_w
-			and mouse_y >= self.vp2_y and mouse_y < self.vp2_y + self.vp2_h
-			then
-				self:setCursorLow(self.skin.cursor_on)
-			else
-				self:setCursorLow()
-			end
+		if mouse_x >= self.vp2_x and mouse_x < self.vp2_x + self.vp2_w
+		and mouse_y >= self.vp2_y and mouse_y < self.vp2_y + self.vp2_h
+		then
+			self:setCursorLow(self.skin.cursor_on)
+		else
+			self:setCursorLow()
 		end
 	end
 end
