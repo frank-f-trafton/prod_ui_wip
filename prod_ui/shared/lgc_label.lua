@@ -8,7 +8,7 @@ Label modes:
 "single": A single line of text.
 
 "single-ul": A single line of text with an optional underline. The text to be underlined is marked
-	by two underscores, like _this_.
+	by two underscores, like `_this_`.
 
 "multi": Multi-line text.
 
