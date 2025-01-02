@@ -165,10 +165,8 @@ end
 
 function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		if not self.press_busy then
-			mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
-			commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
-		end
+		mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
+		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
 	end
 end
 
