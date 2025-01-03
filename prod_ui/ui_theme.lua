@@ -38,6 +38,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local commonMath = require(REQ_PATH .. "common.common_math")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
@@ -68,7 +69,7 @@ function uiTheme.newThemeInstance(scale)
 	scale = scale or 1.0
 
 	uiTheme.assertScale(1, scale, false)
-	scale = uiRes.clamp(scale, 0.1, 10.0)
+	scale = commonMath.clamp(scale, 0.1, 10.0)
 
 	local self = setmetatable({}, _mt_themeInst)
 
@@ -290,6 +291,35 @@ function _mt_themeInst:loadSkinDef(id, path)
 	return def
 end
 
+
+--- Loads multiple SkinDefs from a directory. The SkinDef names are based on the file names with the base path and
+--	file extension stripped.
+-- @param base_path The file path to scan.
+-- @param id_prepend An optional string to insert before the SkinDef names.
+function _mt_themeInst:loadSkinDefs(base_path, recursive, id_prepend)
+	--[[
+	An example of how this method names SkinDefs:
+
+	inst:loadSkinDefs("game/ui_skins", "xtra/")
+
+	The file "game/ui_skins/skeleton.lua" produces "xtra/skeleton".
+	The file "game/ui_skins/pads/lily.lua" produces "xtra/pads/lily".
+	--]]
+
+	id_prepend = id_prepend or ""
+	local source_files = uiRes.enumerate(base_path, ".lua", recursive)
+
+	for i, file_path in ipairs(source_files) do
+		-- Use the file name without the '.lua' extension as the ID.
+		local id = file_path:match("^(.-)%.lua$")
+		if not id then
+			error("couldn't extract ID from file path: " .. file_path)
+		end
+		id = id_prepend .. uiRes.stripBaseDirectoryFromPath(base_path, id)
+
+		self:loadSkinDef(id, file_path)
+	end
+end
 
 
 local temp_remove = {}

@@ -546,7 +546,9 @@ touch deeper descendants, but you can include calls to applyLayout() in the resh
 
 The built-in widget remove() method automatically removes any instances of a widget from its parent's layout table.
 
-Code running from applyLayout() should not add or remove widgets, or add to or delete from lp_seq.
+Code running from applyLayout() should not:
+	* Add or remove widgets
+	* Add to, or delete from lp_seq
 --]]
 
 

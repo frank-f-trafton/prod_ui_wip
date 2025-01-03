@@ -23,6 +23,9 @@
 
 	Arbitrary multiple selection is implemented by setting the field `marked` on a per-item basis.
 	Not all menu widgets support multiple selection.
+
+	When creating a menu structure, the library user can provide an existing table of items (for example, a widget's
+	array of child widgets).
 --]]
 
 
@@ -50,10 +53,11 @@ local _clamp = commonMath.clamp
 
 --- Makes a new menu.
 -- @return The menu table.
-function stMenu.new()
+-- @param An existing table of items, if applicable. When not provided, a fresh items table is created.
+function stMenu.new(items)
 	local self = {}
 
-	self.items = {}
+	self.items = items or {}
 
 	-- The main selection index.
 	self.index = 0

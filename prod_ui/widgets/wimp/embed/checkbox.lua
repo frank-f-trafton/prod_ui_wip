@@ -52,6 +52,9 @@ function def:uiCall_create(inst)
 		self.hovered = false
 		self.pressed = false
 
+		self:skinSetRefs()
+		self:skinInstall()
+
 		self:reshape()
 	end
 end
@@ -63,13 +66,31 @@ function def:uiCall_reshape()
 end
 
 
-function def:render(ox, oy)
-	love.graphics.push("all")
-	love.graphics.setColor(1, 1, 1, 1)
-	local rect_mode = self.checked and "fill" or "line"
-	love.graphics.rectangle(rect_mode, 0, 0, self.w - 1, self.h - 1)
-	love.graphics.pop()
-end
+def.skinners = {
+	default = {
+		install = function(self, skinner, skin)
+			uiTheme.skinnerCopyMethods(self, skinner)
+		end,
+
+
+		remove = function(self, skinner, skin)
+			uiTheme.skinnerClearData(self)
+		end,
+
+
+		--refresh = function(self, skinner, skin)
+		--update = function(self, skinner, skin, dt)
+
+
+		render = function(self, ox, oy)
+			love.graphics.push("all")
+			love.graphics.setColor(1, 1, 1, 1)
+			local rect_mode = self.checked and "fill" or "line"
+			love.graphics.rectangle(rect_mode, 0, 0, self.w - 1, self.h - 1)
+			love.graphics.pop()
+		end,
+	},
+}
 
 
 return def

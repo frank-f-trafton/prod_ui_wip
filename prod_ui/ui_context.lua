@@ -1032,31 +1032,19 @@ end
 -- @param recursive If true, scan subdirectories within the base dir.
 -- @param id_prepend ("") An optional string to prepend to widget IDs. May help with organization.
 -- @param def_conf (false) An optional, arbitrary config table to pass to each chunk to help with configuration.
--- @return Nothing.
 function _mt_context:loadWidgetDefsInDirectory(dir_path, recursive, id_prepend, def_conf)
 	id_prepend = id_prepend or ""
 	def_conf = def_conf or false
 
-	local path_info = love.filesystem.getInfo(dir_path)
-	if not path_info then
-		error("Can't access widget definition path: " .. tostring(dir_path))
-	end
-
 	local source_files = uiRes.enumerate(dir_path, ".lua", recursive)
 
 	for i, file_path in ipairs(source_files) do
-		-- Use file path without '.lua' extension as the ID.
-		local id = string.match(file_path, "^(.-)%.lua$")
+		-- Use the file name without the '.lua' extension as the ID.
+		local id = file_path:match("^(.-)%.lua$")
 		if not id then
 			error("couldn't extract ID from file path: " .. file_path)
 		end
-
-		-- ... And snip out the base directory as well.
-		local dir_chop = #dir_path + 1
-		if string.sub(id, dir_chop, dir_chop) == "/" then
-			dir_chop = dir_chop + 1
-		end
-		id = string.sub(id, dir_chop)
+		id = id_prepend .. uiRes.stripBaseDirectoryFromPath(dir_path, id)
 
 		self:loadWidgetDef(file_path, id, def_conf)
 	end

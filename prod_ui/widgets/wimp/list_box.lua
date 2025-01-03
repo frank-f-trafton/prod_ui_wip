@@ -165,7 +165,7 @@ end
 function def:addItem(text, pos, bijou_id)
 	uiShared.type1(1, text, "string")
 	uiShared.intEval(2, pos, "number")
-	uiShared.typeEval1(1, bijou_id, "string")
+	uiShared.typeEval1(3, bijou_id, "string")
 
 	local skin = self.skin
 	local font = skin.font
@@ -193,7 +193,7 @@ function def:addItem(text, pos, bijou_id)
 
 	table.insert(items, pos, item)
 
-	self:arrange(pos, #items)
+	self:arrange(1, pos, #items)
 
 	print("addItem text:", item.text, "y: ", item.y)
 
@@ -236,7 +236,7 @@ function def:removeItemByIndex(item_i)
 		self.menu.index = self.menu.index - 1
 	end
 
-	self:arrange(item_i, #items)
+	self:arrange(1, item_i, #items)
 
 	return removed_item
 end
