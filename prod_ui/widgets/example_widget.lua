@@ -534,9 +534,10 @@ function def:uiCap_gamepadAxis(joystick, axis, value)
 --]]
 
 
---- Runs when self:reshape() or self:reshapeChildren() are called. Unlike most uiCall events, this has no arguments other than 'self'. Be careful about calling wid:reshape() on children within uiCall_reshape(), since wid:reshape() itself can be configured to be called on descendants recursively.
+--- Runs when self:reshape() or self:reshapeChildren() are called. Be careful about calling wid:reshape() on children within uiCall_reshape(), since wid:reshape() itself can be configured to be called on descendants recursively.
+-- @param recursive True if reshape() was called with the recursive argument.
 -- @return Truthy value to halt reshaping of descendants in widget reshape methods.
-function def:uiCall_reshape()
+function def:uiCall_reshape(recursive)
 	--[[
 		NOTE: Reshaping is intended to modify a widget's content (children, minor visual details etc.), and
 		not its current dimensions and position within its parent. There are some exceptions:

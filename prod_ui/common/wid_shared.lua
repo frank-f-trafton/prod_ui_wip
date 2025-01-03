@@ -36,7 +36,18 @@ local edge_keys = {
 widShared.edge_keys = edge_keys
 
 
-local function getWidgetBox(self, v)
+--- Gets the table keys for a widget viewport. (ie index 2 will return 'vp2_x', 'vp2_y', 'vp2_w' and 'vp2_h'.)
+function widShared.getViewportKeys(self, v)
+	assert(vp_keys[v], "invalid viewport index.")
+	return vp_keys[v].x, vp_keys[v].y, vp_keys[v].w, vp_keys[v].h
+end
+
+
+--- Gets the XYWH values of a widget viewport, or (0, 0) and the widget's dimensions if no viewport index is specified.
+-- @param self The widget.
+-- @param v The viewport index, or `nil`.
+-- @return The viewport / widget position and dimensions.
+function widShared.getViewportXYWH(self, v)
 	if v then
 		v = vp_keys[v]
 		return self[v.x], self[v.y], self[v.w], self[v.h]
@@ -92,7 +103,7 @@ function widShared.keepInBoundsOfParent(self, v)
 		return
 	end
 
-	local px, py, pw, ph = getWidgetBox(parent, v)
+	local px, py, pw, ph = widShared.getViewportXYWH(parent, v)
 
 	self.x = math.max(px, math.min(self.x, pw - self.w))
 	self.y = math.max(py, math.min(self.y, ph - self.h))
@@ -110,7 +121,7 @@ function widShared.keepInBoundsExtended(self, v, x1, x2, y1, y2)
 		return
 	end
 
-	local px, py, pw, ph = getWidgetBox(parent, v)
+	local px, py, pw, ph = widShared.getViewportXYWH(parent, v)
 
 	self.x = math.max(-self.w - x1 + px, math.min(self.x, pw + x2))
 	self.y = math.max(-self.h - y1 + py, math.min(self.y, ph + y2))

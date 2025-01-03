@@ -18,8 +18,11 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
-function lgcMenu.new()
-	return stMenu.new()
+local vp_keys = widShared.vp_keys
+
+
+function lgcMenu.new(items)
+	return stMenu.new(items)
 end
 
 
@@ -286,12 +289,12 @@ end
 --[[
 	Here are some built-in arrangement functions.
 	These are all very basic in design. They expect the dimensions of items to already be correct,
-	relative to the size of viewport #1.
+	relative to the size of the viewport specified (default #1).
 --]]
 
 
 -- Vertical list, top to bottom
-function lgcMenu.arrangeListVerticalTB(self, first, last)
+function lgcMenu.arrangeListVerticalTB(self, v, first, last) -- ('v' is unused)
 	local menu = self.menu
 	local items = menu.items
 
@@ -323,10 +326,11 @@ end
 
 
 -- Vertical list, left-to-right then top-to-bottom.
-function lgcMenu.arrangeListVerticalLRTB(self, first, last)
+function lgcMenu.arrangeListVerticalLRTB(self, v, first, last)
 	local menu = self.menu
 	local items = menu.items
 
+	v = v or 1
 	first = first or 1
 	last = last or #items
 
@@ -347,7 +351,7 @@ function lgcMenu.arrangeListVerticalLRTB(self, first, last)
 	for i = first, last do
 		local item = items[i]
 
-		if xx + item.w > self.vp_w then
+		if xx + item.w > self[vp_keys[v].w] then
 			xx = 0
 			yy = yy + item.h
 		end
@@ -361,7 +365,7 @@ end
 
 
 -- Horizontal list, left to right
-function lgcMenu.arrangeListHorizontalLR(self, first, last)
+function lgcMenu.arrangeListHorizontalLR(self, v, first, last) -- ('v' is unused)
 	local menu = self.menu
 	local items = menu.items
 
@@ -393,10 +397,11 @@ end
 
 
 -- Horizontal list, top to bottom then left to right.
-function lgcMenu.arrangeListHorizontalTBLR(self, first, last)
+function lgcMenu.arrangeListHorizontalTBLR(self, v, first, last)
 	local menu = self.menu
 	local items = menu.items
 
+	v = v or 1
 	first = first or 1
 	last = last or #items
 
@@ -417,7 +422,7 @@ function lgcMenu.arrangeListHorizontalTBLR(self, first, last)
 	for i = first, last do
 		local item = items[i]
 
-		if yy + item.h > self.vp_h then
+		if yy + item.h > self[vp_keys[v].h] then
 			xx = xx + item.w
 			yy = 0
 		end

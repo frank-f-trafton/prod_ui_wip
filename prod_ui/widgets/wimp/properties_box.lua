@@ -159,98 +159,76 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:addItem(text, pos, bijou_id)
-	uiShared.type1(1, text, "string")
-	uiShared.intEval(2, pos, "number")
-	uiShared.typeEval1(1, bijou_id, "string")
+function def:addControl(wid_id, text, pos, bijou_id)
+	uiShared.type1(2, text, "string")
+	uiShared.intEval(3, pos, "number")
+	uiShared.typeEval1(4, bijou_id, "string")
 
-	local skin = self.skin
-	local font = skin.font
+	local wid = self:addChild(wid_id, nil, pos)
 
-	local items = self.menu.items
+	wid.selectable = true
+	wid.marked = false -- multi-select
+	wid.x, wid.y = 0, 0
+	wid.w = 256 -- WIP
+	wid.h = 40 -- WIP
+	wid.text = text
+	wid.bijou_id = bijou_id
+	wid.tq_bijou = self.context.resources.tex_quads[bijou_id]
 
-	local item = {}
+	self:arrange(4, pos, #self.children)
 
-	item.selectable = true
-	item.marked = false -- multi-select
+	print("addControl text:", wid.text, "xywh: ", wid.x, wid.y, wid.w, wid.h)
 
-	item.x, item.y = 0, 0
-	item.w = font:getWidth(text)
-	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-
-	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
-
-	pos = pos or #items + 1
-
-	if pos < 1 or pos > #items + 1 then
-		error("addItem: insert position is out of range.")
-	end
-
-	table.insert(items, pos, item)
-
-	self:arrange(pos, #items)
-
-	print("addItem text:", item.text, "xywh: ", item.x, item.y, item.w, item.h)
-
-	return item
+	return wid
 end
 
 
-function def:removeItem(item_t)
-	uiShared.type1(1, item_t, "table")
+function def:removeControl(wid)
+	uiShared.type1(1, wid, "table")
 
-	local item_i = self.menu:getItemIndex(item_t)
+	local wid_i = self.menu:getItemIndex(wid)
 
-	local removed_item = self:removeItemByIndex(item_i)
-	return removed_item
+	self:removeControlByIndex(wid_i)
 end
 
 
-function def:removeItemByIndex(item_i)
-	uiShared.numberNotNaN(1, item_i)
+function def:removeControlByIndex(wid_i)
+	uiShared.numberNotNaN(1, wid_i)
 
-	local items = self.menu.items
-	local removed_item = items[item_i]
-	if not removed_item then
-		error("no item to remove at index: " .. tostring(item_i))
+	local children = self.children
+	local to_remove = children[wid_i]
+	if not to_remove then
+		error("no control to remove at index: " .. tostring(wid_i))
 	end
 
-	table.remove(items, item_i)
+	to_remove:remove()
 
-	-- Removed item was the last in the list, and was selected:
-	if self.menu.index > #self.menu.items then
-		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
-		if landing_i then
-			self:setSelectionByIndex(landing_i)
-		else
-			self:setSelectionByIndex(0)
-		end
+	-- Removed control was the last in the list, and was selected:
+	if self.menu.index > #children then
+		local landing_i = self.menu:findSelectableLanding(#children, -1)
+		self:setSelectionByIndex(landing_i or 0)
 
-	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self.menu.index > item_i then
+	-- Removed control was not selected, and the selected control appears after the removed control in the list:
+	elseif self.menu.index > wid_i then
 		self.menu.index = self.menu.index - 1
 	end
 
-	self:arrange(item_i, #items)
-
-	return removed_item
+	self:arrange(4, wid_i, #children)
 end
 
 
-function def:setSelection(item_t)
-	uiShared.type1(1, item_t, "table")
+function def:setSelection(wid)
+	uiShared.type1(1, wid, "table")
 
-	local item_i = self.menu:getItemIndex(item_t)
-	self:setSelectionByIndex(item_i)
+	local wid_i = self.menu:getItemIndex(wid)
+	self:setSelectionByIndex(wid_i)
 end
 
 
-function def:setSelectionByIndex(item_i)
-	uiShared.intGE(1, item_i, 0)
+function def:setSelectionByIndex(wid_i)
+	uiShared.intGE(1, wid_i, 0)
 
-	self.menu:setSelectedIndex(item_i)
+	self.menu:setSelectedIndex(wid_i)
 end
 
 
@@ -270,7 +248,7 @@ function def:uiCall_create(inst)
 
 		self.MN_wrap_selection = false
 
-		self.menu = lgcMenu.new()
+		self.menu = lgcMenu.new(self.children) -- (self.menu.items == self.children)
 
 		self.sash_enabled = true
 
@@ -297,7 +275,7 @@ function def:uiCall_reshape()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 	-- Viewport #3 is the area for item labels.
-	-- Viewport #4 is the area for item controls.
+	-- Viewport #4 is the area for item controls (child widgets).
 	-- Viewport #5 is a sash that is placed between the labels and controls.
 
 	-- The sash viewport overlaps labels and controls, so cursor intersection
@@ -328,12 +306,20 @@ function def:uiCall_reshape()
 	self:scrollClampViewport()
 	commonScroll.updateScrollState(self)
 
+	-- Reposition and resize controls.
+	for i, wid in ipairs(self.menu.items) do
+		wid.x = 0
+		wid.y = 0
+		wid.w = 256 -- WIP
+		wid.h = 40 -- WIP
+	end
+
 	self:cacheUpdate(true)
 end
 
 
 --- Updates cached display state.
--- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
+-- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all controls.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
 	local menu = self.menu
@@ -342,10 +328,12 @@ function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
-		-- Document height is based on the last item in the menu.
-		local last_item = menu.items[#menu.items]
-		if last_item then
-			self.doc_h = last_item.y + last_item.h
+		local children = menu.items
+
+		-- Document height is based on the last control in the menu.
+		local last_wid = children[#children]
+		if last_wid then
+			self.doc_h = last_wid.y + last_wid.h
 		end
 
 		-- Calculate column widths.
@@ -357,20 +345,18 @@ function def:cacheUpdate(refresh_dimensions)
 
 		self.col_text_w = 0
 		local font = skin.font
-		for i, item in ipairs(menu.items) do
-			self.col_text_w = math.max(self.col_text_w, item.x + item.w)
+		for i, wid in ipairs(children) do
+			self.col_text_w = math.max(self.col_text_w, wid.x + wid.w)
 		end
 
 		-- Additional text padding.
 		self.col_text_w = self.col_text_w + skin.pad_text_x
-
 		self.col_text_w = math.max(self.col_text_w, self.vp3_w - self.col_icon_w)
 
 		-- Get column left positions.
 		if skin.icon_side == "left" then
 			self.col_icon_x = 0
 			self.col_text_x = self.col_icon_w
-
 		else
 			self.col_icon_x = self.col_text_w
 			self.col_text_x = 0
@@ -379,7 +365,7 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w = math.max(self.vp_w, self.col_icon_w + self.col_text_w)
 	end
 
-	-- Set the draw ranges for items.
+	-- Set the draw ranges for controls.
 	lgcMenu.widgetAutoRangeV(self)
 end
 

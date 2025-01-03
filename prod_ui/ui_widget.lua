@@ -948,27 +948,29 @@ end
 
 
 --- Run the 'reshape' UI callback on a widget, and optionally on its descendants.
--- @param include_descendants When true, recursively reshapes children, grandchildren, etc. Return a truthy value
--- in the callback to halt further reshaping.
+-- @param recursive When true, recursively reshapes children, grandchildren, etc. Return a truthy value
+-- in the callback to halt the reshaping of descendants.
 -- @return Nothing.
-function _mt_widget:reshape(include_descendants)
-	local result = self:runStatement("uiCall_reshape", self)
+function _mt_widget:reshape(recursive)
+	recursive = not not recursive
+	local result = self:runStatement("uiCall_reshape", self, recursive)
 
-	-- Reshape children only if 'include_descendants' is truthy and the above statement returned falsy.
-	if include_descendants and not result then
+	-- Reshape children only if 'recursive' is truthy and the above statement returned falsy.
+	if recursive and not result then
 		for _, child in ipairs(self.children) do
-			child:reshape(include_descendants)
+			child:reshape(recursive)
 		end
 	end
 end
 
 
 --- Convenience wrapper for reshape() which skips the calling widget and starts with its children.
--- @param include_descendants When true, the caller's grandchildren and onwards are recursively reshaped.
+-- @param recursive When true, the caller's grandchildren and onwards are recursively reshaped.
 -- @return Nothing.
-function _mt_widget:reshapeChildren(include_descendants)
+function _mt_widget:reshapeChildren(recursive)
+	recursive = not not recursive
 	for i, child in ipairs(self.children) do
-		child:reshape(include_descendants)
+		child:reshape(recursive)
 	end
 end
 

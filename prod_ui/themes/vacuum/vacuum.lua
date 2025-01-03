@@ -15,7 +15,7 @@ local quadSlice = require(PROD_UI_PATH .. "graphics.quad_slice")
 
 
 local REQ_PATH = uiRes.pathToRequire(THIS_THEME_PATH, true)
-local BASE_PATH = uiRes.pathStripFile(THIS_THEME_PATH)
+local BASE_PATH = uiRes.pathStripEnd(THIS_THEME_PATH)
 
 
 --- Creates a new theme instance.
@@ -559,49 +559,10 @@ function themeDef.newInstance(scale)
 
 	-- inst.skins is created in uiTheme.newThemeInstance().
 
-	local loadSkinDef = uiTheme.loadSkinDef
+	inst:loadSkinDefs(BASE_PATH .. "skins", true)
 
-	inst:loadSkinDef("button1", BASE_PATH .. "skins/button1.lua")
-	inst:loadSkinDef("button_split1", BASE_PATH .. "skins/button_split1.lua")
-	inst:loadSkinDef("button_tq1", BASE_PATH .. "skins/button_tq1.lua")
-
-	inst:loadSkinDef("checkbox1", BASE_PATH .. "skins/checkbox1.lua")
-	inst:loadSkinDef("checkbox_multi1", BASE_PATH .. "skins/checkbox_multi1.lua")
-	inst:loadSkinDef("combo_box1", BASE_PATH .. "skins/combo_box1.lua")
-	inst:loadSkinDef("container1", BASE_PATH .. "skins/container1.lua")
-
-	inst:loadSkinDef("dropdown_box1", BASE_PATH .. "skins/dropdown_box1.lua")
-	inst:loadSkinDef("dropdown_pop1", BASE_PATH .. "skins/dropdown_pop1.lua")
-
-	inst:loadSkinDef("icon_box1", BASE_PATH .. "skins/icon_box1.lua")
-
-	inst:loadSkinDef("label1", BASE_PATH .. "skins/label1.lua")
-	inst:loadSkinDef("list_box1", BASE_PATH .. "skins/list_box1.lua")
-
-	inst:loadSkinDef("menu1", BASE_PATH .. "skins/menu1.lua")
-	inst:loadSkinDef("menu_simple1", BASE_PATH .. "skins/menu_simple1.lua")
-	inst:loadSkinDef("menu_tab1", BASE_PATH .. "skins/menu_tab1.lua")
-	inst:loadSkinDef("menu_pop1", BASE_PATH .. "skins/menu_pop1.lua")
-	inst:loadSkinDef("menu_bar1", BASE_PATH .. "skins/menu_bar1.lua")
-
-	inst:loadSkinDef("number_box1", BASE_PATH .. "skins/number_box1.lua")
-
-	inst:loadSkinDef("progress_bar1", BASE_PATH .. "skins/progress_bar1.lua")
-	inst:loadSkinDef("properties_box1", BASE_PATH .. "skins/properties_box1.lua")
-
-	inst:loadSkinDef("radio1", BASE_PATH .. "skins/radio1.lua")
-
-	inst:loadSkinDef("sash1", BASE_PATH .. "skins/sash1.lua")
-	inst:loadSkinDef("slider1", BASE_PATH .. "skins/slider1.lua")
-	inst:loadSkinDef("stepper1", BASE_PATH .. "skins/stepper1.lua")
-
-	inst:loadSkinDef("text_box_m1", BASE_PATH .. "skins/text_box_m1.lua")
-	inst:loadSkinDef("text_box_s1", BASE_PATH .. "skins/text_box_s1.lua")
-	inst:loadSkinDef("tree_box1", BASE_PATH .. "skins/tree_box1.lua")
-
-	inst:loadSkinDef("wimp_frame", BASE_PATH .. "skins/wimp_frame.lua")
-	inst:loadSkinDef("wimp_frame_header", BASE_PATH .. "skins/wimp_frame_header.lua")
-	inst:loadSkinDef("wimp_frame_button", BASE_PATH .. "skins/wimp_frame_button.lua")
+	-- To load SkinDefs individually, do something like this:
+	-- inst:loadSkinDef("button1", BASE_PATH .. "skins/button1.lua")
 
 	return inst
 end
