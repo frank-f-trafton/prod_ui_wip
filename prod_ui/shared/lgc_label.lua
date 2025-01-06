@@ -45,7 +45,10 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-local modes = {["single"] = true, ["single-ul"] = true, ["multi"] = true}
+local modes = {["single"]=true, ["single-ul"]=true, ["multi"]=true}
+
+-- Numeric values from 0-1 that correspond to font rendering alignment enums.
+local align_h_num = {left=0.0, center=0.5, right=1.0, justify=0.0}
 
 
 local function _assertLabelMode(n, mode)
@@ -68,10 +71,7 @@ end
 function lgcLabel.setup(self, mode)
 	mode = mode or "single"
 
-	-- Assertions
-	-- [[
 	_assertLabelMode(2, mode)
-	--]]
 
 	-- The label text to draw.
 	self.label = ""
@@ -124,15 +124,7 @@ end
 local function _calculateUnderlineOffset(self, font)
 	-- Valid only for "single-ul" mode.
 	local align_h = self.skin.label_align_h
-	if align_h == "center" then
-		self.label_ul_ox = math.floor((self.vp_w - font:getWidth(self.label)) / 2)
-
-	elseif align_h == "right" then
-		self.label_ul_ox = math.floor((self.vp_w - font:getWidth(self.label)))
-
-	else -- "left"
-		self.label_ul_ox = 0
-	end
+	self.label_ul_ox = math.floor((self.vp_w - font:getWidth(self.label)) * align_h_num[align_h])
 end
 
 
@@ -143,11 +135,8 @@ end
 function lgcLabel.widSetLabel(self, text, mode)
 	mode = mode or self.label_mode
 
-	-- Assertions
-	-- [[
 	uiShared.assertText(2, text)
 	_assertLabelMode(3, mode)
-	--]]
 
 	-- Check for mode update.
 	if mode ~= self.label_mode then

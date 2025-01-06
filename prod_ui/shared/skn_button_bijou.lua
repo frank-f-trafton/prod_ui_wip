@@ -3,10 +3,14 @@
 local context = select(1, ...)
 
 
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
+
+
+local _lerp = commonMath.lerp
 
 
 return {
@@ -31,27 +35,8 @@ return {
 			local tex_quad = self.checked and res.quad_checked or res.quad_unchecked
 
 			-- Calculate bijou drawing coordinates.
-			local box_x
-			if skin.bijou_align_h == "right" then
-				box_x = math.floor(0.5 + self.vp2_x + self.vp2_w - skin.bijou_w)
-
-			elseif skin.bijou_align_h == "center" then
-				box_x = math.floor(0.5 + self.vp2_x + (self.vp2_w - skin.bijou_w) * 0.5)
-
-			else -- "left"
-				box_x = math.floor(0.5 + self.vp2_x)
-			end
-
-			local box_y
-			if skin.bijou_align_v == "bottom" then
-				box_y = math.floor(0.5 + self.vp2_y + self.vp2_h - skin.bijou_h)
-
-			elseif skin.bijou_align_v == "middle" then
-				box_y = math.floor(0.5 + self.vp2_y + (self.vp2_h - skin.bijou_h) * 0.5)
-
-			else -- "top"
-				box_y = math.floor(0.5 + self.vp2_y)
-			end
+			local box_x = math.floor(0.5 + _lerp(self.vp2_x, self.vp2_x + self.vp2_w - skin.bijou_w, skin.bijou_align_h))
+			local box_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - skin.bijou_h, skin.bijou_align_v))
 
 			-- Draw the bijou.
 			-- XXX: Scissor to Viewport #2?
