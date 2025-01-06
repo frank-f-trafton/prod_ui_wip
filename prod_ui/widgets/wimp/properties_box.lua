@@ -378,46 +378,67 @@ function def:cacheUpdate(refresh_dimensions)
 end
 
 
+local function updateSelectedControl(self, control)
+	local menu = self.menu
+	local old_item = menu.items[menu.index]
+
+	menu:clearAllMarkedItems()
+	menu:setSelectedItem(control)
+
+	if old_item ~= control then
+		self:wid_select(control, menu:getItemIndex(control))
+	end
+end
+
+
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	if self == inst then
-		local menu = self.menu
-		local items = menu.items
-		local old_index = menu.index
-		local old_item = items[old_index]
+	local menu = self.menu
+	local items = menu.items
+	local old_index = menu.index
+	local old_item = items[old_index]
 
-		-- wid_action() is handled in the 'thimbleAction()' callback.
+	-- wid_action() is handled in the 'thimbleAction()' callback.
 
-		-- If there is a selected child widget, forward keyboard events to it first.
+	-- NOTE: This code path for 'toggle' MN_mark_mode won't work if the widget can
+	-- take the thimble.
+	if self.MN_mark_mode == "toggle" and key == "space" then
+		if old_index > 0 and menu:canSelect(old_index) then
+			menu:toggleMarkedItem(items[old_index])
+			return true
+		end
+
+	-- Escape: take thimble from embedded child widget
+	elseif key == "escape" and inst == self.context.current_thimble then
+		self:tryTakeThimble()
+		return true
+
+	elseif self:wid_keyPressed(key, scancode, isrepeat)
+	or self:wid_defaultKeyNav(key, scancode, isrepeat)
+	then
 		local control = items[menu.index]
-		if control and control:runStatement("uiCall_keyPressed", control, key, scancode, isrepeat) then
-			return true
-		end
-
-		if self.MN_mark_mode == "toggle" and key == "space" then
-			if old_index > 0 and menu:canSelect(old_index) then
-				menu:toggleMarkedItem(items[old_index])
-				return true
-			end
-
-		elseif self:wid_keyPressed(key, scancode, isrepeat)
-		or self:wid_defaultKeyNav(key, scancode, isrepeat)
-		then
-			if old_item ~= items[menu.index] then
-				if self.MN_mark_mode == "cursor" then
-					local mods = self.context.key_mgr.mod
-					if mods["shift"] then
-						menu:clearAllMarkedItems()
-						lgcMenu.markItemsCursorMode(self, old_index)
-					else
-						self.MN_mark_index = false
-						menu:clearAllMarkedItems()
-						menu:setMarkedItemByIndex(menu.index, true)
-					end
+		if old_item ~= control then
+			if self.MN_mark_mode == "cursor" then
+				local mods = self.context.key_mgr.mod
+				if mods["shift"] then
+					menu:clearAllMarkedItems()
+					lgcMenu.markItemsCursorMode(self, old_index)
+				else
+					self.MN_mark_index = false
+					menu:clearAllMarkedItems()
+					menu:setMarkedItemByIndex(menu.index, true)
 				end
-				self:wid_select(items[menu.index], menu.index)
 			end
-			return true
+
+			-- If the old control had the thimble, pass it on to the new control.
+			-- If that fails, then assign the thimble to this menu.
+			if old_item == self.context.current_thimble then
+				if not (control and control:tryTakeThimble()) then
+					self:tryTakeThimble()
+				end
+			end
+			self:wid_select(control, menu.index)
 		end
+		return true
 	end
 end
 
@@ -501,25 +522,18 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
-			self:tryTakeThimble()
-
 			-- The user clicked on a child widget
 			if self ~= inst then
-				local menu = self.menu
-				local old_item = menu.items[menu.index]
-
-				menu:clearAllMarkedItems()
-				menu:setSelectedItem(inst)
-
-				if old_item ~= inst then
-					self:wid_select(inst, menu:getItemIndex(inst))
-				end
+				updateSelectedControl(self, inst)
 			end
 		end
 
 		-- The user clicked somewhere on the menu, outside of child widgets (or "through"
 		-- an inactive child widget)
 		if self == inst then
+			if button <= 3 then
+				self:tryTakeThimble()
+			end
 			if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
 				local mx, my = self:getRelativePosition(x, y)
 
@@ -619,14 +633,21 @@ function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 end
 
 
+function def:uiCall_thimbleTake(inst)
+	if self ~= inst then
+		updateSelectedControl(self, inst)
+	end
+end
+
+
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
+		-- If there is an active, selected control widget, then try to give it the thimble.
 		local menu = self.menu
 		local control = menu.items[menu.index]
-		-- If there is a selected child widget, forward keyboard events to it first.
-		if control and control:runStatement("uiCall_thimbleAction", control, key, scancode, isrepeat) then
+		if control and control:tryTakeThimble() then
 			return true
 		end
 
@@ -643,11 +664,6 @@ function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
 	then
 		local menu = self.menu
 		local control = menu.items[menu.index]
-		-- If there is a selected child widget, forward keyboard events to it first.
-		if control and control:runStatement("uiCall_thimbleAction2", control, key, scancode, isrepeat) then
-			return true
-		end
-
 		self:wid_action2(control, menu.index)
 
 		return true
@@ -756,7 +772,8 @@ def.skinners = {
 			-- Selection glow.
 			local sel_item = items[menu.index]
 			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
+				local col = (self == self.context.current_thimble or sel_item == self.context.current_thimble) and skin.color_active_glow or skin.color_select_glow
+				love.graphics.setColor(col)
 				uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
 			end
 
@@ -849,7 +866,11 @@ def.skinners = {
 		end,
 
 		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+
+		-- Do not render a standard thimble outline for this widget.
+		-- We change the color of the current selection glow instead.
+		renderThimble = uiShared.dummyFunc,
+
 	},
 }
 

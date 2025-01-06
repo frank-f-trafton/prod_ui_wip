@@ -46,7 +46,7 @@ function plan.make(parent)
 		-- (wid_id, text, pos, bijou_id)
 		local c1 = properties_box:addControl("wimp/embed/checkbox", "Foobar")
 		local c2 = properties_box:addControl("wimp/embed/checkbox", "Cat")
-		local c3 = properties_box:addControl("wimp/embed/checkbox", "Dog")
+		local c3 = properties_box:addControl("wimp/embed/text", "Dog")
 
 		properties_box:setScrollBars(false, true)
 		properties_box:reshape()

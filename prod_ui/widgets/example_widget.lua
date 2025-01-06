@@ -429,7 +429,6 @@ end
 -- Bubbles when the thimble moves to a widget.
 -- @param inst The originating widget instance.
 -- @param a, b, c, d Generic arguments which are supplied through widget:thimbleTake(). Usage depends on the implementation.
--- One example is to center some widgets in their container, while not in other cases.
 function def:uiCall_thimbleTake(inst, a, b, c, d)
 
 end
@@ -443,20 +442,29 @@ function def:uiCall_thimbleRelease(inst, a, b, c, d)
 end
 
 
--- Bubbles when the user presses enter or 'confirm' while this widget has the thimble.
+-- Bubbles when the user presses enter or space while this widget has the thimble. The enter key fires repeatedly,
+--	while space only fires once per key-down.
 -- @param inst The originating widget instance.
 function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 
 end
 
 
+-- Bubbles when the user presses the Application key or Shift+F10 while this widget has the thimble. Does not
+--	fire repeatedly.
+-- @param inst The originating widget instance.
+function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
+
+end
+
+
 -- Bubbles when a love.keypressed() event reaches the widget.
-function def:uiCall_keyPressed(inst, kc, sc, rep)
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 end
 
 -- Bubbles when a love.keyreleased() event reaches the widget.
-function def:uiCall_keyReleased(inst, kc, sc)
+function def:uiCall_keyReleased(inst, key, scancode)
 
 end
 
