@@ -56,7 +56,7 @@ local function _createPopUpMenu(self)
 		self.pressed = true
 		self.aux_pressed = true
 
-		local lgcMenu = context:getLua("shared/lgc_menu.lua")
+		local lgcMenu = self.context:getLua("shared/lgc_menu")
 		lgcMenu.widgetConfigureMenuItems(self, _pop_up_def)
 
 		local root = self:getTopWidgetInstance()
