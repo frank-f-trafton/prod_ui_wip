@@ -38,7 +38,7 @@ return {
 			local box_x = math.floor(0.5 + _lerp(self.vp2_x, self.vp2_x + self.vp2_w - skin.bijou_w, skin.bijou_align_h))
 			local box_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - skin.bijou_h, skin.bijou_align_v))
 
-			-- Draw the bijou.
+			-- draw bijou
 			-- XXX: Scissor to Viewport #2?
 			love.graphics.setColor(res.color_bijou)
 			uiGraphics.quadXYWH(tex_quad, box_x, box_y, skin.bijou_w, skin.bijou_h)

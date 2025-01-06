@@ -69,6 +69,7 @@ def.moveLast = lgcMenu.widgetMoveLast
 
 
 --- Called when user double-clicks on the widget or presses "return" or "kpenter".
+--	An active control widget may swallow the events that trigger this callback.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
 function def:wid_action(item, item_i)
@@ -77,6 +78,7 @@ end
 
 
 --- Called when the user right-clicks on the widget or presses "application" or shift+F10.
+--	An active control widget may swallow the events that trigger this callback.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
 function def:wid_action2(item, item_i)
@@ -85,6 +87,7 @@ end
 
 
 --- Called when the user middle-clicks on the widget.
+--	An active control widget may swallow the events that trigger this callback.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
 function def:wid_action3(item, item_i)
@@ -377,35 +380,64 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		local items = self.menu.items
-		local old_index = self.menu.index
+		local menu = self.menu
+		local items = menu.items
+		local old_index = menu.index
 		local old_item = items[old_index]
 
 		-- wid_action() is handled in the 'thimbleAction()' callback.
 
+		-- If there is a selected child widget, forward keyboard events to it first.
+		local control = items[menu.index]
+		if control and control:runStatement("uiCall_keyPressed", control, key, scancode, isrepeat) then
+			return true
+		end
+
 		if self.MN_mark_mode == "toggle" and key == "space" then
-			if old_index > 0 and self.menu:canSelect(old_index) then
-				self.menu:toggleMarkedItem(self.menu.items[old_index])
+			if old_index > 0 and menu:canSelect(old_index) then
+				menu:toggleMarkedItem(items[old_index])
 				return true
 			end
 
 		elseif self:wid_keyPressed(key, scancode, isrepeat)
 		or self:wid_defaultKeyNav(key, scancode, isrepeat)
 		then
-			if old_item ~= items[self.menu.index] then
+			if old_item ~= items[menu.index] then
 				if self.MN_mark_mode == "cursor" then
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
-						self.menu:clearAllMarkedItems()
+						menu:clearAllMarkedItems()
 						lgcMenu.markItemsCursorMode(self, old_index)
 					else
 						self.MN_mark_index = false
-						self.menu:clearAllMarkedItems()
-						self.menu:setMarkedItemByIndex(self.menu.index, true)
+						menu:clearAllMarkedItems()
+						menu:setMarkedItemByIndex(menu.index, true)
 					end
 				end
-				self:wid_select(items[self.menu.index], self.menu.index)
+				self:wid_select(items[menu.index], menu.index)
 			end
+			return true
+		end
+	end
+end
+
+
+function def:uiCall_keyReleased(inst, keycode, scancode)
+	if self == inst then
+		-- If there is a selected child widget, forward keyboard events to it first.
+		local control = self.menu.items[self.menu.index]
+		if control and control:runStatement("uiCall_keyReleased", control, keycode, scancode) then
+			return true
+		end
+	end
+end
+
+
+function def:uiCall_textInput(inst, text)
+	if self == inst then
+		-- If there is a selected child widget, forward keyboard events to it first.
+		local control = self.menu.items[self.menu.index]
+		if control and control:runStatement("uiCall_textInput", control, text) then
 			return true
 		end
 	end
@@ -465,61 +497,77 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
-	and self.enabled
+	if self.enabled
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
 			self:tryTakeThimble()
+
+			-- The user clicked on a child widget
+			if self ~= inst then
+				local menu = self.menu
+				local old_item = menu.items[menu.index]
+
+				menu:clearAllMarkedItems()
+				menu:setSelectedItem(inst)
+
+				if old_item ~= inst then
+					self:wid_select(inst, menu:getItemIndex(inst))
+				end
+			end
 		end
 
-		if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
-			local mx, my = self:getRelativePosition(x, y)
+		-- The user clicked somewhere on the menu, outside of child widgets (or "through"
+		-- an inactive child widget)
+		if self == inst then
+			if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
+				local mx, my = self:getRelativePosition(x, y)
 
-			if widShared.pointInViewport(self, 2, mx, my) then
-				mx, my = mx + self.scr_x, my + self.scr_y
+				if widShared.pointInViewport(self, 2, mx, my) then
+					mx, my = mx + self.scr_x, my + self.scr_y
 
-				local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
+					local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
 
-				if item_t and item_t.selectable then
-					local old_index = self.menu.index
-					local old_item = self.menu.items[old_index]
+					if item_t and item_t.selectable then
+						local old_index = self.menu.index
+						local old_item = self.menu.items[old_index]
 
-					-- Buttons 1, 2 and 3 all select an item.
-					-- Only button 1 updates the item mark state.
-					if button <= 3 then
-						lgcMenu.widgetSelectItemByIndex(self, item_i)
-						self.MN_mouse_clicked_item = item_t
+						-- Buttons 1, 2 and 3 all select an item.
+						-- Only button 1 updates the item mark state.
+						if button <= 3 then
+							lgcMenu.widgetSelectItemByIndex(self, item_i)
+							self.MN_mouse_clicked_item = item_t
 
+							if button == 1 then
+								lgcMenu.pointerPressButton1(self, item_t, old_index)
+							end
+
+							if old_item ~= item_t then
+								self:wid_select(item_t, item_i)
+							end
+						end
+
+						-- All Button 1 clicks initiate click-drag.
 						if button == 1 then
-							lgcMenu.pointerPressButton1(self, item_t, old_index)
+
+							self.press_busy = "menu-drag"
+
+							-- Double-clicking Button 1 invokes action 1.
+							if self.context.cseq_button == 1
+							and self.context.cseq_widget == self
+							and self.context.cseq_presses % 2 == 0
+							then
+								self:wid_action(item_t, item_i)
+							end
+
+						-- Button 2 clicks invoke action 2.
+						elseif button == 2 then
+							self:wid_action2(item_t, item_i)
+
+						-- Button 3 -> action 3...
+						elseif button == 3 then
+							self:wid_action3(item_t, item_i)
 						end
-
-						if old_item ~= item_t then
-							self:wid_select(item_t, item_i)
-						end
-					end
-
-					-- All Button 1 clicks initiate click-drag.
-					if button == 1 then
-
-						self.press_busy = "menu-drag"
-
-						-- Double-clicking Button 1 invokes action 1.
-						if self.context.cseq_button == 1
-						and self.context.cseq_widget == self
-						and self.context.cseq_presses % 2 == 0
-						then
-							self:wid_action(item_t, item_i)
-						end
-
-					-- Button 2 clicks invoke action 2.
-					elseif button == 2 then
-						self:wid_action2(item_t, item_i)
-
-					-- Button 3 -> action 3...
-					elseif button == 3 then
-						self:wid_action3(item_t, item_i)
 					end
 				end
 			end
@@ -575,12 +623,16 @@ function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
-		local index = self.menu.index
-		local item = self.menu.items[index]
+		local menu = self.menu
+		local control = menu.items[menu.index]
+		-- If there is a selected child widget, forward keyboard events to it first.
+		if control and control:runStatement("uiCall_thimbleAction", control, key, scancode, isrepeat) then
+			return true
+		end
 
-		self:wid_action(item, index)
+		self:wid_action(control, menu.index)
 
-		return true -- Stop bubbling.
+		return true
 	end
 end
 
@@ -589,12 +641,16 @@ function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
-		local index = self.menu.index
-		local item = self.menu.items[index]
+		local menu = self.menu
+		local control = menu.items[menu.index]
+		-- If there is a selected child widget, forward keyboard events to it first.
+		if control and control:runStatement("uiCall_thimbleAction2", control, key, scancode, isrepeat) then
+			return true
+		end
 
-		self:wid_action2(item, index)
+		self:wid_action2(control, menu.index)
 
-		return true -- Stop bubbling.
+		return true
 	end
 end
 
@@ -780,12 +836,12 @@ def.skinners = {
 			love.graphics.push("all")
 
 			-- (WIP) Label area
-			love.graphics.setColor(0.5, 0.1, 0.1, 0.5)
-			love.graphics.rectangle("fill", self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+			--love.graphics.setColor(0.5, 0.1, 0.1, 0.5)
+			--love.graphics.rectangle("fill", self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
 
 			-- (WIP) Control area
-			love.graphics.setColor(0.1, 0.1, 0.5, 0.5)
-			love.graphics.rectangle("fill", self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+			--love.graphics.setColor(0.1, 0.1, 0.5, 0.5)
+			--love.graphics.rectangle("fill", self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
 
 			-- (WIP) Sash
 			love.graphics.setColor(1.0, 1.0, 1.0, 0.5)

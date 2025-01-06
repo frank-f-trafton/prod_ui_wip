@@ -133,8 +133,6 @@ function lgcButton.setCheckedRadioConditional(self, key, value)
 			return wid
 		end
 	end
-
-	-- return nil
 end
 
 
@@ -176,7 +174,7 @@ function lgcButton.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx
 end
 
 
---- Mouse callback for pressing normal buttons (whose primary actions don't activate just on click-down).
+--- Mouse callback for pressing normal buttons (whose primary actions don't activate upon click-down).
 function lgcButton.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
