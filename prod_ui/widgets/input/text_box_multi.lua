@@ -644,11 +644,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerDrag(inst, x, y, dx, dy)
-	return true
-end
-
-
 function def:uiCall_pointerWheel(inst, x, y)
 	-- Catch wheel events from descendants that did not block it.
 

@@ -154,11 +154,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerDrag(inst, x, y, dx, dy) -- XXX: can't remember if this is necessary, or just the stub of an old function.
-	return true
-end
-
-
 function def:uiCall_thimbleTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)

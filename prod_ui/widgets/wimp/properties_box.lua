@@ -751,12 +751,7 @@ def.skinners = {
 			uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
 			love.graphics.translate(-self.scr_x, -self.scr_y)
 
-			-- Hover glow.
-			local item_hover = self.MN_item_hover
-			if item_hover then
-				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.doc_w, item_hover.h)
-			end
+			-- No hover glow.
 
 			-- Selection glow.
 			local sel_item = items[menu.index]
