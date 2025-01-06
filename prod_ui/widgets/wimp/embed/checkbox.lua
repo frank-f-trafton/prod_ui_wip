@@ -46,7 +46,7 @@ function def:uiCall_create(inst)
 	if self == inst then
 		self.visible = true
 		self.allow_hover = true
-		self.can_have_thimble = false
+		self.can_have_thimble = true
 
 		widShared.setupViewports(self, 1)
 

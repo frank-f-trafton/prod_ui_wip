@@ -98,7 +98,7 @@ WIMP widgets.
 | wimp/menu_pop | Working |
 | wimp/menu_tab | **Buggy** |
 | wimp/number_box | Working |
-| wimp/properties_box | **Barely started** |
+| wimp/properties_box | **Early prototype** |
 | wimp/root_wimp | Working |
 | wimp/sash | **Partial** |
 | wimp/tree_box | Working |

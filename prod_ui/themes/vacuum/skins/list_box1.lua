@@ -29,6 +29,6 @@ return {
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
 	color_select_glow = {1.0, 1.0, 1.0, 0.33},
 	color_hover_glow = {1.0, 1.0, 1.0, 0.16},
-	color_active_glow = {1.0, 1.0, 1.0, 0.33},
+	color_active_glow = {0.75, 0.75, 1.0, 0.33},
 	color_item_marked = {0.0, 0.0, 1.0, 0.33},
 }
