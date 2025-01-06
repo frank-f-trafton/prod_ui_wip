@@ -38,6 +38,8 @@ def.uiCall_pointerHoverOff = lgcButton.uiCall_pointerHoverOff
 def.uiCall_pointerPress = lgcButton.uiCall_pointerPress
 def.uiCall_pointerRelease = lgcButton.uiCall_pointerReleaseCheck
 def.uiCall_pointerUnpress = lgcButton.uiCall_pointerUnpress
+def.uiCall_thimbleAction = lgcButton.uiCall_thimbleActionCheck
+def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_create(inst)
