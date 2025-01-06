@@ -14,15 +14,16 @@ return {
 	cursor_sash = "sizewe",
 	["$sash_w"] = 12,
 
-	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-	["$item_pad_v"] = 2,
+	["$item_h"] = 40,
+	["$control_min_w"] = 128,
 
 	["*sl_body"] = "tex_slices/list_box_body",
 
+	-- Alignment of property name text:
 	text_align_h = "left", -- "left", "center", "right"
 	-- Vertical text alignment is centered.
 
-	-- Icon column width and positioning, if active.
+	-- Property name icon column width and positioning, if active.
 	["$icon_spacing"] = 24,
 	icon_side = "left", -- "left", "right"
 
