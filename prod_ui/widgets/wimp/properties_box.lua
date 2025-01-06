@@ -159,6 +159,14 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
+local function updateItemDimensions(self, v, item)
+	local skin = self.skin
+	local vx, vy, vw, vh = widShared.getViewportXYWH(self, v)
+	item.w = math.max(skin.control_min_w, vw)
+	item.h = skin.item_h
+end
+
+
 function def:addControl(wid_id, text, pos, bijou_id)
 	uiShared.type1(2, text, "string")
 	uiShared.intEval(3, pos, "number")
@@ -169,8 +177,7 @@ function def:addControl(wid_id, text, pos, bijou_id)
 	wid.selectable = true
 	wid.marked = false -- multi-select
 	wid.x, wid.y = 0, 0
-	wid.w = 256 -- WIP
-	wid.h = 40 -- WIP
+	updateItemDimensions(self, 4, wid)
 	wid.text = text
 	wid.bijou_id = bijou_id
 	wid.tq_bijou = self.context.resources.tex_quads[bijou_id]
@@ -306,12 +313,10 @@ function def:uiCall_reshape()
 	self:scrollClampViewport()
 	commonScroll.updateScrollState(self)
 
-	-- Reposition and resize controls.
+	-- Resize controls.
 	for i, wid in ipairs(self.menu.items) do
-		wid.x = 0
-		wid.y = 0
-		wid.w = 256 -- WIP
-		wid.h = 40 -- WIP
+		wid.x = self.vp4_x
+		updateItemDimensions(self, 4, wid)
 	end
 
 	self:cacheUpdate(true)
