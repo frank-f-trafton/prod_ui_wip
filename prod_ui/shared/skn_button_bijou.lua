@@ -34,7 +34,7 @@ return {
 			local res = uiTheme.pickButtonResource(self, skin)
 			local tex_quad = self.checked and res.quad_checked or res.quad_unchecked
 
-			-- Calculate bijou drawing coordinates.
+			-- bijou drawing coordinates
 			local box_x = math.floor(0.5 + _lerp(self.vp2_x, self.vp2_x + self.vp2_w - skin.bijou_w, skin.bijou_align_h))
 			local box_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - skin.bijou_h, skin.bijou_align_v))
 
