@@ -26,12 +26,12 @@ return {
 	bijou_side = "left", -- left (default), right
 
 	-- Alignment of bijou within Viewport #2.
-	bijou_align_h = "center", -- "left", "center", "right"
-	bijou_align_v = "middle", -- "top", "middle", "bottom"
+	bijou_align_h = 0.5, -- From 0.0 (left) to 1.0 (right)
+	bijou_align_v = 0.5, -- From 0.0 (top) to 1.0 (bottom)
 
 	-- Alignment of label text within Viewport #1.
 	label_align_h = "left", -- "left", "center", "right", "justify"
-	label_align_v = "middle", -- "top", "middle", "bottom"
+	label_align_v = 0.5, -- From 0.0 (top) to 1.0 (bottom)
 
 
 	res_idle = {
