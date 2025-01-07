@@ -275,6 +275,12 @@ local function _launchSelector(root)
 end
 
 
+local function _launchWidgetTreeView(root)
+	local planWidgetTreeView = require("plan_wimp_widget_tree")
+	return planWidgetTreeView.make(root)
+end
+
+
 do
 	local wimp_root = context:findTag("wimp_workspace")
 	context:setRoot(wimp_root)
@@ -422,6 +428,16 @@ do
 					local root = client:getTopWidgetInstance()
 					if root then
 						_launchSelector(root)
+					end
+				end,
+			},
+			{
+				type = "command",
+				text = "Widget Tree View",
+				callback = function(client, item)
+					local root = client:getTopWidgetInstance()
+					if root then
+						_launchWidgetTreeView(root)
 					end
 				end,
 			},
