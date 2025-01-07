@@ -34,12 +34,16 @@ end
 
 local function _buildLoop(tree_box, node, root, thimble, _collapsed)
 	for i, child in ipairs(root.children) do
-		local n1 = tree_box:addNode(_widgetToString(child, i, thimble), node)
-		n1.usr_wid = child
-		if _collapsed[child] then
-			n1.expanded = false
+		if not tree_box.parent.usr_exclude
+		or tree_box.parent.usr_exclude and tree_box.parent.parent ~= child
+		then
+			local n1 = tree_box:addNode(_widgetToString(child, i, thimble), node)
+			n1.usr_wid = child
+			if _collapsed[child] then
+				n1.expanded = false
+			end
+			_buildLoop(tree_box, n1, child, thimble, _collapsed)
 		end
-		_buildLoop(tree_box, n1, child, thimble, _collapsed)
 	end
 end
 
@@ -144,7 +148,11 @@ function plan.make(root)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
+		local tree_box = content:addChild("wimp/tree_box")
 		local chk_vp = content:addChild("base/checkbox")
+		local chk_highlight = content:addChild("base/checkbox")
+		local chk_exclude = content:addChild("base/checkbox")
+
 		chk_vp:setLabel("Show Viewports")
 		chk_vp:setChecked(content.context.app.dbg_vp.active)
 
@@ -155,10 +163,8 @@ function plan.make(root)
 
 		chk_vp.h = 32
 		chk_vp.lc_func = uiLayout.fitBottom
-		uiLayout.register(content, chk_vp)
 
 
-		local chk_highlight = content:addChild("base/checkbox")
 		chk_highlight:setLabel("Highlight Selected")
 		chk_highlight:setChecked(content.context.app.dbg_outline.active)
 
@@ -169,14 +175,27 @@ function plan.make(root)
 
 		chk_highlight.h = 32
 		chk_highlight.lc_func = uiLayout.fitBottom
-		uiLayout.register(content, chk_highlight)
 
 
-		local tree_box = content:addChild("wimp/tree_box")
+		chk_exclude:setLabel("Exclude this window frame")
+		content.usr_exclude = true
+		chk_exclude:setChecked(content.usr_exclude)
+
+		chk_exclude.wid_buttonAction = function(self)
+			self.parent.usr_exclude = not self.parent.usr_exclude
+		end
+
+		chk_exclude.h = 32
+		chk_exclude.lc_func = uiLayout.fitBottom
+
 
 		tree_box:setExpandersActive(true)
 
 		tree_box.lc_func = uiLayout.fitRemaining
+
+		uiLayout.register(content, chk_exclude)
+		uiLayout.register(content, chk_highlight)
+		uiLayout.register(content, chk_vp)
 		uiLayout.register(content, tree_box)
 
 		tree_box.x = 0
@@ -196,6 +215,7 @@ function plan.make(root)
 		tree_box.usr_timer = tree_box.usr_timer_max
 		tree_box.userUpdate = tree_userUpdate
 		tree_box.userDestroy = tree_userDestroy
+		-- Also reads 'self.parent.usr_exclude'
 	end
 
 	frame:reshape(true)
