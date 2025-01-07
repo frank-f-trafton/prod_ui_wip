@@ -399,46 +399,41 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	-- wid_action() is handled in the 'thimbleAction()' callback.
 
-	-- NOTE: This code path for 'toggle' MN_mark_mode won't work if the widget can
-	-- take the thimble.
-	if self.MN_mark_mode == "toggle" and key == "space" then
-		if old_index > 0 and menu:canSelect(old_index) then
-			menu:toggleMarkedItem(items[old_index])
-			return true
-		end
-
 	-- Escape: take thimble from embedded child widget
-	elseif key == "escape" and inst == self.context.current_thimble then
+	if self ~= inst and inst == self.context.current_thimble and key == "escape" then
 		self:tryTakeThimble()
 		return true
 
-	elseif self:wid_keyPressed(key, scancode, isrepeat)
-	or self:wid_defaultKeyNav(key, scancode, isrepeat)
-	then
-		local control = items[menu.index]
-		if old_item ~= control then
-			if self.MN_mark_mode == "cursor" then
-				local mods = self.context.key_mgr.mod
-				if mods["shift"] then
-					menu:clearAllMarkedItems()
-					lgcMenu.markItemsCursorMode(self, old_index)
-				else
-					self.MN_mark_index = false
-					menu:clearAllMarkedItems()
-					menu:setMarkedItemByIndex(menu.index, true)
-				end
+	elseif self == inst then
+		-- NOTE: This code path for 'toggle' MN_mark_mode won't work if the widget can
+		-- take the thimble (see thimbleAction()).
+		if self.MN_mark_mode == "toggle" and key == "space" then
+			if old_index > 0 and menu:canSelect(old_index) then
+				menu:toggleMarkedItem(items[old_index])
+				return true
 			end
 
-			-- If the old control had the thimble, pass it on to the new control.
-			-- If that fails, then assign the thimble to this menu.
-			if old_item == self.context.current_thimble then
-				if not (control and control:tryTakeThimble()) then
-					self:tryTakeThimble()
+		elseif self:wid_keyPressed(key, scancode, isrepeat)
+		or self:wid_defaultKeyNav(key, scancode, isrepeat)
+		then
+			local control = items[menu.index]
+			if old_item ~= control then
+				if self.MN_mark_mode == "cursor" then
+					local mods = self.context.key_mgr.mod
+					if mods["shift"] then
+						menu:clearAllMarkedItems()
+						lgcMenu.markItemsCursorMode(self, old_index)
+					else
+						self.MN_mark_index = false
+						menu:clearAllMarkedItems()
+						menu:setMarkedItemByIndex(menu.index, true)
+					end
 				end
+
+				self:wid_select(control, menu.index)
 			end
-			self:wid_select(control, menu.index)
+			return true
 		end
-		return true
 	end
 end
 
