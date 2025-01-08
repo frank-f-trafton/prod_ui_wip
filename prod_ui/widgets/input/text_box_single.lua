@@ -249,9 +249,6 @@ def.skinners = {
 				self.vp2_h
 			)
 
-			--love.graphics.setScissor()
-			--love.graphics.translate(0, 16)
-
 			-- Text editor component.
 			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
 			lgcInputS.draw(
