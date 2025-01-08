@@ -46,7 +46,8 @@ function plan.make(parent)
 		-- (wid_id, text, pos, bijou_id)
 		local c1 = properties_box:addControl("wimp/embed/checkbox", "Foobar")
 		local c2 = properties_box:addControl("wimp/embed/checkbox", "Cat")
-		local c3 = properties_box:addControl("wimp/embed/text", "Dog")
+		local c3 = properties_box:addControl("input/text_box_single", "Dog")
+		c3.select_all_on_thimble_take = true
 
 		properties_box:setScrollBars(false, true)
 		properties_box:reshape()

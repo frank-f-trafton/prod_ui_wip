@@ -72,6 +72,12 @@ function def:uiCall_create(inst)
 
 		lgcInputS.setupInstance(self)
 
+		-- Highlights all text whenever this widget gets the thimble.
+		self.select_all_on_thimble_take = false
+
+		-- Unhighlights all upon releasing the thimble (moving the caret to the first position).
+		self.deselect_all_on_thimble_release = false
+
 		-- State flags.
 		self.enabled = true
 		self.hovered = false
@@ -129,6 +135,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
+		local had_thimble_before = self == self.context.current_thimble
 		if button <= 3 then
 			self:tryTakeThimble()
 		end
@@ -137,7 +144,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if widShared.pointInViewport(self, 2, mx, my) then
 			-- Propagation is halted when a context menu is created.
-			if lgcInputS.mousePressLogic(self, button, mx, my) then
+			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble_before) then
 				return true
 			end
 		end
@@ -160,6 +167,10 @@ function def:uiCall_thimbleTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
 		lgcInputS.resetCaretBlink(self)
+		if self.select_all_on_thimble_take then
+			self:highlightAll()
+			lgcInputS.updateCaretShape(self)
+		end
 	end
 end
 
@@ -167,6 +178,10 @@ end
 function def:uiCall_thimbleRelease(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
+		if self.deselect_all_on_thimble_release then
+			self:caretFirst(true)
+			lgcInputS.updateCaretShape(self)
+		end
 	end
 end
 

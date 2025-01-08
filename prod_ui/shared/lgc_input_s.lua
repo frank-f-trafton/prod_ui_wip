@@ -360,13 +360,20 @@ end
 
 -- @param mouse_x, mouse_y Mouse position relative to widget top-left.
 -- @return true if event propagation should be halted.
-function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y)
+function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble_before)
 	local line_ed = self.line_ed
 	local context = self.context
 
 	lgcInputS.resetCaretBlink(self)
 
 	if button == 1 then
+		--[[
+		WIP: this isn't quite right.
+		if not had_thimble_before and self.select_all_on_thimble_take then
+			return
+		end
+		--]]
+
 		self.press_busy = "text-drag"
 
 		-- Apply scroll + margin offsets
