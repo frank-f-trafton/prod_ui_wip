@@ -690,7 +690,9 @@ def.skinners = {
 			-- Selection glow.
 			local sel_item = items[menu.index]
 			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
+				local is_active = self == self.context.current_thimble
+				local col = is_active and skin.color_active_glow or skin.color_select_glow
+				love.graphics.setColor(col)
 				uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
 			end
 

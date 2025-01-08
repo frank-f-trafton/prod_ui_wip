@@ -1072,8 +1072,11 @@ def.skinners = {
 			love.graphics.translate(self.vp_x + self.align_offset - self.scr_x, self.vp_y - self.scr_y)
 
 			-- Draw highlight rectangles.
-			love.graphics.setColor(res.color_highlight)
 			if line_ed:isHighlighted() then
+				local is_active = self == self.context.current_thimble
+				local col_highlight = is_active and res.color_highlight_active or res.color_highlight
+				love.graphics.setColor(col_highlight)
+
 				for i = self.vis_para_top, self.vis_para_bot do
 					local paragraph = disp.paragraphs[i]
 					for j, sub_line in ipairs(paragraph) do

@@ -247,9 +247,13 @@ def.skinners = {
 
 			-- Text editor component.
 			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+
+			local is_active = self == self.context.current_thimble
+			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
+
 			lgcInputS.draw(
 				self,
-				res.color_highlight,
+				col_highlight,
 				skin.font_ghost,
 				res.color_text,
 				line_ed.font,
