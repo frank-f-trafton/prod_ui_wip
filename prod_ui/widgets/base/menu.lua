@@ -712,7 +712,9 @@ def.skinners = {
 			-- Draw selection glow, if applicable
 			local sel_item = items[menu.index]
 			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
+				local is_active = self == self.context.current_thimble
+				local col = is_active and skin.color_active_glow or skin.color_select_glow
+				love.graphics.setColor(col)
 				love.graphics.rectangle("fill", sel_item.x, sel_item.y, sel_item.w, sel_item.h)
 			end
 

@@ -350,7 +350,10 @@ def.skinners = {
 
 			-- Draw selection glow, if applicable
 			if menu.index > 0 then
-				love.graphics.setColor(skin.color_select_glow)
+				local is_active = self == self.context.current_thimble
+				local col = is_active and skin.color_active_glow or skin.color_select_glow
+				love.graphics.setColor(col)
+
 				local sel_pos = (menu.index-1 - self.scroll_i) * self.item_len
 				if self.horizontal then
 					love.graphics.rectangle("fill", sel_pos + 0.5, 0.5, self.item_len, self.w)
