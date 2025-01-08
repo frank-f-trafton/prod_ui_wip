@@ -287,9 +287,7 @@ function def:uiCall_reshape()
 	-- Viewport #3 is the area for item labels.
 	-- Viewport #4 is the area for item controls (child widgets).
 	-- Viewport #5 is a sash that is placed between the labels and controls.
-
-	-- The sash viewport overlaps labels and controls, so cursor intersection
-	-- tests should check it first.
+	-- * The sash viewport overlaps and straddles #3 and #4.
 
 	local skin = self.skin
 
@@ -318,7 +316,7 @@ function def:uiCall_reshape()
 
 	-- Resize controls.
 	for i, wid in ipairs(self.menu.items) do
-		wid.x = self.vp4_x
+		wid.x = self.vp4_x - self.vp_x
 		updateItemDimensions(self, 4, wid)
 	end
 
@@ -842,22 +840,21 @@ def.skinners = {
 
 			love.graphics.push("all")
 
-			-- (WIP) Label area
-			--love.graphics.setColor(0.5, 0.1, 0.1, 0.5)
-			--love.graphics.rectangle("fill", self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-
-			-- (WIP) Control area
-			--love.graphics.setColor(0.1, 0.1, 0.5, 0.5)
-			--love.graphics.rectangle("fill", self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
-
 			-- (WIP) Sash
-			love.graphics.setColor(1.0, 1.0, 1.0, 0.5)
-			love.graphics.rectangle("fill", self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
+			--love.graphics.setColor(1.0, 1.0, 1.0, 0.5)
+			--love.graphics.rectangle("fill", self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
+			love.graphics.setColor(1.0, 1.0, 1.0, 0.25)
+			local xx = math.floor(self.vp5_x + self.vp5_w / 2)
+			love.graphics.setLineStyle("smooth")
+			love.graphics.setLineWidth(1.0)
+			love.graphics.line(xx, self.vp5_y, xx, self.vp5_y + self.vp5_h)
 
 			love.graphics.pop()
 
 			--widDebug.debugDrawViewport(self, 1)
 			--widDebug.debugDrawViewport(self, 2)
+			--widDebug.debugDrawViewport(self, 3)
+			--widDebug.debugDrawViewport(self, 4)
 		end,
 
 		--renderLast = function(self, ox, oy) end,
