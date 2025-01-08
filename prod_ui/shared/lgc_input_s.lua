@@ -367,8 +367,8 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble_b
 	lgcInputS.resetCaretBlink(self)
 
 	if button == 1 then
+		-- WIP: this isn't quite right.
 		--[[
-		WIP: this isn't quite right.
 		if not had_thimble_before and self.select_all_on_thimble_take then
 			return
 		end

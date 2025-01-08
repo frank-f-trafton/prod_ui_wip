@@ -704,8 +704,6 @@ function widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 
 		wid = wid.chain_prev
 	end
-
-	return nil
 end
 
 
@@ -727,8 +725,8 @@ function widShared.chainRemovePost(self)
 end
 
 
-function widShared.chainHasThisWidgetRight(wid_in, wid_check)
-	local wid = wid_in.chain_next
+function widShared.chainHasThisWidget(self, wid_check)
+	local wid = self.chain_next
 	while wid do
 		if wid == wid_check then
 			return true
@@ -736,20 +734,7 @@ function widShared.chainHasThisWidgetRight(wid_in, wid_check)
 		wid = wid.chain_next
 	end
 
-	return wid_in == wid_check
-end
-
-
-function widShared.chainHasThisWidget(wid_in, wid_check)
-	local wid = wid_in.chain_next
-	while wid do
-		if wid == wid_check then
-			return true
-		end
-		wid = wid.chain_next
-	end
-
-	wid = wid_in.chain_prev
+	wid = self.chain_prev
 	while wid do
 		if wid == wid_check then
 			return true
@@ -757,7 +742,57 @@ function widShared.chainHasThisWidget(wid_in, wid_check)
 		wid = wid.chain_prev
 	end
 
-	return wid_in == wid_check
+	return self == wid_check
+end
+
+
+function widShared.chainHasThisWidgetRight(self, wid_check)
+	local wid = self.chain_next
+	while wid do
+		if wid == wid_check then
+			return true
+		end
+		wid = wid.chain_next
+	end
+
+	return self == wid_check
+end
+
+
+--- Checks if this widget or any widgets in the chain have the thimble.
+-- @param self The first widget to check.
+-- @return The widget with the thimble, or nil if the thimble wasn't found in the chain.
+function widShared.chainHasThimble(self)
+	local wid = self
+	local cur_thimble = self.context.current_thimble
+	while wid do
+		if wid == cur_thimble then
+			return wid
+		end
+		wid = wid.chain_next
+	end
+
+	wid = self.chain_prev
+	while wid do
+		if wid == cur_thimble then
+			return wid
+		end
+		wid = wid.chain_next
+	end
+end
+
+
+--- Like widShared.chainHasThimble(), but searches to the right of the supplied widget only.
+-- @param self The first widget to check.
+-- @return The widget with the thimble, or nil if the thimble wasn't found in this widget or
+--	in its chain to the right.
+function widShared.chainHasThimbleRight(self)
+	while self do
+		if self == self.context.current_thimble then
+			return self
+		end
+		self = self.chain_next
+	end
 end
 
 
