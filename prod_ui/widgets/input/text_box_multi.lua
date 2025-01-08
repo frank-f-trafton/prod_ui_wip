@@ -228,6 +228,16 @@ for k, v in pairs(editMethodsM) do
 end
 
 
+local function updateCaretShape(self)
+	local disp = self.line_ed.disp
+
+	self.caret_x = disp.caret_box_x
+	self.caret_y = disp.caret_box_y
+	self.caret_w = disp.caret_box_w
+	self.caret_h = disp.caret_box_h
+end
+
+
 function def:uiCall_create(inst)
 	if self == inst then
 		self.visible = true
@@ -304,6 +314,8 @@ function def:uiCall_create(inst)
 
 		-- State flags (WIP)
 		self.enabled = true
+
+		updateCaretShape(self)
 	end
 end
 
@@ -428,11 +440,7 @@ function def:cacheUpdate()
 
 	self:updateDocumentDimensions()
 
-	-- Update caret shape
-	self.caret_x = disp.caret_box_x
-	self.caret_y = disp.caret_box_y
-	self.caret_w = disp.caret_box_w
-	self.caret_h = disp.caret_box_h
+	updateCaretShape(self)
 
 	if line_ed.replace_mode then
 		self.caret_fill = "line"
@@ -662,6 +670,7 @@ end
 function def:uiCall_thimbleTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
+		self.line_ed.disp:resetCaretBlink()
 	end
 end
 

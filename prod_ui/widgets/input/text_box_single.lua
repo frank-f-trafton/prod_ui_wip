@@ -84,6 +84,8 @@ function def:uiCall_create(inst)
 
 		self.line_ed = lineEdS.new(skin.font)
 
+		lgcInputS.updateCaretShape(self)
+
 		self:reshape()
 	end
 end
@@ -157,6 +159,7 @@ end
 function def:uiCall_thimbleTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
+		lgcInputS.resetCaretBlink(self)
 	end
 end
 
