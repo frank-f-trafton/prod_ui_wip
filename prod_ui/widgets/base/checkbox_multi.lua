@@ -14,6 +14,7 @@
 local context = select(1, ...)
 
 
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local lgcButton = context:getLua("shared/lgc_button")
 local lgcLabel = context:getLua("shared/lgc_label")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
@@ -21,6 +22,9 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+
+
+local _lerp = commonMath.lerp
 
 
 local def = {
@@ -113,28 +117,9 @@ def.skinners = { -- (2024-11-01 copied from shared/skn_button_bijou.lua)
 			local res = uiTheme.pickButtonResource(self, skin)
 			local tex_quad = res.quads_state[self.value]
 
-			-- Calculate bijou drawing coordinates.
-			local box_x
-			if skin.bijou_align_h == "right" then
-				box_x = math.floor(0.5 + self.vp2_x + self.vp2_w - skin.bijou_w)
-
-			elseif skin.bijou_align_h == "center" then
-				box_x = math.floor(0.5 + self.vp2_x + (self.vp2_w - skin.bijou_w) * 0.5)
-
-			else -- "left"
-				box_x = math.floor(0.5 + self.vp2_x)
-			end
-
-			local box_y
-			if skin.bijou_align_v == "bottom" then
-				box_y = math.floor(0.5 + self.vp2_y + self.vp2_h - skin.bijou_h)
-
-			elseif skin.bijou_align_v == "middle" then
-				box_y = math.floor(0.5 + self.vp2_y + (self.vp2_h - skin.bijou_h) * 0.5)
-
-			else -- "top"
-				box_y = math.floor(0.5 + self.vp2_y)
-			end
+			-- bijou drawing coordinates
+			local box_x = math.floor(0.5 + _lerp(self.vp2_x, self.vp2_x + self.vp2_w - skin.bijou_w, skin.bijou_align_h))
+			local box_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - skin.bijou_h, skin.bijou_align_v))
 
 			-- Draw the bijou.
 			-- XXX: Scissor to Viewport #2?
