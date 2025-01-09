@@ -640,7 +640,7 @@ function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 		-- If there is an active, selected control widget, then try to give it the thimble.
 		local menu = self.menu
 		local control = menu.items[menu.index]
-		if control and control:tryTakeThimble() then
+		if control and control:tryTakeThimble1() then
 			return true
 		end
 

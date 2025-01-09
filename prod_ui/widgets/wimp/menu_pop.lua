@@ -783,7 +783,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false
-				--temp_chain_prev:tryTakeThimble() -- XTHM
+				--temp_chain_prev:tryTakeThimble?() -- XTHM
 
 				return true
 			end
