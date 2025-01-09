@@ -397,14 +397,14 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 	-- wid_action() is handled in the 'thimbleAction()' callback.
 
-	-- Escape: take thimble from embedded child widget
-	if self ~= inst and inst == self.context.current_thimble and key == "escape" then
-		self:tryTakeThimble()
+	-- Escape: take thimble1 from embedded child widget
+	if self ~= inst and inst == self.context.thimble1 and key == "escape" then
+		self:tryTakeThimble1()
 		return true
 
 	elseif self == inst then
 		-- NOTE: This code path for 'toggle' MN_mark_mode won't work if the widget can
-		-- take the thimble (see thimbleAction()).
+		-- take thimble1 (see thimbleAction()).
 		if self.MN_mark_mode == "toggle" and key == "space" then
 			if old_index > 0 and menu:canSelect(old_index) then
 				menu:toggleMarkedItem(items[old_index])
@@ -525,7 +525,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- an inactive child widget)
 		if self == inst then
 			if button <= 3 then
-				self:tryTakeThimble()
+				self:tryTakeThimble1()
 			end
 			if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
 				local mx, my = self:getRelativePosition(x, y)
@@ -626,7 +626,7 @@ function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_thimbleTake(inst)
+function def:uiCall_thimble1Take(inst)
 	if self ~= inst then
 		updateSelectedControl(self, inst)
 	end
@@ -765,7 +765,7 @@ def.skinners = {
 			-- Selection glow.
 			local sel_item = items[menu.index]
 			if sel_item then
-				local is_active = self == self.context.current_thimble or sel_item == self.context.current_thimble
+				local is_active = self == self.context.thimble1 or sel_item == self.context.thimble1
 				local col = is_active and skin.color_active_glow or skin.color_select_glow
 				love.graphics.setColor(col)
 				uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)

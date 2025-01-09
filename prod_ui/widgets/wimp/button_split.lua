@@ -76,7 +76,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
@@ -99,6 +99,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 							-- Press action
 							self:wid_buttonActionAux()
 
+							-- XTHM
 							-- Halt propagation (to prevent snatching the thimble
 							-- from the newly-made pop-up menu).
 							return true

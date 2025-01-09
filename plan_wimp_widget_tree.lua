@@ -27,22 +27,24 @@ local function _deleteLoop(node, _collapsed)
 end
 
 
-local function _widgetToString(wid, n, thimble)
-	return "[" .. n .. "] " .. wid.id .. " (" .. tostring(wid) .. ")" .. (wid == thimble and "*" or "")
+local function _widgetToString(wid, n, thimble1, thimble2)
+	return "[" .. n .. "] " .. wid.id .. " (" .. tostring(wid) .. ")"
+		.. (wid == thimble1 and "(*)" or "")
+		.. (wid == thimble2 and "(**)" or "")
 end
 
 
-local function _buildLoop(tree_box, node, root, thimble, _collapsed)
+local function _buildLoop(tree_box, node, root, thimble1, thimble2, _collapsed)
 	for i, child in ipairs(root.children) do
 		if not tree_box.parent.usr_exclude
 		or tree_box.parent.usr_exclude and tree_box.parent.parent ~= child
 		then
-			local n1 = tree_box:addNode(_widgetToString(child, i, thimble), node)
+			local n1 = tree_box:addNode(_widgetToString(child, i, thimble1, thimble2), node)
 			n1.usr_wid = child
 			if _collapsed[child] then
 				n1.expanded = false
 			end
-			_buildLoop(tree_box, n1, child, thimble, _collapsed)
+			_buildLoop(tree_box, n1, child, thimble1, thimble2, _collapsed)
 		end
 	end
 end
@@ -53,16 +55,16 @@ local function _buildTree(tree_box, root)
 
 	-- TODO: Try preserving existing node tables at update intervals.
 
-	-- Note the last selection and the UI thimble.
+	-- Note the last selection and the UI thimbles.
+	local context = tree_box.context
 	local item_selected = tree_box.menu:getSelectedItem()
 	local wid_selected = item_selected and item_selected.usr_wid
-	local thimble = tree_box.context.current_thimble
 
 	tree_box.tree.usr_wid = root
-	tree_box.tree.text = _widgetToString(root, 1, thimble)
+	tree_box.tree.text = _widgetToString(root, 1, context.thimble1, context.thimble2)
 	local _collapsed = {}
 	_deleteLoop(tree_box.tree, _collapsed)
-	_buildLoop(tree_box, tree_box.tree, root, thimble, _collapsed)
+	_buildLoop(tree_box, tree_box.tree, root, context.thimble1, context.thimble2, _collapsed)
 
 	tree_box:orderItems()
 	tree_box:arrange()

@@ -192,116 +192,167 @@ function _mt_widget:checkPressed()
 end
 
 
---- Check if this widget currently has the thimble. This is effectively the same as 'wid == wid.context.current_thimble'.
+local function _assertCanHaveThimble(self)
+	if not self.can_have_thimble then
+		error("this widget isn't allowed to have cursor focus.", 2)
+	end
+end
+
+
+--- Check if this widget currently has top thimble focus.
 -- @return True if it has the thimble, false if not.
-function _mt_widget:hasThimble()
-	return self.context.current_thimble == self
+function _mt_widget:hasTopThimble()
+	local context = self.context
+	return context.thimble2 and context.thimble2 == self or context.thimble1 == self
 end
 
 
---- If this widget does not have the thimble, move it here. The widget must have 'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget already has the thimble, nothing happens.
---	Callbacks:
---	* uiCall_thimbleRelease -> The old focus host, if applicable. Only fires if the thimble changes hands.
---	* uiCall_thimbleTake -> The new focus host. Only fires if the widget changes hands.
--- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent. An example usage is to permit some thimble changes to center the selected widget within its container, while not doing so in other cases.
+--- Check if the widget has either thimble1 or thimble2.
+-- @return 1 for thimble1, 2 for thimble2, otherwise `nil`.
+function _mt_widget:hasAnyThimble()
+	local context = self.context
+	return context.thimble2 == self and 2 or context.thimble1 == self and 1
+end
+
+
+function _mt_widget:hasThimble1()
+	return self.context.thimble1 == self
+end
+
+
+function _mt_widget:hasThimble2()
+	return self.context.thimble2 == self
+end
+
+
+--- Assigns thimble1 to this widget. The current thimble1 widget, if present, is replaced. This widget must have
+--	'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget is
+--	already thimble1, nothing happens.
+-- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
 -- @return Nothing.
-function _mt_widget:takeThimble(a, b, c, d)
-	--print("takeThimble", debug.traceback())
+function _mt_widget:takeThimble1(a, b, c, d)
+	--print("takeThimble1", debug.traceback())
+	_assertCanHaveThimble(self)
 
-	if not self.can_have_thimble then
-		error("this widget isn't allowed to be have the thimble (cursor).")
-	end
+	local context = self.context
+	local thimble1, thimble2 = context.thimble1, context.thimble2
 
-	local old_thimble = self.context.current_thimble
-
-	if old_thimble ~= self then
-		self.context.current_thimble = false
-
-		if old_thimble then
-			old_thimble:bubbleStatement("uiCall_thimbleRelease", old_thimble, a, b, c, d)
+	if thimble1 ~= self then
+		if thimble1 then
+			thimble1:releaseThimble1(a, b, c, d)
+		end
+		context.thimble1 = self
+		self:bubbleStatement("uiCall_thimble1Take", self, a, b, c, d)
+		if not thimble2 then
+			self:bubbleStatement("uiCall_thimbleTopTake", self, a, b, c, d)
 		end
 
-		self.context.current_thimble = self
-
-		self:bubbleStatement("uiCall_thimbleTake", self, a, b, c, d)
-	end
-end
-
-
---- Like takeThimble(), but all logic will trigger (release and take events) even if the widget already has the thimble.
---	Callbacks:
---	* uiCall_thimbleRelease -> The old focus host, if applicable.
---	* uiCall_thimbleTake -> The new focus host.
--- @param a, b, c, d Generic arguments (same as takeThimble()).
--- @return Nothing.
-function _mt_widget:retakeThimble(a, b, c, d)
-	if not self.can_have_thimble then
-		error("this widget isn't allowed to be have the thimble (cursor).")
-	end
-
-	local old_thimble = self.context.current_thimble
-	self.context.current_thimble = false
-
-	if old_thimble then
-		old_thimble:bubbleStatement("uiCall_thimbleRelease", old_thimble, a, b, c, d)
-	end
-
-	self.context.current_thimble = self
-
-	self:bubbleStatement("uiCall_thimbleTake", self, a, b, c, d)
-end
-
-
---- Like takeThimble(), but doesn't error out if the widget is missing 'can_have_thimble'. It may still fail if the context is in captured mode.
--- @param a, b, c, d Generic arguments (same as takeThimble()).
--- @return True if takeThimble() was called, false if not.
-function _mt_widget:tryTakeThimble(a, b, c, d)
-	if not self.can_have_thimble then
-		return false
-	end
-
-	self:takeThimble(a, b, c, d)
-
-	return true
-end
-
-
---- Like retakeThimble(), but doesn't error out if the widget is missing 'can_have_thimble'. It may still fail if the context is in captured mode.
--- @param a, b, c, d Generic arguments (same as takeThimble()).
--- @return True if retakeThimble() was called, false if not.
-function _mt_widget:tryRetakeThimble(a, b, c, d)
-	if not self.can_have_thimble then
-		return false
-	end
-
-	self:retakeThimble(a, b, c, d)
-
-	return true
-end
-
-
-function _mt_widget:tryAscendingThimble(a, b, c, d)
-	local wid = self
-	while wid do
-		if wid.can_have_thimble then
-			wid:takeThimble(a, b, c, d)
-			return wid, true
+		if thimble2 then
+			thimble2:bubbleStatement("uiCall_thimble1Changed", thimble2, a, b, c, d)
 		end
-		wid = wid.parent
 	end
-
-	return nil, false
 end
 
 
-function _mt_widget:releaseThimble()
-	if self.context.current_thimble ~= self then
-		error("this widget isn't currently holding the thimble.")
+--- Assigns thimble2 to this widget. The current thimble2 widget, if present, is replaced. This widget must have
+--	'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget is
+--	already thimble2, nothing happens.
+-- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
+-- @return Nothing.
+function _mt_widget:takeThimble2(a, b, c, d)
+	--print("takeThimble2", debug.traceback())
+	_assertCanHaveThimble(self)
+
+	local context = self.context
+	local thimble1, thimble2 = context.thimble1, context.thimble2
+
+	if thimble2 ~= self then
+		if thimble1 and not thimble2 then
+			thimble1:bubbleStatement("uiCall_thimbleTopRelease", thimble1, a, b, c, d)
+		end
+		context.thimble2 = false
+		if thimble2 then
+			thimble2:bubbleStatement("uiCall_thimbleTopRelease", thimble2, a, b, c, d)
+			thimble2:bubbleStatement("uiCall_thimble2Release", thimble2, a, b, c, d)
+		end
+		context.thimble2 = self
+		self:bubbleStatement("uiCall_thimble2Take", self, a, b, c, d)
+		self:bubbleStatement("uiCall_thimbleTopTake", self, a, b, c, d)
+
+		if thimble1 then
+			thimble1:bubbleStatement("uiCall_thimble2Changed", thimble1, a, b, c, d)
+		end
+	end
+end
+
+
+--- Like takeThimble1(), but doesn't error out if the widget is missing 'can_have_thimble'. It may still fail if the context is in captured mode.
+-- @param a, b, c, d Generic arguments (same as takeThimble()).
+-- @return True if takeThimble() was called, nil if not.
+function _mt_widget:tryTakeThimble1(a, b, c, d)
+	if self.can_have_thimble then
+		self:takeThimble1(a, b, c, d)
+		return true
+	end
+end
+
+
+function _mt_widget:tryTakeThimble2(a, b, c, d)
+	if self.can_have_thimble then
+		self:takeThimble2(a, b, c, d)
+		return true
+	end
+end
+
+
+function _mt_widget:releaseThimble1(a, b, c, d)
+	local context = self.context
+	local thimble2 = context.thimble2
+
+	if context.thimble1 ~= self then
+		error("this widget doesn't have cursor focus.")
 	end
 
-	self.context.current_thimble = false
+	context.thimble1 = false
+	if not thimble2 then
+		self:bubbleStatement("uiCall_thimbleTopRelease", self, a, b, c, d)
+	end
+	self:bubbleStatement("uiCall_thimble1Release", self, a, b, c, d)
+	if thimble2 then
+		thimble2:bubbleStatement("uiCall_thimble1Changed", self, a, b, c, d)
+	end
+end
 
-	self:bubbleStatement("uiCall_thimbleRelease", self)
+
+function _mt_widget:releaseThimble2(a, b, c, d)
+	local context = self.context
+	local thimble1 = context.thimble1
+
+	if context.thimble2 ~= self then
+		error("this widget doesn't have cursor focus.")
+	end
+
+	context.thimble2 = false
+	self:bubbleStatement("uiCall_thimble2Release", self, a, b, c, d)
+	self:bubbleStatement("uiCall_thimbleTopRelease", self, a, b, c, d)
+	if thimble1 then
+		thimble1:bubbleStatement("uiCall_thimbleTopTake", thimble1, a, b, c, d)
+		thimble1:bubbleStatement("uiCall_thimble2Changed", thimble1, a, b, c, d)
+	end
+end
+
+
+function _mt_widget:tryReleaseThimble1(a, b, c, d)
+	if self.can_have_thimble and self.context.thimble1 == self then
+		self:releaseThimble1(a, b, c, d)
+	end
+end
+
+
+function _mt_widget:tryReleaseThimble2(a, b, c, d)
+	if self.can_have_thimble and self.context.thimble2 == self then
+		self:releaseThimble2(a, b, c, d)
+	end
 end
 
 
@@ -325,7 +376,6 @@ function _mt_widget:getTopWidgetInstance()
 	-- Catch cycles in the tree?
 	error("failed to get top-level widget instance after " .. failsafe .. " iterations.")
 end
-
 
 
 --- Depth-first search for the first widget which can take the thimble.
@@ -486,9 +536,11 @@ function _mt_widget:remove()
 		error("attempted to remove widget that is already " .. tostring(self._dead) .. ".")
 	end
 
+	local context = self.context
+
 	self._dead = "dying"
 
-	local locks = self.context.locks
+	local locks = context.locks
 	if locks[self.parent] then
 		uiShared.errLockedParent("remove")
 
@@ -504,7 +556,7 @@ function _mt_widget:remove()
 		end
 	end
 
-	if self.context.captured_focus == self then
+	if context.captured_focus == self then
 		-- XXX not sure if this should be an error or handled implicitly.
 		--error("cannot remove a widget that currently has the context focus captured.")
 		self:uncaptureFocus()
@@ -544,8 +596,6 @@ function _mt_widget:remove()
 		self.parent = false
 	-- No parent: top-level widget special handling
 	else
-		local context = self.context
-
 		-- IMPORTANT: Removing a top-level widget will not automatically trigger uiCall_rootPop().
 		-- Delete from 'instances' table
 		local seq = context.instances
@@ -571,13 +621,16 @@ function _mt_widget:remove()
 		end
 	end
 
-	-- Release the thimble, if applicable
-	if self.context.current_thimble == self then
-		self:releaseThimble()
+	-- Release thimbles, if applicable
+	if context.thimble2 == self then
+		self:releaseThimble2()
+	end
+	if context.thimble1 == self then
+		self:releaseThimble1()
 	end
 
 	-- Purge this widget from the async actions list.
-	local async = self.context.async
+	local async = context.async
 	for i = 1, #async, 3 do
 		if async[i] == self then
 			async[i] = false
@@ -587,8 +640,8 @@ function _mt_widget:remove()
 	end
 
 	-- If this widget is part of a Click-Sequence, remove it.
-	if self.context.cseq_widget == self then
-		self.context:clearClickSequence()
+	if context.cseq_widget == self then
+		context:clearClickSequence()
 	end
 
 	self._dead = "dead"
@@ -922,25 +975,6 @@ function _mt_widget:hasThisAncestor(wid)
 			return true
 		end
 		ancestor = ancestor.parent
-	end
-
-	return false
-end
-
-
-function _mt_widget:descendantHasThimble()
-	local current_thimble = self.context.current_thimble
-
-	for _, child in ipairs(self.children) do
-		if child == current_thimble then
-			return child
-
-		else
-			local retval = child:descendantHasThimble()
-			if retval then
-				return retval
-			end
-		end
 	end
 
 	return false

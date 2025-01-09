@@ -177,8 +177,8 @@ function def:uiCall_create(inst)
 		self.is_frame = true
 
 		-- Link to the last widget within this tree which held the thimble.
-		-- The link may become stale, so confirm the widget is still within the tree before using.
-		self.banked_thimble = false
+		-- The link may become stale, so confirm the widget is still alive and within the tree before using.
+		self.banked_thimble1 = false
 
 		self.cap_mode = "idle" -- idle, drag, resize
 		self.cap_axis_x = false -- -1, 0, 1
@@ -304,17 +304,17 @@ function def:uiCall_create(inst)
 end
 
 
-function def:_trySettingThimble()
+function def:_trySettingThimble1()
 	-- Check modal state before calling.
 
-	local wid_banked = self.banked_thimble
+	local wid_banked = self.banked_thimble1
 
 	if wid_banked and wid_banked.can_have_thimble and self:hasThisDescendant(wid_banked) then
-		wid_banked:takeThimble()
+		wid_banked:takeThimble1()
 	else
 		local content = self:findTag("frame_content")
 		if content and content.can_have_thimble then
-			content:takeThimble()
+			content:takeThimble1()
 		end
 	end
 end
@@ -389,9 +389,9 @@ function def:uiCap_mouseReleased(x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_thimbleTake(inst)
+function def:uiCall_thimble1Take(inst)
 	--print("thimbleTake", self.id, inst.id)
-	self.banked_thimble = inst
+	self.banked_thimble1 = inst
 end
 
 
@@ -469,15 +469,15 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 	-- If no widget has the thimble, or the thimble is held in a different widget tree, then
 	-- move the thimble to the container.
-	local current_thimble = self.context.current_thimble
+	local thimble1 = self.context.thimble1
 	local in_tree = false
 
-	if current_thimble and current_thimble:hasThisAncestor(self) then
+	if thimble1 and thimble1:hasThisAncestor(self) then
 		in_tree = true
 	end
 
 	if not in_tree then
-		self:_trySettingThimble()
+		self:_trySettingThimble1()
 
 		-- Callback for when the user clicks on the scroll dead-patch.
 		if self.wid_patchPressed and self:wid_patchPressed(x, y, button, istouch, presses) then
@@ -566,7 +566,7 @@ function def:uiCall_destroy(inst)
 			target:reorder("last")
 			target.parent:sortChildren()
 
-			target:_trySettingThimble()
+			target:_trySettingThimble1()
 			--]]
 		end
 

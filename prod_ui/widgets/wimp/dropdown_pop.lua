@@ -190,9 +190,6 @@ function def:uiCall_create(inst)
 		self.allow_hover = true
 		self.clip_scissor = true
 
-		-- This widget does not take the thimble.
-		-- The owner widget holds onto the thimble and forwards keyboard events through a callback.
-
 		self.sort_id = 6
 
 		widShared.setupDoc(self)
@@ -327,10 +324,6 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 
 	elseif scancode == "pagedown" then
 		self:moveNext(self.MN_page_jump_size, true)
-		return true
-
-	-- Suppress stepping the thimble while a menu is open.
-	elseif scancode == "tab" then
 		return true
 
 	elseif scancode == "escape" then

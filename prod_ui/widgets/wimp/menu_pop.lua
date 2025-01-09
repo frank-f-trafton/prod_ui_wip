@@ -147,7 +147,7 @@ local function assignSubMenu(item, client, set_selection)
 			client.last_open_group = item
 
 			-- Assign thimble to sub-menu
-			client_sub:tryTakeThimble()
+			client_sub:tryTakeThimble2()
 		end
 	end
 end
@@ -772,21 +772,10 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				root:runStatement("rootCall_destroyPopUp", self, "concluded")
 				-- NOTE: self is now dead.
 
-				root:runStatement("rootCall_restoreThimble", wid_ref)
-
-				-- If there is a reference widget, try and pass the thimble to it and clear
-				-- the thimble bank. We assume the reference widget, if it cannot hold the
-				-- thimble, has already restored the banked thimble via its cleanup callback.
-				-- This is a Plan B behavior in case that's not true.
-				if wid_ref then
-					wid_ref:tryTakeThimble()
-				end
-				root:runStatement("rootCall_clearThimbleBank", wid_ref)
-
 				return true
 			-- This pop-up is further down the menu chain.
 			-- We do not want to destroy the entire chain, just this one (and any others to the
-			-- right, which we took care of above) and move the thimble back.
+			-- right, which we took care of above).
 			else
 				local temp_chain_prev = self.chain_prev
 
@@ -794,7 +783,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false
-				temp_chain_prev:tryTakeThimble()
+				--temp_chain_prev:tryTakeThimble() -- XTHM
 
 				return true
 			end
@@ -809,7 +798,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false
-				temp_chain_prev:tryTakeThimble()
+				temp_chain_prev:tryTakeThimble2()
 
 				return true
 			end
@@ -898,7 +887,7 @@ end
 
 function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		self:tryTakeThimble()
+		self:tryTakeThimble2()
 	end
 end
 
@@ -911,7 +900,7 @@ local function pressedAndThimbleHandoff(self, wid)
 		self.press_busy = false
 	end
 
-	wid:tryTakeThimble()
+	wid:tryTakeThimble2()
 
 	if self.wid_chainRollOff then
 		self:wid_chainRollOff()
@@ -1078,7 +1067,7 @@ end
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble2()
 		end
 
 		local ax, ay = self:getAbsolutePosition()
@@ -1202,11 +1191,11 @@ function def:uiCall_update(dt)
 	local selected = self.menu.items[self.menu.index]
 
 	--[[
-	local cur_thimble = self.context.current_thimble
+	local cur_thimble2 = self.context.thimble2
 	local in_chain = false
 	local wid = self.chain_next
 	while wid do
-		if cur_thimble == wid then
+		if cur_thimble2 == wid then
 			in_chain = true
 			break
 		end

@@ -123,7 +123,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 			end
 		end
@@ -133,14 +133,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_thimbleTake(inst)
+function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:uiCall_thimbleRelease(inst)
+function def:uiCall_thimble1Release(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -274,7 +274,7 @@ def.render = function(self, ox, oy)
 	love.graphics.print(self.text, margin_w + offset_x, offset_y) -- Alignment
 
 	-- Caret.
-	if self.context.current_thimble == self then
+	if self.context.thimble1 == self then
 		love.graphics.rectangle("fill", margin_w + offset_x + self.text_w, offset_y, caret_w, font_h)
 	end
 

@@ -23,8 +23,7 @@ Opened:
 
 
 The menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance and
-mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and the
-pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
+mouse actions. The body manages the menu's contents.
 
 Unlike similar list widgets, ComboBoxes do not support menu-item icons. ComboBoxes and Dropdowns use the same
 drawer widget.
@@ -114,7 +113,7 @@ end
 
 
 -- Callback for when the user navigates away from this widget
-function def:wid_thimbleOff(str)
+function def:wid_thimble1Release(str)
 
 end
 
@@ -325,10 +324,6 @@ end
 
 function def:_openPopUpMenu()
 	if not self.wid_drawer then
-		if self:hasThimble() then
-			love.keyboard.setTextInput(false)
-		end
-
 		local skin = self.skin
 		local root = self:getTopWidgetInstance()
 		local menu = self.menu
@@ -377,10 +372,6 @@ function def:wid_popUpCleanup(reason_code)
 		self.context.current_pressed = false
 	end
 
-	if self:hasThimble() then
-		love.keyboard.setTextInput(true)
-	end
-
 	self.wid_drawer = false
 end
 
@@ -421,26 +412,31 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:uiCall_thimbleTake(inst)
+function def:uiCall_thimbleTopTake(inst)
 	if self == inst then
-		love.keyboard.setTextInput(not self.wid_drawer)
+		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:uiCall_thimbleRelease(inst)
-	print("def:uiCall_thimbleRelease", self, inst, self == inst)
-
+function def:uiCall_thimbleTopRelease(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
+	end
+end
 
+
+function def:uiCall_thimble1Release(inst)
+	print("def:uiCall_thimble1Release", self, inst, self == inst)
+
+	if self == inst then
 		if self.wid_drawer then
-			-- The drawer should not exist if the dropdown body does not have the UI thimble.
+			-- The drawer should not exist if the dropdown body does not have thimble1.
 			self:_closePopUpMenu(false)
 			return true
 		end
 
-		self:wid_thimbleOff(self.line_ed.line)
+		self:wid_thimble1Release(self.line_ed.line)
 	end
 end
 
@@ -543,7 +539,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble1()
 			print("hasInput", love.keyboard.hasTextInput())
 		end
 
@@ -673,9 +669,6 @@ def.skinners = {
 				self.vp2_w,
 				self.vp2_h
 			)
-
-			-- (Unlike DropDowns, do not draw the highlight if this widget has the thimble
-			-- and there is no drawer.)
 
 			-- Text editor component.
 			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert

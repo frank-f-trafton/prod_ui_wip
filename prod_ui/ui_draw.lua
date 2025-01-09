@@ -174,8 +174,9 @@ end
 --- The internal draw loop.
 -- @param wid The current widget being drawn.
 -- @param os_x, os_y X and Y offsets of the widget in screen space (for scissor boxes).
--- @param current_thimble Widget that currently has the UI thimble, if applicable.
-local function drawLoop(wid, os_x, os_y, current_thimble)
+-- @param thimble1 The current thimble1, if applicable.
+-- @param thimble2 The current thimble2, if applicable.
+local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
 	if wid.visible then
 		local do_layering = wid.ly_enabled
 
@@ -221,7 +222,7 @@ local function drawLoop(wid, os_x, os_y, current_thimble)
 				love.graphics.push("all") -- [s]
 
 				love.graphics.translate(child.x, child.y)
-				drawLoop(child, wx, wy, current_thimble)
+				drawLoop(child, wx, wy, thimble1, thimble2)
 
 				love.graphics.pop() -- []
 			end
@@ -232,7 +233,7 @@ local function drawLoop(wid, os_x, os_y, current_thimble)
 		wid:renderLast(os_x, os_y)
 
 		-- Render the thimble glow, if applicable.
-		if wid == current_thimble then
+		if wid == thimble1 or wid == thimble2 then
 			love.graphics.push("all") -- [s]
 
 			wid:renderThimble(os_x, os_y)
@@ -297,7 +298,6 @@ end
 -- @param x, y The top-left origin point.
 function uiDraw.drawContext(context, x, y)
 	local stack = context.stack
-	local current_thimble = context.current_thimble
 
 	-- Discard recycled canvas layers if the window's graphical dimensions have changed.
 	local win_w, win_h = love.graphics.getDimensions()
@@ -312,7 +312,7 @@ function uiDraw.drawContext(context, x, y)
 		love.graphics.push("all") -- [s]
 
 		love.graphics.translate(x + wid.x, y + wid.y)
-		drawLoop(wid, x, y, current_thimble)
+		drawLoop(wid, x, y, context.thimble1, context.thimble2)
 
 		love.graphics.pop() -- []
 	end

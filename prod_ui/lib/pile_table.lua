@@ -82,4 +82,13 @@ function M.swapElements(t, i, j)
 end
 
 
+function M.cloneArray(t)
+	local b = {}
+	for i, v in ipairs(t) do
+		b[i] = v
+	end
+	return b
+end
+
+
 return M

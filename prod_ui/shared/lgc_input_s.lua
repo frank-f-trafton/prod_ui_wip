@@ -262,8 +262,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 
 		local root = self:getTopWidgetInstance()
 		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
-		self:bubbleStatement("rootCall_bankThimble", self)
-		pop_up:tryTakeThimble()
+		pop_up:tryTakeThimble2()
 
 		-- Halt propagation
 		return true
@@ -367,6 +366,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble_b
 	lgcInputS.resetCaretBlink(self)
 
 	if button == 1 then
+		-- XTHM
 		-- WIP: this isn't quite right.
 		--[[
 		if not had_thimble_before and self.select_all_on_thimble_take then
@@ -415,15 +415,13 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble_b
 
 		local root = self:getTopWidgetInstance()
 
-		--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
+		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
 		local ax, ay = self:getAbsolutePosition()
 		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, ax + mouse_x, ay + mouse_y)
 		root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
-		pop_up:tryTakeThimble()
-
-		root:runStatement("rootCall_bankThimble", self)
+		pop_up:tryTakeThimble2()
 
 		-- Halt propagation
 		return true
@@ -563,7 +561,7 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 	end
 
 	-- Caret.
-	if color_caret and self == self.context.current_thimble and self.caret_is_showing then
+	if color_caret and self.caret_is_showing and self:hasAnyThimble() then
 		love.graphics.setColor(color_caret)
 		love.graphics.rectangle(
 			self.caret_fill,

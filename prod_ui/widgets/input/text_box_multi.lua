@@ -534,7 +534,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble1()
 		end
 
 		local mouse_x, mouse_y = self:getRelativePosition(x, y)
@@ -611,14 +611,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				local root = self:getTopWidgetInstance()
 
-				--print("text_box, current thimble", self.context.current_thimble, root.banked_thimble)
+				--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
 				local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
 				root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
-				pop_up:tryTakeThimble()
-
-				root:runStatement("rootCall_bankThimble", self)
+				pop_up:tryTakeThimble2()
 
 				-- Halt propagation
 				return true
@@ -667,7 +665,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_thimbleTake(inst)
+function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
 		self.line_ed.disp:resetCaretBlink()
@@ -675,7 +673,7 @@ function def:uiCall_thimbleTake(inst)
 end
 
 
-function def:uiCall_thimbleRelease(inst)
+function def:uiCall_thimble1Release(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
@@ -755,8 +753,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 			local root = self:getTopWidgetInstance()
 			local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
-			self:bubbleStatement("rootCall_bankThimble", self)
-			pop_up:tryTakeThimble()
+			pop_up:tryTakeThimble2()
 
 			-- Halt propagation
 			return true
@@ -993,7 +990,6 @@ function def:uiCall_destroy(inst)
 		local root = self:getTopWidgetInstance()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
 			root:runStatement("rootCall_destroyPopUp", self, "concluded")
-			root:runStatement("rootCall_restoreThimble", self)
 		end
 	end
 end
@@ -1024,7 +1020,7 @@ def.skinners = {
 			local font = disp.font
 
 			local res = line_ed.allow_input and skin.res_readwrite or skin.res_readonly
-			local has_thimble = self == self.context.current_thimble
+			local has_thimble = self == self.context.thimble1
 
 			-- XXX Debug renderer.
 			--[[
@@ -1082,7 +1078,7 @@ def.skinners = {
 
 			-- Draw highlight rectangles.
 			if line_ed:isHighlighted() then
-				local is_active = self == self.context.current_thimble
+				local is_active = self:hasAnyThimble()
 				local col_highlight = is_active and res.color_highlight_active or res.color_highlight
 				love.graphics.setColor(col_highlight)
 

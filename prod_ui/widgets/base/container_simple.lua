@@ -37,7 +37,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button <= 3 then
-				self:tryTakeThimble()
+				self:tryTakeThimble1()
 			end
 
 			self:wid_pressed(x, y, button, istouch, presses)

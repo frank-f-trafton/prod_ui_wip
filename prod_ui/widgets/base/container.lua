@@ -189,10 +189,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
 		end
 
-		-- Scroll bars were not activated: take thimble
+		-- Scroll bars were not activated: take thimble1
 		if (button == 1 or button == 2) and not handled then
 			if self.can_have_thimble then
-				self:takeThimble()
+				self:takeThimble1()
 			end
 			self:wid_pressed(x, y, button, istouch, presses)
 		end
@@ -234,7 +234,7 @@ end
 
 -- Catch focus step actions so that we can ensure the hosted widget is in view.
 -- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
-function def:uiCall_thimbleTake(inst, keep_in_view)
+function def:uiCall_thimble1Take(inst, keep_in_view)
 	if inst ~= self then -- don't try to center the container itself
 		if keep_in_view == "widget_in_view" then
 			self:keepWidgetInView(inst)

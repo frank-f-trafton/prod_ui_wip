@@ -203,9 +203,7 @@ local function invokePopUpMenu(self, x, y)
 	local pop_up = commonWimp.makePopUpMenu(self, cat_pop_up_def, x, y)
 	root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
-	pop_up:tryTakeThimble()
-
-	root:runStatement("rootCall_bankThimble", self)
+	pop_up:tryTakeThimble2()
 end
 
 
@@ -723,7 +721,7 @@ end
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble1()
 		end
 
 		local handled_scroll_bars = false

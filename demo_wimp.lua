@@ -620,7 +620,8 @@ function love.draw()
 
 		qp:print("current_hover:\t", context.current_hover)
 		qp:print("current_pressed:\t", context.current_pressed)
-		qp:print("current_thimble:\t", context.current_thimble)
+		qp:print("thimble1:\t", context.thimble1)
+		qp:print("thimble2:\t", context.thimble2)
 		qp:print("captured_focus:\t", context.captured_focus)
 
 		qp:down()

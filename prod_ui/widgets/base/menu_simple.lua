@@ -263,7 +263,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button <= 3 then
-				self:tryTakeThimble()
+				self:tryTakeThimble1()
 			end
 
 			if button == 1 then
@@ -350,7 +350,7 @@ def.skinners = {
 
 			-- Draw selection glow, if applicable
 			if menu.index > 0 then
-				local is_active = self == self.context.current_thimble
+				local is_active = self:hasAnyThimble()
 				local col = is_active and skin.color_active_glow or skin.color_select_glow
 				love.graphics.setColor(col)
 

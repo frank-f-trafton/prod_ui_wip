@@ -454,7 +454,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble1()
 		end
 
 		if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
@@ -690,7 +690,7 @@ def.skinners = {
 			-- Selection glow.
 			local sel_item = items[menu.index]
 			if sel_item then
-				local is_active = self == self.context.current_thimble
+				local is_active = self == self.context.thimble1
 				local col = is_active and skin.color_active_glow or skin.color_select_glow
 				love.graphics.setColor(col)
 				uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
