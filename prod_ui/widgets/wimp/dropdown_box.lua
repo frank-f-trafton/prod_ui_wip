@@ -349,16 +349,12 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:uiCall_thimbleRelease(inst)
-	print("def:uiCall_thimbleRelease", self, inst, self == inst)
+function def:uiCall_thimble1Release(inst)
+	print("def:uiCall_thimble1Release", self, inst, self == inst)
 
 	if self == inst then
 		if self.wid_drawer then
-			-- The pop-up menu should not exist if the dropdown body does not have the UI thimble.
-			-- This precludes opening a right-click context menu on an item in the pop-up menu, since
-			-- the context menu takes the thimble while it exists.
-			-- If you require opening context menus on list items, consider using a plain ListBox
-			-- widget instead.
+			-- The pop-up menu should not exist if the dropdown body does not have thimble1.
 			self:_closePopUpMenu(false)
 			return true
 		end
@@ -411,7 +407,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble1()
 		end
 
 		if button == 1 then
@@ -520,7 +516,7 @@ def.skinners = {
 			)
 
 			-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
-			if not self.wid_drawer and self.context.current_thimble == self then
+			if not self.wid_drawer and self.context.thimble1 == self then
 				love.graphics.setColor(res.color_highlight)
 				love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 			end

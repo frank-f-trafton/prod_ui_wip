@@ -136,11 +136,10 @@ end
 
 -- @param item The menu item containing the Pop-up menu definition.
 -- @param client The widget that owns the menu item.
--- @param bank_thimble When true, attempt to store the context's current thimble in the WIMP root. Only works if the bank variable is unused (nil).
 -- @param doctor_press When true, if user is pressing down a mouse button, transfer pressed state to the pop-up widget.
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
-local function makePopUpMenu(item, client, bank_thimble, take_thimble, doctor_press, set_selection) -- XXX name is too similar to commonWimp.makePopUpMenu()
+local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to commonWimp.makePopUpMenu()
 	lgcMenu.widgetConfigureMenuItems(item, item.pop_up_def)
 
 	-- Locate bottom of menu item in UI space.
@@ -159,10 +158,6 @@ local function makePopUpMenu(item, client, bank_thimble, take_thimble, doctor_pr
 
 	local pop_up = commonWimp.makePopUpMenu(client, item.pop_up_def, p_x, p_y)
 
-	if bank_thimble then
-		root:runStatement("rootCall_tryBankThimble", client.context.current_thimble)
-	end
-
 	if doctor_press then
 		root:runStatement("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
 	end
@@ -179,18 +174,15 @@ local function makePopUpMenu(item, client, bank_thimble, take_thimble, doctor_pr
 	pop_up.menu:setDefaultSelection()
 
 	if take_thimble then
-		pop_up:tryTakeThimble()
+		pop_up:tryTakeThimble2()
 	end
 end
 
 
-local function destroyPopUpMenu(client, reason_code, unbank_thimble)
+local function destroyPopUpMenu(client, reason_code)
 	local root = client:getTopWidgetInstance()
 
 	root:runStatement("rootCall_destroyPopUp", client, reason_code)
-	if unbank_thimble then
-		root:runStatement("rootCall_restoreThimble", client)
-	end
 
 	client.last_open = false
 	client.chain_next = false
@@ -213,15 +205,11 @@ end
 
 
 function def:wid_popUpCleanup(reason_code)
-	print("wid_popUpCleanup", "reason_code", reason_code, "current_thimble", self.context.current_thimble, "s==t", self == self.context.current_thimble)
-
+	print("wid_popUpCleanup", "reason_code", reason_code, "thimble1", self.context.thimble1, "thimble2", self.context.thimble2, "self", self)
 	--print(debug.traceback())
 
 	if reason_code == "concluded" then
 		setStateIdle(self)
-
-		local root = self:getTopWidgetInstance()
-		root:runStatement("rootCall_restoreThimble", self)
 	end
 
 	self.chain_next = false
@@ -443,7 +431,7 @@ function def:widCall_keyboardRunItem(item_t)
 
 	if item_t.selectable then
 		if item_t.pop_up_def then
-			makePopUpMenu(item_t, self, true, true, false, true)
+			makePopUpMenu(item_t, self, true, false, true)
 			self.state = "opened"
 			self.menu:setSelectedIndex(item_i)
 		end
@@ -463,7 +451,6 @@ function def:widCall_keyboardActivate()
 	else
 		-- If the menu bar is currently active, blank out the current selection and restore thimble state if possible.
 		if self.state == "opened" then
-			self:bubbleStatement("rootCall_restoreThimble", self)
 			setStateIdle(self)
 		else
 			-- Find first selectable item
@@ -477,7 +464,7 @@ function def:widCall_keyboardActivate()
 			end
 
 			if item_t and item_t.selectable and item_t.pop_up_def then
-				makePopUpMenu(item_t, self, true, true, false, true)
+				makePopUpMenu(item_t, self, true, false, true)
 				self.state = "opened"
 				self.menu:setSelectedIndex(item_i)
 			end
@@ -507,7 +494,7 @@ local function handleLeftRightKeys(self, key, scancode, isrepeat)
 	if selection_old ~= selection_new then
 		local item = self.menu.items[self.menu.index]
 		if item.selectable and item.pop_up_def then
-			makePopUpMenu(item, self, false, true, false, true)
+			makePopUpMenu(item, self, true, false, true)
 
 			self.menu:setSelectedIndex(selection_new)
 			return true
@@ -547,7 +534,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				wid.press_busy = self.press_busy
 				self.press_busy = false
-				wid:tryTakeThimble()
+				wid:tryTakeThimble2()
 
 				if self.wid_chainRollOff then
 					self:wid_chainRollOff()
@@ -596,7 +583,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 							destroyPopUpMenu(self, "continued", false)
 						end
 						if item_t.pop_up_def then
-							makePopUpMenu(item_t, self, false, false, false, false)
+							makePopUpMenu(item_t, self, false, false, false)
 						end
 					end
 				end
@@ -657,7 +644,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 							destroyPopUpMenu(self, "continued", false)
 						end
 						if item.pop_up_def then
-							makePopUpMenu(item, self, false, true, false, false)
+							makePopUpMenu(item, self, true, false, false)
 						end
 					end
 				end
@@ -718,15 +705,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 								destroyPopUpMenu(self, "concluded", true)
 
 							elseif item_t.pop_up_def then
-								-- Only bank the thimble if going from idle state.
-								local bank_thimble = (self.state == "idle")
-								makePopUpMenu(item_t, self, bank_thimble, true, false, false)
+								makePopUpMenu(item_t, self, true, false, false)
 								self:cacheUpdate(true)
 								-- Halt propagation
 								return true
 							end
-						-- Clicked on bare or non-interactive part of widget: close any open category
-						-- and restore banked thimble state.
+						-- Clicked on bare or non-interactive part of widget: close any open category.
 						else
 							destroyPopUpMenu(self, "concluded", true)
 							setStateIdle(self)
@@ -829,7 +813,6 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		-- If a pop-up menu exists that references this widget, destroy it.
-		-- Also try to unbank the thimble if it hasn't been done already.
 		if self.chain_next then
 			destroyPopUpMenu(self, "concluded", true)
 		end
@@ -931,11 +914,9 @@ def.skinners = {
 			local root = self:getTopWidgetInstance()
 
 			love.graphics.print("state: " .. self.state
-			.. "\nthimbled: " .. tostring(self == self.context.current_thimble)
 			.. "\npressed: " .. tostring(self == self.context.current_pressed)
 			.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
-			.. "\nself.menu.index: " .. tostring(self.menu.index)
-			.. "\n\nbanked thimble: " .. tostring(root.banked_thimble)
+			.. "\nself.menu.index: " .. tostring(self.menu.index))
 			,
 			ww, oy + 32)
 			 --]]

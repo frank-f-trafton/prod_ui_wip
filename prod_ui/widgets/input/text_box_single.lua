@@ -135,9 +135,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
-		local had_thimble_before = self == self.context.current_thimble
+		local had_thimble_before = self == self.context.thimble1
 		if button <= 3 then
-			self:tryTakeThimble()
+			self:tryTakeThimble1()
 		end
 
 		local mx, my = self:getRelativePosition(x, y)
@@ -163,7 +163,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_thimbleTake(inst)
+function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
 		lgcInputS.resetCaretBlink(self)
@@ -175,7 +175,7 @@ function def:uiCall_thimbleTake(inst)
 end
 
 
-function def:uiCall_thimbleRelease(inst)
+function def:uiCall_thimble1Release(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
 		if self.deselect_all_on_thimble_release then
@@ -270,7 +270,7 @@ def.skinners = {
 			-- Text editor component.
 			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
 
-			local is_active = self == self.context.current_thimble
+			local is_active = self == self.context.thimble1
 			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
 
 			lgcInputS.draw(

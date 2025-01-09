@@ -72,9 +72,7 @@ local function _createPopUpMenu(self)
 		local pop_up = commonWimp.makePopUpMenu(self, _pop_up_def, menu_x, menu_y)
 		root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
-		pop_up:tryTakeThimble()
-
-		root:runStatement("rootCall_bankThimble", self)
+		pop_up:tryTakeThimble2()
 
 		pop_up.userDestroy = _popUpDestroy
 

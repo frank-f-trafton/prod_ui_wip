@@ -18,6 +18,7 @@ local hoverLogic = require(REQ_PATH .. "common.hover_logic")
 local commonMath = require(REQ_PATH .. "common.common_math")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
+local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiLoad = require(REQ_PATH .. "ui_load")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
@@ -47,8 +48,8 @@ local function cb_keyDown(self, kc, sc, rep, latest)
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	-- Any widget has thimble focus: bubble up the key event
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_keyPressed", wid_cur, kc, sc, rep)
 
@@ -67,7 +68,7 @@ local function cb_keyUp(self, kc, sc)
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_keyReleased", wid_cur, kc, sc)
 
@@ -161,16 +162,18 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 	self.async_lock = true
 
 	-- Focus state. These point to widget tables when active, and are false otherwise.
-	-- hover: cursor hovers over this widget while no mouse buttons are pressed.
-	-- pressed: cursor is pressing down on this widget.
-	-- drag_dest: cursor hovers over this widget while `current_pressed` is active.
+	-- * hover: the cursor hovers over this widget while no mouse buttons are pressed.
+	-- * pressed: the cursor is pressing down on this widget.
+	-- * drag_dest: the cursor hovers over this widget while `current_pressed` is active.
 	--   Used for drag-and-drop.
-	-- current_thimble: this widget has the keyboard focus.
-	-- captured_focus: this widget is in focus capture mode.
+	-- * thimble1: a "concrete" widget that has keyboard focus.
+	-- * thimble2: an "ephemeral" widget that has keyboard focus. Takes priority over 'thimble1'.
+	-- * captured_focus: this widget is in focus capture mode.
 	self.current_hover = false
 	self.current_pressed = false
 	self.current_drag_dest = false
-	self.current_thimble = false
+	self.thimble1 = false
+	self.thimble2 = false
 	self.captured_focus = false
 
 	-- Window state.
@@ -397,6 +400,11 @@ function _mt_context:appendAsyncAction(wid, func, opt)
 end
 
 
+function _mt_context:getActiveThimble()
+	return self.thimble2 or self.thimble1
+end
+
+
 -- * LÖVE Callbacks *
 
 
@@ -544,7 +552,7 @@ function _mt_context:love_textinput(text)
 	end
 
 	-- Any widget has focus: bubble up the textInput event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_textInput", wid_cur, text)
 
@@ -846,7 +854,7 @@ function _mt_context:love_joystickpressed(joystick, button) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_joystickPressed", wid_cur, joystick, button)
 
@@ -865,7 +873,7 @@ function _mt_context:love_joystickreleased(joystick, button) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_joystickReleased", wid_cur, joystick, button)
 
@@ -884,7 +892,7 @@ function _mt_context:love_joystickaxis(joystick, axis, value) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_joystickAxis", wid_cur, joystick, axis, value)
 
@@ -903,7 +911,7 @@ function _mt_context:love_joystickhat(joystick, hat, direction) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_joystickHat", wid_cur, joystick, hat, direction)
 
@@ -922,7 +930,7 @@ function _mt_context:love_gamepadpressed(joystick, button) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_gamepadPressed", wid_cur, joystick, button)
 
@@ -941,7 +949,7 @@ function _mt_context:love_gamepadreleased(joystick, button) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_gamepadReleased", wid_cur, joystick, button)
 
@@ -960,7 +968,7 @@ function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 	end
 
 	-- Any widget has focus: bubble up the key event
-	local wid_cur = self.current_thimble
+	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:bubbleStatement("uiCall_gamepadAxis", wid_cur, joystick, axis, value)
 
@@ -1178,14 +1186,16 @@ function _mt_context:pushRoot(new_root)
 	if old_root then
 		old_root._ctx_banked_current_hover = self.current_hover
 		old_root._ctx_banked_current_pressed = self.current_pressed
-		old_root._ctx_banked_current_thimble = self.current_thimble
+		old_root._ctx_banked_thimble1 = self.thimble1
+		old_root._ctx_banked_thimble2 = self.thimble2
 		old_root._ctx_banked_captured_focus = self.captured_focus
 	end
 
 	-- Update the focus state
 	self.current_hover = new_root._ctx_banked_current_hover or false
 	self.current_pressed = new_root._ctx_banked_current_pressed or false
-	self.current_thimble = new_root._ctx_banked_current_thimble or false
+	self.thimble1 = new_root._ctx_banked_thimble1 or false
+	self.thimble2 = new_root._ctx_banked_thimble2 or false
 	self.captured_focus = new_root._ctx_banked_captured_focus or false
 
 	self.stack[#self.stack + 1] = new_root
@@ -1222,12 +1232,14 @@ function _mt_context:popRoot()
 	if new_root then
 		self.current_hover = new_root._ctx_banked_current_hover or false
 		self.current_pressed = new_root._ctx_banked_current_pressed or false
-		self.current_thimble = new_root._ctx_banked_current_thimble or false
+		self.thimble1 = new_root._ctx_banked_thimble1 or false
+		self.thimble2 = new_root._ctx_banked_thimble2 or false
 		self.captured_focus = new_root._ctx_banked_captured_focus or false
 	else
 		self.current_hover = false
 		self.current_pressed = false
-		self.current_thimble = false
+		self.thimble1 = false
+		self.thimble2 = false
 		self.captured_focus = false
 	end
 
@@ -1251,12 +1263,12 @@ function _mt_context:setRoot(instance)
 end
 
 
---- Like wid:releaseThimble(), but with fewer restrictions.
-function _mt_context:clearThimble()
-	if self.current_thimble then
-		local temp_thimble = self.current_thimble
-		self.current_thimble = false
-		temp_thimble:bubbleStatement("uiCall_thimbleRelease", self)
+function _mt_context:releaseThimbles()
+	if self.thimble2 then
+		self.thimble2:releaseThimble2()
+	end
+	if self.thimble1 then
+		self.thimble1:releaseThimble1()
 	end
 end
 

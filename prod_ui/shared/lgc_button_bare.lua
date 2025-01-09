@@ -122,7 +122,7 @@ function lgcButtonBare.uiCall_pointerPress(self, inst, x, y, button, istouch, pr
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
@@ -147,7 +147,7 @@ function lgcButtonBare.uiCall_pointerPressActivate(self, inst, x, y, button, ist
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
@@ -192,7 +192,7 @@ function lgcButtonBare.uiCall_pointerPressSticky(self, inst, x, y, button, istou
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then

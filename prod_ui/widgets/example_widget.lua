@@ -12,12 +12,37 @@
 	space.
 
 	Most callbacks "bubble up" from the affected widget to each of its ancestors. You can use
-	`if self == inst then...` to differentiate between events acting on self, or events bubbled up
+	`if self == inst then...` to differentiate between events acting on `self`, or events bubbled up
 	from a descendant. Widgets can halt callback-bubbling by returning a truthy value (not false,
 	not nil.)
 
 	uiCall_* -> intended to be used with bubbling and trickling mechanisms.
 	ui_* -> intended to be called directly.
+
+	---------------------------------------------------------------------------
+
+	The UI Thimble
+
+	"Thimble" is an arbitrary term for which widget currently has focus. The name was chosen because
+	it is unlikely to be mistaken for other kinds of focus: OS window focus, in-application frame focus,
+	mouse hover + press state, selections within menus, and so on. Generally, the widget which has the
+	thimble gets first dibs for keyboard input.
+
+	Lamentably, there are two thimbles: thimble1 and thimble2. The first is for "concrete" widgets,
+	while the second is for "ephemeral" components like pop-up menus. The *Top Thimble* is the highest
+	one that is currently assigned to a widget:
+
+	+--------------------------------------------+
+	| thimble1 | thimble2 | Top Thimble is...    |
+	+----------+----------+----------------------+
+	|          |          | Neither              |
+	|    x     |          | thimble1             |
+	|          |    x     | thimble2             |
+	|    x     |    x     | thimble2             |
+	+--------------------------------------------+
+
+	This system, confusing as it is, allows a concrete widget to know that it is still selected, even if
+	key events are temporarily directed to an ephemeral widget.
 
 	---------------------------------------------------------------------------
 
@@ -82,9 +107,7 @@
 
 	-> Context-to-widget behavior flags:
 
-	can_have_thimble: When truthy, widget can obtain the thimble (the UI cursor). Other truthy
-	values may be used as a hinting system for the root widget (for example, "auto" to cause
-	bubbled-up mouse presses to attempt thimble assignment.)
+	can_have_thimble: When true, widget can obtain the thimble (the UI cursor).
 
 	allow_hover: When true, widget is eligible for the 'current_hover' context state.
 	When a truthy value that isn't boolean true (by convention, "just-me"), the widget
@@ -426,18 +449,66 @@ function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 end
 
 
--- Bubbles when the thimble moves to a widget.
+-- Bubbles when a widget takes thimble1.
 -- @param inst The originating widget instance.
--- @param a, b, c, d Generic arguments which are supplied through widget:thimbleTake(). Usage depends on the implementation.
-function def:uiCall_thimbleTake(inst, a, b, c, d)
+-- @param a, b, c, d Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.
+function def:uiCall_thimble1Take(inst, a, b, c, d)
 
 end
 
 
--- Bubbles when the thimble leaves a widget.
+-- Bubbles when a widget takes thimble2.
 -- @param inst The originating widget instance.
--- @param a, b, c, d Generic arguments which are supplied through widget:thimbleTake(). Usage depends on the implementation.
-function def:uiCall_thimbleRelease(inst, a, b, c, d)
+-- @param a, b, c, d Generic arguments which are supplied through widget:thimble2Take(). Usage depends on the implementation.
+function def:uiCall_thimble2Take(inst, a, b, c, d)
+
+end
+
+
+-- Bubbles when a widget releases thimble1.
+-- @param inst The originating widget instance.
+-- @param a, b, c, d Generic arguments which are supplied through widget:thimble1Release(). Usage depends on the implementation.
+function def:uiCall_thimble1Release(inst, a, b, c, d)
+
+end
+
+
+-- Bubbles when a widget releases thimble2.
+-- @param inst The originating widget instance.
+-- @param a, b, c, d Generic arguments which are supplied through widget:thimble2Release(). Usage depends on the implementation.
+function def:uiCall_thimble2Release(inst, a, b, c, d)
+
+end
+
+
+-- Bubbles when a widget gains the top thimble.
+-- @param inst The originating widget instance.
+-- @param a, b, c, d Generic arguments which are supplied through widget methods. Usage depends on the implementation.
+function def:uiCall_thimbleTopTake(inst, a, b, c, d)
+
+end
+
+
+-- Bubbles when a widget loses the top thimble.
+-- @param inst The originating widget instance.
+-- @param a, b, c, d Generic arguments which are supplied through widget methods. Usage depends on the implementation.
+function def:uiCall_thimbleTopRelease(inst, a, b, c, d)
+
+end
+
+
+-- Bubbles in thimble2 when thimble1 changes.
+-- @param inst The originating widget instance.
+-- @param a, b, c, d Generic arguments which are supplied through widget methods. Usage depends on the implementation.
+function def:uiCall_thimble1Changed(inst, a, b, c, d)
+
+end
+
+
+-- Bubbles in thimble1 when thimble2 changes.
+-- @param inst The originating widget instance.
+-- @param a, b, c, d Generic arguments which are supplied through widget methods. Usage depends on the implementation.
+function def:uiCall_thimble2Changed(inst, a, b, c, d)
 
 end
 

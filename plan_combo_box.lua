@@ -56,7 +56,7 @@ function plan.make(parent)
 		combo_box.wid_action = function(self)
 			print("ComboBox: user pressed enter")
 		end
-		combo_box.wid_thimbleOff = function(self)
+		combo_box.wid_thimble1Release = function(self)
 			print("ComboBox: user navigated away from this widget")
 		end
 	end

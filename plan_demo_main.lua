@@ -132,7 +132,7 @@ function plan.make(parent)
 
 				local try_host = dialog:getOpenThimbleDepthFirst()
 				if try_host then
-					try_host:takeThimble()
+					try_host:takeThimble1()
 				end
 			end
 		end

@@ -64,12 +64,6 @@ function def:uiCall_create(inst)
 		-- Reference to the base of a pop-up menu, if active.
 		self.pop_up_menu = false
 
-		-- Used to save and restore the current thimble while some temporary pop-up menus are active.
-		-- nil: bank is not active
-		-- false: "nothing" is banked (so upon restoration, 'current_thimble' will become false)
-		-- table: Widget reference.
-		self.banked_thimble = nil
-
 		-- ToolTip state.
 		self.tool_tip = notifMgr.newToolTip(self.context.resources.fonts.p) -- XXX font ref needs to be refresh-able
 
@@ -134,14 +128,13 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	local context = self.context
+
 	-- User clicked on the root widget (whether directly or because other widgets aren't clickable).
 	if self == inst then
 		if button <= 3 then
-			-- Clicking on "nothing" should release the thimble and deselect any frames.
-			if self.context.current_thimble then
-				self.context.current_thimble:releaseThimble()
-			end
-
+			-- Clicking on "nothing" should release both thimbles and deselect any frames.
+			context:releaseThimbles()
 			self:setSelectedFrame(false)
 		end
 
@@ -160,15 +153,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				self:setSelectedFrame(wid, true)
 			end
 		end
-	-- This is bubbling up from an instance.
-	else
-		-- Auto thimble assignment
-		if inst.can_have_thimble == "auto" then
-			if button <= 3 and self.context.mouse_pressed_button == button then
-				inst:takeThimble()
-				self.banked_thimble = nil
-			end
-		end
 	end
 
 	-- Destroy pop-up menu if clicking outside of its lateral chain.
@@ -183,16 +167,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		* Or: the currently-pressed widget is not the pop-up menu, and the pop-up menu chain does not contain currently-pressed.
 		--]]
 		if not cur_pres or cur_pres == self or (pop_up ~= cur_pres and not widShared.chainHasThisWidget(pop_up, cur_pres)) then
-			-- Hack to discard banked thimble when user clicked on another widget which has just taken the thimble.
-			-- Also do so if we have clicked on nothing or the root widget.
-			if cur_pres == self.context.current_thimble
-			or not cur_pres or cur_pres == self
-			then
-				self.banked_thimble = nil
-			end
-
+			-- XTHM
 			clearPopUp(self, "concluded")
-			self.banked_thimble = nil
+			context:releaseThimbles()
 		end
 	end
 end
@@ -218,7 +195,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	-- Block keyboard-driven thimble actions if the mouse is currently pressed.
 	if not context.current_pressed then
 		-- Keypress-driven step events.
-		local wid_cur = context.current_thimble
+		local wid_cur = context.thimble2 or context.thimble1
 		local mods = context.key_mgr.mod
 
 		-- Tab through top-level frames.
@@ -245,10 +222,11 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 						dest_cur = stepHandlers.intergenerationalNext(wid_cur)
 					end
 
+					-- XTHM
 					if dest_cur then
-						dest_cur:takeThimble("widget_in_view")
+						dest_cur:takeThimble1("widget_in_view")
 					else
-						wid_cur:releaseThimble()
+						wid_cur:releaseThimble1()
 					end
 
 				-- Thimble action #1.
@@ -320,7 +298,7 @@ function def:setSelectedFrame(inst, set_new_order)
 	if inst then
 		inst:bringToFront()
 		if old_selected ~= inst then
-			inst:_trySettingThimble()
+			inst:_trySettingThimble1()
 
 			if set_new_order then
 				inst.order_id = self:rootCall_getFrameOrderID()
@@ -472,22 +450,9 @@ function def:rootCall_assignPopUp(inst, pop_up)
 
 	self.pop_up_menu = pop_up
 
+	-- XTHM
 	-- If the calling function is a uiCall_pointerPress event, it should return true to block further propagation
 	-- up. Otherwise, the window-frame and root pointerPress code may interfere with thimble and banking state.
-end
-
-
-local function thimbleUnbank(self)
-	if self.banked_thimble == false then
-		self.context:clearThimble()
-
-	elseif self.banked_thimble ~= nil then
-		if not self.banked_thimble._dead then
-			self.banked_thimble:tryTakeThimble()
-		end
-	end
-
-	self.banked_thimble = nil
 end
 
 
@@ -495,49 +460,10 @@ function def:rootCall_destroyPopUp(inst, reason_code)
 	--print("rootCall_destroyPopUp", inst, reason_code, debug.traceback())
 
 	if self.pop_up_menu then
-		--print("rootCall_destroyPopUp", "reason_code", reason_code, "self.pop_up_menu.banked_thimble", self.pop_up_banked_thimble)
+		--print("rootCall_destroyPopUp", "reason_code", reason_code)
 
 		clearPopUp(self, reason_code)
 	end
-end
-
-
---- Some non-pop-up widgets need to bank and restore the thimble, or set the initial banked state before invoking
---  a pop-up.
-function def:rootCall_bankThimble(inst)
-	--print("rootCall_bankThimble", inst, debug.traceback())
-
-	self.banked_thimble = inst
-
-	--print("self.banked_thimble", self.banked_thimble)
-end
-
-
---- Bank the thimble, but only if the current bank is inactive.
-function def:rootCall_tryBankThimble(inst)
-	--print("rootCall_tryBankThimble", inst, debug.traceback())
-
-	if self.banked_thimble == nil then
-		self.banked_thimble = inst
-		print("self.banked_thimble", self.banked_thimble)
-	else
-		print("(something is already banked.)")
-	end
-end
-
-
-function def:rootCall_restoreThimble(inst)
-	--print("rootCall_restoreThimble", inst, debug.traceback())
-	-- Important: this won't do anything if you bubble the event from a widget that has already been removed (since
-	-- its parent reference was wiped, the event goes nowhere). Call this before destroying the invoking widget.
-	-- Alternatively, get a reference to the top widget instance before destroying and call it with runStatement().
-	thimbleUnbank(self)
-end
-
-
-function def:rootCall_clearThimbleBank(inst)
-	--print("rootCall_clearThimbleBank", inst, debug.traceback())
-	self.banked_thimble = nil
 end
 
 

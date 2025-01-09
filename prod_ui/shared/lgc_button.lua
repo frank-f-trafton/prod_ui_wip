@@ -180,7 +180,7 @@ function lgcButton.uiCall_pointerPress(self, inst, x, y, button, istouch, presse
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
@@ -207,7 +207,7 @@ function lgcButton.uiCall_pointerPressActivate(self, inst, x, y, button, istouch
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
@@ -237,7 +237,7 @@ function lgcButton.uiCall_pointerPressDoubleClick(self, inst, x, y, button, isto
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
@@ -284,7 +284,7 @@ function lgcButton.uiCall_pointerPressSticky(self, inst, x, y, button, istouch, 
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
-					self:tryTakeThimble()
+					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
