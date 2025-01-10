@@ -159,16 +159,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local cur_pres = self.context.current_pressed
 	local pop_up = self.pop_up_menu
 
-	if pop_up then
-		--[[
-		Breakdown for the following line:
-		* There is no currently-pressed widget
-		* Or: the currently-pressed widget is the tree root (self)
-		* Or: the currently-pressed widget is not the pop-up menu, and the pop-up menu chain does not contain currently-pressed.
-		--]]
-		if not cur_pres or cur_pres == self or (pop_up ~= cur_pres and not widShared.chainHasThisWidget(pop_up, cur_pres)) then
-			clearPopUp(self, "concluded")
-		end
+	if pop_up and pop_up ~= cur_pres and not widShared.chainHasThisWidget(pop_up, cur_pres) then
+		clearPopUp(self, "concluded")
 	end
 end
 

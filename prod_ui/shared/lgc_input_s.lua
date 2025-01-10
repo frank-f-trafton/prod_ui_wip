@@ -411,9 +411,8 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble_b
 		end
 
 	elseif button == 2 then
-		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
-
 		local root = self:getTopWidgetInstance()
+		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
 		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 

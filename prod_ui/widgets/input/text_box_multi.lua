@@ -243,8 +243,6 @@ function def:uiCall_create(inst)
 		self.visible = true
 		self.allow_hover = true
 		self.can_have_thimble = true
-		self.clip_hover = false
-		self.clip_scissor = true
 
 		widShared.setupViewports(self, 2)
 

@@ -72,6 +72,9 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 
 	root:runStatement("rootCall_assignPopUp", self, pop_up)
 
+	-- XXX test
+	pop_up:setBlocking(true)
+
 	return pop_up
 end
 

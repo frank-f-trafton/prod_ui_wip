@@ -125,7 +125,7 @@
 	'clip_scissor_h', relative to the top-left of the widget.
 
 	NOTE: don't use math.huge with setScissor or intersectScissor. It will become zero. -2^16 and
-	2^17 seem okay.
+	2^17 seem OK.
 
 	clip_hover: When true, mouse hover and click detection against children is clipped to the
 	widget's body. When "manual", the clipping region is specified in 'clip_hover_x',
@@ -289,19 +289,31 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
---- An optional function that is called when the context is checking widgets for a press event.
---  Usage example: allowing the user to right-click through window resize sensors to a widget
---  underneath.
---  When not defined, a default function in the base widget metatable always returns true.
--- @param x Mouse X position in UI space.
--- @param y Mouse Y position in UI space.
+--- Called when the context is checking widgets for a mouse hover event. Returning true
+--	causes this widget to be selected for the event.
+-- @param mx, my Mouse X and Y positions in UI space.
+-- @param os_x, os_y Position offsets, such that 'mx + os_x' and 'my + os_y' give the widget's top-left
+--	position in UI space.
+-- @return true to select this widget, false/nil otherwise.
+--[[
+function def:ui_evaluateHover(mx, my, os_x, os_y)
+
+end
+--]]
+
+
+--- Called when the context is checking widgets for a mouse press event. Returning true
+--	causes this widget to be selected for the event.
+-- @param mx, my Mouse X and Y positions in UI space.
+-- @param os_x, os_y Position offsets, such that 'mx + os_x' and 'my + os_y' give the widget's top-left
+--	position in UI space.
 -- @param button The button pressed.
 -- @param istouch If this is a touch action.
 -- @param presses Number of times this button has been pressed consecutively (for checking double-clicks).
--- @return True if the widget should accept the press event, false if it should be treated as non-colliding.
+-- @return true to select this widget, false/nil otherwise.
 --[[
-function def:ui_evaluatePress(x, y, button, istouch, presses)
-	return true
+function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
+
 end
 --]]
 

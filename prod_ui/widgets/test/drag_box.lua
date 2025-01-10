@@ -19,7 +19,6 @@ function def:uiCall_create(inst)
 		self.allow_hover = true
 		self.can_have_thimble = false
 		self.allow_focus_capture = true
-		self.clip_hover = true
 
 		-- When true, reposition to be centered on the mouse pointer when dragged
 		self.center_on_pointer = false

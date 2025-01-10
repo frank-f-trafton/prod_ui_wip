@@ -113,13 +113,15 @@ _mt_widget.ly_fn_start = dummyFunc -- XXX untested
 _mt_widget.ly_fn_end = dummyFunc -- XXX untested
 
 
-function _mt_widget:ui_evaluatePress(x, y, button, istouch, presses)
-	return true
+function _mt_widget:ui_evaluateHover(mx, my, os_x, os_y)
+	local wx, wy = self.x + os_x, self.y + os_y
+	return mx >= wx and my >= wy and mx < wx + self.w and my < wy + self.h
 end
 
 
-function _mt_widget:ui_evaluateHover(x, y) -- XXX untested
-	return true
+function _mt_widget:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
+	local wx, wy = self.x + os_x, self.y + os_y
+	return mx >= wx and my >= wy and mx < wx + self.w and my < wy + self.h
 end
 
 
