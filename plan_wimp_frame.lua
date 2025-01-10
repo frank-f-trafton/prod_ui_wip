@@ -58,7 +58,7 @@ function plan.make(parent)
 			checkbox.wid_buttonAction = function(self)
 				local frame = commonWimp.getFrame(self)
 				if frame then
-					frame:debugVisibleSensors(self.checked)
+					frame.DEBUG_show_resize_range = not not self.checked
 				end
 			end
 			checkbox:reshape()
