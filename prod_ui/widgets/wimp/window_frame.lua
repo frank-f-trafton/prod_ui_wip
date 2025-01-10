@@ -3,7 +3,7 @@
 
 wimp/window_frame: A WIMP-style window frame.
 
-........................  <─ Invisible resize sensor
+........................  <─ Resize area
 .┌────────────────────┐.
 .│       Window [o][x]│.  <─ Window frame header, integrated drag sensor and control buttons
 .├────────────────────┤.
@@ -58,15 +58,42 @@ local def = {
 }
 
 
-function def:debugVisibleSensors(enabled)
-	--print("debugVisibleSensors", self.id)
-	for i, child in ipairs(self.children) do
-		--print(self, i, child, enabled)
-		if child.is_frame_sensor then
-			child.visible = not not enabled
-			--print("new child.visible", child.visible)
+-- We need to catch mouse hover+press events that occur in the frame's resize area.
+function def:ui_evaluateHover(mx, my, os_x, os_y)
+	local wx, wy = self.x + os_x, self.y + os_y
+	local rp = self.resize_padding
+	return mx >= wx - rp and my >= wy - rp and mx < wx + self.w + rp and my < wy + self.h + rp
+end
+
+
+function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
+	local wx, wy, ww, wh = self.x + os_x, self.y + os_y, self.w, self.h
+	local rp = self.resize_padding
+	-- in frame + padding area
+	if mx >= wx - rp and my >= wy - rp and mx < wx + ww + rp and my < wy + wh + rp then
+		-- just in frame
+		if mx >= wx and my >= wy and mx < wx + ww and my < wy + wh then
+			return true
+		-- just in padding area: allow clicking through the resize sensor with mouse buttons
+		-- 2, 3, etc.
+		else
+			return button == 1
 		end
 	end
+end
+
+
+local function getCursorCode(a_x, a_y)
+	return (a_y == 0 and a_x ~= 0) and "sizewe" -- -
+	or (a_y ~= 0 and a_x == 0) and "sizens" -- |
+	or ((a_y == 1 and a_x == 1) or (a_y == -1 and a_x == -1)) and "sizenwse" -- \
+	or ((a_y == -1 and a_x == 1) or (a_y == 1 and a_x == -1)) and "sizenesw" -- /
+	or false -- unknown
+
+	-- [XXX 16] on Fedora 36/37 + GNOME, a different cursor design is used for diagonal resize
+	-- which has four orientations (up-left, up-right, down-left, down-right) instead
+	-- of just two. It looks a bit incorrect when resizing a window from the bottom-left
+	-- or bottom-right corners.
 end
 
 
@@ -176,6 +203,11 @@ function def:uiCall_create(inst)
 		-- Differentiates between 2nd-gen frame containers and other stuff at the same hierarchical level.
 		self.is_frame = true
 
+		self.mouse_in_resize_zone = false
+
+		-- Set true to draw a red box around the frame's resize area.
+		--self.DEBUG_show_resize_range
+
 		-- Link to the last widget within this tree which held the thimble.
 		-- The link may become stale, so confirm the widget is still alive and within the tree before using.
 		self.banked_thimble1 = false
@@ -235,18 +267,15 @@ function def:uiCall_create(inst)
 		self:skinSetRefs()
 		self:skinInstall()
 
+		self.resize_padding = self.skin.sensor_resize_pad
+
 		-- Layout rectangle
 		uiLayout.initLayoutRectangle(self)
-
-		-- Make one big single resize sensor.
-		local resize_sensor = self:addChild("sensor_resize")
-		resize_sensor.sensor_pad = self.skin.sensor_resize_pad
 
 		-- Don't let inter-generational thimble stepping leave this widget's children.
 		self.block_step_intergen = true
 
 		-- Header (title) bar, with some controls
-		--local frame_header = self:addChild("base/container_simple")
 		local frame_header = self:addChild("wimp/frame_header")
 
 		-- Add header to layout sequence
@@ -369,6 +398,33 @@ function def:frameCall_close(inst)
 end
 
 
+function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == inst then
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+		local axis_x = mx < 0 and -1 or mx >= self.w and 1 or 0
+		local axis_y = my < 0 and -1 or my >= self.h and 1 or 0
+		if not (axis_x == 0 and axis_y == 0) then
+			self.mouse_in_resize_zone = true
+			local cursor_id = getCursorCode(axis_x, axis_y)
+			self:setCursorLow(cursor_id)
+		else
+			if self.mouse_in_resize_zone then
+				self.mouse_in_resize_zone = false
+				self:setCursorLow()
+			end
+		end
+	end
+end
+
+
+function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == inst then
+		self.mouse_in_resize_zone = false
+		self:setCursorLow()
+	end
+end
+
+
 function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
 	if self.cap_mode == "resize" then
 		return widShared.uiCapEvent_resize_mouseMoved(self, self.cap_axis_x, self.cap_axis_y, x, y, dx, dy, istouch)
@@ -445,7 +501,7 @@ end
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	--print("window-frame pointer-press", self, inst, x, y, button)
-	-- Resize and drag actions are primarily initiated by child sensors.
+	-- Drag actions are primarily initiated by child sensors.
 
 	-- Press events that create a pop-up menu should block propagation (return truthy)
 	-- so that this and the WIMP root do not cause interference.
@@ -467,30 +523,38 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	root:setSelectedFrame(self, true)
 	self.order_id = root:runStatement("rootCall_getFrameOrderID")
 
-	-- If no widget has the thimble, or the thimble is held in a different widget tree, then
-	-- move the thimble to the container.
+	-- If thimble1 is not in this widget tree, move it to the container.
 	local thimble1 = self.context.thimble1
-	local in_tree = false
-
-	if thimble1 and thimble1:hasThisAncestor(self) then
-		in_tree = true
+	if not thimble1 or not thimble1:hasThisAncestor(self) then
+		self:_trySettingThimble1()
 	end
 
-	if not in_tree then
-		self:_trySettingThimble1()
-
-		-- Callback for when the user clicks on the scroll dead-patch.
-		if self.wid_patchPressed and self:wid_patchPressed(x, y, button, istouch, presses) then
-			-- ...
-
-		-- Dragging can also be started by clicking on the container body if 'allow_body_drag' is truthy.
-		elseif self.allow_body_drag then
-			self.cap_mode = "drag"
-			self.cap_mouse_orig_a_x = x
-			self.cap_mouse_orig_a_y = y
-			self:captureFocus()
+	if self == inst then
+		-- If the mouse pointer is outside the frame bounds, then this is a resize action.
+		local mx, my = self:getRelativePosition(x, y)
+		if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
+			local axis_x = mx < 0 and -1 or mx >= self.w and 1 or 0
+			local axis_y = my < 0 and -1 or my >= self.h and 1 or 0
+			if not (axis_x == 0 and axis_y == 0) then
+				self:initiateResizeMode(axis_x, axis_y)
+			end
 		end
 	end
+
+	-- XXX: These should be initiated with callbacks from the content container.
+	--[=[
+	-- Callback for when the user clicks on the scroll dead-patch.
+	if self.wid_patchPressed and self:wid_patchPressed(x, y, button, istouch, presses) then
+		-- ...
+
+	-- Dragging can also be started by clicking on the container body if 'allow_body_drag' is truthy.
+	elseif self.allow_body_drag then
+		self.cap_mode = "drag"
+		self.cap_mouse_orig_a_x = x
+		self.cap_mouse_orig_a_y = y
+		self:captureFocus()
+	end
+	--]=]
 end
 
 
@@ -597,6 +661,22 @@ def.skinners = {
 
 			love.graphics.setColor(skin.color_body)
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+
+			if self.DEBUG_show_resize_range then
+				local rp = self.resize_padding
+				love.graphics.push("all")
+
+				love.graphics.setScissor()
+				love.graphics.setColor(0.8, 0.1, 0.2, 0.8)
+
+				love.graphics.setLineWidth(1)
+				love.graphics.setLineJoin("miter")
+				love.graphics.setLineStyle("rough")
+
+				love.graphics.rectangle("line", 0.5 - rp, 0.5 - rp, self.w + rp*2 - 1, self.h + rp*2 - 1)
+
+				love.graphics.pop()
+			end
 		end,
 	},
 }
