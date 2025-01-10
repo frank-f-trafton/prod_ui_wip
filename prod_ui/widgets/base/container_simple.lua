@@ -22,8 +22,8 @@ function def:uiCall_create(inst)
 		self.visible = true
 		self.allow_hover = true
 		self.can_have_thimble = false
-		self.clip_hover = false
-		self.clip_scissor = false
+		--self.clip_hover = true
+		--self.clip_scissor = true
 
 		widShared.setupMinMaxDimensions(self)
 

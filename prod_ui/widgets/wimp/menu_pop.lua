@@ -87,6 +87,24 @@ widShared.scrollSetMethods(def)
 def.arrange = lgcMenu.arrangeListVerticalTB
 
 
+-- XXX: test
+local function _blocking_ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
+	return true
+end
+
+
+-- XXX: test
+function def:setBlocking(enabled)
+	if enabled then
+		self.is_blocking_clicks = true
+		self.ui_evaluatePress = _blocking_ui_evaluatePress
+	else
+		self.is_blocking_clicks = false
+		self.ui_evaluatePress = nil
+	end
+end
+
+
 -- * Internal: Sub-menu creation and teardown *
 
 
@@ -644,6 +662,9 @@ function def:uiCall_create(inst)
 
 		lgcMenu.instanceSetup(self)
 
+		-- XXX: test
+		self.is_blocking_clicks = false
+
 		-- Do not block this widget while a modal frame is active.
 		self.modal_level = math.huge
 
@@ -1066,6 +1087,15 @@ end
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
+		-- XXX: Test
+		if self.is_blocking_clicks then
+			local mx, my = self:getRelativePosition(x, y)
+			if not (mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h) then
+				self.context.current_pressed = false
+				return
+			end
+		end
+
 		if button <= 3 then
 			self:tryTakeThimble2()
 		end

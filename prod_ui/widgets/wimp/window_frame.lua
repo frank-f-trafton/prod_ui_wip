@@ -169,8 +169,8 @@ function def:uiCall_create(inst)
 		self.allow_hover = true
 		self.can_have_thimble = false
 		self.allow_focus_capture = true
-		self.clip_hover = false
-		self.clip_scissor = false
+		--self.clip_hover = false
+		--self.clip_scissor = false
 		self.sort_id = 3
 
 		-- Differentiates between 2nd-gen frame containers and other stuff at the same hierarchical level.

@@ -38,8 +38,10 @@ end
 
 
 --- Allow clicks that are not the primary mouse button to pass through the sensor.
-function def:ui_evaluatePress(x, y, button, istouch, presses)
-	return button == 1
+function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
+	local wx, wy = self.x + os_x, self.y + os_y
+	return mx >= wx and my >= wy and mx < wx + self.w and my < wy + self.h
+		and button == 1
 end
 
 
