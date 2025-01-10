@@ -193,7 +193,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	-- Block keyboard-driven thimble actions if the mouse is currently pressed.
 	if not context.current_pressed then
 		-- Keypress-driven step events.
-		local wid_cur = context.thimble2 or context.thimble1
+		-- Only runs when thimble1 is assigned and thimble2 is not.
+		local wid_cur = not context.thimble2 and context.thimble1
 		local mods = context.key_mgr.mod
 
 		-- Tab through top-level frames.
@@ -220,7 +221,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 						dest_cur = stepHandlers.intergenerationalNext(wid_cur)
 					end
 
-					-- XTHM
 					if dest_cur then
 						dest_cur:takeThimble1("widget_in_view")
 					else
