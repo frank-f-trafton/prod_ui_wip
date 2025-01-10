@@ -1090,7 +1090,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- XXX: Test
 		if self.is_blocking_clicks then
 			local mx, my = self:getRelativePosition(x, y)
-			if not (mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h) then
+			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
 				self.context.current_pressed = false
 				return
 			end
