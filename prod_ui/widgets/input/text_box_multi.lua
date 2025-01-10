@@ -582,7 +582,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						self.update_flag = true
 
 					elseif context.cseq_presses == 2 then
-
 						self.click_line = line_ed.car_line
 						self.click_byte = line_ed.car_byte
 
@@ -592,7 +591,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						self.update_flag = true
 
 					elseif context.cseq_presses == 3 then
-
 						self.click_line = line_ed.car_line
 						self.click_byte = line_ed.car_byte
 

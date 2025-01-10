@@ -208,7 +208,6 @@ local function activateCommand(client, item)
 
 	local root = client:getTopWidgetInstance()
 	root:runStatement("rootCall_destroyPopUp", client, "concluded")
-	root:runStatement("rootCall_restoreThimble", client)
 end
 
 

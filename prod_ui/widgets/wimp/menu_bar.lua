@@ -150,10 +150,8 @@ local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selec
 
 	local root = client:getTopWidgetInstance()
 
-	-- If this client already has a pop-up opened, close it with the "continued" reason code
-	-- so that we don't mess up the existing banked thimble state.
 	if client.chain_next then
-		root:runStatement("rootCall_destroyPopUp", client, "continued")
+		root:runStatement("rootCall_destroyPopUp", client)
 	end
 
 	local pop_up = commonWimp.makePopUpMenu(client, item.pop_up_def, p_x, p_y)
@@ -376,7 +374,7 @@ function def:widHook_pressed(tbl, key, scancode, isrepeat)
 		if key == "f10" then
 			local root = self:getTopWidgetInstance()
 			if root.pop_up_menu then
-				destroyPopUpMenu(self, "concluded", true)
+				destroyPopUpMenu(self, "concluded")
 				setStateIdle(self)
 
 				key_mgr:stunRecent()
@@ -446,7 +444,7 @@ function def:widCall_keyboardActivate()
 	-- If there is already a pop-up menu (whether chained to the menu bar or just in general), destroy it
 	local root = self:getTopWidgetInstance()
 	if root.pop_up_menu then
-		destroyPopUpMenu(self, "concluded", true)
+		destroyPopUpMenu(self, "concluded")
 		setStateIdle(self)
 	else
 		-- If the menu bar is currently active, blank out the current selection and restore thimble state if possible.
@@ -499,7 +497,7 @@ local function handleLeftRightKeys(self, key, scancode, isrepeat)
 			self.menu:setSelectedIndex(selection_new)
 			return true
 		else
-			destroyPopUpMenu(self, "concluded", false)
+			destroyPopUpMenu(self, "concluded")
 			setStateIdle(self)
 
 			return true
@@ -580,7 +578,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 				if item_t.pop_up_def and self.state ~= "idle" then
 					if self.last_open ~= item_t then
 						if self.chain_next then
-							destroyPopUpMenu(self, "continued", false)
+							destroyPopUpMenu(self)
 						end
 						if item_t.pop_up_def then
 							makePopUpMenu(item_t, self, false, false, false)
@@ -641,7 +639,7 @@ function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 					if self.last_open ~= item then
 						if self.chain_next then
-							destroyPopUpMenu(self, "continued", false)
+							destroyPopUpMenu(self)
 						end
 						if item.pop_up_def then
 							makePopUpMenu(item, self, true, false, false)
@@ -682,7 +680,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			then
 				-- Menu's already opened: close it
 				if self.state == "opened" then
-					destroyPopUpMenu(self, "concluded", true)
+					destroyPopUpMenu(self)
 					setStateIdle(self)
 					self.MN_item_hover = false
 
@@ -702,7 +700,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						if item_t then
 							-- If this menu already has a pop-up menu opened, close it and restore thimble state.
 							if self.chain_next then
-								destroyPopUpMenu(self, "concluded", true)
+								destroyPopUpMenu(self)
 
 							elseif item_t.pop_up_def then
 								makePopUpMenu(item_t, self, true, false, false)
@@ -712,7 +710,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 							end
 						-- Clicked on bare or non-interactive part of widget: close any open category.
 						else
-							destroyPopUpMenu(self, "concluded", true)
+							destroyPopUpMenu(self)
 							setStateIdle(self)
 						end
 
@@ -814,7 +812,7 @@ function def:uiCall_destroy(inst)
 	if self == inst then
 		-- If a pop-up menu exists that references this widget, destroy it.
 		if self.chain_next then
-			destroyPopUpMenu(self, "concluded", true)
+			destroyPopUpMenu(self, "concluded")
 		end
 		widShared.chainUnlink(self)
 	end

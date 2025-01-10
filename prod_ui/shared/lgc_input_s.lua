@@ -260,7 +260,6 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
-		local root = self:getTopWidgetInstance()
 		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
 		pop_up:tryTakeThimble2()
 

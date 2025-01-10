@@ -99,7 +99,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 							-- Press action
 							self:wid_buttonActionAux()
 
-							-- XTHM
 							-- Halt propagation (to prevent snatching the thimble
 							-- from the newly-made pop-up menu).
 							return true

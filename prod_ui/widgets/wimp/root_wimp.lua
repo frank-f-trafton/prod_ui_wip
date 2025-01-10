@@ -440,18 +440,15 @@ function def:rootCall_assignPopUp(inst, pop_up)
 
 	self.pop_up_menu = pop_up
 
-	-- XTHM
 	-- If the calling function is a uiCall_pointerPress event, it should return true to block further propagation
 	-- up. Otherwise, the window-frame and root pointerPress code may interfere with thimble and banking state.
 end
 
 
 function def:rootCall_destroyPopUp(inst, reason_code)
-	--print("rootCall_destroyPopUp", inst, reason_code, debug.traceback())
+	--print("rootCall_destroyPopUp", inst, self.pop_up_menu, reason_code, debug.traceback())
 
 	if self.pop_up_menu then
-		--print("rootCall_destroyPopUp", "reason_code", reason_code)
-
 		clearPopUp(self, reason_code)
 	end
 end
