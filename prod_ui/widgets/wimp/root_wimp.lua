@@ -133,7 +133,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	-- User clicked on the root widget (whether directly or because other widgets aren't clickable).
 	if self == inst then
 		if button <= 3 then
-			-- Clicking on "nothing" should release both thimbles and deselect any frames.
+			-- Clicking on "nothing" should release the thimbles and deselect any frames.
 			context:releaseThimbles()
 			self:setSelectedFrame(false)
 		end
@@ -167,9 +167,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		* Or: the currently-pressed widget is not the pop-up menu, and the pop-up menu chain does not contain currently-pressed.
 		--]]
 		if not cur_pres or cur_pres == self or (pop_up ~= cur_pres and not widShared.chainHasThisWidget(pop_up, cur_pres)) then
-			-- XTHM
 			clearPopUp(self, "concluded")
-			context:releaseThimbles()
 		end
 	end
 end
