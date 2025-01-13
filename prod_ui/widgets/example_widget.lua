@@ -110,9 +110,6 @@
 	can_have_thimble: When true, widget can obtain the thimble (the UI cursor).
 
 	allow_hover: When true, widget is eligible for the 'current_hover' context state.
-	When a truthy value that isn't boolean true (by convention, "just-me"), the widget
-	is eligible but not its children (as in, the mouse will click through the children
-	and interact with the parent).
 	When false, it and all of its descendants are skipped.
 
 

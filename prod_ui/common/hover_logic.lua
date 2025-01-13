@@ -8,53 +8,42 @@ local commonMath = require(REQ_PATH .. "common_math")
 
 
 --- Recursive loop for determining hover-over state for widgets.
--- @param x Mouse X position in UI space.
--- @param y Mouse Y position in UI space.
--- @param os_x X offset for this widget in UI space, such that (x - os_x) is the left side of the widget body.
--- @param os_y Y offset for this widget in UI space, such that (y - os_y) is the top side of the widget body.
+-- @param x, y Mouse X and Y positions in UI space.
+-- @param os_x, os_y X and Y offsets for this widget in UI space, such that (x - os_x) and (y - os_y) are the top-left side of the widget body.
 -- @param widget The widget being considered.
--- @param x1 Left clipping boundary.
--- @param y1 Top clipping boundary.
--- @param x2 Right clipping boundary.
--- @param y2 Bottom clipping boundary.
--- @return A widget that the mouse is hovering over, or nil if no match was found.
+-- @param x1, y1, x2, y2 Left, top, right and bottom clipping boundaries.
+-- @return The widget that the mouse is hovering over, or nil if no match was found.
 local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
-	if widget.allow_hover then
-		-- Evaluate children first, front-to-back.
-		if widget.allow_hover == true and #widget.children > 0 then
-
-			-- Prevents clicking on descendant rectangle areas that are out of bounds of the parent.
-			local xx1, yy1, xx2, yy2 = x1, y1, x2, y2
-
+	if widget.allow_hover
+	and x >= x1 and y >= y1 and x < x2 and y < y2
+	and widget:ui_evaluateHover(x, y, os_x, os_y)
+	then
+		-- Evaluate descendants front-to-back, depth-first.
+		if #widget.children > 0 then
+			-- Update the hover clipping rectangle for recursive calls
 			if widget.clip_hover == true then
-				xx1 = math.max(xx1, os_x + widget.x)
-				yy1 = math.max(yy1, os_y + widget.y)
-				xx2 = math.min(xx2, os_x + widget.x + widget.w)
-				yy2 = math.min(yy2, os_y + widget.y + widget.h)
+				x1 = math.max(x1, os_x + widget.x)
+				y1 = math.max(y1, os_y + widget.y)
+				x2 = math.min(x2, os_x + widget.x + widget.w)
+				y2 = math.min(y2, os_y + widget.y + widget.h)
 
 			elseif widget.clip_hover == "manual" then
-				xx1 = math.max(xx1, os_x + widget.x + widget.clip_hover_x)
-				yy1 = math.max(yy1, os_y + widget.y + widget.clip_hover_y)
-				xx2 = math.min(xx2, os_x + widget.x + widget.clip_hover_x + widget.clip_hover_w)
-				yy2 = math.min(yy2, os_y + widget.y + widget.clip_hover_y + widget.clip_hover_h)
+				x1 = math.max(x1, os_x + widget.x + widget.clip_hover_x)
+				y1 = math.max(y1, os_y + widget.y + widget.clip_hover_y)
+				x2 = math.min(x2, os_x + widget.x + widget.clip_hover_x + widget.clip_hover_w)
+				y2 = math.min(y2, os_y + widget.y + widget.clip_hover_y + widget.clip_hover_h)
 			end
 
 			local children = widget.children
 			for i = #children, 1, -1 do
 				local wid = children[i]
-				local sub = _hoverLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid, xx1, yy1, xx2, yy2)
+				local sub = _hoverLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid, x1, y1, x2, y2)
 				if sub then
 					return sub
 				end
 			end
 		end
-
-		-- No child responded, children are excluded, or widget has no children.
-		if x >= x1 and y >= y1 and x < x2 and y < y2
-		and widget:ui_evaluateHover(x, y, os_x, os_y)
-		then
-			return widget
-		end
+		return widget
 	end
 end
 
@@ -63,47 +52,45 @@ end
 local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, istouch, presses)
 	--[[
 	Press detection used to piggy-back off of the hover code: only the current-hovered widget could be
-	pressed. It's now split into a separate function and called for every press. While not as efficient,
+	pressed. It's now split into a separate function, and called for every press. While not as efficient,
 	it allows the user to click through some widgets in special cases.
 
-	All widgets down the lineage chain must still have the 'allow_hover' field set, and the method
+	All widgets in the hierarchy must still have the 'allow_hover' field set, and the method
 	'ui_evaluatePress' must evaluate to true.
 	--]]
 
-	if widget.allow_hover then
-		-- Evaluate children first, front-to-back.
-		if widget.allow_hover == true and #widget.children > 0 then
-			local xx1, yy1, xx2, yy2 = x1, y1, x2, y2
-
+	if widget.allow_hover
+	and x >= x1 and y >= y1 and x < x2 and y < y2
+	and widget:ui_evaluatePress(x, y, os_x, os_y, button, istouch, presses)
+	then
+		-- Evaluate descendants front-to-back, depth-first.
+		if #widget.children > 0 then
+			-- Update the press clipping rectangle for recursive calls
 			if widget.clip_hover == true then
-				xx1 = math.max(xx1, os_x + widget.x)
-				yy1 = math.max(yy1, os_y + widget.y)
-				xx2 = math.min(xx2, os_x + widget.x + widget.w)
-				yy2 = math.min(yy2, os_y + widget.y + widget.h)
+				x1 = math.max(x1, os_x + widget.x)
+				y1 = math.max(y1, os_y + widget.y)
+				x2 = math.min(x2, os_x + widget.x + widget.w)
+				y2 = math.min(y2, os_y + widget.y + widget.h)
 
 			elseif widget.clip_hover == "manual" then
-				xx1 = math.max(xx1, os_x + widget.x + widget.clip_hover_x)
-				yy1 = math.max(yy1, os_y + widget.y + widget.clip_hover_y)
-				xx2 = math.min(xx2, os_x + widget.x + widget.clip_hover_x + widget.clip_hover_w)
-				yy2 = math.min(yy2, os_y + widget.y + widget.clip_hover_y + widget.clip_hover_h)
+				x1 = math.max(x1, os_x + widget.x + widget.clip_hover_x)
+				y1 = math.max(y1, os_y + widget.y + widget.clip_hover_y)
+				x2 = math.min(x2, os_x + widget.x + widget.clip_hover_x + widget.clip_hover_w)
+				y2 = math.min(y2, os_y + widget.y + widget.clip_hover_y + widget.clip_hover_h)
 			end
 
 			local children = widget.children
 			for i = #children, 1, -1 do
 				local wid = children[i]
-				local sub = _pressLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid, xx1, yy1, xx2, yy2, button, istouch, presses)
+				local sub = _pressLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid,
+					x1, y1, x2, y2, button, istouch, presses
+				)
 				if sub then
 					return sub
 				end
 			end
 		end
-
-		-- No child responded, children are excluded, or widget has no children.
-		if x >= x1 and y >= y1 and x < x2 and y < y2
-		and widget:ui_evaluatePress(x, y, os_x, os_y, button, istouch, presses)
-		then
-			return widget
-		end
+		return widget
 	end
 end
 
