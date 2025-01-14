@@ -201,7 +201,7 @@ local function invokePopUpMenu(self, x, y)
 	local root = self:getTopWidgetInstance()
 
 	local pop_up = commonWimp.makePopUpMenu(self, cat_pop_up_def, x, y)
-	root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 	pop_up:tryTakeThimble2()
 end

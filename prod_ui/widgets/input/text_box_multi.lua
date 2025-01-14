@@ -610,7 +610,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
 				local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
-				root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+				root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 				pop_up:tryTakeThimble2()
 
@@ -985,7 +985,7 @@ function def:uiCall_destroy(inst)
 		-- Destroy pop-up menu if it exists in reference to this widget.
 		local root = self:getTopWidgetInstance()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
-			root:runStatement("rootCall_destroyPopUp", self, "concluded")
+			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end
 	end
 end

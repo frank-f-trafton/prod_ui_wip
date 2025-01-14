@@ -244,13 +244,13 @@ function _mt_widget:takeThimble1(a, b, c, d)
 			thimble1:releaseThimble1(a, b, c, d)
 		end
 		context.thimble1 = self
-		self:bubbleStatement("uiCall_thimble1Take", self, a, b, c, d)
+		self:cycleEvent("uiCall_thimble1Take", self, a, b, c, d)
 		if not thimble2 then
-			self:bubbleStatement("uiCall_thimbleTopTake", self, a, b, c, d)
+			self:cycleEvent("uiCall_thimbleTopTake", self, a, b, c, d)
 		end
 
 		if thimble2 then
-			thimble2:bubbleStatement("uiCall_thimble1Changed", thimble2, a, b, c, d)
+			thimble2:cycleEvent("uiCall_thimble1Changed", thimble2, a, b, c, d)
 		end
 	end
 end
@@ -270,19 +270,19 @@ function _mt_widget:takeThimble2(a, b, c, d)
 
 	if thimble2 ~= self then
 		if thimble1 and not thimble2 then
-			thimble1:bubbleStatement("uiCall_thimbleTopRelease", thimble1, a, b, c, d)
+			thimble1:cycleEvent("uiCall_thimbleTopRelease", thimble1, a, b, c, d)
 		end
 		context.thimble2 = false
 		if thimble2 then
-			thimble2:bubbleStatement("uiCall_thimbleTopRelease", thimble2, a, b, c, d)
-			thimble2:bubbleStatement("uiCall_thimble2Release", thimble2, a, b, c, d)
+			thimble2:cycleEvent("uiCall_thimbleTopRelease", thimble2, a, b, c, d)
+			thimble2:cycleEvent("uiCall_thimble2Release", thimble2, a, b, c, d)
 		end
 		context.thimble2 = self
-		self:bubbleStatement("uiCall_thimble2Take", self, a, b, c, d)
-		self:bubbleStatement("uiCall_thimbleTopTake", self, a, b, c, d)
+		self:cycleEvent("uiCall_thimble2Take", self, a, b, c, d)
+		self:cycleEvent("uiCall_thimbleTopTake", self, a, b, c, d)
 
 		if thimble1 then
-			thimble1:bubbleStatement("uiCall_thimble2Changed", thimble1, a, b, c, d)
+			thimble1:cycleEvent("uiCall_thimble2Changed", thimble1, a, b, c, d)
 		end
 	end
 end
@@ -317,11 +317,11 @@ function _mt_widget:releaseThimble1(a, b, c, d)
 
 	context.thimble1 = false
 	if not thimble2 then
-		self:bubbleStatement("uiCall_thimbleTopRelease", self, a, b, c, d)
+		self:cycleEvent("uiCall_thimbleTopRelease", self, a, b, c, d)
 	end
-	self:bubbleStatement("uiCall_thimble1Release", self, a, b, c, d)
+	self:cycleEvent("uiCall_thimble1Release", self, a, b, c, d)
 	if thimble2 then
-		thimble2:bubbleStatement("uiCall_thimble1Changed", self, a, b, c, d)
+		thimble2:cycleEvent("uiCall_thimble1Changed", self, a, b, c, d)
 	end
 end
 
@@ -335,11 +335,11 @@ function _mt_widget:releaseThimble2(a, b, c, d)
 	end
 
 	context.thimble2 = false
-	self:bubbleStatement("uiCall_thimble2Release", self, a, b, c, d)
-	self:bubbleStatement("uiCall_thimbleTopRelease", self, a, b, c, d)
+	self:cycleEvent("uiCall_thimble2Release", self, a, b, c, d)
+	self:cycleEvent("uiCall_thimbleTopRelease", self, a, b, c, d)
 	if thimble1 then
-		thimble1:bubbleStatement("uiCall_thimbleTopTake", thimble1, a, b, c, d)
-		thimble1:bubbleStatement("uiCall_thimble2Changed", thimble1, a, b, c, d)
+		thimble1:cycleEvent("uiCall_thimbleTopTake", thimble1, a, b, c, d)
+		thimble1:cycleEvent("uiCall_thimble2Changed", thimble1, a, b, c, d)
 	end
 end
 
@@ -402,12 +402,12 @@ function _mt_widget:captureFocus()
 	end
 
 	if self.context.captured_focus then
-		self.context.captured_focus:runStatement("uiCall_uncapture", self)
+		self.context.captured_focus:sendEvent("uiCall_uncapture", self)
 	end
 
 	self.context.captured_focus = self
 
-	self:runStatement("uiCall_capture", self)
+	self:sendEvent("uiCall_capture", self)
 end
 
 
@@ -417,7 +417,7 @@ function _mt_widget:uncaptureFocus()
 		error("can't release focus as widget isn't currently capturing it.")
 	end
 
-	self:runStatement("uiCall_uncapture", self)
+	self:sendEvent("uiCall_uncapture", self)
 
 	self.context.captured_focus = false
 end
@@ -521,7 +521,7 @@ function _mt_widget:addChild(id, init_t, pos)
 
 		table.insert(self.children, pos, init_t)
 
-		init_t:bubbleStatement("uiCall_create", init_t)
+		init_t:bubbleEvent("uiCall_create", init_t)
 		uiWidget._runUserEvent(init_t, "userCreate")
 
 		return init_t
@@ -565,7 +565,7 @@ function _mt_widget:remove()
 	end
 
 	uiWidget._runUserEvent(self, "userDestroy")
-	self:bubbleStatement("uiCall_destroy", self)
+	self:bubbleEvent("uiCall_destroy", self)
 
 	-- If parent exists, find and remove self from parent's list of children
 	if self.parent then
@@ -660,44 +660,46 @@ end
 --]]
 
 
---- Try to execute a statement at 'self[field]'. The field can be a function, the string ID for a statement-handler stored in the context, or false/nil (in which case, nothing is executed.)
+local function errEventBadType(field, var)
+	error("widget event handler '" .. tostring(field) .. "': unsupported type: " .. type(var), 2)
+end
+
+
+--- Try to execute 'self[field](self, a,b,c,d,e,f)'. The field can be a function or nil (in which case, nothing
+--	happens).
 -- @param field The field in 'self' to try executing.
--- @param a First argument to pass.
--- @param b Second argument to pass.
--- @param c Third argument to pass.
--- @param d Fourth argument to pass.
--- @param e Fifth argument to pass.
--- @param f Sixth argument to pass. Additional content could be stored in a subtable if necessary.
-function _mt_widget:runStatement(field, a, b, c, d, e, f)
-	-- Uncomment to help catch ordering issues.
+-- @param a,b,c,d,e,f Additional arguments to pass.
+-- @return the return results of the called function, or nil if nothing was called.
+function _mt_widget:sendEvent(field, a,b,c,d,e,f)
+	-- Debug
 	--[[
 	if wid._dead then
 		error("attempt to run a statement on a dead widget.")
 	end
 	--]]
-
 	local var = self[field]
-
 	if type(var) == "function" then
-		return var(self, a, b, c, d, e, f)
+		return var(self, a,b,c,d,e,f)
 
-	elseif type(var) ~= "nil" then
-		error("Unsupported type for widget statement: " .. type(var))
+	elseif var ~= nil then
+		errEventBadType(field, var)
 	end
 end
 
 
---- Execute 'runStatement' on this widget, and then on each of its ancestors successively.
-function _mt_widget:bubbleStatement(field, a, b, c, d, e, f)
+local function _bubbleEvent(self, field, a,b,c,d,e,f)
 	local wid = self
-
 	while wid do
-		--print("wid", wid, wid.id, field, a, b, c, d, e, f)
 		if wid[field] then
-			local retval = wid:runStatement(field, a, b, c, d, e, f)
-			if retval then
-				--print("^ success", retval)
-				return retval
+			local var = wid[field]
+			if type(var) == "function" then
+				local retval = var(wid, a,b,c,d,e,f)
+				if retval then
+					return retval
+				end
+
+			elseif var ~= nil then
+				errEventBadType(field, var)
 			end
 		end
 		wid = wid.parent
@@ -705,17 +707,61 @@ function _mt_widget:bubbleStatement(field, a, b, c, d, e, f)
 end
 
 
-function _mt_widget:trickleStatement(field, a, b, c, d, e, f)
-	local retval = self:runStatement(field, a, b, c, d, e, f)
+--- Try to execute 'self[field](self, a,b,c,d,e,f)' on this widget and its ancestors, until one returns a success value
+--	or all widgets are exhausted.
+-- @param field The field in each widget to try executing.
+-- @param a,b,c,d,e,f Additional arguments to pass.
+-- @return the first return value that evaluates to true, or nil if that doesn't happen.
+_mt_widget.bubbleEvent = _bubbleEvent -- _mt_widget:bubbleEvent(field, a,b,c,d,e,f)
 
-	if not retval then
-		local children = self.children
-		for i = 1, #self.children do
-			retval = children[i]:trickleStatement(field, a, b, c, d, e, f)
-			if retval then
-				return retval
-			end
+
+local function _trickleEvent(self, field, a,b,c,d,e,f)
+	if self.parent then
+		local retval = _trickleEvent(self.parent, field, a,b,c,d,e,f)
+		if retval then
+			return retval
 		end
+	end
+	local trickle = self.trickle
+	local var = trickle and trickle[field]
+	if type(var) == "function" then
+		local retval = var(self, a,b,c,d,e,f)
+		if retval then
+			return retval
+		end
+
+	elseif var ~= nil then
+		errEventBadType(field, var)
+	end
+end
+
+
+--- Try to execute 'self.trickle[field](self, a,b,c,d,e,f)' from the root widget to this widget, until one returns a success
+--	value or all widgets are exhausted.
+_mt_widget.trickleEvent = _trickleEvent -- _mt_widget:trickleEvent(field, a,b,c,d,e,f)
+
+
+--- Trickle, then bubble an event.
+function _mt_widget:cycleEvent(field, a,b,c,d,e,f)
+	if self.parent then
+		local retval = _trickleEvent(self.parent, field, a,b,c,d,e,f)
+		if retval then
+			return retval
+		end
+	end
+	local var = self[field]
+	if type(var) == "function" then
+		local retval = var(self, a,b,c,d,e,f)
+		if retval then
+			return retval
+		end
+
+	elseif var ~= nil then
+		errEventBadType(field, var)
+	end
+
+	if self.parent then
+		return _bubbleEvent(self.parent, field, a,b,c,d,e,f)
 	end
 end
 
@@ -989,7 +1035,7 @@ end
 -- @return Nothing.
 function _mt_widget:reshape(recursive)
 	recursive = not not recursive
-	local result = self:runStatement("uiCall_reshape", self, recursive)
+	local result = self:sendEvent("uiCall_reshape", self, recursive)
 
 	-- Reshape children only if 'recursive' is truthy and the above statement returned falsy.
 	if recursive and not result then
@@ -1015,7 +1061,7 @@ function _mt_widget:setPosition(x, y) -- XXX under consideration
 	self.x = x
 	self.y = y
 
-	self:runStatement("uiCall_reposition", self, x, y)
+	self:sendEvent("uiCall_reposition", self, x, y)
 end
 
 --[=[
@@ -1024,7 +1070,7 @@ function _mt_widget:setDimensions(w, h) -- XXX under consideration
 	self.w = w
 	self.h = h
 
-	self:runStatement("uiCall_resize", self, w, h)
+	self:sendEvent("uiCall_resize", self, w, h)
 end
 --]=]
 --[=[
@@ -1032,12 +1078,12 @@ function _mt_widget:setXYWH(x, y, w, h) -- XXX under consideration
 	self.x = x
 	self.y = y
 
-	self:runStatement("uiCall_reposition", self, x, y)
+	self:sendEvent("uiCall_reposition", self, x, y)
 
 	self.w = w
 	self.h = h
 
-	self:runStatement("uiCall_resize", self, w, h)
+	self:sendEvent("uiCall_resize", self, w, h)
 end
 --]=]
 

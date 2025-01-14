@@ -151,13 +151,13 @@ local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selec
 	local root = client:getTopWidgetInstance()
 
 	if client.chain_next then
-		root:runStatement("rootCall_destroyPopUp", client)
+		root:sendEvent("rootCall_destroyPopUp", client)
 	end
 
 	local pop_up = commonWimp.makePopUpMenu(client, item.pop_up_def, p_x, p_y)
 
 	if doctor_press then
-		root:runStatement("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
+		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
 	end
 
 	client.chain_next = pop_up
@@ -180,7 +180,7 @@ end
 local function destroyPopUpMenu(client, reason_code)
 	local root = client:getTopWidgetInstance()
 
-	root:runStatement("rootCall_destroyPopUp", client, reason_code)
+	root:sendEvent("rootCall_destroyPopUp", client, reason_code)
 
 	client.last_open = false
 	client.chain_next = false

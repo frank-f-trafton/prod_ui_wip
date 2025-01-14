@@ -1,3 +1,5 @@
+-- TODO: most of these callbacks now cycle (trickle, then bubble) rather than just bubble.
+
 --[[
 	This file attempts to document the built-in features of widget definitions (defs). It has no
 	practical use, and shouldn't be instantiated at run-time (though doing so should be harmless).
@@ -11,13 +13,39 @@
 	All widgets are axis aligned rectangles, even if they are invisible and appear formless in UI
 	space.
 
-	Most callbacks "bubble up" from the affected widget to each of its ancestors. You can use
-	`if self == inst then...` to differentiate between events acting on `self`, or events bubbled up
-	from a descendant. Widgets can halt callback-bubbling by returning a truthy value (not false,
-	not nil.)
+	---------------------------------------------------------------------------
 
-	uiCall_* -> intended to be used with bubbling and trickling mechanisms.
-	ui_* -> intended to be called directly.
+	Event Dispatch
+
+	ProdUI supports four forms of event dispatch:
+		* self:sendEvent(): Just query 'self'.
+		* self:bubbleEvent(): Ascend from the target widget to the root.
+		* self:trickleEvent(): Descend from the root to the target widget.
+		* self:cycleEvent(): Trickle down, then bubble up.
+
+	The main event callbacks are attached to its indexed metatable, like this:
+
+		function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+
+	These are used in 'direct', 'bubble', and the direct and bubble phases of 'cycle'.
+
+	Trickle callbacks are used less frequently, and are stored in a subtable in order to keep the
+	two separated:
+
+		'function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)'
+
+	Note that the colon syntax is misleading here: we always call the function on the widget table
+	directly, never on 'wid.trickle'. Colon syntax is used only to maintain argument parity with
+	the main callbacks in the source code (so that we don't have to add or remove 'self' when
+	moving code snippets back and forth).
+
+	Typically, the first argument after 'self' is the original calling instance. Widgets
+	that do not have the relevant field are ignored.
+
+	Propagation is halted as soon as a widget returns a value that evaluates to true.
+
+	You can use `if self == inst then...` to differentiate between events acting on `self`, or events
+	bubbled up from a descendant. Trickle event callbacks never run directly on targets.
 
 	---------------------------------------------------------------------------
 

@@ -207,7 +207,7 @@ local function activateCommand(client, item)
 	end
 
 	local root = client:getTopWidgetInstance()
-	root:runStatement("rootCall_destroyPopUp", client, "concluded")
+	root:sendEvent("rootCall_destroyPopUp", client, "concluded")
 end
 
 
@@ -789,7 +789,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			if not self.chain_prev or (self.wid_ref and self.wid_ref == self.chain_prev) then
 				local wid_ref = self.wid_ref
 
-				root:runStatement("rootCall_destroyPopUp", self, "concluded")
+				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 				-- NOTE: self is now dead.
 
 				return true

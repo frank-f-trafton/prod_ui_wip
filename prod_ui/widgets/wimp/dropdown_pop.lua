@@ -71,7 +71,7 @@ function def:_closeSelf(update_chosen)
 
 		local root = self:getTopWidgetInstance()
 		if root.pop_up_menu == self then
-			root:runStatement("rootCall_destroyPopUp", self, "concluded")
+			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end
 	end
 end

@@ -195,7 +195,7 @@ function plan.make(parent)
 			local btn = content:addChild("base/button", {x=xx, y=yy, w=ww, h=hh})
 			btn:setLabel("Close Window")
 			btn.wid_buttonAction = function(self)
-				self:bubbleStatement("frameCall_close")
+				self:bubbleEvent("frameCall_close")
 			end
 			yy = yy + hh
 		end
