@@ -16,6 +16,9 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 local def = {}
 
 
+def.trickle = {}
+
+
 function def:uiCall_create(inst)
 	if self == inst then
 		self.allow_hover = true
@@ -78,6 +81,8 @@ function def:uiCall_create(inst)
 		self.drop_state = false
 
 		-- Table of widgets to offer keyPressed and keyReleased input.
+		self.hooks_trickle_key_pressed = {}
+		self.hooks_trickle_key_released = {}
 		self.hooks_key_pressed = {}
 		self.hooks_key_released = {}
 
@@ -174,9 +179,8 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	local context = self.context
 
-	-- Check keyPressed hooks.
 	if self.modal_level == 0 then
-		if widShared.evaluateKeyhooks(self.hooks_key_pressed, key, scancode, isrepeat) then
+		if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
 			return true
 		end
 	end
@@ -237,10 +241,28 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_keyReleased(inst, key, scancode)
-	-- Check keyReleased hooks.
+function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self.modal_level == 0 then
-		if widShared.evaluateKeyhooks(self.hooks_key_released, key, scancode) then
+		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
+			return true
+		end
+	end
+end
+
+
+
+function def:uiCall_keyReleased(inst, key, scancode)
+	if self.modal_level == 0 then
+		if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
+			return true
+		end
+	end
+end
+
+
+function def.trickle:uiCall_keyReleased(inst, key, scancode)
+	if self.modal_level == 0 then
+		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_released, key, scancode) then
 			return true
 		end
 	end

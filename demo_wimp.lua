@@ -486,36 +486,24 @@ do
 			local shortcuts = {
 				["KC q"] = function(self, key, scancode, isrepeat) love.event.quit() end,
 			}
-			local hook_pressed = {
-				wid = wimp_root,
-				func = function(self, tbl, key, scancode, isrepeat)
-					local key_mgr = self.context.key_mgr
-					local mod = key_mgr.mod
+			local hook_pressed = function(self, tbl, key, scancode, isrepeat)
+				local key_mgr = self.context.key_mgr
+				local mod = key_mgr.mod
 
-					local input_str = keyCombo.getKeyString(false, mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], key)
-					if shortcuts[input_str] then
-						shortcuts[input_str](self, key, scancode, isrepeat)
-						return true
-					end
-				end,
-			}
+				local input_str = keyCombo.getKeyString(false, mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], key)
+				if shortcuts[input_str] then
+					shortcuts[input_str](self, key, scancode, isrepeat)
+					return true
+				end
+			end
 
-			table.insert(wimp_root.hooks_key_pressed, hook_pressed)
+			table.insert(wimp_root.hooks_trickle_key_pressed, hook_pressed)
 		end
 
 		-- Hook menu bar key commands to WIMP root
 		do
-			local hook_pressed = {
-				wid = bar_menu,
-				func = bar_menu.widHook_pressed,
-			}
-			local hook_released = {
-				wid = bar_menu,
-				func = bar_menu.widHook_released,
-			}
-
-			table.insert(wimp_root.hooks_key_pressed, hook_pressed)
-			table.insert(wimp_root.hooks_key_released, hook_released)
+			table.insert(wimp_root.hooks_key_pressed, bar_menu.widHook_pressed)
+			table.insert(wimp_root.hooks_key_released, bar_menu.widHook_released)
 		end
 
 		-- Add menu bar to root layout

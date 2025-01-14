@@ -767,31 +767,28 @@ end
 
 	Keyhook callbacks:
 
-	love.keypressed -> self.hooks_key_pressed
-	love.keyreleased -> self.hooks_key_released
+	(trickle) love.keypressed -> self.hooks_trickle_key_pressed
+	(trickle) love.keyreleased -> self.hooks_trickle_key_released
+	(bubble, direct) love.keypressed -> self.hooks_key_pressed
+	(bubble, direct) love.keyreleased -> self.hooks_key_released
 
-	Each keyhook entry is a table containing the following:
+	Each keyhook entry is a function that takes the widget as its first argument, followed by the standard arguments
+	provided by the LÖVE callback. See source comments for parameter lists.
 
-	hook.wid: The widget associated with the hook.
-	hook.func(wid, hook, <callback arguments>): A function that takes the widget and the hook table as its arguments,
-	followed by the standard arguments provided by the LÖVE callback. See source comments for parameter lists.
-
-	Keyhooks are evaluated in reverse order, so the most recently added hooks get priority. You should not
+	Keyhooks are evaluated in reverse order, so the most recently added hook gets priority. You should not
 	add or remove keyhooks during the evaluation loop.
 --]]
 
 
-function widShared.evaluateKeyhooks(keyhooks, a, b, c)
-	-- keyPressed: widShared.evaluateKeyhooks(self.hooks_key_pressed, key, scancode, isrepeat)
-	-- keyReleased: widShared.evaluateKeyhooks(self.hooks_key_released, key, scancode)
+function widShared.evaluateKeyhooks(self, keyhooks, a, b, c)
+	-- keyPressed: widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat)
+	-- keyReleased: widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode)
 
 	for i = #keyhooks, 1, -1 do
-		local tbl = keyhooks[i]
-		local wid = tbl.wid
-		local res
-
-		if not wid._dead then
-			res = tbl.func(wid, tbl, a, b, c)
+		local func = keyhooks[i]
+		print("buh", #keyhooks, 1, self.id)
+		if not self._dead then
+			local res = func(self, a, b, c)
 
 			if res then
 				return res
