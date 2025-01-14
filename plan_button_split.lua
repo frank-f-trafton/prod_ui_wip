@@ -70,7 +70,7 @@ local function _createPopUpMenu(self)
 		end
 
 		local pop_up = commonWimp.makePopUpMenu(self, _pop_up_def, menu_x, menu_y)
-		root:runStatement("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
 

@@ -314,7 +314,7 @@ function def:uiCall_create(inst)
 		--self.wid_patchPressed = frame_wid_patchPressed
 
 		-- Helps with ctrl+tabbing through frames.
-		self.order_id = self:bubbleStatement("rootCall_getFrameOrderID")
+		self.order_id = self:bubbleEvent("rootCall_getFrameOrderID")
 
 		-- Frame-modal widget links. Truthy-checks are used to determine if a frame is currently
 		-- being blocked or is blocking another frame.
@@ -521,7 +521,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	end
 
 	root:setSelectedFrame(self, true)
-	self.order_id = root:runStatement("rootCall_getFrameOrderID")
+	self.order_id = root:sendEvent("rootCall_getFrameOrderID")
 
 	-- If thimble1 is not in this widget tree, move it to the container.
 	local thimble1 = self.context.thimble1
@@ -637,7 +637,7 @@ function def:uiCall_destroy(inst)
 		-- Clean up root-level modal level, if applicable.
 		if self.modal_level > 0 then
 			local root = self:getTopWidgetInstance()
-			root:runStatement("rootCall_clearModalFrame", self)
+			root:sendEvent("rootCall_clearModalFrame", self)
 		end
 	end
 end

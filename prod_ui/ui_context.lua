@@ -51,11 +51,11 @@ local function cb_keyDown(self, kc, sc, rep, latest)
 	-- Any widget has thimble focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_keyPressed", wid_cur, kc, sc, rep)
+		wid_cur:cycleEvent("uiCall_keyPressed", wid_cur, kc, sc, rep)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_keyPressed", self.tree, kc, sc, rep) -- no ancestors
+		self.tree:sendEvent("uiCall_keyPressed", self.tree, kc, sc, rep) -- no ancestors
 	end
 end
 
@@ -70,11 +70,11 @@ local function cb_keyUp(self, kc, sc)
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_keyReleased", wid_cur, kc, sc)
+		wid_cur:cycleEvent("uiCall_keyReleased", wid_cur, kc, sc)
 
 	-- Nothing is focused: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_keyReleased", self.tree, kc, sc) -- no ancestors
+		self.tree:sendEvent("uiCall_keyReleased", self.tree, kc, sc) -- no ancestors
 	end
 end
 
@@ -338,7 +338,7 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 		if cur_pres.click_repeat_oob
 		or (m_x >= 0 and m_y >= 0 and m_x < cur_pres.w and m_y < cur_pres.h)
 		then
-			self.current_pressed:bubbleStatement("uiCall_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
+			self.current_pressed:cycleEvent("uiCall_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
 		end
 	end
 end
@@ -551,14 +551,14 @@ function _mt_context:love_textinput(text)
 		return
 	end
 
-	-- Any widget has focus: bubble up the textInput event
+	-- Any widget has focus: emit a textInput event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_textInput", wid_cur, text)
+		wid_cur:cycleEvent("uiCall_textInput", wid_cur, text)
 
 	-- Nothing is focused: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_textInput", self.tree, text) -- no ancestors
+		self.tree:sendEvent("uiCall_textInput", self.tree, text) -- no ancestors
 	end
 end
 
@@ -573,7 +573,7 @@ function _mt_context:love_focus(focus)
 	self.window_focus = focus
 
 	if self.tree then
-		self.tree:runStatement("uiCall_windowFocus", self.tree, focus) -- XXX maybe trickleStatement would be better.
+		self.tree:sendEvent("uiCall_windowFocus", self.tree, focus)
 	end
 end
 
@@ -588,7 +588,7 @@ function _mt_context:love_visible(visible)
 	self.window_visible = visible
 
 	if self.tree then
-		self.tree:runStatement("uiCall_windowVisible", self.tree, visible)
+		self.tree:sendEvent("uiCall_windowVisible", self.tree, visible)
 	end
 end
 
@@ -603,7 +603,7 @@ function _mt_context:love_mousefocus(focus)
 	self.mouse_focus = focus
 
 	if self.tree then
-		self.tree:runStatement("uiCall_mouseFocus", self.tree, focus) -- XXX maybe trickleStatement would be better.
+		self.tree:sendEvent("uiCall_mouseFocus", self.tree, focus)
 	end
 end
 
@@ -638,9 +638,8 @@ function _mt_context:love_wheelmoved(x, y)
 
 	hoverLogic.update(self, 0, 0)
 
-	-- Bubble up from the current hover widget.
 	if self.current_hover then
-		self.current_hover:bubbleStatement("uiCall_pointerWheel", self.current_hover, x, y)
+		self.current_hover:cycleEvent("uiCall_pointerWheel", self.current_hover, x, y)
 	end
 end
 
@@ -670,24 +669,24 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 	-- some mice have a lot of buttons). As a side effect, you can release on a widget which is covered by
 	-- other widgets, if you were able to hover over it for the initial down-click.
 	if old_current_pressed then
-		old_current_pressed:bubbleStatement("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
+		old_current_pressed:cycleEvent("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
 
 		local old_x, old_y = old_current_pressed:getAbsolutePosition()
 		if commonMath.pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
-			old_current_pressed:bubbleStatement("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
+			old_current_pressed:cycleEvent("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
 		end
 
 	elseif self.tree then
-		self.tree:runStatement("uiCall_pointerUnpress", self.tree, x, y, button, istouch, presses) -- no ancestors
-		self.tree:runStatement("uiCall_pointerRelease", self.tree, x, y, button, istouch, presses) -- no ancestors
+		self.tree:sendEvent("uiCall_pointerUnpress", self.tree, x, y, button, istouch, presses) -- no ancestors
+		self.tree:sendEvent("uiCall_pointerRelease", self.tree, x, y, button, istouch, presses) -- no ancestors
 	end
 
 	if self.mouse_pressed_button == button then
 		-- Clean up Drag-Dest state.
 		local old_drag_dest = self.current_drag_dest
 		if old_drag_dest then
-			old_drag_dest:bubbleStatement("uiCall_pointerDragDestOff", old_drag_dest, x, y, 0, 0)
-			old_drag_dest:bubbleStatement("uiCall_pointerDragDestRelease", old_drag_dest, x, y, button, istouch, presses)
+			old_drag_dest:cycleEvent("uiCall_pointerDragDestOff", old_drag_dest, x, y, 0, 0)
+			old_drag_dest:cycleEvent("uiCall_pointerDragDestRelease", old_drag_dest, x, y, button, istouch, presses)
 			self.current_drag_dest = false
 		end
 
@@ -772,12 +771,12 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 			if old_hover and old_hover ~= wid_pressed then
 				-- Hover off
 				self.current_hover = false
-				old_hover:bubbleStatement("uiCall_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
+				old_hover:cycleEvent("uiCall_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
 
 				-- Hover on + move
 				self.current_hover = wid_pressed
-				wid_pressed:bubbleStatement("uiCall_pointerHoverOn", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
-				wid_pressed:bubbleStatement("uiCall_pointerHoverMove", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+				wid_pressed:cycleEvent("uiCall_pointerHoverOn", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+				wid_pressed:cycleEvent("uiCall_pointerHoverMove", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
 			end
 		end
 	end
@@ -787,7 +786,7 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 	-- The mouse position is relative to the screen because this statement can bubble up through multiple widgets.
 	-- Subtract the results of 'widget:getAbsolutePosition()' to get the point relative to a given widget.
 	if self.current_pressed then
-		self.current_pressed:bubbleStatement("uiCall_pointerPress", self.current_hover, x, y, button, istouch, presses)
+		self.current_pressed:cycleEvent("uiCall_pointerPress", self.current_hover, x, y, button, istouch, presses)
 	end
 end
 
@@ -815,7 +814,7 @@ function _mt_context:love_resize(w, h)
 	end
 
 	if self.tree then
-		self.tree:runStatement("uiCall_windowResize", w, h) -- no ancestors
+		self.tree:sendEvent("uiCall_windowResize", w, h) -- no ancestors
 	end
 end
 
@@ -828,7 +827,7 @@ function _mt_context:love_joystickadded(joystick) -- XXX untested
 	end
 
 	if self.tree then
-		self.tree:runStatement("uiCall_joystickAdded", joystick) -- no ancestors
+		self.tree:sendEvent("uiCall_joystickAdded", joystick) -- no ancestors
 	end
 end
 
@@ -841,7 +840,7 @@ function _mt_context:love_joystickremoved(joystick) -- XXX untested
 	end
 
 	if self.tree then
-		self.tree:runStatement("uiCall_joystickRemoved", joystick) -- no ancestors
+		self.tree:sendEvent("uiCall_joystickRemoved", joystick) -- no ancestors
 	end
 end
 
@@ -856,11 +855,11 @@ function _mt_context:love_joystickpressed(joystick, button) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_joystickPressed", wid_cur, joystick, button)
+		wid_cur:cycleEvent("uiCall_joystickPressed", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_joystickPressed", self.tree, joystick, button) -- no ancestors
+		self.tree:sendEvent("uiCall_joystickPressed", self.tree, joystick, button) -- no ancestors
 	end
 end
 
@@ -875,11 +874,11 @@ function _mt_context:love_joystickreleased(joystick, button) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_joystickReleased", wid_cur, joystick, button)
+		wid_cur:cycleEvent("uiCall_joystickReleased", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_joystickReleased", self.tree, joystick, button) -- no ancestors
+		self.tree:sendEvent("uiCall_joystickReleased", self.tree, joystick, button) -- no ancestors
 	end
 end
 
@@ -894,11 +893,11 @@ function _mt_context:love_joystickaxis(joystick, axis, value) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_joystickAxis", wid_cur, joystick, axis, value)
+		wid_cur:cycleEvent("uiCall_joystickAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_joystickAxis", self.tree, joystick, axis, value) -- no ancestors
+		self.tree:sendEvent("uiCall_joystickAxis", self.tree, joystick, axis, value) -- no ancestors
 	end
 end
 
@@ -913,11 +912,11 @@ function _mt_context:love_joystickhat(joystick, hat, direction) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_joystickHat", wid_cur, joystick, hat, direction)
+		wid_cur:cycleEvent("uiCall_joystickHat", wid_cur, joystick, hat, direction)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_joystickHat", self.tree, joystick, hat, direction) -- no ancestors
+		self.tree:sendEvent("uiCall_joystickHat", self.tree, joystick, hat, direction) -- no ancestors
 	end
 end
 
@@ -932,11 +931,11 @@ function _mt_context:love_gamepadpressed(joystick, button) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_gamepadPressed", wid_cur, joystick, button)
+		wid_cur:cycleEvent("uiCall_gamepadPressed", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_gamepadPressed", self.tree, joystick, button) -- no ancestors
+		self.tree:sendEvent("uiCall_gamepadPressed", self.tree, joystick, button) -- no ancestors
 	end
 end
 
@@ -951,11 +950,11 @@ function _mt_context:love_gamepadreleased(joystick, button) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_gamepadReleased", wid_cur, joystick, button)
+		wid_cur:cycleEvent("uiCall_gamepadReleased", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_gamepadReleased", self.tree, joystick, button) -- no ancestors
+		self.tree:sendEvent("uiCall_gamepadReleased", self.tree, joystick, button) -- no ancestors
 	end
 end
 
@@ -970,11 +969,11 @@ function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 	-- Any widget has focus: bubble up the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:bubbleStatement("uiCall_gamepadAxis", wid_cur, joystick, axis, value)
+		wid_cur:cycleEvent("uiCall_gamepadAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.tree then
-		self.tree:runStatement("uiCall_gamepadAxis", self.tree, joystick, axis, value) -- no ancestors
+		self.tree:sendEvent("uiCall_gamepadAxis", self.tree, joystick, axis, value) -- no ancestors
 	end
 end
 
@@ -1149,7 +1148,7 @@ function _mt_context:addWidget(id, init_t, pos)
 
 		table.insert(self.instances, pos, init_t)
 
-		init_t:runStatement("uiCall_create", init_t) -- no ancestors
+		init_t:sendEvent("uiCall_create", init_t) -- no ancestors
 		uiWidget._runUserEvent(init_t, "userCreate")
 
 		return init_t
@@ -1200,7 +1199,7 @@ function _mt_context:pushRoot(new_root)
 
 	self.stack[#self.stack + 1] = new_root
 	self.tree = new_root
-	new_root:runStatement("uiCall_rootPush", new_root) -- no ancestors
+	new_root:sendEvent("uiCall_rootPush", new_root) -- no ancestors
 end
 
 
@@ -1222,7 +1221,7 @@ function _mt_context:popRoot()
 
 	local old_root = self.tree
 	if old_root then
-		old_root:runStatement("uiCall_rootPop", old_root) -- no ancestors
+		old_root:sendEvent("uiCall_rootPop", old_root) -- no ancestors
 	end
 	stack[#stack] = nil
 	self.tree = stack[#stack] or false
@@ -1357,11 +1356,11 @@ function _mt_context:transferPressedState(wid)
 
 	self.current_hover = false
 	if old_hover then
-		old_hover:bubbleStatement("uiCall_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
+		old_hover:cycleEvent("uiCall_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
 	end
 
 	self.current_hover = wid
-	wid:bubbleStatement("uiCall_pointerHoverOn", wid, self.mouse_x, self.mouse_y, 0, 0)
+	wid:cycleEvent("uiCall_pointerHoverOn", wid, self.mouse_x, self.mouse_y, 0, 0)
 
 	self.current_pressed = wid
 end

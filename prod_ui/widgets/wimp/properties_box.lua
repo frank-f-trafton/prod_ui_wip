@@ -440,7 +440,7 @@ function def:uiCall_keyReleased(inst, keycode, scancode)
 	if self == inst then
 		-- If there is a selected child widget, forward keyboard events to it first.
 		local control = self.menu.items[self.menu.index]
-		if control and control:runStatement("uiCall_keyReleased", control, keycode, scancode) then
+		if control and control:sendEvent("uiCall_keyReleased", control, keycode, scancode) then
 			return true
 		end
 	end
@@ -451,7 +451,7 @@ function def:uiCall_textInput(inst, text)
 	if self == inst then
 		-- If there is a selected child widget, forward keyboard events to it first.
 		local control = self.menu.items[self.menu.index]
-		if control and control:runStatement("uiCall_textInput", control, text) then
+		if control and control:sendEvent("uiCall_textInput", control, text) then
 			return true
 		end
 	end

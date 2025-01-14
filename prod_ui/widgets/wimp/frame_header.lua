@@ -47,7 +47,7 @@ end
 
 
 local function button_wid_close(self)
-	self:bubbleStatement("frameCall_close", self)
+	self:bubbleEvent("frameCall_close", self)
 end
 
 

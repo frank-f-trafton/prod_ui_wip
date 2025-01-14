@@ -130,16 +130,16 @@ function hoverLogic.update(context, dx, dy)
 			if not wid or wid ~= old_drag_dest then
 				if old_drag_dest then
 					context.current_drag_dest = false
-					old_drag_dest:bubbleStatement("uiCall_pointerDragDestOff", old_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
+					old_drag_dest:cycleEvent("uiCall_pointerDragDestOff", old_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
 				end
 			end
 
 			if wid then
 				if wid ~= old_drag_dest then
 					context.current_drag_dest = wid
-					wid:bubbleStatement("uiCall_pointerDragDestOn", context.current_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
+					wid:cycleEvent("uiCall_pointerDragDestOn", context.current_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
 				end
-				wid:bubbleStatement("uiCall_pointerDragDestMove", context.current_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
+				wid:cycleEvent("uiCall_pointerDragDestMove", context.current_drag_dest, context.mouse_x, context.mouse_y, dx, dy)
 			end
 		-- No mouse buttons are active: update hover state.
 		else
@@ -150,7 +150,7 @@ function hoverLogic.update(context, dx, dy)
 				local old_hover = context.current_hover
 				context.current_hover = false
 				if old_hover then
-					old_hover:bubbleStatement("uiCall_pointerHoverOff", old_hover, context.mouse_x, context.mouse_y, dx, dy)
+					old_hover:cycleEvent("uiCall_pointerHoverOff", old_hover, context.mouse_x, context.mouse_y, dx, dy)
 				end
 			else
 				local old_hover = context.current_hover
@@ -159,16 +159,16 @@ function hoverLogic.update(context, dx, dy)
 				if not wid or wid ~= old_hover then
 					if old_hover then
 						context.current_hover = false
-						old_hover:bubbleStatement("uiCall_pointerHoverOff", old_hover, context.mouse_x, context.mouse_y, dx, dy)
+						old_hover:cycleEvent("uiCall_pointerHoverOff", old_hover, context.mouse_x, context.mouse_y, dx, dy)
 					end
 				end
 
 				if wid then
 					if wid ~= old_hover then
 						context.current_hover = wid
-						wid:bubbleStatement("uiCall_pointerHoverOn", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
+						wid:cycleEvent("uiCall_pointerHoverOn", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
 					end
-					wid:bubbleStatement("uiCall_pointerHoverMove", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
+					wid:cycleEvent("uiCall_pointerHoverMove", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
 				end
 			end
 		end
@@ -176,7 +176,7 @@ function hoverLogic.update(context, dx, dy)
 		-- Handle pointer drag statement.
 		wid = context.current_pressed
 		if wid then
-			wid:bubbleStatement("uiCall_pointerDrag", wid, context.mouse_x, context.mouse_y, dx, dy)
+			wid:cycleEvent("uiCall_pointerDrag", wid, context.mouse_x, context.mouse_y, dx, dy)
 		end
 	end
 end

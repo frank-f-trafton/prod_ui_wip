@@ -95,7 +95,7 @@ function plan.make(parent)
 					-- Test root-modal state.
 					-- [=[
 					--dialog.sort_id = 4
-					root:runStatement("rootCall_setModalFrame", dialog)
+					root:sendEvent("rootCall_setModalFrame", dialog)
 					--]=]
 				end
 				--]==]

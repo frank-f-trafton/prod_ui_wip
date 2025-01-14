@@ -70,7 +70,7 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 
 	pop_up.menu:setDefaultSelection()
 
-	root:runStatement("rootCall_assignPopUp", self, pop_up)
+	root:sendEvent("rootCall_assignPopUp", self, pop_up)
 
 	-- XXX test
 	pop_up:setBlocking(true)
@@ -89,7 +89,7 @@ function commonWimp.assignPopUp(self, pop_up)
 
 	pop_up.wid_ref = self
 
-	root:runStatement("rootCall_assignPopUp", self, pop_up)
+	root:sendEvent("rootCall_assignPopUp", self, pop_up)
 end
 
 
@@ -98,7 +98,7 @@ function commonWimp.checkDestroyPopUp(self)
 	local root = self:getTopWidgetInstance()
 
 	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
-		root:runStatement("rootCall_destroyPopUp", self, "concluded")
+		root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 	end
 end
 

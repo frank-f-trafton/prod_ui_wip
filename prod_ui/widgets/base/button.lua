@@ -15,8 +15,9 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "button1",
+	skin_id = "button1"
 }
+
 
 
 def.wid_buttonAction = lgcButton.wid_buttonAction

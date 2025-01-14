@@ -221,12 +221,12 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 				-- Thimble action #1.
 				elseif scancode == "return" or scancode == "kpenter" or (scancode == "space" and not isrepeat) then
-					wid_cur:bubbleStatement("uiCall_thimbleAction", wid_cur, key, scancode, isrepeat)
+					wid_cur:cycleEvent("uiCall_thimbleAction", wid_cur, key, scancode, isrepeat)
 					context.current_pressed = false
 
 				-- Thimble action #2.
 				elseif (scancode == "application" or (mods["shift"] and scancode == "f10")) and not isrepeat then
-					wid_cur:bubbleStatement("uiCall_thimbleAction2", wid_cur, key, scancode, isrepeat)
+					wid_cur:cycleEvent("uiCall_thimbleAction2", wid_cur, key, scancode, isrepeat)
 					context.current_pressed = false
 				end
 			end
