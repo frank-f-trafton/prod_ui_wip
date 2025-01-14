@@ -742,7 +742,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		if scancode == "application" then
 			-- Locate caret in UI space
 			local ax, ay = self:getAbsolutePosition()
-			local caret_x = ax + self.vp_x - self.scr_x + disp.caret_box_x
+			local caret_x = ax + self.vp_x - self.scr_x + disp.caret_box_x + self.align_offset
 			local caret_y = ay + self.vp_y - self.scr_y + disp.caret_box_y + disp.caret_box_h
 
 			lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)

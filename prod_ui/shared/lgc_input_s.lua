@@ -255,7 +255,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 	if scancode == "application" or (shift_down and scancode == "f10") then
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
-		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x
+		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x + self.align_offset
 		local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
 
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
