@@ -58,6 +58,16 @@ local def = {
 }
 
 
+--[[
+-- XXX: Test trickle event propagation.
+def.trickle = {}
+function def.trickle.uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	print("Halt!")
+	return true
+end
+--]]
+
+
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
 function def:ui_evaluateHover(mx, my, os_x, os_y)
 	local wx, wy = self.x + os_x, self.y + os_y
