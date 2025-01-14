@@ -49,6 +49,7 @@ function plan.make(parent)
 		local c3 = properties_box:addControl("input/text_box_single", "Dog")
 		--c3.select_all_on_thimble1_take = true
 		--c3.deselect_all_on_thimble1_release = true
+		local c4 = properties_box:addControl("wimp/number_box", "Number")
 
 		properties_box:setScrollBars(false, true)
 		properties_box:reshape()
