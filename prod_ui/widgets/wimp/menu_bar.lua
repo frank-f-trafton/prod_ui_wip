@@ -363,8 +363,28 @@ local function keyMnemonicSearch(items, key)
 end
 
 
---- A callback function to use for keyPress hooks.
-function def:widHook_pressed(tbl, key, scancode, isrepeat)
+local function _findMenuInParent(parent)
+	-- XXX: This sucks; it's collatoral damage from rewriting how keyhooks work.
+	-- I probably want containers with menus to have a standard set of methods to interact with them.
+	for i, child in ipairs(parent.children) do
+		if child.id == "wimp/menu_bar" then
+			return child
+		end
+	end
+end
+
+
+
+--- KeyPress hooks for the widget that owns the menu.
+function def:widHook_pressed(key, scancode, isrepeat)
+	-- 'self' is the menu's parent.
+
+	-- Find this menu.
+	local menu_bar = _findMenuInParent(self)
+	if not menu_bar then
+		return
+	end
+
 	local key_mgr = self.context.key_mgr
 
 	if not self.context.mouse_pressed_button then
@@ -374,8 +394,8 @@ function def:widHook_pressed(tbl, key, scancode, isrepeat)
 		if key == "f10" then
 			local root = self:getTopWidgetInstance()
 			if root.pop_up_menu then
-				destroyPopUpMenu(self, "concluded")
-				setStateIdle(self)
+				destroyPopUpMenu(menu_bar, "concluded")
+				setStateIdle(menu_bar)
 
 				key_mgr:stunRecent()
 
@@ -384,13 +404,13 @@ function def:widHook_pressed(tbl, key, scancode, isrepeat)
 		-- Check category key mnemonics (when idle, and only if alt is held)
 		else
 			local alt_state = key_mgr:getModAlt()
-			if (self.state == "idle" and alt_state) then
-				print("hook_pressed", key, alt_state, "self.state", self.state)
+			if (menu_bar.state == "idle" and alt_state) then
+				print("hook_pressed", key, alt_state, "menu_bar.state", menu_bar.state)
 
-				local item_i, item = keyMnemonicSearch(self.menu.items, key)
+				local item_i, item = keyMnemonicSearch(menu_bar.menu.items, key)
 				if item then
 					--print("got it", key, item.text)
-					self:widCall_keyboardRunItem(item)
+					menu_bar:widCall_keyboardRunItem(item)
 					return true
 				end
 			end
@@ -400,13 +420,20 @@ end
 
 
 --- A callback function to use for keyRelease hooks.
-function def:widHook_released(tbl, key, scancode, isrepeat)
+function def:widHook_released(key, scancode, isrepeat)
+	-- 'self' is the parent container.
+	-- Find this menu.
+	local menu_bar = _findMenuInParent(self)
+	if not menu_bar then
+		return
+	end
+
 	local key_mgr = self.context.key_mgr
 
 	if not self.context.mouse_pressed_button then
 		-- (Reason for excluding shift: Shift+F10 is used in some applications to open a right-click context menu.)
 		if key == "f10" and key_mgr:getRecentKeyConstant() == key and not key_mgr:getModShift() then
-			self:widCall_keyboardActivate()
+			menu_bar:widCall_keyboardActivate()
 			return true
 		end
 	end

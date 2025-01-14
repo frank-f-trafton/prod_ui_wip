@@ -58,10 +58,12 @@ local def = {
 }
 
 
+def.trickle = {}
+
+
 --[[
 -- XXX: Test trickle event propagation.
-def.trickle = {}
-function def.trickle.uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	print("Halt!")
 	return true
 end
@@ -335,6 +337,8 @@ function def:uiCall_create(inst)
 		self.modal_level = 0
 
 		-- Table of widgets to offer keyPressed and keyReleased input.
+		self.hooks_trickle_key_pressed = {}
+		self.hooks_trickle_key_released = {}
 		self.hooks_key_pressed = {}
 		self.hooks_key_released = {}
 
@@ -475,8 +479,14 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		return
 	end
 
-	-- Check keyPressed hooks.
-	if widShared.evaluateKeyhooks(self.hooks_key_pressed, key, scancode, isrepeat) then
+	if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
+		return true
+	end
+end
+
+
+function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
+	if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
 		return true
 	end
 end
@@ -488,8 +498,14 @@ function def:uiCall_keyReleased(inst, key, scancode)
 		return
 	end
 
-	-- Check keyReleased hooks.
-	if widShared.evaluateKeyhooks(self.hooks_key_released, key, scancode) then
+	if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
+		return true
+	end
+end
+
+
+function def.trickle:uiCall_keyReleased(inst, key, scancode)
+	if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
 		return true
 	end
 end

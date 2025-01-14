@@ -111,10 +111,10 @@ function plan.make(parent)
 			{
 				type = "command",
 				text = "_Q_uit",
-				text_shortcut = "Ctrl+Q",
+				text_shortcut = "Ctrl+W",
 				callback = function(client, item) commonWimp.closeWindowFrame(client) end,
-				key_mnemonic = "q",
-				key_shortcut = "KC q",
+				key_mnemonic = "w",
+				key_shortcut = "KC w",
 			},
 		}
 		menu_bar:appendItem("category", {
@@ -129,39 +129,28 @@ function plan.make(parent)
 		menu_bar:menuChangeCleanup()
 
 		-- Hook menu bar key commands to Window Frame
-		local hook_pressed = {
-			wid = menu_bar,
-			func = menu_bar.widHook_pressed,
-		}
-		local hook_released = {
-			wid = menu_bar,
-			func = menu_bar.widHook_released,
-		}
-
-		table.insert(frame.hooks_key_pressed, hook_pressed)
-		table.insert(frame.hooks_key_released, hook_released)
+		table.insert(frame.hooks_key_pressed, menu_bar.widHook_pressed)
+		table.insert(frame.hooks_key_released, menu_bar.widHook_released)
 	end
 
 	-- Hook shortcuts to Window Frame
 	local shortcuts = {
-		["KC q"] = function(self, key, scancode, isrepeat) commonWimp.closeWindowFrame(self) end,
+		["KC w"] = function(self, key, scancode, isrepeat) commonWimp.closeWindowFrame(self) end,
 	}
-	local hook_pressed = {
-		wid = frame,
-		func = function(self, tbl, key, scancode, isrepeat)
-			local key_mgr = self.context.key_mgr
-			local mod = key_mgr.mod
+	local hook_pressed = function(self, key, scancode, isrepeat)
+		local key_mgr = self.context.key_mgr
+		local mod = key_mgr.mod
 
-			local input_str = keyCombo.getKeyString(false, mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], key)
-			if shortcuts[input_str] then
-				shortcuts[input_str](self, key, scancode, isrepeat)
-				return true
-			end
-		end,
-	}
+		local input_str = keyCombo.getKeyString(false, mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], key)
+		if shortcuts[input_str] then
+			shortcuts[input_str](self, key, scancode, isrepeat)
+			return true
+		end
+	end
 	table.insert(frame.hooks_key_pressed, hook_pressed)
 
 	return frame
 end
+
 
 return plan
