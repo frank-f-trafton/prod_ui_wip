@@ -1,0 +1,1016 @@
+<documentation>
+    <page>
+        <title>Widgets</title>
+
+        ProdUI uses a basic form of inheritance to provide methods to widgets. When an instance calls a method, it checks:
+
+        * Itself
+        * Its widget definition
+        * _mt_widget, the base table for all widgets
+
+        This is implemented with Lua's built-in __index metamethod. Further subclassing is not supported.
+
+        All widgets are axis aligned rectangles, even if they are invisible and appear formless in UI space.
+
+
+        <title>Event Dispatch</title>
+
+        ProdUI supports four forms of event dispatch:
+            * self:sendEvent(): Just query 'self'.
+            * self:bubbleEvent(): Ascend from the target widget to the root.
+            * self:trickleEvent(): Descend from the root to the target widget.
+            * self:cycleEvent(): Trickle down, then bubble up.
+
+        The main event callbacks are attached to its indexed metatable, like this:
+
+        <code lang="lua">function def:uiCall_keyPressed(inst, key, scancode, isrepeat)</code>
+
+        These are used in 'direct', 'bubble', and the direct and bubble phases of 'cycle'.
+
+        Trickle callbacks are used less frequently, and are stored in a subtable in order to keep the two separated:
+
+        <code lang="lua">function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)</code>
+
+        Note that the colon syntax is misleading here: we always call the function on the widget table directly, never on 'wid.trickle'. Colon syntax is used only to maintain argument parity with the main callbacks in the source code (so that we don't have to add or remove 'self' when moving code snippets back and forth).
+
+        Typically, the first argument after 'self' is the original calling instance. Widgets that do not have the relevant field are ignored.
+
+        Propagation is halted as soon as a widget returns a value that evaluates to true.
+
+        You can use <pre>if self == inst then...</pre> to differentiate between events acting on 'self', or events bubbled up from a descendant. Trickle event callbacks never run directly on targets.
+
+
+        <title>The UI Thimble</title>
+
+        "Thimble" is an arbitrary term for which widget currently has focus. The name is unlikely to be mistaken for other kinds of focus: OS window focus, in-application frame focus, mouse hover + press state, selections within menus, and so on. Generally, the widget which has the thimble is also the target for keyboard input.
+
+        Lamentably, there are two thimbles: thimble1 and thimble2. The first is for "concrete" widgets, while the second is for "ephemeral" components like pop-up menus. The *Top Thimble* is the highest one that is currently assigned to a widget:
+
+        <pre>
++--------------------------------------------+
+| thimble1 | thimble2 | Top Thimble is...    |
++----------+----------+----------------------+
+|          |          | Neither              |
+|    x     |          | thimble1             |
+|          |    x     | thimble2             |
+|    x     |    x     | thimble2             |
++--------------------------------------------+
+        </pre>
+
+        This system, confusing as it is, allows a concrete widget to know that it is still selected, even if key events are temporarily directed to an ephemeral widget.
+
+
+        <title>A Note on "Capturing"</title>
+
+        A widget can "capture" the UI context. When this happens, all prodUI events are passed to the widget first, and it has the option to deny the event from being handled further by the context. This can be used to implement custom behaviors without interference from the context or other widgets.
+
+        While this enables some nice widget behaviors, be warned that capturing is prone to subtle input bugs. By default, if a capturing widget does not have a capture callback for an event type, then it is always passed on to the main event handler. You may need to capture events that have nothing to do with the desired behavior, and handle them appropriately or discard them. Consolidating similar capture behavior into shared functions is recommended.
+    </page>
+
+    <page>
+        <title>Widget Callbacks</title>
+
+        <callback>
+            <name>uiCall_gamepadReleased</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.gamepadreleased</event-origin>
+
+            <desc>A held gamepad button was released.</desc>
+
+            <sig>def:uiCall_gamepadReleased(inst, joystick, button)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+            <param name="button">A string identifier of the released gamepad button.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_gamepadAxis</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.gamepadaxis</event-origin>
+
+            <desc>A gamepad axis moved.</desc>
+
+            <sig>def:uiCall_gamepadAxis(inst, joystick, axis, value)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+            <param name="axis">A string identifier of the moved gamepad axis.</param>
+            <param name="value">The value of the axis, from -1.0 to 1.0.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_gamepadPressed</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.gamepadpressed</event-origin>
+
+            <desc>A gamepad button was pressed down.</desc>
+
+            <sig>def:uiCall_gamepadPressed(inst, joystick, button)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+            <param name="button">A string identifier of the gamepad button pressed.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_joystickHat</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.joystickhat</event-origin>
+
+            <desc>A joystick POV hat moved.</desc>
+
+            <sig>def:uiCall_joystickHat(inst, joystick, hat, direction)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+            <param name="hat">The numeric index of the moving hat.</param>
+            <param name="direction">A string identifier representing the current position of the hat.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_joystickAxis</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.joystickaxis</event-origin>
+
+            <desc>A joystick axis moved.</desc>
+
+            <sig>def:uiCall_joystickAxis(inst, joystick, axis, value)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+            <param name="axis">The numeric index of the moved axis.</param>
+            <param name="value">The numeric value of the axis, from -1.0 to 1.0.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_joystickReleased</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.joystickreleased</event-origin>
+
+            <desc>A joystick button was released.</desc>
+
+            <sig>def:uiCall_joystickReleased(inst, joystick, button)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with event.</param>
+            <param name="button">The numeric index of the pressed button.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_joystickPressed</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.joystickpressed</event-origin>
+
+            <desc>A joystick button was pressed.</desc>
+
+            <sig>def:uiCall_joystickPressed(inst, joystick, button)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+            <param name="button">The numeric index of the pressed button.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_windowVisible</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.visible</event-origin>
+
+            <desc>The application window's visibility changed.</desc>
+
+            <sig>def:uiCall_windowVisible(visible)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="visible"><bool>true</bool> if the window is visible, <bool>false</bool> if not.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_windowResize</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.resize</event-origin>
+
+            <desc>The application window was resized.</desc>
+
+            <sig>def:uiCall_windowResize(w, h)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="w" n2="h">The new window width and height.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_joystickAdded</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.joystickadded</event-origin>
+
+            <desc>A joystick was connected.</desc>
+
+            <sig>def:uiCall_joystickAdded(joystick)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_joystickRemoved</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>uiCall_joystickRemoved</event-origin>
+
+            <desc>A joystick was disconnected.</desc>
+
+            <sig>def:uiCall_joystickRemoved(joystick)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="joystick">The joystick associated with the event.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_update</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.update</event-origin>
+
+            <desc>A per-frame update callback for widgets.</desc>
+
+            <sig>def:uiCall_update(dt)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="dt">This frame's delta time (from love.update()).</param>
+
+            <notes>
+                This is run in prodUI.love_update(), starting with context.tree and traversing depth-first. Note that of the top-level instances, only widgets in the current root are updated.
+
+                Return a truthy value to explicitly prevent updating a widget's children. (If uiCall_update doesn't exist in the widget, children will be updated.)
+
+                There are many limitations in effect when the context is locked for updating. Anything that is likely to mess up tree traversal (remove or reorder widgets; change tree root) will raise an error. You can defer these actions to after the update loop using context:appendAsyncAction().
+
+                Widgets may or may not have a built-in 'uiCall_update' method. If not, you can supply your own. You can also assign 'self:userUpdate(dt)', which is run before 'uiCall_update'.
+
+                'uiCall_update' only fires for the current tree root and its descendants. Other top-level instances that are not the root are not updated.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_windowFocus</name>
+            <prop-method>love.focus</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The application window focus changed.</desc>
+
+            <sig>def:uiCall_windowFocus(focus)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="focus"><bool>true</bool> if the window has focus, <bool>false</bool> if not.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_mouseFocus</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.mousefocus</event-origin>
+
+            <desc>The application window's mouse focus changed.</desc>
+
+            <sig>def:uiCall_mouseFocus(focus)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="focus"><bool>true</bool> if the window has mouse focus, <bool>false</bool> if not.</param>
+        </callback>
+
+        <callback>
+            <name>render</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.draw</event-origin>
+
+            <desc>Draws the widget (before its children).</desc>
+
+            <sig>def:render(os_x, os_y)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="os_x" n2="os_y">X and Y offsets, in screen pixels.</params>
+
+            <notes>
+                The graphics state is already translated so that 0,0 is the top-left corner of the widget. The parameters os_x and os_y typically aren't needed, unless the widget needs to adjust the current scissor box.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>renderLast</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.draw</event-origin>
+
+            <desc>Draws the widget (after its children).</desc>
+
+            <sig>def:renderLast(os_x, os_y)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="os_x" n2="os_y">X and Y offsets, in screen pixels.</params>
+
+            <notes>
+                See 'render' for applicable notes.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>renderThimble</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.draw</event-origin>
+
+            <desc>Draws an indicator for the currently selected widget.</desc>
+
+            <sig>def:renderThimble()</sig>
+        </callback>
+
+        <callback>
+            <name>uiCall_reshape</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>Widget</event-origin>
+
+            <desc>A widget called self:reshape() or self:reshapeChildren().</desc>
+
+            <sig>def:uiCall_reshape(recursive)</sig>
+            <param name="recursive"><bool>true</bool> if reshape() was called with the recursive argument.</param>
+            <return>Any truthy value to halt propagation of the event to descendants.</return>
+
+            <notes>
+                Be careful about calling wid:reshape() on children within uiCall_reshape(), since wid:reshape() itself can be configured to be called on descendants recursively.
+
+                Reshaping is intended to modify a widget's content (children, minor visual details etc.), and not its current dimensions and position within its parent. There are some exceptions:
+
+                1) It might be sensible to resize the tree root in uiCall_reshape() because it does not have a parent.
+
+                2) You have free-floating window frames which must be clamped to their parent container, and their positions and sizes do not affect their siblings.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_resize</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>Widget</event-origin>
+
+            <desc>A widget called self:resize().</desc>
+
+            <sig>def:uiCall_resize()</sig>
+
+            <notes>
+                This event can be used to prompt a widget to update its dimensions without having to know about its internals.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_create</name>
+            <prop-method>bubbleEvent</prop-method>
+            <event-origin>Context, Widget</event-origin>
+
+            <desc>A widget was created with context:addWidget() or widget:addChild().</desc>
+
+            <sig>def:uiCall_create(inst)</sig>
+            <param name="inst">The target widget instance.</param>
+
+            <notes>
+                In your documentation, please list:
+
+                * Mandatory ahead-of-time fields
+                * Optional ahead-of-time fields
+
+                Assume that all other fields are assigned defaults, and that the caller must set them after successful instance creation.
+
+                If present, <code lang="lua">self:userCreate()</code> is run after this. (It's incredibly redundant as you have to pass it in ahead of time, but it pairs with <code lang="lua">self:userDestroy()</code>.)
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_destroy</name>
+            <prop-method>bubbleEvent</prop-method>
+            <event-origin>Widget</event-origin>
+
+            <desc>A widget was removed from the context.</desc>
+
+            <sig>def:uiCall_destroy(inst)</sig>
+            <param name="inst">The target widget instance.</param>
+
+            <notes>
+                If present, `self:userDestroy()` is run before this.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerHoverOn</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse pointer entered a widget.</desc>
+
+            <sig>def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
+            <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
+
+            <notes>
+                Hover events are postponed while any mouse button is held.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerHoverOff</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse pointer left a widget.</desc>
+
+            <sig>def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
+            <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
+
+            <notes>
+                Hover events are postponed while any mouse button is held.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerHoverMove</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse pointer is resting or moving over a widget.</desc>
+
+            <sig>def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
+            <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
+
+            <notes>
+                This callback needs to be renamed, or split into two callbacks. It fires both on love.mousemoved() and also in love.update().
+
+                Without the latter, widgets can slip away from the cursor while it isn't moving.
+            </notes>
+        </callback>
+
+
+        <callback>
+            <name>ui_evaluateHover</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>Hover intersect test</event-origin>
+
+            <desc>Called when the context is checking widgets for a mouse hover event.</desc>
+
+            <sig>def:ui_evaluateHover(mx, my, os_x, os_y)</sig>
+            <params n1="mx" n2="my">The mouse cursor position in UI space.</params>
+            <params n1="os_x" n2="os_y">Position offsets, such that mx + os_x and my + os_y give the widget's top-left position in UI space.</params>
+
+            <return><eval>true</eval> to indicate that this widget is selectable, <eval>false</eval> otherwise. It will be chosen if none of its children also return <eval>true</eval>.</return>
+        </callback>
+
+
+        <callback>
+            <name>ui_evaluatePress</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>Called when the context is checking widgets for a mouse press event.</desc>
+
+            <sig>def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)</sig>
+            <params n1="mx" n2="my">The mouse cursor position in UI space.</params>
+            <params n1="os_x" n2="os_y">Position offsets, such that mx + os_x and my + os_y give the widget's top-left position in UI space.</params>
+            <param name="button">The pressed mouse button.</param>
+            <param name="istouch">Whether this was a touchscreen event.</param>
+            <param name="presses">Number of times this button has been pressed consecutively (for checking double-clicks).</param>
+            <return><eval>true</eval> to indicate that this widget is selectable, <eval>false</eval> otherwise. It will be chosen if none of its children also return <eval>true</eval>.</return>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerPress</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>love.mousepressed</event-origin>
+
+            <desc>The mouse pressed on a widget.</desc>
+
+            <sig>def:uiCall_pointerPress(inst, x, y, button, istouch, presses)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">The mouse position, relative to the application.</params>
+            <param name="button">The pressed mouse button.</param>
+            <param name="istouch">Whether this was a touchscreen event.</param>
+            <param name="presses">Number of times this button has been pressed consecutively (for checking double-clicks).</param>
+
+            <notes>
+                If you want to consider only one pressed button at a time, use:
+
+                <code lang="lua">if button == self.context.mouse_pressed_button then ...</code>
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerPressRepeat</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>Called periodically after the the mouse has remained pressed on a widget.</desc>
+
+            <sig>def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">The mouse position, relative to the application.</params>
+            <param name="button">The pressed mouse button.</param>
+            <param name="istouch">Whether this was a touchscreen event.</param>
+            <param name="reps">The number of repetitions of this event, up to this point.</param>
+
+            <notes>
+                This event will emit even if the pointer leaves the pressed widget's area.
+
+                The initial delay and repeat-rate are controlled by the UI Context.
+
+                This is a virtual event, with no equivalent LÖVE callback.
+
+                It will only fire in relation to the button value held in `self.context.mouse_pressed_button`, so the check suggested in `uiCall_pointerPress()` is not necessary here (though including it would be harmless).
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerRelease</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse stopped pressing on a widget, and the cursor was within the widget's bounds.</desc>
+
+            <sig>def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">The mouse position, relative to the application.</params>
+            <param name="button">The pressed mouse button.</param>
+            <param name="istouch">Whether this was a touchscreen event.</param>
+            <param name="presses">Number of times this button has been pressed consecutively (for checking double-clicks).</param>
+
+            <notes>
+                This event only emits if the mouse is over the widget that is designated as "currently-pressed" by the context.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerUnpress</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse stopped pressing on a widget.</desc>
+
+            <sig>def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">The mouse position, relative to the application.</params>
+            <param name="button">The pressed mouse button.</param>
+            <param name="istouch">Whether this was a touchscreen event.</param>
+            <param name="presses">Number of times this button has been pressed consecutively (for checking double-clicks).</param>
+
+            <notes>
+                This event will emit even if the mouse cursor has left the currently-pressed widget.
+            </notes>
+        </callback>
+
+
+        <callback>
+            <name>uiCall_pointerDrag</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse is pressing on this widget on this frame.</desc>
+
+            <sig>def:uiCall_pointerDrag(inst, x, y, dx, dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">The mouse position, relative to the application.</params>
+            <params n1="dx" n2="dy">The mouse position's delta from the previous frame, if applicable.</params>
+
+            <notes>
+                Called per-frame.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerWheel</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse wheel moved.</desc>
+
+            <sig>def:uiCall_pointerWheel(x, y)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">The wheel's movement vector.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerDragDestOn</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse, while pressing, moved to this widget.</desc>
+
+            <sig>def:uiCall_pointerDragDestOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
+            <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
+
+            <notes>
+                Drag-Dest events are intended to help with widget-to-widget drag-and-drop actions.
+
+                The instance here is a widget that the mouse is overlapping *while* some other widget is being pressed. Think of the instance as the destination, and the current_pressed widget as the source.
+
+                Behavior notes:
+
+                * Source and desination may be the same widget.
+
+                * A reference to Source is not provided in the function arguments, but it can be found by reading self.context.current_pressed.
+
+                * Source could be destroyed before the drag-and-drop action is completed. Or, the general circumstances could have changed. You will unfortunately have to do some extra work to ensure that the transaction is valid.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerDragDestOff</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse, while pressing, moved off of this widget.</desc>
+
+            <sig>def:uiCall_pointerDragDestOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
+            <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerDragDestMove</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse, while pressing, is currently over this widget.</desc>
+
+            <sig>def:uiCall_pointerDragDestMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
+            <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
+
+            <notes>
+                Like uiCall_pointerHovermove, this is per-frame, regardless of mouse movement, and should probably be renamed.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_pointerDragDestRelease</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The mouse releases a button while over this widget.</desc>
+
+            <sig>def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="x" n2="y">Mouse cursor position, relative to the application window.</params>
+            <param name="button">The pressed mouse button.</param>
+            <param name="istouch">Whether this was a touchscreen event.</param>
+            <param name="presses">Number of times this button has been pressed consecutively (for checking double-clicks).</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimble1Take</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget took thimble1.</desc>
+
+            <sig>def:uiCall_thimble1Take(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimble2Take</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget took thimble2.</desc>
+
+            <sig>def:uiCall_thimble1Take(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimble1Release</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget released thimble1.</desc>
+
+            <sig>def:uiCall_thimble1Release(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimble2Release</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget released thimble2.</desc>
+
+            <sig>def:uiCall_thimble2Release(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimbleTopTake</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget got the top thimble.</desc>
+
+            <sig>def:uiCall_thimbleTopTake(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimbleTopRelease</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget lost the top thimble.</desc>
+
+            <sig>def:uiCall_thimbleTopRelease(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimble1Changed</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>Emitted to the holder of thimble2 when thimble1 changes.</desc>
+
+            <sig>def:uiCall_thimble1Changed(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimble2Changed</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>Emitted to the holder of thimble1 when thimble2 changes.</desc>
+
+            <sig>def:uiCall_thimble2Changed(inst, a, b, c, d)</sig>
+            <param name="inst">The target widget instance.</param>
+            <params n1="a" n2="b" n3="c" n4="d">Generic arguments which are supplied through widget:thimble1Take(). Usage depends on the implementation.</params>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimbleAction</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The user pressed enter (return) or space while this widget had the thimble.</desc>
+
+            <sig>def:uiCall_thimbleAction(inst, key, scancode, isrepeat)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="key">The key code.</param>
+            <param name="scancode">The keyboard scancode (maps to the classic US QWERTY keyboard layout).</param>
+            <param name="isrepeat"><bool>true</bool> if this is a repeat key event.</param>
+
+            <notes>
+                The enter key fires repeatedly, while space only fires once per key press.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_thimbleAction2</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>The user pressed the Application key or Shift+F10 while a widget had the thimble.</desc>
+
+            <sig>def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="key">The key code.</param>
+            <param name="scancode">The keyboard scancode (maps to the classic US QWERTY keyboard layout).</param>
+            <param name="isrepeat"><bool>true</bool> if this is a repeat key event.</param>
+
+            <notes>
+                Does not fire repeatedly.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_keyPressed</name>
+            <prop-method>cycleEvent</prop-method>
+            <event-origin>love.keypressed</event-origin>
+
+            <desc>The user pressed a key while this widget had the thimble.</desc>
+
+            <sig>def:uiCall_keyPressed(inst, key, scancode, isrepeat)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="key">The key code.</param>
+            <param name="scancode">The keyboard scancode (maps to the classic US QWERTY keyboard layout).</param>
+            <param name="isrepeat"><bool>true</bool> if this is a repeat key event.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_keyReleased</name>
+            <prop-method>cycleEvent</prop-method>
+            <event-origin>love.keyreleased</event-origin>
+
+            <desc>The user released a key while this widget had the thimble.</desc>
+
+            <sig>def:uiCall_keyReleased(inst, key, scancode)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="key">The key code.</param>
+            <param name="scancode">The keyboard scancode (maps to the classic US QWERTY keyboard layout).</param>
+            <param name="isrepeat"><bool>true</bool> if this is a repeat key event.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_textInput</name>
+            <prop-method>cycleEvent</prop-method>
+            <event-origin>love.textinput</event-origin>
+
+            <desc>The user inputted text.</desc>
+
+            <sig>def:uiCall_textInput(inst, text)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="text">The text.</param>
+
+            <notes>
+                These events are independent of keyboard down/up events, and LÖVE text input must be enabled.
+
+                The context checks the UTF-8 encoding of the text before invoking the event.
+            </notes>
+        </callback>
+
+        <callback>
+            <name>uiCall_capture</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget started capturing events from the context.</desc>
+
+            <sig>def:uiCall_capture(inst)</sig>
+            <param name="inst">The target widget instance.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_uncapture</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>A widget stopped capturing events from the context.</desc>
+
+            <sig>def:uiCall_uncapture(inst)</sig>
+            <param name="inst">The target widget instance.</param>
+        </callback>
+
+        <callback>
+            <name>uiCall_captureTick</name>
+            <prop-method>TODO</prop-method>
+            <event-origin>TODO</event-origin>
+
+            <desc>Runs on the start of every frame when the widget is capturing events from the context.</desc>
+
+            <sig>def:uiCall_captureTick(dt)</sig>
+            <param name="inst">The target widget instance.</param>
+            <param name="dt">This frame's delta time (from love.update()).</param>
+
+            <notes>
+                Returning <eval>false</eval> prevents other widgets from updating on this frame.
+            </notes>
+        </callback>
+
+
+<!-- TODO: format later
+
+
+When a widget has captured the context/focus, the following callbacks, if present, are executed as
+prodUI events occur. The capturing widget gets first dibs on the event, and can deny the main event
+handler from acting on the event by returning a truthy value.
+
+Some of these don't make much sense — why would a capturing widget need to hijack the window
+resize event? — but are included for the sake of completeness.
+
+function def:uiCap_windowResize(w, h) — (love.resize)
+
+function def:uiCap_keyPressed(key, scancode, isrepeat)
+function def:uiCap_keyReleased(key, scancode)
+
+function def:uiCap_textEdited(text, start, length)
+function def:uiCap_textInput(text)
+
+function def:uiCap_mouseFocus(focus)
+function def:uiCap_wheelMoved(x, y)
+
+function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
+^ Warning: mouse hover state is not updated automatically when this is in effect.
+
+function def:uiCap_mousePressed(x, y, button, istouch, presses)
+function def:uiCap_mouseReleased(x, y, button, istouch, presses)
+
+function def:uiCap_virtualMouseRepeat(x, y, button, istouch, reps)
+
+function def:uiCap_windowFocus(focus)
+function def:uiCap_mouseFocus(focus)
+
+function def:uiCap_windowVisible(visible)
+
+function def:uiCap_joystickAdded(joystick)
+function def:uiCap_joystickRemoved(joystick)
+function def:uiCap_joystickPressed(joystick, button)
+function def:uiCap_joystickReleased(joystick, button)
+function def:uiCap_joystickAxis(joystick, axis, value)
+function def:uiCap_joystickHat(joystick, hat, direction)
+
+function def:uiCap_gamepadPressed(joystick, button)
+function def:uiCap_gamepadReleased(joystick, button)
+function def:uiCap_gamepadAxis(joystick, axis, value)
+-->
+
+<!--
+        <callback>
+            <name></name>
+            <prop-method></prop-method>
+            <event-origin></event-origin>
+
+            <desc></desc>
+
+            <sig></sig>
+            <param name="inst">The target widget instance.</param>
+            <param name=""></param>
+        </callback>
+-->
+
+    </page>
+
+    <page>
+        <title>Reserved Field prefixes</title>
+
+        These fields are reserved by ProdUI in widget tables.
+
+        <pre>lo_*</pre>: Layout system
+        <pre>ly_*</pre>: Canvas layering
+        <pre>sk_*</pre>: Skinner and skin data
+        <pre>usr_*</pre>: Arbitrary user (application developer) variables
+        <pre>vp_*</pre>: Viewport data (See: Widget Viewports)
+
+
+        <title>Fields with base widget metatable dummy values</title>
+
+        <pre>tag</pre> (empty string) A string you can use to help locate widgets.
+
+        <pre>scr_x, scr_y</pre>: Scroll registers, applicable to a widget's children.
+
+
+        <title>Fields with per-instance metatable dummy values</title>
+
+        <pre>id</pre>: The identifier value for the widget, as set when the widget def was loaded. Typically a string. Do not modify.
+
+
+        <title>Fields set during instance creation (before uiCall_create())</title>
+
+        <pre>x, y</pre>: (0, 0) Position of the widget relative to its parent's upper-left corner.
+        <pre>w, h</pre>: (0, 0) Size of the widget body, in pixels. Must be at least zero.
+
+        NOTE: x, y, w, h values that are set ahead-of-time are preserved.
+
+        <pre>context</pre>: a link to the UI Context that this widget belongs to. Do not modify.
+        <pre>parent</pre>: a link to the widget's parent, or false if there is no parent. Do not modify.
+
+        <pre>children</pre>: table of child widgets and further descendants. This table may be a dummy reference
+        if '_no_descendants' was set in the def. Do not modify directly.
+
+
+        <title>Fields set during instance destruction</title>
+
+        <pre>_dead</pre>: Identifies widgets that are being removed or have already been removed. Can be read, but do not modify.
+
+        * nil: the widget is still part of the context.
+        * "dying": the widget is in the process of being removed from the context.
+        * "dead": The widget has been removed from the context.
+
+
+        <title>Context-to-widget behavior flags</title>
+
+        <pre>can_have_thimble</pre>: When true, widget can obtain the thimble (the UI cursor).
+
+        <pre>allow_hover</pre>: When true, widget is eligible for the 'current_hover' context state. When false, it and all of its descendants are skipped.
+
+
+        <title>Fields applicable to widgets with children</title>
+
+        <pre>hide_children</pre>: When truthy, children are not rendered.
+
+        <pre>clip_scissor</pre>: When true, rendering of children is clipped to the widget's body. When "manual", the scissor region is specified in 'clip_scissor_x', 'clip_scissor_y', 'clip_scissor_w', and 'clip_scissor_h', relative to the top-left of the widget.
+
+        NOTE: don't use math.huge with setScissor or intersectScissor. It will become zero. -2^16 and 2^17 seem OK.
+
+        <pre>clip_hover</pre>: When true, mouse hover and click detection against children is clipped to the widget's body. When "manual", the clipping region is specified in 'clip_hover_x', 'clip_hover_y', 'clip_hover_w' and 'clip_hover_h'.
+
+        <pre>_no_descendants</pre>: When true, upon widget creation, a special shared table is assigned to self.children. This table raises an error if self:addChild() is used, or if anything assigns a new field via __newindex.
+
+        Use with care: it cannot catch every instance of messing with the table. For example, rawset() and table.insert() do not invoke __newindex.
+
+
+        <title>Skin fields</title>
+
+        <pre>skin_id</pre>: Used when assigning the widget's skin. Skins allow the appearance of widgets to be customized. Not all widgets support skins, and most skins are designed for one or a few specific widgets or skinners (implementations).
+
+        Once set, skin_id should not be modified except as part of a skinner/skin replacement action.
+
+        <pre>skinner</pre>, <pre>skin</pre>: The skinning implementation and data package, respectively. They are assigned to skinned widgets by self:skinSetRefs(). Avoid modifying these tables from the widget instance code, as the changes will affect all other widgets with the same skinner / skin.
+
+
+        <title>Widget Viewports</title>
+
+        Viewports are rectangles that widgets can use for placement of their internals, and as the basis for built-in mouse sensors.
+
+        <pre>Viewport #1: self.vp_x, self.vp_y, self.vp_w, self.vp_h</pre>
+        <pre>Viewport #2: self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h</pre>
+
+        Up to eight viewports per widget are permitted by the support code that manages them.
+    </page>
+
+</documentation>
