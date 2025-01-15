@@ -352,7 +352,7 @@ function def:_trySettingThimble1()
 
 	local wid_banked = self.banked_thimble1
 
-	if wid_banked and wid_banked.can_have_thimble and self:hasThisDescendant(wid_banked) then
+	if wid_banked and wid_banked.can_have_thimble and wid_banked:hasThisAncestor(self) then
 		wid_banked:takeThimble1()
 	else
 		local content = self:findTag("frame_content")

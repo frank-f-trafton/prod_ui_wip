@@ -475,6 +475,8 @@
             <param name="presses">Number of times this button has been pressed consecutively (for checking double-clicks).</param>
 
             <notes>
+                This event does not trigger if no widget was clicked (ie the root disables mouse-hover, which in turn prevents clicking on it and all descendants).
+
                 If you want to consider only one pressed button at a time, use:
 
                 <code lang="lua">if button == self.context.mouse_pressed_button then ...</code>
