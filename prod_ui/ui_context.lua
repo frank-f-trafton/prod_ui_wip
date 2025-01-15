@@ -783,10 +783,8 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 
 	self.mouse_buttons[button] = true
 
-	-- The mouse position is relative to the screen because this statement can bubble up through multiple widgets.
-	-- Subtract the results of 'widget:getAbsolutePosition()' to get the point relative to a given widget.
 	if self.current_pressed then
-		self.current_pressed:cycleEvent("uiCall_pointerPress", self.current_hover, x, y, button, istouch, presses)
+		self.current_pressed:cycleEvent("uiCall_pointerPress", self.current_pressed, x, y, button, istouch, presses)
 	end
 end
 

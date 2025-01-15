@@ -978,45 +978,10 @@ function _mt_widget:findSiblingTag(str, i)
 		i = i + 1
 		instance = seq[i]
 	end
-
-	-- return nil
-end
-
-
---- Check if a widget belongs to self's descendants.
--- @param wid The widget to check
--- @return true if it is a child, grandchild, etc., or false if not found.
-function _mt_widget:hasThisDescendant(wid)
-	-- (Does not check if self == self)
-	for i, child in ipairs(self.children) do
-		if child == wid then
-			return true
-
-		elseif child:hasThisDescendant(wid) then
-			return true
-		end
-	end
-
-	return false
-end
-
-
---- Check if a widget is a child of self.
--- @param wid The widget to check.
--- @return true if it is a child, false if not. (Grandchild, great-grandchild, etc., don't count.)
-function _mt_widget:hasThisChild(wid)
-	for i, child in ipairs(self.children) do
-		if child == wid then
-			return true
-		end
-	end
-
-	return false
 end
 
 
 function _mt_widget:hasThisAncestor(wid)
-	-- (Does not check if self == self)
 	local ancestor = self.parent
 	while ancestor do
 		if ancestor == wid then

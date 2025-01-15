@@ -585,7 +585,7 @@ end
 function uiLayout.register(parent, wid)
 	local lp_seq = getLayoutTable(parent)
 
-	if not parent:hasThisChild(wid) then
+	if wid.parent ~= parent then
 		error("attempt to register widget that isn't a direct child of the parent.")
 	end
 
@@ -608,7 +608,7 @@ end
 function uiLayout.unregister(parent, wid)
 	local lp_seq = getLayoutTable(parent)
 
-	if not parent:hasThisChild(wid) then
+	if wid.parent ~= parent then
 		error("attempt to unregister widget that isn't a direct child of the parent.")
 	end
 

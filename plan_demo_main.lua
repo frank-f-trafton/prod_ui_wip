@@ -59,10 +59,11 @@ function plan.make(parent)
 
 		-- Prompt Frame
 		do
-			local btn = content:addChild("base/button", {x=64, y=64, x=96, h=24})
+			local btn = content:addChild("base/button", {x=64, y=64, w=96, h=24})
 			btn:setLabel("Prompt")
+			print("btn", btn.x, btn.y, btn.w, btn.h)
 			btn.wid_buttonAction = function(self)
-				local root = self:findTopWidgetInstance()
+				local root = self:getTopWidgetInstance()
 
 				-- Test pushing a new instance onto the stack
 				--[=[

@@ -132,6 +132,51 @@ local function clearPopUp(self, reason_code)
 end
 
 
+-- Locates the top modal frame.
+-- @return the modal frame with the highest priority, or nil.
+local function _getModalFrame(self)
+	if self.modal_level > 0 then
+		local wid
+		local top = 0
+		for i, child in ipairs(self.children) do
+			if child.modal_level and child.modal_level > top and child.modal_level < math.huge then
+				top = child.modal_level
+				wid = child
+			end
+		end
+		return wid, top
+	end
+end
+
+
+function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	-- Destroy pop-up menu if clicking outside of its lateral chain.
+	local cur_pres = self.context.current_pressed
+	local pop_up = self.pop_up_menu
+	local inst_in_pop_up
+	if pop_up then
+		inst_in_pop_up = widShared.chainHasThisWidget(pop_up, inst)
+		if not inst_in_pop_up then
+			clearPopUp(self, "concluded")
+		end
+	end
+
+	-- If root-modal state is active:
+	-- 1) Block clicking on any widget that is not part of the top modal window frame
+	--    or the pop-up.
+	-- 2) If the top modal frame doesn't have root selection focus, then force it.
+	local modal_wid = _getModalFrame(self)
+	if modal_wid then
+		if modal_wid.is_frame and self.selected_frame ~= modal_wid then
+			self:setSelectedFrame(modal_wid, true)
+		end
+		if not inst:hasThisAncestor(modal_wid) and not inst_in_pop_up then
+			return true
+		end
+	end
+end
+
+
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local context = self.context
 
@@ -142,30 +187,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			context:releaseThimbles()
 			self:setSelectedFrame(false)
 		end
-
-		-- If root-modal state is active, the top modal frame should get focus.
-		if self.modal_level > 0 then
-			-- Locate the top modal.
-			local wid, top
-			for i, child in ipairs(self.children) do
-				if child.modal_level and child.modal_level > 0 and child.modal_level < math.huge then
-					top = child.modal_level
-					wid = child
-				end
-			end
-
-			if wid and wid.is_frame then
-				self:setSelectedFrame(wid, true)
-			end
-		end
-	end
-
-	-- Destroy pop-up menu if clicking outside of its lateral chain.
-	local cur_pres = self.context.current_pressed
-	local pop_up = self.pop_up_menu
-
-	if pop_up and pop_up ~= cur_pres and not widShared.chainHasThisWidget(pop_up, cur_pres) then
-		clearPopUp(self, "concluded")
 	end
 end
 
@@ -176,14 +197,23 @@ function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	local context = self.context
+function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
+	if self.modal_level == 0 then
+		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
+			return true
+		end
+	end
+end
 
+
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self.modal_level == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
 			return true
 		end
 	end
+
+	local context = self.context
 
 	-- Run thimble logic.
 	-- Block keyboard-driven thimble actions if the mouse is currently pressed.
@@ -241,16 +271,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	if self.modal_level == 0 then
-		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
-			return true
-		end
-	end
-end
-
-
-
 function def:uiCall_keyReleased(inst, key, scancode)
 	if self.modal_level == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
@@ -300,7 +320,7 @@ end
 
 -- @param set_new_order When true, assign a new top order_id to the frame. This may be desired when clicking on a frame, and not when ctrl+tabbing through them.
 function def:setSelectedFrame(inst, set_new_order)
-	if inst and not self:hasThisChild(inst) then
+	if inst and inst.parent ~= self then
 		error("instance is not a child of the root widget.")
 	end
 
@@ -485,7 +505,6 @@ local function updateModalHoverState(self)
 
 		if modal_level < self.modal_level then
 			child.allow_hover = false
-
 		else
 			child.allow_hover = true
 		end
