@@ -150,7 +150,8 @@ end
 
 
 function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	-- Destroy pop-up menu if clicking outside of its lateral chain.
+	print("root trickle pointerPress: start")
+	-- Destroy pop-up menu when clicking outside of its lateral chain.
 	local cur_pres = self.context.current_pressed
 	local pop_up = self.pop_up_menu
 	local inst_in_pop_up
@@ -163,14 +164,17 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 	-- If root-modal state is active:
 	-- 1) Block clicking on any widget that is not part of the top modal window frame
-	--    or the pop-up.
+	--    or pop-ups.
 	-- 2) If the top modal frame doesn't have root selection focus, then force it.
 	local modal_wid = _getModalFrame(self)
+	print("modal_wid", modal_wid)
 	if modal_wid then
 		if modal_wid.is_frame and self.selected_frame ~= modal_wid then
+			print("setSelectedFrame")
 			self:setSelectedFrame(modal_wid, true)
 		end
-		if not inst:hasThisAncestor(modal_wid) and not inst_in_pop_up then
+		if not inst:isInLineage(modal_wid) and not inst_in_pop_up then
+			print("return true")
 			return true
 		end
 	end

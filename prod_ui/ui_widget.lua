@@ -994,6 +994,19 @@ function _mt_widget:hasThisAncestor(wid)
 end
 
 
+function _mt_widget:isInLineage(wid)
+	local w2 = self
+	while w2 do
+		if w2 == wid then
+			return true
+		end
+		w2 = w2.parent
+	end
+
+	return false
+end
+
+
 --- Run the 'reshape' UI callback on a widget, and optionally on its descendants.
 -- @param recursive When true, recursively reshapes children, grandchildren, etc. Return a truthy value
 -- in the callback to halt the reshaping of descendants.
