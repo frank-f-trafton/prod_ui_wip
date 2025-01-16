@@ -38,19 +38,6 @@ function plan.make(parent)
 
 		content.DEBUG = "dimensions" -- XXX: see base/container.lua
 
-		--local inspect = require("lib.test.inspect")
-		--print("inspect frame:", inspect(frame))
-
-		-- Light up the front window.
-		-- XXX handle this properly (I guess by routing window creation through a root WIMP widget?)
-		do
-			local header = frame:findTag("frame_header")
-
-			if header then
-				header.selected = true
-			end
-		end
-
 		frame.w = 640
 		frame.h = 550
 
@@ -101,8 +88,8 @@ function plan.make(parent)
 				end
 				--]==]
 
-				dialog.w = 320
-				dialog.h = 224
+				dialog.w = 448
+				dialog.h = 256
 				dialog:reshape(true)
 
 				dialog:setFrameTitle("Sure about that?")
@@ -121,11 +108,19 @@ function plan.make(parent)
 					text.text = "Are you sure?"
 					text:refreshText()
 
-					local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 48, w=96, h=32})
+					local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 72, w=96, h=32})
 					button_y:setLabel("Sure")
+					button_y.wid_buttonAction = function(self)
+						print("Sure")
+						self:bubbleEvent("frameCall_close")
+					end
 
-					local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 48, w=96, h=32})
+					local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 72, w=96, h=32})
 					button_n:setLabel("Unsure")
+					button_n.wid_buttonAction = function(self)
+						print("Unsure")
+						self:bubbleEvent("frameCall_close")
+					end
 				end
 				dialog:center(true, true)
 				local root = dialog:getTopWidgetInstance()
