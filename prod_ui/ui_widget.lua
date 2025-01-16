@@ -743,15 +743,13 @@ _mt_widget.trickleEvent = _trickleEvent -- _mt_widget:trickleEvent(field, a,b,c,
 
 --- Trickle, then bubble an event.
 function _mt_widget:cycleEvent(field, a,b,c,d,e,f)
-	if self.parent then
-		local retval = _trickleEvent(self.parent, field, a,b,c,d,e,f)
-		if retval then
-			return retval
-		end
+	local retval = _trickleEvent(self, field, a,b,c,d,e,f)
+	if retval then
+		return retval
 	end
 	local var = self[field]
 	if type(var) == "function" then
-		local retval = var(self, a,b,c,d,e,f)
+		retval = var(self, a,b,c,d,e,f)
 		if retval then
 			return retval
 		end
