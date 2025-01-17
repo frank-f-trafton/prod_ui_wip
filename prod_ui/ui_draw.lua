@@ -23,7 +23,11 @@ local stack_n = 0
 local function stringScissor()
 	local sx, sy, sw, sh = love.graphics.getScissor()
 
-	return "Scissor: x " .. tostring(sx) .. ", y " .. tostring(sy) .. ", w " .. tostring(sw) .. ", h " .. tostring(sh)
+	if not sx then
+		return "Scissor: (None)"
+	else
+		return "Scissor: x " .. tostring(sx) .. ", y " .. tostring(sy) .. ", w " .. tostring(sw) .. ", h " .. tostring(sh)
+	end
 end
 
 love.graphics.push = function(stack_type)
@@ -33,7 +37,6 @@ love.graphics.push = function(stack_type)
 	old_push(stack_type)
 end
 love.graphics.pop = function()
-
 	print("love.graphics.pop() STACK N " .. tostring(stack_n) .. " " .. stringScissor())
 	stack_n = stack_n - 1
 	--print(debug.traceback())
@@ -46,11 +49,11 @@ love.graphics.setScissor = function(x, y, w, h)
 end
 love.graphics.intersectScissor = function(x, y, w, h)
 	print("love.graphics.intersectScissor(", x, y, w, h, ")")
-	print(debug.traceback())
+	--print(debug.traceback())
 	old_intScis(x, y, w, h)
 end
 love.graphics.newCanvas = function(...) -- untested
-	io.write("love.graphics.newCanvas("
+	io.write("love.graphics.newCanvas()")
 	for i = 1, select("#", ...) do
 		io.write("\t" .. select(i, ...))
 	end
@@ -59,7 +62,7 @@ love.graphics.newCanvas = function(...) -- untested
 	old_newCanv(...)
 end
 love.graphics.setCanvas = function(...) -- untested
-	io.write("love.graphics.setCanvas("
+	io.write("love.graphics.setCanvas()")
 	for i = 1, select("#", ...) do
 		io.write("\t" .. select(i, ...))
 	end
@@ -177,6 +180,7 @@ end
 -- @param thimble1 The current thimble1, if applicable.
 -- @param thimble2 The current thimble2, if applicable.
 local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
+	-- [[DBG]] print("drawLoop " .. wid.id .. ": Start")
 	if wid.visible then
 		local do_layering = wid.ly_enabled
 
@@ -290,6 +294,7 @@ local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
 		end
 		--]]
 	end -- / if wid.visible
+	-- [[DBG]] print("drawLoop " .. wid.id .. ": End")
 end
 
 

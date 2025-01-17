@@ -69,7 +69,7 @@ function plan.make(parent)
 							d_content.scr_v.auto_hide = true
 						end
 
-						local text = dialog:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
+						local text = d_content:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
 						text.align = "center"
 						text.text = "This frame should block interaction\nwith all other content until it is dismissed."
 						text:refreshText()
@@ -123,7 +123,7 @@ function plan.make(parent)
 							d_content.scr_v.auto_hide = true
 						end
 
-						local text = dialog:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
+						local text = d_content:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
 						text.align = "center"
 						text.text = "This frame should block interaction with the frame\nthat invoked it, until dismissed. Other elements should\nbe accessible."
 						text:refreshText()
