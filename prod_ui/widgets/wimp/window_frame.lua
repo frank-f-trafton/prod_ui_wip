@@ -30,13 +30,11 @@ if content then
 end
 ```
 
-Frames can support modal relationships: Frame A can be blocked until Frame B is dismissed. It is
-recommended to use this sparingly (if at all), as there are many ways it can go wrong. Usually, it
-is better to use the WIMP Root's implementation of modal frames, or context-level root stacking.
+Frames support modal relationships: Frame A can be blocked until Frame B is dismissed. Compare with
+root-modal frames, where only the one frame (and pop-ups) can be interacted with.
 
-Another note on the per-frame modal implementation: it messes with the 'allow_hover' state of the
-frame's children (header bar, content, etc.), so you can't manage that directly.
-
+Frame-modals are harder to manage than root-modals, and should only be used when really necessary
+(ie the user needs to open a prompt in one frame, while looking up information in another frame).
 --]]
 
 
@@ -59,15 +57,6 @@ local def = {
 
 
 def.trickle = {}
-
-
---[[
--- XXX: Test trickle event propagation.
-function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	print("Halt!")
-	return true
-end
---]]
 
 
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
@@ -167,7 +156,16 @@ function def:setFrameTitle(text)
 	local header = self:findTag("frame_header")
 
 	if header then
-		header:setTitle(text)
+		header.text = text
+	end
+end
+
+
+function def:getFrameTitle()
+	local header = self:findTag("frame_header")
+
+	if header then
+		return header.text
 	end
 end
 
@@ -333,9 +331,6 @@ function def:uiCall_create(inst)
 		self.ref_modal_prev = false
 		self.ref_modal_next = false
 
-		-- Used with root-level modal state.
-		self.modal_level = 0
-
 		-- Table of widgets to offer keyPressed and keyReleased input.
 		self.hooks_trickle_key_pressed = {}
 		self.hooks_trickle_key_released = {}
@@ -374,11 +369,6 @@ function def:setModal(target)
 
 	self.ref_modal_prev = target
 	target.ref_modal_next = self
-
-	-- Turn off hover flag for the frame's direct children. (Header, content container, etc.)
-	for i, child in ipairs(target.children) do
-		child.allow_hover = false
-	end
 end
 
 
@@ -395,11 +385,6 @@ function def:clearModal()
 	self.ref_modal_prev = false
 	target.ref_modal_next = false
 
-	-- Restore the hover flag for the target's direct children.
-	for i, child in ipairs(target.children) do
-		child.allow_hover = true
-	end
-
 	return target
 end
 
@@ -409,6 +394,14 @@ function def:frameCall_close(inst)
 
 	-- Stop bubbling
 	return true
+end
+
+
+function def.trickle:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self.ref_modal_next then
+		self.context.current_hover = false
+		return true
+	end
 end
 
 
@@ -525,6 +518,14 @@ function def:bringToFront()
 end
 
 
+function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	if self.ref_modal_next then
+		self.context.current_pressed = false
+		return true
+	end
+end
+
+
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	--print("window-frame pointer-press", self, inst, x, y, button)
 	-- Drag actions are primarily initiated by child sensors.
@@ -538,11 +539,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local modal_next = self.ref_modal_next
 	if modal_next then
 		root:setSelectedFrame(modal_next, true)
-		return
-	end
-
-	-- Root-modal check
-	if self.modal_level < root.modal_level then
 		return
 	end
 
@@ -643,7 +639,7 @@ end
 
 function def:uiCall_destroy(inst)
 	if self == inst then
-		-- Clean up any existing frame-modal connection. Note that this function will crash if another frame
+		-- Clean up any existing frame-modal connection. Note that this function will raise an error if another frame
 		-- is still blocking this frame.
 		if self.ref_modal_prev then
 			local target = self:clearModal()
@@ -661,8 +657,8 @@ function def:uiCall_destroy(inst)
 		end
 
 		-- Clean up root-level modal level, if applicable.
-		if self.modal_level > 0 then
-			local root = self:getTopWidgetInstance()
+		local root = self:getTopWidgetInstance()
+		if self == root.modals[#root.modals] then
 			root:sendEvent("rootCall_clearModalFrame", self)
 		end
 	end

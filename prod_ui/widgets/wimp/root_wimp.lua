@@ -19,6 +19,28 @@ local def = {}
 def.trickle = {}
 
 
+local function _printFrames(self)
+	print("_printFrames()")
+	local selected = self.selected_frame
+	for i, child in ipairs(self.children) do
+		if child.is_frame then
+			local frame_title = child:getFrameTitle() or ""
+			frame_title = frame_title == "" and "(Untitled)" or frame_title
+			print(i, child.order_id,
+				frame_title
+				.. (selected and selected == child and "(S)" or "") .. "; "
+				.. (child.tag ~= "" and child.tag or "(Untagged)")
+				.. "; " .. tostring(child)
+				.. (child._dead and " (Dead)" or "")
+			)
+		else
+			print(i, "(not a frame)")
+		end
+	end
+	print("-----------")
+end
+
+
 function def:uiCall_create(inst)
 	if self == inst then
 		self.allow_hover = true
@@ -32,7 +54,7 @@ function def:uiCall_create(inst)
 		1: Background elements
 		2: Workspace panels
 		3: Workspace frames, normal priority
-		4: Workspace frames, always-on-top
+		4: Workspace frames, always on top
 		5: Application menu bar
 		6: Pop-up menus
 		--]]
@@ -50,10 +72,9 @@ function def:uiCall_create(inst)
 		--self.lp_w
 		--self.lp_h
 
-		-- Used to implement 2nd-gen modal frames (blocking all other 2nd-gen widget click actions, except
-		-- for things like pop-up menus).
-		-- Widgets with a modal value less than this may not be accessible.
-		self.modal_level = 0
+		-- Stack of modal 2nd-gen window frames. When populated, the top modal should get exclusive access, blocking
+		-- all other window frames. The user should still be able to interact with ephemeral widgets, such as pop-ups.
+		self.modals = {}
 
 		-- One 2nd-gen window frame can be selected at a time.
 		self.selected_frame = false
@@ -132,23 +153,6 @@ local function clearPopUp(self, reason_code)
 end
 
 
--- Locates the top modal frame.
--- @return the modal frame with the highest priority, or nil.
-local function _getModalFrame(self)
-	if self.modal_level > 0 then
-		local wid
-		local top = 0
-		for i, child in ipairs(self.children) do
-			if child.modal_level and child.modal_level > top and child.modal_level < math.huge then
-				top = child.modal_level
-				wid = child
-			end
-		end
-		return wid, top
-	end
-end
-
-
 function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	-- Destroy pop-up menu when clicking outside of its lateral chain.
 	local cur_pres = self.context.current_pressed
@@ -165,12 +169,13 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	-- 1) Block clicking on any widget that is not part of the top modal window frame
 	--    or pop-ups.
 	-- 2) If the top modal frame doesn't have root selection focus, then force it.
-	local modal_wid = _getModalFrame(self)
+	local modal_wid = self.modals[#self.modals]
 	if modal_wid then
 		if modal_wid.is_frame and self.selected_frame ~= modal_wid then
 			self:setSelectedFrame(modal_wid, true)
 		end
 		if not inst:isInLineage(modal_wid) and not inst_in_pop_up then
+			self.context.current_pressed = false
 			return true
 		end
 	end
@@ -198,7 +203,7 @@ end
 
 
 function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	if self.modal_level == 0 then
+	if #self.modals == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
 			return true
 		end
@@ -207,7 +212,7 @@ end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	if self.modal_level == 0 then
+	if #self.modals == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
 			return true
 		end
@@ -272,7 +277,7 @@ end
 
 
 function def:uiCall_keyReleased(inst, key, scancode)
-	if self.modal_level == 0 then
+	if #self.modals == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
 			return true
 		end
@@ -281,7 +286,7 @@ end
 
 
 function def.trickle:uiCall_keyReleased(inst, key, scancode)
-	if self.modal_level == 0 then
+	if #self.modals == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_released, key, scancode) then
 			return true
 		end
@@ -342,12 +347,43 @@ function def:setSelectedFrame(inst, set_new_order)
 end
 
 
+-- Select the topmost window frame.
+-- @param exclude Optionally provide one window frame to exclude from the search. Use this when the
+-- current selected frame is in the process of being destroyed. (Root-modal state should have been cleaned
+-- up before this point.)
+function def:selectTopWindowFrame(exclude)
+	print("selectTopWindowFrame: start")
+	if #self.modals > 0 then
+		print("modals > 0")
+		self:setSelectedFrame(self.modals[#self.modals], false)
+		return
+	end
+
+	for i = #self.children, 1, -1 do
+		print("child #", i)
+		local child = self.children[i]
+
+		print("is_frame", child.is_frame, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
+		if child.is_frame
+		and not child.ref_modal_next
+		and child ~= exclude
+		then
+			print("this child was selected")
+			self:setSelectedFrame(child, false)
+			return
+		end
+	end
+
+	print("no child was selected")
+	self:setSelectedFrame(false)
+end
+
+
 local function frameSearch(self, dir, v1, v2)
 	local candidate = false
 
 	for i, child in ipairs(self.children) do
 		if child.is_frame
-		and child.modal_level >= self.modal_level
 		and not child.ref_modal_next
 		and child.order_id > v1 and child.order_id < v2
 		then
@@ -365,28 +401,6 @@ local function frameSearch(self, dir, v1, v2)
 end
 
 
--- Select the topmost window frame.
--- @param exclude Optionally provide one window frame to exclude from the search. Use this when the
--- current selected frame is in the process of being destroyed.
-function def:selectTopWindowFrame(exclude)
-	for i = #self.children, 1, -1 do
-		local child = self.children[i]
-
-		if child.is_frame
-		and child.modal_level >= self.modal_level
-		and not child.ref_modal_next
-		and child ~= exclude
-		then
-			self:setSelectedFrame(child, false)
-			return true
-		end
-	end
-
-	self:setSelectedFrame(false)
-	return false
-end
-
-
 -- @param dir 1 or -1.
 -- @return true if the step was successful, false if no step happened.
 function def:stepSelectedFrame(dir)
@@ -394,16 +408,20 @@ function def:stepSelectedFrame(dir)
 		error("argument #1: invalid direction.")
 	end
 
+	-- Don't step frames when any root-modal frame is active.
+	if #self.modals > 0 then
+		return false
+	end
+
 	--[[
 	We need to keep the step-through order of frames separate from their position in the root's list of children.
 
 	Traveling left-to-right: find the next-biggest order ID. If this is the biggest, search again for the smallest
-	ID. Right-to-left is the opposite. Ignore widgets that are not frames, that are below the modal threshold, or
-	which are being frame-modal blocked.
+	ID. Right-to-left is the opposite. Ignore widgets that are not frames, and frames which are being blocked by a
+	frame-modal reference.
 	--]]
 
 	local current = self.selected_frame
-	local candidate
 	local v1, v2 = 0, math.huge
 	if current then
 		if dir == 1 then
@@ -496,48 +514,25 @@ function def:rootCall_destroyPopUp(inst, reason_code)
 end
 
 
---- Change allow_hover for all 2nd-gen widgets with a modal_level less than the current (or if modal_level is nil).
---  To opt widgets out of this, set their modal_level to math.huge.
--- @param self The root widget.
-local function updateModalHoverState(self)
-	for i, child in ipairs(self.children) do
-		local modal_level = child.modal_level or 0
-
-		if modal_level < self.modal_level then
-			child.allow_hover = false
-		else
-			child.allow_hover = true
+function def:rootCall_setModalFrame(inst)
+	for i, child in ipairs(self.modals) do
+		if child == inst then
+			error("this frame is already in the stack of root-modals.")
 		end
 	end
-end
 
-
-function def:rootCall_setModalFrame(inst)
-	if inst.modal_level ~= 0 then
-		-- Troubleshooting:
-		-- * Ensure you are not double-assigning modal state to a frame.
-		error("frame modal level must be zero upon assignment (got: " .. inst.modal_level .. ")")
-	end
-
-	self.modal_level = self.modal_level + 1
-	inst.modal_level = self.modal_level
-
-	updateModalHoverState(self)
+	self.modals[#self.modals + 1] = inst
+	self.context.mouse_start = inst
 end
 
 
 function def:rootCall_clearModalFrame(inst)
-	if inst.modal_level ~= self.modal_level then
-		-- Troubleshooting:
-		-- * Attempted to clear the modal state of a frame twice?
-		-- * Clearing modal frames out of order?
-		error("mismatch between modal level of frame and root (" .. inst.modal_level .. " vs " .. self.modal_level .. ")")
+	if self.modals[#self.modals] ~= inst then
+		error("tried to clear the root-modal status of a frame that is not at the top of the 'modals' stack.")
 	end
 
-	self.modal_level = self.modal_level - 1
-	inst.modal_level = 0
-
-	updateModalHoverState(self)
+	self.modals[#self.modals] = nil
+	self.context.mouse_start = self.modals[#self.modals] or false
 end
 
 
@@ -595,16 +590,9 @@ end
 function def:uiCall_destroy(inst)
 	-- Bubbled events from children
 	if self ~= inst then
-		--[=[
-		-- If the instance is the current pop-up widget, clean up root's link to it.
-		if self.pop_up_menu and inst == self.pop_up_menu then
-			-- On the fence about this.
-			self.pop_up_menu = false
-		end
-		--]=]
-
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
 		if inst.is_frame and self.selected_frame == inst then
+			--_printFrames(self)
 			self:selectTopWindowFrame(inst)
 		end
 	end

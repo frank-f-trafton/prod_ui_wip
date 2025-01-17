@@ -44,94 +44,129 @@ function plan.make(parent)
 		frame:reshape(true)
 		frame:center(false, true)
 
-		-- Prompt Frame
+		-- Root-modal frame test
 		do
-			local btn = content:addChild("base/button", {x=64, y=64, w=96, h=24})
-			btn:setLabel("Prompt")
-			print("btn", btn.x, btn.y, btn.w, btn.h)
+			local btn = content:addChild("base/button", {x=64, y=64, w=160, h=24})
+			btn:setLabel("Root-Modal Test")
 			btn.wid_buttonAction = function(self)
 				local root = self:getTopWidgetInstance()
 
-				-- Test pushing a new instance onto the stack
-				--[=[
-				local root2 = context:addWidget("wimp/root_wimp")
-				--context:pushRoot(root2)
-				context:setRoot(root2)
-				local dialog = root2:addChild("wimp/window_frame")
-				dialog.userDestroy = function(self)
-					--self.context:popRoot()
-					self.context:setRoot(root)
-				end
-				--]=]
-
-				-- [==[
-				local frame = commonWimp.getFrame(self)
-				local header
-				if frame then
-					header = frame:findTag("frame_header")
-				end
-
-				local dialog = root:addChild("wimp/window_frame")
+				local frame, dialog
+				frame = commonWimp.getFrame(self)
 
 				if frame then
-
-					--[=[
-					-- Test frame-modal state.
-					dialog:setModal(frame)
-					--]=]
-
-					-- Test root-modal state.
-					-- [=[
-					--dialog.sort_id = 4
+					dialog = root:addChild("wimp/window_frame", {w = 448, h = 256})
 					root:sendEvent("rootCall_setModalFrame", dialog)
-					--]=]
-				end
-				--]==]
+					dialog:reshape(true)
+					dialog:setFrameTitle("Root-Modal Test")
 
-				dialog.w = 448
-				dialog.h = 256
-				dialog:reshape(true)
+					local d_content = dialog:findTag("frame_content")
+					if d_content then
+						if d_content.scr_h then
+							d_content.scr_h.auto_hide = true
+						end
+						if d_content.scr_v then
+							d_content.scr_v.auto_hide = true
+						end
 
-				dialog:setFrameTitle("Sure about that?")
+						local text = dialog:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
+						text.align = "center"
+						text.text = "This frame should block interaction\nwith all other content until it is dismissed."
+						text:refreshText()
 
-				local d_content = dialog:findTag("frame_content")
-				if d_content then
-					if d_content.scr_h then
-						d_content.scr_h.auto_hide = true
+						local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 72, w=96, h=32})
+						button_y:setLabel("O")
+						button_y.wid_buttonAction = function(self)
+							self:bubbleEvent("frameCall_close")
+						end
+
+						local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 72, w=96, h=32})
+						button_n:setLabel("K")
+						button_n.wid_buttonAction = function(self)
+							self:bubbleEvent("frameCall_close")
+						end
 					end
-					if d_content.scr_v then
-						d_content.scr_v.auto_hide = true
+					dialog:center(true, true)
+					local root = dialog:getTopWidgetInstance()
+					root:setSelectedFrame(dialog)
+
+					local try_host = dialog:getOpenThimbleDepthFirst()
+					if try_host then
+						try_host:takeThimble1()
 					end
-
-					local text = dialog:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
-					text.align = "center"
-					text.text = "Are you sure?"
-					text:refreshText()
-
-					local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 72, w=96, h=32})
-					button_y:setLabel("Sure")
-					button_y.wid_buttonAction = function(self)
-						print("Sure")
-						self:bubbleEvent("frameCall_close")
-					end
-
-					local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 72, w=96, h=32})
-					button_n:setLabel("Unsure")
-					button_n.wid_buttonAction = function(self)
-						print("Unsure")
-						self:bubbleEvent("frameCall_close")
-					end
-				end
-				dialog:center(true, true)
-				local root = dialog:getTopWidgetInstance()
-				root:setSelectedFrame(dialog)
-
-				local try_host = dialog:getOpenThimbleDepthFirst()
-				if try_host then
-					try_host:takeThimble1()
 				end
 			end
 		end
+
+		-- Frame-modal test
+		do
+			local btn = content:addChild("base/button", {x=64, y=96, w=160, h=24})
+			btn:setLabel("Frame-Modal Test")
+			btn.wid_buttonAction = function(self)
+				local root = self:getTopWidgetInstance()
+
+				local frame, dialog
+				frame = commonWimp.getFrame(self)
+
+				if frame then
+					dialog = root:addChild("wimp/window_frame", {w = 448, h = 256})
+					dialog:setModal(frame)
+					dialog:reshape(true)
+					dialog:setFrameTitle("Frame-Modal test")
+
+					local d_content = dialog:findTag("frame_content")
+					if d_content then
+						if d_content.scr_h then
+							d_content.scr_h.auto_hide = true
+						end
+						if d_content.scr_v then
+							d_content.scr_v.auto_hide = true
+						end
+
+						local text = dialog:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
+						text.align = "center"
+						text.text = "This frame should block interaction with the frame\nthat invoked it, until dismissed. Other elements should\nbe accessible."
+						text:refreshText()
+
+						local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 72, w=96, h=32})
+						button_y:setLabel("O")
+						button_y.wid_buttonAction = function(self)
+							self:bubbleEvent("frameCall_close")
+						end
+
+						local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 72, w=96, h=32})
+						button_n:setLabel("K")
+						button_n.wid_buttonAction = function(self)
+							self:bubbleEvent("frameCall_close")
+						end
+					end
+					dialog:center(true, true)
+					local root = dialog:getTopWidgetInstance()
+					root:setSelectedFrame(dialog)
+
+					local try_host = dialog:getOpenThimbleDepthFirst()
+					if try_host then
+						try_host:takeThimble1()
+					end
+				end
+			end
+		end
+
+
+		do
+			-- Test pushing a new instance onto the stack
+			--[=[
+			local root2 = context:addWidget("wimp/root_wimp")
+			--context:pushRoot(root2)
+			context:setRoot(root2)
+			local dialog = root2:addChild("wimp/window_frame")
+			dialog.userDestroy = function(self)
+				--self.context:popRoot()
+				self.context:setRoot(root)
+			end
+			--]=]
+		end
+
 
 		-- Toast/Notification WIP
 		do
@@ -285,6 +320,5 @@ of it.\
 
 	return frame
 end
-
 
 return plan

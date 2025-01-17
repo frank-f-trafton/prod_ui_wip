@@ -144,11 +144,6 @@ function def:uiCall_create(inst)
 end
 
 
-function def:setTitle(text)
-	self.text = text
-end
-
-
 function def:uiCall_reshape()
 	local button_pad = 2 -- XXX style/theme integration
 	local button_w = 32 - button_pad*2 -- XXX style/theme integration

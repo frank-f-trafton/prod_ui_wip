@@ -14,7 +14,7 @@ local utf8 = require("utf8")
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
 local eventHandlers = require(REQ_PATH .. "common.event_handlers")
-local hoverLogic = require(REQ_PATH .. "common.hover_logic")
+local mouseLogic = require(REQ_PATH .. "common.mouse_logic")
 local commonMath = require(REQ_PATH .. "common.common_math")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
@@ -54,8 +54,8 @@ local function cb_keyDown(self, kc, sc, rep, latest)
 		wid_cur:cycleEvent("uiCall_keyPressed", wid_cur, kc, sc, rep)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_keyPressed", self.tree, kc, sc, rep) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_keyPressed", self.root, kc, sc, rep) -- no ancestors
 	end
 end
 
@@ -73,8 +73,8 @@ local function cb_keyUp(self, kc, sc)
 		wid_cur:cycleEvent("uiCall_keyReleased", wid_cur, kc, sc)
 
 	-- Nothing is focused: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_keyReleased", self.tree, kc, sc) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_keyReleased", self.root, kc, sc) -- no ancestors
 	end
 end
 
@@ -141,7 +141,7 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 	self.instances = {}
 
 	-- Only one top-level widget may be active (root) at a time.
-	self.tree = false
+	self.root = false
 
 	-- Maintain a stack of top-level widgets to help with layered UI roots and drawing order.
 	self.stack = {}
@@ -180,6 +180,13 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 	self.window_focus = false -- love.focus()
 	self.window_visible = false -- love.visible()
 	self.mouse_focus = false -- love.mousefocus()
+
+	-- When populated with a widget table, mouse hover and press state checks
+	-- begin here. When false, they begin at the root.
+	-- Note that while this prevents some events from emitting, it does not affect the
+	-- overall propagation of events (that is, they can still trickle and bubble through
+	-- the root).
+	self.mouse_start = false
 
 	-- The mouse pointer's most recent position. Can be outside the window bounds if the user
 	-- clicks in the app and drags outwards.
@@ -326,7 +333,7 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 	self.mouse_x = x
 	self.mouse_y = y
 
-	hoverLogic.update(self, 0, 0)
+	mouseLogic.checkHover(self, 0, 0)
 
 	local cur_pres = self.current_pressed
 
@@ -447,8 +454,8 @@ function _mt_context:love_update(dt)
 	self.async_lock = false
 
 	-- Run all other widget update functions.
-	if self.tree then
-		_updateLoop(self.tree, dt, self.locks)
+	if self.root then
+		_updateLoop(self.root, dt, self.locks)
 	end
 
 	-- All widgets should have been unlocked by the end of the update loop.
@@ -557,8 +564,8 @@ function _mt_context:love_textinput(text)
 		wid_cur:cycleEvent("uiCall_textInput", wid_cur, text)
 
 	-- Nothing is focused: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_textInput", self.tree, text) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_textInput", self.root, text) -- no ancestors
 	end
 end
 
@@ -572,8 +579,8 @@ function _mt_context:love_focus(focus)
 
 	self.window_focus = focus
 
-	if self.tree then
-		self.tree:sendEvent("uiCall_windowFocus", self.tree, focus)
+	if self.root then
+		self.root:sendEvent("uiCall_windowFocus", self.root, focus)
 	end
 end
 
@@ -587,8 +594,8 @@ function _mt_context:love_visible(visible)
 
 	self.window_visible = visible
 
-	if self.tree then
-		self.tree:sendEvent("uiCall_windowVisible", self.tree, visible)
+	if self.root then
+		self.root:sendEvent("uiCall_windowVisible", self.root, visible)
 	end
 end
 
@@ -602,8 +609,8 @@ function _mt_context:love_mousefocus(focus)
 
 	self.mouse_focus = focus
 
-	if self.tree then
-		self.tree:sendEvent("uiCall_mouseFocus", self.tree, focus)
+	if self.root then
+		self.root:sendEvent("uiCall_mouseFocus", self.root, focus)
 	end
 end
 
@@ -636,7 +643,7 @@ function _mt_context:love_wheelmoved(x, y)
 		return
 	end
 
-	hoverLogic.update(self, 0, 0)
+	mouseLogic.checkHover(self, 0, 0)
 
 	if self.current_hover then
 		self.current_hover:cycleEvent("uiCall_pointerWheel", self.current_hover, x, y)
@@ -676,9 +683,9 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 			old_current_pressed:cycleEvent("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
 		end
 
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_pointerUnpress", self.tree, x, y, button, istouch, presses) -- no ancestors
-		self.tree:sendEvent("uiCall_pointerRelease", self.tree, x, y, button, istouch, presses) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_pointerUnpress", self.root, x, y, button, istouch, presses) -- no ancestors
+		self.root:sendEvent("uiCall_pointerRelease", self.root, x, y, button, istouch, presses) -- no ancestors
 	end
 
 	if self.mouse_pressed_button == button then
@@ -705,7 +712,7 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 
 	self.mouse_buttons[button] = false
 
-	hoverLogic.update(self, 0, 0)
+	mouseLogic.checkHover(self, 0, 0)
 end
 
 
@@ -724,7 +731,7 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 	self.mouse_x = x
 	self.mouse_y = y
 
-	hoverLogic.update(self, 0, 0)
+	mouseLogic.checkHover(self, 0, 0)
 
 	-- Mouse clicking blocks single 'keypress->keyrelease' actions.
 	self.key_mgr:stunRecent()
@@ -741,7 +748,7 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 		self.mouse_pressed_x = x
 		self.mouse_pressed_y = y
 
-		local wid_pressed = hoverLogic.checkPressed(self, button, istouch, presses)
+		local wid_pressed = mouseLogic.checkPressed(self, button, istouch, presses)
 
 		self.current_pressed = wid_pressed or false
 
@@ -811,8 +818,8 @@ function _mt_context:love_resize(w, h)
 		return
 	end
 
-	if self.tree then
-		self.tree:sendEvent("uiCall_windowResize", w, h) -- no ancestors
+	if self.root then
+		self.root:sendEvent("uiCall_windowResize", w, h) -- no ancestors
 	end
 end
 
@@ -824,8 +831,8 @@ function _mt_context:love_joystickadded(joystick) -- XXX untested
 		return
 	end
 
-	if self.tree then
-		self.tree:sendEvent("uiCall_joystickAdded", joystick) -- no ancestors
+	if self.root then
+		self.root:sendEvent("uiCall_joystickAdded", joystick) -- no ancestors
 	end
 end
 
@@ -837,8 +844,8 @@ function _mt_context:love_joystickremoved(joystick) -- XXX untested
 		return
 	end
 
-	if self.tree then
-		self.tree:sendEvent("uiCall_joystickRemoved", joystick) -- no ancestors
+	if self.root then
+		self.root:sendEvent("uiCall_joystickRemoved", joystick) -- no ancestors
 	end
 end
 
@@ -856,8 +863,8 @@ function _mt_context:love_joystickpressed(joystick, button) -- XXX untested
 		wid_cur:cycleEvent("uiCall_joystickPressed", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_joystickPressed", self.tree, joystick, button) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_joystickPressed", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -875,8 +882,8 @@ function _mt_context:love_joystickreleased(joystick, button) -- XXX untested
 		wid_cur:cycleEvent("uiCall_joystickReleased", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_joystickReleased", self.tree, joystick, button) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_joystickReleased", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -894,8 +901,8 @@ function _mt_context:love_joystickaxis(joystick, axis, value) -- XXX untested
 		wid_cur:cycleEvent("uiCall_joystickAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_joystickAxis", self.tree, joystick, axis, value) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_joystickAxis", self.root, joystick, axis, value) -- no ancestors
 	end
 end
 
@@ -913,8 +920,8 @@ function _mt_context:love_joystickhat(joystick, hat, direction) -- XXX untested
 		wid_cur:cycleEvent("uiCall_joystickHat", wid_cur, joystick, hat, direction)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_joystickHat", self.tree, joystick, hat, direction) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_joystickHat", self.root, joystick, hat, direction) -- no ancestors
 	end
 end
 
@@ -932,8 +939,8 @@ function _mt_context:love_gamepadpressed(joystick, button) -- XXX untested
 		wid_cur:cycleEvent("uiCall_gamepadPressed", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_gamepadPressed", self.tree, joystick, button) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_gamepadPressed", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -951,8 +958,8 @@ function _mt_context:love_gamepadreleased(joystick, button) -- XXX untested
 		wid_cur:cycleEvent("uiCall_gamepadReleased", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_gamepadReleased", self.tree, joystick, button) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_gamepadReleased", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -970,8 +977,8 @@ function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 		wid_cur:cycleEvent("uiCall_gamepadAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
-	elseif self.tree then
-		self.tree:sendEvent("uiCall_gamepadAxis", self.tree, joystick, axis, value) -- no ancestors
+	elseif self.root then
+		self.root:sendEvent("uiCall_gamepadAxis", self.root, joystick, axis, value) -- no ancestors
 	end
 end
 
@@ -1115,9 +1122,9 @@ end
 --	fresh table will be used instead. Note that uiCall_create() may overwrite certain fields depending on how the widget
 --	def is written. It's best to only use this in ways that are described by the widget documentation or def code. Do
 --	not share the table among multiple instances.
--- @param pos (#children + 1) Where to add the widget within the caller's children array. Must be between 1 and
+-- @param pos (#children + 1) Where to add the widget within the caller's children array. Must be from 1 to
 --	#children + 1.
--- @return A reference to the new instance. The function will raise an error in the event of a problem.
+-- @return A reference to the new instance.
 function _mt_context:addWidget(id, init_t, pos)
 	uiShared.notNilNotFalseNotNaN(1, id)
 	uiShared.typeEval1(2, init_t, "table")
@@ -1157,7 +1164,39 @@ end
 --- Get the context's current root widget.
 -- @return The root widget table, or false if there is no root.
 function _mt_context:getRoot()
-	return self.tree
+	return self.root
+end
+
+
+function _mt_context:bankRootContextState()
+	return {
+		current_hover = self.current_hover,
+		current_pressed = self.current_pressed,
+		--current_drag_dest ???
+		thimble1 = self.thimble1,
+		thimble2 = self.thimble2,
+		captured_focus = self.captured_focus
+		--mouse_start ???
+		--mouse_pressed_x ???
+		--mouse_pressed_y ???
+	}
+end
+
+
+function _mt_context:applyRootContextState(t)
+	if t then
+		self.current_hover = t.current_hover or false
+		self.current_pressed = t.current_pressed or false
+		self.thimble1 = t.thimble1 or false
+		self.thimble2 = t.thimble2 or false
+		self.captured_focus = t.captured_focus or false
+	else
+		self.current_hover = false
+		self.current_pressed = false
+		self.thimble1 = false
+		self.thimble2 = false
+		self.captured_focus = false
+	end
 end
 
 
@@ -1177,26 +1216,16 @@ function _mt_context:pushRoot(new_root)
 		error("only top-level widget instances can become the context root.")
 	end
 
-	local old_root = self.tree
+	local old_root = self.root
 
-	-- Bank the existing focus state
 	if old_root then
-		old_root._ctx_banked_current_hover = self.current_hover
-		old_root._ctx_banked_current_pressed = self.current_pressed
-		old_root._ctx_banked_thimble1 = self.thimble1
-		old_root._ctx_banked_thimble2 = self.thimble2
-		old_root._ctx_banked_captured_focus = self.captured_focus
+		old_root._ctx_banked = self:bankRootContextState()
 	end
 
-	-- Update the focus state
-	self.current_hover = new_root._ctx_banked_current_hover or false
-	self.current_pressed = new_root._ctx_banked_current_pressed or false
-	self.thimble1 = new_root._ctx_banked_thimble1 or false
-	self.thimble2 = new_root._ctx_banked_thimble2 or false
-	self.captured_focus = new_root._ctx_banked_captured_focus or false
+	self:applyRootContextState(new_root._ctx_banked or {})
 
 	self.stack[#self.stack + 1] = new_root
-	self.tree = new_root
+	self.root = new_root
 	new_root:sendEvent("uiCall_rootPush", new_root) -- no ancestors
 end
 
@@ -1217,28 +1246,15 @@ function _mt_context:popRoot()
 		return nil
 	end
 
-	local old_root = self.tree
+	local old_root = self.root
 	if old_root then
 		old_root:sendEvent("uiCall_rootPop", old_root) -- no ancestors
 	end
 	stack[#stack] = nil
-	self.tree = stack[#stack] or false
+	self.root = stack[#stack] or false
 
-	-- Restore the previous focus state, if applicable.
-	local new_root = self.tree
-	if new_root then
-		self.current_hover = new_root._ctx_banked_current_hover or false
-		self.current_pressed = new_root._ctx_banked_current_pressed or false
-		self.thimble1 = new_root._ctx_banked_thimble1 or false
-		self.thimble2 = new_root._ctx_banked_thimble2 or false
-		self.captured_focus = new_root._ctx_banked_captured_focus or false
-	else
-		self.current_hover = false
-		self.current_pressed = false
-		self.thimble1 = false
-		self.thimble2 = false
-		self.captured_focus = false
-	end
+	local new_root = self.root
+	self:applyRootContextState(new_root and new_root._ctx_banked)
 
 	return old_root
 end
@@ -1346,7 +1362,7 @@ function _mt_context:transferPressedState(wid)
 	* uiCall_pointerRelease() for the old pressed widget.
 	* uiCall_pointerPress() for the new pressed widget.
 
-	uiCall_pointerDrag() should happen -- soon-ish -- as a result of hoverLogic being called in the context update
+	uiCall_pointerDrag() should happen -- soon-ish -- as a result of mouseLogic being called in the context update
 	function.
 	--]]
 

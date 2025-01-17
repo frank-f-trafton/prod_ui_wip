@@ -88,7 +88,7 @@ def.arrange = lgcMenu.arrangeListVerticalTB
 
 
 -- XXX: test
-local function _blocking_ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
+local function _blocking_ui_evaluatePress(self, mx, my, os_x, os_y, button, istouch, presses)
 	return true
 end
 
@@ -663,9 +663,6 @@ function def:uiCall_create(inst)
 
 		-- XXX: test
 		self.is_blocking_clicks = false
-
-		-- Do not block this widget while a modal frame is active.
-		self.modal_level = math.huge
 
 		-- Padding values. -- XXX style/config, scale
 		self.pad_bijou_x1 = 2

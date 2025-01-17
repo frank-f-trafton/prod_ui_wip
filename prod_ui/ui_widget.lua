@@ -358,7 +358,7 @@ function _mt_widget:tryReleaseThimble2(a, b, c, d)
 end
 
 
---- Gets the top-level widget instance. In widget code, prefer this over referencing 'self.context.tree' because it can work outside of the current root (unless you really do want to interact with the current root).
+--- Gets the top-level widget instance. In widget code, prefer this over referencing 'self.context.root' because it can work outside of the current root (unless you really do want to interact with the current root).
 -- @return The root widget.
 function _mt_widget:getTopWidgetInstance()
 	-- This is safe for the root itself to run.
@@ -618,8 +618,8 @@ function _mt_widget:remove()
 		end
 
 		-- If applicable, refresh the instance tree (stack top) reference.
-		if context.tree == self then
-			context.tree = context.stack[#context.stack] or false
+		if context.root == self then
+			context.root = context.stack[#context.stack] or false
 		end
 	end
 
