@@ -410,21 +410,19 @@
         </callback>
 
         <callback>
-            <name>uiCall_pointerHoverMove</name>
+            <name>uiCall_pointerHover</name>
             <prop-method>TODO</prop-method>
-            <event-origin>TODO</event-origin>
+            <event-origin>love.mousemoved, love.update</event-origin>
 
             <desc>The mouse pointer is resting or moving over a widget.</desc>
 
-            <sig>def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
+            <sig>def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)</sig>
             <param name="inst">The target widget instance.</param>
             <params n1="mouse_x" n2="mouse_y">Mouse cursor position, relative to the application window.</params>
             <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
 
             <notes>
-                This callback needs to be renamed, or split into two callbacks. It fires both on love.mousemoved() and also in love.update().
-
-                Without the latter, widgets can slip away from the cursor while it isn't moving.
+                This callback fires in both love.mousemoved() and love.update(). Without the latter, widgets can slip away from the cursor while it isn't moving.
             </notes>
         </callback>
 
@@ -629,7 +627,7 @@
             <params n1="mouse_dx" n2="mouse_dy">Relative mouse delta from its last position, if applicable.</params>
 
             <notes>
-                Like uiCall_pointerHovermove, this is per-frame, regardless of mouse movement, and should probably be renamed.
+                Like uiCall_pointerHover, this is per-frame, regardless of mouse movement. It should probably be renamed.
             </notes>
         </callback>
 

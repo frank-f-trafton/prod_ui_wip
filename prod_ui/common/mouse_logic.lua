@@ -170,7 +170,7 @@ function mouseLogic.checkHover(context, dx, dy)
 						context.current_hover = wid
 						wid:cycleEvent("uiCall_pointerHoverOn", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
 					end
-					wid:cycleEvent("uiCall_pointerHoverMove", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
+					wid:cycleEvent("uiCall_pointerHover", context.current_hover, context.mouse_x, context.mouse_y, dx, dy)
 				end
 			end
 		end
