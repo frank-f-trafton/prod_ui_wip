@@ -1,4 +1,4 @@
-local hoverLogic = {}
+local mouseLogic = {}
 
 
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
@@ -95,15 +95,17 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 end
 
 
-function hoverLogic.checkPressed(context, button, istouch, presses)
-	if context.tree then
-		return _pressLoop(context.mouse_x, context.mouse_y, 0, 0, context.tree, -2^53, -2^53, 2^53, 2^53, button, istouch, presses)
+function mouseLogic.checkPressed(context, button, istouch, presses)
+	local starter = context.mouse_start or context.root
+	if starter then
+		return _pressLoop(context.mouse_x, context.mouse_y, 0, 0, starter, -2^53, -2^53, 2^53, 2^53, button, istouch, presses)
 	end
 end
 
 
-function hoverLogic.update(context, dx, dy)
-	if context.tree then
+function mouseLogic.checkHover(context, dx, dy)
+	local starter = context.mouse_start or context.root
+	if starter then
 		-- Hover state
 
 		--[[
@@ -125,7 +127,7 @@ function hoverLogic.update(context, dx, dy)
 		-- A mouse button is being held down: update drag-dest reference.
 		if context.mouse_pressed_button then
 			local old_drag_dest = context.current_drag_dest
-			wid = _hoverLoop(context.mouse_x, context.mouse_y, 0, 0, context.tree, -2^53, -2^53, 2^53, 2^53)
+			wid = _hoverLoop(context.mouse_x, context.mouse_y, 0, 0, starter, -2^53, -2^53, 2^53, 2^53)
 
 			if not wid or wid ~= old_drag_dest then
 				if old_drag_dest then
@@ -154,7 +156,7 @@ function hoverLogic.update(context, dx, dy)
 				end
 			else
 				local old_hover = context.current_hover
-				wid = _hoverLoop(context.mouse_x, context.mouse_y, 0, 0, context.tree, -2^53, -2^53, 2^53, 2^53)
+				wid = _hoverLoop(context.mouse_x, context.mouse_y, 0, 0, starter, -2^53, -2^53, 2^53, 2^53)
 
 				if not wid or wid ~= old_hover then
 					if old_hover then
@@ -182,4 +184,4 @@ function hoverLogic.update(context, dx, dy)
 end
 
 
-return hoverLogic
+return mouseLogic

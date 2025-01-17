@@ -8,7 +8,7 @@ local eventHandlers = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local hoverLogic = require(REQ_PATH .. "hover_logic")
+local mouseLogic = require(REQ_PATH .. "mouse_logic")
 
 
 function eventHandlers.mousemoved(context, x, y, dx, dy, istouch)
@@ -28,7 +28,7 @@ function eventHandlers.mousemoved(context, x, y, dx, dy, istouch)
 		return
 	end
 
-	hoverLogic.update(context, dx, dy)
+	mouseLogic.checkHover(context, dx, dy)
 end
 
 

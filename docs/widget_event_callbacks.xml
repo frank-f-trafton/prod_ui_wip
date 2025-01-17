@@ -224,7 +224,7 @@
             <param name="dt">This frame's delta time (from love.update()).</param>
 
             <notes>
-                This is run in prodUI.love_update(), starting with context.tree and traversing depth-first. Note that of the top-level instances, only widgets in the current root are updated.
+                This is run in prodUI.love_update(), starting with context.root and traversing depth-first. Note that of the top-level instances, only widgets in the current root are updated.
 
                 Return a truthy value to explicitly prevent updating a widget's children. (If uiCall_update doesn't exist in the widget, children will be updated.)
 

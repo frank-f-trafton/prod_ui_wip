@@ -140,14 +140,14 @@ local function newWimpContext()
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
 	local wid_root = context:addWidget("wimp/root_wimp")
-	wid_root.tag = "wimp_workspace"
-
+	context:setRoot(wid_root)
 	wid_root.w, wid_root.h = love.graphics.getDimensions()
 
 	return context, wid_root
 end
 
-local context = newWimpContext()
+
+local context, wimp_root = newWimpContext()
 
 
 local app_scale_x = 1.0
@@ -283,9 +283,6 @@ end
 
 
 do
-	local wimp_root = context:findTag("wimp_workspace")
-	context:setRoot(wimp_root)
-
 	-- [[
 	do
 		local fr_demo_select = _launchSelector(wimp_root)

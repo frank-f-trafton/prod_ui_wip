@@ -786,7 +786,6 @@ function widShared.evaluateKeyhooks(self, keyhooks, a, b, c)
 
 	for i = #keyhooks, 1, -1 do
 		local func = keyhooks[i]
-		print("buh", #keyhooks, 1, self.id)
 		if not self._dead then
 			local res = func(self, a, b, c)
 
