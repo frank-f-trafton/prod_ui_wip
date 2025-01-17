@@ -783,7 +783,7 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 				-- Hover on + move
 				self.current_hover = wid_pressed
 				wid_pressed:cycleEvent("uiCall_pointerHoverOn", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
-				wid_pressed:cycleEvent("uiCall_pointerHoverMove", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+				wid_pressed:cycleEvent("uiCall_pointerHover", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
 			end
 		end
 	end

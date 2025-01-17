@@ -409,7 +409,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 

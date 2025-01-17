@@ -613,7 +613,7 @@ end
 --]]
 
 
-function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
 		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)

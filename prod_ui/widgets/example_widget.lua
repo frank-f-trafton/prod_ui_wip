@@ -53,7 +53,7 @@ def.skinners = {
 --function def:uiCall_destroy(inst)
 --function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 --function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
---function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+--function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 --function def:ui_evaluateHover(mx, my, os_x, os_y)
 --function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 --function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)

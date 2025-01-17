@@ -621,7 +621,7 @@ end
 --function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
-function def:uiCall_pointerHoverMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		--[[
 		-- XXX: Commented out 2023-Apr-07. I don't think this is necessary anymore. When active,
