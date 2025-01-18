@@ -204,8 +204,11 @@ return {
 		["window_body"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
-		["window_header"] = {
+		["window_header_norm"] = {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 12, h2 = 12, w3 = 6, h3 = 6,
+		},
+		["window_header_cond"] = {
+			x = 0, y = 0, w1 = 3, h1 = 3, w2 = 6, h2 = 6, w3 = 3, h3 = 3,
 		},
 		["window_header_button"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,

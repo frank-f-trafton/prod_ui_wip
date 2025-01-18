@@ -77,25 +77,25 @@ return {
     button_minor = {
       h = 12,
       w = 12,
-      x = 15,
+      x = 29,
       y = 153
     },
     button_minor_disabled = {
       h = 12,
       w = 12,
-      x = 1,
+      x = 15,
       y = 153
     },
     button_minor_hover = {
       h = 12,
       w = 12,
-      x = 239,
-      y = 139
+      x = 1,
+      y = 153
     },
     button_minor_press = {
       h = 12,
       w = 12,
-      x = 225,
+      x = 239,
       y = 139
     },
     button_press = {
@@ -215,13 +215,13 @@ return {
     ind_decrement = {
       h = 8,
       w = 8,
-      x = 79,
+      x = 93,
       y = 153
     },
     ind_increment = {
       h = 8,
       w = 8,
-      x = 69,
+      x = 83,
       y = 153
     },
     input_box = {
@@ -257,13 +257,13 @@ return {
     label = {
       h = 12,
       w = 12,
-      x = 211,
+      x = 225,
       y = 139
     },
     label_disabled = {
       h = 12,
       w = 12,
-      x = 197,
+      x = 211,
       y = 139
     },
     list_box_body = {
@@ -317,7 +317,7 @@ return {
     progress_back = {
       h = 8,
       w = 8,
-      x = 59,
+      x = 73,
       y = 153
     },
     progress_ichor = {
@@ -371,37 +371,37 @@ return {
     sash_lr = {
       h = 8,
       w = 8,
-      x = 49,
+      x = 63,
       y = 153
     },
     sash_tb = {
       h = 8,
       w = 8,
-      x = 39,
+      x = 53,
       y = 153
     },
     scroll_button = {
       h = 12,
       w = 12,
-      x = 183,
+      x = 197,
       y = 139
     },
     scroll_button_disabled = {
       h = 12,
       w = 12,
-      x = 169,
+      x = 183,
       y = 139
     },
     scroll_button_hover = {
       h = 12,
       w = 12,
-      x = 155,
+      x = 169,
       y = 139
     },
     scroll_button_press = {
       h = 12,
       w = 12,
-      x = 141,
+      x = 155,
       y = 139
     },
     scroll_trough = {
@@ -425,7 +425,7 @@ return {
     slider_trough_active = {
       h = 8,
       w = 8,
-      x = 29,
+      x = 43,
       y = 153
     },
     slider_trough_empty = {
@@ -467,19 +467,19 @@ return {
     tabular_category_body = {
       h = 12,
       w = 12,
-      x = 127,
+      x = 141,
       y = 139
     },
     tabular_category_body_hover = {
       h = 12,
       w = 12,
-      x = 113,
+      x = 127,
       y = 139
     },
     tabular_category_body_press = {
       h = 12,
       w = 12,
-      x = 99,
+      x = 113,
       y = 139
     },
     window_body = {
@@ -491,50 +491,56 @@ return {
     window_graphic_close = {
       h = 12,
       w = 12,
-      x = 85,
+      x = 99,
       y = 139
     },
     window_graphic_maximize = {
       h = 12,
       w = 12,
-      x = 71,
+      x = 85,
       y = 139
     },
     window_graphic_unmaximize = {
       h = 12,
       w = 12,
-      x = 57,
+      x = 71,
       y = 139
-    },
-    window_header = {
-      h = 24,
-      w = 24,
-      x = 69,
-      y = 1
     },
     window_header_button = {
       h = 12,
       w = 12,
-      x = 43,
+      x = 57,
       y = 139
     },
     window_header_button_disabled = {
       h = 12,
       w = 12,
-      x = 29,
+      x = 43,
       y = 139
     },
     window_header_button_hover = {
       h = 12,
       w = 12,
-      x = 15,
+      x = 29,
       y = 139
     },
     window_header_button_press = {
       h = 12,
       w = 12,
+      x = 15,
+      y = 139
+    },
+    window_header_cond = {
+      h = 12,
+      w = 12,
       x = 1,
       y = 139
+    },
+    window_header_norm = {
+      h = 24,
+      w = 24,
+      x = 69,
+      y = 1
     }
   },
   slices = {
@@ -925,16 +931,6 @@ return {
       x = 0,
       y = 0
     },
-    window_header = {
-      h1 = 6,
-      h2 = 12,
-      h3 = 6,
-      w1 = 6,
-      w2 = 12,
-      w3 = 6,
-      x = 0,
-      y = 0
-    },
     window_header_button = {
       h1 = 4,
       h2 = 4,
@@ -972,6 +968,26 @@ return {
       w1 = 4,
       w2 = 4,
       w3 = 4,
+      x = 0,
+      y = 0
+    },
+    window_header_cond = {
+      h1 = 3,
+      h2 = 6,
+      h3 = 3,
+      w1 = 3,
+      w2 = 6,
+      w3 = 3,
+      x = 0,
+      y = 0
+    },
+    window_header_norm = {
+      h1 = 6,
+      h2 = 12,
+      h3 = 6,
+      w1 = 6,
+      w2 = 12,
+      w3 = 6,
       x = 0,
       y = 0
     }

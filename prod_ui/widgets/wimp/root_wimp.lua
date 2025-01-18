@@ -474,6 +474,7 @@ function def:rootCall_doctorCurrentPressed(inst, new_pressed, press_busy_code)
 		if press_busy_code then
 			new_pressed.press_busy = press_busy_code
 		end
+		return true
 	end
 end
 

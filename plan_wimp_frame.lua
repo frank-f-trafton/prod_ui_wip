@@ -16,7 +16,24 @@ end
 function plan.make(parent)
 	local context = parent.context
 
-	local frame = parent:addChild("wimp/window_frame")
+	-- Make some skinDef patches to avoid messing up other frames.
+	local resources = context.resources
+	local patch_header_norm = resources:newSkinDef("wimp_header_norm")
+	resources:registerSkinDef(patch_header_norm, patch_header_norm, false)
+	resources:refreshSkinDef(patch_header_norm)
+
+	local patch_header_cond = resources:newSkinDef("wimp_header_cond")
+	resources:registerSkinDef(patch_header_cond, patch_header_cond, false)
+	resources:refreshSkinDef(patch_header_cond)
+
+	local patch_frame = resources:newSkinDef("wimp_frame")
+	patch_frame.skin_header_norm = patch_header_norm
+	patch_frame.skin_header_cond = patch_header_cond
+	resources:registerSkinDef(patch_frame, patch_frame, false)
+	resources:refreshSkinDef(patch_frame)
+
+
+	local frame = parent:addChild("wimp/window_frame", {skin_id = patch_frame})
 	local header = frame:findTag("frame_header")
 
 	frame.w = 640
@@ -41,8 +58,7 @@ function plan.make(parent)
 			checkbox.wid_buttonAction = function(self)
 				local frame, header = _getFrameAndHeader(self)
 				if header then
-					header.condensed = not not self.checked
-					frame:reshape(true)
+					frame:setCondensedHeader(not not self.checked)
 				end
 			end
 			yy = yy + hh
@@ -81,7 +97,8 @@ function plan.make(parent)
 			local r_action = function(self)
 				local frame, header = _getFrameAndHeader(self)
 				if header then
-					header.button_side = self.usr_button_side
+					patch_header_norm.button_side = self.usr_button_side
+					patch_header_cond.button_side = self.usr_button_side
 					frame:reshape(true)
 				end
 			end
@@ -96,7 +113,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.button_side == rad_btn.usr_button_side then
+				if header and header.skin.button_side == rad_btn.usr_button_side then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -112,7 +129,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.button_side == rad_btn.usr_button_side then
+				if header and header.skin.button_side == rad_btn.usr_button_side then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -135,7 +152,8 @@ function plan.make(parent)
 			local r_action = function(self)
 				local frame, header = _getFrameAndHeader(self)
 				if header then
-					header.text_align = self.usr_text_align
+					patch_header_norm.text_align_h = self.usr_text_align_h
+					patch_header_cond.text_align_h = self.usr_text_align_h
 					frame:reshape(true)
 				end
 			end
@@ -144,13 +162,13 @@ function plan.make(parent)
 			do
 				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
 				rad_btn.bijou_side = "right"
-				rad_btn.radio_group = "rg_header_text_align"
+				rad_btn.radio_group = "rg_header_text_align_h"
 				rad_btn:setLabel("Left")
-				rad_btn.usr_text_align = "left"
+				rad_btn.usr_text_align_h = 0
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.text_align == rad_btn.usr_text_align then
+				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
 					radio_button:setChecked(true)
 				end
 				yy = yy + hh
@@ -160,13 +178,13 @@ function plan.make(parent)
 			do
 				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
 				rad_btn.bijou_side = "right"
-				rad_btn.radio_group = "rg_header_text_align"
+				rad_btn.radio_group = "rg_header_text_align_h"
 				rad_btn:setLabel("Center")
-				rad_btn.usr_text_align = "center"
+				rad_btn.usr_text_align_h = 0.5
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.text_align == rad_btn.usr_text_align then
+				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -176,13 +194,13 @@ function plan.make(parent)
 			do
 				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
 				rad_btn.bijou_side = "right"
-				rad_btn.radio_group = "rg_header_text_align"
+				rad_btn.radio_group = "rg_header_text_align_h"
 				rad_btn:setLabel("Right")
-				rad_btn.usr_text_align = "right"
+				rad_btn.usr_text_align_h = 1
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.text_align == rad_btn.usr_text_align then
+				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh

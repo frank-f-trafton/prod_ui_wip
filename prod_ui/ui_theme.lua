@@ -470,8 +470,9 @@ end
 
 
 --- Creates a new Box Style table.
+-- @t An existing table to use for the object. Do not share across objects.
 -- @return The new Box Style table.
-function uiTheme.newBoxStyle()
+function uiTheme.newBoxStyle(t)
 	--[[
 	Fields:
 	sl_body_id: The ID of a 9-Slice texture which should be rendered with the box.
@@ -490,7 +491,7 @@ function uiTheme.newBoxStyle()
 	Similar to "padding" in HTML/CSS.
 	--]]
 
-	return setmetatable({}, _mt_box_style)
+	return setmetatable(t or {}, _mt_box_style)
 end
 
 

@@ -395,16 +395,6 @@ return {
       x = 0,
       y = 0
     },
-    window_header = {
-      h1 = 6,
-      h2 = 12,
-      h3 = 6,
-      w1 = 6,
-      w2 = 12,
-      w3 = 6,
-      x = 0,
-      y = 0
-    },
     window_header_button = {
       h1 = 4,
       h2 = 4,
@@ -442,6 +432,26 @@ return {
       w1 = 4,
       w2 = 4,
       w3 = 4,
+      x = 0,
+      y = 0
+    },
+    window_header_cond = {
+      h1 = 3,
+      h2 = 6,
+      h3 = 3,
+      w1 = 3,
+      w2 = 6,
+      w3 = 3,
+      x = 0,
+      y = 0
+    },
+    window_header_norm = {
+      h1 = 6,
+      h2 = 12,
+      h3 = 6,
+      w1 = 6,
+      w2 = 12,
+      w3 = 6,
       x = 0,
       y = 0
     }
