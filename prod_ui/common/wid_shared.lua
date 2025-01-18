@@ -128,225 +128,6 @@ function widShared.keepInBoundsExtended(self, v, x1, x2, y1, y2)
 end
 
 
--- @param self The widget to resize.
--- @param mx Mouse position within the parent widget space.
-local function resizeLeft(self, mx)
-	mx = math.floor(0.5 + mx)
-
-	local old_x = self.x
-
-	self.x = math.min(mx, self.x + self.w - self.min_w)
-	self.w = self.w + (old_x - self.x)
-end
-
-
-local function resizeRight(self, mx)
-	mx = math.floor(0.5 + mx)
-
-	self.w = math.max(self.min_w, mx - self.x)
-end
-
-
-local function resizeTop(self, my)
-	my = math.floor(0.5 + my)
-
-	local old_y = self.y
-
-	self.y = math.min(my, self.y + self.h - self.min_h)
-	self.h = self.h + (old_y - self.y)
-end
-
-
-local function resizeBottom(self, my)
-	my = math.floor(0.5 + my)
-	self.h = math.max(self.min_h, my - self.y)
-end
-
-
-function widShared.uiCapEvent_resize_mouseMoved(self, axis_x, axis_y, x, y, dx, dy, istouch)
-	-- Update mouse position
-	self.context.mouse_x = x
-	self.context.mouse_y = y
-
-	local old_w, old_h = self.w, self.h
-
-	-- Get mouse position in parent's space
-	local ax, ay = self.parent:getAbsolutePosition()
-	local mx, my = x - ax, y - ay
-
-	-- Crop mouse position to a range slightly bigger than the parent rectangle.
-	-- This prevents stretching frames far beyond the LÖVE window (though if you want that behavior,
-	-- you can comment out or delete the block below). -- XXX Yeah, this probably should be configurable.
-	-- [[
-	mx = math.max(-32, math.min(mx, self.parent.w + 32))
-	my = math.max(-32, math.min(my, self.parent.h + 32))
-	--]]
-
-	--[[
-	print(
-		"x", x, "y", y,
-		"ax", ax, "ay", ay,
-		"mx", mx, "my", my,
-		"self.cap_ox", self.cap_ox, "self.cap_oy", self.cap_oy
-	)
-	--]]
-
-	-- Resize the container.
-	if axis_x > 0 then
-		resizeRight(self, mx + self.cap_ox)
-
-	elseif axis_x < 0 then
-		resizeLeft(self, mx + self.cap_ox)
-	end
-
-	if axis_y > 0 then
-		resizeBottom(self, my + self.cap_oy)
-
-	elseif axis_y < 0 then
-		resizeTop(self, my + self.cap_oy)
-	end
-
-	-- Resize self, contents, sensors
-	if old_w ~= self.w or old_h ~= self.h then
-		self:reshape(true)
-	end
-
-	return false
-end
-
-
-function widShared.uiCapEvent_resize_mouseReleased(self, x, y, button, istouch, presses)
-	if button == 1 and self.context.mouse_pressed_button == button then
-		self.cap_mode = "idle"
-		self:uncaptureFocus()
-
-		local context = self.context
-		eventHandlers.mousemoved(context, context.mouse_x, context.mouse_y, 0, 0, false)
-
-		-- Hack: clamp frame to parent. This isn't handled while resizing because the
-		-- width and height can go haywire when resizing against the bounds of the
-		-- screen (see the 'p_bounds_*' fields).
-		--widShared.keepInBoundsPort2(self)
-		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
-
-		-- mousereleased cleanup
-		return false
-	end
-
-	return true
-end
-
-
-function widShared.uiCapEvent_drag_mouseMoved(self, x, y, dx, dy, istouch)
-	--[[
-	Relies on the following fields:
-	self.drag_ox
-	self.drag_oy
-	--]]
-
-	local old_x, old_y = self.context.mouse_x, self.context.mouse_y
-
-	-- Update mouse position
-	self.context.mouse_x = x
-	self.context.mouse_y = y
-
-	if self.maximized then
-		-- Unmaximize only if the mouse has wandered a bit from its original click-point.
-		if self.context.mouse_x < self.cap_mouse_orig_a_x - 32
-		or self.context.mouse_x >= self.cap_mouse_orig_a_x + 32
-		or self.context.mouse_y < self.cap_mouse_orig_a_y - 32
-		or self.context.mouse_y >= self.cap_mouse_orig_a_y + 32
-		then
-			-- If unmaximizing as a result of the pointer dragging the top bar, tweak the
-			-- container's XY position so that it looks like the mouse pointer has gripped
-			-- the window.
-
-			local a_x, a_y = self:getAbsolutePosition()
-			local mouse_rel_x = self.context.mouse_x - a_x
-			local mouse_rel_y = self.context.mouse_y - a_y
-
-			-- 0.0 == left or top, 1.0 == bottom or right
-			local lerp_x = commonMath.lerp(0, self.w, mouse_rel_x / self.w) / self.w
-			local lerp_y = commonMath.lerp(0, self.h, mouse_rel_y / self.h) / self.h
-
-			self:wid_unmaximize()
-			self:reshape(true)
-
-			-- Would need adjustments if dragging elsewhere (not along the top bar)
-			-- unmaximizes the window.
-			self.drag_ox = math.floor(0.5 - lerp_x * self.w)
-			self.drag_oy = -self.cap_mouse_orig_a_y
-		end
-	end
-
-	if not self.maximized then
-		-- Update self's position
-		-- We could use dx and dy here, but if the mouse leaves the window and
-		-- enters from another location, the window will not teleport with the pointer.
-		-- Whether you want this behavior or not is a matter of personal preference.
-		--[[
-		self.x = self.x + dx
-		self.y = self.y + dy
-		--]]
-
-		local parent = self.parent
-		if parent then
-			local pa_x, pa_y = parent:getAbsolutePosition()
-
-			--[[
-			self.drag_ox = a_x - x
-			self.drag_oy = a_y - y
-			--]]
-
-			self.x = self.context.mouse_x - pa_x + self.drag_ox
-			self.y = self.context.mouse_y - pa_y + self.drag_oy
-		end
-
-		--widShared.keepInBoundsPort2(self)
-		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
-	end
-
-	-- Tweak to fix accidental maximizes from double-clicks.
-	if self.drag_dc_fix_x then
-		local fix_pad = self.context.cseq_range
-		if x < self.drag_dc_fix_x - fix_pad or x > self.drag_dc_fix_x + fix_pad
-		or y < self.drag_dc_fix_y - fix_pad or y > self.drag_dc_fix_y + fix_pad
-		then
-			self.context:forceClickSequence(false, 1, 1)
-		end
-	end
-end
-
-
-function widShared.uiCapEvent_drag_mouseReleased(self, x, y, button, istouch, presses)
-	if button == 1 and self.context.mouse_pressed_button == button then
-		self.cap_mode = "idle"
-		self:uncaptureFocus()
-
-		local context = self.context
-		eventHandlers.mousemoved(context, context.mouse_x, context.mouse_y, 0, 0, false)
-
-		-- Allow event through so that the context can clean up its mouse-released state.
-		return false
-	end
-
-	return true
-end
-
-
-function widShared.addResizeSensor(self, pad, axis_x, axis_y)
-	local sens = self:addChild("sensor_resize")
-
-	sens.axis_x = axis_x
-	sens.axis_y = axis_y
-	sens.sensor_pad = pad
-
-	sens:reshape()
-
-	return sens
-end
-
-
 function widShared.centerInParent(self, hori, vert)
 	local parent = self.parent
 	if not parent then
@@ -925,6 +706,21 @@ function widShared.carveViewport(self, v, e)
 	self[vw] = math.max(0, self[vw] - skin[e.x1] - skin[e.x2])
 	self[vh] = math.max(0, self[vh] - skin[e.y1] - skin[e.y2])
 end
+
+
+--- Reduce or enlarge a viewport in place with relative numbers.
+-- untested
+--[[
+function widShared.resizeViewportInPlace(self, v, x1, y1, x2, y2)
+	v = vp_keys[v]
+	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
+
+	self[vx] = self[vx] + x1
+	self[vy] = self[vy] + y1
+	self[vw] = self[vw] + x2 - x1
+	self[vh] = self[vh] + y2 - y1
+end
+--]]
 
 
 --- Copies the values of one viewport to another.

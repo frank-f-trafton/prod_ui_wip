@@ -40,6 +40,7 @@ Frame-modals are harder to manage than root-modals, and should only be used when
 
 local context = select(1, ...)
 
+local commonFrame = require(context.conf.prod_ui_req .. "common.common_frame")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -62,14 +63,14 @@ def.trickle = {}
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
 function def:ui_evaluateHover(mx, my, os_x, os_y)
 	local wx, wy = self.x + os_x, self.y + os_y
-	local rp = self.resize_padding
+	local rp = self.maximized and 0 or self.resize_padding
 	return mx >= wx - rp and my >= wy - rp and mx < wx + self.w + rp and my < wy + self.h + rp
 end
 
 
 function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 	local wx, wy, ww, wh = self.x + os_x, self.y + os_y, self.w, self.h
-	local rp = self.resize_padding
+	local rp = self.maximized and 0 or self.resize_padding
 	-- in frame + padding area
 	if mx >= wx - rp and my >= wy - rp and mx < wx + ww + rp and my < wy + wh + rp then
 		-- just in frame
@@ -79,6 +80,21 @@ function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 		-- 2, 3, etc.
 		else
 			return button == 1
+		end
+	end
+end
+
+
+function def:setCondensedHeader(enabled)
+	local header = self:findTag("frame_header")
+	if header then
+		local frame_skin = self.skin
+		if header.condensed ~= enabled then
+			header.condensed = enabled
+			header:skinRemove()
+			header.skin = enabled and frame_skin.skin_header_cond or frame_skin.skin_header_norm
+			header:skinInstall()
+			self:reshape(true)
 		end
 	end
 end
@@ -103,34 +119,18 @@ function def:initiateResizeMode(axis_x, axis_y)
 		error("invalid resize mode (0, 0).")
 	end
 
-	self.cap_mode = "resize"
-	self.cap_axis_x = axis_x
-	self.cap_axis_y = axis_y
+	self.press_busy = "resize"
+	self.adjust_axis_x = axis_x
+	self.adjust_axis_y = axis_y
 
 	local ax, ay = self:getAbsolutePosition()
 	local mx, my = self.context.mouse_x, self.context.mouse_y
 
 	-- Track mouse offsets for a less jarring transition to resize mode.
-	self.cap_ox = 0
-	self.cap_oy = 0
+	self.adjust_ox = axis_x < 0 and ax - mx or axis_x > 0 and ax + self.w - mx or 0
+	self.adjust_oy = axis_y < 0 and ay - my or axis_y > 0 and ay + self.h - my or 0
 
-	if axis_x < 0 then
-		self.cap_ox = ax - mx
-
-	elseif axis_x > 0 then
-		self.cap_ox = ax + self.w - mx
-	end
-
-	if axis_y < 0 then
-		self.cap_oy = ay - my
-
-	elseif axis_y > 0 then
-		self.cap_oy = ay + self.h - my
-	end
-
-	--print("cap_ox", self.cap_ox, "cap_oy", self.cap_oy)
-
-	self:captureFocus()
+	--print("adjust_ox", self.adjust_ox, "adjust_oy", self.adjust_oy)
 end
 
 
@@ -205,7 +205,6 @@ function def:uiCall_create(inst)
 		self.visible = true
 		self.allow_hover = true
 		self.can_have_thimble = false
-		self.allow_focus_capture = true
 		--self.clip_hover = false
 		--self.clip_scissor = false
 		self.sort_id = 3
@@ -218,18 +217,19 @@ function def:uiCall_create(inst)
 		-- Set true to draw a red box around the frame's resize area.
 		--self.DEBUG_show_resize_range
 
-		-- Link to the last widget within this tree which held the thimble.
+		-- Link to the last widget within this tree which held thimble1.
 		-- The link may become stale, so confirm the widget is still alive and within the tree before using.
 		self.banked_thimble1 = false
 
-		self.cap_mode = "idle" -- idle, drag, resize
-		self.cap_axis_x = false -- -1, 0, 1
-		self.cap_axis_y = false -- -1, 0, 1
-		-- 0,0 is invalid.
+		self.press_busy = false -- false, "drag", "resize"
+
+		-- Valid while resizing. (0,0) is an error.
+		self.adjust_axis_x = 0 -- -1, 0, 1
+		self.adjust_axis_y = 0 -- -1, 0, 1
 
 		-- Offsets from mouse when resizing.
-		self.cap_ox = 0
-		self.cap_oy = 0
+		self.adjust_ox = 0
+		self.adjust_oy = 0
 
 		-- How far past the parent bounds this widget is permitted to go.
 		self.p_bounds_x1 = 0
@@ -237,10 +237,6 @@ function def:uiCall_create(inst)
 		self.p_bounds_x2 = 0
 		self.p_bounds_y2 = 0
 
-		-- How thick the frame border should be.
-		self.border_breadth = 1
-
-		-- Content and frame controls are within this rectangle, while the frame border is outside.
 		widShared.setupViewports(self, 1)
 
 		-- Layout rectangle
@@ -250,8 +246,8 @@ function def:uiCall_create(inst)
 		self.lp_h = 1
 
 		-- Used when unmaximizing as a result of dragging.
-		self.cap_mouse_orig_a_x = 0
-		self.cap_mouse_orig_a_y = 0
+		self.adjust_mouse_orig_a_x = 0
+		self.adjust_mouse_orig_a_y = 0
 
 		self.maximized = false
 		self.maxim_x = 0
@@ -286,7 +282,7 @@ function def:uiCall_create(inst)
 		self.block_step_intergen = true
 
 		-- Header (title) bar, with some controls
-		local frame_header = self:addChild("wimp/frame_header")
+		local frame_header = self:addChild("wimp/frame_header", {skin = self.skin.default_header_skin})
 
 		-- Add header to layout sequence
 		frame_header.lc_func = uiLayout.fitTop
@@ -408,9 +404,9 @@ end
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		local axis_x = mx < 0 and -1 or mx >= self.w and 1 or 0
-		local axis_y = my < 0 and -1 or my >= self.h and 1 or 0
-		if not (axis_x == 0 and axis_y == 0) then
+		local axis_x = mx < self.vp_x and -1 or mx >= self.vp_x + self.vp_w and 1 or 0
+		local axis_y = my < self.vp_y and -1 or my >= self.vp_y + self.vp_h and 1 or 0
+		if not self.maximized and not (axis_x == 0 and axis_y == 0) then
 			self.mouse_in_resize_zone = true
 			local cursor_id = getCursorCode(axis_x, axis_y)
 			self:setCursorLow(cursor_id)
@@ -428,26 +424,6 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		self.mouse_in_resize_zone = false
 		self:setCursorLow()
-	end
-end
-
-
-function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
-	if self.cap_mode == "resize" then
-		return widShared.uiCapEvent_resize_mouseMoved(self, self.cap_axis_x, self.cap_axis_y, x, y, dx, dy, istouch)
-
-	elseif self.cap_mode == "drag" then
-		return widShared.uiCapEvent_drag_mouseMoved(self, x, y, dx, dy, istouch)
-	end
-end
-
-
-function def:uiCap_mouseReleased(x, y, button, istouch, presses)
-	if self.cap_mode == "resize" then
-		return widShared.uiCapEvent_resize_mouseReleased(self, x, y, button, istouch, presses)
-
-	elseif self.cap_mode == "drag" then
-		return widShared.uiCapEvent_drag_mouseReleased(self, x, y, button, istouch, presses)
 	end
 end
 
@@ -527,7 +503,6 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	--print("window-frame pointer-press", self, inst, x, y, button)
 	-- Drag actions are primarily initiated by child sensors.
 
 	-- Press events that create a pop-up menu should block propagation (return truthy)
@@ -552,11 +527,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	end
 
 	if self == inst then
-		-- If the mouse pointer is outside the frame bounds, then this is a resize action.
+		-- If the mouse pointer is outside of viewport #1, then this is a resize action.
 		local mx, my = self:getRelativePosition(x, y)
-		if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
-			local axis_x = mx < 0 and -1 or mx >= self.w and 1 or 0
-			local axis_y = my < 0 and -1 or my >= self.h and 1 or 0
+		if not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h) then
+			local axis_x = mx < self.vp_x and -1 or mx >= self.vp_x + self.vp_w and 1 or 0
+			local axis_y = my < self.vp_y and -1 or my >= self.vp_y + self.vp_h and 1 or 0
 			if not (axis_x == 0 and axis_y == 0) then
 				self:initiateResizeMode(axis_x, axis_y)
 			end
@@ -571,16 +546,42 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 	-- Dragging can also be started by clicking on the container body if 'allow_body_drag' is truthy.
 	elseif self.allow_body_drag then
-		self.cap_mode = "drag"
-		self.cap_mouse_orig_a_x = x
-		self.cap_mouse_orig_a_y = y
-		self:captureFocus()
+		self.press_busy = "drag"
+		self.adjust_mouse_orig_a_x = x
+		self.adjust_mouse_orig_a_y = y
+		--self:captureFocus()
 	end
 	--]=]
 end
 
 
+function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == inst then
+		if self.press_busy == "resize" then
+			commonFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
+
+		elseif self.press_busy == "drag" then
+			commonFrame.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
+		end
+	end
+end
+
+
+function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+	if self == inst then
+		if self.press_busy == "resize" or self.press_busy == "drag" then
+			return commonFrame.mouseReleased(self, x, y, button, istouch, presses)
+		end
+	end
+end
+
+
 function def:uiCall_reshape()
+	-- Viewports #1 and #2 separate the frame border from its content. The first viewport excludes an inner
+	-- region of the border that can be clicked to resize the frame (in addition to the invisible resize area
+	-- outside of the frame bounds). The second viewport excludes the rest of the border.
+
+	local skin = self.skin
 	-- (parent should be the WIMP root widget.)
 	local parent = self.parent
 	local wimp_res = self.context.resources.wimp
@@ -598,19 +599,19 @@ function def:uiCall_reshape()
 	widShared.enforceLimitedDimensions(self)
 
 	-- Update viewport, then components.
-	self.vp_x = self.border_breadth
-	self.vp_y = self.border_breadth
-	self.vp_w = self.w - self.border_breadth*2
-	self.vp_h = self.h - self.border_breadth*2
+	widShared.resetViewport(self, 1)
+	widShared.carveViewport(self, 1, "border")
+	widShared.copyViewport(self, 1, 2)
+	widShared.carveViewport(self, 2, "margin")
 
-	uiLayout.resetLayoutPort(self, 1)
+	uiLayout.resetLayoutPortFull(self, 2)
 
 	local header = self:findTag("frame_header")
 	local menu_bar = self:findTag("frame_menu_bar")
 	local content = self:findTag("frame_content")
 
 	if header then
-		header.h = header.condensed and wimp_res.frame_header_height_condensed or wimp_res.frame_header_height_norm
+		header.h = header.skin.h
 		uiLayout.fitTop(self, header)
 	end
 
@@ -627,9 +628,8 @@ function def:uiCall_reshape()
 	-- Needs to happen after shaping the header bar, as the header height factors into the default bounds.
 	self:setDefaultBounds()
 
-	-- Hacky way of not interfering with resize actions. Call keepInBounds* before exiting the resize mode.
-	if self.cap_mode ~= "resize" then
-		--widShared.keepInBoundsPort2(self)
+	-- Hacky way of not interfering with the user resizing the frame. Call keepInBounds* before exiting the resize mode.
+	if self.press_busy ~= "resize" then
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 

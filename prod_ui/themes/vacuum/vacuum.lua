@@ -135,7 +135,6 @@ function themeDef.newInstance(scale)
 
 	inst.style.boxes = uiTheme.newThemeDataPack()
 
-	local box
 	inst.style.boxes.panel = uiTheme.newBoxStyle()
 
 	inst.style.boxes.panel.sl_body_id = "tex_slices/list_box_body"
@@ -155,6 +154,57 @@ function themeDef.newInstance(scale)
 	inst.style.boxes.panel.margin_y1 = math.max(0, math.floor(2 * scale))
 	inst.style.boxes.panel.margin_y2 = math.max(0, math.floor(2 * scale))
 
+	inst.style.boxes.wimp_frame = uiTheme.newBoxStyle({
+		outpad_x1 = math.max(0, math.floor(0 * scale)),
+		outpad_x2 = math.max(0, math.floor(0 * scale)),
+		outpad_y1 = math.max(0, math.floor(0 * scale)),
+		outpad_y2 = math.max(0, math.floor(0 * scale)),
+
+		border_x1 = math.max(0, math.floor(1 * scale)),
+		border_x2 = math.max(0, math.floor(1 * scale)),
+		border_y1 = math.max(0, math.floor(1 * scale)),
+		border_y2 = math.max(0, math.floor(1 * scale)),
+
+		margin_x1 = math.max(0, math.floor(0 * scale)),
+		margin_x2 = math.max(0, math.floor(0 * scale)),
+		margin_y1 = math.max(0, math.floor(0 * scale)),
+		margin_y2 = math.max(0, math.floor(0 * scale))
+	})
+
+	inst.style.boxes.wimp_frame_header_norm = uiTheme.newBoxStyle({
+		outpad_x1 = math.max(0, math.floor(0 * scale)),
+		outpad_x2 = math.max(0, math.floor(0 * scale)),
+		outpad_y1 = math.max(0, math.floor(0 * scale)),
+		outpad_y2 = math.max(0, math.floor(0 * scale)),
+
+		border_x1 = math.max(0, math.floor(1 * scale)),
+		border_x2 = math.max(0, math.floor(1 * scale)),
+		border_y1 = math.max(0, math.floor(1 * scale)),
+		border_y2 = math.max(0, math.floor(1 * scale)),
+
+		margin_x1 = math.max(0, math.floor(0 * scale)),
+		margin_x2 = math.max(0, math.floor(0 * scale)),
+		margin_y1 = math.max(0, math.floor(0 * scale)),
+		margin_y2 = math.max(0, math.floor(0 * scale))
+	})
+
+
+	inst.style.boxes.wimp_frame_header_cond = uiTheme.newBoxStyle({
+		outpad_x1 = math.max(0, math.floor(0 * scale)),
+		outpad_x2 = math.max(0, math.floor(0 * scale)),
+		outpad_y1 = math.max(0, math.floor(0 * scale)),
+		outpad_y2 = math.max(0, math.floor(0 * scale)),
+
+		border_x1 = math.max(0, math.floor(0 * scale)),
+		border_x2 = math.max(0, math.floor(0 * scale)),
+		border_y1 = math.max(0, math.floor(0 * scale)),
+		border_y2 = math.max(0, math.floor(0 * scale)),
+
+		margin_x1 = math.max(0, math.floor(0 * scale)),
+		margin_x2 = math.max(0, math.floor(0 * scale)),
+		margin_y1 = math.max(0, math.floor(0 * scale)),
+		margin_y2 = math.max(0, math.floor(0 * scale))
+	})
 
 	inst.style.boxes.frame_norm = uiTheme.newBoxStyle()
 
@@ -310,12 +360,12 @@ function themeDef.newInstance(scale)
 	-- General WIMP settings
 	inst.wimp = {}
 
+	-- How far to allow resizing a widget outside the bounds of its parent.
+	-- Used to prevent stretching frames too far outside the LÖVE application window.
+	inst.wimp.frame_outbound_limit = math.max(1, math.floor(32 * scale))
+
 	-- How many pixels to extend / pad resize sensors.
 	inst.wimp.frame_resize_pad = math.max(1, math.floor(8 * scale))
-
-	-- How tall frame header bars should be.
-	inst.wimp.frame_header_height_norm = math.max(1, math.floor(32 * scale))
-	inst.wimp.frame_header_height_condensed = math.max(1, math.floor(18 * scale))
 
 	-- Common / shared render state + functions.
 	inst.common = {}
