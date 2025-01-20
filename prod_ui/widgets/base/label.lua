@@ -42,7 +42,7 @@ end
 
 function def:uiCall_reshape()
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, self.skin.box.border)
 	lgcLabel.reshapeLabel(self)
 end
 

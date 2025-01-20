@@ -494,8 +494,8 @@ function def:updateDimensions()
 	-- (We assume that the top-level widget's dimensions match the display area.)
 	local wid_top = self:getTopWidgetInstance()
 
-	self.w = math.min(w + skin.box.margin_x1 + skin.box.margin_x2, wid_top.w)
-	self.h = math.min(h + skin.box.margin_y1 + skin.box.margin_y2, wid_top.h)
+	self.w = math.min(w + skin.box.margin.x1 + skin.box.margin.x2, wid_top.w)
+	self.h = math.min(h + skin.box.margin.y1 + skin.box.margin.y2, wid_top.h)
 
 	self:reshape()
 
@@ -728,7 +728,7 @@ function def:uiCall_reshape()
 	widShared.resetViewport(self, 1)
 
 	-- Apply edge padding.
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, self.skin.box.margin)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)

@@ -397,6 +397,8 @@ function def:uiCall_reshape()
 	-- Viewport #1 is the scrollable region.
 	-- Viewport #2 includes margins and excludes borders.
 
+	local skin = self.skin
+
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
@@ -405,13 +407,13 @@ function def:uiCall_reshape()
 
 	widShared.resetViewport(self, 1)
 
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	commonScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)

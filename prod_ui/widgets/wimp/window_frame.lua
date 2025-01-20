@@ -600,9 +600,9 @@ function def:uiCall_reshape()
 
 	-- Update viewport, then components.
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 2, "margin")
+	widShared.carveViewport(self, 2, skin.box.margin)
 
 	uiLayout.resetLayoutPortFull(self, 2)
 

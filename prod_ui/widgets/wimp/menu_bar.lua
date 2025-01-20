@@ -329,7 +329,7 @@ end
 
 function def:uiCall_reshape()
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, self.skin.box.border)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)

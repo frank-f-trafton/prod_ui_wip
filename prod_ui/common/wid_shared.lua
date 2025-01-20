@@ -29,13 +29,6 @@ local vp_keys = {
 widShared.vp_keys = vp_keys
 
 
-local edge_keys = {
-	border = {x1 = "border_x1", x2 = "border_x2", y1 = "border_y1", y2 = "border_y2"},
-	margin = {x1 = "margin_x1", x2 = "margin_x2", y1 = "margin_y1", y2 = "margin_y2"},
-}
-widShared.edge_keys = edge_keys
-
-
 --- Gets the table keys for a widget viewport. (ie index 2 will return 'vp2_x', 'vp2_y', 'vp2_w' and 'vp2_h'.)
 function widShared.getViewportKeys(self, v)
 	assert(vp_keys[v], "invalid viewport index.")
@@ -695,16 +688,15 @@ end
 --- Carve an edge out of a viewport.
 -- @param self The widget.
 -- @param v Viewport index to modify.
--- @param e Edge ID.
+-- @param e A table with the fields 'x1', 'y1', 'x2' and 'y2'.
 function widShared.carveViewport(self, v, e)
-	v, e = vp_keys[v], edge_keys[e]
+	v = vp_keys[v]
 	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
-	local skin = self.skin
 
-	self[vx] = self[vx] + skin[e.x1]
-	self[vy] = self[vy] + skin[e.y1]
-	self[vw] = math.max(0, self[vw] - skin[e.x1] - skin[e.x2])
-	self[vh] = math.max(0, self[vh] - skin[e.y1] - skin[e.y2])
+	self[vx] = self[vx] + e.x1
+	self[vy] = self[vy] + e.y1
+	self[vw] = math.max(0, self[vw] - e.x1 - e.x2)
+	self[vh] = math.max(0, self[vh] - e.y1 - e.y2)
 end
 
 
@@ -754,12 +746,6 @@ function widShared.setupMinMaxDimensions(self)
 	self.min_h = 64
 	self.max_w = 2^16
 	self.max_h = 2^16
-end
-
-
---- Get scroll position relative to the document.
-function widShared.getDocumentScroll(self)
-	return self.vp_x + self.scr_x, self.vp_y + self.scr_y
 end
 
 

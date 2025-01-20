@@ -4,18 +4,19 @@
 local themeDef = {}
 
 
-local THIS_THEME_PATH, context = select(1, ...)
-local PROD_UI_PATH = context.conf.prod_ui_req
+local THIS_THEME_PATH, context = select(1, ...) -- path/to/vacuum/vacuum.lua
+local PROD_UI_REQ = context.conf.prod_ui_req
 
 
-local uiGraphics = require(PROD_UI_PATH .. "ui_graphics")
-local uiRes = require(PROD_UI_PATH .. "ui_res")
-local uiTheme = require(PROD_UI_PATH .. "ui_theme")
-local quadSlice = require(PROD_UI_PATH .. "graphics.quad_slice")
+local pTable = require(PROD_UI_REQ .. "lib.pile_table")
+local uiGraphics = require(PROD_UI_REQ .. "ui_graphics")
+local uiRes = require(PROD_UI_REQ .. "ui_res")
+local uiTheme = require(PROD_UI_REQ .. "ui_theme")
+local quadSlice = require(PROD_UI_REQ .. "graphics.quad_slice")
 
 
-local REQ_PATH = uiRes.pathToRequire(THIS_THEME_PATH, true)
-local BASE_PATH = uiRes.pathStripEnd(THIS_THEME_PATH)
+local BASE_REQ = uiRes.pathToRequire(THIS_THEME_PATH, true) -- path.to.vacuum
+local BASE_PATH = uiRes.pathStripEnd(THIS_THEME_PATH) -- path/to/vacuum/
 
 
 --- Creates a new theme instance.
@@ -129,218 +130,36 @@ function themeDef.newInstance(scale)
 	end
 
 	-- General style defaults
-	inst.style = {}
+	inst.style_default = uiRes.loadLuaFile(BASE_PATH .. "data.lua")
+	inst.style = pTable.deepCopy(inst.style_default)
+	local inspect = require("lib.test.inspect") -- WIP
+	print(inspect(inst.style))
 
-	-- Widget box styles.
+	local _mt_box_style = uiTheme._mt_box_style
+	for k2, v2 in pairs(inst.style.boxes) do
+		setmetatable(v2, _mt_box_style)
 
-	inst.style.boxes = uiTheme.newThemeDataPack()
-
-	inst.style.boxes.panel = uiTheme.newBoxStyle()
-
-	inst.style.boxes.panel.sl_body_id = "tex_slices/list_box_body"
-
-	inst.style.boxes.panel.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.panel.border_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.border_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.border_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.border_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.panel.margin_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.margin_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.margin_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.panel.margin_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.wimp_frame = uiTheme.newBoxStyle({
-		outpad_x1 = math.max(0, math.floor(0 * scale)),
-		outpad_x2 = math.max(0, math.floor(0 * scale)),
-		outpad_y1 = math.max(0, math.floor(0 * scale)),
-		outpad_y2 = math.max(0, math.floor(0 * scale)),
-
-		border_x1 = math.max(0, math.floor(1 * scale)),
-		border_x2 = math.max(0, math.floor(1 * scale)),
-		border_y1 = math.max(0, math.floor(1 * scale)),
-		border_y2 = math.max(0, math.floor(1 * scale)),
-
-		margin_x1 = math.max(0, math.floor(0 * scale)),
-		margin_x2 = math.max(0, math.floor(0 * scale)),
-		margin_y1 = math.max(0, math.floor(0 * scale)),
-		margin_y2 = math.max(0, math.floor(0 * scale))
-	})
-
-	inst.style.boxes.wimp_frame_header_norm = uiTheme.newBoxStyle({
-		outpad_x1 = math.max(0, math.floor(0 * scale)),
-		outpad_x2 = math.max(0, math.floor(0 * scale)),
-		outpad_y1 = math.max(0, math.floor(0 * scale)),
-		outpad_y2 = math.max(0, math.floor(0 * scale)),
-
-		border_x1 = math.max(0, math.floor(1 * scale)),
-		border_x2 = math.max(0, math.floor(1 * scale)),
-		border_y1 = math.max(0, math.floor(1 * scale)),
-		border_y2 = math.max(0, math.floor(1 * scale)),
-
-		margin_x1 = math.max(0, math.floor(0 * scale)),
-		margin_x2 = math.max(0, math.floor(0 * scale)),
-		margin_y1 = math.max(0, math.floor(0 * scale)),
-		margin_y2 = math.max(0, math.floor(0 * scale))
-	})
-
-
-	inst.style.boxes.wimp_frame_header_cond = uiTheme.newBoxStyle({
-		outpad_x1 = math.max(0, math.floor(0 * scale)),
-		outpad_x2 = math.max(0, math.floor(0 * scale)),
-		outpad_y1 = math.max(0, math.floor(0 * scale)),
-		outpad_y2 = math.max(0, math.floor(0 * scale)),
-
-		border_x1 = math.max(0, math.floor(0 * scale)),
-		border_x2 = math.max(0, math.floor(0 * scale)),
-		border_y1 = math.max(0, math.floor(0 * scale)),
-		border_y2 = math.max(0, math.floor(0 * scale)),
-
-		margin_x1 = math.max(0, math.floor(0 * scale)),
-		margin_x2 = math.max(0, math.floor(0 * scale)),
-		margin_y1 = math.max(0, math.floor(0 * scale)),
-		margin_y2 = math.max(0, math.floor(0 * scale))
-	})
-
-	inst.style.boxes.frame_norm = uiTheme.newBoxStyle()
-
-	inst.style.boxes.frame_norm.sl_body_id = "tex_slices/list_box_body"
-
-	inst.style.boxes.frame_norm.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.frame_norm.border_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.border_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.border_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.border_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.frame_norm.margin_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.margin_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.margin_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.margin_y2 = math.max(0, math.floor(2 * scale))
-
-
-	inst.style.boxes.wimp_group = uiTheme.newBoxStyle()
-
-	-- XXX: WIP.
-	inst.style.boxes.frame_norm.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.frame_norm.border_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.border_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.border_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.border_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.frame_norm.margin_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.margin_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.margin_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.frame_norm.margin_y2 = math.max(0, math.floor(2 * scale))
-
-
-	inst.style.boxes.button = uiTheme.newBoxStyle()
-
-	-- inst.style.boxes.button: No sl_body_id.
-
-	inst.style.boxes.button.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.button.border_x1 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button.border_x2 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button.border_y1 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button.border_y2 = math.max(0, math.floor(4 * scale))
-
-	-- Margin is applied to Viewport #2 (graphic).
-	inst.style.boxes.button.margin_x1 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button.margin_x2 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button.margin_y1 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button.margin_y2 = math.max(0, math.floor(4 * scale))
-
-
-	inst.style.boxes.button_small = uiTheme.newBoxStyle()
-
-	-- inst.style.boxes.button_small: No sl_body_id.
-
-	inst.style.boxes.button_small.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button_small.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button_small.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button_small.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.button_small.border_x1 = math.max(0, math.floor(1 * scale))
-	inst.style.boxes.button_small.border_x2 = math.max(0, math.floor(1 * scale))
-	inst.style.boxes.button_small.border_y1 = math.max(0, math.floor(1 * scale))
-	inst.style.boxes.button_small.border_y2 = math.max(0, math.floor(1 * scale))
-
-	-- Margin is applied to Viewport #2 (graphic).
-	inst.style.boxes.button_small.margin_x1 = math.max(0, math.floor(1 * scale))
-	inst.style.boxes.button_small.margin_x2 = math.max(0, math.floor(1 * scale))
-	inst.style.boxes.button_small.margin_y1 = math.max(0, math.floor(1 * scale))
-	inst.style.boxes.button_small.margin_y2 = math.max(0, math.floor(1 * scale))
-
-
-	-- Used with checkboxes and radio buttons.
-	inst.style.boxes.button_bijou = uiTheme.newBoxStyle()
-
-	-- inst.style.boxes.button: No sl_body_id.
-
-	inst.style.boxes.button_bijou.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button_bijou.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button_bijou.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.button_bijou.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.button_bijou.border_x1 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button_bijou.border_x2 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button_bijou.border_y1 = math.max(0, math.floor(4 * scale))
-	inst.style.boxes.button_bijou.border_y2 = math.max(0, math.floor(4 * scale))
-
-	-- Margin is applied to Viewport #2 (the bijou's drawing area).
-	inst.style.boxes.button_bijou.margin_x1 = math.max(0, math.floor(0 * scale))
-	inst.style.boxes.button_bijou.margin_x2 = math.max(0, math.floor(0 * scale))
-	inst.style.boxes.button_bijou.margin_y1 = math.max(0, math.floor(0 * scale))
-	inst.style.boxes.button_bijou.margin_y2 = math.max(0, math.floor(0 * scale))
-
-
-	-- Input box edges.
-	inst.style.boxes.input_box = uiTheme.newBoxStyle()
-
-	-- inst.style.boxes.button: No sl_body_id.
-
-	inst.style.boxes.input_box.outpad_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.outpad_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.outpad_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.outpad_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.input_box.border_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.border_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.border_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.border_y2 = math.max(0, math.floor(2 * scale))
-
-	inst.style.boxes.input_box.margin_x1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.margin_x2 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.margin_y1 = math.max(0, math.floor(2 * scale))
-	inst.style.boxes.input_box.margin_y2 = math.max(0, math.floor(2 * scale))
-
+		for k, v in pairs(v2) do
+			if k == "outpad" or k == "border" or k == "margin" then
+				v.x1 = math.max(0, math.floor(v.x1 * scale))
+				v.x2 = math.max(0, math.floor(v.x2 * scale))
+				v.y1 = math.max(0, math.floor(v.y1 * scale))
+				v.y2 = math.max(0, math.floor(v.y2 * scale))
+			end
+		end
+	end
 
 	-- Icon classifications.
 	inst.style.icons = {}
 
 	-- Icons which may be placed next to text.
-	inst.style.icons.p = {}
-	inst.style.icons.p.w = 16
-	inst.style.icons.p.h = 16
-	inst.style.icons.p.pad_x1 = 2
-	inst.style.icons.p.pad_x2 = 2
-	inst.style.icons.p.pad_y = 2
-
+	inst.style.icons.p = {
+		w = 16,
+		h = 16,
+		pad_x1 = 2,
+		pad_x2 = 2,
+		pad_y = 2
+	}
 
 	-- Widget text label styles.
 	inst.style.labels = {}

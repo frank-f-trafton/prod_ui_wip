@@ -209,9 +209,9 @@ function def:uiCall_reshape()
 
 	widShared.resetViewport(self, 1)
 	widShared.partitionViewport(self, 1, 3, aux_sz, skin.aux_placement, false) -- no "overlay"
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement, true)
-	widShared.carveViewport(self, 2, "margin")
+	widShared.carveViewport(self, 2, skin.box.margin)
 	lgcLabel.reshapeLabel(self)
 end
 

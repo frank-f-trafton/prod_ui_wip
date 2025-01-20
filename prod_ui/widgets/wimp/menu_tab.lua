@@ -327,8 +327,10 @@ end
 
 
 function def:uiCall_reshape()
+	local skin = self.skin
+
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	commonScroll.arrangeScrollBars(self)
 
 	-- Column bar. Carve out a niche in the top part of viewport #1.
@@ -350,13 +352,13 @@ function def:uiCall_reshape()
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 	-- Carve a bit more out of the column bar so that it fits into the margin better.
 	--[[
 	local box = self.skin.box
-	self.col_bar_x = self.col_bar_x + box.margin_x1
-	self.col_bar_w = self.col_bar_w - box.margin_x1 - box.margin_x2
+	self.col_bar_x = self.col_bar_x + box.margin.x1
+	self.col_bar_w = self.col_bar_w - box.margin.x1 - box.margin.x2
 	--]]
 
 	-- Clamp scrolling.

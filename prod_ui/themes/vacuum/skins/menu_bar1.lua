@@ -4,16 +4,12 @@
 return {
 	skinner_id = "default",
 
+	-- NOTE: Very large box borders will interfere with clicking on menu items.
+	["*box"] = "style/boxes/menu_bar",
 	["*tq_px"] = "tex_quads/pixel",
 	["*sl_body"] = "tex_slices/menu_bar_body",
 	["*font_item"] = "fonts/p",
 	["*thimble_info"] = "common/thimble_info",
-
-	-- NOTE: Very large borders will interfere with clicking on menu-items.
-	["$border_x1"] = 1,
-	["$border_x2"] = 1,
-	["$border_y1"] = 1,
-	["$border_y2"] = 1,
 
 	color_cat_enabled = {1.0, 1.0, 1.0, 1.0},
 	color_cat_selected = {0.1, 0.1, 0.1, 1.0},
