@@ -28,7 +28,17 @@ local _lerp = commonMath.lerp
 
 
 local def = {
-	skin_id = "wimp_header_norm",
+	skin_id = "wimp_header",
+
+	default_settings = {
+		text = "Untitled Frame",
+		text_align_h = 0.5, -- From 0 (left) to 1 (right)
+		text_align_v = 0.5, -- From 0 (top) to 1 (bottom)
+
+		condensed = false,
+
+		button_side = "right", -- "left", "right"
+	}
 }
 
 
@@ -63,23 +73,18 @@ function def:uiCall_create(inst)
 
 		self:skinSetRefs()
 		self:skinInstall()
+		self:applyAllSettings()
 
 		self.tag = "frame_header"
 
-		-- Change from the window frame interface.
-		self.condensed = false
-
-		self.text = "Window Title"
-
 		-- Potentially shortened version of 'text' for display.
 		self.text_disp = ""
-
-		self.needs_update = true
 
 		-- Text offsetting
 		self.text_ox = 0
 		self.text_oy = 0
 
+		self.needs_update = true
 
 		-- Close button
 		local button_close = self:addChild("base/button", {
@@ -106,6 +111,8 @@ end
 
 
 local function _placeButtonShortenPort(self, button, right, w, h)
+	local res = self.condensed and self.skin.res_cond or self.skin.res_norm
+
 	button.y = self.vp2_y
 	button.w = w
 	button.h = h
@@ -113,9 +120,9 @@ local function _placeButtonShortenPort(self, button, right, w, h)
 		button.x = self.vp2_x + self.vp2_w - w
 	else -- left
 		button.x = self.vp2_x
-		self.vp2_x = self.vp2_x + w + self.skin.button_pad_w
+		self.vp2_x = self.vp2_x + w + res.button_pad_w
 	end
-	self.vp2_w = math.max(0, self.vp2_w - w - self.skin.button_pad_w)
+	self.vp2_w = math.max(0, self.vp2_w - w - res.button_pad_w)
 end
 
 
@@ -124,22 +131,23 @@ function def:uiCall_reshape()
 	-- Viewport #2 is a subset of #1, just for text.
 
 	local skin = self.skin
+	local res = self.condensed and skin.res_cond or skin.res_norm
 
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
+	widShared.carveViewport(self, 1, res.header_box.border)
 	widShared.copyViewport(self, 1, 2)
 
-	local button_h = math.min(skin.button_h, self.vp2_h)
-	local right = skin.button_side == "right"
+	local button_h = math.min(res.button_h, self.vp2_h)
+	local right = self.button_side == "right"
 
 	local button_close = self:findTag("header_close")
 	if button_close then
-		_placeButtonShortenPort(self, button_close, right, skin.button_w, button_h)
+		_placeButtonShortenPort(self, button_close, right, res.button_w, button_h)
 	end
 
 	local button_max = self:findTag("header_max")
 	if button_max then
-		_placeButtonShortenPort(self, button_max, right, skin.button_w, button_h)
+		_placeButtonShortenPort(self, button_max, right, res.button_w, button_h)
 
 		local frame = self:findAncestorByField("is_frame", true)
 		if frame then
@@ -156,7 +164,8 @@ end
 function def:uiCall_update(dt)
 	if self.needs_update then
 		local skin = self.skin
-		local font = skin.font
+		local res = self.condensed and skin.res_cond or skin.res_norm
+		local font = res.header_font
 
 		-- Refresh the text string. Shorten to the first line feed, if applicable.
 		self.text_disp = self.text and string.match(self.text, "^([^\n]*)\n*") or ""
@@ -166,13 +175,13 @@ function def:uiCall_update(dt)
 		local text_w = font:getWidth(self.text_disp)
 		local text_h = font:getHeight()
 
-		self.text_ox = math.floor(0.5 + _lerp(self.vp_x, self.vp_x + self.vp_w - text_w, skin.text_align_h))
+		self.text_ox = math.floor(0.5 + _lerp(self.vp_x, self.vp_x + self.vp_w - text_w, self.text_align_h))
 		if self.text_ox + text_w > self.vp2_w then
 			self.text_ox = self.vp2_w - text_w
 		end
 		self.text_ox = math.max(0, self.text_ox)
 
-		self.text_oy = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - text_h, skin.text_align_v))
+		self.text_oy = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - text_h, self.text_align_v))
 
 		self.needs_update = false
 	end
@@ -234,16 +243,17 @@ def.skinners = {
 
 		render = function(self, ox, oy)
 			local skin = self.skin
-			local res = self.selected and skin.res_selected or skin.res_unselected
+			local res = self.condensed and skin.res_cond or skin.res_norm
+			local res2 = self.selected and res.res_selected or res.res_unselected
 
-			local slc_body = skin.slc_body
-			love.graphics.setColor(res.col_fill)
+			local slc_body = res.header_slc_body
+			love.graphics.setColor(res2.col_header_fill)
 			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
 			if self.text then
-				local font = skin.font
+				local font = res.header_font
 
-				love.graphics.setColor(res.col_text)
+				love.graphics.setColor(res2.col_header_text)
 				love.graphics.setFont(font)
 
 				local sx, sy, sw, sh = love.graphics.getScissor()
