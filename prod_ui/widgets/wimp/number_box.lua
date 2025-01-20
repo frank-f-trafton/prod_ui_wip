@@ -430,7 +430,7 @@ function def:uiCall_reshape()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
 	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, false)
@@ -441,7 +441,7 @@ function def:uiCall_reshape()
 	end
 
 	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:updateDocumentDimensions()
 	self:scrollClampViewport()

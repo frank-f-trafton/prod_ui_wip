@@ -115,9 +115,9 @@ function def:uiCall_reshape()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 2)
-	widShared.carveViewport(self, 2, "border")
+	widShared.carveViewport(self, 2, skin.box.border)
 	widShared.partitionViewport(self, 2, 1, skin.label_spacing, skin.label_placement, true)
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 	lgcSlider.reshapeSliderComponent(self, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h, skin.thumb_w, skin.thumb_h)
 

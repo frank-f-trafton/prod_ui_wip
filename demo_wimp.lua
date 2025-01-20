@@ -131,8 +131,7 @@ local function newWimpContext()
 	}
 
 	-- Assign resources ASAP.
-	local theme_main_path = "prod_ui/themes/vacuum/vacuum.lua"
-	local theme_module = uiRes.loadLuaFile(theme_main_path, context)
+	local theme_module = uiRes.loadLuaFile("prod_ui/themes/vacuum/vacuum.lua", context)
 	local theme_instance = theme_module.newInstance(1.0)
 
 	context.resources = theme_instance

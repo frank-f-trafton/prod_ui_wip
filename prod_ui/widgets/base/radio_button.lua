@@ -85,15 +85,15 @@ end
 
 
 function def:uiCall_reshape()
-	local skin = self.skin
-
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the bijou drawing rectangle.
 
+	local skin = self.skin
+
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side == "right"))
-	widShared.carveViewport(self, 2, "margin")
+	widShared.carveViewport(self, 2, skin.box.margin)
 
 	lgcLabel.reshapeLabel(self)
 end

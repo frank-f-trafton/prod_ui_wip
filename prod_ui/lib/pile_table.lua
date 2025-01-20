@@ -90,4 +90,23 @@ function M.cloneArray(t)
 	return b
 end
 
+
+local function _deepCopy(dst, src, _depth)
+	print("_deepCopy: start", _depth)
+	for k, v in pairs(src) do
+		dst[k] = type(v) == "table" and _deepCopy({}, v, _depth + 1) or v
+	end
+	print("_deepCopy: end", _depth)
+	return dst
+end
+
+
+-- Does not handle tables as keys (t = {[{true}] = "foo"}).
+-- Does not handle cycles.
+-- Multiple appearances of the same table in src will generate unique tables in dst.
+function M.deepCopy(t)
+	return _deepCopy({}, t, 1)
+end
+
+
 return M

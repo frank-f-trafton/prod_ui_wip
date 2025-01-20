@@ -122,11 +122,13 @@ end
 function def:uiCall_reshape()
 	-- Viewport #1 is the area for text and buttons.
 	-- Viewport #2 is a subset of #1, just for text.
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
-	widShared.copyViewport(self, 1, 2)
 
 	local skin = self.skin
+
+	widShared.resetViewport(self, 1)
+	widShared.carveViewport(self, 1, skin.box.border)
+	widShared.copyViewport(self, 1, 2)
+
 	local button_h = math.min(skin.button_h, self.vp2_h)
 	local right = skin.button_side == "right"
 

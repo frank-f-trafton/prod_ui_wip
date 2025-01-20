@@ -253,17 +253,19 @@ end
 
 
 function def:uiCall_reshape()
+	local skin = self.skin
+
 	widShared.resetViewport(self, 1)
 
 	-- Border and scroll bars
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	commonScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
 	-- Margin.
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 	-- Optional: reshape all menu items
 	if self.auto_reshape_items == true

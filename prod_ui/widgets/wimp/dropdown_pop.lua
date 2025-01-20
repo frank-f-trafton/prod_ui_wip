@@ -263,17 +263,19 @@ function def:uiCall_reshape()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
+	local skin = self.skin
+
 	widShared.resetViewport(self, 1)
 
 	-- Border and scroll bars.
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 	commonScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
 	-- Margin.
-	widShared.carveViewport(self, 1, "margin")
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 
 	self:scrollClampViewport()

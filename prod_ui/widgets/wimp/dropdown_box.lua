@@ -245,7 +245,7 @@ function def:uiCall_reshape()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, "border")
+	widShared.carveViewport(self, 1, skin.box.border)
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
 

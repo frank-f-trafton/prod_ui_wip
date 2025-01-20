@@ -60,6 +60,7 @@ _mt_themeDataPack.__index = _mt_themeDataPack
 
 local _mt_box_style = {}
 _mt_box_style.__index = _mt_box_style
+uiTheme._mt_box_style = _mt_box_style
 
 
 --- Create a new theme instance.
@@ -386,21 +387,6 @@ function _mt_themeInst:refreshSkinDef(skin)
 		temp[i] = nil
 	end
 
-	-- Apply box measurements directly to the SkinDef.
-	local box = rawget(skin, "box")
-	if box then
-		if type(box) ~= "table" then
-			error("expected type 'table' for SkinDef box style.")
-		else
-			if box.border_x1 then
-				box:copyBorder(skin)
-			end
-			if box.margin_x1 then
-				box:copyMargin(skin)
-			end
-		end
-	end
-
 	-- Recursively apply to all tables with string keys beginning with 'res_' or '>'.
 	-- These subtables must not be shared (ie if one such table appears twice in some SkinDefs,
 	-- then it will be updated twice, even though it really only needed to be processed once).
@@ -469,30 +455,26 @@ function uiTheme.assertScale(arg_n, scale, integral)
 end
 
 
---- Creates a new Box Style table.
--- @t An existing table to use for the object. Do not share across objects.
--- @return The new Box Style table.
-function uiTheme.newBoxStyle(t)
-	--[[
-	Fields:
-	sl_body_id: The ID of a 9-Slice texture which should be rendered with the box.
-	Used to unify the look of panels and context menus. Not all boxes include this
-	field.
+--[[
+Box styles.
 
-	outpad_*: The intended amount of outer padding around the box. Sometimes used
-	by the layout system. Does not affect the widget's width and height directly.
-	Similar to "margin" in HTML/CSS.
+Fields:
 
-	border_*: A border that starts at the widget's edge and grows inward. Usually
-	precludes scroll bars, and may be used to designate a widget's draggable edges.
-	Similar to "border" in HTML/CSS.
+* sl_body_id: The ID of a 9-Slice texture which should be rendered with the box.
+Used to unify the look of panels and context menus. Not all boxes include this
+field.
 
-	margin_*: Inner padding which begins at the border and grows inward.
-	Similar to "padding" in HTML/CSS.
-	--]]
+* outpad {x1, y1, x2, y2}: The intended amount of outer padding around the box.
+Sometimes used by the layout system. Does not affect the widget's width and height
+directly. Similar to "margin" in HTML/CSS.
 
-	return setmetatable(t or {}, _mt_box_style)
-end
+* border {x1, y1, x2, y2}: A border that starts at the widget's edge and grows inward.
+Usually precludes scroll bars, and may be used to designate a widget's draggable
+edges. Similar to "border" in HTML/CSS.
+
+* margin {x1, y1, x2, y2}: Inner padding which begins at the border and grows inward.
+Similar to "padding" in HTML/CSS.
+--]]
 
 
 local function _assertBoxVar(box, id, expected)
@@ -540,17 +522,12 @@ end
 
 
 function _mt_box_style:getMargin()
-	_assertBoxVar(self, "margin_x1", "number")
-	_assertBoxVar(self, "margin_x2", "number")
-	_assertBoxVar(self, "margin_y1", "number")
-	_assertBoxVar(self, "margin_y2", "number")
+	_assertBoxVar(self, "x1", "number")
+	_assertBoxVar(self, "x2", "number")
+	_assertBoxVar(self, "y1", "number")
+	_assertBoxVar(self, "y2", "number")
 
-	return self.margin_x1, self.margin_x2, self.margin_y1, self.margin_y2
-end
-
-
-function _mt_box_style:copyMargin(wid)
-	wid.margin_x1, wid.margin_x2, wid.margin_y1, wid.margin_y2 = self:getMargin()
+	return self.x1, self.x2, self.y1, self.y2
 end
 
 
