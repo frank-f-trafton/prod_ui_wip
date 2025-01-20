@@ -156,7 +156,7 @@ function def:setFrameTitle(text)
 	local header = self:findTag("frame_header")
 
 	if header then
-		header.text = text
+		header:writeSetting("text", text)
 	end
 end
 
@@ -290,9 +290,7 @@ function def:uiCall_create(inst)
 		-- Optional menu bar
 		if self.make_menu_bar then
 			local menu_bar = self:addChild("wimp/menu_bar")
-
 			menu_bar.tag = "frame_menu_bar"
-
 			menu_bar.lc_func = uiLayout.fitTop
 		end
 
@@ -313,7 +311,6 @@ function def:uiCall_create(inst)
 		--self:setDefaultBounds()
 
 		self.center = widShared.centerInParent
-		--print("self.center", self.center)
 
 		self.wid_maximize = widShared.wid_maximize
 		self.wid_unmaximize = widShared.wid_unmaximize
@@ -582,6 +579,7 @@ function def:uiCall_reshape()
 	-- outside of the frame bounds). The second viewport excludes the rest of the border.
 
 	local skin = self.skin
+
 	-- (parent should be the WIMP root widget.)
 	local parent = self.parent
 	local wimp_res = self.context.resources.wimp
@@ -611,7 +609,12 @@ function def:uiCall_reshape()
 	local content = self:findTag("frame_content")
 
 	if header then
-		header.h = header.skin.h
+		if self.condensed then
+			header.h = header.skin.res_cond.header_h
+		else
+			header.h = header.skin.res_norm.header_h
+		end
+
 		uiLayout.fitTop(self, header)
 	end
 

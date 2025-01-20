@@ -145,6 +145,10 @@ function uiWidget._initWidgetInstance(instance, def, context, parent)
 	instance.w = instance.w or 0
 	instance.h = instance.h or 0
 
+	if def.default_settings then
+		instance.settings = instance.settings or {}
+	end
+
 	-- Back-links
 	instance.context = context
 	instance.parent = parent
@@ -1332,6 +1336,41 @@ function _mt_widget:getParent()
 	end
 
 	return parent
+end
+
+
+function _mt_widget:applySetting(key)
+	if self.default_settings[key] == nil then
+		error("invalid setting.")
+	end
+
+	self[key] = self.settings[key] ~= nil and self.settings[key]
+		or self.skin and self.skin[key] ~= nil and self.skin[key]
+		or self.default_settings[key]
+end
+
+
+function _mt_widget:applyAllSettings()
+	local settings, skin, default_settings = self.settings, self.skin, self.default_settings
+
+	for k, v in pairs(default_settings) do
+		self[k] = settings[k] ~= nil and settings[k]
+			or skin and skin[k] ~= nil and skin[k]
+			or v
+	end
+end
+
+
+function _mt_widget:writeSetting(key, val)
+	if self.default_settings[key] == nil then
+		error("invalid setting.")
+	end
+
+	self.settings[key] = val
+
+	self[key] = self.settings[key] ~= nil and self.settings[key]
+		or self.skin and self.skin[key] ~= nil and self.skin[key]
+		or self.default_settings[key]
 end
 
 

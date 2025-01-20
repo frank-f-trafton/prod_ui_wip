@@ -990,7 +990,8 @@ end
 -- @param chunk The function to execute.
 -- @param id The ID that this widget def will be referenced by within the UI context.
 -- @param def_conf An arbitrary config table for the chunk function.
--- @return The def table. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
+-- @return The def table. Raises a Lua error if there's an issue with file handling, or parsing and executing the Lua
+--	chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	uiShared.type1(1, chunk, "function")
 	uiShared.notNilNotFalseNotNaN(2, id)
@@ -1013,6 +1014,8 @@ function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	--print("\tout_def._inst_mt", out_def._inst_mt)
 
 	out_def.id = id
+	out_def.default_settings = out_def.default_settings or {}
+
 	self.widget_defs[id] = out_def
 
 	-- (later on, when creating instances: setmetatable(instance, def._inst_mt))
