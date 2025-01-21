@@ -1,6 +1,7 @@
 
 -- ProdUI
 local uiLayout = require("prod_ui.ui_layout")
+local pTable = require("prod_ui.lib.pile_table")
 local widShared = require("prod_ui.common.wid_shared")
 
 
@@ -34,16 +35,18 @@ function plan.make(parent)
 
 		content:setScrollBars(false, false)
 
-		-- Make a one-off SkinDef Patch that we can adjust without changing all other buttons with the default skin.
-		local resources = content.context.resources
-		local patch = resources:newSkinDef("button1")
-		resources:registerSkinDef(patch, patch, false)
-		-- This patch is empty (except for an __index reference), so refreshSkinDef() isn't necessary in
-		-- this specific case. You should call it whenever changing resources which need to be refreshed
-		-- from the theme (prefixed with "*") or scaled (prefixed with "$").
-		resources:refreshSkinDef(patch)
+		-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.
 
-		local button_norm = content:addChild("base/button", {skin_id = patch})
+		local resources = content.context.resources
+		local skin_defs = resources.skin_defs
+		local clone = pTable.deepCopy({}, skin_defs["button1"])
+		resources:registerSkinDef(clone, clone)
+
+		local function _userDestroy(self)
+			self.context.resources:removeSkinDef(clone)
+		end
+
+		local button_norm = content:addChild("base/button", {skin_id = clone, userDestroy = _userDestroy})
 		button_norm.x = 256
 		button_norm.w = 224
 		button_norm.h = 64

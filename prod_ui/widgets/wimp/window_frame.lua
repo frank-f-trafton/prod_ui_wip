@@ -5,7 +5,7 @@ wimp/window_frame: A WIMP-style window frame.
 
 ........................  <─ Resize area
 .┌────────────────────┐.
-.│       Window [o][x]│.  <─ Window frame header, integrated drag sensor and control buttons
+.│       Window [o][x]│.  <─ Window frame header, drag sensor and control buttons
 .├────────────────────┤.
 .│File Edit View Help │.  <─ Optional menu bar
 .├────────────────────┤.
@@ -41,12 +41,17 @@ Frame-modals are harder to manage than root-modals, and should only be used when
 local context = select(1, ...)
 
 local commonFrame = require(context.conf.prod_ui_req .. "common.common_frame")
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+
+
+local _lerp = commonMath.lerp
 
 
 local function dummy_renderThimble() end
@@ -54,10 +59,38 @@ local function dummy_renderThimble() end
 
 local def = {
 	skin_id = "wimp_frame",
+
+	default_settings = {
+		header_text = "Untitled Frame",
+		header_text_align_h = 0.5, -- From 0 (left) to 1 (right)
+		header_text_align_v = 0.5, -- From 0 (top) to 1 (bottom)
+
+		header_condensed = false,
+
+		header_button_side = "right", -- "left", "right"
+	}
 }
 
 
 def.trickle = {}
+
+
+local function button_wid_maximize(self)
+	if self.wid_maximize and self.wid_unmaximize then
+		if not self.maximized then
+			self:wid_maximize()
+		else
+			self:wid_unmaximize()
+		end
+
+		self:reshape(true)
+	end
+end
+
+
+local function button_wid_close(self)
+	self:frameCall_close(self)
+end
 
 
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
@@ -86,16 +119,10 @@ end
 
 
 function def:setCondensedHeader(enabled)
-	local header = self:findTag("frame_header")
-	if header then
-		local frame_skin = self.skin
-		if header.condensed ~= enabled then
-			header.condensed = enabled
-			header:skinRemove()
-			header.skin = enabled and frame_skin.skin_header_cond or frame_skin.skin_header_norm
-			header:skinInstall()
-			self:reshape(true)
-		end
+	local skin = self.skin
+	if self.header_condensed ~= enabled then
+		self.header_condensed = enabled
+		self:reshape(true)
 	end
 end
 
@@ -153,20 +180,14 @@ end
 
 
 function def:setFrameTitle(text)
-	local header = self:findTag("frame_header")
+	uiShared.type1(1, text, "string", "nil")
 
-	if header then
-		header:writeSetting("text", text)
-	end
+	self:writeSetting("header_text", text)
 end
 
 
 function def:getFrameTitle()
-	local header = self:findTag("frame_header")
-
-	if header then
-		return header.text
-	end
+	return self.header_text
 end
 
 
@@ -198,6 +219,127 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 		end
 	end
 end
+
+
+local function _placeButtonShortenPort(self, button, right, w, h)
+	local res = self.header_condensed and self.skin.res_cond or self.skin.res_norm
+
+	button.y = self.vp2_y
+	button.w = w
+	button.h = h
+	if right then
+		button.x = self.vp2_x + self.vp2_w - w
+	else -- left
+		button.x = self.vp2_x
+		self.vp2_x = self.vp2_x + w + res.button_pad_w
+	end
+	self.vp2_w = math.max(0, self.vp2_w - w - res.button_pad_w)
+end
+
+
+--[====[
+function def:uiCall_reshape()
+	-- Viewport #1 is the area for text and buttons.
+	-- Viewport #2 is a subset of #1, just for text.
+
+	local skin = self.skin
+	local res = self.header_condensed and skin.res_cond or skin.res_norm
+
+	widShared.resetViewport(self, 1)
+	widShared.carveViewport(self, 1, res.header_box.border)
+	widShared.copyViewport(self, 1, 2)
+
+	local button_h = math.min(res.button_h, self.vp2_h)
+	local right = self.button_side == "right"
+
+	local button_close = self:findTag("header_close")
+	if button_close then
+		_placeButtonShortenPort(self, button_close, right, res.button_w, button_h)
+	end
+
+	local button_max = self:findTag("header_max")
+	if button_max then
+		_placeButtonShortenPort(self, button_max, right, res.button_w, button_h)
+
+		local frame = self:findAncestorByField("is_frame", true)
+		if frame then
+			button_max.graphic = frame.maximized and button_max.graphic_unmax or button_max.graphic_max
+		else
+			button_max.graphic = button_max.graphic_max
+		end
+	end
+
+	self.needs_update = true
+end
+
+
+function def:uiCall_update(dt)
+	if self.needs_update then
+		local skin = self.skin
+		local res = self.header_condensed and skin.res_cond or skin.res_norm
+		local font = res.header_font
+
+		-- Refresh the text string. Shorten to the first line feed, if applicable.
+		self.header_text_disp = self.text and string.match(self.header_text, "^([^\n]*)\n*") or ""
+
+		-- align text
+		-- [XXX 12] Centered text can be cut off by the control buttons.
+		local text_w = font:getWidth(self.header_text_disp)
+		local text_h = font:getHeight()
+
+		self.header_text_ox = math.floor(0.5 + _lerp(self.vp_x, self.vp_x + self.vp_w - text_w, self.header_text_align_h))
+		if self.header_text_ox + text_w > self.vp2_w then
+			self.header_text_ox = self.vp2_w - text_w
+		end
+		self.header_text_ox = math.max(0, self.text_ox)
+
+		self.header_text_oy = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - text_h, self.header_text_align_v))
+
+		self.needs_update = false
+	end
+end
+
+
+function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	-- Implements dragging and double-click-to-maximize/restore
+	if self == inst then
+		if button == 1 and self.context.mouse_pressed_button == button then
+			local frame = self.parent
+			if not frame or not frame.is_frame then
+				error("no frame parent to drag.")
+			end
+
+			if self.context.cseq_button == 1 and self.context.cseq_presses % 2 == 0 then
+				if frame.wid_maximize and frame.wid_unmaximize then
+					if not frame.maximized then
+						frame:wid_maximize()
+					else
+						frame:wid_unmaximize()
+					end
+
+					frame:reshape(true)
+				end
+			else
+				-- Drag (reposition) action
+				local root = self:getTopWidgetInstance()
+				if root:sendEvent("rootCall_doctorCurrentPressed", self, frame) then
+					frame.press_busy = "drag"
+
+					local a_x, a_y = frame:getAbsolutePosition()
+					frame.drag_ox = a_x - x
+					frame.drag_oy = a_y - y
+
+					frame.adjust_mouse_orig_a_x = x
+					frame.adjust_mouse_orig_a_y = y
+
+					frame.drag_dc_fix_x = x
+					frame.drag_dc_fix_y = y
+				end
+			end
+		end
+	end
+end
+--]====]
 
 
 function def:uiCall_create(inst)
@@ -237,7 +379,7 @@ function def:uiCall_create(inst)
 		self.p_bounds_x2 = 0
 		self.p_bounds_y2 = 0
 
-		widShared.setupViewports(self, 1)
+		widShared.setupViewports(self, 4)
 
 		-- Layout rectangle
 		self.lp_x = 0
@@ -272,6 +414,40 @@ function def:uiCall_create(inst)
 
 		self:skinSetRefs()
 		self:skinInstall()
+		self:applyAllSettings()
+
+		-- Potentially shortened version of 'text' for display.
+		self.header_text_disp = ""
+
+		-- Text offsetting
+		self.header_text_ox = 0
+		self.header_text_oy = 0
+
+		self.needs_update = true
+
+		--[====[
+		-- Close button
+		local button_close = self:addChild("base/button", {
+			skin_id = "wimp_frame_button",
+			graphic = self.context.resources.tex_quads["window_graphic_close"],
+		})
+		button_close.tag = "header_close"
+		button_close.wid_buttonAction = button_wid_close
+		button_close.can_have_thimble = false
+
+
+		-- Maximize/restore button
+		local button_max = self:addChild("base/button", {
+			skin_id = "wimp_frame_button",
+			graphic = self.context.resources.tex_quads["window_graphic_maximize"],
+			graphic_max = self.context.resources.tex_quads["window_graphic_maximize"],
+			graphic_unmax = self.context.resources.tex_quads["window_graphic_unmaximize"],
+		})
+		button_max.tag = "header_max"
+		button_max.wid_buttonAction = button_wid_maximize
+		button_max.can_have_thimble = false
+		--]====]
+
 
 		self.resize_padding = self.skin.sensor_resize_pad
 
@@ -281,17 +457,10 @@ function def:uiCall_create(inst)
 		-- Don't let inter-generational thimble stepping leave this widget's children.
 		self.block_step_intergen = true
 
-		-- Header (title) bar, with some controls
-		local frame_header = self:addChild("wimp/frame_header", {skin = self.skin.default_header_skin})
-
-		-- Add header to layout sequence
-		frame_header.lc_func = uiLayout.fitTop
-
 		-- Optional menu bar
 		if self.make_menu_bar then
 			local menu_bar = self:addChild("wimp/menu_bar")
 			menu_bar.tag = "frame_menu_bar"
-			menu_bar.lc_func = uiLayout.fitTop
 		end
 
 		-- Main content container
@@ -300,9 +469,6 @@ function def:uiCall_create(inst)
 		--content.render = content.renderBlank
 
 		content:setScrollBars(true, true)
-
-		-- Add content to layout sequence
-		content.lc_func = uiLayout.fitRemaining
 
 		content:reshape()
 
@@ -577,6 +743,8 @@ function def:uiCall_reshape()
 	-- Viewports #1 and #2 separate the frame border from its content. The first viewport excludes an inner
 	-- region of the border that can be clicked to resize the frame (in addition to the invisible resize area
 	-- outside of the frame bounds). The second viewport excludes the rest of the border.
+	-- Viewport #3 is the header area.
+	-- Viewport #4 is a subsection of the header area for text.
 
 	local skin = self.skin
 
@@ -596,27 +764,25 @@ function def:uiCall_reshape()
 
 	widShared.enforceLimitedDimensions(self)
 
-	-- Update viewport, then components.
+	local header_h
+	if self.header_condensed then
+		header_h = self.skin.res_cond.header_h
+	else
+		header_h = self.skin.res_norm.header_h
+	end
+	uiLayout.discardTop(self, header_h)
+
 	widShared.resetViewport(self, 1)
+	widShared.partitionViewport(self, 1, 3, header_h, "top", false)
+	widShared.copyViewport(self, 3, 4)
 	widShared.carveViewport(self, 1, skin.box.border)
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 2, skin.box.margin)
 
 	uiLayout.resetLayoutPortFull(self, 2)
 
-	local header = self:findTag("frame_header")
 	local menu_bar = self:findTag("frame_menu_bar")
 	local content = self:findTag("frame_content")
-
-	if header then
-		if self.condensed then
-			header.h = header.skin.res_cond.header_h
-		else
-			header.h = header.skin.res_norm.header_h
-		end
-
-		uiLayout.fitTop(self, header)
-	end
 
 	if menu_bar then
 		menu_bar:resize()
@@ -682,10 +848,40 @@ def.skinners = {
 
 		render = function(self, ox, oy)
 			local skin = self.skin
-			local slc_body = skin.slc_body
 
+			-- Window shadow
+			love.graphics.setColor(skin.color_shadow)
+			uiGraphics.drawSlice(skin.slc_shadow,
+				-skin.shadow_extrude,
+				-skin.shadow_extrude,
+				self.w + skin.shadow_extrude * 2,
+				self.h + skin.shadow_extrude * 2
+			)
+
+			-- Window body
 			love.graphics.setColor(skin.color_body)
-			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+			uiGraphics.drawSlice(skin.slc_body, 0, 0, self.w, self.h)
+
+			-- Window header
+			local res = self.condensed and skin.res_cond or skin.res_norm
+			local res2 = self.selected and res.res_selected or res.res_unselected
+			local slc_header_body = res.header_slc_body
+			love.graphics.setColor(res2.col_header_fill)
+			uiGraphics.drawSlice(slc_header_body, 0, 0, self.vp3_w, self.vp3_h)
+
+			if self.header_text then
+				local font = res.header_font
+
+				love.graphics.setColor(res2.col_header_text)
+				love.graphics.setFont(font)
+
+				local sx, sy, sw, sh = love.graphics.getScissor()
+				uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+
+				love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
+
+				love.graphics.setScissor(sx, sy, sw, sh)
+			end
 
 			if self.DEBUG_show_resize_range then
 				local rp = self.resize_padding

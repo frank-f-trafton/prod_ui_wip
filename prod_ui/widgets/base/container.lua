@@ -128,6 +128,9 @@ function def:uiCall_reshape()
 	widShared.resetViewport(self, 1)
 
 	-- Border and scroll bars.
+	for k, v in pairs(skin) do
+		print("", k, v)
+	end
 	widShared.carveViewport(self, 1, skin.box.border)
 	commonScroll.arrangeScrollBars(self)
 

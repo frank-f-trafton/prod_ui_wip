@@ -1,32 +1,6 @@
 -- ProdUI: Theme support functions.
 
 
---[[
-Resource Tagging:
-
-Fields beginning with an asterisk (self["*foobar"]) contain strings that indicate where a
-particular resource can be found within the theme instance's table hierarchy. The reference
-is assigned to a copy of the field without the leading asterisk:
-
-self["*foobar"] = "path/to/foobar"
-self.foobar = <resource pulled in from `resources.path.to.foobar`>
-
-self["*bazbop"] = {"multiple/paths", "to/various", "textures/used"}
-self.bazbop = <array containing three resources>
-
-This is used when refreshing the contents of skin tables or widget instances.
-
-Fields beginning with a dollar sign (self["$foobar"]) contain numbers which are automatically
-scaled:
-
-self["$foobar"] = 32
-self.foobar = <math.floor(32 * theme.scale)>
-
-self["$bazbop"] = {32, 64}
-self.bazbop = <{math.floor(32 * theme.scale), math.floor(64 * theme.scale)}>
---]]
-
-
 local uiTheme = {}
 
 
@@ -39,6 +13,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local commonMath = require(REQ_PATH .. "common.common_math")
+local pTable = require(REQ_PATH .. "lib.pile_table")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
@@ -76,23 +51,8 @@ function uiTheme.newThemeInstance(scale)
 
 	self.scale = scale
 
-	--[[
-	The main `skins` table has weak references (both keys and values). This allows the theming
-	system to manage temporary SkinDef patches without the need for additional bookkeeping when
-	they are no longer referenced by anything. A secondary table, `skins_preserve`, prevents certain
-	SkinDefs from being removed by the garbage collector. All SkinDefs loaded from disk are marked
-	to be preserved.
-
-	SkinDefs in `self.skins` but not in `self.skins_preserve` may disappear at any time, including
-	while iterating over `self.skins` with pairs(). According to the Lua Users Wiki, this is safe
-	behavior (unlike adding new keys to a table, which can lead to other keys not being iterated).
-
-	http://lua-users.org/wiki/TablesTutorial (See: "Inside a pairs loop, ...")
-	https://lua-l.lua.narkive.com/NmABQ5pO/iterating-weak-tables#post2
-	--]]
-
-	self.skins = setmetatable({}, {__mode = "kv"})
-	self.skins_preserve = {}
+	self.skin_defs = {}
+	self.skin_insts = {}
 
 	return self
 end
@@ -157,38 +117,36 @@ end
 _mt_themeDataPack.drillS = _mt_themeInst.drillS
 
 
---- Load or refresh a resource at tbl.<id> using a drill-string stored in tbl[<"?id">],
---  where '?' is one of a handful of single-byte UTF-8 symbols.
--- @param tbl The table to update (typically a skin definition or widget instance).
--- @param id String ID of the field to load or refresh (with the leading symbol).
-function _mt_themeInst:applyResource(tbl, id)
-	local symbol = string.sub(id, 1, 1)
+--- Given a key with a special leading symbol and a value, get a processed version
+--	of the value.
+function _mt_themeInst:getProcessedResource(k, v)
+	local symbol = k:sub(1, 1)
 
-	-- Pull in resources from the main theme table.
+	-- Pull in resources from the main theme table
 	if symbol == "*" then
-		if type(tbl[id]) == "table" then
-			local t2 = {}
-			for i, s in ipairs(tbl[id]) do
-				t2[i] = self:drillS(s)
+		if type(v) == "table" then
+			local retval = {}
+			for i, s in ipairs(v) do
+				table.insert(retval, self:drillS(s))
+				return k:sub(2), retval
 			end
-			tbl[id:sub(2)] = t2
 		else
-			tbl[id:sub(2)] = self:drillS(tbl[id])
+			return k:sub(2), self:drillS(v)
 		end
 
-	-- Scale and floor numbers.
+	-- Scale and floor numbers
 	elseif symbol == "$" then
-		if type(tbl[id]) == "table" then
-			local t2 = {}
-			for i, n in ipairs(tbl[id]) do
-				t2[i] = math.floor(n * self.scale)
+		if type(v) == "table" then
+			local retval = {}
+			for i, n in ipairs(v) do
+				table.insert(retval, math.floor(n * self.scale))
 			end
-			tbl[id:sub(2)] = t2
+			return k:sub(2), retval
 		else
-			tbl[id:sub(2)] = math.floor(tbl[id] * self.scale)
+			return k:sub(2), math.floor(v * self.scale)
 		end
 
-	-- Invalid.
+	-- Invalid
 	else
 		if not pUTF8.check(symbol) then
 			symbol = "(Byte: " .. tostring(tonumber(symbol) .. ")")
@@ -197,7 +155,7 @@ function _mt_themeInst:applyResource(tbl, id)
 		error("invalid resource processor symbol: " .. symbol)
 	end
 end
-_mt_themeDataPack.applyResource = _mt_themeInst.applyResource
+_mt_themeDataPack.getProcessedResource = _mt_themeInst.getProcessedResource
 
 
 --- Shortcut to make a new 9-Slice definition.
@@ -206,70 +164,26 @@ function uiTheme.newSlice(x,y, w1,h1, w2,h2, w3,h3, iw,ih)
 end
 
 
---- Creates a new SkinDef table. Call from within SkinDef files to create the base table, and call in
---  user code to create extensions of existing registered skins.
--- @param extends String ID or the actual table of a skin that you wish to extend, or false/nil to
--- create this skin from scratch. If extending, the base skin must already be registered with the theming
--- system.
--- @param skin A pre-filled table to use for the SkinDef. This table must not be shared among other SkinDefs.
--- @return The new skin table.
-function _mt_themeInst:newSkinDef(extends, skin)
-	uiShared.typeEval(1, extends, "string", "table")
-
-	-- WARNING: Avoid making very deep __index chains.
-
-	skin = skin or {}
-
-	-- Root SkinDef.
-	if not extends then
-		-- (Nothing to do.)
-
-	-- Extend based on string ID or existing skin table. The target skin must already be
-	-- registered in the resources table. (Otherwise, the theming system won't be able to
-	-- manage changes.)
-	elseif type(extends) == "string" then
-		local extends_tbl = self.skins[extends]
-		if not extends_tbl then
-			error("skin table not found in the theme registry. ID: " .. tostring(extends))
-		end
-		skin.__index = extends_tbl
-		setmetatable(skin, skin)
-
-	else -- type(extends) == "table"
-		if not self.skins[extends] then
-			error("skin table not found in the theme registry. Address: " .. tostring(extends))
-		end
-		skin.__index = extends
-		setmetatable(skin, skin)
-	end
-
-	return skin
-end
-
-
---- Register a SkinDef table to the theming system.
--- @param skin The SkinDef table to assign.
--- @param id The SkinDef ID to use. Must be a string, a number or a table. If it is a table, then it must be
--- the SkinDef table (skin == id).
--- @param preserve When true, the SkinDef is added to a table which prevents it from being automatically
--- garbage-collected. (Use false for SkinDefs which will only be used for a single widget in an ad hoc manner.)
-function _mt_themeInst:registerSkinDef(skin, id, preserve)
-	uiShared.type1(1, skin, "table")
+--- Registers a SkinDef table to the theming system and creates a SkinInstance.
+-- @param skin_def The SkinDef table to assign.
+-- @param id The SkinDef ID to use. It must be a string, a number or a table, and it cannot already be registerd.
+--	If the value is a table, then it must be the SkinDef table (skin_def == id).
+function _mt_themeInst:registerSkinDef(skin_def, id)
+	uiShared.type1(1, skin_def, "table")
 	uiShared.type(1, id, "string", "number", "table")
 
-	if type(id) == "table" and skin ~= id then
-		error("when registering a table-based ID, its table reference must match the skin table (skin == id).")
+	if type(id) == "table" and skin_def ~= id then
+		error("when registering a table-based ID, its table reference must match the SkinDef table (skin_def == id).")
 	end
 
-	if self.skins[id] then
-		error("a skin is already registered with this ID: " .. tostring(id))
+	if self.skin_defs[id] then
+		error("a SkinDef is already registered with this ID: " .. tostring(id))
 	end
 
-	self.skins[id] = skin
+	self.skin_defs[id] = skin_def
+	self.skin_insts[skin_def] = {}
 
-	if preserve then
-		self.skins_preserve[id] = skin
-	end
+	self:refreshSkinDefInstance(skin_def)
 end
 
 
@@ -284,10 +198,8 @@ function _mt_themeInst:loadSkinDef(id, path)
 		error("bad type for skin def (expected table, got " .. type(def) .. ") at path: " .. path)
 	end
 
-	-- SkinDefs loaded from disk are always set to preserve.
-	self:registerSkinDef(def, id, true)
-
-	self:refreshSkinDef(def)
+	self:registerSkinDef(def, id)
+	self:refreshSkinDefInstance(def)
 
 	return def
 end
@@ -323,78 +235,58 @@ function _mt_themeInst:loadSkinDefs(base_path, recursive, id_prepend)
 end
 
 
-local temp_remove = {}
+local function _skinDeepCopy(theme_inst, inst, def, _depth)
+	print("_skinDeepCopy: start", _depth)
+	for k, v in pairs(def) do
+		if type(v) == "table" then
+			inst[k] = _skinDeepCopy(theme_inst, {}, v, _depth + 1)
+		else
+			if type(k) == "string" then
+				local symbol = k:sub(1, 1)
+				print("***", "k", k, "symbol", symbol)
+				if symbol == "*" or symbol == "$" then
+					print(">>> do it")
+					local pro_k, pro_v = theme_inst:getProcessedResource(k, v)
+					inst[pro_k] = pro_v
+				else
+					inst[k] = v
+				end
+			else
+				inst[k] = v
+			end
+		end
+	end
+	print("_skinDeepCopy: end", _depth)
+	return inst
+end
+
+
+function _mt_themeInst:refreshSkinDefInstance(skin_def)
+	local skin_inst = self.skin_insts[skin_def]
+
+	for k in pairs(skin_inst) do
+		skin_inst[k] = nil
+	end
+
+	_skinDeepCopy(self, skin_inst, skin_def, 1)
+end
+
+
 --- Remove a SkinDef from the theme registry.
 -- @param id ID of the SkinDef to remove.
 function _mt_themeInst:removeSkinDef(id) -- XXX Untested
 	--[[
-	The library user must:
-
-	-> *Completely* uninstall the SkinDef from all widgets.
-	-> *Completely* uninstall any SkinDefs which extend *this* SkinDef from all widgets.
-	-> *Completely* remove extension SkinDefs of this SkinDef, deepest first.
-
+	The library user must *completely* uninstall the skin from all widgets.
 	Any de-skinned widgets which require a skin must have replacements ASAP.
 	--]]
 
-	-- Store all SkinDefs in a temporary table so that they are not removed by the garbage collector
-	-- while this function works.
-	for k, v in pairs(self.skins) do
-		temp_remove[k] = v
-	end
-
-	local skin = self.skins[id]
-	if not skin then
+	local skin_def = self.skin_defs[id]
+	if not skin_def then
 		error("SkinDef not found. ID: " .. tostring(id))
 	end
 
-	-- Removing a SkinDef which is extended by other SkinDefs is forbidden.
-	for k, v in pairs(self.skins) do
-		if v.__index == skin then
-			error("cannot remove a SkinDef which is extended by other SkinDefs.")
-		end
-	end
-
-	self.skins[id] = nil
-	self.skins_preserve[id] = nil
-
-	-- Free up the temp table.
-	for k in pairs(temp_remove) do
-		temp_remove[k] = nil
-	end
-end
-
-
-local temp = {}
-function _mt_themeInst:refreshSkinDef(skin)
-	if #temp > 0 then
-		error("internal scratchspace table is corrupt.")
-	end
-
-	-- Bad things happen if you add new fields to a table while iterating over it with pairs().
-	-- Build a temporary list of fields that need attention.
-	for k, v in pairs(skin) do
-		if type(k) == "string" then
-			local symbol = k:sub(1, 1)
-			if symbol == "*" or symbol == "$" then
-				temp[#temp + 1] = k
-			end
-		end
-	end
-
-	for i = #temp, 1, -1 do
-		self:applyResource(skin, temp[i])
-		temp[i] = nil
-	end
-
-	-- Recursively apply to all tables with string keys beginning with 'res_' or '>'.
-	-- These subtables must not be shared (ie if one such table appears twice in some SkinDefs,
-	-- then it will be updated twice, even though it really only needed to be processed once).
-	for k, v in pairs(skin) do
-		if type(k) == "string" and type(v) == "table" and string.sub(k, 1, 2) == ">" or string.sub(k, 1, 4) == "res_" then
-			self:refreshSkinDef(v)
-		end
-	end
+	self.skin_defs[id] = nil
+	self.skin_insts[skin_def] = nil
 end
 
 
@@ -453,28 +345,6 @@ function uiTheme.assertScale(arg_n, scale, integral)
 		error("argument #" .. arg_n .. ": scale must be greater than zero.", 2)
 	end
 end
-
-
---[[
-Box styles.
-
-Fields:
-
-* sl_body_id: The ID of a 9-Slice texture which should be rendered with the box.
-Used to unify the look of panels and context menus. Not all boxes include this
-field.
-
-* outpad {x1, y1, x2, y2}: The intended amount of outer padding around the box.
-Sometimes used by the layout system. Does not affect the widget's width and height
-directly. Similar to "margin" in HTML/CSS.
-
-* border {x1, y1, x2, y2}: A border that starts at the widget's edge and grows inward.
-Usually precludes scroll bars, and may be used to designate a widget's draggable
-edges. Similar to "border" in HTML/CSS.
-
-* margin {x1, y1, x2, y2}: Inner padding which begins at the border and grows inward.
-Similar to "padding" in HTML/CSS.
---]]
 
 
 local function _assertBoxVar(box, id, expected)

@@ -1246,31 +1246,29 @@ end
 --- Updates the widget's skinner and skin tables based on its `skin_id`. Raises an error if the named
 --	skin or its dependent skinner cannot be found. Returns the skinner and skin tables for convenience.
 --	Intended uses: during widget instance creation; when reloading resources.
---@return The skinner (implementation) and skin (data) tables.
 function _mt_widget:skinSetRefs()
 	if not self.skin_id then
 		error("no skin ID assigned to widget.")
 	end
 
-	local skin = self.context.resources.skins[self.skin_id]
-	if not skin then
+	local resources = self.context.resources
+	local skin_inst = resources.skin_insts[resources.skin_defs[self.skin_id]]
+	if not skin_inst then
 		error("widget skin (the data) is not loaded or is invalid: " .. tostring(self.skin_id))
 	end
 
-	if not skin.skinner_id then
+	if not skin_inst.skinner_id then
 		error("widget skin is missing a skinner ID.")
 	end
 
-	local skinner = self.skinners[skin.skinner_id]
+	local skinner = self.skinners[skin_inst.skinner_id]
 
 	if not skinner then
-		error("widget skinner (the implementation) is not loaded or is invalid: " .. tostring(skin.skinner_id))
+		error("widget skinner (the implementation) is not loaded or is invalid: " .. tostring(skin_inst.skinner_id))
 	end
 
 	self.skinner = skinner
-	self.skin = skin
-
-	return skinner, skin
+	self.skin = skin_inst
 end
 
 
@@ -1318,13 +1316,6 @@ function _mt_widget:drillHierarchical(...)
 	end
 
 	error("hierarchical drill failed. Fields: " .. utilTable.concatVarargs(...))
-end
-
-
---- Load or refresh a resource at self.<id> using a drill-string stored in self[<"*id">].
--- @param id String ID of the field to load or refresh (with the leading symbol).
-function _mt_widget:applyResource(id)
-	self.context.resources:applyResource(self, id)
 end
 
 

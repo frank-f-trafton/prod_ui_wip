@@ -106,16 +106,19 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, true)
 
-		-- Split Button
-		local btn_spl = content:addChild("wimp/button_split", {x=0, y=0, w=224, h=64})
-		btn_spl:setTag("demo_split_btn")
-
-		-- SkinDef patch
+		-- SkinDef clone
 		local resources = content.context.resources
-		local patch = resources:newSkinDef("button_split1")
-		resources:registerSkinDef(patch, patch, false)
-		resources:refreshSkinDef(patch)
+		local skin_defs = resources.skin_defs
+		local clone = pTable.deepCopy({}, skin_defs["button_split1"])
+		resources:registerSkinDef(clone, clone)
 
+		local function _userDestroy(self)
+			self.context.resources:removeSkinDef(clone)
+		end
+
+		-- Split Button
+		local btn_spl = content:addChild("wimp/button_split", {x=0, y=0, w=224, h=64, userDestroy = _userDestroy})
+		btn_spl:setTag("demo_split_btn")
 
 		btn_spl:setLabel("Split Button")
 		btn_spl.wid_buttonAction = function(self)

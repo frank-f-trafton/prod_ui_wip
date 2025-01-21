@@ -131,13 +131,17 @@ end
 
 
 local function makeListBox1(content, x, y)
-	-- Apply a SkinDef patch to this ListBox so that we can modify its skin settings.
+	-- SkinDef clone
 	local resources = content.context.resources
-	local patch = resources:newSkinDef("list_box1")
-	resources:registerSkinDef(patch, patch, false)
-	resources:refreshSkinDef(patch)
+	local skin_defs = resources.skin_defs
+	local clone = pTable.deepCopy({}, skin_defs["list_box1"])
+	resources:registerSkinDef(clone, clone)
 
-	local list_box = content:addChild("wimp/list_box", {skin_id = patch})
+	local function _userDestroy(self)
+		self.context.resources:removeSkinDef(clone)
+	end
+
+	local list_box = content:addChild("wimp/list_box", {skin_id = clone, userDestroy = _userDestroy})
 	list_box:setTag("demo_listbox")
 
 	list_box.wid_action = function(self, item, index)
@@ -319,7 +323,8 @@ local function makeListBox1(content, x, y)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
 			lb.skin["$pad_text_x"] = self.slider_pos
-			self.context.resources:refreshSkinDef(lb.skin)
+			local resources = self.context.resources
+			resources:refreshSkinDefInstance(resources.skin_defs[lb.skin_id])
 			lb:reshape()
 		end
 	end
