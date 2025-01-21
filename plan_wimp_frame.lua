@@ -3,6 +3,7 @@ local plan = {}
 
 
 local commonWimp = require("prod_ui.common.common_wimp")
+local pTable = require("prod_ui.lib.pile_table")
 
 
 local function _getFrameAndHeader(self)
@@ -18,22 +19,25 @@ function plan.make(parent)
 
 	-- Make some skinDef patches to avoid messing up other frames.
 	local resources = context.resources
-	local patch_header_norm = resources:newSkinDef("wimp_header_norm")
-	resources:registerSkinDef(patch_header_norm, patch_header_norm, false)
-	resources:refreshSkinDef(patch_header_norm)
+	local skin_defs = resources.skin_defs
 
-	local patch_header_cond = resources:newSkinDef("wimp_header_cond")
-	resources:registerSkinDef(patch_header_cond, patch_header_cond, false)
-	resources:refreshSkinDef(patch_header_cond)
+	local clone_header_norm = pTable.deepCopy({}, skin_defs["wimp_header_norm"])
+	resources:registerSkinDef(clone_header_norm, clone_header_norm)
 
-	local patch_frame = resources:newSkinDef("wimp_frame")
-	patch_frame.skin_header_norm = patch_header_norm
-	patch_frame.skin_header_cond = patch_header_cond
-	resources:registerSkinDef(patch_frame, patch_frame, false)
-	resources:refreshSkinDef(patch_frame)
+	local clone_header_cond = pTable.deepCopy({}, skin_defs["wimp_header_cond"])
+	resources:registerSkinDef(clone_header_cond, clone_header_cond)
+
+	local clone_frame = pTable.deepCopy({}, skin_defs["wimp_frame"])
+	resources:registerSkinDef(clone_frame, clone_frame, false)
+
+	local function _userDestroy(self)
+		self.context.resources:removeSkinDef(clone_header_norm)
+		self.context.resources:removeSkinDef(clone_header_cond)
+		self.context.resources:removeSkinDef(clone_frame)
+	end
 
 
-	local frame = parent:addChild("wimp/window_frame", {skin_id = patch_frame})
+	local frame = parent:addChild("wimp/window_frame", {skin_id = clone_frame, userDestroy = _userDestroy})
 	local header = frame:findTag("frame_header")
 
 	frame.w = 640

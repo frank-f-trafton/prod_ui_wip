@@ -92,11 +92,11 @@ end
 
 
 local function _deepCopy(dst, src, _depth)
-	print("_deepCopy: start", _depth)
+	--print("_deepCopy: start", _depth)
 	for k, v in pairs(src) do
 		dst[k] = type(v) == "table" and _deepCopy({}, v, _depth + 1) or v
 	end
-	print("_deepCopy: end", _depth)
+	--print("_deepCopy: end", _depth)
 	return dst
 end
 

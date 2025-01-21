@@ -426,7 +426,7 @@ function themeDef.newInstance(scale)
 	-- * (TODO) Textual menu items
 	-- * (TODO) Status bar along the bottom
 
-	-- inst.skins is created in uiTheme.newThemeInstance().
+	-- 'inst.skin_defs' and 'inst.skin_insts' are created in uiTheme.newThemeInstance().
 
 	inst:loadSkinDefs(BASE_PATH .. "skins", true)
 

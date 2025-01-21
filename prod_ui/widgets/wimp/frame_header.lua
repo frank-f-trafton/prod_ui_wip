@@ -4,10 +4,10 @@
 wimp/frame_header: Displays the window title, contains control buttons, and serves as a
 dragging sensor for the window as a whole.
 
-                     Title            Control buttons
-                       v                     V
+                                      Control buttons
+                                             V
 ┌───────────────────────────────────────────────┐
-│             The Name Of The Frame       [#][X]│
+│                 Frame Title             [#][X]│
 └───────────────────────────────────────────────┘
 
 --]]
