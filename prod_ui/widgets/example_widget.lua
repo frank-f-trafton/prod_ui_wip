@@ -15,36 +15,40 @@ local def = {}
 --def.skin_id = "foobar"
 
 
--- If the widget is skinned, place the built-in skinner implementations here.
--- The default built-in skinner should be named: "default"
+-- A default skinner may be placed here. Ideally, these would be in the skinners folder, but
+-- most widgets in the base release will only have one skinner, and it's easier to develop
+-- with that one skinner in the same file as the widget definition.
 --[[
-def.skinners = {
-	default = {
-		-- Installs the skin into the widget.
-		-- Called by wid:skinInstall().
-		install = function() end,
+def.default_skinner = {
+	-- Describes how to deal with some fields in the skin table.
+	-- In the future, this might be more rigorous. For now, it indicates which fields
+	-- should be automatically scaled, floored, clamped, etc.
+	schema = {},
 
-		-- Removes the skin from the widget.
-		-- Called by wid:skinRemove().
-		remove = function() end,
+	-- Installs the skin into the widget.
+	-- Called by wid:skinInstall().
+	install = function() end,
 
-		-- Updates the skin state (after a state change to the widget).
-		-- Called by wid:skinRefresh()
-		refresh = function() end,
+	-- Removes the skin from the widget.
+	-- Called by wid:skinRemove().
+	remove = function() end,
 
-		-- Per-frame update callback for the skin.
-		-- Called by wid:skinUpdate()
-		update = function(dt) end,
+	-- Updates the skin state (after a state change to the widget).
+	-- Called by wid:skinRefresh()
+	refresh = function() end,
 
-		-- Copied to: wid.render
-		render = function() end,
+	-- Per-frame update callback for the skin.
+	-- Called by wid:skinUpdate()
+	update = function(dt) end,
 
-		-- Copied to: wid.renderLast
-		renderLast = function() end,
+	-- Copied to: wid.render
+	render = function() end,
 
-		-- Copied to: wid.renderThimble
-		renderThimble = function() end,
-	},
+	-- Copied to: wid.renderLast
+	renderLast = function() end,
+
+	-- Copied to: wid.renderThimble
+	renderThimble = function() end,
 }
 --]]
 

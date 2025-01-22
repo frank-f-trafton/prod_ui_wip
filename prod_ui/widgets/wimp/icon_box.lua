@@ -106,38 +106,40 @@ function def:uiCall_create(inst)
 end
 
 
-def.skinners = {
-	default = {
+def.default_skinner = {
+	schema = {
 
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			love.graphics.push("all")
-
-			-- [[
-			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
-			love.graphics.print("<WIP Icon Box>", 0, 0)
-			--]]
-
-			love.graphics.pop()
-		end,
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		love.graphics.push("all")
+
+		-- [[
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.rectangle("line", 0, 0, self.w - 1, self.h - 1)
+		love.graphics.print("<WIP Icon Box>", 0, 0)
+		--]]
+
+		love.graphics.pop()
+	end,
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

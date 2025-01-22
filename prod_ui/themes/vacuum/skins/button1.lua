@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "skn_button",
 
 	box = "*style/boxes/button",
 	label_style = "*style/labels/norm",
@@ -27,7 +27,7 @@ return {
 	graphic_placement = "overlay", -- "left", "right", "top", "bottom", "overlay"
 
 	-- How much space to assign the graphic when not using "overlay" placement.
-	["$graphic_spacing"] = 0,
+	graphic_spacing = 0,
 
 
 	res_idle = {
@@ -35,8 +35,8 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_hover = {
@@ -44,8 +44,8 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_pressed = {
@@ -53,8 +53,8 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 1,
+		label_ox = 0,
+		label_oy = 1
 	},
 
 	res_disabled = {
@@ -62,7 +62,7 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 }

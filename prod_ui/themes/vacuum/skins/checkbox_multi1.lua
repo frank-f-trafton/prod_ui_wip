@@ -5,7 +5,7 @@ This skin provides graphics for states 1-3.
 --]]
 
 return {
-	skinner_id = "default",
+	skinner_id = "base/checkbox_multi",
 
 	box = "*style/boxes/button_bijou",
 	label_style = "*style/labels/norm",
@@ -16,11 +16,11 @@ return {
 	cursor_press = "hand",
 
 	-- Checkbox (quad) render size.
-	["$bijou_w"] = 24,
-	["$bijou_h"] = 24,
+	bijou_w = 24,
+	bijou_h = 24,
 
 	-- Horizontal spacing between checkbox area and text label.
-	["$bijou_spacing"] = 40,
+	bijou_spacing = 40,
 
 	-- Checkbox horizontal placement.
 	bijou_side = "left", -- left (default), right
@@ -44,8 +44,8 @@ return {
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 
 	res_hover = {
@@ -58,8 +58,8 @@ return {
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 
 	res_pressed = {
@@ -72,8 +72,8 @@ return {
 		color_bijou = {0.7, 0.7, 0.7, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 
 	res_disabled = {
@@ -86,7 +86,7 @@ return {
 		color_bijou = {0.5, 0.5, 0.5, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 }

@@ -627,150 +627,153 @@ function def:uiCall_update(dt)
 end
 
 
-def.skinners = {
-	default = {
-
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local data_icon = skin.data_icon
-
-			local tq_px = skin.tq_px
-			local sl_body = skin.sl_body
-
-			local menu = self.menu
-			local items = menu.items
-
-			-- XXX: pick resources for enabled or disabled state, etc.
-			--local res = (self.active) and skin.res_active or skin.res_inactive
-
-			-- ListBox body.
-			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
-
-			-- Embedded scroll bars, if present and active.
-			local data_scroll = skin.data_scroll
-
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
-
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-			end
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-
-			love.graphics.push("all")
-
-			-- Scissor, scroll offsets for content.
-			uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
-			love.graphics.translate(-self.scr_x, -self.scr_y)
-
-			-- Hover glow.
-			local item_hover = self.MN_item_hover
-			if item_hover then
-				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.doc_w, item_hover.h)
-			end
-
-			-- Selection glow.
-			local sel_item = items[menu.index]
-			if sel_item then
-				local is_active = self == self.context.thimble1
-				local col = is_active and skin.color_active_glow or skin.color_select_glow
-				love.graphics.setColor(col)
-				uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
-			end
-
-			-- Menu items.
-			love.graphics.setColor(skin.color_item_text)
-			local font = skin.font
-			love.graphics.setFont(font)
-			local font_h = font:getHeight()
-
-			local first = math.max(self.MN_items_first, 1)
-			local last = math.min(self.MN_items_last, #items)
-
-			-- 1: Item markings
-			local rr, gg, bb, aa = love.graphics.getColor()
-			love.graphics.setColor(skin.color_item_marked)
-			for i = first, last do
-				local item = items[i]
-				if item.marked then
-					uiGraphics.quadXYWH(tq_px, 0, item.y, self.doc_w, item.h)
-				end
-			end
-
-			-- 2: Bijou icons, if enabled
-			love.graphics.setColor(rr, gg, bb, aa)
-			if self.show_icons then
-				for i = first, last do
-					local item = items[i]
-					local tq_bijou = item.tq_bijou
-					if tq_bijou then
-						uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, self.col_icon_x, item.y, self.col_icon_w, item.h)
-					end
-				end
-			end
-
-			-- 3: Text labels
-			for i = first, last do
-				local item = items[i]
-				-- ugh
-				--[[
-				love.graphics.push("all")
-				love.graphics.setColor(1, 0, 0, 1)
-				love.graphics.setLineWidth(1)
-				love.graphics.setLineStyle("rough")
-				love.graphics.setLineJoin("miter")
-				love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
-				love.graphics.pop()
-				--]]
-
-				if item.text then
-					-- Need to align manually to prevent long lines from wrapping.
-					local text_x
-					if skin.text_align_h == "left" then
-						text_x = self.col_text_x + skin.pad_text_x
-
-					elseif skin.text_align_h == "center" then
-						text_x = self.col_text_x + math.floor((self.col_text_w - item.w) * 0.5)
-
-					elseif skin.text_align_h == "right" then
-						text_x = self.col_text_x + math.floor(self.col_text_w - item.w - skin.pad_text_x)
-					end
-
-					love.graphics.print(
-						item.text,
-						text_x,
-						item.y + math.floor((item.h - font_h) * 0.5)
-					)
-				end
-			end
-
-			love.graphics.pop()
-
-			--widDebug.debugDrawViewport(self, 1)
-			--widDebug.debugDrawViewport(self, 2)
-		end,
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+def.default_skinner = {
+	schema = {
+		item_pad_v = "scaled-int",
+		icon_spacing = "scaled-int",
+		pad_text_x = "scaled-int"
 	},
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local data_icon = skin.data_icon
+
+		local tq_px = skin.tq_px
+		local sl_body = skin.sl_body
+
+		local menu = self.menu
+		local items = menu.items
+
+		-- XXX: pick resources for enabled or disabled state, etc.
+		--local res = (self.active) and skin.res_active or skin.res_inactive
+
+		-- ListBox body.
+		love.graphics.setColor(1, 1, 1, 1)
+		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
+
+		-- Embedded scroll bars, if present and active.
+		local data_scroll = skin.data_scroll
+
+		local scr_h = self.scr_h
+		local scr_v = self.scr_v
+
+		if scr_h and scr_h.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		end
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
+
+		love.graphics.push("all")
+
+		-- Scissor, scroll offsets for content.
+		uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+		love.graphics.translate(-self.scr_x, -self.scr_y)
+
+		-- Hover glow.
+		local item_hover = self.MN_item_hover
+		if item_hover then
+			love.graphics.setColor(skin.color_hover_glow)
+			uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.doc_w, item_hover.h)
+		end
+
+		-- Selection glow.
+		local sel_item = items[menu.index]
+		if sel_item then
+			local is_active = self == self.context.thimble1
+			local col = is_active and skin.color_active_glow or skin.color_select_glow
+			love.graphics.setColor(col)
+			uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
+		end
+
+		-- Menu items.
+		love.graphics.setColor(skin.color_item_text)
+		local font = skin.font
+		love.graphics.setFont(font)
+		local font_h = font:getHeight()
+
+		local first = math.max(self.MN_items_first, 1)
+		local last = math.min(self.MN_items_last, #items)
+
+		-- 1: Item markings
+		local rr, gg, bb, aa = love.graphics.getColor()
+		love.graphics.setColor(skin.color_item_marked)
+		for i = first, last do
+			local item = items[i]
+			if item.marked then
+				uiGraphics.quadXYWH(tq_px, 0, item.y, self.doc_w, item.h)
+			end
+		end
+
+		-- 2: Bijou icons, if enabled
+		love.graphics.setColor(rr, gg, bb, aa)
+		if self.show_icons then
+			for i = first, last do
+				local item = items[i]
+				local tq_bijou = item.tq_bijou
+				if tq_bijou then
+					uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, self.col_icon_x, item.y, self.col_icon_w, item.h)
+				end
+			end
+		end
+
+		-- 3: Text labels
+		for i = first, last do
+			local item = items[i]
+			-- ugh
+			--[[
+			love.graphics.push("all")
+			love.graphics.setColor(1, 0, 0, 1)
+			love.graphics.setLineWidth(1)
+			love.graphics.setLineStyle("rough")
+			love.graphics.setLineJoin("miter")
+			love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
+			love.graphics.pop()
+			--]]
+
+			if item.text then
+				-- Need to align manually to prevent long lines from wrapping.
+				local text_x
+				if skin.text_align_h == "left" then
+					text_x = self.col_text_x + skin.pad_text_x
+
+				elseif skin.text_align_h == "center" then
+					text_x = self.col_text_x + math.floor((self.col_text_w - item.w) * 0.5)
+
+				elseif skin.text_align_h == "right" then
+					text_x = self.col_text_x + math.floor(self.col_text_w - item.w - skin.pad_text_x)
+				end
+
+				love.graphics.print(
+					item.text,
+					text_x,
+					item.y + math.floor((item.h - font_h) * 0.5)
+				)
+			end
+		end
+
+		love.graphics.pop()
+
+		--widDebug.debugDrawViewport(self, 1)
+		--widDebug.debugDrawViewport(self, 2)
+	end,
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

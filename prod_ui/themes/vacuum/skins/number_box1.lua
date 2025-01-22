@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/number_box",
 
 	box = "*style/boxes/input_box",
 	font = "*fonts/p",
@@ -13,7 +13,7 @@ return {
 
 	-- Horizontal size of the increment and decrement buttons.
 	-- "auto": use Viewport #?'s (XXX) height.
-	["$button_spacing"] = 24,
+	button_spacing = 24,
 
 	-- Inc/dec button positioning
 	button_placement = "right", -- "left", "right"
@@ -31,8 +31,8 @@ return {
 		color_highlight_active = {0.23, 0.23, 0.67, 1.0},
 		color_caret_insert = {1.0, 1.0, 1.0, 1.0},
 		color_caret_replace = {0.75, 0.75, 0.75, 1.0},
-		["$deco_ox"] = 0,
-		["$deco_oy"] = 0,
+		deco_ox = 0,
+		deco_oy = 0,
 	},
 
 	res_hover = {
@@ -47,8 +47,8 @@ return {
 		color_highlight_active = {0.23, 0.23, 0.67, 1.0},
 		color_caret_insert = {1.0, 1.0, 1.0, 1.0},
 		color_caret_replace = {0.75, 0.75, 0.75, 1.0},
-		["$deco_ox"] = 0,
-		["$deco_oy"] = 0,
+		deco_ox = 0,
+		deco_oy = 0,
 	},
 
 	res_pressed = {
@@ -63,8 +63,8 @@ return {
 		color_highlight_active = {0.23, 0.23, 0.67, 1.0},
 		color_caret_insert = {1.0, 1.0, 1.0, 1.0},
 		color_caret_replace = {0.75, 0.75, 0.75, 1.0},
-		["$deco_ox"] = 0,
-		["$deco_oy"] = 1,
+		deco_ox = 0,
+		deco_oy = 1,
 	},
 
 	res_disabled = {
@@ -79,7 +79,7 @@ return {
 		color_highlight_active = {0.23, 0.23, 0.67, 1.0},
 		color_caret_insert = {1.0, 1.0, 1.0, 1.0},
 		color_caret_replace = {0.75, 0.75, 0.75, 1.0},
-		["$deco_ox"] = 0,
-		["$deco_oy"] = 0,
+		deco_ox = 0,
+		deco_oy = 0,
 	},
 }

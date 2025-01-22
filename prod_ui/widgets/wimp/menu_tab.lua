@@ -1174,108 +1174,109 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 end
 
 
-def.skinners = {
-	default = {
-
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-
-			self.col_bar_h = skin.impl_column.bar_height
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-
-			local menu = self.menu
-			local items = menu.items
-
-			local font = skin.font
-
-			local tq_px = skin.tq_px
-
-			love.graphics.push("all")
-
-			local sx0, sy0, sw0, sh0 = love.graphics.getScissor()
-			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-
-			-- Widget body fill.
-			love.graphics.setColor(skin.color_background)
-			uiGraphics.quadXYWH(tq_px, 0, 0, self.w, self.h)
-
-			-- Column bar body (spanning the top of the widget).
-			local impl_column = skin.impl_column
-
-			love.graphics.setColor(impl_column.color_body)
-			uiGraphics.quadXYWH(tq_px, self.col_bar_x, self.col_bar_y, self.col_bar_w, self.col_bar_h)
-
-			local col_pres = self.column_pressed
-
-			-- Draw columns.
-
-			-- * Box mosaics
-			for i, column in ipairs(self.columns) do
-				if column.visible
-				and col_pres ~= column
-				and column.x - self.scr_x < self.vp2_x + self.vp2_w
-				and column.x + column.w - self.scr_x >= self.vp2_x
-				then
-					drawWholeColumn(self, column, false, ox, oy)
-				end
-			end
-
-			-- If there is a column that is currently being dragged, draw it last.
-			if col_pres then
-				drawWholeColumn(self, col_pres, true, ox, oy)
-			end
-
-			love.graphics.translate(self.vp_x - self.scr_x, self.vp_y - self.scr_y)
-
-			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
-
-			-- Draw hover glow, if applicable
-			local item_hover = self.MN_item_hover
-			if item_hover then
-				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quadXYWH(tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
-			end
-
-			-- Draw selection glow, if applicable
-			local sel_item = items[menu.index]
-			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
-			end
-
-			love.graphics.pop()
-
-			-- Embedded scroll bars.
-			local data_scroll = skin.data_scroll
-
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
-
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-			end
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+def.default_skinner = {
+	schema = {
+		column_sep_width = "scaled-int"
 	},
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+
+		self.col_bar_h = skin.impl_column.bar_height
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+
+		local menu = self.menu
+		local items = menu.items
+
+		local font = skin.font
+
+		local tq_px = skin.tq_px
+
+		love.graphics.push("all")
+
+		local sx0, sy0, sw0, sh0 = love.graphics.getScissor()
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+
+		-- Widget body fill.
+		love.graphics.setColor(skin.color_background)
+		uiGraphics.quadXYWH(tq_px, 0, 0, self.w, self.h)
+
+		-- Column bar body (spanning the top of the widget).
+		local impl_column = skin.impl_column
+
+		love.graphics.setColor(impl_column.color_body)
+		uiGraphics.quadXYWH(tq_px, self.col_bar_x, self.col_bar_y, self.col_bar_w, self.col_bar_h)
+
+		local col_pres = self.column_pressed
+
+		-- Draw columns.
+
+		-- * Box mosaics
+		for i, column in ipairs(self.columns) do
+			if column.visible
+			and col_pres ~= column
+			and column.x - self.scr_x < self.vp2_x + self.vp2_w
+			and column.x + column.w - self.scr_x >= self.vp2_x
+			then
+				drawWholeColumn(self, column, false, ox, oy)
+			end
+		end
+
+		-- If there is a column that is currently being dragged, draw it last.
+		if col_pres then
+			drawWholeColumn(self, col_pres, true, ox, oy)
+		end
+
+		love.graphics.translate(self.vp_x - self.scr_x, self.vp_y - self.scr_y)
+
+		uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
+
+		-- Draw hover glow, if applicable
+		local item_hover = self.MN_item_hover
+		if item_hover then
+			love.graphics.setColor(skin.color_hover_glow)
+			uiGraphics.quadXYWH(tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
+		end
+
+		-- Draw selection glow, if applicable
+		local sel_item = items[menu.index]
+		if sel_item then
+			love.graphics.setColor(skin.color_select_glow)
+			uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+		end
+
+		love.graphics.pop()
+
+		-- Embedded scroll bars.
+		local data_scroll = skin.data_scroll
+
+		local scr_h = self.scr_h
+		local scr_v = self.scr_v
+
+		if scr_h and scr_h.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		end
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

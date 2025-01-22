@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/button_split",
 
 	box = "*style/boxes/button",
 	label_style = "*style/labels/norm",
@@ -26,7 +26,7 @@ return {
 
 	-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
 	-- "auto": size is based on Viewport #2
-	["$aux_size"] = 64,
+	aux_size = 64,
 
 	-- Quad (graphic) alignment within Viewport #2.
 	quad_align_h = "center", -- "left", "center", "right"
@@ -36,7 +36,7 @@ return {
 	graphic_placement = "overlay", -- "left", "right", "top", "bottom", "overlay"
 
 	-- How much space to assign the graphic when not using "overlay" placement.
-	["$graphic_spacing"] = 0,
+	graphic_spacing = 0,
 
 
 	res_idle = {
@@ -45,8 +45,8 @@ return {
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 
 	res_hover = {
@@ -55,8 +55,8 @@ return {
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 
 	res_pressed = {
@@ -65,8 +65,8 @@ return {
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 1,
+		label_ox = 0,
+		label_oy = 1,
 	},
 
 	res_disabled = {
@@ -75,7 +75,7 @@ return {
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		color_aux_icon = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 }

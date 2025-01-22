@@ -528,254 +528,263 @@ function def:uiCall_update(dt)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		item_pad_v = "scaled-int",
+		first_col_spacing = "scaled-int",
+		indent = "scaled-int",
+		pipe_width = "scaled-int",
+		icon_spacing = "scaled-int",
+		pad_icon_x = "scaled-int",
+		pad_text_x = "scaled-int",
+	},
 
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
 
 
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
 
 
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local data_icon = skin.data_icon
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
 
-			local tq_px = skin.tq_px
-			local sl_body = skin.sl_body
 
-			local menu = self.menu
-			local items = menu.items
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local data_icon = skin.data_icon
 
-			local font = skin.font
-			local font_h = font:getHeight()
+		local tq_px = skin.tq_px
+		local sl_body = skin.sl_body
 
-			local first = math.max(self.MN_items_first, 1)
-			local last = math.min(self.MN_items_last, #items)
+		local menu = self.menu
+		local items = menu.items
 
-			-- XXX: pick resources for enabled or disabled state, etc.
-			--local res = (self.active) and skin.res_active or skin.res_inactive
+		local font = skin.font
+		local font_h = font:getHeight()
 
-			-- TreeBox body
-			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
+		local first = math.max(self.MN_items_first, 1)
+		local last = math.min(self.MN_items_last, #items)
 
-			-- Embedded scroll bars, if present and active.
-			local data_scroll = skin.data_scroll
+		-- XXX: pick resources for enabled or disabled state, etc.
+		--local res = (self.active) and skin.res_active or skin.res_inactive
 
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
+		-- TreeBox body
+		love.graphics.setColor(1, 1, 1, 1)
+		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		-- Embedded scroll bars, if present and active.
+		local data_scroll = skin.data_scroll
+
+		local scr_h = self.scr_h
+		local scr_v = self.scr_v
+
+		if scr_h and scr_h.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		end
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
+
+		love.graphics.push("all")
+
+		-- Scissor, scroll offsets for content.
+		uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+		love.graphics.translate(-self.scr_x, -self.scr_y)
+
+		-- Vertical pipes.
+		if skin.draw_pipes then
+			love.graphics.setColor(skin.color_pipe)
+			local line_x_offset, dir_h
+			if skin.item_align_h == "left" then
+				line_x_offset = math.floor((skin.first_col_spacing - skin.pipe_width) / 2)
+				dir_h = 1
+			else -- "right"
+				line_x_offset = math.floor(self.doc_w - (skin.first_col_spacing  - skin.pipe_width) / 2)
+				dir_h = -1
 			end
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-
-			love.graphics.push("all")
-
-			-- Scissor, scroll offsets for content.
-			uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
-			love.graphics.translate(-self.scr_x, -self.scr_y)
-
-			-- Vertical pipes.
-			if skin.draw_pipes then
-				love.graphics.setColor(skin.color_pipe)
-				local line_x_offset, dir_h
-				if skin.item_align_h == "left" then
-					line_x_offset = math.floor((skin.first_col_spacing - skin.pipe_width) / 2)
-					dir_h = 1
-				else -- "right"
-					line_x_offset = math.floor(self.doc_w - (skin.first_col_spacing  - skin.pipe_width) / 2)
-					dir_h = -1
-				end
-
-				for i = first, last do
-					local item = items[i]
-					for j = 0 , item.depth - 1 do
-						uiGraphics.quadXYWH(tq_px,
-							line_x_offset + skin.indent * j * dir_h,
-							item.y,
-							skin.pipe_width,
-							item.h
-						)
-					end
-					-- draw the final pipe if there is no expander sensor in the way
-					-- [[
-					if not self.TR_expanders_active or #item.nodes == 0 then
-						uiGraphics.quadXYWH(tq_px,
-							line_x_offset + skin.indent * item.depth * dir_h,
-							item.y,
-							skin.pipe_width,
-							item.h
-						)
-					end
-					--]]
-				end
-			end
-
-			-- Hover glow.
-			local item_hover = self.MN_item_hover
-			if item_hover then
-				love.graphics.setColor(skin.color_hover_glow)
-				if skin.item_align_h == "left" then
-					uiGraphics.quadXYWH(
-						tq_px,
-						item_hover.x + skin.first_col_spacing,
-						item_hover.y,
-						math.max(self.vp_w, self.doc_w) - item_hover.x,
-						item_hover.h
-					)
-				else -- "right"
-					uiGraphics.quadXYWH(
-						tq_px,
-						self.vp_x,
-						item_hover.y,
-						-self.vp_x + item_hover.x + item_hover.w - skin.first_col_spacing,
-						item_hover.h
-					)
-				end
-				--[[
-				love.graphics.push("all")
-				love.graphics.setColor(1,0,0,1)
-				love.graphics.rectangle("line", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
-				love.graphics.pop()
-				--]]
-			end
-
-			-- Selection glow.
-			local sel_item = items[menu.index]
-			if sel_item then
-				local is_active = self == self.context.thimble1
-				local col = is_active and skin.color_active_glow or skin.color_select_glow
-				love.graphics.setColor(col)
-
-				if skin.item_align_h == "left" then
-					uiGraphics.quadXYWH(
-						tq_px,
-						sel_item.x + skin.first_col_spacing,
-						sel_item.y,
-						math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h
-					)
-				else -- "right"
-					uiGraphics.quadXYWH(
-						tq_px,
-						self.vp_x,
-						sel_item.y,
-						-self.vp_x + sel_item.x + sel_item.w - skin.first_col_spacing,
-						sel_item.h
-					)
-				end
-			end
-
-
-			-- Menu items.
-			love.graphics.setColor(skin.color_item_text)
-			love.graphics.setFont(font)
-
-			-- 1: Item markings
-			local rr, gg, bb, aa = love.graphics.getColor()
-			love.graphics.setColor(skin.color_item_marked)
 
 			for i = first, last do
 				local item = items[i]
-				if item.marked then
-					uiGraphics.quadXYWH(tq_px, item.x, item.y, math.max(self.vp_w, self.doc_w) - item.x, item.h)
+				for j = 0 , item.depth - 1 do
+					uiGraphics.quadXYWH(tq_px,
+						line_x_offset + skin.indent * j * dir_h,
+						item.y,
+						skin.pipe_width,
+						item.h
+					)
 				end
-			end
-
-			love.graphics.setColor(rr, gg, bb, aa)
-
-			-- 2: Expander sensors, if enabled.
-			if self.TR_expanders_active then
-				local tq_on = skin.tq_expander_down
-				local tq_off = (skin.item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
-
-				for i = first, last do
-					local item = items[i]
-
-					if #item.nodes > 0 then
-						local tq_expander = item.expanded and tq_on or tq_off
-						if tq_expander then
-							local item_x
-							if skin.item_align_h == "left" then
-								item_x = item.x + self.TR_expander_x
-							else -- "right"
-								item_x = item.x + item.w - self.TR_expander_x - self.TR_expander_w
-							end
-
-							uiGraphics.quadShrinkOrCenterXYWH(tq_expander, item_x, item.y, self.TR_expander_w, item.h)
-						end
-					end
+				-- draw the final pipe if there is no expander sensor in the way
+				-- [[
+				if not self.TR_expanders_active or #item.nodes == 0 then
+					uiGraphics.quadXYWH(tq_px,
+						line_x_offset + skin.indent * item.depth * dir_h,
+						item.y,
+						skin.pipe_width,
+						item.h
+					)
 				end
+				--]]
 			end
+		end
+
+		-- Hover glow.
+		local item_hover = self.MN_item_hover
+		if item_hover then
+			love.graphics.setColor(skin.color_hover_glow)
+			if skin.item_align_h == "left" then
+				uiGraphics.quadXYWH(
+					tq_px,
+					item_hover.x + skin.first_col_spacing,
+					item_hover.y,
+					math.max(self.vp_w, self.doc_w) - item_hover.x,
+					item_hover.h
+				)
+			else -- "right"
+				uiGraphics.quadXYWH(
+					tq_px,
+					self.vp_x,
+					item_hover.y,
+					-self.vp_x + item_hover.x + item_hover.w - skin.first_col_spacing,
+					item_hover.h
+				)
+			end
+			--[[
+			love.graphics.push("all")
+			love.graphics.setColor(1,0,0,1)
+			love.graphics.rectangle("line", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
+			love.graphics.pop()
+			--]]
+		end
+
+		-- Selection glow.
+		local sel_item = items[menu.index]
+		if sel_item then
+			local is_active = self == self.context.thimble1
+			local col = is_active and skin.color_active_glow or skin.color_select_glow
+			love.graphics.setColor(col)
+
+			if skin.item_align_h == "left" then
+				uiGraphics.quadXYWH(
+					tq_px,
+					sel_item.x + skin.first_col_spacing,
+					sel_item.y,
+					math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h
+				)
+			else -- "right"
+				uiGraphics.quadXYWH(
+					tq_px,
+					self.vp_x,
+					sel_item.y,
+					-self.vp_x + sel_item.x + sel_item.w - skin.first_col_spacing,
+					sel_item.h
+				)
+			end
+		end
 
 
-			-- 3: Bijou icons, if enabled
-			if self.TR_show_icons then
-				for i = first, last do
-					local item = items[i]
-					local tq_bijou = item.tq_bijou
-					if tq_bijou then
+		-- Menu items.
+		love.graphics.setColor(skin.color_item_text)
+		love.graphics.setFont(font)
+
+		-- 1: Item markings
+		local rr, gg, bb, aa = love.graphics.getColor()
+		love.graphics.setColor(skin.color_item_marked)
+
+		for i = first, last do
+			local item = items[i]
+			if item.marked then
+				uiGraphics.quadXYWH(tq_px, item.x, item.y, math.max(self.vp_w, self.doc_w) - item.x, item.h)
+			end
+		end
+
+		love.graphics.setColor(rr, gg, bb, aa)
+
+		-- 2: Expander sensors, if enabled.
+		if self.TR_expanders_active then
+			local tq_on = skin.tq_expander_down
+			local tq_off = (skin.item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
+
+			for i = first, last do
+				local item = items[i]
+
+				if #item.nodes > 0 then
+					local tq_expander = item.expanded and tq_on or tq_off
+					if tq_expander then
 						local item_x
 						if skin.item_align_h == "left" then
-							item_x = item.x + self.TR_icon_x
+							item_x = item.x + self.TR_expander_x
 						else -- "right"
-							item_x = item.x + item.w - self.TR_icon_x - self.TR_icon_w
+							item_x = item.x + item.w - self.TR_expander_x - self.TR_expander_w
 						end
 
-						uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item_x, item.y, self.TR_icon_w, item.h)
+						uiGraphics.quadShrinkOrCenterXYWH(tq_expander, item_x, item.y, self.TR_expander_w, item.h)
 					end
 				end
 			end
+		end
 
-			-- 4: Text labels
+
+		-- 3: Bijou icons, if enabled
+		if self.TR_show_icons then
 			for i = first, last do
 				local item = items[i]
-				-- ugh
-				--[[
-				love.graphics.push("all")
-				love.graphics.setColor(1, 0, 0, 1)
-				love.graphics.setLineWidth(1)
-				love.graphics.setLineStyle("rough")
-				love.graphics.setLineJoin("miter")
-				love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
-				love.graphics.pop()
-				--]]
-
-				if item.text then
+				local tq_bijou = item.tq_bijou
+				if tq_bijou then
 					local item_x
 					if skin.item_align_h == "left" then
-						item_x = item.x + self.TR_text_x
+						item_x = item.x + self.TR_icon_x
 					else -- "right"
-						item_x = item.x + item.w - self.TR_text_x - font:getWidth(item.text)
-						-- XXX: Maybe cache text width in each item table?
+						item_x = item.x + item.w - self.TR_icon_x - self.TR_icon_w
 					end
-					love.graphics.print(
-						item.text,
-						item_x,
-						item.y + math.floor((item.h - font_h) * 0.5)
-					)
+
+					uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item_x, item.y, self.TR_icon_w, item.h)
 				end
 			end
+		end
 
+		-- 4: Text labels
+		for i = first, last do
+			local item = items[i]
+			-- ugh
+			--[[
+			love.graphics.push("all")
+			love.graphics.setColor(1, 0, 0, 1)
+			love.graphics.setLineWidth(1)
+			love.graphics.setLineStyle("rough")
+			love.graphics.setLineJoin("miter")
+			love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
 			love.graphics.pop()
+			--]]
 
-			--widDebug.debugDrawViewport(self, 1)
-			--widDebug.debugDrawViewport(self, 2)
-		end,
+			if item.text then
+				local item_x
+				if skin.item_align_h == "left" then
+					item_x = item.x + self.TR_text_x
+				else -- "right"
+					item_x = item.x + item.w - self.TR_text_x - font:getWidth(item.text)
+					-- XXX: Maybe cache text width in each item table?
+				end
+				love.graphics.print(
+					item.text,
+					item_x,
+					item.y + math.floor((item.h - font_h) * 0.5)
+				)
+			end
+		end
 
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
-	},
+		love.graphics.pop()
+
+		--widDebug.debugDrawViewport(self, 1)
+		--widDebug.debugDrawViewport(self, 2)
+	end,
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

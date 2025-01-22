@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "skn_button_bijou",
 
 	box = "*style/boxes/button_bijou",
 	label_style = "*style/labels/norm",
@@ -12,17 +12,12 @@ return {
 	cursor_on = "hand",
 	cursor_press = "hand",
 
-	-- Radio button indicator (quad) render size.
-	["$bijou_w"] = 24,
-	["$bijou_h"] = 24,
+	bijou_w = 24,
+	bijou_h = 24,
+	bijou_spacing = 40,
 
-	-- How much horizontal space to assign the radio button graphic.
-	["$bijou_spacing"] = 40,
-
-	-- Radio button indicator horizontal placement.
 	bijou_side = "left", -- left (default), right
 
-	-- Alignment of bijou in Viewport #2.
 	bijou_align_h = 0.5, -- From 0.0 (left) to 1.0 (right)
 	bijou_align_v = 0.5, -- From 0.0 (top) to 1.0 (bottom)
 
@@ -38,8 +33,8 @@ return {
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_hover = {
@@ -49,8 +44,8 @@ return {
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul,
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_pressed = {
@@ -60,8 +55,8 @@ return {
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_disabled = {
@@ -71,7 +66,7 @@ return {
 		color_bijou = {0.5, 0.5, 0.5, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
-	},
+		label_ox = 0,
+		label_oy = 0
+	}
 }

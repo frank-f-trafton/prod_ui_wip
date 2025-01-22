@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/tree_box",
 
 	box = "style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
@@ -17,7 +17,7 @@ return {
 	tq_expander_right = "*tex_quads/arrow2_right",
 
 	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-	["$item_pad_v"] = 2,
+	item_pad_v = 2,
 
 	sl_body = "*tex_slices/list_box_body",
 
@@ -27,27 +27,27 @@ return {
 	-- Vertical text alignment is centered.
 
 	-- Spacing for expanders, and half the initial width for the first pipe indentation.
-	["$first_col_spacing"] = 24,
+	first_col_spacing = 24,
 
 	-- The amount to indent child nodes.
-	["$indent"] = 12,
+	indent = 12,
 
 	-- Draw vertical pipes that show the indentation of each node.
 	draw_pipes = true,
-	["$pipe_width"] = 1,
+	pipe_width = 1,
 
 	-- Icon column width and positioning, if active.
-	["$icon_spacing"] = 24,
+	icon_spacing = 24,
 
 	-- Item components are always placed in these orders:
 	-- Left alignment: pipe decoration, expander, icon, text.
 	-- Right alignment: text, icon, expander, pipe decoration
 
 	-- Additional padding for icons.
-	["$pad_icon_x"] = 0,
+	pad_icon_x = 0,
 
 	-- Additional padding for text.
-	["$pad_text_x"] = 0,
+	pad_text_x = 0,
 
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
 	color_select_glow = {1.0, 1.0, 1.0, 0.33},

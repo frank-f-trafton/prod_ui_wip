@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/sash",
 
 	box = "*style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
@@ -13,11 +13,11 @@ return {
 	cursor_v = "sizens",
 
 	-- width for vertical sashes, height for horizontal sashes
-	["$breadth"] = 8,
+	breadth = 8,
 
 	-- Allows shrinking the drag sensor if it interferes with
 	-- adjacent widgets.
-	["$sensor_margin"] = 0,
+	sensor_margin = 0,
 
 	color = {1.0, 1.0, 1.0, 1.0}
 }

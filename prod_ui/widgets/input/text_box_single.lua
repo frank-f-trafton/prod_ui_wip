@@ -234,90 +234,91 @@ function def:uiCall_destroy(inst)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {},
 
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
 
 
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
 
 
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local res = uiTheme.pickButtonResource(self, skin)
-			local line_ed = self.line_ed
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
 
-			love.graphics.push("all")
 
-			-- Body.
-			local slc_body = res.slice
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local res = uiTheme.pickButtonResource(self, skin)
+		local line_ed = self.line_ed
 
-			uiGraphics.intersectScissor(
-				ox + self.x + self.vp2_x,
-				oy + self.y + self.vp2_y,
-				self.vp2_w,
-				self.vp2_h
-			)
+		love.graphics.push("all")
 
-			-- Text editor component.
-			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+		-- Body.
+		local slc_body = res.slice
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
-			local is_active = self == self.context.thimble1
-			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
+		uiGraphics.intersectScissor(
+			ox + self.x + self.vp2_x,
+			oy + self.y + self.vp2_y,
+			self.vp2_w,
+			self.vp2_h
+		)
 
-			lgcInputS.draw(
-				self,
-				col_highlight,
-				skin.font_ghost,
-				res.color_text,
-				line_ed.font,
-				color_caret
-			)
+		-- Text editor component.
+		local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
 
-			love.graphics.pop()
+		local is_active = self == self.context.thimble1
+		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
 
-			-- Debug (viewports)
-			--[[
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			--]]
+		lgcInputS.draw(
+			self,
+			col_highlight,
+			skin.font_ghost,
+			res.color_text,
+			line_ed.font,
+			color_caret
+		)
 
-			-- Debug renderer
-			--[[
-			love.graphics.print(
-				"line: " .. line_ed.line
-				.. "\n#line: " .. #line_ed.line
-				.. "\ncar_byte: " .. line_ed.car_byte
-				.. "\nh_byte: " .. line_ed.h_byte
-				.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
-				.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
-				.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
-				.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
-				--.. "\ndoc_w: " .. self.doc_w
-				,
-				0, 64
-			)
+		love.graphics.pop()
 
-			local yy, hh = 240, line_ed.font:getHeight()
-			love.graphics.print("History state:", 0, 216)
+		-- Debug (viewports)
+		--[[
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		--]]
 
-			for i, entry in ipairs(line_ed.hist.ledger) do
-				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
-				yy = yy + hh
-			end
-			--]]
-		end,
-	},
+		-- Debug renderer
+		--[[
+		love.graphics.print(
+			"line: " .. line_ed.line
+			.. "\n#line: " .. #line_ed.line
+			.. "\ncar_byte: " .. line_ed.car_byte
+			.. "\nh_byte: " .. line_ed.h_byte
+			.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
+			.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
+			.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+			.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
+			--.. "\ndoc_w: " .. self.doc_w
+			,
+			0, 64
+		)
+
+		local yy, hh = 240, line_ed.font:getHeight()
+		love.graphics.print("History state:", 0, 216)
+
+		for i, entry in ipairs(line_ed.hist.ledger) do
+			love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
+			yy = yy + hh
+		end
+		--]]
+	end,
 }
 
 

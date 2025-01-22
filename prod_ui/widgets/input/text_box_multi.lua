@@ -993,201 +993,202 @@ function def:uiCall_destroy(inst)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {},
 
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
 
 
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
 
 
-		render = function(self, ox, oy)
-			local skin = self.skin
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
 
-			local line_ed = self.line_ed
-			local lines = line_ed.lines
-			local disp = line_ed.disp
-			local font = disp.font
 
-			local res = line_ed.allow_input and skin.res_readwrite or skin.res_readonly
-			local has_thimble = self == self.context.thimble1
+	render = function(self, ox, oy)
+		local skin = self.skin
 
-			-- XXX Debug renderer.
-			--[[
-			love.graphics.setColor(0, 0, 0, 0.90)
-			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+		local line_ed = self.line_ed
+		local lines = line_ed.lines
+		local disp = line_ed.disp
+		local font = disp.font
 
-			love.graphics.setColor(1, 1, 1, 1)
-			local yy = 0
-			for i, line in ipairs(self.line_ed.lines) do
-				love.graphics.print(i .. ": " .. line, 16, yy)
-				yy = yy + self.line_ed.disp.font:getHeight()
-			end
-			--]]
+		local res = line_ed.allow_input and skin.res_readwrite or skin.res_readonly
+		local has_thimble = self == self.context.thimble1
 
-			local scx, scy, scw, sch = love.graphics.getScissor()
-			uiGraphics.intersectScissor(
-				ox + self.x + self.vp2_x,
-				oy + self.y + self.vp2_y,
-				self.vp2_w,
-				self.vp2_h
-			)
+		-- XXX Debug renderer.
+		--[[
+		love.graphics.setColor(0, 0, 0, 0.90)
+		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
-			--[[
-			print("ox, oy", ox, oy)
-			print("xy", self.x, self.y)
-			print("vp", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-			print("vp2", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-			--]]
+		love.graphics.setColor(1, 1, 1, 1)
+		local yy = 0
+		for i, line in ipairs(self.line_ed.lines) do
+			love.graphics.print(i .. ": " .. line, 16, yy)
+			yy = yy + self.line_ed.disp.font:getHeight()
+		end
+		--]]
 
-			--print("render", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
+		local scx, scy, scw, sch = love.graphics.getScissor()
+		uiGraphics.intersectScissor(
+			ox + self.x + self.vp2_x,
+			oy + self.y + self.vp2_y,
+			self.vp2_w,
+			self.vp2_h
+		)
 
-			-- Draw background body
-			love.graphics.setColor(res.color_body)
-			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+		--[[
+		print("ox, oy", ox, oy)
+		print("xy", self.x, self.y)
+		print("vp", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+		print("vp2", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+		--]]
 
-			-- ^ Variant with less overdraw?
-			--love.graphics.rectangle("fill", disp.vp2_x, disp.vp2_y, disp.vp2_w, disp.vp2_h)
+		--print("render", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
 
-			-- Draw current paragraph illumination, if applicable.
-			if self.illuminate_current_line then
-				love.graphics.setColor(res.color_current_line_illuminate)
-				local paragraph = disp.paragraphs[disp.d_car_para]
-				local para_y = paragraph[1].y
+		-- Draw background body
+		love.graphics.setColor(res.color_body)
+		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
-				local last_sub = paragraph[#paragraph]
-				local para_h = last_sub.y + last_sub.h - para_y
+		-- ^ Variant with less overdraw?
+		--love.graphics.rectangle("fill", disp.vp2_x, disp.vp2_y, disp.vp2_w, disp.vp2_h)
 
-				love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr_y + para_y, self.vp2_w, para_h)
-			end
+		-- Draw current paragraph illumination, if applicable.
+		if self.illuminate_current_line then
+			love.graphics.setColor(res.color_current_line_illuminate)
+			local paragraph = disp.paragraphs[disp.d_car_para]
+			local para_y = paragraph[1].y
 
-			love.graphics.push()
+			local last_sub = paragraph[#paragraph]
+			local para_h = last_sub.y + last_sub.h - para_y
 
-			-- Translate into core region, with scrolling offsets applied.
-			love.graphics.translate(self.vp_x + self.align_offset - self.scr_x, self.vp_y - self.scr_y)
+			love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr_y + para_y, self.vp2_w, para_h)
+		end
 
-			-- Draw highlight rectangles.
-			if line_ed:isHighlighted() then
-				local is_active = self:hasAnyThimble()
-				local col_highlight = is_active and res.color_highlight_active or res.color_highlight
-				love.graphics.setColor(col_highlight)
+		love.graphics.push()
 
-				for i = self.vis_para_top, self.vis_para_bot do
-					local paragraph = disp.paragraphs[i]
-					for j, sub_line in ipairs(paragraph) do
-						if sub_line.highlighted then
-							love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
-						end
+		-- Translate into core region, with scrolling offsets applied.
+		love.graphics.translate(self.vp_x + self.align_offset - self.scr_x, self.vp_y - self.scr_y)
+
+		-- Draw highlight rectangles.
+		if line_ed:isHighlighted() then
+			local is_active = self:hasAnyThimble()
+			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
+			love.graphics.setColor(col_highlight)
+
+			for i = self.vis_para_top, self.vis_para_bot do
+				local paragraph = disp.paragraphs[i]
+				for j, sub_line in ipairs(paragraph) do
+					if sub_line.highlighted then
+						love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
 					end
 				end
 			end
+		end
 
-			-- Draw ghost text, if applicable.
-			-- XXX: center and right ghost text alignment modes aren't working correctly.
-			if self.ghost_text and lines:isEmpty() then
-				local align = self.ghost_text_align or disp.align
+		-- Draw ghost text, if applicable.
+		-- XXX: center and right ghost text alignment modes aren't working correctly.
+		if self.ghost_text and lines:isEmpty() then
+			local align = self.ghost_text_align or disp.align
 
-				love.graphics.setFont(skin.font_ghost)
+			love.graphics.setFont(skin.font_ghost)
 
-				local gx, gy
-				if align == "left" then
-					gx, gy = 0, 0
+			local gx, gy
+			if align == "left" then
+				gx, gy = 0, 0
 
-				elseif align == "center" then
-					gx, gy = math.floor(-font:getWidth(self.ghost_text) / 2), 0
+			elseif align == "center" then
+				gx, gy = math.floor(-font:getWidth(self.ghost_text) / 2), 0
 
-				elseif align == "right" then
-					gx, gy = math.floor(-font:getWidth(self.ghost_text)), 0
-				end
-
-				if disp.wrap_mode then
-					love.graphics.printf(self.ghost_text, -self.align_offset, 0, self.vp_w, align)
-
-				else
-					love.graphics.print(self.ghost_text, gx, gy)
-				end
+			elseif align == "right" then
+				gx, gy = math.floor(-font:getWidth(self.ghost_text)), 0
 			end
 
-			-- Draw the main text.
-			love.graphics.setColor(res.color_text)
+			if disp.wrap_mode then
+				love.graphics.printf(self.ghost_text, -self.align_offset, 0, self.vp_w, align)
 
-			if self.text_object then
-				love.graphics.draw(self.text_object)
 			else
-				love.graphics.setFont(skin.font)
+				love.graphics.print(self.ghost_text, gx, gy)
+			end
+		end
 
-				for i = self.vis_para_top, self.vis_para_bot do
-					local paragraph = disp.paragraphs[i]
-					for j, sub_line in ipairs(paragraph) do
-						love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
-					end
+		-- Draw the main text.
+		love.graphics.setColor(res.color_text)
+
+		if self.text_object then
+			love.graphics.draw(self.text_object)
+		else
+			love.graphics.setFont(skin.font)
+
+			for i = self.vis_para_top, self.vis_para_bot do
+				local paragraph = disp.paragraphs[i]
+				for j, sub_line in ipairs(paragraph) do
+					love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
 				end
 			end
+		end
 
-			-- Draw the caret.
-			if has_thimble and disp.caret_is_showing then
-				love.graphics.setColor(res.color_insert) -- XXX: color_replace
-				love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
-			end
+		-- Draw the caret.
+		if has_thimble and disp.caret_is_showing then
+			love.graphics.setColor(res.color_insert) -- XXX: color_replace
+			love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
+		end
 
-			love.graphics.setScissor(scx, scy, scw, sch)
+		love.graphics.setScissor(scx, scy, scw, sch)
 
-			love.graphics.pop()
+		love.graphics.pop()
 
-			-- Scroll bars.
-			local data_scroll = skin.data_scroll
+		-- Scroll bars.
+		local data_scroll = skin.data_scroll
 
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
+		local scr_h = self.scr_h
+		local scr_v = self.scr_v
 
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-			end
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
+		if scr_h and scr_h.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		end
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
 
-			-- DEBUG: draw history state
-			--[[
-			love.graphics.push("all")
+		-- DEBUG: draw history state
+		--[[
+		love.graphics.push("all")
 
-			love.graphics.pop()
-			--]]
+		love.graphics.pop()
+		--]]
 
-			--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
-			--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
+		--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
+		--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
 
-			-- DEBUG: draw viewports.
-			--[[
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			--]]
+		-- DEBUG: draw viewports.
+		--[[
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		--]]
 
-			-- DEBUG: show editor details.
-			-- [[
-			love.graphics.push("all")
-			love.graphics.setScissor()
-			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.print(
-				"car_line:" .. line_ed.car_line .. "\n" ..
-				"car_byte:" .. line_ed.car_byte .. "\n" ..
-				"h_line:" .. line_ed.h_line .. "\n" ..
-				"h_byte:" .. line_ed.h_byte,
-				200, 200
-			)
-			--]]
+		-- DEBUG: show editor details.
+		-- [[
+		love.graphics.push("all")
+		love.graphics.setScissor()
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.print(
+			"car_line:" .. line_ed.car_line .. "\n" ..
+			"car_byte:" .. line_ed.car_byte .. "\n" ..
+			"h_line:" .. line_ed.h_line .. "\n" ..
+			"h_byte:" .. line_ed.h_byte,
+			200, 200
+		)
+		--]]
 
-			love.graphics.pop()
-		end,
-	},
+		love.graphics.pop()
+	end,
 }
 
 

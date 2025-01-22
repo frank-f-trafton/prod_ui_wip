@@ -51,8 +51,8 @@ function uiTheme.newThemeInstance(scale)
 
 	self.scale = scale
 
-	self.skin_defs = {}
-	self.skin_insts = {}
+	self.skinners = {}
+	self.skins = {}
 
 	return self
 end
@@ -117,34 +117,6 @@ end
 _mt_themeDataPack.drillS = _mt_themeInst.drillS
 
 
---- Given a key with a special leading symbol and a value, get a processed version
---	of the value.
-function _mt_themeInst:getProcessedResource(k, v)
-	local symbol = k:sub(1, 1)
-
-	-- Scale and floor numbers
-	if symbol == "$" then
-		if type(v) == "table" then
-			local retval = {}
-			for i, n in ipairs(v) do
-				table.insert(retval, math.floor(n * self.scale))
-			end
-			return k:sub(2), retval
-		else
-			return k:sub(2), math.floor(v * self.scale)
-		end
-
-	-- Invalid
-	else
-		if not pUTF8.check(symbol) then
-			symbol = "(Byte: " .. tostring(tonumber(symbol) .. ")")
-		end
-
-		error("invalid resource processor symbol: " .. symbol)
-	end
-end
-
-
 --- Shortcut to make a new 9-Slice definition.
 function uiTheme.newSlice(x,y, w1,h1, w2,h2, w3,h3, iw,ih)
 	return quadSlice.newSlice(x,y, w1,h1, w2,h2, w3,h3, iw,ih)
@@ -160,17 +132,16 @@ function _mt_themeInst:registerSkinDef(skin_def, id)
 	uiShared.type(1, id, "string", "number", "table")
 
 	if type(id) == "table" and skin_def ~= id then
-		error("when registering a table-based ID, its table reference must match the SkinDef table (skin_def == id).")
+		error("when using a table as the ID, it must be the same table as the SkinDef (skin_def == id).")
 	end
 
-	if self.skin_defs[id] then
+	if self.skins[id] then
 		error("a SkinDef is already registered with this ID: " .. tostring(id))
 	end
 
-	self.skin_defs[id] = skin_def
-	self.skin_insts[skin_def] = {}
-
-	self:refreshSkinDefInstance(skin_def)
+	local skin_inst = setmetatable({}, skin_def)
+	self.skins[id] = skin_inst
+	self:refreshSkinDefInstance(id)
 end
 
 
@@ -179,14 +150,13 @@ end
 -- @param path Path to the file containing the SkinDef.
 -- @return The loaded SkinDef.
 function _mt_themeInst:loadSkinDef(id, path)
-	local def = uiRes.loadLuaFile(path, self, REQ_PATH)
+	local def = uiRes.loadLuaFile(path, self)
 
 	if type(def) ~= "table" then
 		error("bad type for skin def (expected table, got " .. type(def) .. ") at path: " .. path)
 	end
 
 	self:registerSkinDef(def, id)
-	self:refreshSkinDefInstance(def)
 
 	return def
 end
@@ -222,67 +192,98 @@ function _mt_themeInst:loadSkinDefs(base_path, recursive, id_prepend)
 end
 
 
-local function _skinDeepCopy(theme_inst, inst, def, _depth)
-	--print("_skinDeepCopy: start", _depth)
+local _schema_commands = {
+	["scaled-int"] = function(self, v)
+		return math.floor(v * self.scale)
+	end,
+	["unit-interval"] = function(self, v)
+		return math.max(0, math.min(v, 1))
+	end
+}
+
+
+local _dummy_schema = {}
+
+
+local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
+	print("_skinDeepCopy: start", _depth)
+
+	--[[
+	setmetatable(inst, inst)
+	inst.__index = def
+	--]]
+
 	for k, v in pairs(def) do
 		if type(v) == "table" then
-			inst[k] = _skinDeepCopy(theme_inst, {}, v, _depth + 1)
+			inst[k] = _skinDeepCopy(theme_inst, {}, v, schema[k] or _dummy_schema, _depth + 1)
 		else
+			local symbol
 			if type(k) == "string" then
-				local symbol = k:sub(1, 1)
-				--print("***", "k", k, "symbol", symbol, "v", v)
+				symbol = k:sub(1, 1)
+				print("***", "k", k, "symbol", symbol, "v", v)
 				-- Pull in resources from the main theme table
 				if type(v) == "string" and v:sub(1, 1) == "*" then
-					--print(">>> do lookup")
+					print(">>> do lookup")
 					inst[k] = theme_inst:drillS(v:sub(2))
-
-				elseif symbol == "$" then
-					--print(">>> do number scale")
-					local pro_k, pro_v = theme_inst:getProcessedResource(k, v)
-					inst[pro_k] = pro_v
+					print(">>> value is now: ", tostring(inst[k]))
 				else
-					--print(">>> copy it")
+					print(">>> direct copy")
 					inst[k] = v
 				end
 			else
 				inst[k] = v
 			end
+
+			if schema[k] then
+				local command = schema[k]
+				local func = _schema_commands[command]
+				if func then
+					print("schema command", command, "inst[k]", inst[k])
+					inst[k] = func(theme_inst, inst[k])
+				else
+					error("unhandled schema command: " .. tostring(command))
+				end
+			end
 		end
 	end
-	--print("_skinDeepCopy: end", _depth)
+	print("_skinDeepCopy: end", _depth)
 	return inst
 end
 
 
-function _mt_themeInst:refreshSkinDefInstance(skin_def)
-	local skin_inst = self.skin_insts[skin_def]
-
-	for k in pairs(skin_inst) do
-		skin_inst[k] = nil
+local function _getSkinTables(self, id)
+	local skin_inst = self.skins[id]
+	if not skin_inst then
+		error("no skin loaded with ID: " .. tostring(id))
+	end
+	local skin_def = getmetatable(skin_inst)
+	if not skin_def then
+		error("missing SkinDef for ID: " .. tostring(id))
 	end
 
-	_skinDeepCopy(self, skin_inst, skin_def, 1)
+	return skin_def, skin_inst
 end
 
 
-local function _shadowClone(dst, src, _depth)
-	setmetatable(dst, dst)
-	dst.__index = src
-	for k, v in pairs(src) do
-		if type(v) == "table" then
-			dst[k] = _shadowClone({}, v, _depth + 1)
-		end
+function _mt_themeInst:refreshSkinDefInstance(id)
+	local skin_def, skin_inst = _getSkinTables(self, id)
+
+	local skinner = self.skinners[skin_def.skinner_id]
+	if not skinner then
+		error("missing skinner (the implementation). Skinner ID: " .. tostring(skin_def.skinner_id) .. ", requesting skin: " .. tostring(id))
 	end
-	return dst
+
+	_skinDeepCopy(self, skin_inst, skin_def, skinner.schema or _dummy_schema, 1)
 end
 
 
-function _mt_themeInst:cloneSkinDef(skin_def, full)
-	if full then
-		return pTable.deepCopy(skin_def)
-	else
-		return _shadowClone({}, skin_def, 1)
-	end
+function _mt_themeInst:cloneSkinDef(skin_def_id)
+	local skin_def = _getSkinTables(self, skin_def_id)
+	local clone_def = pTable.deepCopy(skin_def)
+
+	self:registerSkinDef(clone_def, clone_def)
+
+	return clone_def
 end
 
 
@@ -294,18 +295,18 @@ function _mt_themeInst:removeSkinDef(id) -- XXX Untested
 	Any de-skinned widgets which require a skin must have replacements ASAP.
 	--]]
 
-	local skin_def = self.skin_defs[id]
-	if not skin_def then
-		error("SkinDef not found. ID: " .. tostring(id))
+	local skin = self.skins[id]
+	if not skin then
+		error("Skin not found. ID: " .. tostring(id))
 	end
 
-	self.skin_defs[id] = nil
-	self.skin_insts[skin_def] = nil
+	self.skins[id] = nil
 end
 
 
 --- Pick a resource table in a skin based on three common widget state flags: self.enabled, self.pressed and self.hovered.
 -- @param self The widget instance, containing a skin table reference.
+-- @param skin The skin table, or a sub-table.
 -- @return The selected resource table.
 function uiTheme.pickButtonResource(self, skin)
 	if not self.enabled then

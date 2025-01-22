@@ -2,8 +2,7 @@
 
 
 return {
-	skinner_id = "default",
-
+	skinner_id = "wimp/menu_tab",
 
 	box = "*style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
@@ -20,7 +19,7 @@ return {
 
 	color_drag_col_bg = {0.2, 0.2, 0.2, 0.85},
 
-	["$column_sep_width"] = 1,
+	column_sep_width = 1,
 
 	-- Some default data for cell implementations.
 	color_cell_bijou = {1.0, 1.0, 1.0, 1.0},

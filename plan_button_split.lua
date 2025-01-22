@@ -108,9 +108,7 @@ function plan.make(parent)
 
 		-- SkinDef clone
 		local resources = content.context.resources
-		local skin_defs = resources.skin_defs
-		local clone = pTable.deepCopy(skin_defs["button_split1"])
-		resources:registerSkinDef(clone, clone)
+		local clone = resources:cloneSkinDef("button_split1")
 
 		local function _userDestroy(self)
 			self.context.resources:removeSkinDef(clone)
@@ -199,7 +197,6 @@ function plan.make(parent)
 		yy = yy + math.floor(hh/2)
 
 		do
-			--["$aux_size"] = 64,
 			local sld = content:addChild("barebones/slider_bar", {x=xx, y=yy, w=ww, h=hh})
 			sld.trough_vertical = false
 			sld:setLabel("Aux Size")

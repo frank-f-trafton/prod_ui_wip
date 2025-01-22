@@ -73,52 +73,56 @@ function def:uiCall_reshape()
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local res = uiTheme.pickButtonResource(self, skin)
-			local tex_quad = self.checked and res.quad_checked or res.quad_unchecked
-
-			-- bijou drawing coordinates
-			local box_x = math.floor(0.5 + _lerp(self.vp_x, self.vp_x + self.vp_w - skin.bijou_w, skin.bijou_align_h))
-			local box_y = math.floor(0.5 + _lerp(self.vp_y, self.vp_y + self.vp_h - skin.bijou_h, skin.bijou_align_v))
-
-			-- draw bijou
-			-- XXX: Scissor to Viewport #1?
-			love.graphics.setColor(res.color_bijou)
-			uiGraphics.quadXYWH(tex_quad, box_x, box_y, skin.bijou_w, skin.bijou_h)
-
-			-- XXX: Debug border (viewport rectangle)
-			--[[
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			--]]
-
-			-- old debugging
-			--[[
-			love.graphics.push("all")
-			love.graphics.setColor(1, 1, 1, 1)
-			local rect_mode = self.checked and "fill" or "line"
-			love.graphics.rectangle(rect_mode, 0, 0, self.w - 1, self.h - 1)
-			love.graphics.pop()
-			--]]
-		end,
+def.default_skinner = {
+	schema = {
+		bijou_w = "scaled-int",
+		bijou_h = "scaled-int"
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local res = uiTheme.pickButtonResource(self, skin)
+		local tex_quad = self.checked and res.quad_checked or res.quad_unchecked
+
+		-- bijou drawing coordinates
+		local box_x = math.floor(0.5 + _lerp(self.vp_x, self.vp_x + self.vp_w - skin.bijou_w, skin.bijou_align_h))
+		local box_y = math.floor(0.5 + _lerp(self.vp_y, self.vp_y + self.vp_h - skin.bijou_h, skin.bijou_align_v))
+
+		-- draw bijou
+		-- XXX: Scissor to Viewport #1?
+		love.graphics.setColor(res.color_bijou)
+		uiGraphics.quadXYWH(tex_quad, box_x, box_y, skin.bijou_w, skin.bijou_h)
+
+		-- XXX: Debug border (viewport rectangle)
+		--[[
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		--]]
+
+		-- old debugging
+		--[[
+		love.graphics.push("all")
+		love.graphics.setColor(1, 1, 1, 1)
+		local rect_mode = self.checked and "fill" or "line"
+		love.graphics.rectangle(rect_mode, 0, 0, self.w - 1, self.h - 1)
+		love.graphics.pop()
+		--]]
+	end,
 }
 
 

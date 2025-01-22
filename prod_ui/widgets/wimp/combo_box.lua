@@ -623,94 +623,113 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		button_spacing = "scaled-int",
+		item_pad_v = "scaled-int",
 
+		res_idle = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+		res_pressed = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			--local font = skin.font
-			local line_ed = self.line_ed
-
-			local res
-			if self.enabled then
-				res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
-			else
-				res = skin.res_disabled
-			end
-
-			love.graphics.push("all")
-
-			-- Back panel body.
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
-
-			-- XXX: "Open menu" button.
-			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(res.slc_deco_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-			uiGraphics.quadShrinkOrCenterXYWH(res.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
-
-			-- Crop item text.
-			uiGraphics.intersectScissor(
-				ox + self.x + self.vp2_x,
-				oy + self.y + self.vp2_y,
-				self.vp2_w,
-				self.vp2_h
-			)
-
-			-- Text editor component.
-			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
-			lgcInputS.draw(
-				self,
-				res.color_highlight,
-				skin.font_ghost,
-				res.color_text,
-				line_ed.font,
-				(not self.wid_drawer) and color_caret or false -- Don't draw caret if drawer is pulled out. It's annoying.
-			)
-
-			love.graphics.pop()
-
-			-- Debug
-			love.graphics.push()
-
-			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
-
-			--[[
-			-- Debug: working on text input enable/disable in events.
-			if love.keyboard.hasTextInput() then
-				love.graphics.setColor(1, 0, 0, 1)
-			else
-				love.graphics.setColor(0, 0, 1, 1)
-			end
-			love.graphics.circle("fill", 0, 0, 32)
-			--]]
-
-			love.graphics.pop()
-
-			--[[
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			widDebug.debugDrawViewport(self, 3)
-			--]]
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy)
+		res_disabled = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		}
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		--local font = skin.font
+		local line_ed = self.line_ed
+
+		local res
+		if self.enabled then
+			res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
+		else
+			res = skin.res_disabled
+		end
+
+		love.graphics.push("all")
+
+		-- Back panel body.
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
+
+		-- XXX: "Open menu" button.
+		love.graphics.setColor(1, 1, 1, 1)
+		uiGraphics.drawSlice(res.slc_deco_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+		uiGraphics.quadShrinkOrCenterXYWH(res.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
+
+		-- Crop item text.
+		uiGraphics.intersectScissor(
+			ox + self.x + self.vp2_x,
+			oy + self.y + self.vp2_y,
+			self.vp2_w,
+			self.vp2_h
+		)
+
+		-- Text editor component.
+		local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+		lgcInputS.draw(
+			self,
+			res.color_highlight,
+			skin.font_ghost,
+			res.color_text,
+			line_ed.font,
+			(not self.wid_drawer) and color_caret or false -- Don't draw caret if drawer is pulled out. It's annoying.
+		)
+
+		love.graphics.pop()
+
+		-- Debug
+		love.graphics.push()
+
+		love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
+
+		--[[
+		-- Debug: working on text input enable/disable in events.
+		if love.keyboard.hasTextInput() then
+			love.graphics.setColor(1, 0, 0, 1)
+		else
+			love.graphics.setColor(0, 0, 1, 1)
+		end
+		love.graphics.circle("fill", 0, 0, 32)
+		--]]
+
+		love.graphics.pop()
+
+		--[[
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		widDebug.debugDrawViewport(self, 3)
+		--]]
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy)
 }
 
 

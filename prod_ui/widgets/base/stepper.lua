@@ -402,78 +402,102 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	scheme = {
+		prev_spacing = "scaled-int",
+		next_spacing = "scaled-int",
 
+		res_idle = {
+			button_ox = "scaled-int",
+			button_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+		res_hover = {
+			button_ox = "scaled-int",
+			button_oy = "scaled-int"
+		},
 
+		res_pressed = {
+			button_ox = "scaled-int",
+			button_oy = "scaled-int"
+		},
 
-		--refresh = function (self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local res = uiTheme.pickButtonResource(self, skin)
-
-			local sl_body = res.sl_body
-			local sl_button
-
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
-
-			local tq_prev, tq_next
-			if self.vertical then
-				tq_prev, tq_next = res.tq_up, res.tq_down
-			else
-				tq_prev, tq_next = res.tq_left, res.tq_right
-			end
-
-			-- XXX WIP
-			local button_ox, button_oy
-			if self.b_pressing == "prev" then
-				button_ox, button_oy = res.button_ox, res.button_oy
-				sl_button = res.sl_button
-			else
-				button_ox, button_oy = 0, 0
-				sl_button = res.sl_button_up
-			end
-			uiGraphics.drawSlice(sl_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-			uiGraphics.quadShrinkOrCenterXYWH(tq_prev, self.vp2_x + button_ox, self.vp2_y + button_oy, self.vp2_w, self.vp2_h)
-
-
-			if self.b_pressing == "next" then
-				button_ox, button_oy = res.button_ox, res.button_oy
-				sl_button = res.sl_button
-			else
-				button_ox, button_oy = 0, 0
-				sl_button = res.sl_button_up
-			end
-			uiGraphics.drawSlice(sl_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-			uiGraphics.quadShrinkOrCenterXYWH(tq_next, self.vp3_x + button_ox, self.vp3_y + button_oy, self.vp3_w, self.vp3_h)
-
-			if self.label_mode then
-				lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, 0, 0, ox, oy)
-			end
-
-			-- XXX: Debug border (viewport rectangle)
-			--[[
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			widDebug.debugDrawViewport(self, 3)
-			--]]
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+		res_disabled = {
+			button_ox = "scaled-int",
+			button_oy = "scaled-int"
+		}
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function (self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local res = uiTheme.pickButtonResource(self, skin)
+
+		local sl_body = res.sl_body
+		local sl_button
+
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
+
+		local tq_prev, tq_next
+		if self.vertical then
+			tq_prev, tq_next = res.tq_up, res.tq_down
+		else
+			tq_prev, tq_next = res.tq_left, res.tq_right
+		end
+
+		-- XXX WIP
+		local button_ox, button_oy
+		if self.b_pressing == "prev" then
+			button_ox, button_oy = res.button_ox, res.button_oy
+			sl_button = res.sl_button
+		else
+			button_ox, button_oy = 0, 0
+			sl_button = res.sl_button_up
+		end
+		uiGraphics.drawSlice(sl_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+		uiGraphics.quadShrinkOrCenterXYWH(tq_prev, self.vp2_x + button_ox, self.vp2_y + button_oy, self.vp2_w, self.vp2_h)
+
+
+		if self.b_pressing == "next" then
+			button_ox, button_oy = res.button_ox, res.button_oy
+			sl_button = res.sl_button
+		else
+			button_ox, button_oy = 0, 0
+			sl_button = res.sl_button_up
+		end
+		uiGraphics.drawSlice(sl_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+		uiGraphics.quadShrinkOrCenterXYWH(tq_next, self.vp3_x + button_ox, self.vp3_y + button_oy, self.vp3_w, self.vp3_h)
+
+		if self.label_mode then
+			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, 0, 0, ox, oy)
+		end
+
+		-- XXX: Debug border (viewport rectangle)
+		--[[
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		widDebug.debugDrawViewport(self, 3)
+		--]]
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

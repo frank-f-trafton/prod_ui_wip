@@ -439,12 +439,16 @@ function themeDef.newInstance(scale)
 	-- * (TODO) Textual menu items
 	-- * (TODO) Status bar along the bottom
 
-	-- 'inst.skin_defs' and 'inst.skin_insts' are created in uiTheme.newThemeInstance().
+	-- 'inst.skins' is created in uiTheme.newThemeInstance().
 
-	inst:loadSkinDefs(BASE_PATH .. "skins", true)
+	-- To resolve an ordering problem, skins need to be pulled in and initialized
+	-- after widgets and skinners.
 
-	-- To load SkinDefs individually, do something like this:
-	-- inst:loadSkinDef("button1", BASE_PATH .. "skins/button1.lua")
+	-- To load all SkinDefs in a folder:
+	-- inst:loadSkinDefs(BASE_PATH .. "path/to/skins", true)
+
+	-- To load SkinDefs individually:
+	-- inst:loadSkinDef("button1", BASE_PATH .. "skins/my_skin.lua")
 
 	return inst
 end

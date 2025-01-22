@@ -194,115 +194,145 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		label_spacing = "scaled-int",
+		trough_breadth = "scaled-int",
+		trough_breadth2 = "scaled-int",
+		thumb_w = "scaled-int",
+		thumb_h = "scaled-int",
+		thumb_ox = "scaled-int",
+		thumb_oy = "scaled-int",
+		trough_ext = "scaled-int",
 
+		res_idle = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+		res_hover = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
+		res_pressed = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local res = uiTheme.pickButtonResource(self, skin)
-
-			love.graphics.setColor(1, 1, 1, 1)
-
-			-- Trough line
-			local trough_ext = skin.trough_ext
-			if self.trough_vertical then
-				local trough_x1 = self.trough_x + math.floor(self.trough_w/2 - skin.trough_breadth/2 + 0.5)
-
-				uiGraphics.drawSlice(
-					res.sl_trough_empty,
-					trough_x1,
-					self.trough_y - trough_ext,
-					skin.trough_breadth,
-					self.trough_h + trough_ext * 2
-				)
-
-				if self.show_use_line then
-					local trough_x1b = self.trough_x + math.floor(self.trough_w/2 - skin.trough_breadth2/2 + 0.5)
-					local y1 = self.trough_y + self.trough_home
-					local y2 = self.trough_y + self.thumb_y
-					if y1 > y2 then
-						y1, y2 = y2, y1
-					end
-
-					uiGraphics.drawSlice(
-						res.sl_trough_active,
-						trough_x1b,
-						y1,
-						skin.trough_breadth2,
-						y2 - y1
-					)
-					--print("y1, y2", y1, y2)
-				end
-			else -- horizontal
-				local trough_y1 = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth/2 + 0.5)
-
-				uiGraphics.drawSlice(
-					res.sl_trough_empty,
-					self.trough_x - trough_ext,
-					trough_y1,
-					self.trough_w + trough_ext * 2,
-					skin.trough_breadth
-				)
-
-				if self.show_use_line then
-					local trough_y1b = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth2/2 + 0.5)
-					local x1 = self.trough_x + self.trough_home
-					local x2 = self.trough_x + self.thumb_x
-					if x1 > x2 then
-						x1, x2 = x2, x1
-					end
-
-					uiGraphics.drawSlice(
-						res.sl_trough_active,
-						x1,
-						trough_y1b,
-						x2 - x1,
-						skin.trough_breadth2
-					)
-				end
-			end
-
-			-- Thumb
-			uiGraphics.quadXYWH(
-				res.tq_thumb,
-				self.trough_x + self.thumb_x - skin.thumb_ox,
-				self.trough_y + self.thumb_y - skin.thumb_oy,
-				self.thumb_w,
-				self.thumb_h
-			)
-			-- Debug
-			--[[
-			love.graphics.print(
-				"trough: " .. self.trough_x .. ", " .. self.trough_y .. ", " .. self.trough_w .. ", " .. self.trough_h .. "\n" ..
-				"thumb: " .. self.thumb_x .. ", " .. self.thumb_y .. ", " .. self.thumb_w .. ", " .. self.thumb_h .. "\n" ..
-				"",
-				256, 0
-			)
-			--]]
-
-			-- Optional label
-			if self.label_mode then
-				lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
-			end
-
-			-- XXX: Debug border (viewport rectangle)
-			--widDebug.debugDrawViewport(self, 1)
-			--widDebug.debugDrawViewport(self, 2)
-		end,
+		res_disabled = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local res = uiTheme.pickButtonResource(self, skin)
+
+		love.graphics.setColor(1, 1, 1, 1)
+
+		-- Trough line
+		local trough_ext = skin.trough_ext
+		if self.trough_vertical then
+			local trough_x1 = self.trough_x + math.floor(self.trough_w/2 - skin.trough_breadth/2 + 0.5)
+
+			uiGraphics.drawSlice(
+				res.sl_trough_empty,
+				trough_x1,
+				self.trough_y - trough_ext,
+				skin.trough_breadth,
+				self.trough_h + trough_ext * 2
+			)
+
+			if self.show_use_line then
+				local trough_x1b = self.trough_x + math.floor(self.trough_w/2 - skin.trough_breadth2/2 + 0.5)
+				local y1 = self.trough_y + self.trough_home
+				local y2 = self.trough_y + self.thumb_y
+				if y1 > y2 then
+					y1, y2 = y2, y1
+				end
+
+				uiGraphics.drawSlice(
+					res.sl_trough_active,
+					trough_x1b,
+					y1,
+					skin.trough_breadth2,
+					y2 - y1
+				)
+				--print("y1, y2", y1, y2)
+			end
+		else -- horizontal
+			local trough_y1 = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth/2 + 0.5)
+
+			uiGraphics.drawSlice(
+				res.sl_trough_empty,
+				self.trough_x - trough_ext,
+				trough_y1,
+				self.trough_w + trough_ext * 2,
+				skin.trough_breadth
+			)
+
+			if self.show_use_line then
+				local trough_y1b = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth2/2 + 0.5)
+				local x1 = self.trough_x + self.trough_home
+				local x2 = self.trough_x + self.thumb_x
+				if x1 > x2 then
+					x1, x2 = x2, x1
+				end
+
+				uiGraphics.drawSlice(
+					res.sl_trough_active,
+					x1,
+					trough_y1b,
+					x2 - x1,
+					skin.trough_breadth2
+				)
+			end
+		end
+
+		-- Thumb
+		uiGraphics.quadXYWH(
+			res.tq_thumb,
+			self.trough_x + self.thumb_x - skin.thumb_ox,
+			self.trough_y + self.thumb_y - skin.thumb_oy,
+			self.thumb_w,
+			self.thumb_h
+		)
+		-- Debug
+		--[[
+		love.graphics.print(
+			"trough: " .. self.trough_x .. ", " .. self.trough_y .. ", " .. self.trough_w .. ", " .. self.trough_h .. "\n" ..
+			"thumb: " .. self.thumb_x .. ", " .. self.thumb_y .. ", " .. self.thumb_w .. ", " .. self.thumb_h .. "\n" ..
+			"",
+			256, 0
+		)
+		--]]
+
+		-- Optional label
+		if self.label_mode then
+			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+		end
+
+		-- XXX: Debug border (viewport rectangle)
+		--widDebug.debugDrawViewport(self, 1)
+		--widDebug.debugDrawViewport(self, 2)
+	end,
 }
 
 return def

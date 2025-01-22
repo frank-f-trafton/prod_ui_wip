@@ -11,10 +11,7 @@ function plan.make(parent)
 
 	-- Clone the skin to avoid messing up other frames.
 	local resources = context.resources
-	local skin_defs = resources.skin_defs
-
-	local skin_clone = pTable.deepCopy(skin_defs["wimp_frame"])
-	resources:registerSkinDef(skin_clone, skin_clone, false)
+	local skin_clone = resources:cloneSkinDef("wimp_frame")
 
 	local function _userDestroy(self)
 		self.context.resources:removeSkinDef(skin_clone)

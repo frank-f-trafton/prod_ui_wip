@@ -38,9 +38,7 @@ function plan.make(parent)
 		-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.
 
 		local resources = content.context.resources
-		local skin_defs = resources.skin_defs
-		local clone = pTable.deepCopy(skin_defs["button1"])
-		resources:registerSkinDef(clone, clone)
+		local clone = resources:cloneSkinDef("button1")
 
 		local function _userDestroy(self)
 			self.context.resources:removeSkinDef(clone)

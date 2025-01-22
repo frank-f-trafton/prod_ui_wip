@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "base/stepper",
 
 
 	box = "*style/boxes/button",
@@ -26,8 +26,8 @@ return {
 	gfx_next_align_v = "middle", -- "top", "middle", "bottom"
 
 	-- How much space to assign the next+prev buttons when not using "overlay" placement.
-	["$prev_spacing"] = 40,
-	["$next_spacing"] = 40,
+	prev_spacing = 40,
+	next_spacing = 40,
 
 	--[[
 	Arrow quad mappings:
@@ -49,8 +49,8 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
-		["$button_ox"] = 0,
-		["$button_oy"] = 0,
+		button_ox = 0,
+		button_oy = 0,
 	},
 
 	res_hover = {
@@ -64,8 +64,8 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
-		["$button_ox"] = 0,
-		["$button_oy"] = 0,
+		button_ox = 0,
+		button_oy = 0,
 	},
 
 	res_pressed = {
@@ -79,8 +79,8 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
-		["$button_ox"] = 0,
-		["$button_oy"] = 1,
+		button_ox = 0,
+		button_oy = 1,
 	},
 
 	res_disabled = {
@@ -94,7 +94,7 @@ return {
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul,
-		["$button_ox"] = 0,
-		["$button_oy"] = 0,
+		button_ox = 0,
+		button_oy = 0,
 	},
 }

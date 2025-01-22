@@ -2,5 +2,5 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/icon_box",
 }

@@ -1252,7 +1252,7 @@ function _mt_widget:skinSetRefs()
 	end
 
 	local resources = self.context.resources
-	local skin_inst = resources.skin_insts[resources.skin_defs[self.skin_id]]
+	local skin_inst = resources.skins[self.skin_id]
 	if not skin_inst then
 		error("widget skin (the data) is not loaded or is invalid: " .. tostring(self.skin_id))
 	end
@@ -1261,8 +1261,7 @@ function _mt_widget:skinSetRefs()
 		error("widget skin (" .. tostring(self.skin_id) .. ") is missing a skinner ID.")
 	end
 
-	local skinner = self.skinners[skin_inst.skinner_id]
-
+	local skinner = resources.skinners[skin_inst.skinner_id]
 	if not skinner then
 		error("widget skinner (the implementation) is not loaded or is invalid: " .. tostring(skin_inst.skinner_id))
 	end

@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "base/menu",
 
 	box = "*style/boxes/panel",
 
@@ -14,6 +14,6 @@ return {
 
 	data_scroll = "*common/scroll_bar1",
 
-	["$outline_width"] = 1,
+	outline_width = 1,
 	font_item = "*fonts/p",
 }

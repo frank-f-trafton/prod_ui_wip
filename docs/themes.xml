@@ -6,40 +6,31 @@
     <page>
 		<title>Skins</title>
 
-		Widgets can be customized by developing new skins.
+		Widgets can be customized with the skinning system.
 
-		SkinDef: Defines a skin.
-
-		SkinInstance: A "live" copy of a SkinDef, with references assigned, numbers scaled, and other such transformations applied.
+		Skinners provide the rendering implementation; skins provide skinners with data.
 
 
 		<title>Resource Management</title>
 
-		The SkinDef registry is a weak table (both keys and values). This allows the theming system to manage temporary SkinDefs without the need for additional bookkeeping when they are no longer referenced by anything. All SkinDefs loaded from disk are preserved by being stored in a secondary table that is not weak.
+		Skinners are stored in the context and skins are kept in the theme instance. The library user is responsible for removing unneeded ad hoc skins so that they can be deleted by the garbage collector.
 
 
 		<title>Marking resources for transformation</title>
 
-		SkinDef fields beginning with an asterisk (<pre>self["*foobar"]</pre>) contain strings that indicate where a particular resource can be found within the theme instance's table hierarchy. The reference is assigned in the skin instance to a copy of the field without the leading asterisk:
+		Skinners include a schema table which controls which values in a skin are scaled, floored, clamped, and so on.
 
 		<pre>
-		self["*foobar"] = "path/to/foobar"
-		self.foobar = **resource pulled in from resources.path.to.foobar**
-
-		self["*bazbop"] = {"multiple/paths", "to/various", "textures/used"}
-		self.bazbop = **array containing three resources**
+			schema = {
+				foo = "scaled-int", -- scale and floor the value
+				bar = "unit-interval" -- clamp the value from 0.0 to 1.0
+			}
 		</pre>
 
-		This is used when refreshing the contents of SkinInstances.
-
-		Fields beginning with a dollar sign (<pre>self["$foobar"]</pre>) contain numbers which are automatically scaled:
+		Skin values can be references to data in the main resources table. They are pulled in whenever the skin is refreshed.
 
 		<pre>
-		self["$foobar"] = 32
-		self.foobar = **math.floor(32 * theme.scale)**
-
-		self["$bazbop"] = {32, 64}
-		self.bazbop = <{math.floor(32 * theme.scale), math.floor(64 * theme.scale)}>
+			foobar = "*path/to/foo" -- pulls in the value at 'resources.path.to.foo'
 		</pre>
 
 

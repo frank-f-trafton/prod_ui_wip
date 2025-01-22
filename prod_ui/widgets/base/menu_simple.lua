@@ -310,137 +310,140 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-
-			local menu = self.menu
-
-			local body_len = self.horizontal and self.w or self.h
-
-			local font = skin.font
-			local font_h = font:getHeight()
-			local sep_offset = math.floor(self.item_len / 2)
-
-			local max_vis = math.floor(body_len / self.item_len)
-			--print(body_len / self.item_len, math.floor(body_len / self.item_len))
-
-			-- Back panel body
-			love.graphics.setColor(skin.color_background)
-			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
-
-			-- Don't draw menu contents outside of the widget bounding box.
-			love.graphics.push("all")
-			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-
-			-- Draw selection glow, if applicable
-			if menu.index > 0 then
-				local is_active = self:hasAnyThimble()
-				local col = is_active and skin.color_active_glow or skin.color_select_glow
-				love.graphics.setColor(col)
-
-				local sel_pos = (menu.index-1 - self.scroll_i) * self.item_len
-				if self.horizontal then
-					love.graphics.rectangle("fill", sel_pos + 0.5, 0.5, self.item_len, self.w)
-				else
-					love.graphics.rectangle("fill", 0.5, sel_pos + 0.5, self.w, self.item_len)
-				end
-			end
-
-			-- Draw each menu item
-			love.graphics.setColor(skin.color_item_text)
-			love.graphics.setFont(font)
-
-
-			local vis_item_bot = math.min(#menu.items, self.scroll_i + max_vis)
-			local work_pos = 0
-
-			--print("vis_item_bot", vis_item_bot)
-
-			for i = self.scroll_i + 1, vis_item_bot do
-				local item = menu.items[i]
-
-				if item then
-					local px = self.item_pad
-					local py = work_pos
-					local pw = self.w - self.item_pad
-					local ph = work_pos
-
-					if self.horizontal then
-						px, py = py, px
-						pw, ph = ph, pw
-					end
-
-					if item.type == "separator" then
-						love.graphics.setLineWidth(1)
-						if self.horizontal then
-							love.graphics.line(px + sep_offset + 0.5, py + 0.5, px + sep_offset, py + ph + 0.5)
-						else
-							love.graphics.line(px + 0.5, py + sep_offset + 0.5, px + pw + 0.5, py + sep_offset)
-						end
-					else
-						if self.horizontal then
-							love.graphics.print(item.text, work_pos, self.item_pad)
-						else
-							love.graphics.print(item.text, self.item_pad, work_pos + math.floor(self.item_len/2 - font_h/2))
-						end
-					end
-				end
-				work_pos = work_pos + self.item_len
-			end
-
-			love.graphics.pop()
-
-			-- Outline for the back panel
-			love.graphics.setColor(skin.color_outline)
-			love.graphics.setLineWidth(skin.outline_width)
-			love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1)
-
-			-- Draw a scrolling indicator, if applicable.
-			-- XXX maybe just an up-arrow and down-arrow would be better in some cases.
-			if self.show_scroll_ind then
-				local circ_r = 6 -- XXX style
-				local shortened = #menu.items - max_vis
-				if shortened > 0 then
-					local circ_pos = 0
-
-					-- Peg to current scroll offset
-					if self.show_scroll_ind == true then
-						circ_pos = math.floor(circ_r + (self.scroll_i) / shortened * (body_len - circ_r*2))
-						-- Clamp the indicator, in case scrolling itself is not clamped.
-						-- It looks bad, but it's better than the indicator flying off the widget or being scissored out.
-						circ_pos = math.max(circ_r, math.min(circ_pos, body_len - circ_r*2))
-
-					-- Peg to current selection
-					elseif self.show_scroll_ind == "selection" then
-						circ_pos = math.floor(circ_r + ((menu.index-1) / math.max(1, #menu.items-1) * (body_len - circ_r*2)))
-					end
-
-					love.graphics.setColor(skin.color_scroll_ind)
-					if self.horizontal then
-						love.graphics.circle("fill", circ_pos, self.h - circ_r, circ_r)
-					else
-						love.graphics.circle("fill", self.w - circ_r, circ_pos, circ_r)
-					end
-				end
-			end
-		end,
+def.default_skinner = {
+	schema = {
+		outline_width = "scaled-int"
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+
+		local menu = self.menu
+
+		local body_len = self.horizontal and self.w or self.h
+
+		local font = skin.font
+		local font_h = font:getHeight()
+		local sep_offset = math.floor(self.item_len / 2)
+
+		local max_vis = math.floor(body_len / self.item_len)
+		--print(body_len / self.item_len, math.floor(body_len / self.item_len))
+
+		-- Back panel body
+		love.graphics.setColor(skin.color_background)
+		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+
+		-- Don't draw menu contents outside of the widget bounding box.
+		love.graphics.push("all")
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+
+		-- Draw selection glow, if applicable
+		if menu.index > 0 then
+			local is_active = self:hasAnyThimble()
+			local col = is_active and skin.color_active_glow or skin.color_select_glow
+			love.graphics.setColor(col)
+
+			local sel_pos = (menu.index-1 - self.scroll_i) * self.item_len
+			if self.horizontal then
+				love.graphics.rectangle("fill", sel_pos + 0.5, 0.5, self.item_len, self.w)
+			else
+				love.graphics.rectangle("fill", 0.5, sel_pos + 0.5, self.w, self.item_len)
+			end
+		end
+
+		-- Draw each menu item
+		love.graphics.setColor(skin.color_item_text)
+		love.graphics.setFont(font)
+
+
+		local vis_item_bot = math.min(#menu.items, self.scroll_i + max_vis)
+		local work_pos = 0
+
+		--print("vis_item_bot", vis_item_bot)
+
+		for i = self.scroll_i + 1, vis_item_bot do
+			local item = menu.items[i]
+
+			if item then
+				local px = self.item_pad
+				local py = work_pos
+				local pw = self.w - self.item_pad
+				local ph = work_pos
+
+				if self.horizontal then
+					px, py = py, px
+					pw, ph = ph, pw
+				end
+
+				if item.type == "separator" then
+					love.graphics.setLineWidth(1)
+					if self.horizontal then
+						love.graphics.line(px + sep_offset + 0.5, py + 0.5, px + sep_offset, py + ph + 0.5)
+					else
+						love.graphics.line(px + 0.5, py + sep_offset + 0.5, px + pw + 0.5, py + sep_offset)
+					end
+				else
+					if self.horizontal then
+						love.graphics.print(item.text, work_pos, self.item_pad)
+					else
+						love.graphics.print(item.text, self.item_pad, work_pos + math.floor(self.item_len/2 - font_h/2))
+					end
+				end
+			end
+			work_pos = work_pos + self.item_len
+		end
+
+		love.graphics.pop()
+
+		-- Outline for the back panel
+		love.graphics.setColor(skin.color_outline)
+		love.graphics.setLineWidth(skin.outline_width)
+		love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1)
+
+		-- Draw a scrolling indicator, if applicable.
+		-- XXX maybe just an up-arrow and down-arrow would be better in some cases.
+		if self.show_scroll_ind then
+			local circ_r = 6 -- XXX style
+			local shortened = #menu.items - max_vis
+			if shortened > 0 then
+				local circ_pos = 0
+
+				-- Peg to current scroll offset
+				if self.show_scroll_ind == true then
+					circ_pos = math.floor(circ_r + (self.scroll_i) / shortened * (body_len - circ_r*2))
+					-- Clamp the indicator, in case scrolling itself is not clamped.
+					-- It looks bad, but it's better than the indicator flying off the widget or being scissored out.
+					circ_pos = math.max(circ_r, math.min(circ_pos, body_len - circ_r*2))
+
+				-- Peg to current selection
+				elseif self.show_scroll_ind == "selection" then
+					circ_pos = math.floor(circ_r + ((menu.index-1) / math.max(1, #menu.items-1) * (body_len - circ_r*2)))
+				end
+
+				love.graphics.setColor(skin.color_scroll_ind)
+				if self.horizontal then
+					love.graphics.circle("fill", circ_pos, self.h - circ_r, circ_r)
+				else
+					love.graphics.circle("fill", self.w - circ_r, circ_pos, circ_r)
+				end
+			end
+		end
+	end,
 }
 
 

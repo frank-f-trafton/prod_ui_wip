@@ -469,81 +469,100 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		button_spacing = "scaled-int",
+		item_pad_v = "scaled-int",
 
+		res_idle = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+		res_pressed = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local font = skin.font
-
-			local res
-			if self.enabled then
-				res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
-			else
-				res = skin.res_disabled
-			end
-
-			love.graphics.push("all")
-
-			-- Back panel body.
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
-
-			-- XXX: Decorative button.
-			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(res.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-			uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x + res.deco_ox, self.vp2_y + res.deco_oy, self.vp2_w, self.vp2_h)
-
-			-- Crop item text.
-			uiGraphics.intersectScissor(
-				ox + self.x + self.vp_x,
-				oy + self.y + self.vp_y,
-				self.vp_w,
-				self.vp_h
-			)
-
-			-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
-			if not self.wid_drawer and self.context.thimble1 == self then
-				love.graphics.setColor(res.color_highlight)
-				love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-			end
-
-			local chosen = self.menu.items[self.menu.chosen_i]
-			if chosen then
-				love.graphics.setColor(res.color_text)
-
-				-- XXX: Chosen item icon.
-
-				-- Chosen item text.
-				love.graphics.setFont(font)
-				local xx = self.vp_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp_w)
-				local yy = math.floor(0.5 + self.vp_y + (self.vp_h - font:getHeight()) / 2)
-				love.graphics.print(chosen.text, xx, yy)
-			end
-
-			-- Debug
-			love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
-
-			love.graphics.pop()
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy)
+		res_disabled = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		}
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local font = skin.font
+
+		local res
+		if self.enabled then
+			res = (self.wid_drawer) and skin.res_pressed or skin.res_idle
+		else
+			res = skin.res_disabled
+		end
+
+		love.graphics.push("all")
+
+		-- Back panel body.
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
+
+		-- XXX: Decorative button.
+		love.graphics.setColor(1, 1, 1, 1)
+		uiGraphics.drawSlice(res.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+		uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x + res.deco_ox, self.vp2_y + res.deco_oy, self.vp2_w, self.vp2_h)
+
+		-- Crop item text.
+		uiGraphics.intersectScissor(
+			ox + self.x + self.vp_x,
+			oy + self.y + self.vp_y,
+			self.vp_w,
+			self.vp_h
+		)
+
+		-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
+		if not self.wid_drawer and self.context.thimble1 == self then
+			love.graphics.setColor(res.color_highlight)
+			love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+		end
+
+		local chosen = self.menu.items[self.menu.chosen_i]
+		if chosen then
+			love.graphics.setColor(res.color_text)
+
+			-- XXX: Chosen item icon.
+
+			-- Chosen item text.
+			love.graphics.setFont(font)
+			local xx = self.vp_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp_w)
+			local yy = math.floor(0.5 + self.vp_y + (self.vp_h - font:getHeight()) / 2)
+			love.graphics.print(chosen.text, xx, yy)
+		end
+
+		-- Debug
+		love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
+
+		love.graphics.pop()
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy)
 }
 
 

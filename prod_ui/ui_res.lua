@@ -11,19 +11,25 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 
 
 --- Load and execute a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
--- @param ... An arbitrary set of arguments to pass to the Lua chunk. The first argument is the file path to the Lua file.
+-- @param path The path to the Lua file.
+-- @param ... An arbitrary set of arguments to pass to the Lua chunk.
 -- @return The result of executing the chunk.
-function uiRes.loadLuaFile(...)
-	local file_path = select(1, ...)
-	local chunk, err = love.filesystem.load(file_path)
+function uiRes.loadLuaFile(path, ...)
+	local chunk, err = love.filesystem.load(path)
 
 	if not chunk then
-		error("couldn't load Lua file: " .. tostring(file_path) .. ", error: " .. err, 2)
+		error("couldn't load Lua file: " .. tostring(path) .. ", error: " .. err, 2)
 	end
 
 	local retval = chunk(...)
 
 	return retval
+end
+
+
+--- Like uiRes.loadLuaFile(), but includes the file path as the first argument.
+function uiRes.loadLuaFileWithPath(path, ...)
+	return uiRes.loadLuaFile(path, path, ...)
 end
 
 
@@ -66,7 +72,7 @@ function uiRes.pathStripEnd(path, remove_trailing_slashes)
 	return s1, s2
 end
 
-
+--[===[
 --- Strips the file extension from a path.
 -- @param path The file path to strip.
 -- @return The path without the file extension.
@@ -82,11 +88,12 @@ function uiRes.stripFileExtension(path)
 	return a .. c, d
 end
 
+
 --- Strips the file extension from a path.
 -- @param path The file path to strip.
 -- @param omit_first_dot When true, removes the first dot in the returned extension (".lua" -> "lua")
 -- @return The path without the extension, and the extension.
-function uiRes.stripFileExtension(path, omit_first_dot)
+function uiRes.stripFileExtension2(path, omit_first_dot)
 	--[[
 	"hello.lua" -> "hello", ".lua"
 	"foo/bar.txt" -> "foo/bar", ".txt"
@@ -102,6 +109,7 @@ function uiRes.stripFileExtension(path, omit_first_dot)
 	end
 	return a .. c, d
 end
+--]===]
 
 
 --- Strip the first part of a path.
@@ -168,7 +176,7 @@ function uiRes.enumerate(folder, ext, recursive, depth)
 	uiShared.intGEEval(4, depth, 1)
 
 	if not love.filesystem.getInfo(folder) then
-		error("nothing exists at file path: " .. tostring(folder))
+		error("folder not found at: " .. tostring(folder))
 	end
 
 	--[[
@@ -192,6 +200,37 @@ function uiRes.enumerate(folder, ext, recursive, depth)
 	depth = depth or 1000
 
 	return _enumerate(folder, {}, ext, recursive, depth)
+end
+
+
+-- Joins a path and file name, injecting a forward slash when necessary.
+function uiRes.join(path, file_name)
+	if path == "" or string.sub(path, -1) == "/" then
+		return path .. file_name
+	else
+		return path .. "/" .. file_name
+	end
+end
+
+
+function uiRes.assertNotRegistered(what, tbl, id)
+	if tbl[id] then
+		error(what .. ": ID '" .. tostring(id) .. "' is already registered.")
+	end
+end
+
+
+function uiRes.extractIDFromLuaFile(base_path, file_path)
+	uiShared.type1(1, base_path, "string")
+	uiShared.type1(2, file_path, "string")
+
+	if not file_path:find("%.lua$") then
+		error("file_path string doesn't end in '.lua'.")
+	end
+
+	local str = file_path:match("^(.-)%.lua$")
+	str = uiRes.stripBaseDirectoryFromPath(base_path, str)
+	return str
 end
 
 

@@ -831,85 +831,105 @@ function def:uiCall_destroy(inst)
 end
 
 
-def.skinners = {
-	default = {
-		schema = {}, -- WIP
+def.default_skinner = {
+	schema = {
+		header_text_align_h = "unit-interval",
+		header_text_align_v = "unit-interval",
+		sensor_resize_pad = "scaled-int",
+		shadow_extrude = "scaled-int",
 
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+		res_norm = {
+			header_h = "scaled-int",
+			button_pad_w = "scaled-int",
+			button_w = "scaled-int",
+			button_h = "scaled-int",
+			button_align_v = "unit-interval",
+		},
 
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-
-			-- Window shadow
-			if self.frame_render_shadow then
-				love.graphics.setColor(skin.color_shadow)
-				uiGraphics.drawSlice(skin.slc_shadow,
-					-skin.shadow_extrude,
-					-skin.shadow_extrude,
-					self.w + skin.shadow_extrude * 2,
-					self.h + skin.shadow_extrude * 2
-				)
-			end
-
-			-- Window body
-			love.graphics.setColor(skin.color_body)
-			uiGraphics.drawSlice(skin.slc_body, 0, 0, self.w, self.h)
-
-			-- Window header
-			local res = self.header_condensed and skin.res_cond or skin.res_norm
-			local res2 = self.selected and res.res_selected or res.res_unselected
-			local slc_header_body = res.header_slc_body
-			love.graphics.setColor(res2.col_header_fill)
-			uiGraphics.drawSlice(slc_header_body, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-
-			if self.header_text then
-				local font = res.header_font
-
-				love.graphics.setColor(res2.col_header_text)
-				love.graphics.setFont(font)
-
-				local sx, sy, sw, sh = love.graphics.getScissor()
-				uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
-
-				love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
-
-				love.graphics.setScissor(sx, sy, sw, sh)
-			end
-
-			-- Header buttons
-			--[[
-			if frame then
-				button_max.graphic = frame.maximized and button_max.graphic_unmax or button_max.graphic_max
-			else
-				button_max.graphic = button_max.graphic_max
-			end
-			--]]
-
-			if self.DEBUG_show_resize_range then
-				local rp = skin.sensor_resize_pad
-				love.graphics.push("all")
-
-				love.graphics.setScissor()
-				love.graphics.setColor(0.8, 0.1, 0.2, 0.8)
-
-				love.graphics.setLineWidth(1)
-				love.graphics.setLineJoin("miter")
-				love.graphics.setLineStyle("rough")
-
-				love.graphics.rectangle("line", 0.5 - rp, 0.5 - rp, self.w + rp*2 - 1, self.h + rp*2 - 1)
-
-				love.graphics.pop()
-			end
-		end,
+		res_cond = {
+			header_h = "scaled-int",
+			button_pad_w = "scaled-int",
+			button_w = "scaled-int",
+			button_h = "scaled-int",
+			button_align_v = "unit-interval",
+		},
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+
+		-- Window shadow
+		if self.frame_render_shadow then
+			love.graphics.setColor(skin.color_shadow)
+			uiGraphics.drawSlice(skin.slc_shadow,
+				-skin.shadow_extrude,
+				-skin.shadow_extrude,
+				self.w + skin.shadow_extrude * 2,
+				self.h + skin.shadow_extrude * 2
+			)
+		end
+
+		-- Window body
+		love.graphics.setColor(skin.color_body)
+		uiGraphics.drawSlice(skin.slc_body, 0, 0, self.w, self.h)
+
+		-- Window header
+		local res = self.header_condensed and skin.res_cond or skin.res_norm
+		local res2 = self.selected and res.res_selected or res.res_unselected
+		local slc_header_body = res.header_slc_body
+		love.graphics.setColor(res2.col_header_fill)
+		uiGraphics.drawSlice(slc_header_body, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+
+		if self.header_text then
+			local font = res.header_font
+
+			love.graphics.setColor(res2.col_header_text)
+			love.graphics.setFont(font)
+
+			local sx, sy, sw, sh = love.graphics.getScissor()
+			uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+
+			love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
+
+			love.graphics.setScissor(sx, sy, sw, sh)
+		end
+
+		-- Header buttons
+		--[[
+		if frame then
+			button_max.graphic = frame.maximized and button_max.graphic_unmax or button_max.graphic_max
+		else
+			button_max.graphic = button_max.graphic_max
+		end
+		--]]
+
+		if self.DEBUG_show_resize_range then
+			local rp = skin.sensor_resize_pad
+			love.graphics.push("all")
+
+			love.graphics.setScissor()
+			love.graphics.setColor(0.8, 0.1, 0.2, 0.8)
+
+			love.graphics.setLineWidth(1)
+			love.graphics.setLineJoin("miter")
+			love.graphics.setLineStyle("rough")
+
+			love.graphics.rectangle("line", 0.5 - rp, 0.5 - rp, self.w + rp*2 - 1, self.h + rp*2 - 1)
+
+			love.graphics.pop()
+		end
+	end,
 }
 
 

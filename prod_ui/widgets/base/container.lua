@@ -281,77 +281,81 @@ end
 --]=]
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-		--render = function(self, ox, oy)
-
-
-		renderLast = function(self, ox, oy)
-			local skin = self.skin
-
-			-- Draw the embedded scroll bars, if present and active.
-			local data_scroll = skin.data_scroll
-
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
-
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-			end
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-
-			-- XXX Debug...
-			--[=[
-			love.graphics.push("all")
-
-			love.graphics.setLineStyle("smooth")
-			love.graphics.setLineWidth(2)
-			love.graphics.setLineJoin("miter")
-
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.rectangle("line", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-
-			love.graphics.setColor(0, 1, 0, 1)
-			love.graphics.rectangle("line", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-
-			love.graphics.setColor(0, 0, 1, 1)
-			love.graphics.rectangle("line", -self.scr_x, -self.scr_y, self.doc_w, self.doc_h)
-
-			if self.DEBUG == "dimensions" then -- XXX debug cleanup
-				love.graphics.setColor(0,0,0,0.6)
-				love.graphics.rectangle("fill", 0, 0, 160, 256)
-				love.graphics.setColor(1,1,1,1)
-				love.graphics.print(
-					"scr_x: " .. self.scr_x .. "\nscr_y: " .. self.scr_y
-					.. "\nscr_fx: " .. self.scr_fx .. "\nscr_fy: " .. self.scr_fy
-					.. "\nscr_tx: " .. self.scr_tx .. "\nscr_ty: " .. self.scr_ty
-					.. "\ndoc_w: " .. self.doc_w .. "\ndoc_h: " .. self.doc_h
-					.. "\nw: " .. self.w .. "\nh: " .. self.h
-					--.. "\nscr_v.pos: " .. self.scr_v.pos .. "\n^len: " .. self.scr_v.len .. "\n^max: " .. self.scr_v.max
-				)
-			end
-
-			love.graphics.pop("all")
-			--]=]
-		end,
-
-		-- Don't highlight when holding the UI thimble.
-		renderThimble = widShared.dummy,
+def.default_skinner = {
+	schema = {
+		in_view_pad_x = "scaled-int",
+		in_view_pad_y = "scaled-int"
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+	--render = function(self, ox, oy)
+
+
+	renderLast = function(self, ox, oy)
+		local skin = self.skin
+
+		-- Draw the embedded scroll bars, if present and active.
+		local data_scroll = skin.data_scroll
+
+		local scr_h = self.scr_h
+		local scr_v = self.scr_v
+
+		if scr_h and scr_h.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		end
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
+
+		-- XXX Debug...
+		--[=[
+		love.graphics.push("all")
+
+		love.graphics.setLineStyle("smooth")
+		love.graphics.setLineWidth(2)
+		love.graphics.setLineJoin("miter")
+
+		love.graphics.setColor(1, 0, 0, 1)
+		love.graphics.rectangle("line", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+
+		love.graphics.setColor(0, 1, 0, 1)
+		love.graphics.rectangle("line", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+
+		love.graphics.setColor(0, 0, 1, 1)
+		love.graphics.rectangle("line", -self.scr_x, -self.scr_y, self.doc_w, self.doc_h)
+
+		if self.DEBUG == "dimensions" then -- XXX debug cleanup
+			love.graphics.setColor(0,0,0,0.6)
+			love.graphics.rectangle("fill", 0, 0, 160, 256)
+			love.graphics.setColor(1,1,1,1)
+			love.graphics.print(
+				"scr_x: " .. self.scr_x .. "\nscr_y: " .. self.scr_y
+				.. "\nscr_fx: " .. self.scr_fx .. "\nscr_fy: " .. self.scr_fy
+				.. "\nscr_tx: " .. self.scr_tx .. "\nscr_ty: " .. self.scr_ty
+				.. "\ndoc_w: " .. self.doc_w .. "\ndoc_h: " .. self.doc_h
+				.. "\nw: " .. self.w .. "\nh: " .. self.h
+				--.. "\nscr_v.pos: " .. self.scr_v.pos .. "\n^len: " .. self.scr_v.len .. "\n^max: " .. self.scr_v.max
+			)
+		end
+
+		love.graphics.pop("all")
+		--]=]
+	end,
+
+	-- Don't highlight when holding the UI thimble.
+	renderThimble = widShared.dummy,
 }
 
 
