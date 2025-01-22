@@ -4,17 +4,17 @@
 return {
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/panel",
-	["*tq_px"] = "tex_quads/pixel",
-	["*data_scroll"] = "common/scroll_bar1",
-	["*scr_style"] = "style/scroll_bar_styles/norm",
-	["*font"] = "fonts/p",
-	["*data_icon"] = "style/icons/p",
+	box = "*style/boxes/panel",
+	tq_px = "*tex_quads/pixel",
+	data_scroll = "*common/scroll_bar1",
+	scr_style = "*style/scroll_bar_styles/norm",
+	font = "*fonts/p",
+	data_icon = "*style/icons/p",
 
 	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 	["$item_pad_v"] = 2,
 
-	["*sl_body"] = "tex_slices/list_box_body",
+	sl_body = "*tex_slices/list_box_body",
 
 	text_align_h = "left", -- "left", "center", "right"
 	-- Vertical text alignment is centered.

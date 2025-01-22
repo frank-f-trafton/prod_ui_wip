@@ -205,6 +205,7 @@ return {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
 		["window_shadow"] = {
+			draw_fn_id = "hollow",
 			x = 0, y = 0, w1 = 11, h1 = 11, w2 = 2, h2 = 2, w3 = 11, h3 = 11,
 		},
 		["window_header_norm"] = {

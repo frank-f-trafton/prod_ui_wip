@@ -134,7 +134,7 @@ local function makeListBox1(content, x, y)
 	-- SkinDef clone
 	local resources = content.context.resources
 	local skin_defs = resources.skin_defs
-	local clone = pTable.deepCopy({}, skin_defs["list_box1"])
+	local clone = pTable.deepCopy(skin_defs["list_box1"])
 	resources:registerSkinDef(clone, clone)
 
 	local function _userDestroy(self)

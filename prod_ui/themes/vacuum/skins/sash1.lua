@@ -4,10 +4,10 @@
 return {
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/panel",
-	["*tq_px"] = "tex_quads/pixel",
-	["*slc_lr"] = "tex_slices/sash_lr",
-	["*slc_tb"] = "tex_slices/sash_tb",
+	box = "*style/boxes/panel",
+	tq_px = "*tex_quads/pixel",
+	slc_lr = "*tex_slices/sash_lr",
+	slc_tb = "*tex_slices/sash_tb",
 
 	cursor_h = "sizewe",
 	cursor_v = "sizens",

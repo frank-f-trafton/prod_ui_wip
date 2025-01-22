@@ -4,7 +4,7 @@
 return {
 	skinner_id = "default",
 
-	["*font"] = "fonts/p",
+	font = "*fonts/p",
 
 	color_background = {0.2, 0.2, 0.2, 1.0},
 	color_outline = {0.5, 0.5, 0.5, 1.0},

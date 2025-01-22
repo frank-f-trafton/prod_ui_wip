@@ -998,6 +998,7 @@ return {
       y = 0
     },
     window_shadow = {
+      draw_fn_id = "hollow",
       h1 = 11,
       h2 = 2,
       h3 = 11,

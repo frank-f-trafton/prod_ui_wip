@@ -122,20 +122,8 @@ _mt_themeDataPack.drillS = _mt_themeInst.drillS
 function _mt_themeInst:getProcessedResource(k, v)
 	local symbol = k:sub(1, 1)
 
-	-- Pull in resources from the main theme table
-	if symbol == "*" then
-		if type(v) == "table" then
-			local retval = {}
-			for i, s in ipairs(v) do
-				table.insert(retval, self:drillS(s))
-				return k:sub(2), retval
-			end
-		else
-			return k:sub(2), self:drillS(v)
-		end
-
 	-- Scale and floor numbers
-	elseif symbol == "$" then
+	if symbol == "$" then
 		if type(v) == "table" then
 			local retval = {}
 			for i, n in ipairs(v) do
@@ -155,7 +143,6 @@ function _mt_themeInst:getProcessedResource(k, v)
 		error("invalid resource processor symbol: " .. symbol)
 	end
 end
-_mt_themeDataPack.getProcessedResource = _mt_themeInst.getProcessedResource
 
 
 --- Shortcut to make a new 9-Slice definition.
@@ -236,19 +223,25 @@ end
 
 
 local function _skinDeepCopy(theme_inst, inst, def, _depth)
-	print("_skinDeepCopy: start", _depth)
+	--print("_skinDeepCopy: start", _depth)
 	for k, v in pairs(def) do
 		if type(v) == "table" then
 			inst[k] = _skinDeepCopy(theme_inst, {}, v, _depth + 1)
 		else
 			if type(k) == "string" then
 				local symbol = k:sub(1, 1)
-				print("***", "k", k, "symbol", symbol)
-				if symbol == "*" or symbol == "$" then
-					print(">>> do it")
+				--print("***", "k", k, "symbol", symbol, "v", v)
+				-- Pull in resources from the main theme table
+				if type(v) == "string" and v:sub(1, 1) == "*" then
+					--print(">>> do lookup")
+					inst[k] = theme_inst:drillS(v:sub(2))
+
+				elseif symbol == "$" then
+					--print(">>> do number scale")
 					local pro_k, pro_v = theme_inst:getProcessedResource(k, v)
 					inst[pro_k] = pro_v
 				else
+					--print(">>> copy it")
 					inst[k] = v
 				end
 			else
@@ -256,7 +249,7 @@ local function _skinDeepCopy(theme_inst, inst, def, _depth)
 			end
 		end
 	end
-	print("_skinDeepCopy: end", _depth)
+	--print("_skinDeepCopy: end", _depth)
 	return inst
 end
 
@@ -269,6 +262,27 @@ function _mt_themeInst:refreshSkinDefInstance(skin_def)
 	end
 
 	_skinDeepCopy(self, skin_inst, skin_def, 1)
+end
+
+
+local function _shadowClone(dst, src, _depth)
+	setmetatable(dst, dst)
+	dst.__index = src
+	for k, v in pairs(src) do
+		if type(v) == "table" then
+			dst[k] = _shadowClone({}, v, _depth + 1)
+		end
+	end
+	return dst
+end
+
+
+function _mt_themeInst:cloneSkinDef(skin_def, full)
+	if full then
+		return pTable.deepCopy(skin_def)
+	else
+		return _shadowClone({}, skin_def, 1)
+	end
 end
 
 
@@ -343,85 +357,6 @@ function uiTheme.assertScale(arg_n, scale, integral)
 
 	elseif scale <= 0 then
 		error("argument #" .. arg_n .. ": scale must be greater than zero.", 2)
-	end
-end
-
-
-local function _assertBoxVar(box, id, expected)
-	if type(box[id]) ~= expected then
-		error("Box Style: bad type for requested field: " .. id .. " (expected " .. expected .. ", got " .. type(box[id]) .. ")")
-	end
-end
-
-
-function _mt_box_style:getBodyID()
-	_assertBoxVar(self, "sl_body_id", "string")
-
-	return self.sl_body_id
-end
-
-
-function _mt_box_style:getOutpad()
-	_assertBoxVar(self, "outpad_x1", "number")
-	_assertBoxVar(self, "outpad_x2", "number")
-	_assertBoxVar(self, "outpad_y1", "number")
-	_assertBoxVar(self, "outpad_y2", "number")
-
-	return self.outpad_x1, self.outpad_x2, self.outpad_y1, self.outpad_y2
-end
-
-
-function _mt_box_style:copyOutpad(wid)
-	wid.outpad_x1, wid.outpad_x2, wid.outpad_y1, wid.outpad_y2 = self:getOutpad()
-end
-
-
-function _mt_box_style:getBorder()
-	_assertBoxVar(self, "border_x1", "number")
-	_assertBoxVar(self, "border_x2", "number")
-	_assertBoxVar(self, "border_y1", "number")
-	_assertBoxVar(self, "border_y2", "number")
-
-	return self.border_x1, self.border_x2, self.border_y1, self.border_y2
-end
-
-
-function _mt_box_style:copyBorder(wid)
-	wid.border_x1, wid.border_x2, wid.border_y1, wid.border_y2 = self:getBorder()
-end
-
-
-function _mt_box_style:getMargin()
-	_assertBoxVar(self, "x1", "number")
-	_assertBoxVar(self, "x2", "number")
-	_assertBoxVar(self, "y1", "number")
-	_assertBoxVar(self, "y2", "number")
-
-	return self.x1, self.x2, self.y1, self.y2
-end
-
-
---- Check that a Box Style has the expected fields, raising a Lua error if any expected info is missing.
--- @param box The Box Style table to check.
--- @param has_body_id The box must have a Body ID string. (NOTE: does not confirm that the texture exists.)
--- @param has_outpad The box must have Outpad numbers.
--- @param has_border The box must have Border numbers.
--- @param has_margin The box must have Margin numbers.
-function _mt_box_style:validate(has_body_id, has_outpad, has_border, has_margin)
-	if has_body_id then
-		self:getBodyID()
-	end
-
-	if has_outpad then
-		self:getOutpad()
-	end
-
-	if has_border then
-		self:getBorder()
-	end
-
-	if has_margin then
-		self:getMargin()
 	end
 end
 

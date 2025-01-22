@@ -4,9 +4,9 @@
 return {
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/button",
-	["*label_style"] = "style/labels/norm",
-	["*tq_px"] = "tex_quads/pixel",
+	box = "*style/boxes/button",
+	label_style = "*style/labels/norm",
+	tq_px = "*tex_quads/pixel",
 
 	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
@@ -17,10 +17,10 @@ return {
 	label_align_v = "middle", -- "top", "middle", "bottom"
 
 	-- A default graphic to use if the widget doesn't provide one.
-	-- ["*graphic"]
+	-- graphic =
 
 	-- Icon to show in the aux part of the button.
-	["*tq_aux_glyph"] = "tex_quads/arrow_down",
+	tq_aux_glyph = "*tex_quads/arrow_down",
 
 	aux_placement = "right", -- "left", "right", "top", "bottom"
 
@@ -40,7 +40,7 @@ return {
 
 
 	res_idle = {
-		["*slice"] = "tex_slices/button",
+		slice = "*tex_slices/button",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
@@ -50,7 +50,7 @@ return {
 	},
 
 	res_hover = {
-		["*slice"] = "tex_slices/button_hover",
+		slice = "*tex_slices/button_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
@@ -60,7 +60,7 @@ return {
 	},
 
 	res_pressed = {
-		["*slice"] = "tex_slices/button_press",
+		slice = "*tex_slices/button_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
@@ -70,7 +70,7 @@ return {
 	},
 
 	res_disabled = {
-		["*slice"] = "tex_slices/button_disabled",
+		slice = "*tex_slices/button_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		color_aux_icon = {0.5, 0.5, 0.5, 1.0},

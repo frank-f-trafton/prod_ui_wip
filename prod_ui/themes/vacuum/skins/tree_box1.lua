@@ -4,22 +4,22 @@
 return {
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/panel",
-	["*tq_px"] = "tex_quads/pixel",
-	["*data_scroll"] = "common/scroll_bar1",
-	["*scr_style"] = "style/scroll_bar_styles/norm",
-	["*font"] = "fonts/p",
-	["*data_icon"] = "style/icons/p",
+	box = "style/boxes/panel",
+	tq_px = "*tex_quads/pixel",
+	data_scroll = "*common/scroll_bar1",
+	scr_style = "*style/scroll_bar_styles/norm",
+	font = "*fonts/p",
+	data_icon = "*style/icons/p",
 
-	["*tq_expander_up"] = "tex_quads/arrow2_up",
-	["*tq_expander_down"] = "tex_quads/arrow2_down",
-	["*tq_expander_left"] = "tex_quads/arrow2_left",
-	["*tq_expander_right"] = "tex_quads/arrow2_right",
+	tq_expander_up = "*tex_quads/arrow2_up",
+	tq_expander_down = "*tex_quads/arrow2_down",
+	tq_expander_left = "*tex_quads/arrow2_left",
+	tq_expander_right = "*tex_quads/arrow2_right",
 
 	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 	["$item_pad_v"] = 2,
 
-	["*sl_body"] = "tex_slices/list_box_body",
+	sl_body = "*tex_slices/list_box_body",
 
 	-- Horizontal starting edge for the tree root.
 	item_align_h = "left", -- "left", "right"

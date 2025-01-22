@@ -5,12 +5,12 @@ return {
 	skinner_id = "default",
 
 
-	["*box"] = "style/boxes/panel",
-	["*tq_px"] = "tex_quads/pixel",
-	["*data_scroll"] = "common/scroll_bar1",
-	["*scr_style"] = "style/scroll_bar_styles/norm",
-	["*font"] = "fonts/p",
-	["*data_icon"] = "style/icons/p",
+	box = "*style/boxes/panel",
+	tq_px = "*tex_quads/pixel",
+	data_scroll = "*common/scroll_bar1",
+	scr_style = "*style/scroll_bar_styles/norm",
+	font = "*fonts/p",
+	data_icon = "*style/icons/p",
 
 	color_background = {0.2, 0.2, 0.2, 1.0},
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
@@ -25,7 +25,7 @@ return {
 	-- Some default data for cell implementations.
 	color_cell_bijou = {1.0, 1.0, 1.0, 1.0},
 	color_cell_text = {1.0, 1.0, 1.0, 1.0},
-	["*cell_font"] = "fonts/p",
+	cell_font = "*fonts/p",
 
-	["*impl_column"] = "common/impl_column",
+	impl_column = "*common/impl_column",
 }

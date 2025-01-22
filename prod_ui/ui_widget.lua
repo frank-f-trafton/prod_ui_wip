@@ -1258,7 +1258,7 @@ function _mt_widget:skinSetRefs()
 	end
 
 	if not skin_inst.skinner_id then
-		error("widget skin is missing a skinner ID.")
+		error("widget skin (" .. tostring(self.skin_id) .. ") is missing a skinner ID.")
 	end
 
 	local skinner = self.skinners[skin_inst.skinner_id]
