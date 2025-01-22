@@ -110,60 +110,73 @@ function def:uiCall_reshape()
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		bar_spacing = "scaled-int",
 
+		res_active = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local res = (self.active) and skin.res_active or skin.res_inactive
-
-			-- Progress bar back-panel.
-			local slc_back = skin.slc_back
-			love.graphics.setColor(res.color_back)
-			uiGraphics.drawSlice(skin.slc_back, 0, 0, self.w, self.h)
-
-			-- Progress bar ichor.
-			if self.pos > 0 and self.max > 0 then
-				-- Orientation.
-				local px, py, pw, ph
-				if self.vertical then
-					pw = self.vp2_w
-					px = self.vp2_x
-					ph = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_h))))
-					py = self.far_end and self.vp2_y + self.vp2_h - ph or self.vp2_y
-				else
-					pw = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_w))))
-					px = self.far_end and self.vp2_x + self.vp2_w - pw or self.vp2_x
-					ph = self.vp2_h
-					py = self.vp2_y
-				end
-
-				local slc_ichor = skin.slc_ichor
-				love.graphics.setColor(res.color_ichor)
-				uiGraphics.drawSlice(slc_ichor, px, py, pw, ph)
-			end
-
-			if self.label_mode then
-				lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
-			end
-
-			--widDebug.debugDrawViewport(self, 1)
-			--widDebug.debugDrawViewport(self, 2)
-		end,
+		res_inactive = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		}
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local res = (self.active) and skin.res_active or skin.res_inactive
+
+		-- Progress bar back-panel.
+		local slc_back = skin.slc_back
+		love.graphics.setColor(res.color_back)
+		uiGraphics.drawSlice(skin.slc_back, 0, 0, self.w, self.h)
+
+		-- Progress bar ichor.
+		if self.pos > 0 and self.max > 0 then
+			-- Orientation.
+			local px, py, pw, ph
+			if self.vertical then
+				pw = self.vp2_w
+				px = self.vp2_x
+				ph = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_h))))
+				py = self.far_end and self.vp2_y + self.vp2_h - ph or self.vp2_y
+			else
+				pw = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_w))))
+				px = self.far_end and self.vp2_x + self.vp2_w - pw or self.vp2_x
+				ph = self.vp2_h
+				py = self.vp2_y
+			end
+
+			local slc_ichor = skin.slc_ichor
+			love.graphics.setColor(res.color_ichor)
+			uiGraphics.drawSlice(slc_ichor, px, py, pw, ph)
+		end
+
+		if self.label_mode then
+			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+		end
+
+		--widDebug.debugDrawViewport(self, 1)
+		--widDebug.debugDrawViewport(self, 2)
+	end,
 }
 
 

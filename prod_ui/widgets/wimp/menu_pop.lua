@@ -1277,149 +1277,153 @@ function def:uiCall_destroy(inst)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		separator_size = "scaled-int",
+
+	},
 
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
 
 
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
 
 
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local tq_px = skin.tq_px
-			local tq_arrow = skin.tq_arrow
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
 
-			local menu = self.menu
-			local items = menu.items
 
-			local font = skin.font_item
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local tq_px = skin.tq_px
+		local tq_arrow = skin.tq_arrow
 
-			local items_first, items_last = math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items)
+		local menu = self.menu
+		local items = menu.items
 
-			-- Don't draw menu contents outside of the widget bounding box.
-			love.graphics.push("all")
-			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+		local font = skin.font_item
 
-			-- Back panel body.
-			local slc_body = skin.slc_body
-			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+		local items_first, items_last = math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items)
 
-			-- Scroll offsets.
-			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+		-- Don't draw menu contents outside of the widget bounding box.
+		love.graphics.push("all")
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-			-- Pop up menus do not render hover-glow.
+		-- Back panel body.
+		local slc_body = skin.slc_body
+		uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
-			-- Selection glow.
-			local sel_item = items[menu.index]
-			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quad1x1(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+		-- Scroll offsets.
+		love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+
+		-- Pop up menus do not render hover-glow.
+
+		-- Selection glow.
+		local sel_item = items[menu.index]
+		if sel_item then
+			love.graphics.setColor(skin.color_select_glow)
+			uiGraphics.quad1x1(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+		end
+
+		-- Separators
+		love.graphics.setColor(skin.color_separator)
+		for i = items_first, items_last do
+			local item = items[i]
+			if item.type == "separator" then
+				uiGraphics.quad1x1(tq_px, item.x, math.floor(item.y + item.h/2), item.w, skin.separator_size)
 			end
+		end
 
-			-- Separators
-			love.graphics.setColor(skin.color_separator)
-			for i = items_first, items_last do
-				local item = items[i]
-				if item.type == "separator" then
-					uiGraphics.quad1x1(tq_px, item.x, math.floor(item.y + item.h/2), item.w, skin.separator_size)
-				end
+		-- Underlines
+		for i = items_first, items_last do
+			local item = items[i]
+			if item.ul_on then
+				local tbl_color = selectItemColor(item, self, skin)
+				love.graphics.setColor(tbl_color)
+				uiGraphics.quad1x1(
+					tq_px,
+					item.x + item.ul_x,
+					item.y + item.ul_y,
+					item.ul_w,
+					self.underline_width
+				)
 			end
+		end
 
-			-- Underlines
-			for i = items_first, items_last do
-				local item = items[i]
-				if item.ul_on then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
-					uiGraphics.quad1x1(
-						tq_px,
-						item.x + item.ul_x,
-						item.y + item.ul_y,
-						item.ul_w,
-						self.underline_width
-					)
-				end
-			end
-
-			-- Bijoux for commands, arrow graphics for groups
-			for i = items_first, items_last do
-				local item = items[i]
-				--print("item.bijou", item.bijou, "xywh", item.bijou_x, item.bijou_y, item.bijou_w, item.bijou_h)
-				if item.bijou then
-					local tq_bijou = skin[item.bijou]
-					if tq_bijou then
-						local tbl_color = selectItemColor(item, self, skin)
-						love.graphics.setColor(tbl_color)
-						uiGraphics.quadXYWH(
-							tq_bijou,
-							item.x + self.pad_bijou_x1,
-							item.y + self.pad_bijou_y1,
-							self.bijou_draw_w,
-							self.bijou_draw_h
-						)
-					end
-				end
-
-				if item.type == "group" then
+		-- Bijoux for commands, arrow graphics for groups
+		for i = items_first, items_last do
+			local item = items[i]
+			--print("item.bijou", item.bijou, "xywh", item.bijou_x, item.bijou_y, item.bijou_w, item.bijou_h)
+			if item.bijou then
+				local tq_bijou = skin[item.bijou]
+				if tq_bijou then
 					local tbl_color = selectItemColor(item, self, skin)
 					love.graphics.setColor(tbl_color)
 					uiGraphics.quadXYWH(
-						tq_arrow,
-						item.x + item.arrow_x,
-						item.y + item.arrow_y,
-						tq_arrow.w,
-						tq_arrow.h
+						tq_bijou,
+						item.x + self.pad_bijou_x1,
+						item.y + self.pad_bijou_y1,
+						self.bijou_draw_w,
+						self.bijou_draw_h
 					)
 				end
 			end
 
-			love.graphics.setFont(font)
+			if item.type == "group" then
+				local tbl_color = selectItemColor(item, self, skin)
+				love.graphics.setColor(tbl_color)
+				uiGraphics.quadXYWH(
+					tq_arrow,
+					item.x + item.arrow_x,
+					item.y + item.arrow_y,
+					tq_arrow.w,
+					tq_arrow.h
+				)
+			end
+		end
 
-			-- Main text and shortcuts
-			for i = items_first, items_last do
-				local item = items[i]
+		love.graphics.setFont(font)
 
-				-- Main text label
-				if item.text_int then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
+		-- Main text and shortcuts
+		for i = items_first, items_last do
+			local item = items[i]
 
-					love.graphics.print(
-						item.text_int,
-						item.x + item.text_x,
-						item.y + item.text_y
-					)
-				end
+			-- Main text label
+			if item.text_int then
+				local tbl_color = selectItemColor(item, self, skin)
+				love.graphics.setColor(tbl_color)
 
-				-- Shortcut indicator
-				if item.text_shortcut then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
-					love.graphics.print(item.text_shortcut, item.x + item.text_s_x, item.y + item.text_s_y)
-				end
-
+				love.graphics.print(
+					item.text_int,
+					item.x + item.text_x,
+					item.y + item.text_y
+				)
 			end
 
-			love.graphics.pop()
-		end,
+			-- Shortcut indicator
+			if item.text_shortcut then
+				local tbl_color = selectItemColor(item, self, skin)
+				love.graphics.setColor(tbl_color)
+				love.graphics.print(item.text_shortcut, item.x + item.text_s_x, item.y + item.text_s_y)
+			end
+
+		end
+
+		love.graphics.pop()
+	end,
 
 
-		--renderLast = function(self, ox, oy) end,
+	--renderLast = function(self, ox, oy) end,
 
 
-		renderThimble = function(self, ox, oy)
-			-- nothing
-		end,
-	},
+	renderThimble = function(self, ox, oy)
+		-- nothing
+	end,
 }
 
 

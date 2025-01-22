@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "input/text_box_multi",
 
 	box = "*style/boxes/input_box",
 	data_scroll = "*common/scroll_bar1",

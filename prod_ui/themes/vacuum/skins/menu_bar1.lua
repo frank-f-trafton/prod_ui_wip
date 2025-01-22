@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/menu_bar",
 
 	-- NOTE: Very large box borders will interfere with clicking on menu items.
 	box = "*style/boxes/menu_bar",
@@ -17,7 +17,7 @@ return {
 	color_select_glow = {0.33, 0.33, 0.33, 1.0},
 	color_hover_glow = {0.33, 0.33, 0.33, 1.0},
 
-	underline_width = 1, -- XXX forgot to scale this?
+	underline_width = 1,
 	height_mult = 1.5,
 
 	base_height = 28, -- XXX clean up. Original assignment follows:

@@ -671,140 +671,163 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+def.default_skinner = {
+	schema = {
+		button_spacing = "scaled-int",
 
+		res_idle = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
+		res_hover = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
+		res_pressed = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			--local font = skin.font
-			local line_ed = self.line_ed
-
-			-- b1: increment sensor, b2: decrement sensor
-			local res, res_b1, res_b2
-			if self.enabled then
-				res = self.hovered and skin.res_hover or skin.res_idle
-				res_b1 = self.btn_rep == 1 and skin.res_pressed or self.btn_hov == 1 and skin.res_hover or skin.res_idle
-				res_b2 = self.btn_rep == 2 and skin.res_pressed or self.btn_hov == 2 and skin.res_hover or skin.res_idle
-			else
-				res = skin.res_disabled
-				res_b1 = skin.res_disabled
-				res_b2 = skin.res_disabled
-			end
-
-			love.graphics.push("all")
-
-			-- Back panel body.
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
-
-			-- Increment and decrement buttons.
-			love.graphics.setColor(1, 1, 1, 1)
-			uiGraphics.drawSlice(res_b1.slc_button_inc, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-			uiGraphics.drawSlice(res_b2.slc_button_dec, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
-			uiGraphics.quadShrinkOrCenterXYWH(res_b1.tq_inc, self.vp3_x + res_b1.deco_ox, self.vp3_y + res_b1.deco_oy, self.vp3_w, self.vp3_h)
-			uiGraphics.quadShrinkOrCenterXYWH(res_b2.tq_dec, self.vp4_x + res_b2.deco_ox, self.vp4_y + res_b2.deco_oy, self.vp4_w, self.vp4_h)
-
-			-- Crop text and caret
-			uiGraphics.intersectScissor(
-				ox + self.x + self.vp2_x,
-				oy + self.y + self.vp2_y,
-				self.vp2_w,
-				self.vp2_h
-			)
-
-			-- debug
-			--love.graphics.setScissor()
-
-			-- Text editor component.
-			local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
-
-			local is_active = self == self.context.thimble1
-			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
-
-			lgcInputS.draw(
-				self,
-				col_highlight,
-				skin.font_ghost,
-				res.color_text,
-				line_ed.font,
-				color_caret
-			)
-
-			love.graphics.pop()
-
-			-- Debug
-			--[[
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			widDebug.debugDrawViewport(self, 3)
-			widDebug.debugDrawViewport(self, 4)
-			--]]
-
-			--[=====[
-			-- Debug: show internal state
-			love.graphics.push("all")
-			love.graphics.setScissor()
-			love.graphics.print(
-				"value_default: " .. tostring(self.value_default)
-				.. "\nvalue: " .. tostring(self.value)
-				.. "\nvalue_min: " .. tostring(self.value_min)
-				.. "\nvalue_max: " .. tostring(self.value_max)
-				.. "\nfractional_comma: " .. tostring(self.fractional_comma)
-				, 0, 64
-			)
-
-
-			-- Debug renderer
-			-- [[
-			love.graphics.print(
-				"line: " .. line_ed.line
-				.. "\n#line: " .. #line_ed.line
-				.. "\ncar_byte: " .. line_ed.car_byte
-				.. "\nh_byte: " .. line_ed.h_byte
-				.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
-				.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
-				.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
-				.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
-				--.. "\ndoc_w: " .. self.doc_w
-				,
-				0, 256
-			)
-
-			local yy, hh = 240, line_ed.font:getHeight()
-			love.graphics.print("History state:", 256, 216)
-
-			for i, entry in ipairs(line_ed.hist.ledger) do
-				if i == line_ed.hist.pos then
-					love.graphics.setColor(1, 1, 0, 1)
-				else
-					love.graphics.setColor(1, 1, 1, 1)
-				end
-				love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: |" .. entry.line .. "|", 256, yy)
-				yy = yy + hh
-			end
-			--]]
-
-			love.graphics.pop()
-			--]=====]
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy)
+		res_disabled = {
+			deco_ox = "scaled-int",
+			deco_oy = "scaled-int"
+		},
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		--local font = skin.font
+		local line_ed = self.line_ed
+
+		-- b1: increment sensor, b2: decrement sensor
+		local res, res_b1, res_b2
+		if self.enabled then
+			res = self.hovered and skin.res_hover or skin.res_idle
+			res_b1 = self.btn_rep == 1 and skin.res_pressed or self.btn_hov == 1 and skin.res_hover or skin.res_idle
+			res_b2 = self.btn_rep == 2 and skin.res_pressed or self.btn_hov == 2 and skin.res_hover or skin.res_idle
+		else
+			res = skin.res_disabled
+			res_b1 = skin.res_disabled
+			res_b2 = skin.res_disabled
+		end
+
+		love.graphics.push("all")
+
+		-- Back panel body.
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
+
+		-- Increment and decrement buttons.
+		love.graphics.setColor(1, 1, 1, 1)
+		uiGraphics.drawSlice(res_b1.slc_button_inc, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+		uiGraphics.drawSlice(res_b2.slc_button_dec, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+		uiGraphics.quadShrinkOrCenterXYWH(res_b1.tq_inc, self.vp3_x + res_b1.deco_ox, self.vp3_y + res_b1.deco_oy, self.vp3_w, self.vp3_h)
+		uiGraphics.quadShrinkOrCenterXYWH(res_b2.tq_dec, self.vp4_x + res_b2.deco_ox, self.vp4_y + res_b2.deco_oy, self.vp4_w, self.vp4_h)
+
+		-- Crop text and caret
+		uiGraphics.intersectScissor(
+			ox + self.x + self.vp2_x,
+			oy + self.y + self.vp2_y,
+			self.vp2_w,
+			self.vp2_h
+		)
+
+		-- debug
+		--love.graphics.setScissor()
+
+		-- Text editor component.
+		local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+
+		local is_active = self == self.context.thimble1
+		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
+
+		lgcInputS.draw(
+			self,
+			col_highlight,
+			skin.font_ghost,
+			res.color_text,
+			line_ed.font,
+			color_caret
+		)
+
+		love.graphics.pop()
+
+		-- Debug
+		--[[
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		widDebug.debugDrawViewport(self, 3)
+		widDebug.debugDrawViewport(self, 4)
+		--]]
+
+		--[=====[
+		-- Debug: show internal state
+		love.graphics.push("all")
+		love.graphics.setScissor()
+		love.graphics.print(
+			"value_default: " .. tostring(self.value_default)
+			.. "\nvalue: " .. tostring(self.value)
+			.. "\nvalue_min: " .. tostring(self.value_min)
+			.. "\nvalue_max: " .. tostring(self.value_max)
+			.. "\nfractional_comma: " .. tostring(self.fractional_comma)
+			, 0, 64
+		)
+
+
+		-- Debug renderer
+		-- [[
+		love.graphics.print(
+			"line: " .. line_ed.line
+			.. "\n#line: " .. #line_ed.line
+			.. "\ncar_byte: " .. line_ed.car_byte
+			.. "\nh_byte: " .. line_ed.h_byte
+			.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
+			.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
+			.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+			.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
+			--.. "\ndoc_w: " .. self.doc_w
+			,
+			0, 256
+		)
+
+		local yy, hh = 240, line_ed.font:getHeight()
+		love.graphics.print("History state:", 256, 216)
+
+		for i, entry in ipairs(line_ed.hist.ledger) do
+			if i == line_ed.hist.pos then
+				love.graphics.setColor(1, 1, 0, 1)
+			else
+				love.graphics.setColor(1, 1, 1, 1)
+			end
+			love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: |" .. entry.line .. "|", 256, yy)
+			yy = yy + hh
+		end
+		--]]
+
+		love.graphics.pop()
+		--]=====]
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy)
 }
 
 

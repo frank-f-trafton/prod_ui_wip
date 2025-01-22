@@ -669,93 +669,96 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-
-			local menu = self.menu
-			local items = menu.items
-
-			local font = skin.font_item
-
-			-- Back panel body
-			love.graphics.setColor(skin.color_background)
-			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
-
-			-- Don't draw menu contents outside of the widget bounding box.
-			love.graphics.push("all")
-
-			-- Scroll offsets
-			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
-			uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
-
-			-- Draw hover glow, if applicable
-			local item_hover = self.MN_item_hover
-			if item_hover then
-				love.graphics.setColor(skin.color_hover_glow)
-				love.graphics.rectangle("fill", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
-			end
-
-			-- Draw selection glow, if applicable
-			local sel_item = items[menu.index]
-			if sel_item then
-				local is_active = self:hasAnyThimble()
-				local col = is_active and skin.color_active_glow or skin.color_select_glow
-				love.graphics.setColor(col)
-				love.graphics.rectangle("fill", sel_item.x, sel_item.y, sel_item.w, sel_item.h)
-			end
-
-			-- Draw each menu item in range
-			love.graphics.setColor(skin.color_item_text)
-			love.graphics.setFont(font)
-
-			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
-
-			self:renderItems(items, math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items), ox, oy)
-
-			love.graphics.pop()
-
-			-- Draw the embedded scroll bars, if present and active.
-
-			--love.graphics.setScissor() -- XXX debug
-
-			local data_scroll = skin.data_scroll
-
-			local scr_h = self.scr_h
-			local scr_v = self.scr_v
-
-			if scr_h and scr_h.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-			end
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-
-			-- Outline for the back panel
-			love.graphics.setColor(skin.color_outline)
-			love.graphics.setLineWidth(skin.outline_width)
-			love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1)
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+def.default_skinner = {
+	schema = {
+		outline_width = "scaled-int"
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+
+		local menu = self.menu
+		local items = menu.items
+
+		local font = skin.font_item
+
+		-- Back panel body
+		love.graphics.setColor(skin.color_background)
+		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+
+		-- Don't draw menu contents outside of the widget bounding box.
+		love.graphics.push("all")
+
+		-- Scroll offsets
+		love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+		uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
+
+		-- Draw hover glow, if applicable
+		local item_hover = self.MN_item_hover
+		if item_hover then
+			love.graphics.setColor(skin.color_hover_glow)
+			love.graphics.rectangle("fill", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
+		end
+
+		-- Draw selection glow, if applicable
+		local sel_item = items[menu.index]
+		if sel_item then
+			local is_active = self:hasAnyThimble()
+			local col = is_active and skin.color_active_glow or skin.color_select_glow
+			love.graphics.setColor(col)
+			love.graphics.rectangle("fill", sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+		end
+
+		-- Draw each menu item in range
+		love.graphics.setColor(skin.color_item_text)
+		love.graphics.setFont(font)
+
+		--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
+
+		self:renderItems(items, math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items), ox, oy)
+
+		love.graphics.pop()
+
+		-- Draw the embedded scroll bars, if present and active.
+
+		--love.graphics.setScissor() -- XXX debug
+
+		local data_scroll = skin.data_scroll
+
+		local scr_h = self.scr_h
+		local scr_v = self.scr_v
+
+		if scr_h and scr_h.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+		end
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
+
+		-- Outline for the back panel
+		love.graphics.setColor(skin.color_outline)
+		love.graphics.setLineWidth(skin.outline_width)
+		love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1)
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

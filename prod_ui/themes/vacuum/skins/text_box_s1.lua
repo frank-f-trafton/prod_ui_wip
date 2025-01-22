@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "input/text_box_single",
 
 	box = "*style/boxes/input_box",
 	font = "*fonts/p",

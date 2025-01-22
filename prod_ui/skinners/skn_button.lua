@@ -1,55 +1,37 @@
---[[
-A plain skinned label with an optional 9-slice body.
---]]
-
 
 local context = select(1, ...)
 
+print(type(context), context)
+for k, v in pairs(context) do
+	print("context", k, v)
+end
+for k, v in pairs(getmetatable(context)) do
+	print("_mt_context", k, v)
+end
 
+
+local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
-local def = {
-	skin_id = "label1",
-}
-
-
-def.setLabel = lgcLabel.widSetLabel
-
-
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-
-		widShared.setupViewports(self, 1)
-
-		lgcLabel.setup(self)
-
-		self:skinSetRefs()
-		self:skinInstall()
-
-		-- "enabled" affects visual style.
-		self.enabled = true
-
-		self:reshape()
-	end
-end
-
-
-function def:uiCall_reshape()
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, self.skin.box.border)
-	lgcLabel.reshapeLabel(self)
-end
-
-
-def.default_skinner = {
+return {
 	schema = {
+		graphic_spacing = "scaled-int",
+
 		res_idle = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
+
+		res_hover = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
+
+		res_pressed = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
 		},
@@ -77,12 +59,15 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		local res = (self.enabled) and skin.res_idle or skin.res_disabled
+		local res = uiTheme.pickButtonResource(self, skin)
 
-		local slc_body = res.sl_body
-		if slc_body then
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+		local slc_body = res.slice
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+
+		local graphic = self.graphic or skin.graphic
+		if graphic then
+			lgcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
 		end
 
 		if self.label_mode then
@@ -97,6 +82,3 @@ def.default_skinner = {
 	--renderLast = function(self, ox, oy) end,
 	--renderThimble = function(self, ox, oy) end,
 }
-
-
-return def

@@ -133,15 +133,13 @@ end
 local function makeListBox1(content, x, y)
 	-- SkinDef clone
 	local resources = content.context.resources
-	local skin_defs = resources.skin_defs
-	local clone = pTable.deepCopy(skin_defs["list_box1"])
-	resources:registerSkinDef(clone, clone)
+	local skin_clone = resources:cloneSkinDef("list_box1")
 
 	local function _userDestroy(self)
-		self.context.resources:removeSkinDef(clone)
+		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-	local list_box = content:addChild("wimp/list_box", {skin_id = clone, userDestroy = _userDestroy})
+	local list_box = content:addChild("wimp/list_box", {skin_id = skin_clone, userDestroy = _userDestroy})
 	list_box:setTag("demo_listbox")
 
 	list_box.wid_action = function(self, item, index)
@@ -262,8 +260,10 @@ local function makeListBox1(content, x, y)
 	chk.wid_buttonAction = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb.skin["$pad_text_x"] = self.slider_pos
-			lb.show_icons = not not self.checked
+			local skin_def = getmetatable(lb.skin)
+			skin_def.pad_text_x = self.slider_pos
+			skin_def.show_icons = not not self.checked
+			self.context.resources:refreshSkinDefInstance(lb.skin_id)
 			lb:reshape()
 		end
 	end
@@ -322,14 +322,15 @@ local function makeListBox1(content, x, y)
 	sld.wid_actionSliderChanged = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb.skin["$pad_text_x"] = self.slider_pos
-			local resources = self.context.resources
-			resources:refreshSkinDefInstance(resources.skin_defs[lb.skin_id])
+			local skin_def = getmetatable(lb.skin)
+			skin_def.pad_text_x = self.slider_pos
+			self.context.resources:refreshSkinDefInstance(lb.skin_id)
 			lb:reshape()
 		end
 	end
 
-	sld:setSliderPosition(list_box.skin["$pad_text_x"])
+	local lb_skin_def = getmetatable(list_box.skin)
+	sld:setSliderPosition(lb_skin_def.pad_text_x)
 
 	sld:reshape()
 end

@@ -7,21 +7,12 @@ local uiLoad = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
+local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
 
 
 local _mt_cache = {}
 _mt_cache.__index = _mt_cache
-
-
--- Joins a path and file name, injecting a forward slash when necessary.
-local function join(path, file_name)
-	if path == "" or string.sub(path, -1) == "/" then
-		return path .. file_name
-	else
-		return path .. "/" .. file_name
-	end
-end
 
 
 local function checkArrayOfStrings(arr)
@@ -113,7 +104,7 @@ end
 local function fetchPre(self, id)
 	-- [[DBG]] print("fetchPre(): Prefix paths. No extensions.")
 	for i, path in ipairs(self.paths) do
-		local file_path = join(path, id)
+		local file_path = uiRes.join(path, id)
 		if checkFile(file_path, self.file_types) then
 			return loadAttachAndReturn(self, id, file_path)
 		end
@@ -131,7 +122,7 @@ local function fetchPreExt(self, id)
 	-- [[DBG]] print("fetchPreExt(): Prefix Paths. Extensions.")
 	for i, path in ipairs(self.paths) do
 		for j, extension in ipairs(self.extensions) do
-			local file_path = join(path, id .. "." .. extension)
+			local file_path = uiRes.join(path, id .. "." .. extension)
 			if checkFile(file_path, self.file_types) then
 				return loadAttachAndReturn(self, id, file_path)
 			end

@@ -1010,11 +1010,15 @@ function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	out_def._inst_mt = {__index = out_def}
 	setmetatable(out_def, uiWidget._mt_widget)
 
-	--print("\tout_def", out_def)
-	--print("\tout_def._inst_mt", out_def._inst_mt)
-
 	out_def.id = id
 	out_def.default_settings = out_def.default_settings or {}
+
+	if out_def.default_skinner then
+		if not self.resources then
+			error("a theme resource table must be instantiated to use widget default skinners.")
+		end
+		self:registerSkinnerTable(out_def.default_skinner, id)
+	end
 
 	self.widget_defs[id] = out_def
 
@@ -1054,13 +1058,7 @@ function _mt_context:loadWidgetDefsInDirectory(dir_path, recursive, id_prepend, 
 	local source_files = uiRes.enumerate(dir_path, ".lua", recursive)
 
 	for i, file_path in ipairs(source_files) do
-		-- Use the file name without the '.lua' extension as the ID.
-		local id = file_path:match("^(.-)%.lua$")
-		if not id then
-			error("couldn't extract ID from file path: " .. file_path)
-		end
-		id = id_prepend .. uiRes.stripBaseDirectoryFromPath(dir_path, id)
-
+		local id = id_prepend .. uiRes.extractIDFromLuaFile(dir_path, file_path)
 		self:loadWidgetDef(file_path, id, def_conf)
 	end
 end
@@ -1160,6 +1158,45 @@ function _mt_context:addWidget(id, init_t, pos)
 		uiWidget._runUserEvent(init_t, "userCreate")
 
 		return init_t
+	end
+end
+
+
+--- Registers a skinner.
+-- @param skinner The skinner table.
+-- @param id The skinner's ID. Can be a string or a number.
+function _mt_context:registerSkinnerTable(skinner, id)
+	uiShared.type1(1, skinner, "table")
+	uiShared.type1(2, id, "string", "number")
+
+	uiRes.assertNotRegistered("skinner", self.resources.skinners, id)
+
+	self.resources.skinners[id] = skinner
+end
+
+
+--- Loads a skinner from a file and registers it.
+-- @param file_path The path to the Lua file.
+-- @param id The skinner's ID. Can be a string or a number.
+function _mt_context:loadSkinner(file_path, id)
+	uiShared.type1(1, file_path, "string")
+	uiShared.type1(2, id, "string", "number")
+
+	uiRes.assertNotRegistered("skinner", self.resources.skinners, id)
+
+	local skinner = uiRes.loadLuaFile(file_path, self)
+	self.resources.skinners[id] = skinner
+end
+
+
+function _mt_context:loadSkinnersInDirectory(dir_path, recursive, id_prepend)
+	id_prepend = id_prepend or ""
+
+	local source_files = uiRes.enumerate(dir_path, ".lua", recursive)
+
+	for i, file_path in ipairs(source_files) do
+		local id = id_prepend .. uiRes.extractIDFromLuaFile(dir_path, file_path)
+		self:loadSkinner(file_path, id)
 	end
 end
 

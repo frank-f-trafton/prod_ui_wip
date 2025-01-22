@@ -850,107 +850,110 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
+def.default_skinner = {
+	schema = {
+		underline_width = "scaled-int",
+		base_height = "scaled-int"
+	},
 
-			self.underline_width = skin.underline_width
-			self.base_height = skin.base_height
-		end,
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
 
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
+		self.underline_width = skin.underline_width
+		self.base_height = skin.base_height
+	end,
 
 
-		render = function(self, ox, oy)
-			local skin = self.skin
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
 
-			local items = self.menu.items
-			local selected_index = self.menu.index
 
-			local font = skin.font_item
-			local font_h = font:getHeight()
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
 
-			love.graphics.push("all")
 
-			-- Don't draw menu contents outside of the widget bounding box.
-			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+	render = function(self, ox, oy)
+		local skin = self.skin
 
-			-- Body background.
-			uiGraphics.drawSlice(skin.sl_body, 0, 0, self.w, self.h)
+		local items = self.menu.items
+		local selected_index = self.menu.index
 
-			-- Scroll offsets
-			love.graphics.translate(-self.scr_x, -self.scr_y)
+		local font = skin.font_item
+		local font_h = font:getHeight()
 
-			-- Draw selection or hover glow (just one or the other).
-			local sel_item = items[selected_index]
-			local item_hover = self.MN_item_hover
+		love.graphics.push("all")
 
-			if sel_item then
-				love.graphics.setColor(skin.color_select_glow)
-				uiGraphics.quad1x1(skin.tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+		-- Don't draw menu contents outside of the widget bounding box.
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-			elseif item_hover then
-				love.graphics.setColor(skin.color_hover_glow)
-				uiGraphics.quad1x1(skin.tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
-			end
+		-- Body background.
+		uiGraphics.drawSlice(skin.sl_body, 0, 0, self.w, self.h)
 
-			love.graphics.setFont(font)
+		-- Scroll offsets
+		love.graphics.translate(-self.scr_x, -self.scr_y)
 
-			if self.show_underlines then
-				for i = 1, #items do
-					local item = items[i]
-					if item.ul_on then
-						love.graphics.setColor(determineItemColor(item, self))
+		-- Draw selection or hover glow (just one or the other).
+		local sel_item = items[selected_index]
+		local item_hover = self.MN_item_hover
 
-						uiGraphics.quad1x1(
-							skin.tq_px,
-							item.x + item.ul_x,
-							item.y + item.ul_y,
-							item.ul_w,
-							self.underline_width
-						)
-					end
+		if sel_item then
+			love.graphics.setColor(skin.color_select_glow)
+			uiGraphics.quad1x1(skin.tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+
+		elseif item_hover then
+			love.graphics.setColor(skin.color_hover_glow)
+			uiGraphics.quad1x1(skin.tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
+		end
+
+		love.graphics.setFont(font)
+
+		if self.show_underlines then
+			for i = 1, #items do
+				local item = items[i]
+				if item.ul_on then
+					love.graphics.setColor(determineItemColor(item, self))
+
+					uiGraphics.quad1x1(
+						skin.tq_px,
+						item.x + item.ul_x,
+						item.y + item.ul_y,
+						item.ul_w,
+						self.underline_width
+					)
 				end
 			end
+		end
 
-			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
+		--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 
-			for i = 1, #items do
-				items[i]:render(self, ox, oy)
-			end
+		for i = 1, #items do
+			items[i]:render(self, ox, oy)
+		end
 
-			love.graphics.pop()
+		love.graphics.pop()
 
-			-- XXX Debug
-			--[[
-			love.graphics.origin()
-			love.graphics.setColor(1,1,1,1)
-			love.graphics.setFont(self.context.resources.fonts.p)
-			local ww = love.graphics.getWidth() - 288
+		-- XXX Debug
+		--[[
+		love.graphics.origin()
+		love.graphics.setColor(1,1,1,1)
+		love.graphics.setFont(self.context.resources.fonts.p)
+		local ww = love.graphics.getWidth() - 288
 
-			local root = self:getTopWidgetInstance()
+		local root = self:getTopWidgetInstance()
 
-			love.graphics.print("state: " .. self.state
-			.. "\npressed: " .. tostring(self == self.context.current_pressed)
-			.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
-			.. "\nself.menu.index: " .. tostring(self.menu.index))
-			,
-			ww, oy + 32)
-			 --]]
-		end,
+		love.graphics.print("state: " .. self.state
+		.. "\npressed: " .. tostring(self == self.context.current_pressed)
+		.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
+		.. "\nself.menu.index: " .. tostring(self.menu.index))
+		,
+		ww, oy + 32)
+		 --]]
+	end,
 
 
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy)
-	},
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy)
 }
 
 

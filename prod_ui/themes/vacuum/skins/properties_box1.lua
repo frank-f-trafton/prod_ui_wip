@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/properties_box",
 
 	box = "*style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
@@ -12,10 +12,10 @@ return {
 	data_icon = "*style/icons/p",
 
 	cursor_sash = "sizewe",
-	["$sash_w"] = 12,
+	sash_w = 12,
 
-	["$item_h"] = 40,
-	["$control_min_w"] = 128,
+	item_h = 40,
+	control_min_w = 128,
 
 	sl_body = "*tex_slices/list_box_body",
 
@@ -24,11 +24,11 @@ return {
 	-- Vertical text alignment is centered.
 
 	-- Property name icon column width and positioning, if active.
-	["$icon_spacing"] = 24,
+	icon_spacing = 24,
 	icon_side = "left", -- "left", "right"
 
 	-- Additional padding for left or right-aligned text. No effect with center alignment.
-	["$pad_text_x"] = 0,
+	pad_text_x = 0,
 
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
 	color_select_glow = {1.0, 1.0, 1.0, 0.33},

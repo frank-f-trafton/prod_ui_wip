@@ -555,75 +555,77 @@ function def:uiCall_destroy(inst)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function(self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local menu = self.menu
-
-			local font = skin.font
-
-			love.graphics.push("all")
-
-			uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-
-			-- Back panel body.
-			love.graphics.setColor(skin.color_body)
-			uiGraphics.drawSlice(skin.slice, 0, 0, self.w, self.h)
-
-			-- Embedded scroll bars, if present and active.
-			local data_scroll = skin.data_scroll
-			local scr_v = self.scr_v
-
-			if scr_v and scr_v.active then
-				self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-			end
-
-			-- Scroll offsets.
-			love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
-
-			-- Dropdown drawers do not render hover-glow.
-
-			-- Selection glow.
-			local selected_item = menu.items[menu.index]
-			if selected_item then
-				love.graphics.setColor(skin.color_selected)
-				love.graphics.rectangle("fill", 0, selected_item.y, self.vp_w - self.vp_x, selected_item.h)
-			end
-
-			-- XXX: icons.
-
-			-- Item text.
-			love.graphics.setColor(skin.color_text)
-			love.graphics.setFont(font)
-
-			for i = math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last) do
-				local item = menu.items[i]
-				local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
-				love.graphics.print(item.text, xx, item.y)
-			end
-
-			love.graphics.pop()
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) -- (This widget can't take the thimble.)
+def.default_skinner = {
+	schema = {
+		item_height = "scaled-int",
 	},
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function(self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local menu = self.menu
+
+		local font = skin.font
+
+		love.graphics.push("all")
+
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+
+		-- Back panel body.
+		love.graphics.setColor(skin.color_body)
+		uiGraphics.drawSlice(skin.slice, 0, 0, self.w, self.h)
+
+		-- Embedded scroll bars, if present and active.
+		local data_scroll = skin.data_scroll
+		local scr_v = self.scr_v
+
+		if scr_v and scr_v.active then
+			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+		end
+
+		-- Scroll offsets.
+		love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+
+		-- Dropdown drawers do not render hover-glow.
+
+		-- Selection glow.
+		local selected_item = menu.items[menu.index]
+		if selected_item then
+			love.graphics.setColor(skin.color_selected)
+			love.graphics.rectangle("fill", 0, selected_item.y, self.vp_w - self.vp_x, selected_item.h)
+		end
+
+		-- XXX: icons.
+
+		-- Item text.
+		love.graphics.setColor(skin.color_text)
+		love.graphics.setFont(font)
+
+		for i = math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last) do
+			local item = menu.items[i]
+			local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
+			love.graphics.print(item.text, xx, item.y)
+		end
+
+		love.graphics.pop()
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) -- (This widget can't take the thimble.)
 }
 
 

@@ -81,7 +81,4 @@ function def:uiCall_reshape()
 end
 
 
-def.skinners = context:getLua("shared/skn_button_bijou")
-
-
 return def

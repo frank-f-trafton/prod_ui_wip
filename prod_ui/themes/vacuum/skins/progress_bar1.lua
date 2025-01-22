@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "status/progress_bar",
 
 	box = "*style/boxes/button",
 	label_style = "*style/labels/norm",
@@ -16,7 +16,7 @@ return {
 	bar_placement = "overlay", -- "left", "right", "top", "bottom", "overlay"
 
 	-- How much space to assign the progress bar when not using "overlay" placement.
-	["$bar_spacing"] = 50,
+	bar_spacing = 50,
 
 	slc_back = "*tex_slices/progress_back",
 	slc_ichor = "*tex_slices/progress_ichor",
@@ -26,8 +26,8 @@ return {
 		color_ichor = {0.5, 0.5, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 
 	res_inactive = {
@@ -35,7 +35,7 @@ return {
 		color_ichor = {0.50, 0.50, 0.50, 1.0},
 		color_label = {0.75, 0.75, 0.75, 1.0},
 		--color_label_ul
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0,
 	},
 }

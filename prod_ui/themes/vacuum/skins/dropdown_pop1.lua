@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/dropdown_pop",
 
 	box = "*style/boxes/panel",
 	font = "*fonts/p",
@@ -12,7 +12,7 @@ return {
 	text_align = "left", -- "left", "center", "right"
 
 	-- Height of items.
-	["$item_height"] = 22,
+	item_height = 22,
 
 	-- The drawer's maximum height, as measured by the number of visible items (plus margins).
 	-- Drawer height is limited by the size of the application window.

@@ -1,8 +1,6 @@
--- * Widget Skin: Application button.
-
-
+-- Widget Skin: Application button.
 return {
-	skinner_id = "tquad",
+	skinner_id = "skn_button_tquad",
 
 	box = "*style/boxes/button",
 	label_style = "*style/labels/norm",
@@ -23,38 +21,38 @@ return {
 	graphic_placement = "overlay", -- "left", "right", "top", "bottom", "overlay"
 
 	-- Additional spacing between graphic and label.
-	["$graphic_spacing"] = 0,
+	graphic_spacing = 0,
 
 
 	res_idle = {
 		slice = "*tex_slices/button",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_hover = {
 		slice = "*tex_slices/button_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 
 	res_pressed = {
 		slice = "*tex_slices/button_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
-		["$label_ox"] = 0,
-		["$label_oy"] = 1,
+		label_ox = 0,
+		label_oy = 1
 	},
 
 	res_disabled = {
 		slice = "*tex_slices/button_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.5, 0.5, 0.5, 1.0},
-		["$label_ox"] = 0,
-		["$label_oy"] = 0,
+		label_ox = 0,
+		label_oy = 0
 	},
 }

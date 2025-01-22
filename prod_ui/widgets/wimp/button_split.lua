@@ -216,82 +216,102 @@ function def:uiCall_reshape()
 end
 
 
-def.skinners = context:getLua("shared/skn_button")
+def.default_skinner = {
+	schema = {
+		aux_size = "scaled-int",
+		graphic_spacing = "scaled-int",
 
+		res_idle = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
+		res_hover = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
+		res_pressed = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		},
 
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function (self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local res = uiTheme.pickButtonResource(self, skin)
-
-			local slc_body = res.slice
-			love.graphics.setColor(res.color_body)
-			uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
-
-			local tq_px = skin.tq_px
-
-			-- draw a line between the main and aux parts of the button
-			love.graphics.push("all")
-
-			love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
-			-- (get coordinates for the line)
-			local vx, vy, vw, vh
-			if     skin.aux_placement == "left"   then vx, vy, vw, vh = self.vp3_x + self.vp3_w - 1, self.vp3_y, 1, self.vp3_h - 1
-			elseif skin.aux_placement == "right"  then vx, vy, vw, vh = self.vp3_x, self.vp3_y, 1, self.vp3_h
-			elseif skin.aux_placement == "top"    then vx, vy, vw, vh = self.vp3_x, self.vp3_y + self.vp3_h - 1, self.vp3_w - 1, 1
-			elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = self.vp3_x, self.vp3_y, self.vp3_w - 1, 1 end
-			uiGraphics.quadXYWH(tq_px, vx + res.label_ox, vy + res.label_oy, vw, vh)
-
-			-- aux part icon
-			local aux_color = self.aux_enabled and res.color_aux_icon or skin.res_disabled.color_aux_icon
-			love.graphics.setColor(aux_color)
-			uiGraphics.quadShrinkOrCenterXYWH(
-				skin.tq_aux_glyph,
-				self.vp3_x + res.label_ox,
-				self.vp3_y + res.label_oy,
-				self.vp3_w,
-				self.vp3_h
-			)
-
-			love.graphics.pop()
-
-			local graphic = self.graphic or skin.graphic
-			if graphic then
-				lgcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
-			end
-
-			if self.label_mode then
-				lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
-			end
-
-			-- XXX: Debug border (viewport rectangle)
-			--[[
-			local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
-			widDebug.debugDrawViewport(self, 1)
-			widDebug.debugDrawViewport(self, 2)
-			widDebug.debugDrawViewport(self, 3)
-			--]]
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+		res_disabled = {
+			label_ox = "scaled-int",
+			label_oy = "scaled-int"
+		}
 	},
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function (self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local res = uiTheme.pickButtonResource(self, skin)
+
+		local slc_body = res.slice
+		love.graphics.setColor(res.color_body)
+		uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
+
+		local tq_px = skin.tq_px
+
+		-- draw a line between the main and aux parts of the button
+		love.graphics.push("all")
+
+		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
+		-- (get coordinates for the line)
+		local vx, vy, vw, vh
+		if     skin.aux_placement == "left"   then vx, vy, vw, vh = self.vp3_x + self.vp3_w - 1, self.vp3_y, 1, self.vp3_h - 1
+		elseif skin.aux_placement == "right"  then vx, vy, vw, vh = self.vp3_x, self.vp3_y, 1, self.vp3_h
+		elseif skin.aux_placement == "top"    then vx, vy, vw, vh = self.vp3_x, self.vp3_y + self.vp3_h - 1, self.vp3_w - 1, 1
+		elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = self.vp3_x, self.vp3_y, self.vp3_w - 1, 1 end
+		uiGraphics.quadXYWH(tq_px, vx + res.label_ox, vy + res.label_oy, vw, vh)
+
+		-- aux part icon
+		local aux_color = self.aux_enabled and res.color_aux_icon or skin.res_disabled.color_aux_icon
+		love.graphics.setColor(aux_color)
+		uiGraphics.quadShrinkOrCenterXYWH(
+			skin.tq_aux_glyph,
+			self.vp3_x + res.label_ox,
+			self.vp3_y + res.label_oy,
+			self.vp3_w,
+			self.vp3_h
+		)
+
+		love.graphics.pop()
+
+		local graphic = self.graphic or skin.graphic
+		if graphic then
+			lgcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
+		end
+
+		if self.label_mode then
+			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+		end
+
+		-- XXX: Debug border (viewport rectangle)
+		--[[
+		local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
+		widDebug.debugDrawViewport(self, 1)
+		widDebug.debugDrawViewport(self, 2)
+		widDebug.debugDrawViewport(self, 3)
+		--]]
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

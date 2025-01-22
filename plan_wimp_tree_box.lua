@@ -51,15 +51,14 @@ function plan.make(parent)
 
 		-- SkinDef clone
 		local resources = content.context.resources
-		local skin_defs = resources.skin_defs
-		local clone = pTable.deepCopy(skin_defs["tree_box1"])
-		resources:registerSkinDef(clone, clone)
+		local skin_clone = resources:cloneSkinDef("tree_box1")
+		resources:registerSkinDef(skin_clone, skin_clone)
 
 		local function _userDestroy(self)
-			self.context.resources:removeSkinDef(clone)
+			self.context.resources:removeSkinDef(skin_clone)
 		end
 
-		local tree_box = content:addChild("wimp/tree_box", {skin_id = clone, userDestroy = _userDestroy})
+		local tree_box = content:addChild("wimp/tree_box", {skin_id = skin_clone, userDestroy = _userDestroy})
 		tree_box:setTag("demo_treebox")
 
 		tree_box.wid_action = function(self, item, index)

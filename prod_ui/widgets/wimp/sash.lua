@@ -211,36 +211,40 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-def.skinners = {
-	default = {
-		install = function(self, skinner, skin)
-			uiTheme.skinnerCopyMethods(self, skinner)
-		end,
-
-
-		remove = function(self, skinner, skin)
-			uiTheme.skinnerClearData(self)
-		end,
-
-
-		--refresh = function (self, skinner, skin)
-		--update = function(self, skinner, skin, dt)
-
-
-		render = function(self, ox, oy)
-			local skin = self.skin
-			local tq_px = skin.tq_px
-			local side = self.att_side
-			local slc = (side == "left" or side == "right") and skin.slc_lr or skin.slc_tb
-
-			love.graphics.setColor(skin.color)
-			uiGraphics.drawSlice(slc, 0, 0, self.w, self.h)
-		end,
-
-
-		--renderLast = function(self, ox, oy) end,
-		--renderThimble = function(self, ox, oy) end,
+def.default_skinner = {
+	schema = {
+		breadth = "scaled-int",
+		sensor_margin = "scaled-int"
 	},
+
+
+	install = function(self, skinner, skin)
+		uiTheme.skinnerCopyMethods(self, skinner)
+	end,
+
+
+	remove = function(self, skinner, skin)
+		uiTheme.skinnerClearData(self)
+	end,
+
+
+	--refresh = function (self, skinner, skin)
+	--update = function(self, skinner, skin, dt)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		local tq_px = skin.tq_px
+		local side = self.att_side
+		local slc = (side == "left" or side == "right") and skin.slc_lr or skin.slc_tb
+
+		love.graphics.setColor(skin.color)
+		uiGraphics.drawSlice(slc, 0, 0, self.w, self.h)
+	end,
+
+
+	--renderLast = function(self, ox, oy) end,
+	--renderThimble = function(self, ox, oy) end,
 }
 
 

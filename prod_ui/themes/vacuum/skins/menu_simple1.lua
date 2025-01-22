@@ -2,7 +2,7 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "base/menu_simple",
 
 	font = "*fonts/p",
 
@@ -14,5 +14,5 @@ return {
 
 	color_scroll_ind = {0.75, 0.75, 0.75, 1.0},
 
-	["$outline_width"] = 1,
+	outline_width = 1
 }

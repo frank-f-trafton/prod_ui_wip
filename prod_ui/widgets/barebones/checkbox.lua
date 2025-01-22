@@ -52,7 +52,7 @@ function def:uiCall_create(inst)
 end
 
 
-def.render = context:getLua("shared/skn_button_bare")
+def.render = context:getLua("shared/render_button_bare")
 
 
 return def

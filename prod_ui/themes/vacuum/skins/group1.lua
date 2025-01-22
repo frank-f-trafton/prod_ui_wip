@@ -17,7 +17,7 @@ Slice B       Slice C
 --]]
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/group",
 
 	box = "*style/boxes/wimp_group",
 	font = "*fonts/p",

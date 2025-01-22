@@ -2,11 +2,11 @@
 
 
 return {
-	skinner_id = "default",
+	skinner_id = "wimp/menu_pop",
 
 	box = "*style/boxes/panel",
 
-	["$separator_size"] = 1,
+	separator_size = 1,
 
 
 	-- (Pop up menus do not render hover-glow.)
