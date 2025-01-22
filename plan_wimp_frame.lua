@@ -6,38 +6,22 @@ local commonWimp = require("prod_ui.common.common_wimp")
 local pTable = require("prod_ui.lib.pile_table")
 
 
-local function _getFrameAndHeader(self)
-	local frame = commonWimp.getFrame(self)
-	if frame then
-		return frame, frame:findTag("frame_header")
-	end
-end
-
-
 function plan.make(parent)
 	local context = parent.context
 
-	-- Make some skinDef patches to avoid messing up other frames.
+	-- Clone the skin to avoid messing up other frames.
 	local resources = context.resources
 	local skin_defs = resources.skin_defs
 
-	local clone_header_norm = pTable.deepCopy({}, skin_defs["wimp_header_norm"])
-	resources:registerSkinDef(clone_header_norm, clone_header_norm)
-
-	local clone_header_cond = pTable.deepCopy({}, skin_defs["wimp_header_cond"])
-	resources:registerSkinDef(clone_header_cond, clone_header_cond)
-
-	local clone_frame = pTable.deepCopy({}, skin_defs["wimp_frame"])
-	resources:registerSkinDef(clone_frame, clone_frame, false)
+	local skin_clone = pTable.deepCopy(skin_defs["wimp_frame"])
+	resources:registerSkinDef(skin_clone, skin_clone, false)
 
 	local function _userDestroy(self)
-		self.context.resources:removeSkinDef(clone_header_norm)
-		self.context.resources:removeSkinDef(clone_header_cond)
-		self.context.resources:removeSkinDef(clone_frame)
+		self.context.resources:removeSkinDef(skin_clone)
 	end
 
 
-	local frame = parent:addChild("wimp/window_frame", {skin_id = clone_frame, userDestroy = _userDestroy})
+	local frame = parent:addChild("wimp/window_frame", {skin_id = skin_clone, userDestroy = _userDestroy})
 	local header = frame:findTag("frame_header")
 
 	frame.w = 640
@@ -60,8 +44,8 @@ function plan.make(parent)
 			checkbox:setLabel("Condensed Header")
 
 			checkbox.wid_buttonAction = function(self)
-				local frame, header = _getFrameAndHeader(self)
-				if header then
+				local frame = commonWimp.getFrame(self)
+				if frame then
 					frame:setCondensedHeader(not not self.checked)
 				end
 			end
@@ -99,10 +83,9 @@ function plan.make(parent)
 			yy = yy + hh
 
 			local r_action = function(self)
-				local frame, header = _getFrameAndHeader(self)
-				if header then
-					patch_header_norm.button_side = self.usr_button_side
-					patch_header_cond.button_side = self.usr_button_side
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:writeSetting("header_button_side", self.usr_button_side)
 					frame:reshape(true)
 				end
 			end
@@ -154,11 +137,13 @@ function plan.make(parent)
 			yy = yy + hh
 
 			local r_action = function(self)
-				local frame, header = _getFrameAndHeader(self)
-				if header then
-					patch_header_norm.text_align_h = self.usr_text_align_h
-					patch_header_cond.text_align_h = self.usr_text_align_h
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					skin_clone.header_text_align_h = self.usr_text_align_h
+					self.context.resources:refreshSkinDefInstance(skin_clone)
 					frame:reshape(true)
+					print("skin_clone.header_text_align_h", skin_clone.header_text_align_h)
+					print("frame.skin.header_text_align_h", frame.skin.header_text_align_h)
 				end
 			end
 
@@ -173,7 +158,7 @@ function plan.make(parent)
 
 				-- initial state
 				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
-					radio_button:setChecked(true)
+					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
 			end

@@ -4,10 +4,10 @@
 return {
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/input_box",
-	["*data_scroll"] = "common/scroll_bar1",
-	["*font"] = "fonts/p",
-	["*font_ghost"] = "fonts/p",
+	box = "*style/boxes/input_box",
+	data_scroll = "*common/scroll_bar1",
+	font = "*fonts/p",
+	font_ghost = "*fonts/p",
 
 	cursor_on = "ibeam",
 

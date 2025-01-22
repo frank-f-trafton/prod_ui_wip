@@ -186,6 +186,19 @@ function themeDef.newInstance(scale)
 	-- How many pixels to extend / pad resize sensors.
 	inst.wimp.frame_resize_pad = math.max(1, math.floor(8 * scale))
 
+	-- Theme -> Skin settings
+	inst.wimp.frame_render_shadow = true
+	inst.wimp.header_button_side = "right"
+	inst.wimp.header_condensed = false
+	inst.wimp.header_enable_close_button = true
+	inst.wimp.header_enable_size_button = true
+	inst.wimp.header_show_close_button = true
+	inst.wimp.header_show_size_button = true
+	inst.wimp.header_text = "Untitled Frame"
+	inst.wimp.header_text_align_h = 0.5
+	inst.wimp.header_text_align_v = 0.5
+
+
 	-- Common / shared render state + functions.
 	inst.common = {}
 

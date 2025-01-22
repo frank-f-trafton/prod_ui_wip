@@ -39,7 +39,7 @@ function plan.make(parent)
 
 		local resources = content.context.resources
 		local skin_defs = resources.skin_defs
-		local clone = pTable.deepCopy({}, skin_defs["button1"])
+		local clone = pTable.deepCopy(skin_defs["button1"])
 		resources:registerSkinDef(clone, clone)
 
 		local function _userDestroy(self)

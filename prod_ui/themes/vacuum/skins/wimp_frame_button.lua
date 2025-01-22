@@ -4,8 +4,8 @@
 return {
 	skinner_id = "tquad",
 
-	["*box"] = "style/boxes/button_small",
-	["*label_style"] = "style/labels/norm",
+	box = "*style/boxes/button_small",
+	label_style = "*style/labels/norm",
 
 	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
@@ -17,7 +17,7 @@ return {
 
 
 	res_idle = {
-		["*slice"] = "tex_slices/window_header_button",
+		slice = "*tex_slices/window_header_button",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
 		["$label_ox"] = 0,
@@ -25,7 +25,7 @@ return {
 	},
 
 	res_hover = {
-		["*slice"] = "tex_slices/window_header_button_hover",
+		slice = "*tex_slices/window_header_button_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
 		["$label_ox"] = 0,
@@ -33,7 +33,7 @@ return {
 	},
 
 	res_pressed = {
-		["*slice"] = "tex_slices/window_header_button_press",
+		slice = "*tex_slices/window_header_button_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
 		["$label_ox"] = 0,
@@ -41,7 +41,7 @@ return {
 	},
 
 	res_disabled = {
-		["*slice"] = "tex_slices/window_header_button_disabled",
+		slice = "*tex_slices/window_header_button_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.5, 0.5, 0.5, 1.0},
 		["$label_ox"] = 0,

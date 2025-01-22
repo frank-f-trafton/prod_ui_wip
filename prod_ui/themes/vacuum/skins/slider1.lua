@@ -4,9 +4,9 @@
 return {
 	skinner_id = "default",
 
-	["*box"] = "style/boxes/button",
-	["*label_style"] = "style/labels/norm",
-	["*tq_px"] = "tex_quads/pixel",
+	box = "*style/boxes/button",
+	label_style = "*style/labels/norm",
+	tq_px = "*tex_quads/pixel",
 
 
 	-- Label placement and spacing.
@@ -48,9 +48,9 @@ return {
 	--]]
 
 	res_idle = {
-		["*tq_thumb"] = "tex_quads/slider_thumb1", -- XXX make some variations for hover, press, disabled
-		["*sl_trough_active"] = "tex_slices/slider_trough_active",
-		["*sl_trough_empty"] = "tex_slices/slider_trough_empty",
+		tq_thumb = "*tex_quads/slider_thumb1", -- XXX make some variations for hover, press, disabled
+		sl_trough_active = "*tex_slices/slider_trough_active",
+		sl_trough_empty = "*tex_slices/slider_trough_empty",
 
 		color_label = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul
@@ -59,9 +59,9 @@ return {
 	},
 
 	res_hover = {
-		["*tq_thumb"] = "tex_quads/slider_thumb1",
-		["*sl_trough_active"] = "tex_slices/slider_trough_active",
-		["*sl_trough_empty"] = "tex_slices/slider_trough_empty",
+		tq_thumb = "*tex_quads/slider_thumb1",
+		sl_trough_active = "*tex_slices/slider_trough_active",
+		sl_trough_empty = "*tex_slices/slider_trough_empty",
 
 		color_label = {1.0, 1.0, 1.0, 1.0},
 		--color_label_ul,
@@ -70,9 +70,9 @@ return {
 	},
 
 	res_pressed = {
-		["*tq_thumb"] = "tex_quads/slider_thumb1",
-		["*sl_trough_active"] = "tex_slices/slider_trough_active",
-		["*sl_trough_empty"] = "tex_slices/slider_trough_empty",
+		tq_thumb = "*tex_quads/slider_thumb1",
+		sl_trough_active = "*tex_slices/slider_trough_active",
+		sl_trough_empty = "*tex_slices/slider_trough_empty",
 
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
@@ -81,9 +81,9 @@ return {
 	},
 
 	res_disabled = {
-		["*tq_thumb"] = "tex_quads/slider_thumb1",
-		["*sl_trough_active"] = "tex_slices/slider_trough_active",
-		["*sl_trough_empty"] = "tex_slices/slider_trough_empty",
+		tq_thumb = "*tex_quads/slider_thumb1",
+		sl_trough_active = "*tex_slices/slider_trough_active",
+		sl_trough_empty = "*tex_slices/slider_trough_empty",
 
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul,
