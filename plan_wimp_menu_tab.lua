@@ -32,11 +32,6 @@ function plan.make(parent)
 
 	frame:setFrameTitle("Tabular Menu Test")
 
-	local header = frame:findTag("frame_header")
-	if header then
-		--header.condensed = true
-	end
-
 	local content = frame:findTag("frame_content")
 	if content then
 

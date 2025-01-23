@@ -17,16 +17,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame", {make_menu_bar = true})
-
 	frame.w = 640--350
 	frame.h = 480--240
-
 	frame:setFrameTitle("LineEditor Test")
-
-	local header = frame:findTag("frame_header")
-	if header then
-		--header.condensed = true
-	end
 
 	local content = frame:findTag("frame_content")
 	if content then

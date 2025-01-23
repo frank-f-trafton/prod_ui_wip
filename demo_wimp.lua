@@ -173,10 +173,6 @@ local function demo_digUpFrameAndHeader(self)
 	if not wid then
 		print("Demo Error: couldn't locate ancestor frame")
 	end
-	local header = wid:findTag("frame_header")
-	if not header then
-		print("Demo Error: no header widget found in window frame")
-	end
 
 	return wid, header -- check the return values before accessing them
 end
