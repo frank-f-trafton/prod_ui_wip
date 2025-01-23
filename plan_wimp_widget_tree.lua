@@ -134,16 +134,15 @@ function plan.make(root)
 	local context = root.context
 
 	local frame = root:addChild("wimp/window_frame")
-
 	frame.w = 400
 	frame.h = 384
-
-	frame:setFrameTitle("Widget Tree")
 	frame:setCondensedHeader(true)
+	frame:setFrameTitle("Widget Tree")
 
 	local content = frame:findTag("frame_content")
 	if content then
-		content.layout_mode = "resize"
+		--content.layout_mode = "resize" -- XXX needs a rethink
+		content.layout_mode = "auto"
 		content:setScrollBars(false, false)
 
 		local tree_box = content:addChild("wimp/tree_box")
