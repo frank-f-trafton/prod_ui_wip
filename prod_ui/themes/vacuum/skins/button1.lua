@@ -58,7 +58,7 @@ return {
 	},
 
 	res_disabled = {
-		slice = "tex_slices/button_disabled",
+		slice = "*tex_slices/button_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul
