@@ -114,15 +114,7 @@ function plan.make(parent)
 		content.layout_mode = "resize"
 		content:setScrollBars(false, false)
 
-		local header_d
-		local content_d
-
-		header_d = frame:findTag("frame_header")
-		if header_d then
-			--header_d.condensed = true
-		end
-
-		content_d = frame:findTag("frame_content")
+		local content_d = frame:findTag("frame_content")
 		if content_d then
 			content_d.w = 640
 			content_d.h = 480

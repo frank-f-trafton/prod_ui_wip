@@ -139,11 +139,7 @@ function plan.make(root)
 	frame.h = 384
 
 	frame:setFrameTitle("Widget Tree")
-
-	local header_b = frame:findTag("frame_header")
-	if header_b then
-		header_b.condensed = true
-	end
+	frame:setCondensedHeader(true)
 
 	local content = frame:findTag("frame_content")
 	if content then
