@@ -10,19 +10,16 @@ function plan.make(parent)
 	local context = parent.context
 
 	-- Clone the skin to avoid messing up other frames.
-	local resources = context.resources
-	local skin_clone = resources:cloneSkinDef("wimp_frame")
+	local skin_clone = context.resources:cloneSkinDef("wimp_frame")
 
 	local function _userDestroy(self)
 		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-
-	local frame = parent:addChild("wimp/window_frame", {skin_id = skin_clone, userDestroy = _userDestroy})
-	local header = frame:findTag("frame_header")
-
+	local frame = parent:addChild("wimp/window_frame", {skin_id = skin_clone})
 	frame.w = 640
 	frame.h = 480
+	frame.userDestroy = _userDestroy
 
 	frame:setFrameTitle("WIMP Window Frame")
 
@@ -97,7 +94,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.skin.button_side == rad_btn.usr_button_side then
+				if frame.header_button_side == rad_btn.usr_button_side then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -113,7 +110,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.skin.button_side == rad_btn.usr_button_side then
+				if frame.header_button_side == rad_btn.usr_button_side then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -154,7 +151,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
+				if frame.skin.header_text_align_h == rad_btn.usr_text_align_h then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -170,7 +167,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
+				if frame.skin.header_text_align_h == rad_btn.usr_text_align_h then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
@@ -186,7 +183,7 @@ function plan.make(parent)
 				rad_btn.wid_buttonAction = r_action
 
 				-- initial state
-				if header and header.skin.text_align_h == rad_btn.usr_text_align_h then
+				if frame.skin.header_text_align_h == rad_btn.usr_text_align_h then
 					rad_btn:setChecked(true)
 				end
 				yy = yy + hh
