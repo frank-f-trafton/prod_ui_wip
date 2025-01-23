@@ -1,20 +1,17 @@
 
--- ProdUI
+local plan = {}
+
+
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
-
-
-local plan = {}
 
 
 function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
 	frame:setFrameTitle("Label Tests")
 
 	local content = frame:findTag("frame_content")
@@ -38,6 +35,7 @@ function plan.make(parent)
 		lbl3:setLabel("Multi-Line Multi-Line Multi-Line Multi-Line Multi-Line", "multi")
 	end
 
+	frame:reshape(true)
 	frame:center(true, true)
 
 	return frame
