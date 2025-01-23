@@ -486,14 +486,6 @@ function def:uiCall_thimble1Take(inst)
 end
 
 
-function def:refreshSelected(is_selected)
-	local header = self:findTag("frame_header")
-	if header then
-		header.selected = not not is_selected
-	end
-end
-
-
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	-- Frame-modal check
 	if self.ref_modal_next then
@@ -720,7 +712,7 @@ function def:uiCall_reshape()
 
 	local skin = self.skin
 	local res = self.header_condensed and skin.res_cond or skin.res_norm
-	local res2 = self.selected and res.res_selected or res.res_unselected
+	--local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
 
 	-- (parent should be the WIMP root widget.)
 	local parent = self.parent
@@ -886,7 +878,7 @@ def.default_skinner = {
 
 		-- Window header
 		local res = self.header_condensed and skin.res_cond or skin.res_norm
-		local res2 = self.selected and res.res_selected or res.res_unselected
+		local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
 		local slc_header_body = res.header_slc_body
 		love.graphics.setColor(res2.col_header_fill)
 		uiGraphics.drawSlice(slc_header_body, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)

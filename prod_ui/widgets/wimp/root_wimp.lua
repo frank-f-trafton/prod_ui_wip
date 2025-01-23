@@ -306,17 +306,6 @@ function def:uiCall_windowResize(w, h)
 end
 
 
-local function refreshSelectedFrame(self)
-	local selected = self.selected_frame
-
-	for i, child in ipairs(self.children) do
-		if child.is_frame then
-			child:refreshSelected(child == selected)
-		end
-	end
-end
-
-
 function def:rootCall_getFrameOrderID()
 	self.frame_order_counter = self.frame_order_counter + 1
 	return self.frame_order_counter
@@ -342,8 +331,6 @@ function def:setSelectedFrame(inst, set_new_order)
 			end
 		end
 	end
-
-	refreshSelectedFrame(self)
 end
 
 
