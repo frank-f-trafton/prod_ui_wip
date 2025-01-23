@@ -52,7 +52,6 @@ function plan.make(parent)
 		-- SkinDef clone
 		local resources = content.context.resources
 		local skin_clone = resources:cloneSkinDef("tree_box1")
-		resources:registerSkinDef(skin_clone, skin_clone)
 
 		local function _userDestroy(self)
 			self.context.resources:removeSkinDef(skin_clone)

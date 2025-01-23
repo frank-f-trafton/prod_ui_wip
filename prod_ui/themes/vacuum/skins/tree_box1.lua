@@ -4,7 +4,7 @@
 return {
 	skinner_id = "wimp/tree_box",
 
-	box = "style/boxes/panel",
+	box = "*style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
 	data_scroll = "*common/scroll_bar1",
 	scr_style = "*style/scroll_bar_styles/norm",
