@@ -87,7 +87,10 @@ widShared.scrollSetMethods(def)
 def.arrange = lgcMenu.arrangeListVerticalTB
 
 
--- XXX: test
+local function _blocking_ui_evaluateHover(self, mx, my, os_x, os_y)
+	return true
+end
+
 local function _blocking_ui_evaluatePress(self, mx, my, os_x, os_y, button, istouch, presses)
 	return true
 end
@@ -97,9 +100,11 @@ end
 function def:setBlocking(enabled)
 	if enabled then
 		self.is_blocking_clicks = true
+		self.ui_evaluateHover = _blocking_ui_evaluateHover
 		self.ui_evaluatePress = _blocking_ui_evaluatePress
 	else
 		self.is_blocking_clicks = false
+		self.ui_evaluateHover = nil
 		self.ui_evaluatePress = nil
 	end
 end
@@ -1083,11 +1088,12 @@ end
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
-		-- XXX: Test
+		local mx, my, ax, ay = self:getRelativePosition(x, y)
+
 		if self.is_blocking_clicks then
-			local mx, my = self:getRelativePosition(x, y)
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
-				self.context.current_pressed = false
+				local root = self:getTopWidgetInstance()
+				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 				return
 			end
 		end
@@ -1096,11 +1102,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble2()
 		end
 
-		local ax, ay = self:getAbsolutePosition()
-		local mouse_x = x - ax
-		local mouse_y = y - ay
-
-		if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
+		if widShared.pointInViewport(self, 2, mx, my) then
 
 			x = x - ax + self.scr_x - self.vp_x
 			y = y - ay + self.scr_y - self.vp_y
