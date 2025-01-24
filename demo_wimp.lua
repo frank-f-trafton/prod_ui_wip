@@ -93,8 +93,23 @@ love.graphics.setFont(font_test)
 -- / LÖVE Setup
 
 
+-- WIMP config/settings. Eventually, this will be placed in a separate file.
+local wimp_settings = {
+	wimp = {
+		pop_up_menu = {
+			-- When clicking off of a pop-up menu, stops the user from clicking
+			-- any other widget that is behind the base menu.
+			-- May prevent accidental clicks, though some people (ahem) hate it.
+			block_1st_click_out = false,
+		}
+	}
+}
+
+
 local function newWimpContext()
-	local context = uiContext.newContext("prod_ui", 0, 0, love.graphics.getDimensions())
+	local context = uiContext.newContext("prod_ui", wimp_settings)
+
+
 
 	-- Config/settings specific to this demo.
 	context.app = {

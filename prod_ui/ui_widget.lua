@@ -1285,39 +1285,6 @@ function _mt_widget:skinUpdate(dt)
 end
 
 
-function _mt_widget:getHierarchical(field)
-	local wid = self
-
-	while wid do
-		local ret = wid[field]
-		if ret ~= nil then
-			return ret
-
-		else
-			wid = wid.parent
-		end
-	end
-
-	error("hierarchical look-up failed. Field: " .. tostring(field))
-end
-
-
-function _mt_widget:drillHierarchical(...)
-	local wid = self
-
-	while wid do
-		local ret = utilTable.tryDrillV(self, ...)
-		if ret ~= nil then
-			return ret
-		else
-			wid = wid.parent
-		end
-	end
-
-	error("hierarchical drill failed. Fields: " .. utilTable.concatVarargs(...))
-end
-
-
 --- Get a widget's parent, throwing an error if there is no reference (it's the root widget, or data corruption).
 function _mt_widget:getParent()
 	local parent = self.parent
