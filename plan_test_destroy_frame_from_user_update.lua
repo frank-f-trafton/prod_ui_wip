@@ -16,12 +16,19 @@ function plan.make(parent)
 		content:setScrollBars(false, false)
 
 		local bb_lbl = content:addChild("barebones/label", {x=0, y=0, w=256, h=192})
-		bb_lbl:setLabel("This frame will self-destruct, via userUpdate, in 4 seconds.")
+		bb_lbl:setTag("countdown_label")
+
+		frame.usr_time = 0.0
+		frame.usr_time_max = 4.0
 	end
 
 	frame.userUpdate = function(self, dt)
-		self.usr_time = (self.usr_time or 0) + dt
-		if self.usr_time >= 4 then
+		self.usr_time = self.usr_time + dt
+		local bb_lbl = content:findTag("countdown_label")
+		if bb_lbl then
+			bb_lbl:setLabel(string.format("This frame will self-destruct, via userUpdate, in %.1f seconds.", self.usr_time_max - self.usr_time))
+		end
+		if self.usr_time >= self.usr_time_max then
 			local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 			commonWimp.closeWindowFrame(self)
 			return true

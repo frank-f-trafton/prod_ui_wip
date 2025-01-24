@@ -645,7 +645,17 @@ function _mt_widget:remove()
 		end
 	end
 
-	-- If this widget is part of a Click-Sequence, remove it.
+	-- Remove widget from any other context fields.
+	-- XXX: emit the appropriate events. This stuff may need to happen earlier.
+	if context.current_hover == self then
+		context.current_hover = false
+	end
+	if context.current_pressed == self then
+		context.current_pressed = false
+	end
+	if context.current_drag_dest == self then
+		context.current_drag_dest = false
+	end
 	if context.cseq_widget == self then
 		context:clearClickSequence()
 	end
