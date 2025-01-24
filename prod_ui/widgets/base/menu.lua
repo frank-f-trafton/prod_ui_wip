@@ -584,9 +584,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 		if (y > 0 and self.scr_y > 0) or (y < 0 and self.scr_y < self.doc_h - self.vp_h) then
 			local old_scr_x, old_scr_y = self.scr_x, self.scr_y
 
-			-- Scroll about 1/4 of the visible items.
-			--local n = self.h / self.item_h * 4
-			self:scrollDeltaV(math.floor(self.MN_wheel_jump_size * -y + 0.5))
+			self:scrollDeltaV(math.floor(self.context.settings.wimp.navigation.mouse_wheel_move_size_v * -y + 0.5))
 
 			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
 				self:cacheUpdate(false)
