@@ -30,18 +30,70 @@ function plan.make(parent)
 
 		local xx, yy, ww, hh = 16, 16, 192, 32
 
-		-- Checkbox: Condensed Header
+		-- Radio Buttons: Header size
 		do
-			local checkbox = content:addChild("base/checkbox", {x=xx, y=yy, w=ww, h=hh})
-			checkbox.checked = false
-			checkbox.bijou_side = "right"
-			checkbox:setLabel("Condensed Header")
+			local text1 = content:addChild("base/text", {
+				x=xx, y=yy, w=ww, h=hh,
+				font = context.resources.fonts.p
+			})
+			text1.text = "Header size"
+			text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
+			text1:refreshText()
+			yy = yy + hh
 
-			checkbox.wid_buttonAction = function(self)
+			local r_action = function(self)
 				local frame = commonWimp.getFrame(self)
 				if frame then
-					frame:setCondensedHeader(not not self.checked)
+					frame:setHeaderSize(self.usr_header_size)
 				end
+			end
+
+			-- Small
+			do
+				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				rad_btn.bijou_side = "right"
+				rad_btn.radio_group = "rg_header_size"
+				rad_btn:setLabel("Small")
+				rad_btn.usr_header_size = "small"
+				rad_btn.wid_buttonAction = r_action
+
+				-- initial state
+				if frame.header_size == rad_btn.usr_header_size then
+					rad_btn:setChecked(true)
+				end
+				yy = yy + hh
+			end
+
+			-- Normal
+			do
+				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				rad_btn.bijou_side = "right"
+				rad_btn.radio_group = "rg_header_size"
+				rad_btn:setLabel("Normal")
+				rad_btn.usr_header_size = "normal"
+				rad_btn.wid_buttonAction = r_action
+
+				-- initial state
+				if frame.header_size == rad_btn.usr_header_size then
+					rad_btn:setChecked(true)
+				end
+				yy = yy + hh
+			end
+
+			-- Large
+			do
+				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				rad_btn.bijou_side = "right"
+				rad_btn.radio_group = "rg_header_size"
+				rad_btn:setLabel("Large")
+				rad_btn.usr_header_size = "large"
+				rad_btn.wid_buttonAction = r_action
+
+				-- initial state
+				if frame.header_size == rad_btn.usr_header_size then
+					rad_btn:setChecked(true)
+				end
+				yy = yy + hh
 			end
 			yy = yy + hh
 		end
@@ -115,12 +167,12 @@ function plan.make(parent)
 				end
 				yy = yy + hh
 			end
+			yy = yy + hh
 		end
 
 
 		-- Radio Buttons: Header text alignment
 		do
-			yy = yy + hh
 			local text1 = content:addChild("base/text", {
 				x=xx, y=yy, w=ww, h=hh,
 				font = context.resources.fonts.p
@@ -188,11 +240,11 @@ function plan.make(parent)
 				end
 				yy = yy + hh
 			end
+			yy = yy + hh
 		end
 
 		-- Button: Close
 		do
-			yy = yy + hh
 			local btn = content:addChild("base/button", {x=xx, y=yy, w=ww, h=hh})
 			btn:setLabel("Close Window")
 			btn.wid_buttonAction = function(self)

@@ -15,15 +15,21 @@ return {
 			margin = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
 		},
 
-		wimp_frame_header_norm = {
+		wimp_frame_header_normal = {
 			outpad = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
 			border = {x1 = 1, x2 = 1, y1 = 1, y2 = 1},
 			margin = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
 		},
 
-		wimp_frame_header_cond = {
+		wimp_frame_header_small = {
 			outpad = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
 			border = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
+			margin = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+		},
+
+		wimp_frame_header_large = {
+			outpad = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
+			border = {x1 = 2, x2 = 2, y1 = 2, y2 = 2},
 			margin = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
 		},
 

@@ -11,7 +11,7 @@ return {
 	header_show_close_button = "*wimp/header_show_close_button",
 	header_show_size_button = "*wimp/header_show_size_button",
 	header_text = "*wimp/header_text",
-	header_condensed = "*wimp/header_condensed",
+	header_size = "*wimp/header_size",
 	-- End settings
 
 	box = "*style/boxes/wimp_frame",
@@ -31,14 +31,13 @@ return {
 	color_body = {1.0, 1.0, 1.0, 1.0},
 	color_shadow = {1.0, 1.0, 1.0, 1.0},
 
-	-- normal headers
-	res_norm = {
+	res_normal = {
 		-- Which rectangle to use for fitting the header.
 		-- false: 'self.w', 'self.h'
 		-- number: a corresponding viewport.
 		viewport_fit = 2,
-		header_box = "*style/boxes/wimp_frame_header_norm",
-		header_slc_body = "*tex_slices/window_header_norm",
+		header_box = "*style/boxes/wimp_frame_header_normal",
+		header_slc_body = "*tex_slices/window_header_normal",
 		header_font = "*fonts/h4",
 		header_h = 32,
 		button_pad_w = 2,
@@ -57,11 +56,10 @@ return {
 		}
 	},
 
-	-- condensed headers
-	res_cond = {
+	res_small = {
 		viewport_fit = 2,
-		header_box = "*style/boxes/wimp_frame_header_cond",
-		header_slc_body = "*tex_slices/window_header_cond",
+		header_box = "*style/boxes/wimp_frame_header_small",
+		header_slc_body = "*tex_slices/window_header_small",
 		header_font = "*fonts/small",
 		header_h = 18,
 		button_pad_w = 2,
@@ -79,5 +77,27 @@ return {
 			col_header_fill = {0.25, 0.25, 0.45, 1.0},
 			col_header_text = {0.80, 0.80, 0.80, 1.0}
 		}
-	}
+	},
+
+	res_large = {
+		viewport_fit = 2,
+		header_box = "*style/boxes/wimp_frame_header_large",
+		header_slc_body = "*tex_slices/window_header_large",
+		header_font = "*fonts/h3",
+		header_h = 48,
+		button_pad_w = 2,
+		button_w = 40,
+		button_h = 46,
+		button_align_v = 0.5, -- from 0 (top) to 1 (bottom)
+
+		res_selected = {
+			col_header_fill = {0.3, 0.3, 0.5, 1.0},
+			col_header_text = {1.0, 1.0, 1.0, 1.0}
+		},
+
+		res_unselected = {
+			col_header_fill = {0.25, 0.25, 0.45, 1.0},
+			col_header_text = {0.80, 0.80, 0.80, 1.0}
+		}
+	},
 }

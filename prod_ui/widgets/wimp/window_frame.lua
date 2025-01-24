@@ -44,6 +44,7 @@ local commonFrame = require(context.conf.prod_ui_req .. "common.common_frame")
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -57,6 +58,9 @@ local _lerp = commonMath.lerp
 local function dummy_renderThimble() end
 
 
+local _header_sizes = pTable.makeLUT({"small", "normal", "large"})
+
+
 local def = {
 	skin_id = "wimp_frame",
 
@@ -68,7 +72,7 @@ local def = {
 		header_show_close_button = true,
 		header_show_size_button = true,
 		header_text = "",
-		header_condensed = false,
+		header_size = "normal"
 	}
 }
 
@@ -123,9 +127,13 @@ function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 end
 
 
-function def:setCondensedHeader(enabled)
-	if self.header_condensed ~= enabled then
-		self.header_condensed = enabled
+function def:setHeaderSize(size)
+	if not _header_sizes[size] then
+		error("invalid header size.")
+	end
+
+	if self.header_size ~= size then
+		self.header_size = size
 		self:reshape(true)
 	end
 end
@@ -658,10 +666,18 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
+local function _getHeaderSkinTable(self)
+	local skin = self.skin
+	local h_size = self.header_size
+	return h_size == "small" and skin.res_small or h_size == "large" and skin.res_large or skin.res_normal
+end
+
+
+
 function def:uiCall_update(dt)
 	if self.needs_update then
 		local skin = self.skin
-		local res = self.header_condensed and skin.res_cond or skin.res_norm
+		local res = _getHeaderSkinTable(self)
 		local font = res.header_font
 
 		-- Refresh the text string. Shorten to the first line feed, if applicable.
@@ -711,8 +727,7 @@ function def:uiCall_reshape()
 	-- Viewport #4 is a subsection of the header area for rendering the frame title.
 
 	local skin = self.skin
-	local res = self.header_condensed and skin.res_cond or skin.res_norm
-	--local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
+	local res = _getHeaderSkinTable(self)
 
 	-- (parent should be the WIMP root widget.)
 	local parent = self.parent
@@ -830,7 +845,7 @@ def.default_skinner = {
 		sensor_resize_pad = "scaled-int",
 		shadow_extrude = "scaled-int",
 
-		res_norm = {
+		res_normal = {
 			header_h = "scaled-int",
 			button_pad_w = "scaled-int",
 			button_w = "scaled-int",
@@ -838,7 +853,15 @@ def.default_skinner = {
 			button_align_v = "unit-interval",
 		},
 
-		res_cond = {
+		res_small = {
+			header_h = "scaled-int",
+			button_pad_w = "scaled-int",
+			button_w = "scaled-int",
+			button_h = "scaled-int",
+			button_align_v = "unit-interval",
+		},
+
+		res_large = {
 			header_h = "scaled-int",
 			button_pad_w = "scaled-int",
 			button_w = "scaled-int",
@@ -877,7 +900,7 @@ def.default_skinner = {
 		uiGraphics.drawSlice(skin.slc_body, 0, 0, self.w, self.h)
 
 		-- Window header
-		local res = self.header_condensed and skin.res_cond or skin.res_norm
+		local res = _getHeaderSkinTable(self)
 		local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
 		local slc_header_body = res.header_slc_body
 		love.graphics.setColor(res2.col_header_fill)
