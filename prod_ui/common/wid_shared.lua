@@ -288,8 +288,10 @@ end
 
 
 function widShared.scrollUpdate(self, dt)
-	self.scr_fx = widShared.scrollTargetUpdate(self.scr_fx, self.scr_tx, 1, 800, 8.0, dt) -- XXX config
-	self.scr_fy = widShared.scrollTargetUpdate(self.scr_fy, self.scr_ty, 1, 800, 8.0, dt) -- XXX config
+	local nav = self.context.settings.wimp.navigation
+	local spd_snap, spd_min, spd_mul = nav.scroll_snap, nav.scroll_speed_min, nav.scroll_speed_mul
+	self.scr_fx = widShared.scrollTargetUpdate(self.scr_fx, self.scr_tx, spd_snap, spd_min, spd_mul, dt)
+	self.scr_fy = widShared.scrollTargetUpdate(self.scr_fy, self.scr_ty, spd_snap, spd_min, spd_mul, dt)
 
 	self.scr_x = math.floor(0.5 + self.scr_fx)
 	self.scr_y = math.floor(0.5 + self.scr_fy)
@@ -767,11 +769,8 @@ function widShared.checkScrollWheelScroll(self, x, y)
 	then
 		local old_scr_tx, old_scr_ty = self.scr_tx, self.scr_ty
 
-		-- [XXX 3] style/theme integration
-		self:scrollDeltaHV(
-			-x * self.context.mouse_wheel_scale,
-			-y * self.context.mouse_wheel_scale
-		)
+		local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
+		self:scrollDeltaHV(-x * wheel_scale, -y * wheel_scale)
 
 		return old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty
 	end

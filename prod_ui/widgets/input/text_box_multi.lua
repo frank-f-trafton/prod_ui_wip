@@ -651,8 +651,10 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 	-- Catch wheel events from descendants that did not block it.
 
-	self.scr_tx = self.scr_tx - x * self.context.mouse_wheel_scale -- XXX style/theme integration
-	self.scr_ty = self.scr_ty - y * self.context.mouse_wheel_scale -- XXX style/theme integration
+	local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
+
+	self.scr_tx = self.scr_tx - x * wheel_scale
+	self.scr_ty = self.scr_ty - y * wheel_scale
 	-- XXX add support for non-animated, immediate scroll-to
 
 	self:scrollClampViewport()

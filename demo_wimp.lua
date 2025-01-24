@@ -96,6 +96,23 @@ love.graphics.setFont(font_test)
 -- WIMP config/settings. Eventually, this will be placed in a separate file.
 local wimp_settings = {
 	wimp = {
+		navigation = {
+			-- Scroll animation parameters. See: widShared.scrollTargetUpdate()
+			scroll_snap = 1,
+			scroll_speed_min = 800,
+			scroll_speed_mul = 8.0,
+
+			-- How many pixels to scroll in WIMP widgets when pressing the arrow
+			-- keys.
+			key_scroll_h = 32,
+
+			-- How many pixels to scroll per one discrete mouse-wheel motion event.
+			-- XXX: SDL3 / LÖVE 12 is changing this to distance scrolled.
+			-- XXX: for now, this is also used with horizontal wheel movement. As of
+			-- this writing, I don't have a mouse with a horizontal wheel.
+			mouse_wheel_move_size_v = 64,
+		},
+
 		pop_up_menu = {
 			-- When clicking off of a pop-up menu, stops the user from clicking
 			-- any other widget that is behind the base menu.

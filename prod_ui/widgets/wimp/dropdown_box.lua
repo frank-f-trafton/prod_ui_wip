@@ -213,7 +213,6 @@ function def:uiCall_create(inst)
 
 		-- -> lgcMenu.instanceSetup(self)
 		self.MN_page_jump_size = 4
-		self.MN_wheel_jump_size = 64
 		self.MN_wrap_selection = false
 
 		self.menu = lgcMenu.new()

@@ -234,9 +234,6 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- Number of repeated mouse-press actions.
 	self.mouse_pressed_rep_n = 0
 
-	-- Pixel multiplier for wheelmoved events.
-	self.mouse_wheel_scale = 64 -- XXX scaling?
-
 	-- cseq: "click-sequence" state, used to implement widget-aware multi-click actions.
 	-- Aims to prevent unintentional double-clicks, such as when clicking on two different
 	-- widgets in a short span of time.
