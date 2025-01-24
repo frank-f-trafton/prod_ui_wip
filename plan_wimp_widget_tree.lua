@@ -136,7 +136,7 @@ function plan.make(root)
 	local frame = root:addChild("wimp/window_frame")
 	frame.w = 400
 	frame.h = 384
-	frame:setCondensedHeader(true)
+	frame:setHeaderSize("small")
 	frame:setFrameTitle("Widget Tree")
 
 	local content = frame:findTag("frame_content")
