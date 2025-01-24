@@ -89,20 +89,12 @@ end
 --- Create a new UI context object.
 -- @param prod_ui_path The file system path to ProdUI (where ui_context.lua is located). Needed so
 --	that ProdUI components can pull in additional Lua source files through love.filesystem.load().
--- @param x Context viewport X.
--- @param y Context viewport Y.
--- @param w Context viewport width.
--- @param h Context viewport height.
+-- @param settings Table of settings. Usage depends on the front end. If not provided, an empty
+--	table will be provisioned.
 -- @return The UI context.
-function uiContext.newContext(prod_ui_path, x, y, w, h)
+function uiContext.newContext(prod_ui_path, settings)
 	uiShared.type1(1, prod_ui_path, "string")
-	uiShared.numberNotNaN(2, x)
-	uiShared.numberNotNaN(3, y)
-	uiShared.numberNotNaN(4, w)
-	uiShared.numberNotNaN(5, h)
-
-	if w < 1 then error("context viewport width must be greater than zero.")
-	elseif h < 1 then error("context viewport height must be greater than zero.") end
+	uiShared.typeEval1(2, settings, "table")
 
 	-- Default to non-empty paths having a slash on the end.
 	if prod_ui_path ~= "" and string.sub(prod_ui_path, -1) ~= "/" then
@@ -117,11 +109,18 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 
 	local self = {}
 
-	-- Context config table.
+	-- Context config table. Internal use.
 	self.conf = {
 		prod_ui_req = REQ_PATH,
 		prod_ui_path = prod_ui_path,
 	}
+
+	-- Usage of the settings table depends on the front-end.
+	self.settings = settings or {}
+
+	-- Place the theme instance (containing shared resources such as textures) here.
+	self.resources = false
+
 
 	-- Loader cache for shared Lua source files.
 	-- For convenience, cache:get() and cache:try() are wrapped as context:getLua() and
@@ -267,9 +266,6 @@ function uiContext.newContext(prod_ui_path, x, y, w, h)
 	self.key_mgr = keyMgr.newManager()
 	self.key_mgr.cb_keyDown = cb_keyDown
 	self.key_mgr.cb_keyUp = cb_keyUp
-
-	-- Place shared resources (textures, etc.) in a table here.
-	self.resources = false
 
 	-- Mouse cursor repository
 	if cursorMgr then

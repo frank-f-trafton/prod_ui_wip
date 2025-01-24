@@ -4,6 +4,12 @@
 local commonWimp = {}
 
 
+local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+
+
+local utilTable = require(REQ_PATH .. "util_table")
+
+
 function commonWimp.async_widget_remove(self)
 	self:remove()
 end
@@ -72,7 +78,12 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 
 	root:sendEvent("rootCall_assignPopUp", self, pop_up)
 
-	pop_up:setBlocking(true)
+	local do_block
+	if root.context.settings then
+		do_block = utilTable.tryDrill(root.context.settings, "/", "wimp/pop_up_menu/block_1st_click_out")
+	end
+
+	pop_up:setBlocking(do_block)
 
 	return pop_up
 end

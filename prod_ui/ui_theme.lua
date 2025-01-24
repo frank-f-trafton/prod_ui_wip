@@ -22,6 +22,9 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 local utilTable = require(REQ_PATH .. "common.util_table")
 
 
+local _drill = utilTable.drill
+
+
 function uiTheme.dummyFunc() end
 
 
@@ -75,46 +78,6 @@ function _mt_themeInst:get(field)
 	return ret
 end
 _mt_themeDataPack.get = _mt_themeInst.get
-
-
---- Gets a resource within in a hierarchy of tables. Raises a Lua error if the value is nil or if the table path
---  is invalid.
--- @param ... Varargs list of fields to check.
--- @return The field value.
-function _mt_themeInst:drill(...)
-	local len = select("#", ...)
-
-	local ret, bad_index = utilTable.tryDrillV(self, ...)
-	if ret ~= nil then
-		return ret
-	end
-
-	if bad_index then
-		error("resource drill failed on index #" .. bad_index .. ". Fields: " .. utilTable.concatVarargs(...))
-	else
-		error("resource drill failed: final value is nil. Fields: " .. utilTable.concatVarargs(...))
-	end
-end
-_mt_themeDataPack.drill = _mt_themeInst.drill
-
-
---- Gets a resources within a hierarchy of tables. The path to the resource is stored as a single string with a
---  forward slash (/) between chunks. Raises a Lua error if the value is nil or if the table path is invalid.
--- @param str The string containing the fields to check.
--- @return The field value.
-function _mt_themeInst:drillS(str)
-	local ret, bad_index = utilTable.tryDrillS(self, "/", str)
-	if ret ~= nil then
-		return ret
-	end
-
-	if bad_index then
-		error("resource drill failed on index #" .. bad_index .. ". Fields: " .. str)
-	else
-		error("resource drill failed: final value is nil. Fields: " .. str)
-	end
-end
-_mt_themeDataPack.drillS = _mt_themeInst.drillS
 
 
 --- Shortcut to make a new 9-Slice definition.
@@ -207,10 +170,10 @@ local _dummy_schema = {}
 
 local _ref_handlers = {
 	["*"] = function(self, v)
-		return false, self:drillS(v:sub(2))
+		return false, _drill(self, "/", v:sub(2))
 	end,
 	["#"] = function(self, v)
-		return true, self:drillS(v:sub(2))
+		return true, _drill(self, "/", v:sub(2))
 	end
 }
 
