@@ -71,12 +71,6 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-local function pointInColumnBar(self, px, py)
-	return px >= self.col_bar_x and px < self.col_bar_x + self.col_bar_w
-		and py >= self.col_bar_y and py < self.col_bar_y + self.col_bar_h
-end
-
-
 function def:addColumn(label, visible, cb_sort)
 	local column = {}
 	table.insert(self.columns, column)
@@ -103,22 +97,20 @@ end
 
 
 function def:addRow()
-	local row = {}
-	row.selectable = true
---[[ -- XXX is this stuff needed?
-	row.x = 0
-	row.y = 0
-	row.w = 0
-	row.h = 0
+	local item = {}
+	item.selectable = true
 
-	row.render = widShared.dummy
---]]
+	item.x = 0
+	item.y = 0
+	item.w = 0
+	item.h = 0
+
 	-- Every row in the menu should have as many cells as there are columns (including invisible ones).
-	row.cells = {}
+	item.cells = {}
 
-	table.insert(self.menu.items, row)
+	table.insert(self.menu.items, item)
 
-	return row
+	return item
 end
 
 
@@ -217,8 +209,6 @@ local function _findVisibleColumn(columns, first, last, delta)
 			return i, column
 		end
 	end
-
-	-- (return nil)
 end
 
 
@@ -246,13 +236,12 @@ end
 function def:uiCall_create(inst)
 	if self == inst then
 		self.visible = true
-
 		self.allow_hover = true
 		self.can_have_thimble = true
 
 		widShared.setupDoc(self)
 		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
+		widShared.setupViewports(self, 3)
 
 		self.press_busy = false
 
@@ -268,11 +257,6 @@ function def:uiCall_create(inst)
 		-- Column bar rectangle. Column positions are not relative to these XY values, but they do define
 		-- placement and are used in broad intersect tests.
 		self.col_bar_visible = true
-
-		self.col_bar_x = 0
-		self.col_bar_y = 0
-		self.col_bar_w = 0
-		self.col_bar_h = 0
 
 		-- Location of initial click when dragging column headers. Only valid between
 		-- uiCall_pointerPress and uiCall_pointerUnpress.
@@ -314,12 +298,6 @@ function def:uiCall_create(inst)
 		self.default_item_bijou_w = 0
 		self.default_item_bijou_h = 0
 
-		-- Helps stabilize sorting when rows are otherwise identical.
-		-- Note that this does not guarantee that two separate-but-identical charts
-		-- with ambiguous ties will be sorted in the same order. But one chart
-		-- ping-ponging between ascending and descending order should be stable.
-		self.secret_incrementor = 1
-
 		self:skinSetRefs()
 		self:skinInstall()
 	end
@@ -327,44 +305,31 @@ end
 
 
 function def:uiCall_reshape()
+	-- Viewport #1 is the scrollable tabular content (excluding the column header).
+	-- Viewport #2 separates embedded controls (scroll bars) from the content.
+	-- Viewport #3 is the column header.
+
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
+
+	-- Border and scroll bars.
 	widShared.carveViewport(self, 1, skin.box.border)
 	commonScroll.arrangeScrollBars(self)
-
-	-- Column bar. Carve out a niche in the top part of viewport #1.
-	if self.col_bar_visible then
-		self.col_bar_x = self.vp_x
-		self.col_bar_y = self.vp_y
-		self.col_bar_w = self.vp_w
-		self.col_bar_h = self.col_bar_h
-	else
-		self.col_bar_x = 0
-		self.col_bar_y = 0
-		self.col_bar_w = 0
-		self.col_bar_h = 0
-	end
-
-	self.vp_y = self.vp_y + self.col_bar_h
-	self.vp_h = math.max(0, self.vp_h - self.col_bar_h)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
+	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	-- Carve a bit more out of the column bar so that it fits into the margin better.
-	--[[
-	local box = self.skin.box
-	self.col_bar_x = self.col_bar_x + box.margin.x1
-	self.col_bar_w = self.col_bar_w - box.margin.x1 - box.margin.x2
-	--]]
+	if self.col_bar_visible then
+		widShared.partitionViewport(self, 1, 3, skin.bar_height, "top")
+	else
+		widShared.resetViewport(self, 3)
+	end
 
-	-- Clamp scrolling.
 	self:scrollClampViewport()
-
-	-- Update scroll bar state.
 	commonScroll.updateScrollState(self)
 
 	self:refreshColumnBar()
@@ -374,11 +339,11 @@ end
 
 -- Updates the positions of column header boxes
 function def:refreshColumnBar()
-	local cx = self.vp_x
+	local cx = 0
 	for i, column in ipairs(self.columns) do
 		if column.visible then
 			column.x = cx
-			column.y = self.col_bar_y
+			column.y = 0
 			cx = cx + column.w
 		end
 	end
@@ -388,12 +353,10 @@ end
 
 
 function def:refreshRows()
-	--local column_bar_x2 = self.w
-	local column_bar_x2 = self.vp_x + self.vp_w
+	local column_bar_x2 = self.vp_w
 	local last_column = self.columns[#self.columns]
 	if last_column then
-		--column_bar_x2 = last_column.x + last_column.w
-		column_bar_x2 = last_column.x + last_column.w - self.vp_x
+		column_bar_x2 = last_column.x + last_column.w
 	end
 
 	local yy = 0
@@ -419,16 +382,16 @@ function def:cacheUpdate(refresh_dimensions)
 	local menu = self.menu
 
 	if refresh_dimensions then
+		self.doc_w, self.doc_h = 0, 0
+
 		-- Document height is based on the last item in the menu.
 		local last_item = menu.items[#menu.items]
-		self.doc_h = 0
 		if last_item then
 			self.doc_h = last_item.y + last_item.h
 		end
 
 		-- Document width is based on the rightmost column in the header.
 		local last_col = self.columns[#self.columns]
-		self.doc_w = 0
 		if last_col then
 			self.doc_w = last_col.x + last_col.w
 		end
@@ -504,7 +467,7 @@ end
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		local mx, my, ax, ay = self:getRelativePosition(mouse_x, mouse_y)
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
 		-- Activate the column re-ordering action when the mouse has moved far enough from
 		-- the initial click point.
@@ -525,7 +488,6 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		and self.press_busy == "column-press"
 		and not self.col_click
 		then
-			--column_box.x = math.max(0, math.min(self.w, mx - math.floor(column_box.w/2)))
 			column_box.x = mx - math.floor(column_box.w/2)
 		end
 
@@ -544,11 +506,8 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		elseif self.press_busy == "menu-drag" then
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
-			-- Mouse position relative to viewport #1 with scroll offsets
-			local s_mx = mouse_x - self.vp_x + self.scr_x
-			local s_my = mouse_y - self.vp_y + self.scr_y
-
-			local item_i, item_t = self:getItemAtPoint(s_mx - ax, s_my - ay, 1, #self.menu.items)
+			local smx, smy = mx + self.scr_x, my + self.scr_y
+			local item_i, item_t = self:getItemAtPoint(smx, smy, 1, #self.menu.items)
 			if item_i and item_t.selectable then
 				self.menu:setSelectedIndex(item_i)
 				-- Turn off item_hover so that other items don't glow.
@@ -572,24 +531,24 @@ local function testColumnMouseOverlapWithEdges(self, mx, my)
 	local drag_thresh = 4 -- XXX configurable edge threshold
 
 	-- Broad check
-	if pointInColumnBar(self, mx, my) then
+	if widShared.pointInViewport(self, 3, mx, my) then
 		-- Take horizontal scrolling into account only.
 		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
-			if column.visible and my >= column.y and my < column.y + column.h then
+			local col_x = self.vp3_x + column.x
+			local col_y = self.vp3_y + column.y
+			if column.visible and my >= col_y and my < col_y + column.h then
 
 				-- Check the drag-edge first.
-				if mx >= column.x + column.w - drag_thresh - s2x and mx < column.x + column.w + drag_thresh - s2x then
+				if mx >= col_x + column.w - drag_thresh - s2x and mx < col_x + column.w + drag_thresh - s2x then
 					return "column-edge", i, column
 
-				elseif mx >= column.x - s2x and mx < column.x + column.w - s2x then
+				elseif mx >= col_x - s2x and mx < col_x + column.w - s2x then
 					return "column-press", i, column
 				end
 			end
 		end
 	end
-
-	-- (return nil)
 end
 
 
@@ -598,31 +557,30 @@ local function testColumnMouseOverlap(self, mx, my)
 	-- Assumes mx and my are relative to widget top-left.
 
 	-- Broad check
-	if pointInColumnBar(self, mx, my) then
+	if widShared.pointInViewport(self, 3, mx, my) then
 		-- Take horizontal scrolling into account only.
 		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
-			if column.visible and mx >= column.x - s2x and mx < column.x + column.w - s2x
-			and my >= column.y and my < column.y + column.h
+			local col_x = self.vp3_x + column.x
+			local col_y = self.vp3_y + column.y
+			if column.visible and mx >= col_x - s2x and mx < col_x + column.w - s2x
+			and my >= col_y and my < col_y + column.h
 			then
 				return "column-press", i, column
 			end
 		end
 	end
-
-	-- (return nil)
 end
---]]
 
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+		commonScroll.widgetProcessHover(self, mx, my)
 
 		-- Test for hover over column header boxes
 		local header_box_hovered = false
-		local press_code, _, column = testColumnMouseOverlapWithEdges(self, mouse_x, mouse_y)
+		local press_code, _, column = testColumnMouseOverlapWithEdges(self, mx, my)
 		if press_code == "column-press" then
 			self.column_hovered = column
 			header_box_hovered = true
@@ -639,38 +597,34 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			self.column_hovered = false
 		end
 
-		local xx = mouse_x + self.scr_x - self.vp_x
-		local yy = mouse_y + self.scr_y - self.vp_y
+		local smx, smy = mx + self.scr_x, my + self.scr_y
 
 		local hover_ok = false
 
-		-- Inside of viewport #2
-		if mouse_x >= self.vp2_x
-		and mouse_x < self.vp2_x + self.vp2_w
-		and mouse_y >= self.vp2_y
-		and mouse_y < self.vp2_y + self.vp2_h
-		then
+		if widShared.pointInViewport(self, 1, mx, my) then
 			local menu = self.menu
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
+			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			print("i", i, "item", item)
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
 				if self.MN_item_hover ~= item then
 					if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
-						self.MN_item_hover:menuCall_hoverOff(self, mouse_x, mouse_y)
+						self.MN_item_hover:menuCall_hoverOff(self, mx, my)
 					end
 
 					self.MN_item_hover = item
 
 					if item.menuCall_hoverOn then
-						item:menuCall_hoverOn(self, mouse_x, mouse_y)
+						item:menuCall_hoverOn(self, mx, my)
 					end
 				end
 
 				if item.menuCall_hoverMove then
-					item:menuCall_hoverMove(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
+					item:menuCall_hoverMove(self, mx, my, mouse_dx, mouse_dy)
 				end
 
 				-- Implement mouse hover-to-select.
@@ -687,7 +641,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if self.MN_item_hover and not hover_ok then
 			if self.MN_item_hover.menuCall_hoverOff then
-				self.MN_item_hover:menuCall_hoverOff(self, mouse_x, mouse_y)
+				self.MN_item_hover:menuCall_hoverOff(self, mx, my)
 			end
 			self.MN_item_hover = false
 
@@ -707,8 +661,9 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		self:setCursorLow()
 
 		if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
+			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 			local ax, ay = self:getAbsolutePosition()
-			self.MN_item_hover:menuCall_hoverOff(self, mouse_x - ax, mouse_y - ay)
+			self.MN_item_hover:menuCall_hoverOff(self, mx, my)
 		end
 
 		self.MN_item_hover = false
@@ -721,28 +676,24 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+	if self == inst
+	and button == self.context.mouse_pressed_button
+	then
 		if button <= 3 then
 			self:tryTakeThimble1()
 		end
 
-		local handled_scroll_bars = false
-
-		if button == self.context.mouse_pressed_button then
+		if lgcMenu.pointerPressScrollBars(self, x, y, button) then
+			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
+			self.context:forceClickSequence(false, button, 1)
+		else
 			if button == 1 then
-				-- Check for pressing on scroll bar components.
-				local fixed_step = 24 -- XXX style/config
-
-				handled_scroll_bars = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+				local mx, my = self:getRelativePosition(x, y)
+				local handled
 
 				-- Check for pressing on integrated column header-boxes
-				if not handled_scroll_bars and self.col_bar_visible then
-
-					local ax, ay = self:getAbsolutePosition()
-					local mouse_x = x - ax
-					local mouse_y = y - ay
-
-					local press_code, _, column = testColumnMouseOverlapWithEdges(self, mouse_x, mouse_y)
+				if self.col_bar_visible then
+					local press_code, _, column = testColumnMouseOverlapWithEdges(self, mx, my)
 					if press_code then
 						self.column_hovered = false
 						self.column_pressed = column
@@ -751,48 +702,42 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 						-- Help prevent unwanted double-clicks on menu-items
 						self.MN_mouse_clicked_item = false
+
+						handled = true
 					end
 
 					if press_code == "column-press" then
 						self.col_click = true
-						self.col_click_x = mouse_x
-						self.col_click_y = mouse_y
+						self.col_click_x = mx
+						self.col_click_y = my
 					end
+				end
 
-					-- Check if pointer was inside of viewport #2
-					local in_port_2 = (mouse_x >= self.vp2_x
-						and mouse_x < self.vp2_x + self.vp2_w
-						and mouse_y >= self.vp2_y
-						and mouse_y < self.vp2_y + self.vp2_h
-					)
+				if not handled then
+					local smx, smy = mx + self.scr_x, my + self.scr_y
 
-					if not in_port_2 then
-						-- Successful mouse interaction with scroll bars should break any existing click-sequence.
-						self.context:forceClickSequence(false, button, 1)
+					-- Check for click-able items.
+					if not self.press_busy then
+						local item_i, item_t = self:trySelectItemAtPoint(
+							smx,
+							smy,
+							math.max(1, self.MN_items_first),
+							math.min(#self.menu.items, self.MN_items_last)
+						)
 
-					else
+						if self.MN_drag_select then
+							self.press_busy = "menu-drag"
+						end
 
-						x = x - ax + self.scr_x - self.vp_x
-						y = y - ay + self.scr_y - self.vp_y
+						-- Reset click-sequence if clicking on a different item.
+						if self.MN_mouse_clicked_item ~= item_t then
+							self.context:forceClickSequence(self, button, 1)
+						end
 
-						-- Check for click-able items.
-						if not self.press_busy then
-							local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
+						self.MN_mouse_clicked_item = item_t
 
-							if self.MN_drag_select then
-								self.press_busy = "menu-drag"
-							end
-
-							-- Reset click-sequence if clicking on a different item.
-							if self.MN_mouse_clicked_item ~= item_t then
-								self.context:forceClickSequence(self, button, 1)
-							end
-
-							self.MN_mouse_clicked_item = item_t
-
-							if item_t and item_t.menuCall_pointerPress then
-								item_t.menuCall_pointerPress(item_t, self, button, self.context.cseq_presses)
-							end
+						if item_t and item_t.menuCall_pointerPress then
+							item_t.menuCall_pointerPress(item_t, self, button, self.context.cseq_presses)
 						end
 					end
 				end
@@ -801,11 +746,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			elseif button == 2 then
 
 				-- Confirm mouse cursor is over the column bar.
-				local ax, ay = self:getAbsolutePosition()
-				local mouse_x = x - ax
-				local mouse_y = y - ay
-
-				if pointInColumnBar(self, mouse_x, mouse_y) then
+				local mx, my = self:getRelativePosition(x, y)
+				if widShared.pointInViewport(self, 3, mx, my) then
 					invokePopUpMenu(self, x, y)
 
 					-- Halt propagation
@@ -821,10 +763,6 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		-- Repeat-press events for items
 		if self.MN_mouse_clicked_item and self.MN_mouse_clicked_item.menuCall_pointerPressRepeat then
-			local ax, ay = self:getAbsolutePosition()
-			local mouse_x = x - ax
-			local mouse_y = y - ay
-
 			local context = self.context
 			self.MN_mouse_clicked_item:menuCall_pointerPressRepeat(self, button, context.cseq_presses, context.mouse_pressed_rep_n)
 		else
@@ -857,8 +795,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			self.press_busy = false
 
 			local mx, my = self:getRelativePosition(x, y)
-			local mx2 = mx + self.scr_x
-			local my2 = my + self.scr_y
+			local smx, smy = mx + self.scr_x, my + self.scr_y
 
 			local old_col_press = self.column_pressed
 			self.column_pressed = false
@@ -874,7 +811,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			and self.col_click
 			and self.col_bar_visible
 			and old_press_busy == "column-press"
-			and mx2 >= old_col_press.x and mx2 < old_col_press.x + old_col_press.w
+			and smx >= old_col_press.x and smx < old_col_press.x + old_col_press.w
 			and my >= old_col_press.y and my < old_col_press.y + old_col_press.h
 			then
 				-- Handle release event
@@ -909,8 +846,8 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				if item_selected and item_selected.selectable then
 
 					-- XXX safety precaution: ensure mouse position is within widget viewport #2?
-					if mx >= item_selected.x and mx < item_selected.x + item_selected.w -- XXX: meant mx2 and my2?
-					and my >= item_selected.y and my < item_selected.y + item_selected.h
+					if smx >= item_selected.x and smx < item_selected.x + item_selected.w
+					and smy >= item_selected.y and smy < item_selected.y + item_selected.h
 					then
 						if item_selected.menuCall_pointerRelease then
 							item_selected:menuCall_pointerRelease(self, button)
@@ -972,16 +909,8 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 		-- XXX menuCall_pointerWheel() callback for items.
 
-		if (y > 0 and self.scr_y > 0) or (y < 0 and self.scr_y < self.doc_h - self.vp_h) then
-			local old_scr_x, old_scr_y = self.scr_x, self.scr_y
-
-			self:scrollDeltaV(math.floor(self.context.settings.wimp.navigation.mouse_wheel_move_size_v * -y + 0.5))
-
-			if old_scr_x ~= self.scr_x or old_scr_y ~= self.scr_y then
-				self:cacheUpdate(false)
-			end
-
-			-- Stop bubbling
+		if widShared.checkScrollWheelScroll(self, x, y) then
+			self:cacheUpdate(false)
 			return true
 		end
 	end
@@ -1031,21 +960,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- Update scroll bar registers and thumb position
-	local scr_h = self.scr_h
-	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
-
-		self.scr_h:updateThumb()
-	end
-
-	local scr_v = self.scr_v
-	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
-
-		self.scr_v:updateThumb()
-	end
-
 	commonScroll.updateScrollBarShapes(self)
+	commonScroll.updateScrollState(self)
 
 	-- Per-widget and per-selected-item update callbacks.
 	if self.wid_update then
@@ -1065,17 +981,10 @@ end
 --function def:uiCall_destroy(inst)
 
 
---function def:renderThimble(os_x, os_y)
-
-
 local function drawWholeColumn(self, column, backfill, ox, oy)
-	love.graphics.push("all")
-
-	--love.graphics.translate(self.vp_x - self.scr_x, 0)
-	love.graphics.translate(column.x - self.scr_x, 0)
-
 	local skin = self.skin
-	local impl_col = skin.impl_column
+	local tq_px = skin.tq_px
+	local font = skin.font
 
 	local state = (self.column_pressed == column) and "press"
 		or (self.column_hovered == column) and "hover"
@@ -1086,73 +995,74 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 		bijou_id = self.column_sort_ascending and "ascending" or "descending"
 	end
 
-	local res = impl_col.shared[state]
-	local tq_px = skin.tq_px
-	local font = impl_col.font
+	local res = state == "idle" and skin.res_column_idle
+		or state == "hover" and skin.res_column_hover
+		or state == "press" and skin.res_column_press
 
-	-- Two scissor boxes: one for the header box, and one for the rest of the column.
-	local sx, sy, sw, sh = love.graphics.getScissor()
+	love.graphics.push("all")
+
 	uiGraphics.intersectScissor(
 		ox + column.x - self.scr_x,
-		oy + column.y,
+		oy + self.vp3_y + column.y,
 		column.w,
 		column.h
 	)
+	love.graphics.translate(column.x - self.scr_x, self.vp3_y + column.y)
 
 	-- Header box body.
 	love.graphics.setColor(res.color_body)
-	uiGraphics.drawSlice(res.sl_body, 0, column.y, column.w, column.h)
+	uiGraphics.drawSlice(res.sl_body, 0, 0, column.w, column.h)
 
 	-- Header box text.
-	local text_x = impl_col.category_h_pad
+	local text_x = skin.category_h_pad
 	local text_y = math.floor(column.h / 2 - font:getHeight() / 2)
 
 	love.graphics.setColor(res.color_text)
 	love.graphics.setFont(font)
 	love.graphics.print(
 		column.text,
-		0 + text_x + res.offset_x,
-		column.y + text_y + res.offset_y
+		text_x + res.offset_x,
+		text_y + res.offset_y
 	)
 
 	-- Header box bijou.
 	if bijou_id then
 		local text_w = font:getWidth(column.text)
-		local bx = 0 + math.max(text_w + impl_col.category_h_pad*2, column.w - impl_col.bijou_w - impl_col.category_h_pad)
-		local by = math.floor(0.5 + column.y + column.h / 2 - impl_col.bijou_h / 2)
+		local bx = 0 + math.max(text_w + skin.category_h_pad*2, column.w - skin.bijou_w - skin.category_h_pad)
+		local by = math.floor(0.5 + column.h / 2 - skin.bijou_h / 2)
 
-		local bijou_quad = (bijou_id == "ascending") and impl_col.bijou_arrow_up or impl_col.bijou_arrow_down
+		local bijou_quad = (bijou_id == "ascending") and skin.tq_arrow_up or skin.tq_arrow_down
 		uiGraphics.quadXYWH(
 			bijou_quad,
 			bx + res.offset_x,
 			by + res.offset_y,
-			impl_col.bijou_w,
-			impl_col.bijou_h
+			skin.bijou_w,
+			skin.bijou_h
 		)
 	end
 
-	love.graphics.setScissor(sx, sy, sw, sh)
+	love.graphics.pop()
+
+	love.graphics.push("all")
+
 	uiGraphics.intersectScissor(
 		ox + column.x - self.scr_x,
-		oy + column.y + column.h,
+		oy + self.vp_y,
 		column.w,
-		self.vp2_h -- This is a little too long, but it should intersect with a previously-set scissor-box.
+		self.vp_h
 	)
+	love.graphics.translate(column.x - self.scr_x, -self.scr_y)
 
-	-- Optional backfill. Used to help visually distinguish items in a dragged column.
+	-- Optional backfill. Used to indicate a dragged column.
 	if backfill then
 		love.graphics.setColor(skin.color_drag_col_bg)
-		uiGraphics.quadXYWH(tq_px, 0, column.y, column.w, self.vp2_h) -- Also too long
+		uiGraphics.quadXYWH(tq_px, 0, 0, column.w, self.vp2_h)
 	end
 
 	-- Thin vertical separators between columns
 	-- [XXX] This is kind of iffy. It might be better to draw a mosaic body for every column.
 	love.graphics.setColor(skin.color_column_sep)
-	local col_right = 0 + column.w
-	local col_bottom = column.y + column.h
-	uiGraphics.quadXYWH(tq_px, col_right - skin.column_sep_width, 0, skin.column_sep_width, self.h)
-
-	love.graphics.translate(0, self.vp_y - self.scr_y)
+	uiGraphics.quadXYWH(tq_px, column.w - skin.column_sep_width, self.scr_y, skin.column_sep_width, self.h)
 
 	-- Draw each menu item in range.
 	love.graphics.setColor(skin.color_item_text)
@@ -1176,13 +1086,32 @@ end
 
 def.default_skinner = {
 	schema = {
-		column_sep_width = "scaled-int"
+		column_sep_width = "scaled-int",
+
+		bar_height = "scaled-int",
+		col_sep_line_width = "scaled-int",
+		bijou_w = "scaled-int",
+		bijou_h = "scaled-int",
+		category_h_pad = "scaled-int",
+
+		res_column_idle = {
+			offset_x = "scaled-int",
+			offset_y = "scaled-int"
+		},
+
+		res_column_hover = {
+			offset_x = "scaled-int",
+			offset_y = "scaled-int"
+		},
+
+		res_column_press = {
+			offset_x = "scaled-int",
+			offset_y = "scaled-int"
+		}
 	},
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-
-		self.col_bar_h = skin.impl_column.bar_height
 	end,
 
 
@@ -1197,39 +1126,39 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local font = skin.font
+		local tq_px = skin.tq_px
 
 		local menu = self.menu
 		local items = menu.items
 
-		local font = skin.font
-
-		local tq_px = skin.tq_px
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 		love.graphics.push("all")
-
-		local sx0, sy0, sw0, sh0 = love.graphics.getScissor()
-		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 		-- Widget body fill.
 		love.graphics.setColor(skin.color_background)
 		uiGraphics.quadXYWH(tq_px, 0, 0, self.w, self.h)
 
 		-- Column bar body (spanning the top of the widget).
-		local impl_column = skin.impl_column
+		love.graphics.setColor(skin.color_body)
+		uiGraphics.quadXYWH(tq_px, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
 
-		love.graphics.setColor(impl_column.color_body)
-		uiGraphics.quadXYWH(tq_px, self.col_bar_x, self.col_bar_y, self.col_bar_w, self.col_bar_h)
-
-		local col_pres = self.column_pressed
+		uiGraphics.intersectScissor(
+			ox + self.x + self.vp2_x,
+			oy + self.y + self.vp2_y,
+			self.vp2_w,
+			self.vp2_h
+		)
 
 		-- Draw columns.
+		local col_pres = self.column_pressed
 
-		-- * Box mosaics
 		for i, column in ipairs(self.columns) do
 			if column.visible
 			and col_pres ~= column
-			and column.x - self.scr_x < self.vp2_x + self.vp2_w
-			and column.x + column.w - self.scr_x >= self.vp2_x
+			and self.vp3_x + column.x - self.scr_x < self.vp2_x + self.vp2_w
+			and self.vp3_x + column.x + column.w - self.scr_x >= self.vp2_x
 			then
 				drawWholeColumn(self, column, false, ox, oy)
 			end
@@ -1240,9 +1169,9 @@ def.default_skinner = {
 			drawWholeColumn(self, col_pres, true, ox, oy)
 		end
 
-		love.graphics.translate(self.vp_x - self.scr_x, self.vp_y - self.scr_y)
+		love.graphics.translate(-self.scr_x, -self.scr_y)
 
-		uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp2_y, self.vp2_w, self.vp2_h)
+		uiGraphics.intersectScissor(ox + self.vp_x, oy + self.vp_y, self.vp_w, self.vp_h)
 
 		-- Draw hover glow, if applicable
 		local item_hover = self.MN_item_hover

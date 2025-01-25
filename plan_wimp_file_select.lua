@@ -303,8 +303,7 @@ function plan.make(parent)
 	if content then
 		content.layout_mode = "resize"
 
-		--content:setScrollBars(false, false)
-		content:setScrollBars(true, true) -- XXX debug
+		content:setScrollBars(false, false)
 
 		local menu_tab = content:addChild("wimp/menu_tab")
 		commonTab.setDefaultMeasurements(menu_tab)

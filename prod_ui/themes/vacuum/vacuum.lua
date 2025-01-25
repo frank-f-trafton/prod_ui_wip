@@ -382,56 +382,6 @@ function themeDef.newInstance(scale)
 	inst.common.scroll_bar1.shared.disabled.col_symbol = {0.1, 0.1, 0.1, 1.0}
 
 
-	-- Common column implementations. (For tabular menus, etc.)
-	inst.common.impl_column = {}
-
-	inst.common.impl_column.bar_height = math.max(0, math.floor(32 * scale))
-
-	inst.common.impl_column.color_body = {0.25, 0.25, 0.25, 1.0}
-	inst.common.impl_column.color_col_sep = {0.4, 0.4, 0.4, 1.0} -- vertical separator between columns
-	inst.common.impl_column.color_body_sep = {0.4, 0.4, 0.4, 1.0} -- a line between the header body and rest of widget
-
-	inst.common.impl_column.col_sep_line_width = math.max(1, math.floor(1 * scale))
-
-	inst.common.impl_column.font = inst.fonts.p
-	inst.common.impl_column.bijou_arrow_up = inst.tex_quads["arrow2_up"]
-	inst.common.impl_column.bijou_arrow_down = inst.tex_quads["arrow2_down"]
-
-	inst.common.impl_column.bijou_w = math.floor(math.max(1, 12 * scale))
-	inst.common.impl_column.bijou_h = math.floor(math.max(1, 12 * scale))
-
-	-- Padding between:
-	-- * Category panel left and label text
-	-- * Category panel right and sorting badge
-	inst.common.impl_column.category_h_pad = math.floor(math.max(0, 4 * scale))
-
-	inst.common.impl_column.shared = {}
-
-	inst.common.impl_column.shared.idle = {}
-
-	inst.common.impl_column.shared.idle.sl_body = inst.tex_slices["tabular_category_body"]
-	inst.common.impl_column.shared.idle.color_body = {1.0, 1.0, 1.0, 1.0}
-	inst.common.impl_column.shared.idle.color_text = {0.8, 0.8, 0.8, 1.0}
-	inst.common.impl_column.shared.idle.offset_x = 0
-	inst.common.impl_column.shared.idle.offset_y = 0
-
-	inst.common.impl_column.shared.hover = {}
-
-	inst.common.impl_column.shared.hover.sl_body = inst.tex_slices["tabular_category_body_hover"]
-	inst.common.impl_column.shared.hover.color_body = {1.0, 1.0, 1.0, 1.0}
-	inst.common.impl_column.shared.hover.color_text = {0.9, 0.9, 0.9, 1.0}
-	inst.common.impl_column.shared.hover.offset_x = 0
-	inst.common.impl_column.shared.hover.offset_y = 0
-
-	inst.common.impl_column.shared.press = {}
-
-	inst.common.impl_column.shared.press.sl_body = inst.tex_slices["tabular_category_body_press"]
-	inst.common.impl_column.shared.press.color_body = {1.0, 1.0, 1.0, 1.0}
-	inst.common.impl_column.shared.press.color_text = {1.0, 1.0, 1.0, 1.0}
-	inst.common.impl_column.shared.press.offset_x = 0
-	inst.common.impl_column.shared.press.offset_y = math.max(1, math.floor(1 * scale))
-
-
 	-- Key shortcut underline style.
 	inst.shortcut_style = {}
 	inst.shortcut_style.line_width = math.max(1, math.floor(1 * scale))

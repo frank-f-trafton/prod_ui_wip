@@ -11,7 +11,7 @@ Column fields:
 
 	visible: (bool) The column is displayed when true, and hidden when false.
 
-	lock_visibility: (bool) When false, user-facing controls to toggle the column's
+	lock_visibility: (bool) When true, user-facing controls to toggle the column's
 		visibility should be locked / disabled.
 
 	text: String of text to display to the user.
