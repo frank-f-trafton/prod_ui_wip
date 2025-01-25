@@ -26,10 +26,8 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
 	frame:setFrameTitle("Tabular Menu Test")
 
 	local content = frame:findTag("frame_content")
@@ -48,6 +46,9 @@ function plan.make(parent)
 		menu_tab.MN_wrap_selection = false
 
 		menu_tab:setScrollBars(true, true)
+
+		menu_tab.w = 640
+		menu_tab.h = 480
 
 		menu_tab:reshape()
 

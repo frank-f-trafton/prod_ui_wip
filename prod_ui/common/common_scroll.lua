@@ -360,7 +360,6 @@ local function updateShapesV(self)
 		end
 	-- Normal positioning.
 	else
-
 		local measure = 0
 
 		-- Button 1
@@ -446,7 +445,6 @@ function _mt_bar:updateThumb()
 			self.th_y = self.tr_y + commonScroll.getThumbPosition(self.len, self.pos, self.max, self.tr_h, self.th_h)
 
 			if self.max > 0 and self.th_h < self.tr_h then
-				--print("self.max", self.max, "self.th_h", self.th_h, "self.tr_h", self.tr_h)
 				self.thumb_valid = true
 			end
 		end

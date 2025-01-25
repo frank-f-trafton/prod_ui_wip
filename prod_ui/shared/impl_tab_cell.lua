@@ -12,6 +12,12 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
 --- A default render function for cells.
 function implTabCell.default_renderCell(item, widget, column, cell, os_x, os_y)
+	--[[
+	So, at this point in rendering:
+	* The LÖVE coordinate system is translated to 'column.x - x_scroll' and 'vp_y - y_scroll'.
+	* A scissor box is applied to the column contents (header excluded)
+	--]]
+
 	local skin = widget.skin
 
 	local tq_bijou = cell.tq_bijou
