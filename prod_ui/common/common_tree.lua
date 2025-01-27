@@ -1,18 +1,15 @@
-local commonTree = {}
-
 --[[
 	Logic for tree widgets.
 --]]
 
 
+local commonTree = {}
+
+
+local _enum_align = {left=true, center=true, right=true}
+
+
 function commonTree.instanceSetup(self)
-	-- When true, allows the user to expand and compress items with child items (click the icon or
-	-- press left/right arrow keys).
-	self.TR_expanders_active = false
-
-	-- Shows item icons.
-	self.TR_show_icons = false
-
 	-- X positions and widths of components within menu items.
 	-- The X positions are reversed when right alignment is used.
 	self.TR_expander_x = 0
@@ -103,12 +100,12 @@ function commonTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		return self.skin.item_align_h == "left" and commonTree.keyBackward(self, -1)
-			or self.skin.item_align_h == "right" and commonTree.keyForward(self, -1)
+		return self.TR_item_align_h == "left" and commonTree.keyBackward(self, -1)
+			or self.TR_item_align_h == "right" and commonTree.keyForward(self, -1)
 
 	elseif scancode == "right" then
-		return self.skin.item_align_h == "left" and commonTree.keyForward(self, 1)
-			or self.skin.item_align_h == "right" and commonTree.keyBackward(self, 1)
+		return self.TR_item_align_h == "left" and commonTree.keyForward(self, 1)
+			or self.TR_item_align_h == "right" and commonTree.keyBackward(self, 1)
 	end
 end
 
@@ -137,16 +134,24 @@ end
 
 
 function commonTree.setIconsEnabled(self, enabled)
-	self.TR_show_icons = not not enabled
-
+	self:writeSetting("TR_show_icons", not not enabled)
 	self:cacheUpdate(true)
 	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
 end
 
 
 function commonTree.setExpandersActive(self, active)
-	self.TR_expanders_active = not not active
+	self:writeSetting("TR_expanders_active", not not active)
+	self:cacheUpdate(true)
+	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+end
 
+
+function commonTree.setItemAlignment(self, align)
+	if not _enum_align[align] then
+		error("invalid alignment setting.")
+	end
+	self:writeSetting("TR_item_align_h", align)
 	self:cacheUpdate(true)
 	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
 end
@@ -296,7 +301,7 @@ function commonTree.arrange(self)
 	for i = 1, #items do
 		local item = items[i]
 
-		if skin.item_align_h == "left" then
+		if self.TR_item_align_h == "left" then
 			item.x = item.depth * skin.indent
 		else -- "right"
 			item.x = self.doc_w - item.w - (item.depth * skin.indent)

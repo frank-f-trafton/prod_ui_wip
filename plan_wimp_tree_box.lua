@@ -28,7 +28,7 @@ end
 local rdo_item_align_h_action = function(self)
 	local tb = self:findSiblingTag("demo_treebox")
 	if tb then
-		tb.skin.item_align_h = self.usr_item_align_h
+		tb:setItemAlignment(self.usr_item_align_h)
 		_refreshTreeBox(tb)
 	end
 end
@@ -143,7 +143,9 @@ function plan.make(parent)
 		sld.wid_actionSliderChanged = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.skin.item_pad_v = math.floor(self.slider_pos)
+				local skin_def = getmetatable(tb.skin)
+				skin_def.item_pad_v = math.floor(self.slider_pos)
+				self.context.resources:refreshSkinDefInstance(skin_def)
 				_refreshTreeBox(tb)
 			end
 		end
@@ -159,7 +161,9 @@ function plan.make(parent)
 		sld.wid_actionSliderChanged = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.skin.pipe_width = math.floor(self.slider_pos)
+				local skin_def = getmetatable(tb.skin)
+				skin_def.pipe_width = math.floor(self.slider_pos)
+				self.context.resources:refreshSkinDefInstance(skin_def)
 				_refreshTreeBox(tb)
 			end
 		end
@@ -175,7 +179,9 @@ function plan.make(parent)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.skin.draw_pipes = not not self.checked
+				local skin_def = getmetatable(tb.skin)
+				skin_def.draw_pipes = not not self.checked
+				self.context.resources:refreshSkinDefInstance(skin_def)
 				_refreshTreeBox(tb)
 			end
 		end
@@ -189,7 +195,7 @@ function plan.make(parent)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.TR_show_icons = not not self.checked
+				tb:setIconsEnabled(not not self.checked)
 				_refreshTreeBox(tb)
 			end
 		end
@@ -203,7 +209,7 @@ function plan.make(parent)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
-				tb.TR_expanders_active = not not self.checked
+				tb:setExpandersActive(not not self.checked)
 				_refreshTreeBox(tb)
 			end
 		end

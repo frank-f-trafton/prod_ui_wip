@@ -39,6 +39,12 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 local def = {
 	skin_id = "tree_box1",
 	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+
+	default_settings = {
+		TR_item_align_h = "left", -- start edge for the tree root. "left", "right"
+		TR_expanders_active = false,
+		TR_show_icons = false,
+	},
 }
 
 
@@ -130,6 +136,7 @@ def.wid_defaultKeyNav = commonTree.wid_defaultKeyNav
 
 def.setIconsEnabled = commonTree.setIconsEnabled
 def.setExpandersActive = commonTree.setExpandersActive
+def.setItemAlignment = commonTree.setItemAlignment
 def.addNode = commonTree.addNode
 def.orderItems = commonTree.orderItems
 def.removeNode = commonTree.removeNode
@@ -177,6 +184,7 @@ function def:uiCall_create(inst)
 
 		self:skinSetRefs()
 		self:skinInstall()
+		self:applyAllSettings()
 	end
 end
 
@@ -363,8 +371,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 						if self.TR_expanders_active
 						and #item_t.nodes > 0
-						and (skin.item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
-						or (skin.item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
+						and (self.TR_item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
+						or (self.TR_item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
 						then
 							commonTree.setExpanded(self, item_t, not item_t.expanded)
 
@@ -602,7 +610,7 @@ def.default_skinner = {
 		if skin.draw_pipes then
 			love.graphics.setColor(skin.color_pipe)
 			local line_x_offset, dir_h
-			if skin.item_align_h == "left" then
+			if self.TR_item_align_h == "left" then
 				line_x_offset = math.floor((skin.first_col_spacing - skin.pipe_width) / 2)
 				dir_h = 1
 			else -- "right"
@@ -638,7 +646,7 @@ def.default_skinner = {
 		local item_hover = self.MN_item_hover
 		if item_hover then
 			love.graphics.setColor(skin.color_hover_glow)
-			if skin.item_align_h == "left" then
+			if self.TR_item_align_h == "left" then
 				uiGraphics.quadXYWH(
 					tq_px,
 					item_hover.x + skin.first_col_spacing,
@@ -670,7 +678,7 @@ def.default_skinner = {
 			local col = is_active and skin.color_active_glow or skin.color_select_glow
 			love.graphics.setColor(col)
 
-			if skin.item_align_h == "left" then
+			if self.TR_item_align_h == "left" then
 				uiGraphics.quadXYWH(
 					tq_px,
 					sel_item.x + skin.first_col_spacing,
@@ -709,7 +717,7 @@ def.default_skinner = {
 		-- 2: Expander sensors, if enabled.
 		if self.TR_expanders_active then
 			local tq_on = skin.tq_expander_down
-			local tq_off = (skin.item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
+			local tq_off = (self.TR_item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
 
 			for i = first, last do
 				local item = items[i]
@@ -718,7 +726,7 @@ def.default_skinner = {
 					local tq_expander = item.expanded and tq_on or tq_off
 					if tq_expander then
 						local item_x
-						if skin.item_align_h == "left" then
+						if self.TR_item_align_h == "left" then
 							item_x = item.x + self.TR_expander_x
 						else -- "right"
 							item_x = item.x + item.w - self.TR_expander_x - self.TR_expander_w
@@ -738,7 +746,7 @@ def.default_skinner = {
 				local tq_bijou = item.tq_bijou
 				if tq_bijou then
 					local item_x
-					if skin.item_align_h == "left" then
+					if self.TR_item_align_h == "left" then
 						item_x = item.x + self.TR_icon_x
 					else -- "right"
 						item_x = item.x + item.w - self.TR_icon_x - self.TR_icon_w
@@ -765,7 +773,7 @@ def.default_skinner = {
 
 			if item.text then
 				local item_x
-				if skin.item_align_h == "left" then
+				if self.TR_item_align_h == "left" then
 					item_x = item.x + self.TR_text_x
 				else -- "right"
 					item_x = item.x + item.w - self.TR_text_x - font:getWidth(item.text)
