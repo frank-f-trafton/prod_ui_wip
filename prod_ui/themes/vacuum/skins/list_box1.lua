@@ -4,6 +4,12 @@
 return {
 	skinner_id = "wimp/list_box",
 
+	-- settings
+	--icon_side = "left",
+	--show_icons = false,
+	--text_align_h = "left",
+	-- /settings
+
 	box = "*style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
 	data_scroll = "*common/scroll_bar1",
@@ -16,12 +22,10 @@ return {
 
 	sl_body = "*tex_slices/list_box_body",
 
-	text_align_h = "left", -- "left", "center", "right"
 	-- Vertical text alignment is centered.
 
 	-- Icon column width and positioning, if active.
 	icon_spacing = 24,
-	icon_side = "left", -- "left", "right"
 
 	-- Additional padding for left or right-aligned text. No effect with center alignment.
 	pad_text_x = 0,

@@ -142,6 +142,8 @@ local function makeListBox1(content, x, y)
 	local list_box = content:addChild("wimp/list_box", {skin_id = skin_clone, userDestroy = _userDestroy})
 	list_box:setTag("demo_listbox")
 
+	list_box:writeSetting("show_icons", true)
+
 	list_box.wid_action = function(self, item, index)
 		print("wid_action()", item, index)
 	end
@@ -159,8 +161,6 @@ local function makeListBox1(content, x, y)
 	list_box.y = y
 	list_box.w = 224
 	list_box.h = 256
-
-	list_box.show_icons = true
 
 	list_box.MN_drag_scroll = true
 	list_box.MN_drag_select = true
@@ -212,7 +212,7 @@ local function makeListBox1(content, x, y)
 	local rdo_align_action = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb.skin.text_align_h = self.usr_align
+			lb:writeSetting("text_align_h", self.usr_align)
 			lb:reshape()
 		end
 	end
@@ -248,7 +248,7 @@ local function makeListBox1(content, x, y)
 	rdo_btn.usr_align = "right"
 	rdo_btn.wid_buttonAction = rdo_align_action
 
-	rdo_btn:setCheckedConditional("usr_align", list_box.skin.text_align_h)
+	rdo_btn:setCheckedConditional("usr_align", list_box.text_align_h)
 
 	wy = wy + wh
 	wy = wy + wh
@@ -260,10 +260,7 @@ local function makeListBox1(content, x, y)
 	chk.wid_buttonAction = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			local skin_def = getmetatable(lb.skin)
-			skin_def.pad_text_x = self.slider_pos
-			skin_def.show_icons = not not self.checked
-			self.context.resources:refreshSkinDefInstance(lb.skin_id)
+			lb:writeSetting("show_icons", not not self.checked)
 			lb:reshape()
 		end
 	end
@@ -279,7 +276,7 @@ local function makeListBox1(content, x, y)
 	local rdo_icon_side_action = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb.skin.icon_side = self.usr_icon_side
+			lb:writeSetting("icon_side", self.usr_icon_side)
 			lb:reshape()
 		end
 	end
@@ -300,7 +297,7 @@ local function makeListBox1(content, x, y)
 	rdo_btn.usr_icon_side = "right"
 	rdo_btn.wid_buttonAction = rdo_icon_side_action
 
-	rdo_btn:setCheckedConditional("usr_icon_side", list_box.skin.icon_side)
+	rdo_btn:setCheckedConditional("usr_icon_side", list_box.icon_side)
 
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
@@ -350,7 +347,7 @@ local function makeListBox2(content, x, y)
 	list_box.w = 224
 	list_box.h = 256
 
-	list_box.show_icons = true
+	list_box:writeSetting("show_icons", true)
 
 	list_box.MN_drag_scroll = true
 	--list_box.MN_drag_select = true
@@ -390,7 +387,7 @@ local function makeListBox3(content, x, y)
 	lb1.w = 224
 	lb1.h = 256
 
-	lb1.show_icons = true
+	lb1:writeSetting("show_icons", true)
 
 	lb1.MN_drag_scroll = true
 	lb1.MN_drag_select = true
@@ -456,7 +453,7 @@ local function makeListBox4(content, x, y)
 	lb1.w = 224
 	lb1.h = 256
 
-	lb1.show_icons = true
+	lb1:writeSetting("show_icons", true)
 
 	lb1.MN_drag_scroll = true
 	lb1.MN_drag_select = true
@@ -534,7 +531,7 @@ local function makeListBox4(content, x, y)
 	lb2.w = 224
 	lb2.h = 256
 
-	lb2.show_icons = true
+	lb2:writeSetting("show_icons", true)
 
 	lb2.MN_drag_scroll = true
 	lb2.MN_drag_select = true

@@ -179,7 +179,7 @@ local _ref_handlers = {
 
 
 local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
-	print("_skinDeepCopy: start", _depth)
+	--print("_skinDeepCopy: start", _depth)
 
 	--[[
 	setmetatable(inst, inst)
@@ -190,17 +190,17 @@ local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
 		if type(v) == "table" then
 			inst[k] = _skinDeepCopy(theme_inst, {}, v, schema[k] or _dummy_schema, _depth + 1)
 		else
-			print("***", "k", k, "v", v)
+			--print("***", "k", k, "v", v)
 			-- Pull in resources from the main theme table
 			local symbol = type(v) == "string" and v:sub(1, 1)
 			local stop_processing
 			local ref_handler = _ref_handlers[symbol]
 			if ref_handler then
-				print(">>> do lookup")
+				--print(">>> do lookup")
 				stop_processing, inst[k] = ref_handler(theme_inst, v)
-				print(">>> value is now: ", tostring(inst[k]), "stop_processing: " .. tostring(stop_processing))
+				--print(">>> value is now: ", tostring(inst[k]), "stop_processing: " .. tostring(stop_processing))
 			else
-				print(">>> direct copy")
+				--print(">>> direct copy")
 				inst[k] = v
 			end
 
@@ -208,7 +208,7 @@ local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
 				local command = schema[k]
 				local func = _schema_commands[command]
 				if func then
-					print("schema command", command, "inst[k]", inst[k])
+					--print("schema command", command, "inst[k]", inst[k])
 					inst[k] = func(theme_inst, inst[k])
 				else
 					error("unhandled schema command: " .. tostring(command))
@@ -216,7 +216,7 @@ local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
 			end
 		end
 	end
-	print("_skinDeepCopy: end", _depth)
+	--print("_skinDeepCopy: end", _depth)
 	return inst
 end
 
