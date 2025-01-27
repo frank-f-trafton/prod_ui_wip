@@ -71,6 +71,8 @@ def.movePrev = lgcMenu.widgetMovePrev
 def.moveNext = lgcMenu.widgetMoveNext
 def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
+def.movePageUp = lgcMenu.widgetMovePageUp
+def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 --- Called when user double-clicks on the widget or presses "return" or "kpenter".

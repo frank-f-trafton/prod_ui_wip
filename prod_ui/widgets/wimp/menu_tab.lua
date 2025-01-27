@@ -142,6 +142,8 @@ def.movePrev = lgcMenu.widgetMovePrev
 def.moveNext = lgcMenu.widgetMoveNext
 def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
+def.movePageUp = lgcMenu.widgetMovePageUp
+def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 -- * / Selection movement *
@@ -420,11 +422,11 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.MN_page_jump_size, true)
+		self:movePageUp(true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.MN_page_jump_size, true)
+		self:movePageDown(true)
 		return true
 
 	elseif scancode == "left" then

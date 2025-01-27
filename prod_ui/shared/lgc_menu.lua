@@ -257,8 +257,9 @@ end
 
 
 --- Call the getItemAtPoint method, and if a selectable item is found, select it, update scrolling, etc.
--- @param x X position (relative to widget, with scroll offset).
--- @param y Y position (relative to widget, with scroll offset).
+-- @param x, y The position (relative to widget, with scroll offset).
+-- @param first, last The first and last widgets to check.
+-- @return The index and item table, or nil if no item was found.
 function lgcMenu.widgetTrySelectItemAtPoint(self, x, y, first, last)
 	-- Prerequisites: widget must have a 'getItemAtPoint()' method assigned.
 
@@ -516,6 +517,101 @@ function lgcMenu.widgetMoveLast(self, immediate, id)
 end
 
 
+local function _pageStep(self, index, vert, dir, dist)
+	local menu = self.menu
+	local item = menu.items[index]
+	if not item then
+		return
+	end
+	local candidate = menu.items[index + dir]
+
+	local pos, len
+	if vert then
+		pos, len = "y", "h"
+	else
+		pos, len = "x", "w"
+	end
+	local point = item[pos] + (dist * dir)
+
+	if dir == -1 then
+		for i = index - 1, 1, -1 do
+			local item2 = menu.items[i]
+			if item2[pos] + item2[len] >= point then
+				if item.selectable then
+					candidate = item2
+				end
+			else
+				break
+			end
+		end
+
+	elseif dir == 1 then
+		for i = index + 1, #menu.items do
+			local item2 = menu.items[i]
+			if item2[pos] <= point then
+				if item.selectable then
+					candidate = item2
+				end
+			else
+				break
+			end
+		end
+
+	else
+		error("bad direction.")
+	end
+
+	return candidate
+end
+
+
+--- Move the widget menu selection up, preferring an item that is the distance of one "page" from the current
+--	selection. Viewport #1's height is used for the page size.
+function lgcMenu.widgetMovePageUp(self, immediate, id)
+	id = id or "index"
+	if self.menu[id] == 0 then
+		lgcMenu.widgetMoveFirst(self, immediate, id)
+		return
+	end
+
+	local dist = self.vp_h * self.context.settings.wimp.navigation.page_viewport_factor
+	local new_selection = _pageStep(self, self.menu[id], true, -1, dist)
+
+	if new_selection then
+		self.menu:setSelectedItem(new_selection)
+		if self.selectionInView then
+			self:selectionInView(immediate)
+		end
+		if self.cacheUpdate then
+			self:cacheUpdate(false)
+		end
+	end
+end
+
+
+--- Move the widget menu selection down, preferring an item that is the distance of one "page" from the current
+--	selection. Viewport #1's height is used for the page size.
+function lgcMenu.widgetMovePageDown(self, immediate, id)
+	id = id or "index"
+	if self.menu[id] == 0 then
+		lgcMenu.widgetMoveFirst(self, immediate, id)
+		return
+	end
+
+	local dist = self.vp_h * self.context.settings.wimp.navigation.page_viewport_factor
+	local new_selection = _pageStep(self, self.menu[id], true, 1, dist)
+	if new_selection then
+		self.menu:setSelectedItem(new_selection)
+		if self.selectionInView then
+			self:selectionInView(immediate)
+		end
+		if self.cacheUpdate then
+			self:cacheUpdate(false)
+		end
+	end
+end
+
+
 --[[
 	Some default key navigation functions.
 
@@ -547,11 +643,11 @@ function lgcMenu.keyNavTB(self, key, scancode, isrepeat, id)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.MN_page_jump_size, nil, id)
+		self:movePageUp(true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.MN_page_jump_size, nil, id)
+		self:movePageDown(true)
 		return true
 	end
 end
@@ -576,11 +672,11 @@ function lgcMenu.keyNavLR(self, key, scancode, isrepeat, id)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.MN_page_jump_size, nil, id)
+		self:movePageUp(true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.MN_page_jump_size, nil, id)
+		self:movePageDown(true)
 		return true
 	end
 end

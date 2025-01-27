@@ -55,7 +55,8 @@ def.movePrev = lgcMenu.widgetMovePrev
 def.moveNext = lgcMenu.widgetMoveNext
 def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
-
+def.movePageUp = lgcMenu.widgetMovePageUp
+def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 function def:_closeSelf(update_chosen)
@@ -321,11 +322,11 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.MN_page_jump_size, true)
+		self:movePageUp(true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.MN_page_jump_size, true)
+		self:movePageDown(true)
 		return true
 
 	elseif scancode == "escape" then
