@@ -3,7 +3,7 @@
 return {
 	skinner_id = "wimp/window_frame",
 
-	-- Begin settings
+	-- settings
 	frame_render_shadow = "*wimp/frame_render_shadow",
 	header_button_side = "*wimp/header_button_side",
 	header_enable_close_button = "*wimp/header_enable_close_button",
@@ -12,7 +12,7 @@ return {
 	header_show_size_button = "*wimp/header_show_size_button",
 	header_text = "*wimp/header_text",
 	header_size = "*wimp/header_size",
-	-- End settings
+	-- /settings
 
 	box = "*style/boxes/wimp_frame",
 

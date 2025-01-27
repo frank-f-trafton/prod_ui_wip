@@ -38,6 +38,12 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 local def = {
 	skin_id = "list_box1",
 	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+
+	default_settings = {
+		icon_side = "left", -- "left", "right"
+		show_icons = false,
+		text_align_h = "left" -- "left", "center", "right"
+	}
 }
 
 
@@ -287,11 +293,9 @@ function def:uiCall_create(inst)
 		-- State flags.
 		self.enabled = true
 
-		-- Shows a column of icons when true.
-		self.show_icons = false
-
 		self:skinSetRefs()
 		self:skinInstall()
+		self:applyAllSettings()
 	end
 end
 
@@ -338,12 +342,7 @@ function def:cacheUpdate(refresh_dimensions)
 		end
 
 		-- Calculate column widths.
-		if self.show_icons then
-			self.col_icon_w = skin.icon_spacing
-
-		else
-			self.col_icon_w = 0
-		end
+		self.col_icon_w = self.show_icons and skin.icon_spacing or 0
 
 		self.col_text_w = 0
 		local font = skin.font
@@ -357,10 +356,9 @@ function def:cacheUpdate(refresh_dimensions)
 		self.col_text_w = math.max(self.col_text_w, self.vp_w - self.col_icon_w)
 
 		-- Get column left positions.
-		if skin.icon_side == "left" then
+		if self.icon_side == "left" then
 			self.col_icon_x = 0
 			self.col_text_x = self.col_icon_w
-
 		else
 			self.col_icon_x = self.col_text_w
 			self.col_text_x = 0
@@ -750,13 +748,13 @@ def.default_skinner = {
 			if item.text then
 				-- Need to align manually to prevent long lines from wrapping.
 				local text_x
-				if skin.text_align_h == "left" then
+				if self.text_align_h == "left" then
 					text_x = self.col_text_x + skin.pad_text_x
 
-				elseif skin.text_align_h == "center" then
+				elseif self.text_align_h == "center" then
 					text_x = self.col_text_x + math.floor((self.col_text_w - item.w) * 0.5)
 
-				elseif skin.text_align_h == "right" then
+				elseif self.text_align_h == "right" then
 					text_x = self.col_text_x + math.floor(self.col_text_w - item.w - skin.pad_text_x)
 				end
 
