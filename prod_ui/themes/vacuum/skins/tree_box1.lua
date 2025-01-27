@@ -4,6 +4,12 @@
 return {
 	skinner_id = "wimp/tree_box",
 
+	-- settings
+	--TR_item_align_h = "left",
+	--TR_expanders_active = false,
+	--TR_show_icons = false,
+	-- /settings
+
 	box = "*style/boxes/panel",
 	tq_px = "*tex_quads/pixel",
 	data_scroll = "*common/scroll_bar1",
@@ -20,9 +26,6 @@ return {
 	item_pad_v = 2,
 
 	sl_body = "*tex_slices/list_box_body",
-
-	-- Horizontal starting edge for the tree root.
-	item_align_h = "left", -- "left", "right"
 
 	-- Vertical text alignment is centered.
 
