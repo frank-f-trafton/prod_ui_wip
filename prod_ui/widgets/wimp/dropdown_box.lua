@@ -270,6 +270,10 @@ function def:_openPopUpMenu()
 			y = ay + self.h,
 		})
 		self.wid_drawer = drawer
+
+		self.chain_next = drawer
+		drawer.chain_prev = self
+
 		commonWimp.assignPopUp(self, drawer)
 
 		self:setSelectionByIndex(menu.chosen_i)
@@ -285,6 +289,7 @@ function def:_closePopUpMenu(update_chosen)
 	local wid_drawer = self.wid_drawer
 	if wid_drawer and not wid_drawer._dead then
 		self.wid_drawer:_closeSelf(update_chosen)
+		self.chain_next = false
 	end
 end
 
@@ -414,7 +419,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 
 		if button == 1 then
-			if not self.wid_drawer then
+			-- Drawer is already opened: close it.
+			if self.wid_drawer then
+				self:_closePopUpMenu(false)
+			-- Open it.
+			else
 				self:_openPopUpMenu()
 
 				return true

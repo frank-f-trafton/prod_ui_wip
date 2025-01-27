@@ -339,6 +339,10 @@ function def:_openPopUpMenu()
 			y = ay + self.h,
 		})
 		self.wid_drawer = drawer
+
+		self.chain_next = drawer
+		drawer.chain_prev = self
+
 		commonWimp.assignPopUp(self, drawer)
 
 		self:setSelectionByIndex(menu.chosen_i)
@@ -354,6 +358,7 @@ function def:_closePopUpMenu(update_chosen)
 	local wid_drawer = self.wid_drawer
 	if wid_drawer and not wid_drawer._dead then
 		self.wid_drawer:_closeSelf(update_chosen)
+		self.chain_next = false
 	end
 end
 
@@ -546,6 +551,13 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			print("hasInput", love.keyboard.hasTextInput())
 		end
 
+		local closed_drawer
+		-- Drawer is already opened: close it.
+		if self.wid_drawer then
+			self:_closePopUpMenu(false)
+			closed_drawer = true
+		end
+
 		local mx, my = self:getRelativePosition(x, y)
 
 		-- Clicking the text area:
@@ -555,12 +567,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				return true
 			end
 
-		-- Clicking the drawer expander button:
-		elseif widShared.pointInViewport(self, 3, mx, my) then
-			if button == 1 and not self.wid_drawer then
-				self:_openPopUpMenu()
-				return true
-			end
+		-- Clicking the drawer expander button: open drawer, but only
+		-- if we didn't just close it.
+		elseif button == 1
+		and not closed_drawer
+		and widShared.pointInViewport(self, 3, mx, my)
+		then
+			self:_openPopUpMenu()
+			return true
 		end
 	end
 end
