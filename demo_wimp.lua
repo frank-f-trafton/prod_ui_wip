@@ -5,13 +5,13 @@ print("Start WIMP Demo.")
 
 -- Plans to launch upon starting the demo.
 local demo_quick_launch = {
-	"plan_wimp_menu_tab",
+	--"plan_wimp_menu_tab",
 	--"plan_wimp_frame",
 	--"plan_demo_main",
 	--"plan_properties_box",
 	--"plan_button_split",
 	--"plan_wimp_tree_box",
-	--"plan_wimp_list_box",
+	"plan_wimp_list_box",
 }
 
 
@@ -112,6 +112,10 @@ local wimp_settings = {
 			-- XXX: for now, this is also used with horizontal wheel movement. As of
 			-- this writing, I don't have a mouse with a horizontal wheel.
 			mouse_wheel_move_size_v = 64,
+
+			-- How much of a "page" to jump when pressing pageup or pagedown in a
+			-- menu. 1.0 is one whole span of the viewport, 0.5 is half, etc.
+			page_viewport_factor = 1.0,
 		},
 
 		pop_up_menu = {

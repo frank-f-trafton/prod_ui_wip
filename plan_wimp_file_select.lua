@@ -113,11 +113,11 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePrev(self.MN_page_jump_size, true)
+		self:movePageUp(true)
 		return true
 
 	elseif scancode == "pagedown" then
-		self:moveNext(self.MN_page_jump_size, true)
+		self:movePageDown(true)
 		return true
 
 	elseif scancode == "left" then
