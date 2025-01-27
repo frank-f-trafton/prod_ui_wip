@@ -689,9 +689,14 @@ function def:uiCall_update(dt)
 		local text_h = font:getHeight()
 
 		self.header_text_ox = math.floor(0.5 + _lerp(self.vp3_x, self.vp3_x + self.vp3_w - text_w, skin.header_text_align_h))
-		if self.header_text_ox + text_w > self.vp3_w then
+
+		if self.header_button_side == "right" and self.header_text_ox + text_w >= self.vp4_w then
 			self.header_text_ox = self.vp4_w - text_w
+
+		elseif self.header_button_side == "left" and self.header_text_ox < self.vp4_x then
+			self.header_text_ox = self.vp4_x
 		end
+
 		self.header_text_ox = math.max(0, self.header_text_ox)
 		self.header_text_oy = math.floor(0.5 + _lerp(self.vp3_y, self.vp3_y + self.vp3_h - text_h, skin.header_text_align_v))
 
@@ -913,7 +918,7 @@ def.default_skinner = {
 			love.graphics.setFont(font)
 
 			local sx, sy, sw, sh = love.graphics.getScissor()
-			uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+			uiGraphics.intersectScissor(ox + self.x + self.vp4_x, oy + self.y + self.vp4_y, self.vp4_w, self.vp4_h)
 
 			love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
 
