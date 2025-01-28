@@ -5,7 +5,8 @@ print("Start WIMP Demo.")
 
 -- Plans to launch upon starting the demo.
 local demo_quick_launch = {
-	"plan_wimp_menu_tab",
+	"plan_dial",
+	--"plan_wimp_menu_tab",
 	--"plan_wimp_frame",
 	--"plan_demo_main",
 	--"plan_properties_box",
