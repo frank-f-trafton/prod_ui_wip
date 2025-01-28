@@ -22,6 +22,45 @@ local function rngChr(n)
 end
 
 
+local function hof_sort1(a, b)
+	return a.label1 < b.label1
+end
+local function hof_sort2(a, b)
+	return (a.label2 == b.label2) and a.label1 < b.label1
+		or a.label2 < b.label2
+end
+local function hof_sort3(a, b)
+	return (a.label3 == b.label3) and a.label2 < b.label2
+		or (a.label2 == b.label2) and a.label1 < b.label1
+		or a.label3 < b.label3
+end
+local function hof_sort4(a, b)
+	return (a.label4 == b.label4) and a.label3 < b.label3
+		or (a.label3 == b.label3) and a.label2 < b.label2
+		or (a.label2 == b.label2) and a.label1 < b.label1
+		or a.label4 < b.label4
+end
+local sort_functions = {
+	hof_sort1,
+	hof_sort2,
+	hof_sort3,
+	hof_sort4
+}
+
+
+local function columnSortLabels(wid, column)
+	local items = wid.menu.items
+	print("column.id", column.id)
+	table.sort(items, sort_functions[column.id])
+
+	if not wid.column_sort_ascending then
+		commonTab.reverseSequence(items)
+	end
+
+	return true
+end
+
+
 function plan.make(parent)
 	local context = parent.context
 
@@ -55,30 +94,28 @@ function plan.make(parent)
 		menu_tab.lc_func = uiLayout.fitRemaining
 		uiLayout.register(content, menu_tab)
 
-		menu_tab:addColumn("Column 1", true, commonTab.columnSortGeneric) -- ID #1
-		menu_tab:addColumn("Column 2", true, commonTab.columnSortGeneric) -- ID #2
-		menu_tab:addColumn("Column 3", true, commonTab.columnSortGeneric) -- ID #3
-		menu_tab:addColumn("Column 4", true, commonTab.columnSortGeneric) -- ID #4
+		local primary_column = menu_tab:addColumn("Column 1", true, columnSortLabels) -- ID #1
+		primary_column.lock_visibility = true
+
+		menu_tab:addColumn("Column 2", true, columnSortLabels) -- ID #2
+		menu_tab:addColumn("Column 3", true, columnSortLabels) -- ID #3
+		menu_tab:addColumn("Column 4", true, columnSortLabels) -- ID #4
 
 		menu_tab.column_sort_ascending = true
 
-		local rnd = love.math.random
-		local chr = string.char
-		local function rndChr(n)
-			local str = ""
-			for i = 1, n do
-				str = str .. chr(rnd(32, 126))
-			end
-			return str
-		end
-
+		-- TODO: Word filter? Or just use a known-good random seed.
 		for i = 1, 100 do
 			local item = menu_tab:addRow()
 
-			item.cells[1] = {text = tostring(i)}
-			item.cells[2] = {text = rngChr(3)}
-			item.cells[3] = {text = rndChr(5)}
-			item.cells[4] = {text = rndChr(8)}
+			item.label1 = tostring(i)
+			item.label2 = rngChr(3)
+			item.label3 = rngChr(5)
+			item.label4 = rngChr(8)
+
+			item.cells[1] = {text = item.label1}
+			item.cells[2] = {text = item.label2}
+			item.cells[3] = {text = item.label3}
+			item.cells[4] = {text = item.label4}
 
 			local implTabCell = context:getLua("shared/impl_tab_cell")
 			item.render = implTabCell.default_renderCell
