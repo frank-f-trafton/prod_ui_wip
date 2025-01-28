@@ -685,75 +685,66 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble1()
 		end
 
+		local mx, my = self:getRelativePosition(x, y)
+
 		if lgcMenu.pointerPressScrollBars(self, x, y, button) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 			self.context:forceClickSequence(false, button, 1)
-		else
+
+		-- Header bar
+		elseif self.col_bar_visible and widShared.pointInViewport(self, 3, mx, my) then
+			-- Main column interactions
 			if button == 1 then
-				local mx, my = self:getRelativePosition(x, y)
-				local handled
+				local press_code, _, column = testColumnMouseOverlapWithEdges(self, mx, my)
+				if press_code then
+					self.column_hovered = false
+					self.column_pressed = column
 
-				-- Check for pressing on integrated column header-boxes
-				if self.col_bar_visible then
-					local press_code, _, column = testColumnMouseOverlapWithEdges(self, mx, my)
-					if press_code then
-						self.column_hovered = false
-						self.column_pressed = column
+					self.press_busy = press_code
 
-						self.press_busy = press_code
-
-						-- Help prevent unwanted double-clicks on menu-items
-						self.MN_mouse_clicked_item = false
-
-						handled = true
-					end
-
-					if press_code == "column-press" then
-						self.col_click = true
-						self.col_click_x = mx
-						self.col_click_y = my
-					end
+					-- Help prevent unwanted double-clicks on menu-items
+					self.MN_mouse_clicked_item = false
+				end
+				if press_code == "column-press" then
+					self.col_click = true
+					self.col_click_x = mx
+					self.col_click_y = my
 				end
 
-				if not handled then
-					local smx, smy = mx + self.scr_x, my + self.scr_y
-
-					-- Check for click-able items.
-					if not self.press_busy then
-						local item_i, item_t = self:trySelectItemAtPoint(
-							smx,
-							smy,
-							math.max(1, self.MN_items_first),
-							math.min(#self.menu.items, self.MN_items_last)
-						)
-
-						if self.MN_drag_select then
-							self.press_busy = "menu-drag"
-						end
-
-						-- Reset click-sequence if clicking on a different item.
-						if self.MN_mouse_clicked_item ~= item_t then
-							self.context:forceClickSequence(self, button, 1)
-						end
-
-						self.MN_mouse_clicked_item = item_t
-
-						if item_t and item_t.menuCall_pointerPress then
-							item_t.menuCall_pointerPress(item_t, self, button, self.context.cseq_presses)
-						end
-					end
-				end
-
-			-- Pop-up menu
 			elseif button == 2 then
+				invokePopUpMenu(self, x, y)
 
-				-- Confirm mouse cursor is over the column bar.
-				local mx, my = self:getRelativePosition(x, y)
-				if widShared.pointInViewport(self, 3, mx, my) then
-					invokePopUpMenu(self, x, y)
+				-- Halt propagation
+				return true
+			end
 
-					-- Halt propagation
-					return true
+		-- Item content
+		elseif widShared.pointInViewport(self, 1, mx, my) then
+			if button == 1 then
+				local smx, smy = mx + self.scr_x, my + self.scr_y
+
+				if not self.press_busy then
+					local item_i, item_t = self:trySelectItemAtPoint(
+						smx,
+						smy,
+						math.max(1, self.MN_items_first),
+						math.min(#self.menu.items, self.MN_items_last)
+					)
+
+					if self.MN_drag_select then
+						self.press_busy = "menu-drag"
+					end
+
+					-- Reset click-sequence if clicking on a different item.
+					if self.MN_mouse_clicked_item ~= item_t then
+						self.context:forceClickSequence(self, button, 1)
+					end
+
+					self.MN_mouse_clicked_item = item_t
+
+					if item_t and item_t.menuCall_pointerPress then
+						item_t.menuCall_pointerPress(item_t, self, button, self.context.cseq_presses)
+					end
 				end
 			end
 		end
