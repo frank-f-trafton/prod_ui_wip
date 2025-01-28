@@ -1,39 +1,19 @@
+-- WIP: copy of base/slider_bar.lua
+
 --[[
-TODO:
-
-* Visible ticks with simple text labels (not "capital-L" Labels).
-
+base/slider_radial: A dial slider.
 --]]
 
 --[[
-base/slider_bar: A horizontal or vertical slider bar.
+Click and drag up/down to adjust the dial position.
 
-This widget supports an optional text label, but a customized skin is required for correct placement of label and control.
---]]
-
---[[
-Trough
-  |   Thumb
-  |   |
-  v   v
-┌──────────────┐
-│ ┅┅┅┅O┅┅┅┅┅┅┅ │
-└──────────────┘
-
-  ║          ║
-  ╚════╦═════╝
-       ║
-      VP2
-
-
-┌───┐
-│   │
-│ ┇ │
-│ ┇ │
-│ O │  Vertical layout
-│ ┇ │
-│   │
-└───┘
+                    ┌─────────┐
+                    │  ┌───┐  │
+  Min position-->   │ ┌┘   └┐ │
+                    │    ---│ │  <-- Dial, at position 0.0
+  Max position -->  │ └┐   ┌┘ │
+                    │  └───┘  │
+                    └─────────┘
 --]]
 
 
@@ -49,7 +29,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "slider1",
+	skin_id = "slider_radial1",
 }
 
 
@@ -61,10 +41,7 @@ function def:wid_actionSliderChanged()
 end
 
 
--- NOTE: The primary button action is activated by keyboard input only. Click-activated
--- secondary and tertiary actions do not account for the mouse cursor being within the
--- clickable trough area. (That is, right or middle-clicking anywhere on the widget will
--- activate actions 2 and 3, respectively).
+-- NOTE: The primary button action is activated by keyboard input only.
 def.wid_buttonAction = lgcButton.wid_buttonAction
 def.wid_buttonAction2 = lgcButton.wid_buttonAction2
 def.wid_buttonAction3 = lgcButton.wid_buttonAction3
@@ -93,7 +70,30 @@ function def:uiCall_create(inst)
 		widShared.setupViewports(self, 2)
 
 		lgcLabel.setup(self)
-		lgcSlider.setup(self)
+
+		-- Stuff copied from lgcSlider.setup().
+
+		-- When false, the slider control should not respond to user input.
+		-- This field does not prevent self:setSlider() from modifying the slider state. Nor does it
+		-- affect the status of the parent widget as a whole (as in, it may still be capable of holding
+		-- the UI thimble).
+		self.slider_allow_changes = true
+
+		-- Slider value state.
+		-- Internally, the slider position ranges from 0 to 'slider_max' in a linear fashion.
+		self.slider_pos = 0
+		self.slider_min = 0
+		self.slider_max = 0
+		self.slider_def = 0 -- default
+		self.slider_home = 0 -- "home" position, usually zero.
+
+		self.round_policy = "none" -- "none", "floor", "ceil", "nearest"
+
+		self.clockwise = true
+		self.home_radian = 0
+
+		-- Lighten the "used" side of the trough.
+		self.show_use_line = true
 
 		-- State flags
 		self.enabled = true
@@ -103,6 +103,38 @@ function def:uiCall_create(inst)
 		self:skinSetRefs()
 		self:skinInstall()
 	end
+end
+
+
+local function _roundPos(self)
+	local mode = self.round_policy
+
+	if mode == "none" then
+		return
+
+	elseif mode == "floor" then
+		self.slider_pos = math.floor(self.slider_pos)
+
+	elseif mode == "ceil" then
+		self.slider_pos = math.ceil(self.slider_pos)
+
+	elseif mode == "nearest" then
+		self.slider_pos = math.floor(0.5 + self.slider_pos)
+
+	else
+		error("invalid round mode: " .. tostring(mode))
+	end
+end
+
+
+local function _clampPos(self)
+	self.slider_pos = math.max(self.slider_min, math.min(self.slider_pos, self.slider_max))
+end
+
+
+local function _processMovedSliderPos(self)
+	_roundPos(self)
+	_clampPos(self)
 end
 
 
@@ -119,14 +151,12 @@ function def:uiCall_reshape()
 	widShared.partitionViewport(self, 2, 1, skin.label_spacing, skin.label_placement, true)
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	lgcSlider.reshapeSliderComponent(self, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h, skin.thumb_w, skin.thumb_h)
-
 	local slider_pos_old = self.slider_pos
-	lgcSlider.processMovedSliderPos(self)
+	_processMovedSliderPos(self)
 	if self.slider_pos ~= slider_pos_old then
 		self:wid_actionSliderChanged()
 	end
-	lgcSlider.updateTroughHome(self)
+	--lgcSlider.updateTroughHome(self)
 
 	lgcLabel.reshapeLabel(self)
 end
@@ -142,10 +172,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				if button == 1 then
 					local mx, my = self:getRelativePosition(x, y)
-					if lgcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere) then
+					-- WIP
+					--[[
+					if lgcSlider.checkMousePress(self, x, y, self.skin.trough_click_anywhere) then
 						self.pressed = true
 					end
-
+					--]]
 					-- NOTE: The primary button action is keyboard-only (via thimble code in the root widget).
 
 				elseif button == 2 then
@@ -167,8 +199,11 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if self.enabled then
 			if self.pressed then
 				if self.context.mouse_pressed_button == 1 then
-					local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-					lgcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere)
+					-- WIP
+					--[[
+					local x, y = self:getRelativePosition(mouse_x, mouse_y)
+					lgcSlider.checkMousePress(self, x, y, self.skin.trough_click_anywhere)
+					--]]
 				end
 			end
 		end
@@ -179,16 +214,10 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
+			-- WIP
+			--[[
 			return lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
-		end
-	end
-end
-
-
-function def:uiCall_pointerWheel(inst, x, y)
-	if self == inst then
-		if self.enabled then
-			return lgcSlider.mouseWheelLogic(self, x, y)
+			--]]
 		end
 	end
 end
@@ -199,11 +228,6 @@ def.default_skinner = {
 		label_spacing = "scaled-int",
 		trough_breadth = "scaled-int",
 		trough_breadth2 = "scaled-int",
-		thumb_w = "scaled-int",
-		thumb_h = "scaled-int",
-		thumb_ox = "scaled-int",
-		thumb_oy = "scaled-int",
-		trough_ext = "scaled-int",
 
 		res_idle = {
 			label_ox = "scaled-int",
@@ -247,82 +271,17 @@ def.default_skinner = {
 
 		love.graphics.setColor(1, 1, 1, 1)
 
-		-- Trough line
-		local trough_ext = skin.trough_ext
-		if self.trough_vertical then
-			local trough_x1 = self.trough_x + math.floor(self.trough_w/2 - skin.trough_breadth/2 + 0.5)
+		local cx = self.vp_x + math.floor(self.vp_w / 2)
+		local cy = self.vp_y + math.floor(self.vp_h / 2)
+		local radius = math.floor(self.vp_w/2)
 
-			uiGraphics.drawSlice(
-				res.sl_trough_empty,
-				trough_x1,
-				self.trough_y - trough_ext,
-				skin.trough_breadth,
-				self.trough_h + trough_ext * 2
-			)
+		-- WIP: Trough
+		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
+		love.graphics.arc("line", "open", cx, cy, radius, 0, math.pi, 64)
 
-			if self.show_use_line then
-				local trough_x1b = self.trough_x + math.floor(self.trough_w/2 - skin.trough_breadth2/2 + 0.5)
-				local y1 = self.trough_y + self.trough_home
-				local y2 = self.trough_y + self.thumb_y
-				if y1 > y2 then
-					y1, y2 = y2, y1
-				end
-
-				uiGraphics.drawSlice(
-					res.sl_trough_active,
-					trough_x1b,
-					y1,
-					skin.trough_breadth2,
-					y2 - y1
-				)
-				--print("y1, y2", y1, y2)
-			end
-		else -- horizontal
-			local trough_y1 = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth/2 + 0.5)
-
-			uiGraphics.drawSlice(
-				res.sl_trough_empty,
-				self.trough_x - trough_ext,
-				trough_y1,
-				self.trough_w + trough_ext * 2,
-				skin.trough_breadth
-			)
-
-			if self.show_use_line then
-				local trough_y1b = self.trough_y + math.floor(self.trough_h/2 - skin.trough_breadth2/2 + 0.5)
-				local x1 = self.trough_x + self.trough_home
-				local x2 = self.trough_x + self.thumb_x
-				if x1 > x2 then
-					x1, x2 = x2, x1
-				end
-
-				uiGraphics.drawSlice(
-					res.sl_trough_active,
-					x1,
-					trough_y1b,
-					x2 - x1,
-					skin.trough_breadth2
-				)
-			end
-		end
-
-		-- Thumb
-		uiGraphics.quadXYWH(
-			res.tq_thumb,
-			self.trough_x + self.thumb_x - skin.thumb_ox,
-			self.trough_y + self.thumb_y - skin.thumb_oy,
-			self.thumb_w,
-			self.thumb_h
-		)
-		-- Debug
-		--[[
-		love.graphics.print(
-			"trough: " .. self.trough_x .. ", " .. self.trough_y .. ", " .. self.trough_w .. ", " .. self.trough_h .. "\n" ..
-			"thumb: " .. self.thumb_x .. ", " .. self.thumb_y .. ", " .. self.thumb_w .. ", " .. self.thumb_h .. "\n" ..
-			"",
-			256, 0
-		)
-		--]]
+		-- WIP: Dial
+		love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
+		love.graphics.line(cx, cy, cx + radius, cy)
 
 		-- Optional label
 		if self.label_mode then
