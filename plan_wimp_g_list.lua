@@ -79,11 +79,7 @@ function plan.make(parent)
 
 		menu_tab.column_sort_ascending = true
 
-		-- Use the initial arbitrary lookups of hash keys to stabilize sorting.
-		local secret_sort = 1
-
 		for k, v in pairs(_G) do
-
 			local item = menu_tab:addRow()
 
 			item.g_key = tostring(k)

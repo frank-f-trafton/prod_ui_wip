@@ -53,7 +53,6 @@ function commonTab.columnSortGeneric(wid, column)
 
 	local temp = {}
 	for i, item in ipairs(wid.menu.items) do
-
 		local entry = {item}
 		if not sort_order then
 			entry[#entry + 1] = item.cells[column.id][column.sort_cell_field]
