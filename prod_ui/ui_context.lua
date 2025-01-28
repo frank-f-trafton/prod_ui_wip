@@ -48,7 +48,7 @@ local function cb_keyDown(self, kc, sc, rep, latest)
 		return
 	end
 
-	-- Any widget has thimble focus: bubble up the key event
+	-- Any widget has thimble focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_keyPressed", wid_cur, kc, sc, rep)
@@ -67,7 +67,7 @@ local function cb_keyUp(self, kc, sc)
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_keyReleased", wid_cur, kc, sc)
@@ -850,7 +850,7 @@ function _mt_context:love_joystickpressed(joystick, button) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_joystickPressed", wid_cur, joystick, button)
@@ -869,7 +869,7 @@ function _mt_context:love_joystickreleased(joystick, button) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_joystickReleased", wid_cur, joystick, button)
@@ -888,7 +888,7 @@ function _mt_context:love_joystickaxis(joystick, axis, value) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_joystickAxis", wid_cur, joystick, axis, value)
@@ -907,7 +907,7 @@ function _mt_context:love_joystickhat(joystick, hat, direction) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_joystickHat", wid_cur, joystick, hat, direction)
@@ -926,7 +926,7 @@ function _mt_context:love_gamepadpressed(joystick, button) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_gamepadPressed", wid_cur, joystick, button)
@@ -945,7 +945,7 @@ function _mt_context:love_gamepadreleased(joystick, button) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_gamepadReleased", wid_cur, joystick, button)
@@ -964,7 +964,7 @@ function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 		return
 	end
 
-	-- Any widget has focus: bubble up the key event
+	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
 		wid_cur:cycleEvent("uiCall_gamepadAxis", wid_cur, joystick, axis, value)
@@ -972,6 +972,44 @@ function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
 		self.root:sendEvent("uiCall_gamepadAxis", self.root, joystick, axis, value) -- no ancestors
+	end
+end
+
+
+function _mt_context:love_filedropped(file)
+	-- Event capture
+	local cap_cur = self.captured_focus
+	if cap_cur and cap_cur.uiCap_fileDropped and cap_cur:uiCap_fileDropped(file) then
+		return
+	end
+
+	-- Any widget has focus: cycle the event
+	local wid_cur = self.thimble2 or self.thimble1
+	if wid_cur then
+		wid_cur:cycleEvent("uiCall_fileDropped", file)
+
+	-- Nothing has focus: send to root widget, if present
+	elseif self.root then
+		self.root:sendEvent("uiCall_fileDropped", file) -- no ancestors
+	end
+end
+
+
+function _mt_context:love_directorydropped(path)
+	-- Event capture
+	local cap_cur = self.captured_focus
+	if cap_cur and cap_cur.uiCap_directoryDropped and cap_cur:uiCap_directoryDropped(file) then
+		return
+	end
+
+	-- Any widget has focus: cycle the event
+	local wid_cur = self.thimble2 or self.thimble1
+	if wid_cur then
+		wid_cur:cycleEvent("uiCall_directoryDropped", file)
+
+	-- Nothing has focus: send to root widget, if present
+	elseif self.root then
+		self.root:sendEvent("uiCall_directoryDropped", file) -- no ancestors
 	end
 end
 
