@@ -772,7 +772,7 @@ function widShared.checkScrollWheelScroll(self, x, y)
 		local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
 		self:scrollDeltaHV(-x * wheel_scale, -y * wheel_scale)
 
-		return old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty
+		return self.scr_ty ~= self.scr_y or old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty
 	end
 end
 
