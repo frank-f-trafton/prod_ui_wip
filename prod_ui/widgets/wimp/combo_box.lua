@@ -715,7 +715,7 @@ def.default_skinner = {
 			skin.font_ghost,
 			res.color_text,
 			line_ed.font,
-			(not self.wid_drawer) and color_caret or false -- Don't draw caret if drawer is pulled out. It's annoying.
+			self.context.window_focus and not self.wid_drawer and color_caret -- Don't draw caret if drawer is pulled out. It's annoying.
 		)
 
 		love.graphics.pop()

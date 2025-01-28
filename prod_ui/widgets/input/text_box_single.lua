@@ -283,7 +283,7 @@ def.default_skinner = {
 			skin.font_ghost,
 			res.color_text,
 			line_ed.font,
-			color_caret
+			self.context.window_focus and color_caret
 		)
 
 		love.graphics.pop()
