@@ -824,6 +824,37 @@
             </notes>
         </callback>
 
+		<callback>
+            <name>uiCall_fileDropped</name>
+            <prop-method>cycleEvent</prop-method>
+            <event-origin>love.filedropped</event-origin>
+
+            <desc>The user dropped a file onto the application window.</desc>
+
+            <sig>def:uiCall_fileDropped(file)</sig>
+            <param name="file">A File object.</param>
+
+			<notes>
+				Refer to the LÖVE Wiki for more details on how to work with the file argument.
+			</notes>
+        </callback>
+
+		<callback>
+            <name>uiCall_directoryDropped</name>
+            <prop-method>cycleEvent</prop-method>
+            <event-origin>love.directorydropped</event-origin>
+
+            <desc>The user dropped a directory onto the application window.</desc>
+
+            <sig>def:uiCall_directoryDropped(path)</sig>
+            <param name="path">A string path to the directory.</param>
+
+			<notes>
+				Refer to the LÖVE Wiki for more details on how to work with the path argument.
+			</notes>
+        </callback>
+
+
         <callback>
             <name>uiCall_capture</name>
             <prop-method>TODO</prop-method>
