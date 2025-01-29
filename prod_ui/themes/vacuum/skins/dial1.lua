@@ -3,7 +3,7 @@
 
 
 return {
-	skinner_id = "base/slider_radial",
+	skinner_id = "base/dial",
 
 	box = "*style/boxes/button",
 	label_style = "*style/labels/norm",
