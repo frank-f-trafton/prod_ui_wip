@@ -27,6 +27,15 @@ function commonTree.setExpanded(self, item, exp)
 	self:orderItems()
 	self:arrange()
 	self:cacheUpdate(true)
+	self:scrollClampViewport()
+
+	--[[
+	Calling cacheUpdate() again. We need to set the item ranges after clamping. The function that we want
+	is lgcMenu.widgetAutoRangeV(), but it's not accessible (without debug shenanigans) from this source
+	file. Either it needs to be attached to widgets as a method, or this source file needs to be loaded
+	through the context.
+	--]]
+	self:cacheUpdate(true)
 end
 
 
@@ -41,6 +50,8 @@ function commonTree.keyForward(self, dir)
 
 	elseif item and #item.nodes > 0 and item.expanded then
 		self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
+		self:getInBounds(item.nodes[1], true)
+		self:cacheUpdate(true)
 
 	else
 		self:scrollDeltaH(32 * dir) -- XXX config
@@ -61,6 +72,8 @@ function commonTree.keyBackward(self, dir)
 
 	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
 		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
+		self:getInBounds(item.parent, true)
+		self:cacheUpdate(true)
 
 	else
 		self:scrollDeltaH(32 * dir) -- XXX config
