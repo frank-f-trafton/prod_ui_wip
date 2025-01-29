@@ -39,17 +39,15 @@ function plan.make(parent)
 		local xx = 0
 
 		makeLabel(content, xx, 0, 256, 32, "Dial -- **Under construction**")
-		local dial1 = content:addChild("base/slider_radial")
+		local dial1 = content:addChild("base/dial")
 
 		dial1.x = xx
 		dial1.y = 32
 		dial1.w = 64
 		dial1.h = 64
 
-		dial1.slider_pos = 0
-		dial1.slider_max = 5
-
-		dial1.round_policy = "nearest"
+		--:setDialParameters(pos, min, max, home, rnd)
+		dial1:setDialParameters(0, 0, 100, 0, "none")
 	end
 
 	frame:reshape(true)

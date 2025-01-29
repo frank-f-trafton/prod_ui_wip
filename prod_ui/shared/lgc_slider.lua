@@ -42,8 +42,8 @@ local slider_keys = {
 
 function lgcSlider.setup(self)
 	-- When false, the slider control should not respond to user input.
-	-- This field does not prevent self:setSlider() from modifying the slider state. Nor does it
-	-- affect the status of the parent widget as a whole (as in, it may still be capable of holding
+	-- This field does not prevent API calls from modifying the slider state. Nor does it affect
+	-- the status of the parent widget as a whole (as in, it may still be capable of holding
 	-- the UI thimble).
 	self.slider_allow_changes = true
 
@@ -406,25 +406,6 @@ function lgcSlider.widSetSliderMax(self, max)
 end
 
 
-function lgcSlider.widSetSliderDefault(self, def)
-	uiShared.numberNotNaN(1, def)
-
-	-- Does not check `self.enabled` or `self.slider_allow_changes`.
-
-	self.slider_def = math.max(0, math.min(def, max))
-end
-
-
-function lgcSlider.widSetSliderHome(self, home)
-	uiShared.numberNotNaN(1, home)
-
-	-- Does not check `self.enabled` or `self.slider_allow_changes`.
-
-	self.slider_home = math.max(0, math.min(home, max))
-	lgcSlider.updateTroughHome(self)
-end
-
-
 function lgcSlider.widSetSliderAxis(self, axis)
 	uiShared.enum(1, axis, "sliderAxis", _slider_axes)
 
@@ -443,8 +424,6 @@ end
 function lgcSlider.setupMethods(self)
 	self.setSliderPosition = lgcSlider.widSetSliderPosition
 	self.setSliderMax = lgcSlider.widSetSliderMax
-	self.setSliderDefault = lgcSlider.widSetSliderDefault
-	self.setSliderHome = lgcSlider.widSetSliderHome
 	self.setSliderAxis = lgcSlider.widSetSliderAxis
 	self.setSliderAllowChanges = lgcSlider.widSetSliderAllowChanges
 end
