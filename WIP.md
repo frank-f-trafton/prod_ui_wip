@@ -43,11 +43,10 @@ This category was planned to be used across all interfaces (WIMP, gamepad, touch
 | base/container_simple | Working |
 | base/generic | Working (*1)|
 | base/label | Working |
-| base/log | **Unstarted** |
 | base/map2d | **Unstarted** |
 | base/menu | **Broken** |
 | base/menu_simple | **Untested, likely broken** |
-| base/radial | **Unstarted** |
+| base/dial | **Early prototype** |
 | base/radio_button | Working |
 | base/slider_bar | Working |
 | base/stepper | Working |
@@ -96,7 +95,7 @@ WIMP widgets.
 | wimp/list_box | Working |
 | wimp/menu_bar | Working |
 | wimp/menu_pop | Working |
-| wimp/menu_tab | **Buggy** |
+| wimp/menu_tab | **Needs rewrite** |
 | wimp/number_box | Working |
 | wimp/properties_box | **Early prototype** |
 | wimp/root_wimp | Working |
