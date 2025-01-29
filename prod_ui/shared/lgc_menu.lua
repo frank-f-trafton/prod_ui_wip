@@ -57,7 +57,7 @@ function lgcMenu.instanceSetup(self, setup_mark, setup_drag_drop)
 	-- How many items to jump when pressing pageup or pagedown, or equivalent gamepad buttons.
 	self.MN_page_jump_size = 4
 
-	-- Range of items that are visible and should be checked for press/hover state.
+	-- Range of items that are visible, and which should be checked for hover state.
 	self.MN_items_first = 0 -- max(first, 1)
 	self.MN_items_last = 2^53 -- min(last, #items)
 
