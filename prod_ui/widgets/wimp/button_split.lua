@@ -216,29 +216,20 @@ end
 
 def.default_skinner = {
 	schema = {
-		aux_size = "scaled-int",
-		graphic_spacing = "scaled-int",
-
-		res_idle = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
+		main = {
+			aux_size = "scaled-int",
+			graphic_spacing = "scaled-int",
+			res_idle = "&res",
+			res_hover = "&res",
+			res_pressed = "&res",
+			res_disabled = "&res"
 		},
-
-		res_hover = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_pressed = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_disabled = {
+		res = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
 		}
 	},
+
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)

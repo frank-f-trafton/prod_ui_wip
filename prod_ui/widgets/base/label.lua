@@ -47,12 +47,11 @@ end
 
 def.default_skinner = {
 	schema = {
-		res_idle = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
+		main = {
+			res_idle = "&res",
+			res_disabled = "&res"
 		},
-
-		res_disabled = {
+		res = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
 		}

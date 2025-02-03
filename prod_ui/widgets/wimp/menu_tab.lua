@@ -1077,29 +1077,24 @@ end
 
 def.default_skinner = {
 	schema = {
-		column_sep_width = "scaled-int",
+		main = {
+			column_sep_width = "scaled-int",
 
-		bar_height = "scaled-int",
-		col_sep_line_width = "scaled-int",
-		bijou_w = "scaled-int",
-		bijou_h = "scaled-int",
-		category_h_pad = "scaled-int",
-
-		res_column_idle = {
+			bar_height = "scaled-int",
+			col_sep_line_width = "scaled-int",
+			bijou_w = "scaled-int",
+			bijou_h = "scaled-int",
+			category_h_pad = "scaled-int",
+			res_column_idle = "&res",
+			res_column_hover = "&res",
+			res_column_press = "&res"
+		},
+		res = {
 			offset_x = "scaled-int",
 			offset_y = "scaled-int"
 		},
-
-		res_column_hover = {
-			offset_x = "scaled-int",
-			offset_y = "scaled-int"
-		},
-
-		res_column_press = {
-			offset_x = "scaled-int",
-			offset_y = "scaled-int"
-		}
 	},
+
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)

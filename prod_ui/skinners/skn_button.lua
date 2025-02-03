@@ -19,27 +19,17 @@ local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
 
 return {
 	schema = {
-		graphic_spacing = "scaled-int",
-
-		res_idle = {
+		main = {
+			graphic_spacing = "scaled-int",
+			res_idle = "&res",
+			res_hover = "&res",
+			res_pressed = "&res",
+			res_disabled = "&res"
+		},
+		res = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
 		},
-
-		res_hover = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_pressed = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_disabled = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		}
 	},
 
 

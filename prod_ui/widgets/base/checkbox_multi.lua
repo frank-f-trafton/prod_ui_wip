@@ -96,29 +96,19 @@ end
 
 def.default_skinner = {
 	schema = {
-		bijou_w = "scaled-int",
-		bijou_h = "scaled-int",
-		bijou_spacing = "scaled-int",
-		bijou_align_h = "unit-interval",
-		bijou_align_v = "unit-interval",
-		label_align_v = "unit-interval",
-
-		res_idle = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
+		main = {
+			bijou_w = "scaled-int",
+			bijou_h = "scaled-int",
+			bijou_spacing = "scaled-int",
+			bijou_align_h = "unit-interval",
+			bijou_align_v = "unit-interval",
+			label_align_v = "unit-interval",
+			res_idle = "&res",
+			res_hover = "&res",
+			res_pressed = "&res",
+			res_disabled = "&res"
 		},
-
-		res_hover = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_pressed = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_disabled = {
+		res = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
 		}

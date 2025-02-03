@@ -155,6 +155,20 @@ function _mt_themeInst:loadSkinDefs(base_path, recursive, id_prepend)
 end
 
 
+local _dummy_schema = {}
+
+
+local _ref_handlers = {
+	["*"] = function(self, v)
+		return false, _drill(self, "/", v:sub(2))
+	end,
+	["#"] = function(self, v)
+		return true, _drill(self, "/", v:sub(2))
+	end,
+	-- "&" is handled earlier in the function.
+}
+
+
 local _schema_commands = {
 	["scaled-int"] = function(self, v)
 		return math.floor(v * self.scale)
@@ -165,20 +179,9 @@ local _schema_commands = {
 }
 
 
-local _dummy_schema = {}
-
-
-local _ref_handlers = {
-	["*"] = function(self, v)
-		return false, _drill(self, "/", v:sub(2))
-	end,
-	["#"] = function(self, v)
-		return true, _drill(self, "/", v:sub(2))
-	end
-}
-
-
-local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
+-- @param schema_root The topmost schema table.
+-- @param schema_table The current subtable (starting with 'main' at the first level).
+local function _skinDeepCopy(theme_inst, inst, def, schema_root, schema_table, _depth)
 	--print("_skinDeepCopy: start", _depth)
 
 	--[[
@@ -187,12 +190,20 @@ local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
 	--]]
 
 	for k, v in pairs(def) do
-		if type(v) == "table" then
-			inst[k] = _skinDeepCopy(theme_inst, {}, v, schema[k] or _dummy_schema, _depth + 1)
+		local symbol = type(v) == "string" and v:sub(1, 1)
+		if symbol == "&" then
+			local tbl = schema_table[v:sub(2)]
+			if not tbl then
+				error("schema table lookup failed. Address: " .. tostring(v))
+			end
+			inst[k] = _skinDeepCopy(theme_inst, {}, v, schema_root or _dummy_schema, tbl, _depth + 1)
+
+		elseif type(v) == "table" then
+			inst[k] = _skinDeepCopy(theme_inst, {}, v, schema_root or _dummy_schema, schema_table[k] or _dummy_schema, _depth + 1)
+
 		else
 			--print("***", "k", k, "v", v)
 			-- Pull in resources from the main theme table
-			local symbol = type(v) == "string" and v:sub(1, 1)
 			local stop_processing
 			local ref_handler = _ref_handlers[symbol]
 			if ref_handler then
@@ -204,8 +215,8 @@ local function _skinDeepCopy(theme_inst, inst, def, schema, _depth)
 				inst[k] = v
 			end
 
-			if schema[k] and not stop_processing then
-				local command = schema[k]
+			if schema_table[k] and not stop_processing then
+				local command = schema_table[k]
 				local func = _schema_commands[command]
 				if func then
 					--print("schema command", command, "inst[k]", inst[k])
@@ -242,8 +253,10 @@ function _mt_themeInst:refreshSkinDefInstance(id)
 	if not skinner then
 		error("missing skinner (the implementation). Skinner ID: " .. tostring(skin_def.skinner_id) .. ", requesting skin: " .. tostring(id))
 	end
+	local schema = skinner.schema or _dummy_schema
+	local main = schema and schema.main or schema
 
-	_skinDeepCopy(self, skin_inst, skin_def, skinner.schema or _dummy_schema, 1)
+	_skinDeepCopy(self, skin_inst, skin_def, schema, main, 1)
 end
 
 
