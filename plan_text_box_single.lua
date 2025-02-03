@@ -13,6 +13,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -23,9 +24,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Input Boxes")
 
@@ -37,11 +38,11 @@ function plan.make(parent)
 		-- [=[
 		makeLabel(content, 32, 0, 512, 32, "Single-line text input widget", "single")
 		local input_single = content:addChild("input/text_box_single")
-
 		input_single.x = 32
 		input_single.y = 96
 		input_single.w = 256
 		input_single.h = 32
+		input_single:initialize()
 
 		--input_single:setText("Single-Line Text Box")
 

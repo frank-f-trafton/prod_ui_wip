@@ -16,10 +16,12 @@ function plan.make(parent)
 		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-	local frame = parent:addChild("wimp/window_frame", {skin_id = skin_clone})
+	local frame = parent:addChild("wimp/window_frame")
+	frame.skin_id = skin_clone
 	frame.w = 640
 	frame.h = 480
 	frame.userDestroy = _userDestroy
+	frame:initialize()
 
 	frame:setFrameTitle("WIMP Window Frame")
 
@@ -32,10 +34,13 @@ function plan.make(parent)
 
 		-- Radio Buttons: Header size
 		do
-			local text1 = content:addChild("base/text", {
-				x=xx, y=yy, w=ww, h=hh,
-				font = context.resources.fonts.p
-			})
+			local text1 = content:addChild("base/text")
+			text1.x = xx
+			text1.y = yy
+			text1.w = ww
+			text1.h = hh
+			text1.font = context.resources.fonts.p
+			text1:initialize()
 			text1.text = "Header size"
 			text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
 			text1:refreshText()
@@ -50,7 +55,12 @@ function plan.make(parent)
 
 			-- Small
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_header_size"
 				rad_btn:setLabel("Small")
@@ -66,7 +76,12 @@ function plan.make(parent)
 
 			-- Normal
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_header_size"
 				rad_btn:setLabel("Normal")
@@ -82,7 +97,12 @@ function plan.make(parent)
 
 			-- Large
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_header_size"
 				rad_btn:setLabel("Large")
@@ -100,7 +120,12 @@ function plan.make(parent)
 
 		-- Checkbox: Show resize sensors
 		do
-			local checkbox = content:addChild("base/checkbox", {x=xx, y=yy, w=ww, h=hh})
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
 			checkbox.checked = false
 			checkbox.bijou_side = "right"
 			checkbox:setLabel("S_h_ow resize sensors", "single-ul")
@@ -119,10 +144,13 @@ function plan.make(parent)
 		-- Radio Buttons: Control placement
 		do
 			yy = yy + hh
-			local text1 = content:addChild("base/text", {
-				x=xx, y=yy, w=ww, h=hh,
-				font = context.resources.fonts.p
-			})
+			local text1 = content:addChild("base/text")
+			text1.x = xx
+			text1.y = yy
+			text1.w = ww
+			text1.h = hh
+			text1.font = context.resources.fonts.p
+			text1:initialize()
 			text1.text = "Control Placement"
 			text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
 			text1:refreshText()
@@ -138,7 +166,12 @@ function plan.make(parent)
 
 			-- Left side
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_control_side"
 				rad_btn:setLabel("Left")
@@ -154,7 +187,12 @@ function plan.make(parent)
 
 			-- Right side
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_control_side"
 				rad_btn:setLabel("Right")
@@ -173,10 +211,13 @@ function plan.make(parent)
 
 		-- Radio Buttons: Header text alignment
 		do
-			local text1 = content:addChild("base/text", {
-				x=xx, y=yy, w=ww, h=hh,
-				font = context.resources.fonts.p
-			})
+			local text1 = content:addChild("base/text")
+			text1.x = xx
+			text1.y = yy
+			text1.w = ww
+			text1.h = hh
+			text1.font = context.resources.fonts.p
+			text1:initialize()
 			text1.text = "Header Text Alignment"
 			text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
 			text1:refreshText()
@@ -195,7 +236,12 @@ function plan.make(parent)
 
 			-- Left
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_header_text_align_h"
 				rad_btn:setLabel("Left")
@@ -211,7 +257,12 @@ function plan.make(parent)
 
 			-- Center
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_header_text_align_h"
 				rad_btn:setLabel("Center")
@@ -227,7 +278,12 @@ function plan.make(parent)
 
 			-- Right
 			do
-				local rad_btn = content:addChild("base/radio_button", {x=xx, y=yy, w=ww, h=hh})
+				local rad_btn = content:addChild("base/radio_button")
+				rad_btn.x = xx
+				rad_btn.y = yy
+				rad_btn.w = ww
+				rad_btn.h = hh
+				rad_btn:initialize()
 				rad_btn.bijou_side = "right"
 				rad_btn.radio_group = "rg_header_text_align_h"
 				rad_btn:setLabel("Right")
@@ -245,7 +301,12 @@ function plan.make(parent)
 
 		-- Button: Close
 		do
-			local btn = content:addChild("base/button", {x=xx, y=yy, w=ww, h=hh})
+			local btn = content:addChild("base/button")
+			btn.x = xx
+			btn.y = yy
+			btn.w = ww
+			btn.h = hh
+			btn:initialize()
 			btn:setLabel("Close Window")
 			btn.wid_buttonAction = function(self)
 				self:bubbleEvent("frameCall_close")

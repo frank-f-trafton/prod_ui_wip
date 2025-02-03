@@ -177,7 +177,8 @@ function def:addControl(wid_id, text, pos, bijou_id)
 	uiShared.intEval(3, pos, "number")
 	uiShared.typeEval1(4, bijou_id, "string")
 
-	local wid = self:addChild(wid_id, nil, pos)
+	local wid = self:addChild(wid_id, pos)
+	wid:initialize()
 
 	wid.selectable = true
 	wid.marked = false -- multi-select
@@ -244,42 +245,40 @@ function def:setSelectionByIndex(wid_i)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 5)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 5)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		lgcMenu.instanceSetup(self, true, true) -- with mark and drag+drop state
+	lgcMenu.instanceSetup(self, true, true) -- with mark and drag+drop state
 
-		self.MN_wrap_selection = false
+	self.MN_wrap_selection = false
 
-		self.menu = lgcMenu.new(self.children) -- (self.menu.items == self.children)
+	self.menu = lgcMenu.new(self.children) -- (self.menu.items == self.children)
 
-		self.sash_enabled = true
+	self.sash_enabled = true
 
-		-- Column X positions and widths.
-		self.col_icon_x = 0
-		self.col_icon_w = 0
+	-- Column X positions and widths.
+	self.col_icon_x = 0
+	self.col_icon_w = 0
 
-		self.col_text_x = 0
-		self.col_text_w = 0
+	self.col_text_x = 0
+	self.col_text_w = 0
 
-		-- State flags.
-		self.enabled = true
+	-- State flags.
+	self.enabled = true
 
-		-- Shows a column of icons when true.
-		self.show_icons = false
+	-- Shows a column of icons when true.
+	self.show_icons = false
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

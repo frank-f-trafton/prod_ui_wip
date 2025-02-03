@@ -81,22 +81,20 @@ function def:setMaxCodePoints(max)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		self.text = ""
-		self.text_w = 0
+	self.text = ""
+	self.text_w = 0
 
-		self.max_code_points = false
+	self.max_code_points = false
 
-		-- State flags.
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
-	end
+	-- State flags.
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 end
 
 

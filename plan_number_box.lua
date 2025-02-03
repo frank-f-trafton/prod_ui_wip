@@ -13,6 +13,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -23,9 +24,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Number Box")
 
@@ -36,7 +37,6 @@ function plan.make(parent)
 
 		-- [=[
 		local num_box = content:addChild("wimp/number_box")
-
 		num_box.x = 32
 		num_box.y = 96
 		num_box.w = 256
@@ -45,6 +45,8 @@ function plan.make(parent)
 		num_box.wid_action = function(self)
 			-- WIP
 		end
+
+		num_box:initialize()
 		--]=]
 	end
 

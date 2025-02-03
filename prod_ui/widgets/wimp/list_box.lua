@@ -265,38 +265,36 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 2)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		lgcMenu.instanceSetup(self, true, true) -- with mark and drag+drop state
+	lgcMenu.instanceSetup(self, true, true) -- with mark and drag+drop state
 
-		self.MN_wrap_selection = false
+	self.MN_wrap_selection = false
 
-		self.menu = lgcMenu.new()
+	self.menu = lgcMenu.new()
 
-		-- Column X positions and widths.
-		self.col_icon_x = 0
-		self.col_icon_w = 0
+	-- Column X positions and widths.
+	self.col_icon_x = 0
+	self.col_icon_w = 0
 
-		self.col_text_x = 0
-		self.col_text_w = 0
+	self.col_text_x = 0
+	self.col_text_w = 0
 
-		-- State flags.
-		self.enabled = true
+	-- State flags.
+	self.enabled = true
 
-		self:skinSetRefs()
-		self:skinInstall()
-		self:applyAllSettings()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
+	self:applyAllSettings()
 end
 
 

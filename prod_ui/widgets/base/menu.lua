@@ -218,37 +218,35 @@ end
 -- * / Item management *
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
+function def:uiCall_initialize()
+	self.visible = true
 
-		self.allow_hover = true
-		self.can_have_thimble = true
-		--self.allow_focus_capture = true
+	self.allow_hover = true
+	self.can_have_thimble = true
+	--self.allow_focus_capture = true
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 2)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		lgcMenu.instanceSetup(self)
+	lgcMenu.instanceSetup(self)
 
-		self.MN_auto_range = "v"
+	self.MN_auto_range = "v"
 
-		-- When true, reshapes and arranges menu-items when this widget is reshaped.
-		-- When "conditional", only do so if the widget dimensions have changed.
-		self.auto_reshape_items = false
+	-- When true, reshapes and arranges menu-items when this widget is reshaped.
+	-- When "conditional", only do so if the widget dimensions have changed.
+	self.auto_reshape_items = false
 
-		-- Used with 'auto_reshape_items == "conditional"'
-		--self.auto_reshape_w = 0
-		--self.auto_reshape_h = 0
+	-- Used with 'auto_reshape_items == "conditional"'
+	--self.auto_reshape_w = 0
+	--self.auto_reshape_h = 0
 
-		self.menu = self.menu or lgcMenu.new()
+	self.menu = self.menu or lgcMenu.new()
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -22,9 +23,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Slider Bar Work")
 
@@ -45,11 +46,11 @@ function plan.make(parent)
 		-- Horizontal slider
 		makeLabel(content, xx, 0, label_w, label_h, "Horizontal")
 		local sliderh1 = content:addChild("base/slider_bar")
-
 		sliderh1.x = xx
 		sliderh1.y = 32
 		sliderh1.w = h_wid_w
 		sliderh1.h = h_wid_h
+		sliderh1:initialize()
 
 		sliderh1.trough_vertical = false
 
@@ -74,11 +75,11 @@ function plan.make(parent)
 		-- Horizontal slider (user input disabled)
 		makeLabel(content, xx, 0, label_w, label_h, "Read-Only")
 		local sliderh2 = content:addChild("base/slider_bar")
-
 		sliderh2.x = xx
 		sliderh2.y = 32
 		sliderh2.w = h_wid_w
 		sliderh2.h = h_wid_h
+		sliderh2:initialize()
 
 		sliderh2.trough_vertical = false
 
@@ -104,11 +105,11 @@ function plan.make(parent)
 		-- Horizontal slider (whole widget disabled)
 		makeLabel(content, xx, 0, label_w, label_h, "Widget Disabled")
 		local sliderh3 = content:addChild("base/slider_bar")
-
 		sliderh3.x = xx
 		sliderh3.y = 32
 		sliderh3.w = h_wid_w
 		sliderh3.h = h_wid_h
+		sliderh3:initialize()
 
 		sliderh3.trough_vertical = false
 
@@ -134,11 +135,11 @@ function plan.make(parent)
 		-- Vertical slider
 		makeLabel(content, xx, 128, label_w, label_h, "Vertical")
 		local sliderv1 = content:addChild("base/slider_bar")
-
 		sliderv1.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 		sliderv1.y = 160
 		sliderv1.w = v_wid_w
 		sliderv1.h = v_wid_h
+		sliderv1:initialize()
 
 		sliderv1.trough_vertical = true
 
@@ -159,11 +160,11 @@ function plan.make(parent)
 		-- Vertical Read-Only
 		makeLabel(content, xx, 128, label_w, label_h, "Read-Only")
 		local sliderv2 = content:addChild("base/slider_bar")
-
 		sliderv2.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 		sliderv2.y = 160
 		sliderv2.w = v_wid_w
 		sliderv2.h = v_wid_h
+		sliderv2:initialize()
 
 		sliderv2.trough_vertical = true
 
@@ -186,11 +187,11 @@ function plan.make(parent)
 		-- Vertical (Disabled)
 		makeLabel(content, xx, 128, label_w, label_h, "Widget Disabled")
 		local sliderv3 = content:addChild("base/slider_bar")
-
 		sliderv3.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 		sliderv3.y = 160
 		sliderv3.w = v_wid_w
 		sliderv3.h = v_wid_h
+		sliderv3:initialize()
 
 		sliderv3.trough_vertical = true
 

@@ -244,46 +244,44 @@ function def:getDisplayText()
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 3)
+	widShared.setupViewports(self, 3)
 
-		widShared.setupScroll(self)
-		widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupDoc(self)
 
-		-- -> lgcMenu.instanceSetup(self)
-		self.MN_page_jump_size = 4
-		self.MN_wrap_selection = false
+	-- -> lgcMenu.instanceSetup(self)
+	self.MN_page_jump_size = 4
+	self.MN_wrap_selection = false
 
-		self.menu = lgcMenu.new()
+	self.menu = lgcMenu.new()
 
-		lgcInputS.setupInstance(self)
+	lgcInputS.setupInstance(self)
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
+	-- State flags
+	self.enabled = true
+	self.hovered = false
 
-		-- When opened, this holds a reference to the pop-up widget.
-		self.wid_drawer = false
+	-- When opened, this holds a reference to the pop-up widget.
+	self.wid_drawer = false
 
-		-- Index for the last chosen selection.
-		-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
-		-- The item contents may be outdated from what is stored in the LineEditor object.
-		self.menu.chosen_i = 0
+	-- Index for the last chosen selection.
+	-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
+	-- The item contents may be outdated from what is stored in the LineEditor object.
+	self.menu.chosen_i = 0
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		local skin = self.skin
+	local skin = self.skin
 
-		self.line_ed = lineEdS.new(skin.font)
+	self.line_ed = lineEdS.new(skin.font)
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 
@@ -331,13 +329,14 @@ function def:_openPopUpMenu()
 
 		local ax, ay = self:getAbsolutePosition()
 
-		local drawer = root:addChild("wimp/dropdown_pop", {
-			skin_id = skin.skin_id_pop,
-			wid_ref = self,
-			menu = menu,
-			x = ax,
-			y = ay + self.h,
-		})
+		local drawer = root:addChild("wimp/dropdown_pop")
+		drawer.skin_id = skin.skin_id_pop
+		drawer.menu = menu
+		drawer:initialize()
+		drawer.x = ax
+		drawer.y = ay + self.h
+		drawer.wid_ref = self
+
 		self.wid_drawer = drawer
 
 		self.chain_next = drawer

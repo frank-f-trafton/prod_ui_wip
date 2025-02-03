@@ -57,43 +57,41 @@ def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 2)
 
-		widShared.setupScroll(self)
-		widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupDoc(self)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		lgcInputS.setupInstance(self)
+	lgcInputS.setupInstance(self)
 
-		-- Highlights all text whenever this widget gets the thimble.
-		self.select_all_on_thimble1_take = false
+	-- Highlights all text whenever this widget gets the thimble.
+	self.select_all_on_thimble1_take = false
 
-		-- Unhighlights all upon releasing the thimble (moving the caret to the first position).
-		self.deselect_all_on_thimble1_release = false
+	-- Unhighlights all upon releasing the thimble (moving the caret to the first position).
+	self.deselect_all_on_thimble1_release = false
 
-		-- State flags.
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
+	-- State flags.
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		local skin = self.skin
+	local skin = self.skin
 
-		self.line_ed = lineEdS.new(skin.font)
+	self.line_ed = lineEdS.new(skin.font)
 
-		lgcInputS.updateCaretShape(self)
+	lgcInputS.updateCaretShape(self)
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 

@@ -35,22 +35,20 @@ def.uiCall_pointerHoverOff = lgcButtonBare.uiCall_pointerHoverOff
 def.uiCall_pointerUnpress = lgcButtonBare.uiCall_pointerUnpress
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 2)
 
-		lgcLabelBare.setup(self)
-		lgcSlider.setup(self)
+	lgcLabelBare.setup(self)
+	lgcSlider.setup(self)
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
-	end
+	-- State flags
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 end
 
 

@@ -13,35 +13,33 @@ function def:wid_dragAction()
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = false
-		self.allow_focus_capture = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = false
+	self.allow_focus_capture = true
 
-		-- When true, reposition to be centered on the mouse pointer when dragged
-		self.center_on_pointer = false
+	-- When true, reposition to be centered on the mouse pointer when dragged
+	self.center_on_pointer = false
 
-		-- Offset of the mouse pointer upon initial click-and-drag
-		self.mouse_ox = 0
-		self.mouse_oy = 0
+	-- Offset of the mouse pointer upon initial click-and-drag
+	self.mouse_ox = 0
+	self.mouse_oy = 0
 
-		-- Drag boundaries relative to the parent contact box
-		self.drag_min_x = 0
-		self.drag_min_y = 0
-		self.drag_max_x = 2^16
-		self.drag_max_y = 2^16
+	-- Drag boundaries relative to the parent contact box
+	self.drag_min_x = 0
+	self.drag_min_y = 0
+	self.drag_max_x = 2^16
+	self.drag_max_y = 2^16
 
-		-- Cursor IDs for hover and press states.
-		self.cursor_on = "hand"
-		self.cursor_press = "hand"
+	-- Cursor IDs for hover and press states.
+	self.cursor_on = "hand"
+	self.cursor_press = "hand"
 
-		-- Status flags.
-		self.enabled = true
-		self.pressed = false
-		self.hovered = false
-	end
+	-- Status flags.
+	self.enabled = true
+	self.pressed = false
+	self.hovered = false
 end
 
 

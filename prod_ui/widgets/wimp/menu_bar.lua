@@ -265,60 +265,58 @@ end
 -- * / Item management *
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = false
-		self.allow_focus_capture = true
-		self.clip_scissor = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = false
+	self.allow_focus_capture = true
+	self.clip_scissor = true
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 2)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		-- Should be set by the skinner. (Typically, this is font height + top and bottom border values.)
-		self.base_height = 0
+	-- Should be set by the skinner. (Typically, this is font height + top and bottom border values.)
+	self.base_height = 0
 
-		-- Used to determine if a new pop-up menu needs to be invoked.
-		self.last_open = false
+	-- Used to determine if a new pop-up menu needs to be invoked.
+	self.last_open = false
 
-		-- Ref to currently-hovered item, or false if not hovering over any items.
-		self.MN_item_hover = false
+	-- Ref to currently-hovered item, or false if not hovering over any items.
+	self.MN_item_hover = false
 
-		-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
-		self.MN_selection_extend_x = 0
-		self.MN_selection_extend_y = 0
+	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
+	self.MN_selection_extend_x = 0
+	self.MN_selection_extend_y = 0
 
-		-- Range of items that are visible and should be checked for press/hover state.
-		self.MN_items_first = 0 -- max(first, 1)
-		self.MN_items_last = 2^53 -- min(last, #items)
+	-- Range of items that are visible and should be checked for press/hover state.
+	self.MN_items_first = 0 -- max(first, 1)
+	self.MN_items_last = 2^53 -- min(last, #items)
 
-		self.text_pad_x = 12
+	self.text_pad_x = 12
 
-		-- References populated when this widget is part of a chain of menus.
-		self.chain_next = false
+	-- References populated when this widget is part of a chain of menus.
+	self.chain_next = false
 
-		-- "idle": Not active.
-		-- "opened": A pop-up menu is active.
-		self.state = "idle"
+	-- "idle": Not active.
+	-- "opened": A pop-up menu is active.
+	self.state = "idle"
 
-		-- Used when underlining shortcut key letters in menu items.
-		self.show_underlines = true
-		self.underline_width = 1
+	-- Used when underlining shortcut key letters in menu items.
+	self.show_underlines = true
+	self.underline_width = 1
 
-		self.menu = self.menu or lgcMenu.new()
+	self.menu = self.menu or lgcMenu.new()
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		self:resize()
-		self:reshape()
+	self:resize()
+	self:reshape()
 
-		self:menuChangeCleanup()
-	end
+	self:menuChangeCleanup()
 end
 
 

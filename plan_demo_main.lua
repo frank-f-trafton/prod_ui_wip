@@ -14,6 +14,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -24,10 +25,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
+	frame:initialize()
 	frame:setFrameTitle("WIMP Demo")
 
 	local content = frame:findTag("frame_content")
@@ -46,7 +46,12 @@ function plan.make(parent)
 
 		-- Root-modal frame test
 		do
-			local btn = content:addChild("base/button", {x=64, y=64, w=160, h=24})
+			local btn = content:addChild("base/button")
+			btn.x = 64
+			btn.y = 64
+			btn.w = 160
+			btn.h = 24
+			btn:initialize()
 			btn:setLabel("Root-Modal Test")
 			btn.wid_buttonAction = function(self)
 				local root = self:getTopWidgetInstance()
@@ -55,7 +60,10 @@ function plan.make(parent)
 				frame = commonWimp.getFrame(self)
 
 				if frame then
-					dialog = root:addChild("wimp/window_frame", {w = 448, h = 256})
+					dialog = root:addChild("wimp/window_frame")
+					dialog.w = 448
+					dialog.h = 256
+					dialog:initialize()
 					root:sendEvent("rootCall_setModalFrame", dialog)
 					dialog:reshape(true)
 					dialog:setFrameTitle("Root-Modal Test")
@@ -69,18 +77,34 @@ function plan.make(parent)
 							d_content.scr_v.auto_hide = true
 						end
 
-						local text = d_content:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
+						local text = d_content:addChild("base/text")
+						text.font = context.resources.fonts.p
+						text.x = 0
+						text.y = 32
+						text.w = d_content.w
+						text.h = 64
+						text:initialize()
 						text.align = "center"
 						text.text = "This frame should block interaction\nwith all other content until it is dismissed."
 						text:refreshText()
 
-						local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 72, w=96, h=32})
+						local button_y = d_content:addChild("base/button")
+						button_y.x = 32
+						button_y.y = d_content.h - 72
+						button_y.w = 96
+						button_y.h = 32
+						button_y:initialize()
 						button_y:setLabel("O")
 						button_y.wid_buttonAction = function(self)
 							self:bubbleEvent("frameCall_close")
 						end
 
-						local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 72, w=96, h=32})
+						local button_n = d_content:addChild("base/button")
+						button_n.x = 256
+						button_n.y = d_content.h - 72
+						button_n.w = 96
+						button_n.h = 32
+						button_n:initialize()
 						button_n:setLabel("K")
 						button_n.wid_buttonAction = function(self)
 							self:bubbleEvent("frameCall_close")
@@ -100,7 +124,12 @@ function plan.make(parent)
 
 		-- Frame-modal test
 		do
-			local btn = content:addChild("base/button", {x=64, y=96, w=160, h=24})
+			local btn = content:addChild("base/button")
+			btn.x = 64
+			btn.y = 96
+			btn.w = 160
+			btn.h = 24
+			btn:initialize()
 			btn:setLabel("Frame-Modal Test")
 			btn.wid_buttonAction = function(self)
 				local root = self:getTopWidgetInstance()
@@ -109,7 +138,10 @@ function plan.make(parent)
 				frame = commonWimp.getFrame(self)
 
 				if frame then
-					dialog = root:addChild("wimp/window_frame", {w = 448, h = 256})
+					dialog = root:addChild("wimp/window_frame")
+					dialog.w = 448
+					dialog.h = 256
+					dialog:initialize()
 					dialog:setModal(frame)
 					dialog:reshape(true)
 					dialog:setFrameTitle("Frame-Modal test")
@@ -123,18 +155,34 @@ function plan.make(parent)
 							d_content.scr_v.auto_hide = true
 						end
 
-						local text = d_content:addChild("base/text", {font = context.resources.fonts.p, x=0, y=32, w=d_content.w, h=64})
+						local text = d_content:addChild("base/text")
+						text.font = context.resources.fonts.p
+						text.x = 0
+						text.y = 32
+						text.w = d_content.w
+						text.h = 64
+						text:initialize()
 						text.align = "center"
 						text.text = "This frame should block interaction with the frame\nthat invoked it, until dismissed. Other elements should\nbe accessible."
 						text:refreshText()
 
-						local button_y = d_content:addChild("base/button", {x=32, y=d_content.h - 72, w=96, h=32})
+						local button_y = d_content:addChild("base/button")
+						button_y.x = 32
+						button_y.y = d_content.h - 72
+						button_y.w = 96
+						button_y.h = 32
+						button_y:initialize()
 						button_y:setLabel("O")
 						button_y.wid_buttonAction = function(self)
 							self:bubbleEvent("frameCall_close")
 						end
 
-						local button_n = d_content:addChild("base/button", {x=256, y=d_content.h - 72, w=96, h=32})
+						local button_n = d_content:addChild("base/button")
+						button_n.x = 256
+						button_n.y = d_content.h - 72
+						button_n.w = 96
+						button_n.h = 32
+						button_n:initialize()
 						button_n:setLabel("K")
 						button_n.wid_buttonAction = function(self)
 							self:bubbleEvent("frameCall_close")
@@ -164,13 +212,19 @@ function plan.make(parent)
 				--self.context:popRoot()
 				self.context:setRoot(root)
 			end
+			dialog:initialize()
 			--]=]
 		end
 
 
 		-- Toast/Notification WIP
 		do
-			local button_close = content:addChild("base/button", {x=0, y=0, w=96, h=24})
+			local button_close = content:addChild("base/button")
+			button_close.x = 0
+			button_close.y = 0
+			button_close.w = 96
+			button_close.h = 24
+			button_close:initialize()
 			button_close:setLabel("Inspiration")
 			button_close.str_tool_tip = "Click for an inspiring quote."
 
@@ -194,7 +248,12 @@ of it.\
 		end
 
 		do
-			local checkbox = content:addChild("base/checkbox", {x=64, y=160, w=192, h=32})
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = 64
+			checkbox.y = 160
+			checkbox.w = 192
+			checkbox.h = 32
+			checkbox:initialize()
 			checkbox.checked = not not context.app.show_details
 			checkbox.bijou_side = "right"
 			checkbox:setLabel("Show state details")
@@ -206,7 +265,12 @@ of it.\
 		end
 
 		do
-			local checkbox = content:addChild("base/checkbox",{x=64, y=192, w=192, h=32})
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = 64
+			checkbox.y = 192
+			checkbox.w = 192
+			checkbox.h = 32
+			checkbox:initialize()
 			checkbox.checked = not not context.app.show_perf
 			checkbox.bijou_side = "right"
 			checkbox:setLabel("Show perf info")
@@ -218,7 +282,12 @@ of it.\
 		end
 
 		do
-			local checkbox = content:addChild("base/checkbox",{x=64, y=224, w=192, h=32})
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = 64
+			checkbox.y = 224
+			checkbox.w = 192
+			checkbox.h = 32
+			checkbox:initialize()
 			checkbox.checked = not not context.app.show_mouse_cross
 			checkbox.bijou_side = "right"
 			checkbox:setLabel("Show cross at mouse location")
@@ -236,7 +305,9 @@ of it.\
 
 			local yy, hh = 292, 32
 
-			local text_vsync = content:addChild("base/text", {font = context.resources.fonts.p})
+			local text_vsync = content:addChild("base/text")
+			text_vsync.font = context.resources.fonts.p
+			text_vsync:initialize()
 			text_vsync.text = "VSync Mode"
 			text_vsync.x = 64 + 9 -- XXX work on syncing padding with embedded widget labels
 			text_vsync.y = yy
@@ -250,7 +321,12 @@ of it.\
 			local rad_btn
 
 			yy=yy+hh
-			rad_btn = content:addChild("base/radio_button", {x=64, y=yy, w=192, h=hh})
+			rad_btn = content:addChild("base/radio_button")
+			rad_btn.x = 64
+			rad_btn.y = yy
+			rad_btn.w = 192
+			rad_btn.h = hh
+			rad_btn:initialize()
 			rad_btn.checked = false
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_vsync"
@@ -262,7 +338,12 @@ of it.\
 			end
 
 			yy=yy+hh
-			rad_btn = content:addChild("base/radio_button", {x=64, y=yy, w=192, h=hh})
+			rad_btn = content:addChild("base/radio_button")
+			rad_btn.x = 64
+			rad_btn.y = yy
+			rad_btn.w = 192
+			rad_btn.h = hh
+			rad_btn:initialize()
 			rad_btn.checked = false
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_vsync"
@@ -275,7 +356,12 @@ of it.\
 
 			-- 2 or larger will wait that many frames before syncing.
 			yy=yy+hh
-			rad_btn = content:addChild("base/radio_button", {x=64, y=yy, w=192, h=hh})
+			rad_btn = content:addChild("base/radio_button")
+			rad_btn.x = 64
+			rad_btn.y = yy
+			rad_btn.w = 192
+			rad_btn.h = hh
+			rad_btn:initialize()
 			rad_btn.checked = false
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_vsync"
@@ -287,7 +373,12 @@ of it.\
 			end
 
 			yy=yy+hh
-			rad_btn = content:addChild("base/radio_button", {x=64, y=yy, w=192, h=hh})
+			rad_btn = content:addChild("base/radio_button")
+			rad_btn.x = 64
+			rad_btn.y = yy
+			rad_btn.w = 192
+			rad_btn.h = hh
+			rad_btn:initialize()
 			rad_btn.checked = false
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_vsync"
@@ -299,7 +390,12 @@ of it.\
 			end
 
 			yy=yy+hh
-			rad_btn = content:addChild("base/radio_button",{x=64, y=yy, w=192, h=hh})
+			rad_btn = content:addChild("base/radio_button")
+			rad_btn.x = 64
+			rad_btn.y = yy
+			rad_btn.w = 192
+			rad_btn.h = hh
+			rad_btn:initialize()
 			rad_btn.checked = false
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_vsync"

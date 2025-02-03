@@ -33,22 +33,20 @@ def.uiCall_thimbleAction = lgcButtonBare.uiCall_thimbleActionCheck
 def.uiCall_thimbleAction2 = lgcButtonBare.uiCall_thimbleAction2
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		lgcLabelBare.setup(self)
+	lgcLabelBare.setup(self)
 
-		-- Checkbox state.
-		self.checked = false
+	-- Checkbox state.
+	self.checked = false
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
-	end
+	-- State flags
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 end
 
 

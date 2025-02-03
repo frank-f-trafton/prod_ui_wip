@@ -26,30 +26,28 @@ local def = {
 }
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
 
-		widShared.setupViewports(self, 1)
+	widShared.setupViewports(self, 1)
 
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 
-		-- attachment details
-		self.att_ref = false
-		self.att_side = "right" -- "left", "right", "top", "bottom"
+	-- attachment details
+	self.att_ref = false
+	self.att_side = "right" -- "left", "right", "top", "bottom"
 
-		-- length of the attached widget at start of drag state
-		self.att_len = 0
+	-- length of the attached widget at start of drag state
+	self.att_len = 0
 
-		-- mouse cursor absolute position at start of drag state
-		self.att_ax, self.att_ay = 0, 0
+	-- mouse cursor absolute position at start of drag state
+	self.att_ax, self.att_ay = 0, 0
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

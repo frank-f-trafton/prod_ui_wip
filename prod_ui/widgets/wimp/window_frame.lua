@@ -242,159 +242,163 @@ local function _configureButton(button, visible, hover)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = false
-		--self.clip_hover = false
-		--self.clip_scissor = false
-		self.sort_id = 3
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = false
+	--self.clip_hover = false
+	--self.clip_scissor = false
+	self.sort_id = 3
 
-		-- Differentiates between 2nd-gen frame containers and other stuff at the same hierarchical level.
-		self.is_frame = true
+	-- Differentiates between 2nd-gen frame containers and other stuff at the same hierarchical level.
+	self.is_frame = true
 
-		self.mouse_in_resize_zone = false
+	self.mouse_in_resize_zone = false
 
-		-- Helps to distinguish double-clicks on the frame header.
-		self.cseq_header = false
+	-- Helps to distinguish double-clicks on the frame header.
+	self.cseq_header = false
 
-		-- Set true to draw a red box around the frame's resize area.
-		--self.DEBUG_show_resize_range
+	-- Set true to draw a red box around the frame's resize area.
+	--self.DEBUG_show_resize_range
 
-		-- Link to the last widget within this tree which held thimble1.
-		-- The link may become stale, so confirm the widget is still alive and within the tree before using.
-		self.banked_thimble1 = false
+	-- Link to the last widget within this tree which held thimble1.
+	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
+	self.banked_thimble1 = false
 
-		self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
+	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
 
-		-- Valid while resizing. (0,0) is an error.
-		self.adjust_axis_x = 0 -- -1, 0, 1
-		self.adjust_axis_y = 0 -- -1, 0, 1
+	-- Valid while resizing. (0,0) is an error.
+	self.adjust_axis_x = 0 -- -1, 0, 1
+	self.adjust_axis_y = 0 -- -1, 0, 1
 
-		-- Offsets from mouse when resizing.
-		self.adjust_ox = 0
-		self.adjust_oy = 0
+	-- Offsets from mouse when resizing.
+	self.adjust_ox = 0
+	self.adjust_oy = 0
 
-		-- How far past the parent bounds this widget is permitted to go.
-		self.p_bounds_x1 = 0
-		self.p_bounds_y1 = 0
-		self.p_bounds_x2 = 0
-		self.p_bounds_y2 = 0
+	-- How far past the parent bounds this widget is permitted to go.
+	self.p_bounds_x1 = 0
+	self.p_bounds_y1 = 0
+	self.p_bounds_x2 = 0
+	self.p_bounds_y2 = 0
 
-		widShared.setupViewports(self, 4)
+	widShared.setupViewports(self, 4)
 
-		-- Layout rectangle
-		self.lp_x = 0
-		self.lp_y = 0
-		self.lp_w = 1
-		self.lp_h = 1
+	-- Layout rectangle
+	self.lp_x = 0
+	self.lp_y = 0
+	self.lp_w = 1
+	self.lp_h = 1
 
-		-- Used when unmaximizing as a result of dragging.
-		self.adjust_mouse_orig_a_x = 0
-		self.adjust_mouse_orig_a_y = 0
+	-- Used when unmaximizing as a result of dragging.
+	self.adjust_mouse_orig_a_x = 0
+	self.adjust_mouse_orig_a_y = 0
 
-		self.maximized = false
-		self.maxim_x = 0
-		self.maxim_y = 0
-		self.maxim_w = 128
-		self.maxim_h = 128
+	self.maximized = false
+	self.maxim_x = 0
+	self.maxim_y = 0
+	self.maxim_w = 128
+	self.maxim_h = 128
 
-		-- Set true to allow dragging the container by clicking on its body
-		self.allow_body_drag = false -- XXX moved from container, maybe not the correct place here.
+	-- Set true to allow dragging the container by clicking on its body
+	self.allow_body_drag = false -- XXX moved from container, maybe not the correct place here.
 
-		-- Used to position frame relative to pointer when dragging.
-		self.drag_ox = 0
-		self.drag_oy = 0
+	-- Used to position frame relative to pointer when dragging.
+	self.drag_ox = 0
+	self.drag_oy = 0
 
-		-- Minimum container size
-		self.min_w = 64
-		self.min_h = 64
+	-- Minimum container size
+	self.min_w = 64
+	self.min_h = 64
 
-		-- Maximum container size
-		self.max_w = 2^16
-		self.max_h = 2^16
+	-- Maximum container size
+	self.max_w = 2^16
+	self.max_h = 2^16
 
-		self:skinSetRefs()
-		self:skinInstall()
-		self:applyAllSettings()
+	self:skinSetRefs()
+	self:skinInstall()
+	self:applyAllSettings()
 
-		-- Potentially shortened version of 'text' for display.
-		self.header_text_disp = ""
+	-- Potentially shortened version of 'text' for display.
+	self.header_text_disp = ""
 
-		-- Text offsetting
-		self.header_text_ox = 0
-		self.header_text_oy = 0
-
-
-		-- Close button
-		local b_close = self:addChild("base/button", {skin_id = "wimp_frame_button"})
-		b_close.graphic = self.context.resources.tex_quads["window_graphic_close"]
-		b_close.tag = "header_close"
-		b_close.wid_buttonAction = button_wid_close
-		b_close.can_have_thimble = false
-		_configureButton(b_close, self.header_show_close_button, self.header_enable_close_button)
-
-		-- Maximize/restore button
-		local b_size = self:addChild("base/button", {skin_id = "wimp_frame_button"})
-		b_size.graphic = self.context.resources.tex_quads["window_graphic_maximize"]
-		b_size.graphic_max = self.context.resources.tex_quads["window_graphic_maximize"]
-		b_size.graphic_unmax = self.context.resources.tex_quads["window_graphic_unmaximize"]
-		b_size.tag = "header_max"
-		b_size.wid_buttonAction = button_wid_maximize
-		b_size.can_have_thimble = false
-		_configureButton(b_size, self.header_show_size_button, self.header_enable_size_button)
+	-- Text offsetting
+	self.header_text_ox = 0
+	self.header_text_oy = 0
 
 
-		self.needs_update = true
+	-- Close button
+	local b_close = self:addChild("base/button")
+	b_close.skin_id = "wimp_frame_button"
+	b_close:initialize()
+	b_close.graphic = self.context.resources.tex_quads["window_graphic_close"]
+	b_close.tag = "header_close"
+	b_close.wid_buttonAction = button_wid_close
+	b_close.can_have_thimble = false
+	_configureButton(b_close, self.header_show_close_button, self.header_enable_close_button)
 
-		-- Layout rectangle
-		uiLayout.initLayoutRectangle(self)
+	-- Maximize/restore button
+	local b_size = self:addChild("base/button")
+	b_size.skin_id = "wimp_frame_button"
+	b_size:initialize()
+	b_size.graphic = self.context.resources.tex_quads["window_graphic_maximize"]
+	b_size.graphic_max = self.context.resources.tex_quads["window_graphic_maximize"]
+	b_size.graphic_unmax = self.context.resources.tex_quads["window_graphic_unmaximize"]
+	b_size.tag = "header_max"
+	b_size.wid_buttonAction = button_wid_maximize
+	b_size.can_have_thimble = false
+	_configureButton(b_size, self.header_show_size_button, self.header_enable_size_button)
 
-		-- Don't let inter-generational thimble stepping leave this widget's children.
-		self.block_step_intergen = true
 
-		-- Optional menu bar
-		if self.make_menu_bar then
-			local menu_bar = self:addChild("wimp/menu_bar")
-			menu_bar.tag = "frame_menu_bar"
-		end
+	self.needs_update = true
 
-		-- Main content container
-		local content = self:addChild("base/container")
-		content.tag = "frame_content"
-		--content.render = content.renderBlank
+	-- Layout rectangle
+	uiLayout.initLayoutRectangle(self)
 
-		content:setScrollBars(true, true)
+	-- Don't let inter-generational thimble stepping leave this widget's children.
+	self.block_step_intergen = true
 
-		content:reshape()
-
-		content.can_have_thimble = true
-
-		--self:setDefaultBounds()
-
-		self.center = widShared.centerInParent
-
-		self.wid_maximize = widShared.wid_maximize
-		self.wid_unmaximize = widShared.wid_unmaximize
-		--self.wid_patchPressed = frame_wid_patchPressed
-
-		-- Helps with ctrl+tabbing through frames.
-		self.order_id = self:bubbleEvent("rootCall_getFrameOrderID")
-
-		-- Frame-modal widget links. Truthy-checks are used to determine if a frame is currently
-		-- being blocked or is blocking another frame.
-		self.ref_modal_prev = false
-		self.ref_modal_next = false
-
-		-- Table of widgets to offer keyPressed and keyReleased input.
-		self.hooks_trickle_key_pressed = {}
-		self.hooks_trickle_key_released = {}
-		self.hooks_key_pressed = {}
-		self.hooks_key_released = {}
-
-		-- Call reshape(true) on this once you've set the initial size.
+	-- Optional menu bar
+	if self.make_menu_bar then
+		local menu_bar = self:addChild("wimp/menu_bar")
+		menu_bar:initialize()
+		menu_bar.tag = "frame_menu_bar"
 	end
+
+	-- Main content container
+	local content = self:addChild("base/container")
+	content:initialize()
+	content.tag = "frame_content"
+	--content.render = content.renderBlank
+
+	content:setScrollBars(true, true)
+
+	content:reshape()
+
+	content.can_have_thimble = true
+
+	--self:setDefaultBounds()
+
+	self.center = widShared.centerInParent
+
+	self.wid_maximize = widShared.wid_maximize
+	self.wid_unmaximize = widShared.wid_unmaximize
+	--self.wid_patchPressed = frame_wid_patchPressed
+
+	-- Helps with ctrl+tabbing through frames.
+	self.order_id = self:bubbleEvent("rootCall_getFrameOrderID")
+
+	-- Frame-modal widget links. Truthy-checks are used to determine if a frame is currently
+	-- being blocked or is blocking another frame.
+	self.ref_modal_prev = false
+	self.ref_modal_next = false
+
+	-- Table of widgets to offer keyPressed and keyReleased input.
+	self.hooks_trickle_key_pressed = {}
+	self.hooks_trickle_key_released = {}
+	self.hooks_key_pressed = {}
+	self.hooks_key_released = {}
+
+	-- Call reshape(true) on this once you've set the initial size.
 end
 
 

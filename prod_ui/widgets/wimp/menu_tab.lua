@@ -235,74 +235,72 @@ local function _moveColumn(self, col, dest_i)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 3)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 3)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		lgcMenu.instanceSetup(self)
+	lgcMenu.instanceSetup(self)
 
-		self.menu = self.menu or lgcMenu.new()
+	self.menu = self.menu or lgcMenu.new()
 
-		-- Array of header category columns.
-		self.columns = {}
+	-- Array of header category columns.
+	self.columns = {}
 
-		-- Column bar visibility.
+	-- Column bar visibility.
 
-		-- Column bar rectangle. Column positions are not relative to these XY values, but they do define
-		-- placement and are used in broad intersect tests.
-		self.col_bar_visible = true
+	-- Column bar rectangle. Column positions are not relative to these XY values, but they do define
+	-- placement and are used in broad intersect tests.
+	self.col_bar_visible = true
 
-		-- Location of initial click when dragging column headers. Only valid between
-		-- uiCall_pointerPress and uiCall_pointerUnpress.
-		self.col_click = false
-		self.col_click_x = 0
-		self.col_click_y = 0
+	-- Location of initial click when dragging column headers. Only valid between
+	-- uiCall_pointerPress and uiCall_pointerUnpress.
+	self.col_click = false
+	self.col_click_x = 0
+	self.col_click_y = 0
 
-		-- Half square range of where row sorting is permitted by clicking on column squares.
-		self.col_click_threshold = 16 -- XXX config, scale
+	-- Half square range of where row sorting is permitted by clicking on column squares.
+	self.col_click_threshold = 16 -- XXX config, scale
 
-		-- Reference(s) to the currently-hovered and currently-pressed column header.
-		-- Hovered should only be considered if pressed is false.
-		self.column_hovered = false
-		self.column_pressed = false
+	-- Reference(s) to the currently-hovered and currently-pressed column header.
+	-- Hovered should only be considered if pressed is false.
+	self.column_hovered = false
+	self.column_pressed = false
 
-		-- Reference to the column which is currently being used for sorting.
-		-- Should be false when there are no columns or when no explicit sorting is being
-		-- applied.
-		self.column_primary = false
+	-- Reference to the column which is currently being used for sorting.
+	-- Should be false when there are no columns or when no explicit sorting is being
+	-- applied.
+	self.column_primary = false
 
-		-- Columns at indices less than or equal to this number cannot be reordered.
-		-- We assume that affected columns never move: that their indices always equal
-		-- their column.id fields (so ID #1 is at index 1, ID #2 is at index 2, and so
-		-- on).
-		self.reorder_limit = 0
+	-- Columns at indices less than or equal to this number cannot be reordered.
+	-- We assume that affected columns never move: that their indices always equal
+	-- their column.id fields (so ID #1 is at index 1, ID #2 is at index 2, and so
+	-- on).
+	self.reorder_limit = 0
 
-		-- The sorting direction for the primary column. True == ascending (arrow down).
-		self.column_sort_ascending = true
+	-- The sorting direction for the primary column. True == ascending (arrow down).
+	self.column_sort_ascending = true
 
-		-- Item measurements. These should be set based on the font size used with
-		-- Menu-Item text.
-		-- The default item width is determined by the width of the column bar (or the
-		-- width of the widget if there are no categories).
-		self.default_item_h = 16
-		self.default_item_text_x = 0
-		self.default_item_text_y = 0
-		self.default_item_bijou_x = 0
-		self.default_item_bijou_y = 0
-		self.default_item_bijou_w = 0
-		self.default_item_bijou_h = 0
+	-- Item measurements. These should be set based on the font size used with
+	-- Menu-Item text.
+	-- The default item width is determined by the width of the column bar (or the
+	-- width of the widget if there are no categories).
+	self.default_item_h = 16
+	self.default_item_text_x = 0
+	self.default_item_text_y = 0
+	self.default_item_bijou_x = 0
+	self.default_item_bijou_y = 0
+	self.default_item_bijou_w = 0
+	self.default_item_bijou_h = 0
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

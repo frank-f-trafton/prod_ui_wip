@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
 	local label = content:addChild("base/label")
+	label:initialize()
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:setLabel(text, label_mode)
 
@@ -95,9 +96,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 640
+	frame:initialize()
 
 	frame:setFrameTitle("Split Button")
 
@@ -115,7 +116,13 @@ function plan.make(parent)
 		end
 
 		-- Split Button
-		local btn_spl = content:addChild("wimp/button_split", {x=0, y=0, w=224, h=64, userDestroy = _userDestroy})
+		local btn_spl = content:addChild("wimp/button_split")
+		btn_spl.x = 0
+		btn_spl.y = 0
+		btn_spl.w = 224
+		btn_spl.h = 64
+		btn_spl.userDestroy = _userDestroy
+		btn_spl:initialize()
 		btn_spl:setTag("demo_split_btn")
 
 		btn_spl:setLabel("Split Button")
@@ -128,7 +135,12 @@ function plan.make(parent)
 		local xx, yy, ww, hh = 256, 0, 256, 48
 
 		do
-			local chk = content:addChild("base/checkbox", {x=xx, y=yy, w=ww, h=hh})
+			local chk = content:addChild("base/checkbox")
+			chk.x = xx
+			chk.y = yy
+			chk.w = ww
+			chk.h = hh
+			chk:initialize()
 			chk:setLabel("Aux Enabled")
 			chk:setChecked(not not btn_spl.aux_enabled)
 			chk.wid_buttonAction = function(self)
@@ -144,7 +156,12 @@ function plan.make(parent)
 		yy = yy + hh
 
 		do
-			local rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww, h = hh})
+			local rdo = content:addChild("barebones/radio_button")
+			rdo.x = xx
+			rdo.y = yy
+			rdo.w = ww
+			rdo.h = hh
+			rdo:initialize()
 			rdo.radio_group = "split_placement"
 			rdo.usr_placement = "right"
 			rdo:setLabel("Right")
@@ -156,7 +173,12 @@ function plan.make(parent)
 		end
 
 		do
-			local rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww, h = hh})
+			local rdo = content:addChild("barebones/radio_button")
+			rdo.x = xx
+			rdo.y = yy
+			rdo.w = ww
+			rdo.h = hh
+			rdo:initialize()
 			rdo.radio_group = "split_placement"
 			rdo.usr_placement = "left"
 			rdo:setLabel("Left")
@@ -168,7 +190,12 @@ function plan.make(parent)
 		end
 
 		do
-			local rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww, h = hh})
+			local rdo = content:addChild("barebones/radio_button")
+			rdo.x = xx
+			rdo.y = yy
+			rdo.w = ww
+			rdo.h = hh
+			rdo:initialize()
 			rdo.radio_group = "split_placement"
 			rdo.usr_placement = "top"
 			rdo:setLabel("Top")
@@ -180,7 +207,12 @@ function plan.make(parent)
 		end
 
 		do
-			local rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww, h = hh})
+			local rdo = content:addChild("barebones/radio_button")
+			rdo.x = xx
+			rdo.y = yy
+			rdo.w = ww
+			rdo.h = hh
+			rdo:initialize()
 			rdo.radio_group = "split_placement"
 			rdo.usr_placement = "bottom"
 			rdo:setLabel("Bottom")
@@ -197,7 +229,12 @@ function plan.make(parent)
 		yy = yy + math.floor(hh/2)
 
 		do
-			local sld = content:addChild("barebones/slider_bar", {x=xx, y=yy, w=ww, h=hh})
+			local sld = content:addChild("barebones/slider_bar")
+			sld.x = xx
+			sld.y = yy
+			sld.w = ww
+			sld.h = hh
+			sld:initialize()
 			sld.trough_vertical = false
 			sld:setLabel("Aux Size")
 			sld.slider_def = btn_spl.skin.aux_size

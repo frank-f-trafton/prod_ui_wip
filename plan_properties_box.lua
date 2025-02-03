@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -22,9 +23,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Properties Box Test")
 
@@ -36,12 +37,13 @@ function plan.make(parent)
 		makeLabel(content, 32, 0, 512, 32, "***Under Construction***", "single")
 
 		local properties_box = content:addChild("wimp/properties_box")
-		properties_box:setTag("demo_properties_box")
-
 		properties_box.x = 0
 		properties_box.y = 64
 		properties_box.w = 400
 		properties_box.h = 300
+		properties_box:initialize()
+
+		properties_box:setTag("demo_properties_box")
 
 		-- (wid_id, text, pos, bijou_id)
 		local c1 = properties_box:addControl("wimp/embed/checkbox", "Foobar")

@@ -147,51 +147,49 @@ def.moveLast = lgcMenu.widgetMoveLast
 -- * / Selection movement *
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
-		self.allow_focus_capture = true
-		self.clip_scissor = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
+	self.allow_focus_capture = true
+	self.clip_scissor = true
 
-		-- Changes orientation to left/right.
-		self.horizontal = false
+	-- Changes orientation to left/right.
+	self.horizontal = false
 
-		-- Size of each item in the menu on the primary axis.
-		self.item_len = 24 -- must be greater than zero
+	-- Size of each item in the menu on the primary axis.
+	self.item_len = 24 -- must be greater than zero
 
-		-- Scrolling offset. Zero corresponds to the first visible item in the list.
-		self.scroll_i = 0
+	-- Scrolling offset. Zero corresponds to the first visible item in the list.
+	self.scroll_i = 0
 
-		-- Begin scrolling the list when selector is within this number of items to the edge.
-		-- To center the selection, ensure there are an odd number of items visible and set
-		-- this to floor(n_vis/2) - 1. (Ex: 9 items -> padding of 4.)
-		self.scroll_i_pad = 3 -- XXX I think there's an off-by-one error here. I want to rewrite this
-		-- so that the number of visible item slots is specified explicitly, independent of the
-		-- widget dimensions.
+	-- Begin scrolling the list when selector is within this number of items to the edge.
+	-- To center the selection, ensure there are an odd number of items visible and set
+	-- this to floor(n_vis/2) - 1. (Ex: 9 items -> padding of 4.)
+	self.scroll_i_pad = 3 -- XXX I think there's an off-by-one error here. I want to rewrite this
+	-- so that the number of visible item slots is specified explicitly, independent of the
+	-- widget dimensions.
 
-		-- Lateral padding for items. (Vertical: right + left padding. Horizontal: top + bottom padding.)
-		self.item_pad = 16
+	-- Lateral padding for items. (Vertical: right + left padding. Horizontal: top + bottom padding.)
+	self.item_pad = 16
 
-		-- Show a non-interactive scrolling indication, pegged to the current selection.
-		-- true: peg to current scroll offset (clamped even if scrolling itself is clamped).
-		-- "selection": peg to current selection.
-		self.show_scroll_ind = true
+	-- Show a non-interactive scrolling indication, pegged to the current selection.
+	-- true: peg to current scroll offset (clamped even if scrolling itself is clamped).
+	-- "selection": peg to current selection.
+	self.show_scroll_ind = true
 
-		-- When true, clamp scrolling to the first and last menu items.
-		self.scroll_clamp = true
+	-- When true, clamp scrolling to the first and last menu items.
+	self.scroll_clamp = true
 
-		-- XXX WIP: Assign a function here to serve as the default item renderer.
-		-- Allows menus to contain primitive types like strings, which may reduce
-		-- overhead in some use cases.
-		-- self.item_render
+	-- XXX WIP: Assign a function here to serve as the default item renderer.
+	-- Allows menus to contain primitive types like strings, which may reduce
+	-- overhead in some use cases.
+	-- self.item_render
 
-		self.menu = self.menu or lgcMenu.new()
+	self.menu = self.menu or lgcMenu.new()
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

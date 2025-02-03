@@ -238,83 +238,81 @@ local function updateCaretShape(self)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 2)
 
-		widShared.setupScroll(self)
-		widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupDoc(self)
 
-		-- Minimum widget size.
-		self.min_w = 8
-		self.min_h = 8
+	-- Minimum widget size.
+	self.min_w = 8
+	self.min_h = 8
 
-		-- How far to offset sub-line X positions depending on the alignment.
-		-- Based on doc_w.
-		self.align_offset = 0
+	-- How far to offset sub-line X positions depending on the alignment.
+	-- Based on doc_w.
+	self.align_offset = 0
 
-		self.press_busy = false
+	self.press_busy = false
 
-		-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
-		self.caret_extend_x = 0
-		self.caret_extend_y = 0
+	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
+	self.caret_extend_x = 0
+	self.caret_extend_y = 0
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		local skin = self.skin
+	local skin = self.skin
 
-		self.line_ed = lineEdM.new(skin.font)
+	self.line_ed = lineEdM.new(skin.font)
 
-		-- Ghost text appears when the field is empty.
-		-- This is not part of the lineEditor core, and so it is not drawn through
-		-- the seqString or displayLine sub-objects, and is not affected by glyph masking.
-		self.ghost_text = false
+	-- Ghost text appears when the field is empty.
+	-- This is not part of the lineEditor core, and so it is not drawn through
+	-- the seqString or displayLine sub-objects, and is not affected by glyph masking.
+	self.ghost_text = false
 
-		-- false: use content text alignment.
-		-- "left", "center", "right", "justify"
-		self.ghost_text_align = false
+	-- false: use content text alignment.
+	-- "left", "center", "right", "justify"
+	self.ghost_text_align = false
 
-		-- The first and last visible display paragraphs. Used as boundaries for text rendering.
-		-- Update whenever you scroll vertically or modify the text.
-		self.vis_para_top = 1
-		self.vis_para_bot = 1
+	-- The first and last visible display paragraphs. Used as boundaries for text rendering.
+	-- Update whenever you scroll vertically or modify the text.
+	self.vis_para_top = 1
+	self.vis_para_bot = 1
 
-		-- Caret fill mode and color table
-		self.caret_fill = "fill"
+	-- Caret fill mode and color table
+	self.caret_fill = "fill"
 
-		-- Tick this whenever something related to the text box needs to be cached again.
-		-- lineEditor itself should immediately apply its own state changes.
-		self.update_flag = true
+	-- Tick this whenever something related to the text box needs to be cached again.
+	-- lineEditor itself should immediately apply its own state changes.
+	self.update_flag = true
 
-		-- The caret rect dimensions for drawing.
-		self.caret_x = 0
-		self.caret_y = 0
-		self.caret_w = 0
-		self.caret_h = 0
+	-- The caret rect dimensions for drawing.
+	self.caret_x = 0
+	self.caret_y = 0
+	self.caret_w = 0
+	self.caret_h = 0
 
-		self.text_object = uiGraphics.newTextBatch(skin.font)
+	self.text_object = uiGraphics.newTextBatch(skin.font)
 
-		self.illuminate_current_line = true
+	self.illuminate_current_line = true
 
-		-- Used to update viewport scrolling as a result of dragging the mouse in update().
-		self.mouse_drag_x = 0
-		self.mouse_drag_y = 0
+	-- Used to update viewport scrolling as a result of dragging the mouse in update().
+	self.mouse_drag_x = 0
+	self.mouse_drag_y = 0
 
-		-- Position offsets when clicking the mouse.
-		-- These are only valid when a mouse action is in progress.
-		self.click_line = 1
-		self.click_byte = 1
+	-- Position offsets when clicking the mouse.
+	-- These are only valid when a mouse action is in progress.
+	self.click_line = 1
+	self.click_byte = 1
 
-		-- State flags (WIP)
-		self.enabled = true
+	-- State flags (WIP)
+	self.enabled = true
 
-		updateCaretShape(self)
-	end
+	updateCaretShape(self)
 end
 
 

@@ -178,8 +178,9 @@ local function newWimpContext()
 	context.resources:loadSkinDefs("prod_ui/themes/vacuum/skins", true)
 
 	local wid_root = context:addWidget("wimp/root_wimp")
-	context:setRoot(wid_root)
 	wid_root.w, wid_root.h = love.graphics.getDimensions()
+	wid_root:initialize()
+	context:setRoot(wid_root)
 
 	return context, wid_root
 end
@@ -331,6 +332,7 @@ do
 
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
+		bar_menu:initialize()
 
 		bar_menu.tag = "root_menu_bar"
 
@@ -553,6 +555,7 @@ do
 
 		bar_button.can_have_thimble = false
 
+		bar_button:initialize()
 		bar_button:reshape()
 		--]]
 	end

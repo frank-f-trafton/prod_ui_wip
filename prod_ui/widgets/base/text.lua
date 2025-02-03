@@ -14,40 +14,38 @@ local def = {}
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		-- Required:
-		if not self.font then
-			error("missing field: self.font")
-		end
-
-		-- Defaults:
-		self.visible = true
-
-		self.text = ""
-
-		-- These are set automatically by textRefresh().
-		self.text_y = 0
-		self.text_w = 0
-		self.text_h = 0
-
-		self.align = "left"
-		self.align_v = "top" -- unformatted only
-
-		self.formatted = false
-
-		self.margin_l = 0
-		self.margin_r = 0
-		self.margin_t = 0
-		self.margin_b = 0
-
-		self.r = 1
-		self.g = 1
-		self.b = 1
-		self.a = 1
-
-		self:refreshText()
+function def:uiCall_initialize()
+	-- Required:
+	if not self.font then
+		error("missing field: self.font")
 	end
+
+	-- Defaults:
+	self.visible = true
+
+	self.text = ""
+
+	-- These are set automatically by textRefresh().
+	self.text_y = 0
+	self.text_w = 0
+	self.text_h = 0
+
+	self.align = "left"
+	self.align_v = "top" -- unformatted only
+
+	self.formatted = false
+
+	self.margin_l = 0
+	self.margin_r = 0
+	self.margin_t = 0
+	self.margin_b = 0
+
+	self.r = 1
+	self.g = 1
+	self.b = 1
+	self.a = 1
+
+	self:refreshText()
 end
 
 

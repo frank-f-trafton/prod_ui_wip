@@ -16,15 +16,13 @@ local def = {}
 def.setLabel = lgcLabelBare.widSetLabel
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
+function def:uiCall_initialize()
+	self.visible = true
 
-		lgcLabelBare.setup(self)
+	lgcLabelBare.setup(self)
 
-		-- "enabled" affects the rendered color.
-		self.enabled = true
-	end
+	-- "enabled" affects the rendered color.
+	self.enabled = true
 end
 
 

@@ -1146,50 +1146,19 @@ end
 
 --- Add a top-level widget instance to the context.
 --  Locked during update: yes (context)
---	Callbacks:
---	* uiCall_create (run)
 -- @param id The widget def ID.
--- @param init_t An optional table the caller may provide as the basis for the instance table. This may be necessary in
---	cases where resources must be provided to the widget before uiCall_create() is called. If no table is provided, a
---	fresh table will be used instead. Note that uiCall_create() may overwrite certain fields depending on how the widget
---	def is written. It's best to only use this in ways that are described by the widget documentation or def code. Do
---	not share the table among multiple instances.
 -- @param pos (#children + 1) Where to add the widget within the caller's children array. Must be from 1 to
 --	#children + 1.
 -- @return A reference to the new instance.
-function _mt_context:addWidget(id, init_t, pos)
+function _mt_context:addWidget(id, pos)
 	uiShared.notNilNotFalseNotNaN(1, id)
-	uiShared.typeEval1(2, init_t, "table")
-	uiShared.numberNotNaNEval(3, pos)
+	uiShared.numberNotNaNEval(2, pos)
 
 	if self.locked then
 		uiShared.errLockedContext("add top-level instance widget")
 	end
 
-	pos = pos or #self.instances + 1
-	if pos < 1 or pos > #self.instances + 1 then
-		error("position is out of range.")
-	end
-
-	local def = self.widget_defs[id]
-
-	if not def then
-		error("unregistered widget ID: " .. tostring(id))
-
-	elseif type(def) ~= "table" then
-		error("bad type for widget def. ID: " .. tostring(id) .. ". Expected table, got " .. type(def) .. ".")
-
-	else
-		init_t = init_t or {}
-		uiWidget._initWidgetInstance(init_t, def, self, false)
-
-		table.insert(self.instances, pos, init_t)
-
-		init_t:sendEvent("uiCall_create", init_t) -- no ancestors
-		uiWidget._runUserEvent(init_t, "userCreate")
-
-		return init_t
-	end
+	return uiWidget._prepareWidgetInstance(id, self, nil, self.instances, pos)
 end
 
 

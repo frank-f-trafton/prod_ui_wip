@@ -41,46 +41,44 @@ def.uiCall_thimbleAction = lgcButton.uiCall_thimbleActionRadio
 def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 2)
 
-		lgcLabel.setup(self)
+	lgcLabel.setup(self)
 
-		-- Identifier.
-		self.is_radio_button = true
+	-- Identifier.
+	self.is_radio_button = true
 
-		-- The group that this radio button belongs to. The default is an empty string.
-		-- Group scope is among siblings.
-		self.radio_group = ""
+	-- The group that this radio button belongs to. The default is an empty string.
+	-- Group scope is among siblings.
+	self.radio_group = ""
 
-		-- Radio button state.
-		self.checked = false
+	-- Radio button state.
+	self.checked = false
 
-		-- Cursor IDs for hover and press states.
-		self.cursor_on = "hand"
-		self.cursor_press = "hand"
+	-- Cursor IDs for hover and press states.
+	self.cursor_on = "hand"
+	self.cursor_press = "hand"
 
-		-- [XXX 8] (Optional) image associated with the button.
-		--self.graphic = <tq>
+	-- [XXX 8] (Optional) image associated with the button.
+	--self.graphic = <tq>
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
+	-- State flags
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 
-		-- Placement of a single visual element.
-		--self.bijou_side = "left" -- left (default), right
+	-- Placement of a single visual element.
+	--self.bijou_side = "left" -- left (default), right
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 

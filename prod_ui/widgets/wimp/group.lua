@@ -33,18 +33,16 @@ function def:setText(text)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
 
-		self.text = ""
+	self.text = ""
 
-		self.enabled = true
+	self.enabled = true
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

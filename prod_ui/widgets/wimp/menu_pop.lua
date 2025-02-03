@@ -134,6 +134,7 @@ local function assignSubMenu(item, client, set_selection)
 		if group_def and parent then
 			-- Add as a sibling and attach to the menu chain.
 			local client_sub = parent:addChild("wimp/menu_pop")
+			client_sub:initialize()
 
 			client.chain_next = client_sub
 			client_sub.chain_prev = client
@@ -648,84 +649,82 @@ end
 -- * / Item management *
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		self.clip_scissor = true
+	self.clip_scissor = true
 
-		self.sort_id = 6
+	self.sort_id = 6
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 2)
 
-		self.press_busy = false
+	self.press_busy = false
 
-		lgcMenu.instanceSetup(self)
+	lgcMenu.instanceSetup(self)
 
-		-- XXX: test
-		self.is_blocking_clicks = false
+	-- XXX: test
+	self.is_blocking_clicks = false
 
-		-- Padding values. -- XXX style/config, scale
-		self.pad_bijou_x1 = 2
-		self.pad_bijou_x2 = 2
-		self.pad_bijou_y1 = 2
-		self.pad_bijou_y2 = 2
+	-- Padding values. -- XXX style/config, scale
+	self.pad_bijou_x1 = 2
+	self.pad_bijou_x2 = 2
+	self.pad_bijou_y1 = 2
+	self.pad_bijou_y2 = 2
 
-		self.pad_shortcut_x1 = 16
-		self.pad_shortcut_x2 = 8
+	self.pad_shortcut_x1 = 16
+	self.pad_shortcut_x2 = 8
 
-		-- Drawing offsets and size for bijou quads.
-		self.bijou_draw_w = 24
-		self.bijou_draw_h = 24
+	-- Drawing offsets and size for bijou quads.
+	self.bijou_draw_w = 24
+	self.bijou_draw_h = 24
 
-		-- Padding above and below text and bijoux in items.
-		-- The tallest of the two components determines the item's height.
-		self.pad_text_x1 = 4
-		self.pad_text_x2 = 4
-		self.pad_text_y1 = 4
-		self.pad_text_y2 = 4
+	-- Padding above and below text and bijoux in items.
+	-- The tallest of the two components determines the item's height.
+	self.pad_text_x1 = 4
+	self.pad_text_x2 = 4
+	self.pad_text_y1 = 4
+	self.pad_text_y2 = 4
 
-		-- Padding for separators.
-		self.pad_separator_y = 4
+	-- Padding for separators.
+	self.pad_separator_y = 4
 
-		-- Padding for group arrow indicators.
-		self.pad_arrow_x1 = 4
-		self.pad_arrow_x2 = 0
-		self.arrow_draw_w = 24
-		self.arrow_draw_h = 24
+	-- Padding for group arrow indicators.
+	self.pad_arrow_x1 = 4
+	self.pad_arrow_x2 = 0
+	self.arrow_draw_w = 24
+	self.arrow_draw_h = 24
 
-		-- Used when underlining shortcut key letters in menu items.
-		self.underline_width = 1 -- XXX pull from skin.
+	-- Used when underlining shortcut key letters in menu items.
+	self.underline_width = 1 -- XXX pull from skin.
 
-		-- References populated when this widget is part of a chain of menus.
-		self.chain_next = false
-		self.chain_prev = false
+	-- References populated when this widget is part of a chain of menus.
+	self.chain_next = false
+	self.chain_prev = false
 
-		-- Caller sets this to the widget table that this menu "belongs to" or extends.
-		self.wid_ref = false
+	-- Caller sets this to the widget table that this menu "belongs to" or extends.
+	self.wid_ref = false
 
-		-- Used to determine if a sub-menu needs to be invoked.
-		self.last_open_group = false
+	-- Used to determine if a sub-menu needs to be invoked.
+	self.last_open_group = false
 
-		-- Timer to delay the opening and closing of sub-menus.
-		self.open_time = 0.0
+	-- Timer to delay the opening and closing of sub-menus.
+	self.open_time = 0.0
 
-		-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
-		--self.origin_item =
+	-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
+	--self.origin_item =
 
-		self.menu = self.menu or lgcMenu.new()
-		self.menu.default_deselect = true
+	self.menu = self.menu or lgcMenu.new()
+	self.menu.default_deselect = true
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		self:reshape()
-		self:menuChangeCleanup()
-	end
+	self:reshape()
+	self:menuChangeCleanup()
 end
 
 

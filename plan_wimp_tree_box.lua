@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -38,9 +39,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("TreeBox Test")
 
@@ -57,7 +58,14 @@ function plan.make(parent)
 			self.context.resources:removeSkinDef(skin_clone)
 		end
 
-		local tree_box = content:addChild("wimp/tree_box", {skin_id = skin_clone, userDestroy = _userDestroy})
+		local tree_box = content:addChild("wimp/tree_box")
+		tree_box.x = 0
+		tree_box.y = 0
+		tree_box.w = 224
+		tree_box.h = 256
+		tree_box.skin_id = skin_clone
+		tree_box.userDestroy = _userDestroy
+		tree_box:initialize()
 		tree_box:setTag("demo_treebox")
 
 		tree_box.wid_action = function(self, item, index)
@@ -72,11 +80,6 @@ function plan.make(parent)
 		tree_box.wid_select = function(self, item, index)
 			print("wid_select()", item, index)
 		end
-
-		tree_box.x = 0
-		tree_box.y = 0
-		tree_box.w = 224
-		tree_box.h = 256
 
 		tree_box:setScrollBars(false, true)
 
@@ -117,6 +120,7 @@ function plan.make(parent)
 		local rdo_btn
 		rdo_btn = content:addChild("barebones/radio_button")
 		rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+		rdo_btn:initialize()
 		rdo_btn.radio_group = "tb_item_h_align"
 		rdo_btn:setLabel("left")
 		rdo_btn.usr_item_align_h = "left"
@@ -126,6 +130,7 @@ function plan.make(parent)
 
 		rdo_btn = content:addChild("barebones/radio_button")
 		rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+		rdo_btn:initialize()
 		rdo_btn.radio_group = "tb_item_h_align"
 		rdo_btn:setLabel("right")
 		rdo_btn.usr_item_align_h = "right"
@@ -134,7 +139,12 @@ function plan.make(parent)
 		wy = wy + wh
 		wy = wy + wh
 
-		local sld = content:addChild("barebones/slider_bar", {x=wx, y=wy, w=ww, h=wh})
+		local sld = content:addChild("barebones/slider_bar")
+		sld.x = wx
+		sld.y = wy
+		sld.w = ww
+		sld.h = wh
+		sld:initialize()
 		sld.trough_vertical = false
 		sld:setLabel("Item Vertical Pad")
 		sld.slider_pos = 0
@@ -152,7 +162,12 @@ function plan.make(parent)
 
 		wy = wy + wh
 
-		local sld = content:addChild("barebones/slider_bar", {x=wx, y=wy, w=ww, h=wh})
+		local sld = content:addChild("barebones/slider_bar")
+		sld.x = wx
+		sld.y = wy
+		sld.w = ww
+		sld.h = wh
+		sld:initialize()
 		sld.trough_vertical = false
 		sld:setLabel("Pipe width")
 		sld.slider_pos = 0
@@ -174,6 +189,7 @@ function plan.make(parent)
 
 		local chk = content:addChild("barebones/checkbox")
 		chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
+		chk:initialize()
 		chk:setLabel("Draw pipes")
 		chk:setChecked(tree_box.skin.draw_pipes)
 		chk.wid_buttonAction = function(self)
@@ -190,6 +206,7 @@ function plan.make(parent)
 
 		local chk = content:addChild("barebones/checkbox")
 		chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
+		chk:initialize()
 		chk:setLabel("Draw icons")
 		chk:setChecked(tree_box.TR_show_icons)
 		chk.wid_buttonAction = function(self)
@@ -204,6 +221,7 @@ function plan.make(parent)
 
 		local chk = content:addChild("barebones/checkbox")
 		chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
+		chk:initialize()
 		chk:setLabel("Expanders enabled")
 		chk:setChecked(tree_box.TR_expanders_active)
 		chk.wid_buttonAction = function(self)

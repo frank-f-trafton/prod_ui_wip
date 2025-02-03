@@ -359,65 +359,63 @@ function def:setValueToDefault()
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupScroll(self)
-		widShared.setupDoc(self)
-		widShared.setupViewports(self, 3)
+	widShared.setupScroll(self)
+	widShared.setupDoc(self)
+	widShared.setupViewports(self, 3)
 
-		lgcInputS.setupInstance(self)
+	lgcInputS.setupInstance(self)
 
-		-- The internal value.
-		self.value_default = 0
-		self.value = false
-		self.value_min = 0
-		self.value_max = 999999
+	-- The internal value.
+	self.value_default = 0
+	self.value = false
+	self.value_min = 0
+	self.value_max = 999999
 
-		self.value_mode = "decimal"
+	self.value_mode = "decimal"
 
-		-- when true, use ',' to mark the fractional part
-		self.fractional_comma = false
+	-- when true, use ',' to mark the fractional part
+	self.fractional_comma = false
 
-		-- padding of digits before and after the fractional part
-		self.digit_pad1 = 0
-		self.digit_pad2 = 0
-		-- maximum digits in the fractional part
-		self.fractional_max = 2^15
+	-- padding of digits before and after the fractional part
+	self.digit_pad1 = 0
+	self.digit_pad2 = 0
+	-- maximum digits in the fractional part
+	self.fractional_max = 2^15
 
-		-- hover and repeat-press state for inc/dec sensors
-		-- false for N/A, 1 for increment, 2 for decrement
-		self.btn_hov = false
-		self.btn_rep = false
+	-- hover and repeat-press state for inc/dec sensors
+	-- false for N/A, 1 for increment, 2 for decrement
+	self.btn_hov = false
+	self.btn_rep = false
 
-		-- repeat key state
-		self.rep_sc = false
-		self.rep_sc_count = 0
+	-- repeat key state
+	self.rep_sc = false
+	self.rep_sc_count = 0
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
+	-- State flags
+	self.enabled = true
+	self.hovered = false
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		local skin = self.skin
+	local skin = self.skin
 
-		self.line_ed = lineEdS.new(skin.font)
+	self.line_ed = lineEdS.new(skin.font)
 
-		-- special history configuration
-		self.line_ed.hist:setLockedFirst(true)
-		self.line_ed.hist:setMaxEntries(2)
-		editHistS.writeLockedFirst(self.line_ed)
+	-- special history configuration
+	self.line_ed.hist:setLockedFirst(true)
+	self.line_ed.hist:setMaxEntries(2)
+	editHistS.writeLockedFirst(self.line_ed)
 
-		self:setTextAlignment(skin.text_align)
+	self:setTextAlignment(skin.text_align)
 
-		self:setValueToDefault()
-		self:reshape()
-	end
+	self:setValueToDefault()
+	self:reshape()
 end
 
 

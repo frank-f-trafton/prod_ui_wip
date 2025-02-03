@@ -11,10 +11,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
+	frame:initialize()
 	frame:setFrameTitle("Widget Containers")
 
 	local content = frame:findTag("frame_content")
@@ -28,6 +27,7 @@ function plan.make(parent)
 		ctnr.y = 0
 		ctnr.w = 160
 		ctnr.h = 160
+		ctnr:initialize()
 		ctnr:setScrollBars(true, true)
 
 		ctnr:reshape(true)
@@ -37,7 +37,7 @@ function plan.make(parent)
 		btn.y = 0
 		btn.w = 256
 		btn.h = 256
-
+		btn:initialize()
 		btn:setLabel("Button in container")
 
 
@@ -61,6 +61,7 @@ function plan.make(parent)
 
 			love.graphics.pop()
 		end
+		cntr_s:initialize()
 	end
 
 	frame:reshape(true)
