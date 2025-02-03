@@ -1271,7 +1271,6 @@ end
 def.default_skinner = {
 	schema = {
 		separator_size = "scaled-int",
-
 	},
 
 

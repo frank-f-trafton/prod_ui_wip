@@ -849,34 +849,22 @@ end
 
 def.default_skinner = {
 	schema = {
-		header_text_align_h = "unit-interval",
-		header_text_align_v = "unit-interval",
-		sensor_resize_pad = "scaled-int",
-		shadow_extrude = "scaled-int",
-
-		res_normal = {
+		main = {
+			header_text_align_h = "unit-interval",
+			header_text_align_v = "unit-interval",
+			sensor_resize_pad = "scaled-int",
+			shadow_extrude = "scaled-int",
+			res_normal = "&res",
+			res_small = "&res",
+			res_large = "&res"
+		},
+		res = {
 			header_h = "scaled-int",
 			button_pad_w = "scaled-int",
 			button_w = "scaled-int",
 			button_h = "scaled-int",
 			button_align_v = "unit-interval",
-		},
-
-		res_small = {
-			header_h = "scaled-int",
-			button_pad_w = "scaled-int",
-			button_w = "scaled-int",
-			button_h = "scaled-int",
-			button_align_v = "unit-interval",
-		},
-
-		res_large = {
-			header_h = "scaled-int",
-			button_pad_w = "scaled-int",
-			button_w = "scaled-int",
-			button_h = "scaled-int",
-			button_align_v = "unit-interval",
-		},
+		}
 	},
 
 

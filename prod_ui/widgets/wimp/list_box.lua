@@ -632,6 +632,7 @@ def.default_skinner = {
 		pad_text_x = "scaled-int"
 	},
 
+
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 	end,

@@ -402,25 +402,15 @@ end
 
 def.default_skinner = {
 	scheme = {
-		prev_spacing = "scaled-int",
-		next_spacing = "scaled-int",
-
-		res_idle = {
-			button_ox = "scaled-int",
-			button_oy = "scaled-int"
+		main = {
+			prev_spacing = "scaled-int",
+			next_spacing = "scaled-int",
+			res_idle = "&res",
+			res_hover = "&res",
+			res_pressed = "&res",
+			res_disabled = "&res"
 		},
-
-		res_hover = {
-			button_ox = "scaled-int",
-			button_oy = "scaled-int"
-		},
-
-		res_pressed = {
-			button_ox = "scaled-int",
-			button_oy = "scaled-int"
-		},
-
-		res_disabled = {
+		res = {
 			button_ox = "scaled-int",
 			button_oy = "scaled-int"
 		}

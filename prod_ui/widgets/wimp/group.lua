@@ -47,7 +47,7 @@ end
 
 
 def.default_skinner = {
-	schema = {},
+	--schema = {},
 
 
 	install = function(self, skinner, skin)

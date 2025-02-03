@@ -854,6 +854,7 @@ def.default_skinner = {
 		base_height = "scaled-int"
 	},
 
+
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 

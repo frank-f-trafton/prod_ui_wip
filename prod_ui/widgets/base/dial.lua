@@ -304,29 +304,19 @@ end
 
 def.default_skinner = {
 	schema = {
-		label_spacing = "scaled-int",
-		trough_breadth = "scaled-int",
-		trough_breadth2 = "scaled-int",
-
-		res_idle = {
+		main = {
+			label_spacing = "scaled-int",
+			trough_breadth = "scaled-int",
+			trough_breadth2 = "scaled-int",
+			res_idle = "&res",
+			res_hover = "&res",
+			res_pressed = "&res",
+			res_disabled = "&res"
+		},
+		res = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
-		},
-
-		res_hover = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_pressed = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-
-		res_disabled = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
+		}
 	},
 
 

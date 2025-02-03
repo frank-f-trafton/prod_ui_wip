@@ -641,20 +641,14 @@ end
 
 def.default_skinner = {
 	schema = {
-		button_spacing = "scaled-int",
-		item_pad_v = "scaled-int",
-
-		res_idle = {
-			deco_ox = "scaled-int",
-			deco_oy = "scaled-int"
+		main = {
+			button_spacing = "scaled-int",
+			item_pad_v = "scaled-int",
+			res_idle = "&res",
+			res_pressed = "&res",
+			res_disabled = "&res"
 		},
-
-		res_pressed = {
-			deco_ox = "scaled-int",
-			deco_oy = "scaled-int"
-		},
-
-		res_disabled = {
+		res = {
 			deco_ox = "scaled-int",
 			deco_oy = "scaled-int"
 		}

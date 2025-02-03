@@ -110,14 +110,12 @@ end
 
 def.default_skinner = {
 	schema = {
-		bar_spacing = "scaled-int",
-
-		res_active = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
+		main = {
+			bar_spacing = "scaled-int",
+			res_active = "&res",
+			res_insactive = "&res"
 		},
-
-		res_inactive = {
+		res = {
 			label_ox = "scaled-int",
 			label_oy = "scaled-int"
 		}
