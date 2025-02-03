@@ -339,14 +339,14 @@
         </callback>
 
         <callback>
-            <name>uiCall_create</name>
-            <prop-method>bubbleEvent</prop-method>
-            <event-origin>Context, Widget</event-origin>
+            <name>uiCall_initialize</name>
+            <prop-method>direct</prop-method>
+            <event-origin>widget:initialize()</event-origin>
 
-            <desc>A widget was created with context:addWidget() or widget:addChild().</desc>
+            <desc>A new widget is being initialized.</desc>
 
-            <sig>def:uiCall_create(inst)</sig>
-            <param name="inst">The target widget instance.</param>
+            <sig>def:uiCall_initialize(...)</sig>
+            <param name="...">A list of arguments.</param>
 
             <notes>
                 In your documentation, please list:
@@ -356,7 +356,7 @@
 
                 Assume that all other fields are assigned defaults, and that the caller must set them after successful instance creation.
 
-                If present, <code lang="lua">self:userCreate()</code> is run after this. (It's incredibly redundant as you have to pass it in ahead of time, but it pairs with <code lang="lua">self:userDestroy()</code>.)
+                If present, <code lang="lua">self:userInitialize()</code> is run after this. (It's incredibly redundant as you have to pass it in ahead of time, but it pairs with <code lang="lua">self:userDestroy()</code>.)
             </notes>
         </callback>
 
@@ -980,12 +980,13 @@ function def:uiCap_gamepadAxis(joystick, axis, value)
         <pre>id</pre>: The identifier value for the widget, as set when the widget def was loaded. Typically a string. Do not modify.
 
 
-        <title>Fields set during instance creation (before uiCall_create())</title>
+        <title>Fields with defaults in the widget metatable</title>
 
         <pre>x, y</pre>: (0, 0) Position of the widget relative to its parent's upper-left corner.
         <pre>w, h</pre>: (0, 0) Size of the widget body, in pixels. Must be at least zero.
 
-        NOTE: x, y, w, h values that are set ahead-of-time are preserved.
+
+        <title>Fields set during instance creation (before uiCall_initialize())</title>
 
         <pre>context</pre>: a link to the UI Context that this widget belongs to. Do not modify.
         <pre>parent</pre>: a link to the widget's parent, or false if there is no parent. Do not modify.

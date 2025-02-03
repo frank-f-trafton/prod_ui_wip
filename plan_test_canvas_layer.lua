@@ -11,9 +11,9 @@ local plan = {}
 function plan.make(parent)
 	local context = parent.context
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 300
 	frame.h = 300
+	frame:initialize()
 
 	frame:setFrameTitle("Canvas Layering Test")
 

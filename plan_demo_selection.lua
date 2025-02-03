@@ -7,6 +7,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -34,8 +35,13 @@ local function _makeButton(content, id, label, x, y, w, h)
 	assert(type(id) == "string")
 	assert(type(label) == "string")
 
-	local bb_btn = content:addChild("barebones/button", {x=x, y=y, w=w, h=h})
+	local bb_btn = content:addChild("barebones/button")
+	bb_btn.x = x
+	bb_btn.y = y
+	bb_btn.w = w
+	bb_btn.h = h
 	bb_btn.wid_buttonAction = _button_launchFrame
+	bb_btn:initialize()
 	bb_btn:setLabel(label)
 	bb_btn.usr_plan = id
 	return bb_btn
@@ -46,9 +52,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Plan launcher")
 
@@ -62,7 +68,12 @@ function plan.make(parent)
 
 		local bb_btn
 
-		bb_btn = content:addChild("barebones/button", {x=xx, y=yy, w=ww, h=hh})
+		bb_btn = content:addChild("barebones/button")
+		bb_btn.x = xx
+		bb_btn.y = yy
+		bb_btn.w = ww
+		bb_btn.h = hh
+		bb_btn:initialize()
 		bb_btn:setLabel("Open all (slow)")
 		bb_btn.wid_buttonAction = function(self)
 			local siblings = self:getParent().children

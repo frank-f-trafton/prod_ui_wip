@@ -16,9 +16,11 @@ local plan = {}
 function plan.make(parent)
 	local context = parent.context
 
-	local frame = parent:addChild("wimp/window_frame", {make_menu_bar = true})
+	local frame = parent:addChild("wimp/window_frame")
+	frame.make_menu_bar = true
 	frame.w = 640--350
 	frame.h = 480--240
+	frame:initialize()
 	frame:setFrameTitle("LineEditor Test")
 
 	local content = frame:findTag("frame_content")
@@ -33,6 +35,7 @@ function plan.make(parent)
 
 		local c_bar = content:addChild("base/container")
 		c_bar.h = 64
+		c_bar:initialize()
 
 		c_bar.lc_func = uiLayout.fitTop
 		uiLayout.register(content, c_bar)
@@ -43,22 +46,27 @@ function plan.make(parent)
 		cbox_wrap.y = 0
 		cbox_wrap.w = 160
 		cbox_wrap.h = 40
+		cbox_wrap:initialize()
 		cbox_wrap:setLabel("Wrap Mode (F5)", "single")
 		--]]
 
-		local temp_instructions = c_bar:addChild("base/text", {font = context.resources.fonts.p})
+		local temp_instructions = c_bar:addChild("base/text")
+		temp_instructions.font = context.resources.fonts.p
 		temp_instructions.x = 0
 		temp_instructions.w = 512
 		temp_instructions.h = c_bar.h
+		temp_instructions:initialize()
 		temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
 		temp_instructions:refreshText()
 
-		local text_box = content:addChild("input/text_box_multi", {font = context.resources.fonts.p})
-		text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
+		local text_box = content:addChild("input/text_box_multi")
+		text_box.font = context.resources.fonts.p
 		text_box.x = 0
 		text_box.y = 0
 		text_box.w = 400
 		text_box.h = 350
+		text_box:initialize()
+		text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
 		text_box:setScrollBars(true, true)
 
 		text_box.ghost_text = "Ghost text"

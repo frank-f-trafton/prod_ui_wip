@@ -99,10 +99,8 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		-- ...
-	end
+function def:uiCall_initialize()
+	-- ...
 end
 
 

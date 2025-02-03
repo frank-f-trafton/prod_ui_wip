@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -22,10 +23,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
+	frame:initialize()
 	frame:setFrameTitle("Progress Bar Stuff")
 
 	local content = frame:findTag("frame_content")
@@ -40,11 +40,12 @@ function plan.make(parent)
 		local v_bar_width, v_bar_height = 100, 160
 
 		local p_bar = content:addChild("status/progress_bar")
-		p_bar:setTag("demo_prog_bar")
 		p_bar.x = 32
 		p_bar.y = 32
 		p_bar.w = h_bar_width
 		p_bar.h = h_bar_height
+		p_bar:initialize()
+		p_bar:setTag("demo_prog_bar")
 
 		p_bar.pos = starting_pos
 		p_bar.max = starting_max
@@ -64,6 +65,7 @@ function plan.make(parent)
 		btn_active.y = 32
 		btn_active.w = 128
 		btn_active.h = 40
+		btn_active:initialize()
 
 		btn_active:setLabel("setActive()")
 
@@ -80,6 +82,7 @@ function plan.make(parent)
 		btn_vertical.y = 32+40
 		btn_vertical.w = 128
 		btn_vertical.h = 40
+		btn_vertical:initialize()
 
 		btn_vertical:setLabel("Orientation")
 
@@ -103,6 +106,7 @@ function plan.make(parent)
 		btn_far_end.y = 32+40+40
 		btn_far_end.w = 128
 		btn_far_end.h = 40
+		btn_far_end:initialize()
 
 		btn_far_end:setLabel("Near/Far Start")
 
@@ -147,12 +151,13 @@ function plan.make(parent)
 		lbl_pos:setTag("position_label")
 
 		local sld_pos = content:addChild("base/slider_bar")
-		sld_pos:setTag("position_slider")
-
 		sld_pos.x = 256
 		sld_pos.y = 160+32+8
 		sld_pos.w = 256
 		sld_pos.h = 32
+		sld_pos:initialize()
+
+		sld_pos:setTag("position_slider")
 
 		sld_pos.slider_pos = starting_pos
 		sld_pos.slider_max = 100
@@ -168,12 +173,12 @@ function plan.make(parent)
 		lbl_max:setTag("maximum_label")
 
 		local sld_max = content:addChild("base/slider_bar")
-		sld_max:setTag("maximum_slider")
-
 		sld_max.x = 256
 		sld_max.y = 160+32+8+32+32+8
 		sld_max.w = 256
 		sld_max.h = 32
+		sld_max:initialize()
+		sld_max:setTag("maximum_slider")
 
 		sld_max.slider_pos = starting_max
 		sld_max.slider_max = 100

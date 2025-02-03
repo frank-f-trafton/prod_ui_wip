@@ -67,6 +67,7 @@ function plan.make(parent)
 	local frame = parent:addChild("wimp/window_frame")
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 	frame:setFrameTitle("Tabular Menu Test")
 
 	local content = frame:findTag("frame_content")
@@ -77,6 +78,9 @@ function plan.make(parent)
 		content:setScrollBars(false, false)
 
 		local menu_tab = content:addChild("wimp/menu_tab")
+		menu_tab.w = 640
+		menu_tab.h = 480
+		menu_tab:initialize()
 		commonTab.setDefaultMeasurements(menu_tab)
 
 		menu_tab.renderThimble = widShared.dummy
@@ -85,9 +89,6 @@ function plan.make(parent)
 		menu_tab.MN_wrap_selection = false
 
 		menu_tab:setScrollBars(true, true)
-
-		menu_tab.w = 640
-		menu_tab.h = 480
 
 		menu_tab:reshape()
 

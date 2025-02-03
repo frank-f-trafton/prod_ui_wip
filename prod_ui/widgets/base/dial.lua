@@ -145,50 +145,48 @@ def.uiCall_thimbleAction = lgcButton.uiCall_thimbleAction -- TODO: plug into wid
 def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2 -- TODO: plug into widget
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 2)
 
-		lgcLabel.setup(self)
+	lgcLabel.setup(self)
 
-		-- Stuff copied from lgcSlider.setup().
+	-- Stuff copied from lgcSlider.setup().
 
-		-- When false, the dial control should not respond to user input.
-		-- This field does not prevent API calls from modifying the dial state. Nor does it affect
-		-- the status of the parent widget as a whole (as in, it may still be capable of holding
-		-- the UI thimble).
-		self.dial_allow_changes = true
+	-- When false, the dial control should not respond to user input.
+	-- This field does not prevent API calls from modifying the dial state. Nor does it affect
+	-- the status of the parent widget as a whole (as in, it may still be capable of holding
+	-- the UI thimble).
+	self.dial_allow_changes = true
 
-		-- Dial value state.
-		self.dial_pos = 0
-		self.dial_min = 0
-		self.dial_max = 0
-		self.dial_home = 0 -- "home" position, usually zero.
+	-- Dial value state.
+	self.dial_pos = 0
+	self.dial_min = 0
+	self.dial_max = 0
+	self.dial_home = 0 -- "home" position, usually zero.
 
-		self.round_policy = "none" -- "none", "floor", "ceil", "nearest"
+	self.round_policy = "none" -- "none", "floor", "ceil", "nearest"
 
-		--self.clockwise = true
-		--self.radian_rotate = -math.pi / 2
-		self.radian_rotate = 0
-		self.radian_min = -math.pi * 0.75
-		self.radian_max = math.pi * 0.75
+	--self.clockwise = true
+	--self.radian_rotate = -math.pi / 2
+	self.radian_rotate = 0
+	self.radian_min = -math.pi * 0.75
+	self.radian_max = math.pi * 0.75
 
-		-- Lighten the "used" side of the trough.
-		self.show_use_line = true
+	-- Lighten the "used" side of the trough.
+	self.show_use_line = true
 
-		self.press_busy = false -- false, "adjusting"
+	self.press_busy = false -- false, "adjusting"
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
+	-- State flags
+	self.enabled = true
+	self.hovered = false
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

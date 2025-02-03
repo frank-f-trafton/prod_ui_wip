@@ -53,32 +53,30 @@ def.uiCall_thimbleAction = lgcButton.uiCall_thimbleActionCheckMulti
 def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 2)
 
-		lgcLabel.setup(self)
+	lgcLabel.setup(self)
 
-		self.value = 1
-		self.value_max = 3
+	self.value = 1
+	self.value_max = 3
 
-		-- [XXX 8] (Optional) image associated with the button.
-		--self.graphic = <tq>
+	-- [XXX 8] (Optional) image associated with the button.
+	--self.graphic = <tq>
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
+	-- State flags
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 

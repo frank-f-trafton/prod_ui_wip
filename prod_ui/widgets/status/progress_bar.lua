@@ -65,34 +65,32 @@ function def:getCounter()
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
+function def:uiCall_initialize()
+	self.visible = true
 
-		-- Horizontal or vertical orientation.
-		self.vertical = false
+	-- Horizontal or vertical orientation.
+	self.vertical = false
 
-		-- true: start from the right/bottom side.
-		self.far_end = false
+	-- true: start from the right/bottom side.
+	self.far_end = false
 
-		lgcLabel.setup(self)
+	lgcLabel.setup(self)
 
-		-- Should appear greyed out when not active.
-		self.active = false
+	-- Should appear greyed out when not active.
+	self.active = false
 
-		-- Internal position and max values.
-		self.pos = 0
-		self.max = 0
+	-- Internal position and max values.
+	self.pos = 0
+	self.max = 0
 
-		-- Appearance of progress in pixels per second. Set it to a very high number
-		-- to make it look instantaneous.
-		--self.slide_speed = 2^16
+	-- Appearance of progress in pixels per second. Set it to a very high number
+	-- to make it look instantaneous.
+	--self.slide_speed = 2^16
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 

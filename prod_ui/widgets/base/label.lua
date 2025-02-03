@@ -21,22 +21,20 @@ local def = {
 def.setLabel = lgcLabel.widSetLabel
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
+function def:uiCall_initialize()
+	self.visible = true
 
-		widShared.setupViewports(self, 1)
+	widShared.setupViewports(self, 1)
 
-		lgcLabel.setup(self)
+	lgcLabel.setup(self)
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		-- "enabled" affects visual style.
-		self.enabled = true
+	-- "enabled" affects visual style.
+	self.enabled = true
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 

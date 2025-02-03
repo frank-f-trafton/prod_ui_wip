@@ -178,61 +178,59 @@ function def:menuChangeCleanup()
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		if not self.wid_ref then
-			error("no owner widget assigned to this menu.")
+function def:uiCall_initialize()
+	if not self.wid_ref then
+		error("no owner widget assigned to this menu.")
 
-		elseif not self.menu then
-			error("owner widget did not provide a menu sub-table.")
-		end
-
-		self.visible = true
-		self.allow_hover = true
-		self.clip_scissor = true
-
-		self.sort_id = 6
-
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
-
-		self.press_busy = false
-
-		lgcMenu.instanceSetup(self)
-
-		self.MN_wrap_selection = false
-
-		-- Padding values. -- XXX style/config, scale
-		--[[
-		self.pad_bijou_x1 = 2
-		self.pad_bijou_x2 = 2
-		self.pad_bijou_y1 = 2
-		self.pad_bijou_y2 = 2
-		--]]
-
-		-- Drawing offsets and size for bijou quads.
-		--[[
-		self.bijou_draw_w = 24
-		self.bijou_draw_h = 24
-		--]]
-
-		-- Padding above and below text and bijoux in items.
-		-- The tallest of the two components determines the item's height.
-		--[[
-		self.pad_text_x1 = 4
-		self.pad_text_x2 = 4
-		self.pad_text_y1 = 4
-		self.pad_text_y2 = 4
-		--]]
-
-		self:skinSetRefs()
-		self:skinInstall()
-
-		self:setScrollBars(false, true)
-
-		-- Set up the widget's position, then call reshape() and then menuChangeCleanup().
+	elseif not self.menu then
+		error("owner widget did not provide a menu sub-table.")
 	end
+
+	self.visible = true
+	self.allow_hover = true
+	self.clip_scissor = true
+
+	self.sort_id = 6
+
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 2)
+
+	self.press_busy = false
+
+	lgcMenu.instanceSetup(self)
+
+	self.MN_wrap_selection = false
+
+	-- Padding values. -- XXX style/config, scale
+	--[[
+	self.pad_bijou_x1 = 2
+	self.pad_bijou_x2 = 2
+	self.pad_bijou_y1 = 2
+	self.pad_bijou_y2 = 2
+	--]]
+
+	-- Drawing offsets and size for bijou quads.
+	--[[
+	self.bijou_draw_w = 24
+	self.bijou_draw_h = 24
+	--]]
+
+	-- Padding above and below text and bijoux in items.
+	-- The tallest of the two components determines the item's height.
+	--[[
+	self.pad_text_x1 = 4
+	self.pad_text_x2 = 4
+	self.pad_text_y1 = 4
+	self.pad_text_y2 = 4
+	--]]
+
+	self:skinSetRefs()
+	self:skinInstall()
+
+	self:setScrollBars(false, true)
+
+	-- Set up the widget's position, then call reshape() and then menuChangeCleanup().
 end
 
 

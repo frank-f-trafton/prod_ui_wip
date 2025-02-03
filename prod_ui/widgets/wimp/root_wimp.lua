@@ -41,76 +41,74 @@ local function _printFrames(self)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.allow_hover = true
-		self.can_have_thimble = false
-		self.allow_focus_capture = false
-		self.visible = true
-		self.clip_hover = true
+function def:uiCall_initialize()
+	self.allow_hover = true
+	self.can_have_thimble = false
+	self.allow_focus_capture = false
+	self.visible = true
+	self.clip_hover = true
 
-		--[[
-		WIMP 2nd-gen sort_id lanes:
-		1: Background elements
-		2: Workspace panels
-		3: Workspace frames, normal priority
-		4: Workspace frames, always on top
-		5: Application menu bar
-		6: Pop-up menus
-		--]]
-		self.sort_max = 6
+	--[[
+	WIMP 2nd-gen sort_id lanes:
+	1: Background elements
+	2: Workspace panels
+	3: Workspace frames, normal priority
+	4: Workspace frames, always on top
+	5: Application menu bar
+	6: Pop-up menus
+	--]]
+	self.sort_max = 6
 
-		-- Viewport #2 is used as the boundary for window-frame placement.
-		widShared.setupViewports(self, 2)
+	-- Viewport #2 is used as the boundary for window-frame placement.
+	widShared.setupViewports(self, 2)
 
-		-- Widget layout sequence for children.
-		uiLayout.initLayoutSequence(self)
-		-- Assigns:
-		--self.lp_seq (table)
-		--self.lp_x
-		--self.lp_y
-		--self.lp_w
-		--self.lp_h
+	-- Widget layout sequence for children.
+	uiLayout.initLayoutSequence(self)
+	-- Assigns:
+	--self.lp_seq (table)
+	--self.lp_x
+	--self.lp_y
+	--self.lp_w
+	--self.lp_h
 
-		-- Stack of modal 2nd-gen window frames. When populated, the top modal should get exclusive access, blocking
-		-- all other window frames. The user should still be able to interact with ephemeral widgets, such as pop-ups.
-		self.modals = {}
+	-- Stack of modal 2nd-gen window frames. When populated, the top modal should get exclusive access, blocking
+	-- all other window frames. The user should still be able to interact with ephemeral widgets, such as pop-ups.
+	self.modals = {}
 
-		-- One 2nd-gen window frame can be selected at a time.
-		self.selected_frame = false
+	-- One 2nd-gen window frame can be selected at a time.
+	self.selected_frame = false
 
-		-- Helps with ctrl+tabbing through 2nd-gen frames.
-		self.frame_order_counter = 0
+	-- Helps with ctrl+tabbing through 2nd-gen frames.
+	self.frame_order_counter = 0
 
-		-- When true, include a "nothing" selection while ctrl+tabbing through frames.
-		self.step_on_root = false
+	-- When true, include a "nothing" selection while ctrl+tabbing through frames.
+	self.step_on_root = false
 
-		-- Reference to the base of a pop-up menu, if active.
-		self.pop_up_menu = false
+	-- Reference to the base of a pop-up menu, if active.
+	self.pop_up_menu = false
 
-		-- ToolTip state.
-		self.tool_tip = notifMgr.newToolTip(self.context.resources.fonts.p) -- XXX font ref needs to be refresh-able
+	-- ToolTip state.
+	self.tool_tip = notifMgr.newToolTip(self.context.resources.fonts.p) -- XXX font ref needs to be refresh-able
 
-		self.tool_tip_hover = false
-		self.tool_tip_time = 0.0
-		self.tool_tip_time_max = 0.2
+	self.tool_tip_hover = false
+	self.tool_tip_time = 0.0
+	self.tool_tip_time_max = 0.2
 
-		-- Drag-and-drop state.
-		-- NOTE: this is unrelated to love.filedropped() and love.directorydropped().
-		-- false/nil: Not active.
-		-- table: a DropState object.
-		self.drop_state = false
+	-- Drag-and-drop state.
+	-- NOTE: this is unrelated to love.filedropped() and love.directorydropped().
+	-- false/nil: Not active.
+	-- table: a DropState object.
+	self.drop_state = false
 
-		-- Table of widgets to offer keyPressed and keyReleased input.
-		self.hooks_trickle_key_pressed = {}
-		self.hooks_trickle_key_released = {}
-		self.hooks_key_pressed = {}
-		self.hooks_key_released = {}
+	-- Table of widgets to offer keyPressed and keyReleased input.
+	self.hooks_trickle_key_pressed = {}
+	self.hooks_trickle_key_released = {}
+	self.hooks_key_pressed = {}
+	self.hooks_key_released = {}
 
-		self:reshape(true)
-		-- You may need to call reshape(true) again after creating the initial 2nd-gen widgets to properly
-		-- set up viewports.
-	end
+	self:reshape(true)
+	-- You may need to call reshape(true) again after creating the initial 2nd-gen widgets to properly
+	-- set up viewports.
 end
 
 

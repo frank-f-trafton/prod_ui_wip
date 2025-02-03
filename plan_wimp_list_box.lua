@@ -27,6 +27,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -139,7 +140,10 @@ local function makeListBox1(content, x, y)
 		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-	local list_box = content:addChild("wimp/list_box", {skin_id = skin_clone, userDestroy = _userDestroy})
+	local list_box = content:addChild("wimp/list_box")
+	list_box.skin_id = skin_clone
+	list_box.userDestroy = _userDestroy
+	list_box:initialize()
 	list_box:setTag("demo_listbox")
 
 	list_box:writeSetting("show_icons", true)
@@ -225,6 +229,7 @@ local function makeListBox1(content, x, y)
 	local rdo_btn
 	rdo_btn = content:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_align = "left"
@@ -234,6 +239,7 @@ local function makeListBox1(content, x, y)
 
 	rdo_btn = content:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("center")
 	rdo_btn.usr_align = "center"
@@ -243,6 +249,7 @@ local function makeListBox1(content, x, y)
 
 	rdo_btn = content:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_align = "right"
@@ -255,6 +262,7 @@ local function makeListBox1(content, x, y)
 
 	local chk = content:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
+	chk:initialize()
 	chk:setChecked(list_box.show_icons)
 	chk:setLabel("Icons")
 	chk.wid_buttonAction = function(self)
@@ -283,6 +291,7 @@ local function makeListBox1(content, x, y)
 
 	rdo_btn = content:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_icon_side = "left"
@@ -292,6 +301,7 @@ local function makeListBox1(content, x, y)
 
 	rdo_btn = content:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_icon_side = "right"
@@ -308,6 +318,7 @@ local function makeListBox1(content, x, y)
 	wy = wy + wh
 
 	sld.x, sld.y, sld.w, sld.h = wx, wy, ww, wh
+	sld:initialize()
 
 	sld.slider_pos = 0
 	sld.slider_max = 64
@@ -335,6 +346,12 @@ end
 
 local function makeListBox2(content, x, y)
 	local list_box = content:addChild("wimp/list_box")
+	list_box.x = x
+	list_box.y = y
+	list_box.w = 224
+	list_box.h = 256
+	list_box:initialize()
+
 	list_box:setTag("demo_listbox2")
 
 	list_box.wid_action = function(self, item, index) print("[2] wid_action()", item, index) end
@@ -342,10 +359,6 @@ local function makeListBox2(content, x, y)
 	list_box.wid_action3 = function(self, item, index) print("[2] wid_action3()", item, index) end
 	list_box.wid_select = function(self, item, index) print("[2] wid_select()", item, index) end
 
-	list_box.x = x
-	list_box.y = y
-	list_box.w = 224
-	list_box.h = 256
 
 	list_box:writeSetting("show_icons", true)
 
@@ -375,17 +388,17 @@ end
 
 local function makeListBox3(content, x, y)
 	local lb1 = content:addChild("wimp/list_box")
+	lb1.x = x
+	lb1.y = y
+	lb1.w = 224
+	lb1.h = 256
+	lb1:initialize()
 	lb1:setTag("demo_listbox3a")
 
 	lb1.wid_action = function(self, item, index) print("[3a] wid_action()", item, index) end
 	lb1.wid_action2 = function(self, item, index) print("[3a] wid_action2()", item, index) end
 	lb1.wid_action3 = function(self, item, index) print("[3a] wid_action3()", item, index) end
 	lb1.wid_select = function(self, item, index) print("[3a] wid_select()", item, index) end
-
-	lb1.x = x
-	lb1.y = y
-	lb1.w = 224
-	lb1.h = 256
 
 	lb1:writeSetting("show_icons", true)
 
@@ -407,17 +420,17 @@ local function makeListBox3(content, x, y)
 
 
 	local lb2 = content:addChild("wimp/list_box")
+	lb2.x = x + 320
+	lb2.y = y
+	lb2.w = 224
+	lb2.h = 256
+	lb2:initialize()
 	lb2:setTag("demo_listbox3b")
 
 	lb2.wid_action = function(self, item, index) print("[3b] wid_action()", item, index) end
 	lb2.wid_action2 = function(self, item, index) print("[3b] wid_action2()", item, index) end
 	lb2.wid_action3 = function(self, item, index) print("[3b] wid_action3()", item, index) end
 	lb2.wid_select = function(self, item, index) print("[3b] wid_select()", item, index) end
-
-	lb2.x = x + 320
-	lb2.y = y
-	lb2.w = 224
-	lb2.h = 256
 
 	lb2.show_icons = true
 
@@ -441,17 +454,17 @@ end
 
 local function makeListBox4(content, x, y)
 	local lb1 = content:addChild("wimp/list_box")
+	lb1.x = x
+	lb1.y = y
+	lb1.w = 224
+	lb1.h = 256
+	lb1:initialize()
 	lb1:setTag("demo_listbox4a")
 
 	lb1.wid_action = function(self, item, index) print("[4a] wid_action()", item, index) end
 	lb1.wid_action2 = function(self, item, index) print("[4a] wid_action2()", item, index) end
 	lb1.wid_action3 = function(self, item, index) print("[4a] wid_action3()", item, index) end
 	lb1.wid_select = function(self, item, index) print("[4a] wid_select()", item, index) end
-
-	lb1.x = x
-	lb1.y = y
-	lb1.w = 224
-	lb1.h = 256
 
 	lb1:writeSetting("show_icons", true)
 
@@ -477,6 +490,7 @@ local function makeListBox4(content, x, y)
 	b1.y = lb1.y
 	b1.w = 32
 	b1.h = 32
+	b1:initialize()
 
 	b1:setLabel(">")
 
@@ -500,6 +514,7 @@ local function makeListBox4(content, x, y)
 	b2.y = lb1.y + lb1.h - 32
 	b2.w = 32
 	b2.h = 32
+	b2:initialize()
 
 	b2:setLabel("<")
 
@@ -519,17 +534,16 @@ local function makeListBox4(content, x, y)
 
 
 	local lb2 = content:addChild("wimp/list_box")
-	lb2:setTag("demo_listbox4b")
-
-	lb2.wid_action = function(self, item, index) print("[4b] wid_action()", item, index) end
-	lb2.wid_action2 = function(self, item, index) print("[4b] wid_action2()", item, index) end
-	lb2.wid_action3 = function(self, item, index) print("[4b] wid_action3()", item, index) end
-	lb2.wid_select = function(self, item, index) print("[4b] wid_select()", item, index) end
-
 	lb2.x = x + 320
 	lb2.y = y
 	lb2.w = 224
 	lb2.h = 256
+	lb2.wid_action = function(self, item, index) print("[4b] wid_action()", item, index) end
+	lb2.wid_action2 = function(self, item, index) print("[4b] wid_action2()", item, index) end
+	lb2.wid_action3 = function(self, item, index) print("[4b] wid_action3()", item, index) end
+	lb2.wid_select = function(self, item, index) print("[4b] wid_select()", item, index) end
+	lb2:initialize()
+	lb2:setTag("demo_listbox4b")
 
 	lb2:writeSetting("show_icons", true)
 
@@ -556,9 +570,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("ListBox Test")
 

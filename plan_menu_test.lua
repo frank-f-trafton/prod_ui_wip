@@ -103,10 +103,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
+	frame:initialize()
 	frame:setFrameTitle("Menu Test")
 
 	local content = frame:findTag("frame_content")
@@ -124,10 +123,9 @@ function plan.make(parent)
 			menu1.y = 16
 			menu1.w = 400
 			menu1.h = 350
-
 			menu1.wid_keyPressed = testMenuKeyPressed
-
 			menu1.MN_drag_select = true
+			menu1:initialize()
 
 			menu1:setScrollBars(true, true)
 

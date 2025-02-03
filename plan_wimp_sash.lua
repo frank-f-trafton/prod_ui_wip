@@ -29,9 +29,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Sashes")
 
@@ -40,19 +40,34 @@ function plan.make(parent)
 		content.layout_mode = "auto"
 		content:setScrollBars(false, false)
 
-		local wid_a = content:addChild("base/label", {x=0, y=0, w=256, h=256})
+		local wid_a = content:addChild("base/label")
+		wid_a.x = 0
+		wid_a.y = 0
+		wid_a.w = 256
+		wid_a.h = 256
 		wid_a.lc_func = uiLayout.fitLeft
+		wid_a:initialize()
 		uiLayout.register(content, wid_a)
 		wid_a:setLabel(_text1, "multi")
 		wid_a:reshape(true)
 
-		local wid_sash = content:addChild("wimp/sash", {x=0, y=0, w=8, h=256})
+		local wid_sash = content:addChild("wimp/sash")
+		wid_a.x = 0
+		wid_a.y = 0
+		wid_a.w = 8
+		wid_a.h = 256
 		wid_sash.lc_func = uiLayout.fitLeft
+		wid_sash:initialize()
 		wid_sash:setAttachedWidget(wid_a)
 		uiLayout.register(content, wid_sash)
 
-		local wid_b = content:addChild("base/label", {x=0, y=0, w=256, h=256})
+		local wid_b = content:addChild("base/label")
+		wid_a.x = 0
+		wid_a.y = 0
+		wid_a.w = 256
+		wid_a.h = 256
 		wid_b.lc_func = uiLayout.fitRemaining
+		wid_b:initialize()
 		uiLayout.register(content, wid_b)
 		wid_b:setLabel(_text2, "multi")
 		wid_b:reshape(true)

@@ -17,19 +17,17 @@ function def:wid_pressed(x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = false
-		--self.clip_hover = true
-		--self.clip_scissor = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = false
+	--self.clip_hover = true
+	--self.clip_scissor = true
 
-		widShared.setupMinMaxDimensions(self)
+	widShared.setupMinMaxDimensions(self)
 
-		-- Don't highlight when holding the UI thimble.
-		self.renderThimble = widShared.dummy
-	end
+	-- Don't highlight when holding the UI thimble.
+	self.renderThimble = widShared.dummy
 end
 
 

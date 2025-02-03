@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -22,9 +23,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Dropdown Boxes")
 
@@ -35,11 +36,11 @@ function plan.make(parent)
 
 		--makeLabel(content, 32, 0, 512, 32, "...", "single")
 		local dropdown = content:addChild("wimp/dropdown_box")
-
 		dropdown.x = 32
 		dropdown.y = 96
 		dropdown.w = 256
 		dropdown.h = 32
+		dropdown:initialize()
 
 		dropdown:addItem("foo")
 		dropdown:addItem("bar")

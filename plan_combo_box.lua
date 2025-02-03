@@ -12,6 +12,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -22,10 +23,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
-
+	frame:initialize()
 	frame:setFrameTitle("Combo Boxes")
 
 	local content = frame:findTag("frame_content")
@@ -35,11 +35,11 @@ function plan.make(parent)
 
 		makeLabel(content, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")
 		local combo_box = content:addChild("wimp/combo_box")
-
 		combo_box.x = 32
 		combo_box.y = 96
 		combo_box.w = 256
 		combo_box.h = 32
+		combo_box:initialize()
 
 		combo_box:addItem("foo")
 		combo_box:addItem("bar")

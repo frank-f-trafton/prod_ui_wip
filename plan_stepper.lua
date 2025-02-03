@@ -17,6 +17,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -27,9 +28,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 640
+	frame:initialize()
 
 	frame:setFrameTitle("Stepper")
 
@@ -39,11 +40,11 @@ function plan.make(parent)
 		content:setScrollBars(false, true)
 
 		local stepper_h = content:addChild("base/stepper")
-
 		stepper_h.x = 32
 		stepper_h.y = 32
 		stepper_h.w = 240
 		stepper_h.h = 32
+		stepper_h:initialize()
 
 		stepper_h:insertOption("Foobar")
 		stepper_h:insertOption("Bazbop")
@@ -56,12 +57,11 @@ function plan.make(parent)
 
 
 		local stepper_v = content:addChild("base/stepper")
-
 		stepper_v.x = 288
 		stepper_v.y = 32
 		stepper_v.w = 64
 		stepper_v.h = 128
-
+		stepper_v:initialize()
 		stepper_v:insertOption("Foobar")
 		stepper_v:insertOption("Bazbop")
 		stepper_v:insertOption({text = "Dipdop"})

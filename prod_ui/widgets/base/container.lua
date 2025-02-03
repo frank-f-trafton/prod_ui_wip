@@ -44,47 +44,45 @@ function def:wid_pressed(x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = false
-		self.allow_focus_capture = false
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = false
+	self.allow_focus_capture = false
 
-		-- When true, doc_w and doc_h are set to the combined dimensions of the container's direct descendants.
-		self.auto_doc_update = true
+	-- When true, doc_w and doc_h are set to the combined dimensions of the container's direct descendants.
+	self.auto_doc_update = true
 
-		widShared.setupDoc(self)
-		widShared.setupScroll(self)
-		widShared.setupViewports(self, 2)
-		widShared.setupMinMaxDimensions(self)
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 2)
+	widShared.setupMinMaxDimensions(self)
 
-		-- Layout sequence
-		uiLayout.initLayoutSequence(self)
+	-- Layout sequence
+	uiLayout.initLayoutSequence(self)
 
-		-- Layout mode for containers.
-		-- false: no effect
-		-- "auto": re-apply layout whenever uiCall_reshape() is fired.
-		-- "resize": re-apply layout whenever uiCall_reshape() is fired, but only if the container dimensions have changed.
-		self.layout_mode = false
+	-- Layout mode for containers.
+	-- false: no effect
+	-- "auto": re-apply layout whenever uiCall_reshape() is fired.
+	-- "resize": re-apply layout whenever uiCall_reshape() is fired, but only if the container dimensions have changed.
+	self.layout_mode = false
 
-		-- Used with "resize" layout_mode.
-		self.lc_w_old = self.w
-		self.lc_h_old = self.h
+	-- Used with "resize" layout_mode.
+	self.lc_w_old = self.w
+	self.lc_h_old = self.h
 
-		-- false: pointer-drag not active
-		-- "h": dragging horizontal thumb
-		-- "v": dragging vertical thumb
-		-- "h1", "h2", "v1", "v2": pressing on a less/more button
-		self.press_busy = false
+	-- false: pointer-drag not active
+	-- "h": dragging horizontal thumb
+	-- "v": dragging vertical thumb
+	-- "h1", "h2", "v1", "v2": pressing on a less/more button
+	self.press_busy = false
 
-		self:updateContentClipScissor()
+	self:updateContentClipScissor()
 
-		self:scrollClampViewport()
+	self:scrollClampViewport()
 
-		self:skinSetRefs()
-		self:skinInstall()
-	end
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 

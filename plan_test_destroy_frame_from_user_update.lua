@@ -7,6 +7,7 @@ function plan.make(parent)
 
 	local frame = parent:addChild("wimp/window_frame")
 	frame.w, frame.h = 300, 300
+	frame:initialize()
 	frame:setFrameTitle("Frame Test")
 
 	local content = frame:findTag("frame_content")
@@ -15,7 +16,12 @@ function plan.make(parent)
 
 		content:setScrollBars(false, false)
 
-		local bb_lbl = content:addChild("barebones/label", {x=0, y=0, w=256, h=192})
+		local bb_lbl = content:addChild("barebones/label")
+		bb_lbl.x = 0
+		bb_lbl.y = 0
+		bb_lbl.w = 256
+		bb_lbl.h = 192
+		bb_lbl:initialize()
 		bb_lbl:setTag("countdown_label")
 
 		frame.usr_time = 0.0

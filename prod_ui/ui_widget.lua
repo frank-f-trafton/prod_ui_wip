@@ -46,6 +46,12 @@ _mt_widget.tag = ""
 _mt_widget.children = _mt_no_descendants
 
 
+_mt_widget.x = 0
+_mt_widget.y = 0
+_mt_widget.w = 0
+_mt_widget.h = 0
+
+
 -- Scroll offsets. These apply to a widget's children (a `scr_x` of 50 would offset all of a widget's
 -- children to the left by 50 pixels). They may also be used for offsetting built-in components.
 _mt_widget.scr_x = 0
@@ -113,6 +119,11 @@ _mt_widget.ly_fn_start = dummyFunc -- XXX untested
 _mt_widget.ly_fn_end = dummyFunc -- XXX untested
 
 
+function _mt_widget:uiCall_initialize(...)
+
+end
+
+
 function _mt_widget:ui_evaluateHover(mx, my, os_x, os_y)
 	local wx, wy = self.x + os_x, self.y + os_y
 	return mx >= wx and my >= wy and mx < wx + self.w and my < wy + self.h
@@ -122,42 +133,6 @@ end
 function _mt_widget:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 	local wx, wy = self.x + os_x, self.y + os_y
 	return mx >= wx and my >= wy and mx < wx + self.w and my < wy + self.h
-end
-
-
---- Sets up a new widget instance table. Internal use.
-function uiWidget._initWidgetInstance(instance, def, context, parent)
-	-- Uncomment to assert that instance tables are not being reused.
-	-- [[
-	if not uiWidget._assert_dupe_tables then
-		uiWidget._assert_dupe_tables = {}
-		-- Use weak keys so that we don't prevent tables from being garbage-collected.
-		setmetatable(uiWidget._assert_dupe_tables, {__mode = "k"})
-	end
-	if uiWidget._assert_dupe_tables[instance] then
-		error("duplicate instance table!")
-	end
-	uiWidget._assert_dupe_tables[instance] = true
-	--]]
-
-	instance.x = instance.x or 0
-	instance.y = instance.y or 0
-	instance.w = instance.w or 0
-	instance.h = instance.h or 0
-
-	if def.default_settings then
-		instance.settings = instance.settings or {}
-	end
-
-	-- Back-links
-	instance.context = context
-	instance.parent = parent
-
-	setmetatable(instance, def._inst_mt)
-
-	if not instance._no_descendants then
-		instance.children = {}
-	end
 end
 
 
@@ -181,7 +156,7 @@ function uiWidget._runUserEvent(wid, id, a, b, c, d)
 		end
 
 	else
-		error("bad type for user event (expected function, table or nil, got: " .. type(user_event))
+		error("bad type for user event (expected function, table or nil, got: " .. type(user_event) .. ")")
 	end
 end
 
@@ -486,21 +461,66 @@ function _mt_widget:getRelativePositionScrolled(x, y)
 end
 
 
---- Add a new child widget instance. Note that sorting is left to the caller.
+--- Sets up a new widget instance table. Internal use.
+function uiWidget._prepareWidgetInstance(id, context, parent, siblings, pos)
+	pos = pos or #siblings + 1
+	if pos < 1 or pos > #siblings + 1 then
+		error("position is out of range.")
+	end
+
+	local def = context.widget_defs[id]
+
+	-- Unsupported type. (Corrupt widget defs collection?)
+	if type(def) ~= "table" then
+		error("unregistered ID or unsupported type for widget def (id: " .. tostring(id) .. ", type: " .. type(def) .. ")")
+	end
+
+	local inst = {}
+
+	inst.settings = def.default_settings and {}
+
+	-- Back-links
+	inst.context = context
+	inst.parent = parent
+
+	setmetatable(inst, def._inst_mt)
+
+	if not inst._no_descendants then
+		inst.children = {}
+	end
+
+	table.insert(siblings, pos, inst)
+
+	return inst
+end
+
+
+local debug_init_check
+function _mt_widget:initialize(...)
+	-- Uncomment to check for double initializations.
+	-- [[
+	debug_init_check = debug_init_check or setmetatable({}, {__mode = "k"})
+	if debug_init_check[self] then
+		error("double initialization of widget. ID: " .. tostring(self.id))
+	end
+	debug_init_check[self] = true
+	--]]
+
+	self:uiCall_initialize(...)
+	uiWidget._runUserEvent(self, "userInitialize")
+
+	return self
+end
+
+
+--- Adds a new child widget instance.
 --  Locked during update: yes (self)
---	Callbacks:
---	* uiCall_create (bubble)
 -- @param id The widget def ID.
--- @param init_t An optional table the caller may provide as the basis for the instance table. This may be necessary in
--- cases where resources must be provided to the widget before uiCall_create() is called. If no table is provided, a
--- fresh table will be used instead. Note that uiCall_create() may overwrite certain fields depending on how the widget
--- def is written. Do not share this among multiple instances.
 -- @param pos (default: #self.children + 1) Where to place the new widget in the children table.
 -- @return New instance table. An error is raised if there is a problem.
-function _mt_widget:addChild(id, init_t, pos)
+function _mt_widget:addChild(id, pos)
 	uiShared.notNilNotFalseNotNaN(1, id)
-	uiShared.typeEval1(2, init_t, "table")
-	uiShared.numberNotNaNEval(3, pos)
+	uiShared.numberNotNaNEval(2, pos)
 
 	if self.context.locks[self] then
 		uiShared.errLocked("add child")
@@ -509,27 +529,7 @@ function _mt_widget:addChild(id, init_t, pos)
 		errNoDescendants()
 	end
 
-	pos = pos or #self.children + 1
-	if pos < 1 or pos > #self.children + 1 then
-		error("position is out of range.")
-	end
-
-	local def = self.context.widget_defs[id]
-
-	-- Unsupported type. (Corrupt widget defs collection?)
-	if type(def) ~= "table" then
-		error("unregistered ID or unsupported type for widget def (id: " .. tostring(id) .. ", type: " .. type(def) .. ")")
-	else
-		init_t = init_t or {}
-		uiWidget._initWidgetInstance(init_t, def, self.context, self)
-
-		table.insert(self.children, pos, init_t)
-
-		init_t:bubbleEvent("uiCall_create", init_t)
-		uiWidget._runUserEvent(init_t, "userCreate")
-
-		return init_t
-	end
+	return uiWidget._prepareWidgetInstance(id, self.context, self, self.children, pos)
 end
 
 

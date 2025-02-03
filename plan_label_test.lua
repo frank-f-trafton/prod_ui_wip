@@ -12,6 +12,7 @@ function plan.make(parent)
 	local frame = parent:addChild("wimp/window_frame")
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 	frame:setFrameTitle("Label Tests")
 
 	local content = frame:findTag("frame_content")
@@ -22,16 +23,19 @@ function plan.make(parent)
 		-- Single-Line.
 		local lbl1 = content:addChild("base/label")
 		lbl1.x, lbl1.y, lbl1.w, lbl1.h = 0, 0, 240, 32
+		lbl1:initialize()
 		lbl1:setLabel("Single-Line Label", "single")
 
 		-- Single-Line with underline.
 		local lbl2 = content:addChild("base/label")
 		lbl2.x, lbl2.y, lbl2.w, lbl2.h = 0, 64, 240, 32
+		lbl2:initialize()
 		lbl2:setLabel("Single-Line Plus _Underline_", "single-ul")
 
 		-- Multi-Line
 		local lbl3 = content:addChild("base/label")
 		lbl3.x, lbl3.y, lbl3.w, lbl3.h = 0, 96, 240, 64
+		lbl3:initialize()
 		lbl3:setLabel("Multi-Line Multi-Line Multi-Line Multi-Line Multi-Line", "multi")
 	end
 

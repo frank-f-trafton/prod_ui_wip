@@ -35,29 +35,27 @@ def.uiCall_thimbleAction = lgcButtonBare.uiCall_thimbleActionRadio
 def.uiCall_thimbleAction2 = lgcButtonBare.uiCall_thimbleAction2
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		lgcLabelBare.setup(self)
+	lgcLabelBare.setup(self)
 
-		-- Identifier.
-		self.is_radio_button = true
+	-- Identifier.
+	self.is_radio_button = true
 
-		-- The group that this radio button belongs to. The default is an empty string.
-		-- Group scope is among siblings.
-		self.radio_group = ""
+	-- The group that this radio button belongs to. The default is an empty string.
+	-- Group scope is among siblings.
+	self.radio_group = ""
 
-		-- Radio button state.
-		self.checked = false
+	-- Radio button state.
+	self.checked = false
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
-	end
+	-- State flags
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 end
 
 

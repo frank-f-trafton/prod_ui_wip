@@ -53,7 +53,7 @@ def.default_skinner = {
 --]]
 
 
---function def:uiCall_create(inst)
+--function def:uiCall_initialize(inst)
 --function def:uiCall_destroy(inst)
 --function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 --function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)

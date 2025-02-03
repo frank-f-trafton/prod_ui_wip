@@ -230,43 +230,41 @@ function def:stepIndex(delta)
 end
 
 
-function def:uiCall_create(inst)
-	if self == inst then
-		self.visible = true
-		self.allow_hover = true
-		self.can_have_thimble = true
+function def:uiCall_initialize()
+	self.visible = true
+	self.allow_hover = true
+	self.can_have_thimble = true
 
-		widShared.setupViewports(self, 3)
+	widShared.setupViewports(self, 3)
 
-		lgcLabel.setup(self)
+	lgcLabel.setup(self)
 
-		-- State flags
-		self.enabled = true
-		self.hovered = false
-		self.pressed = false
+	-- State flags
+	self.enabled = true
+	self.hovered = false
+	self.pressed = false
 
-		-- Stepper orientation. Controls placement of the buttons and the quad graphics
-		-- used (left/right or up/down).
-		self.vertical = false
+	-- Stepper orientation. Controls placement of the buttons and the quad graphics
+	-- used (left/right or up/down).
+	self.vertical = false
 
-		-- Which button is currently pressed, if any.
-		self.b_pressing = false -- false, "prev", "next"
+	-- Which button is currently pressed, if any.
+	self.b_pressing = false -- false, "prev", "next"
 
-		-- Enabled state for the 'prev' and 'next' buttons.
-		self.b_prev_enabled = true
-		self.b_next_enabled = true
+	-- Enabled state for the 'prev' and 'next' buttons.
+	self.b_prev_enabled = true
+	self.b_next_enabled = true
 
-		-- An array of strings which represent each selectable option.
-		self.options = {}
+	-- An array of strings which represent each selectable option.
+	self.options = {}
 
-		-- The current selection. It should be 0 if there are no options.
-		self.index = 0
+	-- The current selection. It should be 0 if there are no options.
+	self.index = 0
 
-		self:skinSetRefs()
-		self:skinInstall()
+	self:skinSetRefs()
+	self:skinInstall()
 
-		self:reshape()
-	end
+	self:reshape()
 end
 
 

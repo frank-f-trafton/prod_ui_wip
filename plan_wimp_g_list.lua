@@ -45,9 +45,9 @@ function plan.make(parent)
 	local implTabCell = context:getLua("shared/impl_tab_cell")
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("Snapshot of '_G'")
 
@@ -58,6 +58,7 @@ function plan.make(parent)
 		content:setScrollBars(false, false)
 
 		local menu_tab = content:addChild("wimp/menu_tab")
+		menu_tab:initialize()
 		commonTab.setDefaultMeasurements(menu_tab)
 
 		menu_tab.renderThimble = widShared.dummy

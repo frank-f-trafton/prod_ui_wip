@@ -11,9 +11,9 @@ function plan.make(parent)
 	local context = parent.context
 
 	local frame = parent:addChild("wimp/window_frame")
-
 	frame.w = 640
 	frame.h = 480
+	frame:initialize()
 
 	frame:setFrameTitle("DragBox Test")
 
@@ -25,6 +25,7 @@ function plan.make(parent)
 		-- Drag box.
 		local dbox = content:addChild("test/drag_box")
 		dbox.x, dbox.y, dbox.w, dbox.h = 400, 16, 64, 64
+		dbox:initialize()
 	end
 
 	frame:reshape(true)

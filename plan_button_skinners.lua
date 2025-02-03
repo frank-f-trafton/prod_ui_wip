@@ -13,6 +13,7 @@ local function makeLabel(content, x, y, w, h, text, label_mode)
 
 	local label = content:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
+	label:initialize()
 	label:setLabel(text, label_mode)
 
 	return label
@@ -26,6 +27,8 @@ function plan.make(parent)
 
 	frame.w = 640
 	frame.h = 480
+
+	frame:initialize()
 
 	frame:setFrameTitle("Button skin tests")
 
@@ -44,10 +47,13 @@ function plan.make(parent)
 			self.context.resources:removeSkinDef(clone)
 		end
 
-		local button_norm = content:addChild("base/button", {skin_id = clone, userDestroy = _userDestroy})
+		local button_norm = content:addChild("base/button")
+		button_norm.skin_id = clone
+		button_norm.userDestroy = _userDestroy
 		button_norm.x = 256
 		button_norm.w = 224
 		button_norm.h = 64
+		button_norm:initialize()
 		button_norm:setLabel("Normal Skinned Button")
 
 		local function radioAlignH(self)
@@ -65,7 +71,12 @@ function plan.make(parent)
 		yy = yy + hh1
 
 		local bb_rdo
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww1
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_h"
 		bb_rdo.usr_align = "left"
 		bb_rdo:setLabel("Left")
@@ -73,7 +84,12 @@ function plan.make(parent)
 
 		xx = xx + ww1
 
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww1
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_h"
 		bb_rdo.usr_align = "center"
 		bb_rdo:setLabel("Center")
@@ -81,7 +97,12 @@ function plan.make(parent)
 
 		xx = xx + ww1
 
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww1
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_h"
 		bb_rdo.usr_align = "right"
 		bb_rdo:setLabel("Right")
@@ -90,7 +111,12 @@ function plan.make(parent)
 		xx = 0
 		yy = yy + hh2
 
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww2, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww2
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_h"
 		bb_rdo.usr_align = "justify"
 		bb_rdo:setLabel("Justify")
@@ -107,7 +133,12 @@ function plan.make(parent)
 		yy = yy + hh1
 
 		local bb_rdo
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww1
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_v"
 		bb_rdo.usr_align = "top"
 		bb_rdo:setLabel("Top")
@@ -115,7 +146,12 @@ function plan.make(parent)
 
 		xx = xx + ww1
 
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww1
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_v"
 		bb_rdo.usr_align = "middle"
 		bb_rdo:setLabel("Middle")
@@ -123,7 +159,12 @@ function plan.make(parent)
 
 		xx = xx + ww1
 
-		bb_rdo = content:addChild("barebones/radio_button", {x = xx, y = yy, w = ww1, h = hh2})
+		bb_rdo = content:addChild("barebones/radio_button")
+		bb_rdo.x = xx
+		bb_rdo.y = yy
+		bb_rdo.w = ww1
+		bb_rdo.h = hh2
+		bb_rdo:initialize()
 		bb_rdo.radio_group = "align_v"
 		bb_rdo.usr_align = "bottom"
 		bb_rdo:setLabel("Bottom")
