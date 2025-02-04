@@ -1,12 +1,6 @@
 local mouseLogic = {}
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-
-local commonMath = require(REQ_PATH .. "common_math")
-
-
 --- Recursive loop for determining hover-over state for widgets.
 -- @param x, y Mouse X and Y positions in UI space.
 -- @param os_x, os_y X and Y offsets for this widget in UI space, such that (x - os_x) and (y - os_y) are the top-left side of the widget body.

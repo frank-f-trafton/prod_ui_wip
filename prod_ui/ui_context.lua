@@ -13,8 +13,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
-local eventHandlers = require(REQ_PATH .. "common.event_handlers")
-local mouseLogic = require(REQ_PATH .. "common.mouse_logic")
+local mouseLogic = require(REQ_PATH .. "core.mouse_logic")
 local commonMath = require(REQ_PATH .. "common.common_math")
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
@@ -22,7 +21,6 @@ local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiLoad = require(REQ_PATH .. "ui_load")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
-local uiWidget = require(REQ_PATH .. "ui_widget")
 
 
 local dummyFunc = function() end
@@ -107,7 +105,7 @@ function uiContext.newContext(prod_ui_path, settings)
 		error("argument #1: couldn't find ui_context.lua within prod_ui_path.")
 	end
 
-	local self = {}
+	local self = setmetatable({}, _mt_context)
 
 	-- Context config table. Internal use.
 	self.conf = {
@@ -131,6 +129,8 @@ function uiContext.newContext(prod_ui_path, settings)
 		owner = self,
 	}
 	self._shared = uiLoad.new(_loader_lua, cache_opts)
+
+	self._mt_widget = self:getLua("core/_mt_widget")
 
 	-- Cache of loaded and prepped widget defs.
 	-- defs are of type "table" and serve as the metatable for instances.
@@ -281,8 +281,6 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- Fields beginning with 'app' or 'usr' are reserved for use by the
 	-- host application.
 
-	setmetatable(self, _mt_context)
-
 	return self
 end
 
@@ -291,7 +289,7 @@ local function _updateLoop(wid, dt, locks)
 	local skip_children
 
 	if wid.userUpdate then
-		uiWidget._runUserEvent(wid, "userUpdate", dt)
+		wid:_runUserEvent("userUpdate", dt)
 	end
 
 	if wid.uiCall_update then
@@ -405,6 +403,27 @@ function _mt_context:getActiveThimble()
 end
 
 
+function uiContext.eventMousemoved(context, x, y, dx, dy, istouch)
+	-- Update mouse position
+	context.mouse_x = x
+	context.mouse_y = y
+
+	-- Update click-sequence origin if the mouse is being held.
+	if context.mouse_pressed_button then
+		context.cseq_x = x
+		context.cseq_y = y
+	end
+
+	-- Event capture
+	local cap_cur = context.captured_focus
+	if cap_cur and cap_cur.uiCap_mouseMoved and cap_cur:uiCap_mouseMoved(x, y, dx, dy, istouch) then
+		return
+	end
+
+	mouseLogic.checkHover(context, dx, dy)
+end
+
+
 -- * LÖVE Callbacks *
 
 
@@ -484,7 +503,7 @@ function _mt_context:love_update(dt)
 	end
 
 	-- Update mouse hover state
-	eventHandlers.mousemoved(self, self.mouse_x, self.mouse_y, 0, 0, false)
+	uiContext.eventMousemoved(self, self.mouse_x, self.mouse_y, 0, 0, false)
 
 	-- Update the click-sequence timer.
 	if self.cseq_button then
@@ -710,7 +729,7 @@ end
 
 
 function _mt_context:love_mousemoved(x, y, dx, dy, istouch)
-	eventHandlers.mousemoved(self, x, y, dx, dy, istouch)
+	uiContext.eventMousemoved(self, x, y, dx, dy, istouch)
 end
 
 
@@ -1039,7 +1058,7 @@ function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 
 	-- Chain instances to the def, and the def to the widget base metatable.
 	out_def._inst_mt = {__index = out_def}
-	setmetatable(out_def, uiWidget._mt_widget)
+	setmetatable(out_def, self._mt_widget)
 
 	out_def.id = id
 	out_def.default_settings = out_def.default_settings or {}
@@ -1144,6 +1163,37 @@ function _mt_context:getWidgetDef(id)
 end
 
 
+--- Sets up a new widget instance table. Internal use.
+function _mt_context:_prepareWidgetInstance(id, parent, siblings, pos)
+	pos = pos or #siblings + 1
+	if pos < 1 or pos > #siblings + 1 then
+		error("position is out of range.")
+	end
+
+	local def = self.widget_defs[id]
+
+	-- Unsupported type. (Corrupt widget defs collection?)
+	if type(def) ~= "table" then
+		error("unregistered ID or unsupported type for widget def (id: " .. tostring(id) .. ", type: " .. type(def) .. ")")
+	end
+
+	local inst = {}
+
+	inst.parent = parent
+	inst.settings = def.default_settings and {}
+
+	setmetatable(inst, def._inst_mt)
+
+	if not inst._no_descendants then
+		inst.children = {}
+	end
+
+	table.insert(siblings, pos, inst)
+
+	return inst
+end
+
+
 --- Add a top-level widget instance to the context.
 --  Locked during update: yes (context)
 -- @param id The widget def ID.
@@ -1158,7 +1208,7 @@ function _mt_context:addWidget(id, pos)
 		uiShared.errLockedContext("add top-level instance widget")
 	end
 
-	return uiWidget._prepareWidgetInstance(id, self, nil, self.instances, pos)
+	return self:_prepareWidgetInstance(id, nil, self.instances, pos)
 end
 
 
