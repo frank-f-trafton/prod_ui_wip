@@ -40,7 +40,7 @@ end
 
 
 function commonTree.keyForward(self, dir)
-	local item = self.menu.items[self.menu.index]
+	local item = self.items[self.index]
 	if item
 	and self.TR_expanders_active
 	and #item.nodes > 0
@@ -49,7 +49,7 @@ function commonTree.keyForward(self, dir)
 		commonTree.setExpanded(self, item, true)
 
 	elseif item and #item.nodes > 0 and item.expanded then
-		self.menu:setSelectedIndex(self.menu:getItemIndex(item.nodes[1]))
+		self:menuSetSelectedIndex(self:menuGetItemIndex(item.nodes[1]))
 		self:getInBounds(item.nodes[1], true)
 		self:cacheUpdate(true)
 
@@ -61,7 +61,7 @@ end
 
 
 function commonTree.keyBackward(self, dir)
-	local item = self.menu.items[self.menu.index]
+	local item = self.items[self.index]
 
 	if item
 	and self.TR_expanders_active
@@ -71,7 +71,7 @@ function commonTree.keyBackward(self, dir)
 		commonTree.setExpanded(self, item, false)
 
 	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
-		self.menu:setSelectedIndex(self.menu:getItemIndex(item.parent))
+		self:menuSetSelectedIndex(self:menuGetItemIndex(item.parent))
 		self:getInBounds(item.parent, true)
 		self:cacheUpdate(true)
 
@@ -226,27 +226,24 @@ end
 
 
 local function _selectionLoop(self, node)
-	local menu = self.menu
-
 	while node do
 		if node.presented and node.selectable then
-			menu:setSelectedItem(node)
+			self:menuSetSelectedItem(node)
 			return
 		else
 			node = node.parent
 		end
 	end
 
-	menu:setSelectedIndex(0)
+	self:menuSetSelectedIndex(0)
 end
 
 
 function commonTree.orderItems(self)
-	local menu = self.menu
-	local items = menu.items
+	local items = self.items
 
 	-- Note the current selected item, if any.
-	local item_sel = menu.items[menu.index]
+	local item_sel = items[self.index]
 
 	-- Clear the existing menu layout.
 	for i = #items, 1, -1 do
@@ -265,7 +262,7 @@ function commonTree.orderItems(self)
 		-- If the item is still visible, update the selected index.
 		-- If not, find the next selectable ancestor, or select nothing if there is no suitable candidate.
 		if item_sel.presented then
-			menu:setSelectedItem(item_sel)
+			self:menuSetSelectedItem(item_sel)
 		else
 			_selectionLoop(self, item_sel)
 		end
@@ -289,8 +286,8 @@ local function _removeNode(self, node, depth)
 	local item = node.item
 	item.presented = nil
 	node.item = nil
-	local item_i = self.menu:getItemIndex(item)
-	table.remove(self.menu.items, item_i)
+	local item_i = self:menuGetItemIndex(item)
+	table.remove(self.items, item_i)
 end
 
 
@@ -305,8 +302,7 @@ end
 
 
 function commonTree.arrange(self)
-	local skin, menu = self.skin, self.menu
-	local items = menu.items
+	local skin, items = self.skin, self.items
 	local font = skin.font
 
 	local yy = 0

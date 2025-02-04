@@ -27,7 +27,7 @@ local sort_functions = {
 
 
 local function columnSortGlobals(wid, column)
-	local items = wid.menu.items
+	local items = wid.items
 
 	table.sort(items, sort_functions[column.id])
 

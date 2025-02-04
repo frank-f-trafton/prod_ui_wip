@@ -55,6 +55,7 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
@@ -149,7 +150,7 @@ def.moveLast = lgcMenu.widgetMoveLast
 -- @param index (default: #items + 1) Where to add the item in the list.
 -- @return Nothing.
 function def:addItem(item_instance, index)
-	local items = self.menu.items
+	local items = self.items
 	index = index or #items + 1
 
 	table.insert(items, index, item_instance)
@@ -164,7 +165,7 @@ end
 -- @param index (default: #items) Index of the item to remove. Must point to a valid table.
 -- @return The removed item instance.
 function def:removeItem(index)
-	local items = self.menu.items
+	local items = self.items
 	index = index or #items
 
 	-- Catch attempts to remove invalid item indexes (Lua's table.remove() is okay with empty indexes 0 and 1)
@@ -172,7 +173,7 @@ function def:removeItem(index)
 		error("Menu has no item at index: " .. tostring(index))
 	end
 
-	local removed = table.remove(self.menu.items, index)
+	local removed = table.remove(self.items, index)
 
 	return removed
 
@@ -186,7 +187,7 @@ end
 -- @return The removed item. Raises an error if the item is not found in the menu.
 function def:removeItemTable(item) -- XXX untested
 	local index
-	for i, check in ipairs(self.menu.items) do
+	for i, check in ipairs(self.items) do
 		if check == item then
 			index = i
 			break
@@ -204,7 +205,7 @@ end
 
 
 function def:menuChangeCleanup()
-	self.menu:setSelectionStep(0, false)
+	self:menuSetSelectionStep(0, false)
 	if self.arrange then
 		self:arrange()
 	end
@@ -231,7 +232,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.instanceSetup(self)
+	lgcMenu.setup(self)
 
 	self.MN_auto_range = "v"
 
@@ -242,8 +243,6 @@ function def:uiCall_initialize()
 	-- Used with 'auto_reshape_items == "conditional"'
 	--self.auto_reshape_w = 0
 	--self.auto_reshape_h = 0
-
-	self.menu = self.menu or lgcMenu.new()
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -269,7 +268,7 @@ function def:uiCall_reshape()
 	if self.auto_reshape_items == true
 	or self.auto_reshape_items == "conditional" and (self.auto_reshape_w ~= self.w or self.auto_reshape_h ~= self.h)
 	then
-		for i, item in ipairs(self.menu.items) do
+		for i, item in ipairs(self.items) do
 			if item.reshape then
 				item:reshape(self)
 			end
@@ -296,10 +295,8 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-	local menu = self.menu
-
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
 	end
 
 	-- Option: automatically set the draw ranges for items.
@@ -324,7 +321,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
-		local sel_item = self.menu.items[self.menu.index]
+		local sel_item = self.items[self.index]
 		if sel_item and sel_item.menuCall_keyPressed and sel_item:menuCall_keyPressed(self, key, scancode, isrepeat) then
 			return true
 
@@ -355,9 +352,9 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 			local ax, ay = self:getAbsolutePosition()
 
-			local item_i, item_t = self:getItemAtPoint(s_mx - ax, s_my - ay, 1, #self.menu.items)
+			local item_i, item_t = self:getItemAtPoint(s_mx - ax, s_my - ay, 1, #self.items)
 			if item_i and item_t.selectable then
-				self.menu:setSelectedIndex(item_i)
+				self:menuSetSelectedIndex(item_i)
 				-- Turn off item_hover so that other items don't glow.
 				self.MN_item_hover = false
 
@@ -368,7 +365,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				end
 
 			elseif self.MN_drag_select == "auto-off" then
-				self.menu:setSelectedIndex(0)
+				self:menuSetSelectedIndex(0)
 			end
 		end
 	end
@@ -394,10 +391,8 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		and mouse_y >= self.vp2_y
 		and mouse_y < self.vp2_y + self.vp2_h
 		then
-			local menu = self.menu
-
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
@@ -419,9 +414,9 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				-- Implement mouse hover-to-select.
 				if self.MN_hover_to_select and (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.menu.items[self.menu.index]
+					local selected_item = self.items[self.index]
 					if item ~= selected_item then
-						self.menu:setSelectedIndex(i)
+						self:menuSetSelectedIndex(i)
 					end
 				end
 
@@ -436,7 +431,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			self.MN_item_hover = false
 
 			if self.MN_hover_to_select == "auto-off" then
-				self.menu:setSelectedIndex(0)
+				self:menuSetSelectedIndex(0)
 			end
 		end
 	end
@@ -455,7 +450,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		self.MN_item_hover = false
 
 		if self.MN_hover_to_select == "auto-off" then
-			self.menu:setSelectedIndex(0)
+			self:menuSetSelectedIndex(0)
 		end
 	end
 end
@@ -498,7 +493,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					-- Check for click-able items.
 					if not self.press_busy then
-						local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
+						local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 						if self.MN_drag_select then
 							self.press_busy = "menu-drag"
@@ -548,7 +543,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			self.press_busy = false
 
 			-- If mouse is over the selected item and it has a pointerRelease callback, run it.
-			local item_selected = self.menu.items[self.menu.index]
+			local item_selected = self.items[self.index]
 			if item_selected and item_selected.selectable then
 				local ax, ay = self:getAbsolutePosition()
 				local mouse_x = x - ax
@@ -640,7 +635,7 @@ function def:uiCall_update(dt)
 	if self.wid_update then
 		self:wid_update(dt)
 	end
-	local selected = self.menu.items[self.menu.index]
+	local selected = self.items[self.index]
 	if selected and selected.menuCall_selectedUpdate then
 		selected:menuCall_selectedUpdate(self, dt) -- XXX untested
 	end
@@ -679,10 +674,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-
-		local menu = self.menu
-		local items = menu.items
-
+		local items = self.items
 		local font = skin.font_item
 
 		-- Back panel body
@@ -704,7 +696,7 @@ def.default_skinner = {
 		end
 
 		-- Draw selection glow, if applicable
-		local sel_item = items[menu.index]
+		local sel_item = items[self.index]
 		if sel_item then
 			local is_active = self:hasAnyThimble()
 			local col = is_active and skin.color_active_glow or skin.color_select_glow

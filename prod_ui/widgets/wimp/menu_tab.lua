@@ -66,6 +66,7 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
@@ -108,7 +109,7 @@ function def:addRow()
 	-- Every row in the menu should have as many cells as there are columns (including invisible ones).
 	item.cells = {}
 
-	table.insert(self.menu.items, item)
+	table.insert(self.items, item)
 
 	return item
 end
@@ -246,9 +247,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.instanceSetup(self)
-
-	self.menu = self.menu or lgcMenu.new()
+	lgcMenu.setup(self)
 
 	-- Array of header category columns.
 	self.columns = {}
@@ -360,7 +359,7 @@ function def:refreshRows()
 	end
 
 	local yy = 0
-	for i, item in ipairs(self.menu.items) do
+	for i, item in ipairs(self.items) do
 		item.x = 0
 		item.y = yy
 		item.w = column_bar_x2
@@ -379,13 +378,11 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-	local menu = self.menu
-
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
 		-- Document height is based on the last item in the menu.
-		local last_item = menu.items[#menu.items]
+		local last_item = self.items[#self.items]
 		if last_item then
 			self.doc_h = last_item.y + last_item.h
 		end
@@ -442,7 +439,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
-		local sel_item = self.menu.items[self.menu.index]
+		local sel_item = self.items[self.index]
 		if sel_item and sel_item.menuCall_keyPressed and sel_item:menuCall_keyPressed(self, key, scancode, isrepeat) then
 			return true
 
@@ -507,9 +504,9 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
 			local smx, smy = mx + self.scr_x, my + self.scr_y
-			local item_i, item_t = self:getItemAtPoint(smx, smy, 1, #self.menu.items)
+			local item_i, item_t = self:getItemAtPoint(smx, smy, 1, #self.items)
 			if item_i and item_t.selectable then
-				self.menu:setSelectedIndex(item_i)
+				self:menuSetSelectedIndex(item_i)
 				-- Turn off item_hover so that other items don't glow.
 				self.MN_item_hover = false
 
@@ -520,7 +517,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				end
 
 			elseif self.MN_drag_select == "auto-off" then
-				self.menu:setSelectedIndex(0)
+				self:menuSetSelectedIndex(0)
 			end
 		end
 	end
@@ -602,11 +599,9 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local hover_ok = false
 
 		if widShared.pointInViewport(self, 1, mx, my) then
-			local menu = self.menu
-
 			-- Update item hover
 			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
-			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 			print("i", i, "item", item)
 
 			if item and item.selectable then
@@ -629,9 +624,9 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				-- Implement mouse hover-to-select.
 				if self.MN_hover_to_select and (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.menu.items[self.menu.index]
+					local selected_item = self.items[self.index]
 					if item ~= selected_item then
-						self.menu:setSelectedIndex(i)
+						self:menuSetSelectedIndex(i)
 					end
 				end
 
@@ -646,7 +641,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			self.MN_item_hover = false
 
 			if self.MN_hover_to_select == "auto-off" then
-				self.menu:setSelectedIndex(0)
+				self:menuSetSelectedIndex(0)
 			end
 		end
 	end
@@ -669,7 +664,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		self.MN_item_hover = false
 
 		if self.MN_hover_to_select == "auto-off" then
-			self.menu:setSelectedIndex(0)
+			self:menuSetSelectedIndex(0)
 		end
 	end
 end
@@ -726,7 +721,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						smx,
 						smy,
 						math.max(1, self.MN_items_first),
-						math.min(#self.menu.items, self.MN_items_last)
+						math.min(#self.items, self.MN_items_last)
 					)
 
 					if self.MN_drag_select then
@@ -816,16 +811,16 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				self.column_primary = old_col_press
 
 				-- Try to maintain the old selection
-				local old_selected_item = self.menu.items[self.menu.index]
+				local old_selected_item = self.items[self.index]
 
 				self:sort()
 
 				if not old_selected_item then
-					self.menu:setSelectedIndex(0)
+					self:menuSetSelectedIndex(0)
 				else
-					for i, item in ipairs(self.menu.items) do
+					for i, item in ipairs(self.items) do
 						if item == old_selected_item then
-							self.menu:setSelectedIndex(self.menu:getItemIndex(old_selected_item))
+							self:menuSetSelectedIndex(self:menuGetItemIndex(old_selected_item))
 						end
 					end
 				end
@@ -833,7 +828,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				self:selectionInView(true)
 			else
 				-- If mouse is over the selected item and it has a pointerRelease callback, run it.
-				local item_selected = self.menu.items[self.menu.index]
+				local item_selected = self.items[self.index]
 				if item_selected and item_selected.selectable then
 
 					-- XXX safety precaution: ensure mouse position is within widget viewport #2?
@@ -958,7 +953,7 @@ function def:uiCall_update(dt)
 	if self.wid_update then
 		self:wid_update(dt)
 	end
-	local selected = self.menu.items[self.menu.index]
+	local selected = self.items[self.index]
 	if selected and selected.menuCall_selectedUpdate then
 		selected:menuCall_selectedUpdate(self, dt) -- XXX untested
 	end
@@ -1058,7 +1053,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	-- Draw each menu item in range.
 	love.graphics.setColor(skin.color_item_text)
 
-	local items = self.menu.items
+	local items = self.items
 
 	local first = math.max(self.MN_items_first, 1)
 	local last = math.min(self.MN_items_last, #items)
@@ -1115,8 +1110,7 @@ def.default_skinner = {
 		local font = skin.font
 		local tq_px = skin.tq_px
 
-		local menu = self.menu
-		local items = menu.items
+		local items = self.items
 
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
@@ -1167,7 +1161,7 @@ def.default_skinner = {
 		end
 
 		-- Draw selection glow, if applicable
-		local sel_item = items[menu.index]
+		local sel_item = items[self.index]
 		if sel_item then
 			love.graphics.setColor(skin.color_select_glow)
 			uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)

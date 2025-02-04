@@ -61,7 +61,7 @@ local sort_functions = {
 
 
 local function columnSortFiles(wid, column)
-	local items = wid.menu.items
+	local items = wid.items
 
 	-- Sort directories + symlinks first, then all other files.
 	local ord1, ord2 = {}, {}
@@ -130,7 +130,7 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 
 	elseif scancode == "return" then
 		-- Enter directory or symlink
-		local selected_item = self.menu.items[self.menu.index]
+		local selected_item = self.items[self.index]
 		if selected_item then
 			local fs_name = selected_item.fs_name
 			local fs_type = selected_item.fs_type
@@ -265,11 +265,11 @@ end
 local function menu_getDirectoryItems(self, filter_type)
 	-- Clear existing menu items.
 	-- XXX might make sense to pool these, and maybe write a custom getDirectoryItemsInfo to reduce table churn.
-	for i = #self.menu.items, 1, -1 do
-		self.menu.items[i] = nil
+	for i = #self.items, 1, -1 do
+		self.items[i] = nil
 	end
 
-	self.menu:setDefaultSelection()
+	self:menuSetDefaultSelection()
 
 	local items = nativefs.getDirectoryItemsInfo(self.usr_path, filter_type)
 

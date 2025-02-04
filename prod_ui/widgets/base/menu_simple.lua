@@ -23,6 +23,7 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 
 
@@ -48,10 +49,8 @@ local function getItemAtPoint(self, px, py)
 	-- NOTES:
 	-- * Does not check if the item is selectable.
 
-	local menu = self.menu
-
 	-- Empty list
-	if #menu.items == 0 then
+	if #self.items == 0 then
 		return nil
 	end
 
@@ -62,14 +61,14 @@ local function getItemAtPoint(self, px, py)
 
 	local mouse_pos = self.horizontal and px or py
 
-	return math.max(1, math.min(#menu.items, math.floor(mouse_pos / self.item_len) + self.scroll_i + 1))
+	return math.max(1, math.min(#self.items, math.floor(mouse_pos / self.item_len) + self.scroll_i + 1))
 end
 
 
 local function clampScroll(self)
 	local len = self.horizontal and self.w or self.h
 
-	self.scroll_i = math.max(0, math.min(self.scroll_i, #self.menu.items - math.floor(len / self.item_len)))
+	self.scroll_i = math.max(0, math.min(self.scroll_i, #self.items - math.floor(len / self.item_len)))
 end
 
 
@@ -96,14 +95,12 @@ end
 
 
 function def:selectionInView()
-	local menu = self.menu
-
 	-- No selection: nothing to do.
-	if menu.index == 0 then
+	if self.index == 0 then
 		return
 
 	-- Empty list: scroll to top
-	elseif #menu.items == 0 then
+	elseif #self.items == 0 then
 		self:scrollTo(0)
 
 	else
@@ -114,18 +111,18 @@ function def:selectionInView()
 		-- Viewport is smaller than item length + padding*2: just scroll so that the current
 		-- selection is at the beginning of the visible area.
 		if max_vis*len < self.item_len + (self.scroll_i_pad * self.item_len) * 2 then
-			self.scroll_i = menu.index - 1
+			self.scroll_i = self.index - 1
 			if self.scroll_clamp then
 				clampScroll(self)
 			end
 		-- Normal circumstances
 		else
-			if menu.index < self.scroll_i + self.scroll_i_pad then
-				self:scrollTo(menu.index - self.scroll_i_pad)
+			if self.index < self.scroll_i + self.scroll_i_pad then
+				self:scrollTo(self.index - self.scroll_i_pad)
 			end
 
-			if menu.index > self.scroll_i + max_vis - self.scroll_i_pad then
-				self:scrollTo(menu.index + self.scroll_i_pad - 1 - max_vis)
+			if self.index > self.scroll_i + max_vis - self.scroll_i_pad then
+				self:scrollTo(self.index + self.scroll_i_pad - 1 - max_vis)
 			end
 		end
 	end
@@ -186,7 +183,7 @@ function def:uiCall_initialize()
 	-- overhead in some use cases.
 	-- self.item_render
 
-	self.menu = self.menu or lgcMenu.new()
+	lgcMenu.setup(self)
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -217,8 +214,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- Debug
 		elseif scancode == "insert" then
-			table.insert(self.menu.items, math.max(1, self.menu.index), {text = "filler entry #" .. #self.menu.items + 1, selectable = true, type = "press_action"})
-			self.menu:setSelectionStep(0)
+			table.insert(self.items, math.max(1, self.index), {text = "filler entry #" .. #self.items + 1, selectable = true, type = "press_action"})
+			self:menuSetSelectionStep(0)
 			if self.scroll_clamp then
 				clampScroll(self)
 			end
@@ -226,8 +223,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- Debug
 		elseif scancode == "delete" then
-			table.remove(self.menu.items, self.menu.index)
-			self.menu:setSelectionStep(0)
+			table.remove(self.items, self.index)
+			self:menuSetSelectionStep(0)
 			if self.scroll_clamp then
 				clampScroll(self)
 			end
@@ -248,9 +245,9 @@ function def:trySelectItemAtPoint(x, y)
 	local i = getItemAtPoint(self, x, y)
 
 	if i then
-		local item = self.menu.items[i]
+		local item = self.items[i]
 		if item and item.selectable then
-			self.menu:setSelectedIndex(i)
+			self:menuSetSelectedIndex(i)
 			self:selectionInView()
 		end
 	end
@@ -284,7 +281,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 
-		self.menu:setSelectionStep(4 * -y, self.MN_wrap_selection)
+		self:menuSetSelectionStep(4 * -y, self.MN_wrap_selection)
 		self:selectionInView()
 
 		-- Block bubbling if event was handled.
@@ -330,11 +327,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-
-		local menu = self.menu
-
 		local body_len = self.horizontal and self.w or self.h
-
 		local font = skin.font
 		local font_h = font:getHeight()
 		local sep_offset = math.floor(self.item_len / 2)
@@ -351,12 +344,12 @@ def.default_skinner = {
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 		-- Draw selection glow, if applicable
-		if menu.index > 0 then
+		if self.index > 0 then
 			local is_active = self:hasAnyThimble()
 			local col = is_active and skin.color_active_glow or skin.color_select_glow
 			love.graphics.setColor(col)
 
-			local sel_pos = (menu.index-1 - self.scroll_i) * self.item_len
+			local sel_pos = (self.index-1 - self.scroll_i) * self.item_len
 			if self.horizontal then
 				love.graphics.rectangle("fill", sel_pos + 0.5, 0.5, self.item_len, self.w)
 			else
@@ -369,13 +362,13 @@ def.default_skinner = {
 		love.graphics.setFont(font)
 
 
-		local vis_item_bot = math.min(#menu.items, self.scroll_i + max_vis)
+		local vis_item_bot = math.min(#self.items, self.scroll_i + max_vis)
 		local work_pos = 0
 
 		--print("vis_item_bot", vis_item_bot)
 
 		for i = self.scroll_i + 1, vis_item_bot do
-			local item = menu.items[i]
+			local item = self.items[i]
 
 			if item then
 				local px = self.item_pad
@@ -417,7 +410,7 @@ def.default_skinner = {
 		-- XXX maybe just an up-arrow and down-arrow would be better in some cases.
 		if self.show_scroll_ind then
 			local circ_r = 6 -- XXX style
-			local shortened = #menu.items - max_vis
+			local shortened = #self.items - max_vis
 			if shortened > 0 then
 				local circ_pos = 0
 
@@ -430,7 +423,7 @@ def.default_skinner = {
 
 				-- Peg to current selection
 				elseif self.show_scroll_ind == "selection" then
-					circ_pos = math.floor(circ_r + ((menu.index-1) / math.max(1, #menu.items-1) * (body_len - circ_r*2)))
+					circ_pos = math.floor(circ_r + ((self.index-1) / math.max(1, #self.items-1) * (body_len - circ_r*2)))
 				end
 
 				love.graphics.setColor(skin.color_scroll_ind)

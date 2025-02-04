@@ -74,21 +74,21 @@ local function testMenuKeyPressed(self, key, scancode, isrepeat)
 		new_item.w = 48--192
 		new_item.h = 48
 
-		new_item.text = "#" .. #self.menu.items + 1--"filler entry #" .. #self.menu.items + 1
+		new_item.text = "#" .. #self.items + 1--"filler entry #" .. #self.items + 1
 		new_item.selectable = true
 		new_item.type = "press_action"
 
 		new_item.itemAction_use = testMultiSelectClick
 
-		self:addItem(new_item, math.max(1, self.menu.index))
+		self:addItem(new_item, math.max(1, self.index))
 		self:menuChangeCleanup()
 
 		return true
 
 	-- Debug
 	elseif scancode == "delete" then
-		if self.menu.index > 0 then
-			self:removeItem(self.menu.index)
+		if self.index > 0 then
+			self:removeItem(self.index)
 			self:menuChangeCleanup()
 		end
 

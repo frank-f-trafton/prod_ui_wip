@@ -28,6 +28,7 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
@@ -66,7 +67,7 @@ function def:_closeSelf(update_chosen)
 			wid_ref.wid_drawer = false
 
 			if update_chosen then
-				wid_ref:setSelectionByIndex(self.menu.index, "chosen_i")
+				wid_ref:setSelectionByIndex(self.index, "chosen_i")
 			end
 		end
 
@@ -93,8 +94,7 @@ function def:updateDimensions()
 	-- XXX: We will just be using the maximum of (dropdown_box.w, widest item).
 
 	local skin = self.skin
-	local menu = self.menu
-	local items = menu.items
+	local items = self.items
 
 	local font = skin.font_item
 
@@ -146,13 +146,13 @@ function def:updateDimensions()
 	self:reshape()
 
 	-- Update item widths and then reshape their internals.
-	for i, item in ipairs(self.menu.items) do
+	for i, item in ipairs(self.items) do
 		item.w = self.vp_w
 		item:reshape(self)
 	end
 
 	-- Refresh document size.
-	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
+	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
 
 	print(
 		"self.w", self.w,
@@ -170,7 +170,7 @@ def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 function def:menuChangeCleanup()
-	self.menu:setSelectionStep(0, false)
+	self:menuSetSelectionStep(0, false)
 	self:arrange()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
@@ -182,8 +182,8 @@ function def:uiCall_initialize()
 	if not self.wid_ref then
 		error("no owner widget assigned to this menu.")
 
-	elseif not self.menu then
-		error("owner widget did not provide a menu sub-table.")
+	elseif not self.items then
+		error("owner widget did not provide a table of menu items.")
 	end
 
 	self.visible = true
@@ -198,7 +198,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.instanceSetup(self)
+	lgcMenu.setup(self, self.items) -- 'items' was set by invoker
 
 	self.MN_wrap_selection = false
 
@@ -236,7 +236,6 @@ end
 
 function def:uiCall_resize()
 	local skin = self.skin
-	local menu = self.menu
 	local wid_ref = self.wid_ref
 	local root = self:getTopWidgetInstance()
 
@@ -247,12 +246,12 @@ function def:uiCall_resize()
 	-- We assume that the root widget's dimensions match the display area.
 	-- Item dimensions must be up-to-date before calling.
 	local widest_item_width = 0
-	for i, item in ipairs(menu.items) do
+	for i, item in ipairs(self.items) do
 		widest_item_width = math.max(widest_item_width, item.w)
 	end
 
 	self.w = math.min(root.w, math.max(wid_ref.w, widest_item_width))
-	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #menu.items)))
+	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.items)))
 
 	self:keepInBounds()
 end
@@ -288,10 +287,8 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-	local menu = self.menu
-
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
 	end
 
 	-- Set the draw ranges for items.
@@ -359,12 +356,12 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				mx = mx - self.vp_x
 				my = my - self.vp_y
 
-				local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
+				local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.items)
 				if item_i and item_t.selectable then
-					self.menu:setSelectedIndex(item_i)
+					self:menuSetSelectedIndex(item_i)
 
 				else
-					self.menu:setSelectedIndex(0)
+					self:menuSetSelectedIndex(0)
 				end
 			--end
 		end
@@ -382,21 +379,19 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local yy = my + self.scr_y - self.vp_y
 
 		if widShared.pointInViewport(self, 2, mx, my) then
-			local menu = self.menu
-
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 			if item and item.selectable then
 				self.MN_item_hover = item
 
-				--print("item", item, "index", menu.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
+				--print("item", item, "index", self.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.menu.items[self.menu.index]
+					local selected_item = self.items[self.index]
 					if item ~= selected_item then
-						self.menu:setSelectedIndex(i)
+						self:menuSetSelectedIndex(i)
 					end
 				end
 			end
@@ -437,7 +432,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				-- Check for click-able items.
 				if not self.press_busy then
-					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
+					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 					self.press_busy = "menu-drag"
 					self:cacheUpdate(true)
@@ -467,7 +462,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 		if old_press_busy == "menu-drag" then
 			-- Handle mouse unpressing over the selected item.
 			if button == 1 then
-				local item_selected = self.menu.items[self.menu.index]
+				local item_selected = self.items[self.index]
 
 				if item_selected and item_selected.selectable then
 					self:_closeSelf(true)
@@ -565,7 +560,6 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		local menu = self.menu
 
 		local font = skin.font
 
@@ -591,7 +585,7 @@ def.default_skinner = {
 		-- Dropdown drawers do not render hover-glow.
 
 		-- Selection glow.
-		local selected_item = menu.items[menu.index]
+		local selected_item = self.items[self.index]
 		if selected_item then
 			love.graphics.setColor(skin.color_selected)
 			love.graphics.rectangle("fill", 0, selected_item.y, self.vp_w - self.vp_x, selected_item.h)
@@ -603,8 +597,8 @@ def.default_skinner = {
 		love.graphics.setColor(skin.color_text)
 		love.graphics.setFont(font)
 
-		for i = math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last) do
-			local item = menu.items[i]
+		for i = math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last) do
+			local item = self.items[i]
 			local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
 			love.graphics.print(item.text, xx, item.y)
 		end

@@ -38,6 +38,7 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
@@ -199,7 +200,7 @@ end
 function def:removeControl(wid)
 	uiShared.type1(1, wid, "table")
 
-	local wid_i = self.menu:getItemIndex(wid)
+	local wid_i = self:menuGetItemIndex(wid)
 
 	self:removeControlByIndex(wid_i)
 end
@@ -217,13 +218,13 @@ function def:removeControlByIndex(wid_i)
 	to_remove:remove()
 
 	-- Removed control was the last in the list, and was selected:
-	if self.menu.index > #children then
-		local landing_i = self.menu:findSelectableLanding(#children, -1)
+	if self.index > #children then
+		local landing_i = self:menuFindSelectableLanding(#children, -1)
 		self:setSelectionByIndex(landing_i or 0)
 
 	-- Removed control was not selected, and the selected control appears after the removed control in the list:
-	elseif self.menu.index > wid_i then
-		self.menu.index = self.menu.index - 1
+	elseif self.index > wid_i then
+		self.index = self.index - 1
 	end
 
 	self:arrange(4, wid_i, #children)
@@ -233,7 +234,7 @@ end
 function def:setSelection(wid)
 	uiShared.type1(1, wid, "table")
 
-	local wid_i = self.menu:getItemIndex(wid)
+	local wid_i = self:menuGetItemIndex(wid)
 	self:setSelectionByIndex(wid_i)
 end
 
@@ -241,7 +242,7 @@ end
 function def:setSelectionByIndex(wid_i)
 	uiShared.intGE(1, wid_i, 0)
 
-	self.menu:setSelectedIndex(wid_i)
+	self:menuSetSelectedIndex(wid_i)
 end
 
 
@@ -256,11 +257,9 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.instanceSetup(self, true, true) -- with mark and drag+drop state
-
+	-- (self.items == self.children)
+	lgcMenu.setup(self, self.children, true, true) -- with mark and drag+drop state
 	self.MN_wrap_selection = false
-
-	self.menu = lgcMenu.new(self.children) -- (self.menu.items == self.children)
 
 	self.sash_enabled = true
 
@@ -316,7 +315,7 @@ function def:uiCall_reshape()
 	commonScroll.updateScrollState(self)
 
 	-- Resize controls.
-	for i, wid in ipairs(self.menu.items) do
+	for i, wid in ipairs(self.items) do
 		wid.x = self.vp4_x - self.vp_x
 		updateItemDimensions(self, 4, wid)
 	end
@@ -329,13 +328,12 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all controls.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-	local menu = self.menu
 	local skin = self.skin
 
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
-		local children = menu.items
+		local children = self.items
 
 		-- Document height is based on the last control in the menu.
 		local last_wid = children[#children]
@@ -378,22 +376,20 @@ end
 
 
 local function updateSelectedControl(self, control)
-	local menu = self.menu
-	local old_item = menu.items[menu.index]
+	local old_item = self.items[self.index]
 
-	menu:clearAllMarkedItems()
-	menu:setSelectedItem(control)
+	self:menuClearAllMarkedItems()
+	self:menuSetSelectedItem(control)
 
 	if old_item ~= control then
-		self:wid_select(control, menu:getItemIndex(control))
+		self:wid_select(control, self:menuGetItemIndex(control))
 	end
 end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	local menu = self.menu
-	local items = menu.items
-	local old_index = menu.index
+	local items = self.items
+	local old_index = self.index
 	local old_item = items[old_index]
 
 	-- wid_action() is handled in the 'thimbleAction()' callback.
@@ -407,29 +403,29 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		-- NOTE: This code path for 'toggle' MN_mark_mode won't work if the widget can
 		-- take thimble1 (see thimbleAction()).
 		if self.MN_mark_mode == "toggle" and key == "space" then
-			if old_index > 0 and menu:canSelect(old_index) then
-				menu:toggleMarkedItem(items[old_index])
+			if old_index > 0 and self:menuCanSelect(old_index) then
+				self:menuToggleMarkedItem(items[old_index])
 				return true
 			end
 
 		elseif self:wid_keyPressed(key, scancode, isrepeat)
 		or self:wid_defaultKeyNav(key, scancode, isrepeat)
 		then
-			local control = items[menu.index]
+			local control = items[self.index]
 			if old_item ~= control then
 				if self.MN_mark_mode == "cursor" then
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
-						menu:clearAllMarkedItems()
+						self:menuClearAllMarkedItems()
 						lgcMenu.markItemsCursorMode(self, old_index)
 					else
 						self.MN_mark_index = false
-						menu:clearAllMarkedItems()
-						menu:setMarkedItemByIndex(menu.index, true)
+						self:menuClearAllMarkedItems()
+						self:menuSetMarkedItemByIndex(self.index, true)
 					end
 				end
 
-				self:wid_select(control, menu.index)
+				self:wid_select(control, self.index)
 			end
 			return true
 		end
@@ -440,7 +436,7 @@ end
 function def:uiCall_keyReleased(inst, keycode, scancode)
 	if self == inst then
 		-- If there is a selected child widget, forward keyboard events to it first.
-		local control = self.menu.items[self.menu.index]
+		local control = self.items[self.index]
 		if control and control:sendEvent("uiCall_keyReleased", control, keycode, scancode) then
 			return true
 		end
@@ -451,7 +447,7 @@ end
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		-- If there is a selected child widget, forward keyboard events to it first.
-		local control = self.menu.items[self.menu.index]
+		local control = self.items[self.index]
 		if control and control:sendEvent("uiCall_textInput", control, text) then
 			return true
 		end
@@ -478,10 +474,8 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			mx = mx + self.scr_x
 			my = my + self.scr_y
 
-			local menu = self.menu
-
 			-- Update item hover
-			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
@@ -537,8 +531,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
 
 					if item_t and item_t.selectable then
-						local old_index = self.menu.index
-						local old_item = self.menu.items[old_index]
+						local old_index = self.index
+						local old_item = self.items[old_index]
 
 						-- Buttons 1, 2 and 3 all select an item.
 						-- Only button 1 updates the item mark state.
@@ -639,13 +633,12 @@ function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 	and self.enabled
 	then
 		-- If there is an active, selected control widget, then try to give it the thimble.
-		local menu = self.menu
-		local control = menu.items[menu.index]
+		local control = self.items[self.index]
 		if control and control:tryTakeThimble1() then
 			return true
 		end
 
-		self:wid_action(control, menu.index)
+		self:wid_action(control, self.index)
 
 		return true
 	end
@@ -656,9 +649,8 @@ function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
-		local menu = self.menu
-		local control = menu.items[menu.index]
-		self:wid_action2(control, menu.index)
+		local control = self.items[self.index]
+		self:wid_action2(control, self.index)
 
 		return true
 	end
@@ -739,8 +731,7 @@ def.default_skinner = {
 		local tq_px = skin.tq_px
 		local sl_body = skin.sl_body
 
-		local menu = self.menu
-		local items = menu.items
+		local items = self.items
 
 		-- XXX: pick resources for enabled or disabled state, etc.
 		--local res = (self.active) and skin.res_active or skin.res_inactive
@@ -771,7 +762,7 @@ def.default_skinner = {
 		-- No hover glow.
 
 		-- Selection glow.
-		local sel_item = items[menu.index]
+		local sel_item = items[self.index]
 		if sel_item then
 			local is_active = self == self.context.thimble1 or sel_item == self.context.thimble1
 			local col = is_active and skin.color_active_glow or skin.color_select_glow
