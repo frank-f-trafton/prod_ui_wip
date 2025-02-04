@@ -57,7 +57,7 @@ local function _buildTree(tree_box, root)
 
 	-- Note the last selection and the UI thimbles.
 	local context = tree_box.context
-	local item_selected = tree_box.menu:getSelectedItem()
+	local item_selected = tree_box:menuGetSelectedItem()
 	local wid_selected = item_selected and item_selected.usr_wid
 
 	tree_box.tree.usr_wid = root
@@ -72,16 +72,16 @@ local function _buildTree(tree_box, root)
 	-- Restore the selection, if any.
 	local restored
 	if wid_selected then
-		for i, item in ipairs(tree_box.menu.items) do
+		for i, item in ipairs(tree_box.items) do
 			if item.usr_wid == wid_selected then
-				tree_box.menu:setSelectedIndex(i)
+				tree_box:menuSetSelectedIndex(i)
 				restored = true
 				break
 			end
 		end
 	end
 	if not restored then
-		tree_box.menu:setSelectedIndex(0)
+		tree_box:menuSetSelectedIndex(0)
 	end
 end
 
@@ -101,7 +101,7 @@ local function tree_userUpdate(self, dt)
 			end
 
 			-- Debug view stuff for the demo.
-			local selected = self.menu:getSelectedItem()
+			local selected = self:menuGetSelectedItem()
 			local selected_wid = selected and selected.usr_wid or false
 
 			local outline = context.app.dbg_outline

@@ -36,14 +36,13 @@ end
 
 local function keyPressed_swapItems(self, key, scancode, isrepeat)
 	local mods = self.context.key_mgr.mod
-	local menu = self.menu
 
 	if mods["ctrl"] then
-		local dest_i = (key == "up") and menu.index - 1 or (key == "down") and menu.index + 1 or nil
-		if dest_i and dest_i >= 1 and dest_i <= #menu.items then
-			if menu:canSelect(dest_i) and menu:canSelect(menu.index) then
-				menu:swapItems(menu.index, dest_i)
-				menu:setSelectedIndex(dest_i)
+		local dest_i = (key == "up") and self.index - 1 or (key == "down") and self.index + 1 or nil
+		if dest_i and dest_i >= 1 and dest_i <= #self.items then
+			if self:menuCanSelect(dest_i) and self:menuCanSelect(self.index) then
+				self:menuSwapItems(self.index, dest_i)
+				self:menuSetSelectedIndex(dest_i)
 				self:arrange()
 
 				return true
@@ -68,7 +67,7 @@ end
 
 local function getDropPoint(self)
 	local mx, my = self:getRelativePositionScrolled(self.context.mouse_x, self.context.mouse_y)
-	local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.menu.items)
+	local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.items)
 	return overlap_i, overlap_t, clamped
 end
 
@@ -77,11 +76,10 @@ local function wid_droppedReorder(self, drop_state)
 	if drop_state.id == "menu" then
 		local from = drop_state.from
 		local item = drop_state.item
-		local menu = self.menu
 
-		if self == from and #menu.items > 1 and menu:hasItem(item) then
+		if self == from and #self.items > 1 and self:menuHasItem(item) then
 			local overlap_i, overlap_t, clamped = getDropPoint(self)
-			local old_i = menu:getItemIndex(item)
+			local old_i = self:menuGetItemIndex(item)
 
 			-- Dropped item on itself: nothing to do
 			if old_i == overlap_i then
@@ -89,15 +87,15 @@ local function wid_droppedReorder(self, drop_state)
 
 			-- Dropped after the last item (if clamping), or on no item (if not clamping): move item to the end
 			elseif not overlap_i or clamped == 1 then
-				menu:moveItem(old_i, #menu.items)
-				--menu:swapItems(old_i, #menu.items)
+				self:menuMoveItem(old_i, #self.items)
+				--self:menuSwapItems(old_i, #self.items)
 
 			-- Dropped on an item
 			else
-				menu:moveItem(old_i, overlap_i)
-				--menu:swapItems(old_i, overlap_i)
+				self:menuMoveItem(old_i, overlap_i)
+				--self:menuSwapItems(old_i, overlap_i)
 			end
-			menu.index = overlap_i
+			self.index = overlap_i
 			self:arrange()
 			return true
 		end
@@ -120,7 +118,7 @@ local function wid_droppedTransfer(self, drop_state)
 		and self ~= from
 		and (self.tag == "demo_listbox4a" or self.tag == "demo_listbox4b")
 		and (from.tag == "demo_listbox4a" or from.tag == "demo_listbox4b")
-		and from.menu:hasItem(item)
+		and from:menuHasItem(item)
 		then
 			local overlap_i, overlap_t, clamped = getDropPoint(self)
 			transferItem(item, from, self, overlap_i)
@@ -499,7 +497,7 @@ local function makeListBox4(content, x, y)
 		local l2 = self:findSiblingTag("demo_listbox4b")
 
 		if l1 and l2 then
-			local item = l1.menu.items[l1.menu.index]
+			local item = l1.items[l1.index]
 			if item then
 				transferItem(item, l1, l2, nil)
 			end
@@ -523,7 +521,7 @@ local function makeListBox4(content, x, y)
 		local l2 = self:findSiblingTag("demo_listbox4b")
 
 		if l1 and l2 then
-			local item = l2.menu.items[l2.menu.index]
+			local item = l2.items[l2.index]
 			if item then
 				transferItem(item, l2, l1, nil)
 			end

@@ -48,11 +48,11 @@ end
 
 
 function commonTab.columnSortGeneric(wid, column)
-	local items = wid.menu.items
+	local items = wid.items
 	local sort_order = column.sort_order
 
 	local temp = {}
-	for i, item in ipairs(wid.menu.items) do
+	for i, item in ipairs(wid.items) do
 		local entry = {item}
 		if not sort_order then
 			entry[#entry + 1] = item.cells[column.id][column.sort_cell_field]
@@ -70,7 +70,7 @@ function commonTab.columnSortGeneric(wid, column)
 	table.sort(temp, sort_func)
 
 	for i, tbl in ipairs(temp) do
-		wid.menu.items[i] = tbl[1]
+		wid.items[i] = tbl[1]
 	end
 
 	return true
@@ -95,7 +95,7 @@ function commonTab.getWidestColumnText(self, column_id)
 	local w = 0
 	local index
 
-	for i, row in ipairs(self.menu.items) do
+	for i, row in ipairs(self.items) do
 		local cell = row.cells[column_id]
 		local new_w = font:getWidth(cell.text)
 		if new_w > w then

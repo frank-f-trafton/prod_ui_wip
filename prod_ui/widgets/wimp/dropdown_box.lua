@@ -56,6 +56,9 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
+
+
 def.arrange = lgcMenu.arrangeListVerticalTB
 
 
@@ -87,7 +90,7 @@ function def:addItem(text, pos, bijou_id)
 	local skin = self.skin
 	local font = skin.font
 
-	local items = self.menu.items
+	local items = self.items
 
 	uiShared.type1(1, text, "string")
 	uiShared.intRangeEval(2, pos, 1, #items + 1)
@@ -112,8 +115,8 @@ function def:addItem(text, pos, bijou_id)
 	table.insert(items, pos, item)
 
 	-- If there is no chosen item, assign this one as chosen now.
-	if self.menu.chosen_i == 0 then
-		local i, tbl = self.menu:hasAnySelectableItems()
+	if self.chosen_i == 0 then
+		local i, tbl = self:menuHasAnySelectableItems()
 		if i then
 			self:setSelectionByIndex(i, "chosen_i")
 		end
@@ -130,7 +133,7 @@ end
 function def:removeItem(item_t)
 	uiShared.type1(1, item_t, "table")
 
-	local item_i = self.menu:getItemIndex(item_t)
+	local item_i = self:menuGetItemIndex(item_t)
 
 	local removed_item = self:removeItemByIndex(item_i)
 
@@ -141,19 +144,19 @@ end
 
 local function removeItemIndexCleanup(self, item_i, id)
 	-- Removed item was the last in the list, and was selected:
-	if self.menu[id] > #self.menu.items then
-		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1)
+	if self[id] > #self.items then
+		local landing_i = self:menuFindSelectableLanding(#self.items, -1)
 		self:setSelectionByIndex(landing_i or 0, id)
 
 	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self.menu[id] > item_i then
-		self.menu[id] = self.menu[id] - 1
+	elseif self[id] > item_i then
+		self[id] = self[id] - 1
 	end
 
 	-- Handle the current selection being removed.
-	if self.menu[id] == item_i then
-		local landing_i = self.menu:findSelectableLanding(#self.menu.items, -1) or self.menu:findSelectableLanding(#self.menu.items, 1)
-		self.menu[id] = landing_i or 0
+	if self[id] == item_i then
+		local landing_i = self:menuFindSelectableLanding(#self.items, -1) or self:menuFindSelectableLanding(#self.items, 1)
+		self[id] = landing_i or 0
 	end
 end
 
@@ -161,7 +164,7 @@ end
 function def:removeItemByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local items = self.menu.items
+	local items = self.items
 	local removed_item = items[item_i]
 	if not removed_item then
 		error("no item to remove at index: " .. tostring(item_i))
@@ -183,7 +186,7 @@ end
 function def:setSelection(item_t, id)
 	uiShared.type1(1, item_t, "table")
 
-	local item_i = self.menu:getItemIndex(item_t)
+	local item_i = self:menuGetItemIndex(item_t)
 	self:setSelectionByIndex(item_i, id)
 end
 
@@ -191,12 +194,12 @@ end
 function def:setSelectionByIndex(item_i, id)
 	uiShared.intGE(1, item_i, 0)
 
-	local chosen_i_old = self.menu.chosen_i
+	local chosen_i_old = self.chosen_i
 
-	self.menu:setSelectedIndex(item_i, id)
+	self:menuSetSelectedIndex(item_i, id)
 
-	if id == "chosen_i" and chosen_i_old ~= self.menu.chosen_i then
-		self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+	if id == "chosen_i" and chosen_i_old ~= self.chosen_i then
+		self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
 	end
 
 	if self.wid_drawer then
@@ -212,11 +215,11 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 2)
 
-	-- -> lgcMenu.instanceSetup(self)
+	lgcMenu.setup(self)
 	self.MN_page_jump_size = 4
 	self.MN_wrap_selection = false
 
-	self.menu = lgcMenu.new()
+
 
 	-- XXX: dropdown button icon.
 
@@ -227,8 +230,8 @@ function def:uiCall_initialize()
 	self.wid_drawer = false
 
 	-- Index for the current selection displayed in the dropdown body.
-	-- This is different from `menu.index`, which denotes the current selection in the pop-up menu.
-	self.menu.chosen_i = 0
+	-- This is different from `self.index`, which denotes the current selection in the pop-up menu.
+	self.chosen_i = 0
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -256,26 +259,23 @@ function def:_openPopUpMenu()
 	if not self.wid_drawer then
 		local skin = self.skin
 		local root = self:getTopWidgetInstance()
-		local menu = self.menu
 
 		local ax, ay = self:getAbsolutePosition()
 
 		local drawer = root:addChild("wimp/dropdown_pop")
 		drawer.skin_id = skin.skin_id_pop
-		drawer.menu = menu
-		drawer:initialize()
+		drawer.items = self.items -- XXX maybe safer to make a whole copy of the menu.
 		drawer.x = ax
 		drawer.y = ay + self.h
 		drawer.wid_ref = self
-
 		self.wid_drawer = drawer
-
 		self.chain_next = drawer
 		drawer.chain_prev = self
+		drawer:initialize()
 
 		commonWimp.assignPopUp(self, drawer)
 
-		self:setSelectionByIndex(menu.chosen_i)
+		self:setSelectionByIndex(self.chosen_i)
 
 		drawer:resize()
 		drawer:reshape()
@@ -318,7 +318,7 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
-	local chosen_i_old = self.menu.chosen_i
+	local chosen_i_old = self.chosen_i
 
 	if scancode == "up" then
 		self:movePrev(1, true, "chosen_i")
@@ -348,8 +348,8 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	end
 
 	if check_chosen then
-		if chosen_i_old ~= self.menu.chosen_i then
-			self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+		if chosen_i_old ~= self.chosen_i then
+			self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
 		end
 		return true
 	end
@@ -382,8 +382,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		if self.wid_drawer then
 			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
 		else
-			local items = self.menu.items
-			local old_index = self.menu.index
+			local items = self.items
+			local old_index = self.index
 			local old_item = items[old_index]
 
 			-- Space opens, but does not close the pop-up.
@@ -458,7 +458,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 		if not self.wid_drawer then
 
 			local check_chosen = false
-			local chosen_i_old = self.menu.chosen_i
+			local chosen_i_old = self.chosen_i
 
 			if y > 0 then
 				self:movePrev(y, true, "chosen_i")
@@ -470,8 +470,8 @@ function def:uiCall_pointerWheel(inst, x, y)
 			end
 
 			if check_chosen then
-				if chosen_i_old ~= self.menu.chosen_i then
-					self:wid_chosenSelection(self.menu.chosen_i, self.menu.items[self.menu.chosen_i])
+				if chosen_i_old ~= self.chosen_i then
+					self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
 				end
 				return true
 			end
@@ -546,7 +546,7 @@ def.default_skinner = {
 			love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
 		end
 
-		local chosen = self.menu.items[self.menu.chosen_i]
+		local chosen = self.items[self.chosen_i]
 		if chosen then
 			love.graphics.setColor(res.color_text)
 

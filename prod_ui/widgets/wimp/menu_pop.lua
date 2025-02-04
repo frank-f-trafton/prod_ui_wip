@@ -83,6 +83,7 @@ local def = {
 }
 
 
+lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.arrange = lgcMenu.arrangeListVerticalTB
 
@@ -123,7 +124,7 @@ end
 
 local function assignSubMenu(item, client, set_selection)
 	-- Only create a sub-menu if the last-open doesn't match the current index (including if last-open is false).
-	local selected_item = client.menu.items[client.menu.index]
+	local selected_item = client.items[client.index]
 	if selected_item ~= client.last_open_group then
 
 		-- If this menu currently has a sub-menu, close it.
@@ -163,9 +164,9 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.origin_item = item
 
 			if set_selection then
-				client_sub.menu.default_deselect = false
+				client_sub.default_deselect = false
 			end
-			client_sub.menu:setDefaultSelection()
+			client_sub:menuSetDefaultSelection()
 
 			-- Mark the item used to invoke this sub-menu.
 			client.last_open_group = item
@@ -181,8 +182,8 @@ local function async_changeSubMenu(self, item_index, dt)
 	-- We assume that this async function is only called as a result of the mouse hovering over a group,
 	-- so the sub-menu defaults to no selection.
 
-	if item_index == self.menu.index then
-		local item = self.menu.items[item_index]
+	if item_index == self.index then
+		local item = self.items[item_index]
 
 		if item and item.type == "group" then
 			assignSubMenu(item, self, false)
@@ -236,7 +237,7 @@ local function selectItemColor(item, client, skin)
 	if item.actionable then
 		return skin.color_actionable
 
-	elseif client.menu.items[client.menu.index] == item then
+	elseif client.items[client.index] == item then
 		return skin.color_selected
 
 	else
@@ -423,8 +424,7 @@ function def:updateDimensions()
 	--]]
 
 	local skin = self.skin
-	local menu = self.menu
-	local items = menu.items
+	local items = self.items
 
 	local font = skin.font_item
 
@@ -506,13 +506,13 @@ function def:updateDimensions()
 	self:reshape()
 
 	-- Update item widths and then reshape their internals.
-	for i, item in ipairs(self.menu.items) do
+	for i, item in ipairs(self.items) do
 		item.w = self.vp_w
 		item:reshape(self)
 	end
 
 	-- Refresh document size.
-	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
+	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
 
 	print(
 		"self.w", self.w,
@@ -583,7 +583,7 @@ def.moveLast = lgcMenu.widgetMoveLast
 -- @param index (default: #items + 1) Where to add the item in the list.
 -- @return Nothing.
 function def:addItem(item_instance, index)
-	local items = self.menu.items
+	local items = self.items
 	index = index or #items + 1
 
 	table.insert(items, index, item_instance)
@@ -598,7 +598,7 @@ end
 -- @param index (default: #items) Index of the item to remove. Must point to a valid table.
 -- @return The removed item instance.
 function def:removeItem(index)
-	local items = self.menu.items
+	local items = self.items
 	index = index or #items
 
 	-- Catch attempts to remove invalid item indexes (Lua's table.remove() is okay with empty indexes 0 and 1)
@@ -606,7 +606,7 @@ function def:removeItem(index)
 		error("Menu has no item at index: " .. tostring(index))
 	end
 
-	local removed = table.remove(self.menu.items, index)
+	local removed = table.remove(self.items, index)
 
 	return removed
 
@@ -620,7 +620,7 @@ end
 -- @return The removed item. Raises an error if the item is not found in the menu.
 function def:removeItemTable(item) -- XXX untested
 	local index
-	for i, check in ipairs(self.menu.items) do
+	for i, check in ipairs(self.items) do
 		if check == item then
 			index = i
 			break
@@ -638,7 +638,7 @@ end
 
 
 function def:menuChangeCleanup()
-	self.menu:setSelectionStep(0, false)
+	self:menuSetSelectionStep(0, false)
 	self:arrange()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
@@ -664,7 +664,8 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.instanceSetup(self)
+	lgcMenu.setup(self)
+	self.default_deselect = true
 
 	-- XXX: test
 	self.is_blocking_clicks = false
@@ -717,9 +718,6 @@ function def:uiCall_initialize()
 	-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
 	--self.origin_item =
 
-	self.menu = self.menu or lgcMenu.new()
-	self.menu.default_deselect = true
-
 	self:skinSetRefs()
 	self:skinInstall()
 
@@ -745,10 +743,8 @@ end
 -- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
-	local menu = self.menu
-
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(menu.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
 	end
 
 	-- Set the draw ranges for items.
@@ -826,7 +822,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		end
 		-- 'left' needs to fall down here if not handled.
 
-		local sel_item = self.menu.items[self.menu.index]
+		local sel_item = self.items[self.index]
 
 		if sel_item and sel_item.selectable and sel_item.actionable then
 			if sel_item.type == "group" then
@@ -859,9 +855,9 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local mod = self.context.key_mgr.mod
 		if not mod["ctrl"] then
 			-- Finally, check for key mnemonics.
-			local item_i, item = keyMnemonicSearch(self.menu.items, key)
+			local item_i, item = keyMnemonicSearch(self.items, key)
 			if item and item.selectable then
-				self.menu:setSelectedIndex(item_i)
+				self:menuSetSelectedIndex(item_i)
 				if item.actionable then
 					if item.type == "group" then
 						if item.group_def then
@@ -887,9 +883,9 @@ end
 
 
 function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
-	local item_i, item = keyMnemonicSearch(self.menu.items, key)
+	local item_i, item = keyMnemonicSearch(self.items, key)
 	if item and item.selectable then
-		self.menu:setSelectedIndex(item_i)
+		self:menuSetSelectedIndex(item_i)
 		if item.actionable then
 			if item.type == "group" then
 				if item.group_def then
@@ -961,15 +957,15 @@ local function restingOnOpenGroup(self)
 	print("restingOnOpenGroup",
 		self.chain_next,
 		self.chain_next and self.chain_next.origin_item,
-		self.menu.items[self.menu.index])
+		self.items[self.index])
 	--]]
-	return self.chain_next and self.chain_next.origin_item == self.menu.items[self.menu.index]
+	return self.chain_next and self.chain_next.origin_item == self.items[self.index]
 end
 
 
 local function findOriginItemIndex(c_prev, origin_item)
-	for i, c_item in ipairs(c_prev.menu.items) do
-		--print(i, c_item, #c_prev.menu.items)
+	for i, c_item in ipairs(c_prev.items) do
+		--print(i, c_item, #c_prev.items)
 		if c_item == origin_item then
 			return i
 		end
@@ -989,7 +985,7 @@ local function forceSuperMenuGroupSelection(self)
 		local index = findOriginItemIndex(w_prev, self.origin_item)
 
 		if index then
-			w_prev.menu:setSelectedIndex(index)
+			w_prev:menuSetSelectedIndex(index)
 		end
 	end
 end
@@ -1004,9 +1000,9 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 	mx = mx - self.vp_x
 	my = my - self.vp_y
 
-	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.menu.items)
+	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.items)
 	if item_i and item_t.selectable then
-		self.menu:setSelectedIndex(item_i)
+		self:menuSetSelectedIndex(item_i)
 		--self:selectionInView()
 
 		-- Immediately open groups when dragging over them.
@@ -1018,7 +1014,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 	-- Only remove the selection if it is not a group that is currently opened.
 	elseif not restingOnOpenGroup(self) then
-		self.menu:setSelectedIndex(0)
+		self:menuSetSelectedIndex(0)
 	end
 
 	-- If this is a sub-menu, force the left-menu's open group to remain selected.
@@ -1035,20 +1031,17 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local hover_ok = false
 
 		if widShared.pointInViewport(self, 2, mx, my) then
-
-			local menu = self.menu
-
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#menu.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 			if item and item.selectable then
 				self.MN_item_hover = item
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.menu.items[self.menu.index]
+					local selected_item = self.items[self.index]
 					if item ~= selected_item then
-						self.menu:setSelectedIndex(i)
+						self:menuSetSelectedIndex(i)
 					end
 				end
 
@@ -1061,7 +1054,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 			-- Only remove the selection if it is not a group that is currently opened.
 			if not restingOnOpenGroup(self) then
-				self.menu:setSelectedIndex(0)
+				self:menuSetSelectedIndex(0)
 			end
 		end
 
@@ -1079,7 +1072,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		-- Only remove the selection if it is not a group that is currently opened.
 		if not restingOnOpenGroup(self) then
-			self.menu:setSelectedIndex(0)
+			self:menuSetSelectedIndex(0)
 		end
 	end
 end
@@ -1108,7 +1101,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 			-- Check for click-able items.
 			if not self.press_busy then
-				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.menu.items, self.MN_items_last))
+				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 				self.press_busy = "menu-drag"
 
@@ -1139,7 +1132,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 			-- Handle mouse unpressing over the selected item.
 			if button == 1 then
-				local item_selected = self.menu.items[self.menu.index]
+				local item_selected = self.items[self.index]
 				if item_selected and item_selected.selectable and item_selected.actionable then
 
 					local ax, ay = self:getAbsolutePosition()
@@ -1205,7 +1198,7 @@ function def:uiCall_update(dt)
 
 	--print("wid_update", "open_time", self.open_time)
 
-	local selected = self.menu.items[self.menu.index]
+	local selected = self.items[self.index]
 
 	--[[
 	local cur_thimble2 = self.context.thimble2
@@ -1220,14 +1213,14 @@ function def:uiCall_update(dt)
 	end
 
 	--print("chain_next", self.chain_next, "in_chain", in_chain)
-	--print("menu.index", self.menu.index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
+	--print("self.index", self.index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
 	--]]
 
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
 	if self.context.mouse_focus then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
-		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.menu.items)
+		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.items)
 	end
 
 	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a", "last_open", self.last_open_group, "open_time", self.open_time)
@@ -1242,7 +1235,7 @@ function def:uiCall_update(dt)
 	end
 
 	if self.open_time >= 0.20 then -- XXX config/style
-		self.context:appendAsyncAction(self, async_changeSubMenu, self.menu.index)
+		self.context:appendAsyncAction(self, async_changeSubMenu, self.index)
 		self.open_time = 0
 	end
 
@@ -1293,8 +1286,7 @@ def.default_skinner = {
 		local tq_px = skin.tq_px
 		local tq_arrow = skin.tq_arrow
 
-		local menu = self.menu
-		local items = menu.items
+		local items = self.items
 
 		local font = skin.font_item
 
@@ -1314,7 +1306,7 @@ def.default_skinner = {
 		-- Pop up menus do not render hover-glow.
 
 		-- Selection glow.
-		local sel_item = items[menu.index]
+		local sel_item = items[self.index]
 		if sel_item then
 			love.graphics.setColor(skin.color_select_glow)
 			uiGraphics.quad1x1(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
