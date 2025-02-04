@@ -289,8 +289,7 @@ local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
 		-- Uncomment to enable a user event for debug rendering.
 		--[[
 		if wid.userDebugRender then
-			local uiWidget = require(REQ_PATH .. "ui_widget")
-			uiWidget._runUserEvent(wid, "userDebugRender", os_x, os_y)
+			wid:_runUserEvent("userDebugRender", os_x, os_y)
 		end
 		--]]
 	end -- / if wid.visible

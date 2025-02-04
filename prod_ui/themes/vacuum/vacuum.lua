@@ -203,8 +203,6 @@ function themeDef.newInstance(scale)
 	inst.common = {}
 
 	-- Common details for drawing a rectangular thimble glow.
-	-- If you mix the default thimble renderer with custom renderers, you can overwrite the contents of
-	-- uiWidget.thimble_info with these fields to maintain consistency.
 	inst.common.thimble_info = {}
 	inst.common.thimble_info.mode = "line"
 	inst.common.thimble_info.color = {0.2, 0.2, 1.0, 1.0}

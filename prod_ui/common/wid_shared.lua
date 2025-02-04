@@ -8,7 +8,6 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local commonMath = require(REQ_PATH .. "common_math")
-local eventHandlers = require(REQ_PATH .. "event_handlers")
 
 
 -- A common dummy function for widgets.

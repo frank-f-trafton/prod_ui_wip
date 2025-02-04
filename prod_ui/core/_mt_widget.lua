@@ -1,27 +1,27 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 -- ProdUI: Widget implementation.
 
 
-local uiWidget = {}
+local context = select(1, ...)
+
+
+local _mt_widget = {}
+_mt_widget.__index = _mt_widget
+_mt_widget.context = context
 
 
 -- For loading widget defs, see the UI Context source.
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-
-local uiShared = require(REQ_PATH .. "ui_shared")
-local utilTable = require(REQ_PATH .. "common.util_table")
-local widShared = require(REQ_PATH .. "common.wid_shared")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
+local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local dummyFunc = function() end
 local dummy_table = {}
-
-
-local _mt_widget = {}
-_mt_widget.__index = _mt_widget
-uiWidget._mt_widget = _mt_widget
 
 
 local function errNoDescendants()
@@ -141,18 +141,18 @@ end
 -- @param id The User Event string ID to run.
 -- @param a, b, c, d Generic arguments. Usage depends on the ID.
 -- @return Nothing.
-function uiWidget._runUserEvent(wid, id, a, b, c, d)
-	local user_event = wid[id]
+function _mt_widget:_runUserEvent(id, a, b, c, d)
+	local user_event = self[id]
 
 	if user_event == nil then
 		-- Do nothing.
 
 	elseif type(user_event) == "function" then
-		user_event(wid, a, b, c, d)
+		user_event(self, a, b, c, d)
 
 	elseif type(user_event) == "table" then
 		for i, func in ipairs(user_event) do
-			func(wid, a, b, c, d)
+			func(self, a, b, c, d)
 		end
 
 	else
@@ -163,13 +163,13 @@ end
 
 --- Check if the mouse pointer is hovering over the widget's contact box.
 function _mt_widget:checkHovered()
-	return self.context.current_hover == self
+	return context.current_hover == self
 end
 
 
 --- Check if the mouse pointer is currently pressing the widget.
 function _mt_widget:checkPressed()
-	return self.context.current_pressed == self
+	return context.current_pressed == self
 end
 
 
@@ -183,7 +183,6 @@ end
 --- Check if this widget currently has top thimble focus.
 -- @return True if it has the thimble, false if not.
 function _mt_widget:hasTopThimble()
-	local context = self.context
 	return context.thimble2 and context.thimble2 == self or context.thimble1 == self
 end
 
@@ -191,18 +190,17 @@ end
 --- Check if the widget has either thimble1 or thimble2.
 -- @return 1 for thimble1, 2 for thimble2, otherwise `nil`.
 function _mt_widget:hasAnyThimble()
-	local context = self.context
 	return context.thimble2 == self and 2 or context.thimble1 == self and 1
 end
 
 
 function _mt_widget:hasThimble1()
-	return self.context.thimble1 == self
+	return context.thimble1 == self
 end
 
 
 function _mt_widget:hasThimble2()
-	return self.context.thimble2 == self
+	return context.thimble2 == self
 end
 
 
@@ -215,7 +213,6 @@ function _mt_widget:takeThimble1(a, b, c, d)
 	--print("takeThimble1", debug.traceback())
 	_assertCanHaveThimble(self)
 
-	local context = self.context
 	local thimble1, thimble2 = context.thimble1, context.thimble2
 
 	if thimble1 ~= self then
@@ -244,7 +241,6 @@ function _mt_widget:takeThimble2(a, b, c, d)
 	--print("takeThimble2", debug.traceback())
 	_assertCanHaveThimble(self)
 
-	local context = self.context
 	local thimble1, thimble2 = context.thimble1, context.thimble2
 
 	if thimble2 ~= self then
@@ -287,7 +283,6 @@ end
 
 
 function _mt_widget:releaseThimble1(a, b, c, d)
-	local context = self.context
 	local thimble2 = context.thimble2
 
 	if context.thimble1 ~= self then
@@ -306,7 +301,6 @@ end
 
 
 function _mt_widget:releaseThimble2(a, b, c, d)
-	local context = self.context
 	local thimble1 = context.thimble1
 
 	if context.thimble2 ~= self then
@@ -380,11 +374,11 @@ function _mt_widget:captureFocus()
 		error("widget isn't allowed to capture the focus.")
 	end
 
-	if self.context.captured_focus then
-		self.context.captured_focus:sendEvent("uiCall_uncapture", self)
+	if context.captured_focus then
+		context.captured_focus:sendEvent("uiCall_uncapture", self)
 	end
 
-	self.context.captured_focus = self
+	context.captured_focus = self
 
 	self:sendEvent("uiCall_capture", self)
 end
@@ -392,13 +386,13 @@ end
 
 --- Release the captured focus. The focus must currently be captured by this widget.
 function _mt_widget:uncaptureFocus()
-	if self.context.captured_focus ~= self then
+	if context.captured_focus ~= self then
 		error("can't release focus as widget isn't currently capturing it.")
 	end
 
 	self:sendEvent("uiCall_uncapture", self)
 
-	self.context.captured_focus = false
+	context.captured_focus = false
 end
 
 
@@ -461,40 +455,6 @@ function _mt_widget:getRelativePositionScrolled(x, y)
 end
 
 
---- Sets up a new widget instance table. Internal use.
-function uiWidget._prepareWidgetInstance(id, context, parent, siblings, pos)
-	pos = pos or #siblings + 1
-	if pos < 1 or pos > #siblings + 1 then
-		error("position is out of range.")
-	end
-
-	local def = context.widget_defs[id]
-
-	-- Unsupported type. (Corrupt widget defs collection?)
-	if type(def) ~= "table" then
-		error("unregistered ID or unsupported type for widget def (id: " .. tostring(id) .. ", type: " .. type(def) .. ")")
-	end
-
-	local inst = {}
-
-	inst.settings = def.default_settings and {}
-
-	-- Back-links
-	inst.context = context
-	inst.parent = parent
-
-	setmetatable(inst, def._inst_mt)
-
-	if not inst._no_descendants then
-		inst.children = {}
-	end
-
-	table.insert(siblings, pos, inst)
-
-	return inst
-end
-
-
 local debug_init_check
 function _mt_widget:initialize(...)
 	-- Uncomment to check for double initializations.
@@ -507,7 +467,7 @@ function _mt_widget:initialize(...)
 	--]]
 
 	self:uiCall_initialize(...)
-	uiWidget._runUserEvent(self, "userInitialize")
+	self:_runUserEvent("userInitialize")
 
 	return self
 end
@@ -522,14 +482,14 @@ function _mt_widget:addChild(id, pos)
 	uiShared.notNilNotFalseNotNaN(1, id)
 	uiShared.numberNotNaNEval(2, pos)
 
-	if self.context.locks[self] then
+	if context.locks[self] then
 		uiShared.errLocked("add child")
 
 	elseif self.children == _mt_no_descendants then
 		errNoDescendants()
 	end
 
-	return uiWidget._prepareWidgetInstance(id, self.context, self, self.children, pos)
+	return context:_prepareWidgetInstance(id, self, self.children, pos)
 end
 
 
@@ -541,8 +501,6 @@ function _mt_widget:remove()
 	if self._dead then
 		error("attempted to remove widget that is already " .. tostring(self._dead) .. ".")
 	end
-
-	local context = self.context
 
 	self._dead = "dying"
 
@@ -568,7 +526,7 @@ function _mt_widget:remove()
 		self:uncaptureFocus()
 	end
 
-	uiWidget._runUserEvent(self, "userDestroy")
+	self:_runUserEvent("userDestroy")
 	self:bubbleEvent("uiCall_destroy", self)
 
 	-- If parent exists, find and remove self from parent's list of children
@@ -669,7 +627,7 @@ local function _removeAsync(self)
 	self:remove()
 end
 function _mt_widget:removeAsync()
-	self.context:appendAsyncAction(self, _removeAsync)
+	context:appendAsyncAction(self, _removeAsync)
 end
 --]]
 
@@ -779,7 +737,7 @@ end
 
 
 function _mt_widget:getIndex(seq)
-	seq = seq or (self.parent and self.parent.children) or (self.context.instances)
+	seq = seq or (self.parent and self.parent.children) or (context.instances)
 
 	for i, child in ipairs(seq) do
 		if self == child then
@@ -836,7 +794,7 @@ function _mt_widget:sortChildren(recurse)
 	is 0, and it should respect the 'recurse' argument as well.
 	--]]
 
-	if self.context.locks[self] then
+	if context.locks[self] then
 		uiShared.errLocked("sort children")
 	end
 
@@ -900,11 +858,11 @@ end
 --  Locked during update: yes (parent)
 -- @param var "first" to move to the beginning of the list, "last" to move to the end, or a number to move by a relative number of steps (clamped to the list boundaries.)
 function _mt_widget:reorder(var)
-	if self.context.locks[self.parent] then
+	if context.locks[self.parent] then
 		uiShared.errLockedParent("reorder")
 	end
 
-	local seq = (self.parent and self.parent.children) or (self.context.instances)
+	local seq = (self.parent and self.parent.children) or (context.instances)
 
 	local self_i = self:getIndex(seq)
 	local dest_i
@@ -980,7 +938,7 @@ end
 -- Flat search of siblings for a specific string tag.
 function _mt_widget:findSiblingTag(str, i)
 	i = i or 1
-	local seq = (self.parent and self.parent.children) or (self.context.instances)
+	local seq = (self.parent and self.parent.children) or (context.instances)
 	local instance = seq[i]
 
 	while instance do
@@ -1124,7 +1082,7 @@ end
 
 
 -- Info for the default thimble render function.
-uiWidget.thimble_info = {
+local _thimble_info = {
 	mode = "line",
 	color = {0.2, 0.2, 1.0, 1.0},
 	line_style = "smooth",
@@ -1139,7 +1097,7 @@ uiWidget.thimble_info = {
 
 --- The default renderer for when widgets have the thimble.
 function _mt_widget:renderThimble()
-	local thimble_t = self.thimble_info or uiWidget.thimble_info
+	local thimble_t = self.thimble_info or _thimble_info
 
 	love.graphics.setColor(thimble_t.color)
 
@@ -1185,8 +1143,6 @@ end
 
 --- Set the high-priority cursor for widgets.
 function _mt_widget:setCursorHigh(id)
-	local context = self.context
-
 	if context.cursor_mgr then
 		context.cursor_mgr:assignCursor(id, 3)
 	end
@@ -1195,8 +1151,6 @@ end
 
 --- Get the current high-priority cursor ID, or false if none is set.
 function _mt_widget:getCursorHigh()
-	local context = self.context
-
 	if context.cursor_mgr then
 		return context.cursor_mgr:getCursorID(3)
 	else
@@ -1207,8 +1161,6 @@ end
 
 --- Set the low-priority cursor for widgets.
 function _mt_widget:setCursorLow(id)
-	local context = self.context
-
 	if context.cursor_mgr then
 		context.cursor_mgr:assignCursor(id, 4)
 	end
@@ -1217,8 +1169,6 @@ end
 
 --- Get the current low-priority cursor ID, or false if none is set.
 function _mt_widget:getCursorLow()
-	local context = self.context
-
 	if context.cursor_mgr then
 		return context.cursor_mgr:getCursorID(4)
 	else
@@ -1229,13 +1179,13 @@ end
 
 --- Check if a widget is currently locked by the context (for the update loop).
 function _mt_widget:isLocked()
-	return not not self.context.locks[self]
+	return not not context.locks[self]
 end
 
 
 --- Check if a widget's parent is currently locked by the context (for the update loop).
 function _mt_widget:isParentLocked()
-	return not not self.context.locks[self.parent]
+	return not not context.locks[self.parent]
 end
 
 
@@ -1261,7 +1211,7 @@ function _mt_widget:skinSetRefs()
 		error("no skin ID assigned to widget.")
 	end
 
-	local resources = self.context.resources
+	local resources = context.resources
 	local skin_inst = resources.skins[self.skin_id]
 	if not skin_inst then
 		error("widget skin (the data) is not loaded or is invalid: " .. tostring(self.skin_id))
@@ -1341,4 +1291,4 @@ function _mt_widget:writeSetting(key, val)
 end
 
 
-return uiWidget
+return _mt_widget
