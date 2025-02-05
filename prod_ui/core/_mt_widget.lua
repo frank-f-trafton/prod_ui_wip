@@ -380,7 +380,7 @@ function _mt_widget:captureFocus()
 
 	context.captured_focus = self
 
-	self:sendEvent("uiCall_capture", self)
+	self:sendEvent("uiCall_capture")
 end
 
 
@@ -390,7 +390,7 @@ function _mt_widget:uncaptureFocus()
 		error("can't release focus as widget isn't currently capturing it.")
 	end
 
-	self:sendEvent("uiCall_uncapture", self)
+	self:sendEvent("uiCall_uncapture")
 
 	context.captured_focus = false
 end

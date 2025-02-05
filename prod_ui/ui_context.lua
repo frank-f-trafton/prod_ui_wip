@@ -592,7 +592,7 @@ function _mt_context:love_focus(focus)
 	self.window_focus = focus
 
 	if self.root then
-		self.root:sendEvent("uiCall_windowFocus", self.root, focus)
+		self.root:sendEvent("uiCall_windowFocus", focus)
 	end
 end
 
@@ -607,7 +607,7 @@ function _mt_context:love_visible(visible)
 	self.window_visible = visible
 
 	if self.root then
-		self.root:sendEvent("uiCall_windowVisible", self.root, visible)
+		self.root:sendEvent("uiCall_windowVisible", visible)
 	end
 end
 
@@ -622,11 +622,12 @@ function _mt_context:love_mousefocus(focus)
 	self.mouse_focus = focus
 
 	if self.root then
-		self.root:sendEvent("uiCall_mouseFocus", self.root, focus)
+		self.root:sendEvent("uiCall_mouseFocus", focus)
 	end
 end
 
 
+--[[
 function _mt_context:love_textedited(text, start, length)
 	-- Event capture
 	local cap_cur = self.captured_focus
@@ -636,6 +637,7 @@ function _mt_context:love_textedited(text, start, length)
 
 	-- XXX not handled yet
 end
+--]]
 
 
 function _mt_context:love_keypressed(key, scancode, isrepeat)
@@ -808,19 +810,25 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 end
 
 
+--[[
 function _mt_context:love_touchpressed(id, x, y, dx, dy, pressure) -- XXX Not implemented yet
 	--
 end
+--]]
 
 
+--[[
 function _mt_context:love_touchmoved(id, x, y, dx, dy, pressure) -- XXX Not implemented yet
 	--
 end
+--]]
 
 
+--[[
 function _mt_context:love_touchreleased(id, x, y, dx, dy, pressure) -- XXX Not implemented yet
 	--
 end
+--]]
 
 
 function _mt_context:love_resize(w, h)
@@ -1005,11 +1013,11 @@ function _mt_context:love_filedropped(file)
 	-- Any widget has focus: cycle the event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_fileDropped", file)
+		wid_cur:cycleEvent("uiCall_fileDropped", wid_cur, file)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_fileDropped", file) -- no ancestors
+		self.root:sendEvent("uiCall_fileDropped", self.root, file) -- no ancestors
 	end
 end
 
@@ -1024,11 +1032,11 @@ function _mt_context:love_directorydropped(path)
 	-- Any widget has focus: cycle the event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_directoryDropped", file)
+		wid_cur:cycleEvent("uiCall_directoryDropped", wid_cur, file)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_directoryDropped", file) -- no ancestors
+		self.root:sendEvent("uiCall_directoryDropped", self.root, file) -- no ancestors
 	end
 end
 
