@@ -1,5 +1,5 @@
 return {
-	type = "reference",
+	type = "collection",
 	title = "Widget Callbacks",
 	id = "widget_callback",
 	schema = {
@@ -29,7 +29,7 @@ return {
 			description = "Draws the widget (before its children).",
 			signature = "def:render(os_x, os_y)",
 			parameters = {
-				["#"] = {
+				{
 					name = "os_x, os_y",
 					type = "number",
 					description = "X and Y offsets, in screen pixels.",
@@ -47,7 +47,7 @@ return {
 			description = "Draws the widget (after its children).",
 			signature = "def:renderLast(os_x, os_y)",
 			parameters = {
-				["#"] = {
+				{
 					name = "os_x, os_y",
 					type = "number",
 					description = "X and Y offsets, in screen pixels.",
@@ -65,7 +65,7 @@ return {
 			description = "Draws the visual representation of keyboard focus for a widget.",
 			signature = "def:renderThimble(os_x, os_y)",
 			parameters = {
-				["#"] = {
+				{
 					name = "os_x, os_y",
 					type = "number",
 					description = "X and Y offsets, in screen pixels.",
@@ -80,7 +80,7 @@ return {
 			description = "Determines if the mouse cursor is hovering over this widget.",
 			signature = "def:ui_evaluateHover(mx, my, os_x, os_y)",
 			parameters = {
-				["#"] = {
+				{
 					name = "mx, my",
 					type = "number",
 					description = "The mouse cursor position in UI space.",
@@ -99,7 +99,7 @@ return {
 			description = "Determines if the mouse is pressing this widget.",
 			signature = "def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)",
 			parameters = {
-				["#"] = {
+				{
 					name = "mx, my",
 					type = "number",
 					description = "The mouse cursor position in UI space.",

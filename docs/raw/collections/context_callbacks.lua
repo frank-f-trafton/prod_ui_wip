@@ -1,5 +1,5 @@
 return {
-	type = "reference",
+	type = "collection",
 	title = "Context LÖVE Callbacks",
 	id = "context_love_callback",
 	schema = {

@@ -1,5 +1,5 @@
 return {
-	type = "reference",
+	type = "collection",
 	title = "Widget Events",
 	id = "widget_event",
 	schema = {
@@ -31,7 +31,7 @@ return {
 			description = "A held gamepad button was released.",
 			signature = "def:uiCall_gamepadReleased(inst, joystick, button)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -55,7 +55,7 @@ return {
 			description = "A gamepad axis moved.",
 			signature = "def:uiCall_gamepadAxis(inst, joystick, axis, value)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -79,7 +79,7 @@ return {
 			description = "A gamepad button was pressed.",
 			signature = "def:uiCall_gamepadPressed(inst, joystick, button)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -103,7 +103,7 @@ return {
 			description = "A joystick POV hat moved.",
 			signature = "def:uiCall_joystickHat(inst, joystick, hat, direction)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -131,7 +131,7 @@ return {
 			description = "A joystick axis moved.",
 			signature = "def:uiCall_joystickAxis(inst, joystick, axis, value)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -159,7 +159,7 @@ return {
 			description = "A joystick button was released.",
 			signature = "def:uiCall_joystickReleased(inst, joystick, button)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -183,7 +183,7 @@ return {
 			description = "A joystick button was pressed.",
 			signature = "def:uiCall_joystickPressed(inst, joystick, button)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -207,7 +207,7 @@ return {
 			description = "The application window's visibility changed.",
 			signature = "def:uiCall_windowVisible(visible)",
 			parameters = {
-				["#"] = {
+				{
 					name = "visible",
 					type = "boolean",
 					description = "True if the window is visible, false if not.",
@@ -223,7 +223,7 @@ return {
 			description = "The application window was resized.",
 			signature = "def:uiCall_windowResize(w, h)",
 			parameters = {
-				["#"] = {
+				{
 					name = "w, h",
 					type = "number",
 					description = "The new window width and height.",
@@ -239,7 +239,7 @@ return {
 			description = "A joystick was connected.",
 			signature = "def:uiCall_joystickAdded(joystick)",
 			parameters = {
-				["#"] = {
+				{
 					name = "joystick",
 					type = "love:Joystick",
 					description = "The joystick associated with the event.",
@@ -255,7 +255,7 @@ return {
 			description = "A joystick was disconnected.",
 			signature = "def:uiCall_joystickRemoved(joystick)",
 			parameters = {
-				["#"] = {
+				{
 					name = "joystick",
 					type = "love:Joystick",
 					description = "The joystick associated with the event.",
@@ -271,7 +271,7 @@ return {
 			description = "A per-frame update callback for widgets.",
 			signature = "def:uiCall_update(dt)",
 			parameters = {
-				["#"] = {
+				{
 					name = "dt",
 					type = "number",
 					description = "This frame's delta time.",
@@ -298,7 +298,7 @@ return {
 			description = "The application window focus changed.",
 			signature = "def:uiCall_windowFocus(focus)",
 			parameters = {
-				["#"] = {
+				{
 					name = "focus",
 					type = "boolean",
 					description = "True if the window has focus, false if not.",
@@ -314,7 +314,7 @@ return {
 			description = "The application window's mouse focus changed.",
 			signature = "def:uiCall_mouseFocus(focus)",
 			parameters = {
-				["#"] = {
+				{
 					name = "focus",
 					type = "boolean",
 					description = "True if the window has mouse focus, false if not.",
@@ -330,7 +330,7 @@ return {
 			description = "A widget called self:reshape() or self:reshapeChildren().",
 			signature = "def:uiCall_reshape(recursive)",
 			parameters = {
-				["#"] = {
+				{
 					name = "recursive",
 					type = "boolean",
 					description = "True if reshape() was called with the recursive argument.",
@@ -365,7 +365,7 @@ return {
 			description = "A new widget is being initialized.",
 			signature = "def:uiCall_initialize(...)",
 			parameters = {
-				["#"] = {
+				{
 					name = "...",
 					type = "any",
 					description = "Arguments for the widget setup callback.",
@@ -391,7 +391,7 @@ return {
 			description = "A widget was removed from the context.",
 			signature = "def:uiCall_destroy(inst)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -410,7 +410,7 @@ return {
 			description = "The mouse pointer entered a widget's bounding rectangle.",
 			signature = "def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -437,7 +437,7 @@ return {
 			description = "The mouse pointer left a widget's bounding rectangle.",
 			signature = "def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -464,7 +464,7 @@ return {
 			description = "The mouse pointer is resting or moving over a widget.",
 			signature = "def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -488,7 +488,7 @@ return {
 			description = "The mouse cursor pressed down on a widget.",
 			signature = "def:uiCall_pointerPress(inst, x, y, button, istouch, presses)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -527,7 +527,7 @@ return {
 			description = "Called periodically after the the mouse has remained pressed on a widget for some time.",
 			signature = "def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -568,7 +568,7 @@ return {
 			description = "The mouse cursor stopped pressing on a widget, and the cursor was within the widget's bounds.",
 			signature = "def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -603,7 +603,7 @@ return {
 			description = "The mouse stopped pressing on a widget.",
 			signature = "def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -638,7 +638,7 @@ return {
 			description = "The mouse cursor is pressing on this widget.",
 			signature = "def:uiCall_pointerDrag(inst, x, y, dx, dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -665,7 +665,7 @@ return {
 			description = "The mouse wheel moved.",
 			signature = "def:uiCall_pointerWheel(x, y)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -685,7 +685,7 @@ return {
 			description = "The mouse cursor, while pressing, dragged onto this widget.",
 			signature = "def:uiCall_pointerDragDestOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -707,7 +707,7 @@ return {
 
                 Behavior notes:
 
-                * Source and desination can be the same widget.
+                * Source and destination can be the same widget.
 
                 * A reference to Source is not provided in the function arguments, but it can be found by reading self.context.current_pressed.
 
@@ -722,7 +722,7 @@ return {
 			description = "The mouse cursor, while pressing, moved off of this widget.",
 			signature = "def:uiCall_pointerDragDestOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -746,7 +746,7 @@ return {
 			description = "The mouse, while pressing, is currently over this widget.",
 			signature = "def:uiCall_pointerDragDestMove(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -773,7 +773,7 @@ return {
 			description = "The mouse cursor released a button while over this widget.",
 			signature = "def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -805,7 +805,7 @@ return {
 			description = "A widget took thimble1.",
 			signature = "def:uiCall_thimble1Take(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -825,7 +825,7 @@ return {
 			description = "A widget took thimble2.",
 			signature = "def:uiCall_thimble1Take(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -845,7 +845,7 @@ return {
 			description = "A widget released or lost thimble1.",
 			signature = "def:uiCall_thimble1Release(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -865,7 +865,7 @@ return {
 			description = "A widget released thimble2.",
 			signature = "def:uiCall_thimble2Release(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -885,7 +885,7 @@ return {
 			description = "A widget got the top thimble.",
 			signature = "def:uiCall_thimbleTopTake(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -905,7 +905,7 @@ return {
 			description = "A widget lost the top thimble.",
 			signature = "def:uiCall_thimbleTopRelease(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -925,7 +925,7 @@ return {
 			description = "Emitted to the holder of thimble2 when thimble1 changes.",
 			signature = "def:uiCall_thimble1Changed(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -945,7 +945,7 @@ return {
 			description = "Emitted to the holder of thimble1 when thimble2 changes.",
 			signature = "def:uiCall_thimble2Changed(inst, a, b, c, d)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -965,7 +965,7 @@ return {
 			description = "The user pressed enter (return) or space while this widget had the thimble.",
 			signature = "def:uiCall_thimbleAction(inst, key, scancode, isrepeat)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -996,7 +996,7 @@ return {
 			description = "The user pressed the Application key or Shift+F10 while a widget had the thimble.",
 			signature = "def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -1027,7 +1027,7 @@ return {
 			description = "The user pressed a key while this widget had the thimble.",
 			signature = "def:uiCall_keyPressed(inst, key, scancode, isrepeat)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -1055,7 +1055,7 @@ return {
 			description = "The user released a key while this widget had the thimble.",
 			signature = "def:uiCall_keyReleased(inst, key, scancode)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -1079,7 +1079,7 @@ return {
 			description = "The user inputted text.",
 			signature = "def:uiCall_textInput(inst, text)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -1106,7 +1106,7 @@ return {
 			description = "The user dropped a file onto the application window.",
 			signature = "def:uiCall_fileDropped(inst, file)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -1129,7 +1129,7 @@ return {
 			description = "The user dropped a directory onto the application window.",
 			signature = "def:uiCall_directoryDropped(inst, path)",
 			parameters = {
-				["#"] = {
+				{
 					name = "inst",
 					type = "ui:Widget",
 					description = "The target widget instance.",
@@ -1172,7 +1172,7 @@ return {
 			description = "Runs on the start of every frame when the widget is capturing events from the context.",
 			signature = "def:uiCall_captureTick(dt)",
 			parameters = {
-				["#"] = {
+				{
 					name = "dt",
 					type = "number",
 					description = "This frame's delta time (from love.update()).",
