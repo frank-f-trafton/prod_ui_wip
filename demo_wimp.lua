@@ -52,7 +52,6 @@ local commonWimp = require("prod_ui.common.common_wimp")
 local itemOps = require("prod_ui.common.item_ops")
 local keyCombo = require("prod_ui.lib.key_combo")
 local uiContext = require("prod_ui.ui_context")
-local uiDraw = require("prod_ui.ui_draw")
 local uiGraphics = require("prod_ui.ui_graphics")
 local uiLayout = require("prod_ui.ui_layout")
 local uiRes = require("prod_ui.ui_res")
@@ -629,7 +628,7 @@ function love.draw()
 	-- XXX right... setScissor() won't work if the display is scaled, and especially if it has sub-pixel rendering precision.
 	love.graphics.setScissor()
 
-	uiDraw.drawContext(context, 0, 0)
+	context:draw(0, 0)
 
 	love.graphics.setScissor()
 

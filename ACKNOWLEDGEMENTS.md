@@ -23,7 +23,7 @@
 
 * The stepper widget concept is taken from [LUIGI](http://airstruck.github.io/luigi/doc/widgets/stepper.html).
 
-* The uiDraw canvas stack behavior is based on the opacity stack in [lwtk](https://github.com/osch/lua-lwtk/blob/master/src/lwtk/love/DrawContext.lua#L51C5-L51C5).
+* The contextDraw canvas stack behavior is based on the opacity stack in [lwtk](https://github.com/osch/lua-lwtk).
 
 * Parts of the layout system are inspired by the `pack` command in [Tk](https://www.tcl.tk/).
 

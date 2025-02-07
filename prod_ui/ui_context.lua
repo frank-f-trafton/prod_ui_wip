@@ -12,6 +12,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
+local contextDraw = require(REQ_PATH .. "core.context_draw")
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
 local mouseLogic = require(REQ_PATH .. "core.mouse_logic")
 local commonMath = require(REQ_PATH .. "common.common_math")
@@ -29,6 +30,9 @@ local dummyFunc = function() end
 local _mt_context = {}
 _mt_context.__index = _mt_context
 uiContext._mt_context = _mt_context
+
+
+_mt_context.draw = contextDraw.draw
 
 
 -- Called first and last in context:love_update():
@@ -141,15 +145,17 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- Place the theme instance (containing shared resources such as textures) here.
 	self.resources = false
 
+	-- Passed as the settings argument when creating new layer canvases.
+	self.canvas_settings = {}
+
+	-- Stack of canvases used for tint/fade layering.
+	self.canvas_layers = {}
+	self.canvas_layers_i = 0
+	self.canvas_layers_max = 32
 
 	-- Cache for shared Lua source files.
 	-- For convenience, cache:get() and cache:try() are wrapped as context:getLua() and
 	-- context:tryLua().
-	local cache_opts = {
-		paths = {prod_ui_path},
-		extensions = {"lua"},
-		owner = self,
-	}
 	self._shared = uiLoad.new(self, _loader_lua)
 
 	self._mt_widget = self:getLua("core/_mt_widget")
