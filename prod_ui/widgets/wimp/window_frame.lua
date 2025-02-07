@@ -465,11 +465,20 @@ function def.trickle:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mou
 end
 
 
+local function _getCursorAxisInfo(self, mx, my)
+	local diag = self.skin.sensor_resize_diagonal
+	local axis_x = mx < self.vp_x + diag and -1 or mx >= self.vp_x + self.vp_w - diag and 1 or 0
+	local axis_y = my < self.vp_y + diag and -1 or my >= self.vp_y + self.vp_h - diag and 1 or 0
+
+	return axis_x, axis_y
+end
+
+
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		local axis_x = mx < self.vp_x and -1 or mx >= self.vp_x + self.vp_w and 1 or 0
-		local axis_y = my < self.vp_y and -1 or my >= self.vp_y + self.vp_h and 1 or 0
+
+		local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 		if not self.maximized and not (axis_x == 0 and axis_y == 0) then
 			self.mouse_in_resize_zone = true
 			local cursor_id = getCursorCode(axis_x, axis_y)
@@ -623,8 +632,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			-- If we did not interact with the header, and the mouse pointer is outside of viewport #1, then this
 			-- is a resize action.
 			if not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h) then
-				local axis_x = mx < self.vp_x and -1 or mx >= self.vp_x + self.vp_w and 1 or 0
-				local axis_y = my < self.vp_y and -1 or my >= self.vp_y + self.vp_h and 1 or 0
+				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 				if not (axis_x == 0 and axis_y == 0) then
 					self:initiateResizeMode(axis_x, axis_y)
 				end

@@ -184,7 +184,10 @@ function themeDef.newInstance(scale)
 	inst.wimp.frame_outbound_limit = math.max(1, math.floor(32 * scale))
 
 	-- How many pixels to extend / pad resize sensors.
-	inst.wimp.frame_resize_pad = math.max(1, math.floor(8 * scale))
+	inst.wimp.frame_resize_pad = math.max(1, math.floor(12 * scale))
+
+	-- How much to extend the diagonal parts of the resize area.
+	inst.wimp.frame_resize_diagonal = math.max(0, math.floor(12 * scale))
 
 	-- Theme -> Skin settings
 	inst.wimp.frame_render_shadow = true
