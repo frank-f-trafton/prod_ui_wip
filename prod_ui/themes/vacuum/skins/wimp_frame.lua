@@ -26,6 +26,7 @@ return {
 	header_text_align_h = "*wimp/header_text_align_h",
 	header_text_align_v = "*wimp/header_text_align_v",
 	sensor_resize_pad = "*wimp/frame_resize_pad",
+	sensor_resize_diagonal = "*wimp/frame_resize_diagonal",
 	shadow_extrude = 8,
 
 	color_body = {1.0, 1.0, 1.0, 1.0},
