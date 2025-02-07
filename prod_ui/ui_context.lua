@@ -77,10 +77,32 @@ local function cb_keyUp(self, kc, sc)
 end
 
 
-local function _loader_lua(file_path, self)
-	local chunk = love.filesystem.load(file_path)
-	local result = chunk(self, file_path)
-	return result
+--[[
+context:getLua() and context:tryLua() are similar to require(), but they use forward slashes for directory separators,
+and they pass the UI context table through varargs. The modules are cached inside of `context._shared`, with file paths as
+keys.
+
+Each context will have its own cached instance of a module. Avoid using both getLua() and require() on the same file.
+--]]
+
+
+function _mt_context:getLua(file_path)
+	return self._shared:get(file_path)
+end
+
+
+function _mt_context:tryLua(file_path)
+	return self._shared:try(file_path)
+end
+
+
+local function _loader_lua(context, file_path)
+	local chunk, err = love.filesystem.load(context.conf.prod_ui_path .. file_path .. ".lua")
+	if not chunk then
+		return false, err
+	end
+
+	return chunk(context, file_path)
 end
 
 
@@ -120,7 +142,7 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.resources = false
 
 
-	-- Loader cache for shared Lua source files.
+	-- Cache for shared Lua source files.
 	-- For convenience, cache:get() and cache:try() are wrapped as context:getLua() and
 	-- context:tryLua().
 	local cache_opts = {
@@ -128,7 +150,7 @@ function uiContext.newContext(prod_ui_path, settings)
 		extensions = {"lua"},
 		owner = self,
 	}
-	self._shared = uiLoad.new(_loader_lua, cache_opts)
+	self._shared = uiLoad.new(self, _loader_lua)
 
 	self._mt_widget = self:getLua("core/_mt_widget")
 
@@ -339,37 +361,6 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 			self.current_pressed:cycleEvent("uiCall_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
 		end
 	end
-end
-
-
---[[
-*** WARNING ***
-
-If you use both context:get|tryLua() and require() to access the same source modules, you will end
-up with two separate cached versions of the module.
-
-Files which need to be loaded with context:get|tryLua() typically pull in context state from varargs
-in the first few lines.
---]]
-
-
---- Gets a ProdUI Lua source file, caching it for future calls. Raises an error if the file cannot be
---	loaded.
--- @param file_path The file path. Start at the prod_ui directory, use forward slashes, and omit the
--- '.lua' extension.
--- @return The loaded module.
-function _mt_context:getLua(file_path)
-	return self._shared:get(file_path)
-end
-
-
---- Tries to get a Lua source file, caching it for future calls. Returns false plus error message if
---	the file cannot be loaded.
--- @param file_path The file path. Start at the prod_ui directory, use forward slashes, and omit the
--- '.lua' extension.
--- @return The loaded module, or false plus error message if there was a problem.
-function _mt_context:tryLua(file_path)
-	return self._shared:try(file_path)
 end
 
 
