@@ -1,10 +1,10 @@
--- uiDraw: Implements the context draw loop.
+-- contextDraw: Implements the context draw loop.
 
 
-local uiDraw = {}
+local contextDraw = {}
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+--local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 -- DEBUG: printing wrappers.
@@ -84,23 +84,13 @@ local temp_quad = love.graphics.newQuad(0, 0, 1, 1, 1, 1)
 local last_w, last_h = love.graphics.getDimensions()
 
 
--- Per-context stack of canvases used for tint/fade layering.
-local canvas_layers = {}
-local canvas_layers_i = 0
-local canvas_layers_max = 32
-
-
--- Passed as the settings argument when creating new layer canvases.
-uiDraw.canvas_settings = {}
-
-
-local function newCanvasEntry(w, h, sx, sy, sw, sh)
+local function newCanvasEntry(context, w, h, sx, sy, sw, sh)
 	local entry = {}
 
 	w = math.min(w, graphics_limits.texturesize)
 	h = math.min(h, graphics_limits.texturesize)
 
-	entry.canvas = love.graphics.newCanvas(w, h, uiDraw.canvas_settings)
+	entry.canvas = love.graphics.newCanvas(w, h, context.canvas_settings)
 
 	-- The scissor box state to restore after popping this layer.
 	-- No sx == no scissor box.
@@ -114,18 +104,18 @@ end
 
 
 --- Push a canvas layer.
-function uiDraw.pushLayer(sx, sy, sw, sh)
-	canvas_layers_i = canvas_layers_i + 1
-	if canvas_layers_i > canvas_layers_max then
-		error("max canvas stack size exceeded (" .. canvas_layers_max .. ")")
+local function pushLayer(context, sx, sy, sw, sh)
+	context.canvas_layers_i = context.canvas_layers_i + 1
+	if context.canvas_layers_i > context.canvas_layers_max then
+		error("max canvas stack size exceeded (" .. context.canvas_layers_max .. ")")
 	end
 
-	local entry = canvas_layers[canvas_layers_i]
+	local entry = context.canvas_layers[context.canvas_layers_i]
 	if not entry then
 		local win_w, win_h = love.graphics.getDimensions()
-		entry = newCanvasEntry(win_w, win_h, sx, sy, sw, sh)
+		entry = newCanvasEntry(context, win_w, win_h, sx, sy, sw, sh)
 	end
-	canvas_layers[canvas_layers_i] = entry
+	context.canvas_layers[context.canvas_layers_i] = entry
 
 	love.graphics.setScissor()
 	love.graphics.setCanvas(entry.canvas)
@@ -135,14 +125,14 @@ end
 
 
 --- Pop a canvas layer.
-function uiDraw.popLayer()
-	local entry = canvas_layers[canvas_layers_i]
+local function popLayer(context)
+	local entry = context.canvas_layers[context.canvas_layers_i]
 	if not entry then
-		error("no canvas table at stack position: " .. tostring(canvas_layers_i))
+		error("no canvas table at stack position: " .. tostring(context.canvas_layers_i))
 	end
-	canvas_layers_i = canvas_layers_i - 1
+	context.canvas_layers_i = context.canvas_layers_i - 1
 
-	local new_top = canvas_layers[canvas_layers_i]
+	local new_top = context.canvas_layers[context.canvas_layers_i]
 	if not new_top then
 		love.graphics.setCanvas()
 	else
@@ -164,13 +154,13 @@ function uiDraw.popLayer()
 end
 
 
---- Clears all entries in the canvas layer stack. Call outside of uiDraw.drawContext().
-function uiDraw.clearAllLayers()
-	for i = #canvas_layers, 1, -1 do
-		canvas_layers[i].canvas:release()
-		canvas_layers[i] = nil
+--- Clears all entries in the canvas layer stack. Call outside of contextDraw.draw().
+local function clearAllLayers(context)
+	for i = #context.canvas_layers, 1, -1 do
+		context.canvas_layers[i].canvas:release()
+		context.canvas_layers[i] = nil
 	end
-	canvas_layers_i = 0
+	context.canvas_layers_i = 0
 end
 
 
@@ -179,13 +169,14 @@ end
 -- @param os_x, os_y X and Y offsets of the widget in screen space (for scissor boxes).
 -- @param thimble1 The current thimble1, if applicable.
 -- @param thimble2 The current thimble2, if applicable.
-local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
+local function drawLoop(context, wid, os_x, os_y, thimble1, thimble2)
 	-- [[DBG]] print("drawLoop " .. wid.id .. ": Start")
 	if wid.visible then
 		local do_layering = wid.ly_enabled
 
 		if do_layering then
-			uiDraw.pushLayer(love.graphics.getScissor())
+			local sx, sy, sw, sh = love.graphics.getScissor()
+			pushLayer(context, sx, sy, sw, sh)
 		end
 
 		wid:render(os_x, os_y)
@@ -226,7 +217,7 @@ local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
 				love.graphics.push("all") -- [s]
 
 				love.graphics.translate(child.x, child.y)
-				drawLoop(child, wx, wy, thimble1, thimble2)
+				drawLoop(context, child, wx, wy, thimble1, thimble2)
 
 				love.graphics.pop() -- []
 			end
@@ -246,9 +237,8 @@ local function drawLoop(wid, os_x, os_y, thimble1, thimble2)
 		end
 
 		-- Finish up canvas layer rendering.
-		-- XXX current testing for this is in plan_test_canvas_layer.lua.
 		if do_layering then
-			local canvas = uiDraw.popLayer()
+			local canvas = popLayer(context)
 			-- ^ Restores old canvas and scissor box
 
 			love.graphics.push("all") -- [l]
@@ -300,13 +290,13 @@ end
 --- Draw the UI context.
 -- @param context The context to draw.
 -- @param x, y The top-left origin point.
-function uiDraw.drawContext(context, x, y)
+function contextDraw.draw(context, x, y)
 	local stack = context.stack
 
 	-- Discard recycled canvas layers if the window's graphical dimensions have changed.
 	local win_w, win_h = love.graphics.getDimensions()
 	if last_w ~= win_w or last_h ~= win_h then
-		uiDraw.clearAllLayers()
+		clearAllLayers(context)
 	end
 	last_w, last_h = win_w, win_h
 
@@ -316,11 +306,11 @@ function uiDraw.drawContext(context, x, y)
 		love.graphics.push("all") -- [s]
 
 		love.graphics.translate(x + wid.x, y + wid.y)
-		drawLoop(wid, x, y, context.thimble1, context.thimble2)
+		drawLoop(context, wid, x, y, context.thimble1, context.thimble2)
 
 		love.graphics.pop() -- []
 	end
 end
 
 
-return uiDraw
+return contextDraw

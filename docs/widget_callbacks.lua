@@ -25,7 +25,7 @@ return {
 	main = {
 		{
 			name = "render",
-			call_site = "uiDraw.drawContext",
+			call_site = "context:draw()",
 			description = "Draws the widget (before its children).",
 			signature = "def:render(os_x, os_y)",
 			parameters = {
@@ -43,7 +43,7 @@ return {
 
 		{
 			name = "renderLast",
-			call_site = "uiDraw.drawContext",
+			call_site = "context:draw()",
 			description = "Draws the widget (after its children).",
 			signature = "def:renderLast(os_x, os_y)",
 			parameters = {
@@ -61,7 +61,7 @@ return {
 
 		{
 			name = "renderThimble",
-			call_site = "uiDraw.drawContext",
+			call_site = "context:draw()",
 			description = "Draws the visual representation of keyboard focus for a widget.",
 			signature = "def:renderThimble(os_x, os_y)",
 			parameters = {
