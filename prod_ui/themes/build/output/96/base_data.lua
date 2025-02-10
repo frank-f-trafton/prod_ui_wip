@@ -385,7 +385,7 @@ return {
       x = 0,
       y = 0
     },
-    window_body = {
+    win_body = {
       h1 = 4,
       h2 = 16,
       h3 = 4,
@@ -395,7 +395,58 @@ return {
       x = 0,
       y = 0
     },
-    window_header_button = {
+    win_shadow = {
+      draw_fn_id = "hollow",
+      h1 = 11,
+      h2 = 2,
+      h3 = 11,
+      w1 = 11,
+      w2 = 2,
+      w3 = 11,
+      x = 0,
+      y = 0
+    },
+    winbutton_large_disabled = {
+      h1 = 8,
+      h2 = 8,
+      h3 = 8,
+      w1 = 8,
+      w2 = 8,
+      w3 = 8,
+      x = 0,
+      y = 0
+    },
+    winbutton_large_hover = {
+      h1 = 8,
+      h2 = 8,
+      h3 = 8,
+      w1 = 8,
+      w2 = 8,
+      w3 = 8,
+      x = 0,
+      y = 0
+    },
+    winbutton_large_idle = {
+      h1 = 8,
+      h2 = 8,
+      h3 = 8,
+      w1 = 8,
+      w2 = 8,
+      w3 = 8,
+      x = 0,
+      y = 0
+    },
+    winbutton_large_press = {
+      h1 = 8,
+      h2 = 8,
+      h3 = 8,
+      w1 = 8,
+      w2 = 8,
+      w3 = 8,
+      x = 0,
+      y = 0
+    },
+    winbutton_normal_disabled = {
       h1 = 4,
       h2 = 4,
       h3 = 4,
@@ -405,7 +456,7 @@ return {
       x = 0,
       y = 0
     },
-    window_header_button_disabled = {
+    winbutton_normal_hover = {
       h1 = 4,
       h2 = 4,
       h3 = 4,
@@ -415,7 +466,7 @@ return {
       x = 0,
       y = 0
     },
-    window_header_button_hover = {
+    winbutton_normal_idle = {
       h1 = 4,
       h2 = 4,
       h3 = 4,
@@ -425,7 +476,7 @@ return {
       x = 0,
       y = 0
     },
-    window_header_button_press = {
+    winbutton_normal_press = {
       h1 = 4,
       h2 = 4,
       h3 = 4,
@@ -435,7 +486,47 @@ return {
       x = 0,
       y = 0
     },
-    window_header_large = {
+    winbutton_small_disabled = {
+      h1 = 4,
+      h2 = 4,
+      h3 = 4,
+      w1 = 4,
+      w2 = 4,
+      w3 = 4,
+      x = 0,
+      y = 0
+    },
+    winbutton_small_hover = {
+      h1 = 4,
+      h2 = 4,
+      h3 = 4,
+      w1 = 4,
+      w2 = 4,
+      w3 = 4,
+      x = 0,
+      y = 0
+    },
+    winbutton_small_idle = {
+      h1 = 4,
+      h2 = 4,
+      h3 = 4,
+      w1 = 4,
+      w2 = 4,
+      w3 = 4,
+      x = 0,
+      y = 0
+    },
+    winbutton_small_press = {
+      h1 = 4,
+      h2 = 4,
+      h3 = 4,
+      w1 = 4,
+      w2 = 4,
+      w3 = 4,
+      x = 0,
+      y = 0
+    },
+    winheader_large = {
       h1 = 9,
       h2 = 14,
       h3 = 9,
@@ -445,7 +536,7 @@ return {
       x = 0,
       y = 0
     },
-    window_header_normal = {
+    winheader_normal = {
       h1 = 6,
       h2 = 12,
       h3 = 6,
@@ -455,24 +546,13 @@ return {
       x = 0,
       y = 0
     },
-    window_header_small = {
+    winheader_small = {
       h1 = 3,
       h2 = 6,
       h3 = 3,
       w1 = 3,
       w2 = 6,
       w3 = 3,
-      x = 0,
-      y = 0
-    },
-    window_shadow = {
-      draw_fn_id = "hollow",
-      h1 = 11,
-      h2 = 2,
-      h3 = 11,
-      w1 = 11,
-      w2 = 2,
-      w3 = 11,
       x = 0,
       y = 0
     }

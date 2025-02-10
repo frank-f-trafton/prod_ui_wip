@@ -201,32 +201,56 @@ return {
 		["tabular_category_body_press"] = {
 			x = 0, y = 0, w1 = 2, h1 = 2, w2 = 8, h2 = 8, w3 = 2, h3 = 2,
 		},
-		["window_body"] = {
+		["win_body"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
-		["window_shadow"] = {
+		["win_shadow"] = {
 			draw_fn_id = "hollow",
 			x = 0, y = 0, w1 = 11, h1 = 11, w2 = 2, h2 = 2, w3 = 11, h3 = 11,
 		},
-		["window_header_normal"] = {
+		["winheader_normal"] = {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 12, h2 = 12, w3 = 6, h3 = 6,
 		},
-		["window_header_small"] = {
+		["winheader_small"] = {
 			x = 0, y = 0, w1 = 3, h1 = 3, w2 = 6, h2 = 6, w3 = 3, h3 = 3,
 		},
-		["window_header_large"] = {
+		["winheader_large"] = {
 			x = 0, y = 0, w1 = 9, h1 = 9, w2 = 14, h2 = 14, w3 = 9, h3 = 9,
 		},
-		["window_header_button"] = {
+		["winbutton_normal_idle"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
 		},
-		["window_header_button_disabled"] = {
+		["winbutton_normal_disabled"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
 		},
-		["window_header_button_hover"] = {
+		["winbutton_normal_hover"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
 		},
-		["window_header_button_press"] = {
+		["winbutton_normal_press"] = {
+			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
+		},
+		["winbutton_large_idle"] = {
+			x = 0, y = 0, w1 = 8, h1 = 8, w2 = 8, h2 = 8, w3 = 8, h3 = 8,
+		},
+		["winbutton_large_disabled"] = {
+			x = 0, y = 0, w1 = 8, h1 = 8, w2 = 8, h2 = 8, w3 = 8, h3 = 8,
+		},
+		["winbutton_large_hover"] = {
+			x = 0, y = 0, w1 = 8, h1 = 8, w2 = 8, h2 = 8, w3 = 8, h3 = 8,
+		},
+		["winbutton_large_press"] = {
+			x = 0, y = 0, w1 = 8, h1 = 8, w2 = 8, h2 = 8, w3 = 8, h3 = 8,
+		},
+		["winbutton_small_idle"] = {
+			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
+		},
+		["winbutton_small_disabled"] = {
+			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
+		},
+		["winbutton_small_hover"] = {
+			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
+		},
+		["winbutton_small_press"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 4, h2 = 4, w3 = 4, h3 = 4,
 		},
 	},
