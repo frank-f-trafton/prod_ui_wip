@@ -482,6 +482,7 @@ end
 
 
 local function _getCursorAxisInfo(self, mx, my)
+	-- Check that (mx,my) is outside of Viewport #1 before calling.
 	local diag = self.skin.sensor_resize_diagonal
 	local axis_x = mx < self.vp_x + diag and -1 or mx >= self.vp_x + self.vp_w - diag and 1 or 0
 	local axis_y = my < self.vp_y + diag and -1 or my >= self.vp_y + self.vp_h - diag and 1 or 0
@@ -494,11 +495,16 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
-		if not self.maximized and self.frame_resizable and not (axis_x == 0 and axis_y == 0) then
-			self.mouse_in_resize_zone = true
-			local cursor_id = getCursorCode(axis_x, axis_y)
-			self:setCursorLow(cursor_id)
+		if not self.maximized
+		and self.frame_resizable
+		and not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h)
+		then
+			local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
+			if not (axis_x == 0 and axis_y == 0) then
+				self.mouse_in_resize_zone = true
+				local cursor_id = getCursorCode(axis_x, axis_y)
+				self:setCursorLow(cursor_id)
+			end
 		else
 			if self.mouse_in_resize_zone then
 				self.mouse_in_resize_zone = false
