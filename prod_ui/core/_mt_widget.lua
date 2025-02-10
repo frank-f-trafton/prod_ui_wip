@@ -1256,14 +1256,25 @@ function _mt_widget:getParent()
 end
 
 
+local function _applySetting(self, k, default_settings, skin, settings)
+	if settings[k] ~= nil then
+		self[k] = settings[k]
+
+	elseif skin and skin[k] ~= nil then
+		self[k] = skin[k]
+
+	else
+		self[k] = default_settings[k]
+	end
+end
+
+
 function _mt_widget:applySetting(key)
 	if self.default_settings[key] == nil then
 		error("invalid setting.")
 	end
 
-	self[key] = self.settings[key] ~= nil and self.settings[key]
-		or self.skin and self.skin[key] ~= nil and self.skin[key]
-		or self.default_settings[key]
+	_applySetting(self, key, self.default_settings, self.skin, self.settings)
 end
 
 
@@ -1271,23 +1282,20 @@ function _mt_widget:applyAllSettings()
 	local settings, skin, default_settings = self.settings, self.skin, self.default_settings
 
 	for k, v in pairs(default_settings) do
-		self[k] = settings[k] ~= nil and settings[k]
-			or skin and skin[k] ~= nil and skin[k]
-			or v
+		_applySetting(self, k, default_settings, skin, settings)
 	end
 end
 
 
 function _mt_widget:writeSetting(key, val)
-	if self.default_settings[key] == nil then
+	local settings, skin, default_settings = self.settings, self.skin, self.default_settings
+
+	if default_settings[key] == nil then
 		error("invalid setting.")
 	end
 
-	self.settings[key] = val
-
-	self[key] = self.settings[key] ~= nil and self.settings[key]
-		or self.skin and self.skin[key] ~= nil and self.skin[key]
-		or self.default_settings[key]
+	settings[key] = val
+	_applySetting(self, key, default_settings, skin, settings)
 end
 
 

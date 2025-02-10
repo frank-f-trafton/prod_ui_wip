@@ -118,6 +118,36 @@ function plan.make(parent)
 			yy = yy + hh
 		end
 
+		-- Checkbox: Enable resizing
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getResizable()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Resizable frame", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				print(frame)
+				if frame then
+					frame:setResizable(self.checked)
+				end
+				print(
+					"self.checked", self.checked, "\n",
+					"frame.frame_resizable", frame.frame_resizable, "\n",
+					"frame.settings.frame_resizable", frame.settings.frame_resizable, "\n",
+					"frame.default_settings.frame_resizable", frame.default_settings.frame_resizable
+				)
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
 		-- Checkbox: Show resize sensors
 		do
 			local checkbox = content:addChild("base/checkbox")
