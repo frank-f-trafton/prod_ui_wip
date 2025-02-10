@@ -17,12 +17,8 @@ return {
 
 	box = "*style/boxes/wimp_frame",
 
-	slc_body = "*tex_slices/window_body",
-	slc_shadow = "*tex_slices/window_shadow",
-
-	tex_max = "*tex_quads/window_graphic_maximize",
-	tex_unmax = "*tex_quads/window_graphic_unmaximize",
-	tex_close = "*tex_quads/window_graphic_close",
+	slc_body = "*tex_slices/win_body",
+	slc_shadow = "*tex_slices/win_shadow",
 
 	header_text_align_h = "*wimp/header_text_align_h",
 	header_text_align_v = "*wimp/header_text_align_v",
@@ -43,7 +39,7 @@ return {
 		-- number: a corresponding viewport.
 		viewport_fit = 2,
 		header_box = "*style/boxes/wimp_frame_header_normal",
-		header_slc_body = "*tex_slices/window_header_normal",
+		header_slc_body = "*tex_slices/winheader_normal",
 		header_font = "*fonts/h4",
 		header_h = 32,
 		button_pad_w = 2,
@@ -62,17 +58,17 @@ return {
 		},
 
 		btn_close = {
-			graphic = "*tex_quads/window_graphic_close",
+			graphic = "*tex_quads/wingraphic_normal_close",
 		},
 
 		btn_size = {
-			graphic = "*tex_quads/window_graphic_maximize",
-			graphic_max = "*tex_quads/window_graphic_maximize",
-			graphic_unmax = "*tex_quads/window_graphic_unmaximize"
+			graphic = "*tex_quads/wingraphic_normal_maximize",
+			graphic_max = "*tex_quads/wingraphic_normal_maximize",
+			graphic_unmax = "*tex_quads/wingraphic_normal_unmaximize"
 		},
 
 		res_btn_idle = {
-			slice = "*tex_slices/window_header_button",
+			slice = "*tex_slices/winbutton_normal_idle",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
@@ -80,7 +76,7 @@ return {
 		},
 
 		res_btn_hover = {
-			slice = "*tex_slices/window_header_button_hover",
+			slice = "*tex_slices/winbutton_normal_hover",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
@@ -88,7 +84,7 @@ return {
 		},
 
 		res_btn_pressed = {
-			slice = "*tex_slices/window_header_button_press",
+			slice = "*tex_slices/winbutton_normal_press",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
@@ -96,7 +92,7 @@ return {
 		},
 
 		res_btn_disabled = {
-			slice = "*tex_slices/window_header_button_disabled",
+			slice = "*tex_slices/winbutton_normal_disabled",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.5, 0.5, 0.5, 1.0},
 			label_ox = 0,
@@ -107,7 +103,7 @@ return {
 	res_small = {
 		viewport_fit = 2,
 		header_box = "*style/boxes/wimp_frame_header_small",
-		header_slc_body = "*tex_slices/window_header_small",
+		header_slc_body = "*tex_slices/winheader_small",
 		header_font = "*fonts/small",
 		header_h = 18,
 		button_pad_w = 2,
@@ -127,41 +123,41 @@ return {
 		},
 
 		btn_close = {
-			graphic = "*tex_quads/window_graphic_close",--[[XXX]]
+			graphic = "*tex_quads/wingraphic_small_close",
 		},
 
 		btn_size = {
-			graphic = "*tex_quads/window_graphic_maximize",--[[XXX]]
-			graphic_max = "*tex_quads/window_graphic_maximize",--[[XXX]]
-			graphic_unmax = "*tex_quads/window_graphic_unmaximize"--[[XXX]]
+			graphic = "*tex_quads/wingraphic_small_maximize",
+			graphic_max = "*tex_quads/wingraphic_small_maximize",
+			graphic_unmax = "*tex_quads/wingraphic_small_unmaximize"
 		},
 
-		res_btn_idle = {--[[XXX]]
-			slice = "*tex_slices/window_header_button",
+		res_btn_idle = {
+			slice = "*tex_slices/winbutton_small_idle",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
 			label_oy = 0,
 		},
 
-		res_btn_hover = {--[[XXX]]
-			slice = "*tex_slices/window_header_button_hover",
+		res_btn_hover = {
+			slice = "*tex_slices/winbutton_small_hover",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
 			label_oy = 0,
 		},
 
-		res_btn_pressed = {--[[XXX]]
-			slice = "*tex_slices/window_header_button_press",
+		res_btn_pressed = {
+			slice = "*tex_slices/winbutton_small_press",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
 			label_oy = 1,
 		},
 
-		res_btn_disabled = {--[[XXX]]
-			slice = "*tex_slices/window_header_button_disabled",
+		res_btn_disabled = {
+			slice = "*tex_slices/winbutton_small_disabled",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.5, 0.5, 0.5, 1.0},
 			label_ox = 0,
@@ -172,7 +168,7 @@ return {
 	res_large = {
 		viewport_fit = 2,
 		header_box = "*style/boxes/wimp_frame_header_large",
-		header_slc_body = "*tex_slices/window_header_large",
+		header_slc_body = "*tex_slices/winheader_large",
 		header_font = "*fonts/h3",
 		header_h = 48,
 		button_pad_w = 2,
@@ -191,41 +187,41 @@ return {
 		},
 
 		btn_close = {
-			graphic = "*tex_quads/window_graphic_close",--[[XXX]]
+			graphic = "*tex_quads/wingraphic_large_close",
 		},
 
 		btn_size = {
-			graphic = "*tex_quads/window_graphic_maximize",--[[XXX]]
-			graphic_max = "*tex_quads/window_graphic_maximize",--[[XXX]]
-			graphic_unmax = "*tex_quads/window_graphic_unmaximize"--[[XXX]]
+			graphic = "*tex_quads/wingraphic_large_maximize",
+			graphic_max = "*tex_quads/wingraphic_large_maximize",
+			graphic_unmax = "*tex_quads/wingraphic_large_unmaximize",
 		},
 
-		res_btn_idle = {--[[XXX]]
-			slice = "*tex_slices/window_header_button",
+		res_btn_idle = {
+			slice = "*tex_slices/winbutton_large_idle",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
 			label_oy = 0,
 		},
 
-		res_btn_hover = {--[[XXX]]
-			slice = "*tex_slices/window_header_button_hover",
+		res_btn_hover = {
+			slice = "*tex_slices/winbutton_large_hover",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
 			label_oy = 0,
 		},
 
-		res_btn_pressed = {--[[XXX]]
-			slice = "*tex_slices/window_header_button_press",
+		res_btn_pressed = {
+			slice = "*tex_slices/winbutton_large_press",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.9, 0.9, 0.9, 1.0},
 			label_ox = 0,
 			label_oy = 1,
 		},
 
-		res_btn_disabled = {--[[XXX]]
-			slice = "*tex_slices/window_header_button_disabled",
+		res_btn_disabled = {
+			slice = "*tex_slices/winbutton_large_disabled",
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_quad = {0.5, 0.5, 0.5, 1.0},
 			label_ox = 0,
