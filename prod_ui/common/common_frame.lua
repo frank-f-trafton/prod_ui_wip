@@ -122,16 +122,4 @@ function commonFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 end
 
 
-function commonFrame.mouseReleased(self, x, y, button, istouch, presses)
-	if button == 1 and self.context.mouse_pressed_button == button then
-		self.press_busy = false
-
-		-- Hack: clamp frame to parent. This isn't handled while resizing because the
-		-- width and height can go haywire when resizing against the bounds of the
-		-- screen (see the 'p_bounds_*' fields).
-		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
-	end
-end
-
-
 return commonFrame
