@@ -66,6 +66,7 @@ local def = {
 
 	default_settings = {
 		frame_render_shadow = false,
+		frame_resizable = true,
 		header_button_side = "right", -- "left", "right"
 		header_enable_close_button = true,
 		header_enable_size_button = true,
@@ -105,14 +106,14 @@ end
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
 function def:ui_evaluateHover(mx, my, os_x, os_y)
 	local wx, wy = self.x + os_x, self.y + os_y
-	local rp = self.maximized and 0 or self.skin.sensor_resize_pad
+	local rp = not self.maximized and self.frame_resizable and self.skin.sensor_resize_pad or 0
 	return mx >= wx - rp and my >= wy - rp and mx < wx + self.w + rp and my < wy + self.h + rp
 end
 
 
 function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 	local wx, wy, ww, wh = self.x + os_x, self.y + os_y, self.w, self.h
-	local rp = self.maximized and 0 or self.skin.sensor_resize_pad
+	local rp = not self.maximized and self.frame_resizable and self.skin.sensor_resize_pad or 0
 	-- in frame + padding area
 	if mx >= wx - rp and my >= wy - rp and mx < wx + ww + rp and my < wy + wh + rp then
 		-- just in frame
@@ -133,9 +134,51 @@ function def:setHeaderSize(size)
 	end
 
 	if self.header_size ~= size then
-		self.header_size = size
+		self:writeSetting("header_size", size)
 		self:reshape(true)
 	end
+end
+
+
+function def:getHeaderSize()
+	return self.header_size
+end
+
+
+-- (Resizable by the user.)
+function def:setResizable(enabled)
+	self:writeSetting("frame_resizable", not not enabled)
+end
+
+
+function def:getResizable()
+	return self.frame_resizable
+end
+
+
+function def:setFrameTitle(text)
+	uiShared.type1(1, text, "string", "nil")
+
+	self:writeSetting("header_text", text)
+end
+
+
+function def:getFrameTitle()
+	return self.header_text
+end
+
+
+function def:setDefaultBounds()
+	-- Allow container to be moved partially out of bounds, but not
+	-- so much that the mouse wouldn't be able to drag it back.
+
+	local header_h = self.vp3_h
+
+	-- XXX: theme/scale
+	self.p_bounds_x1 = -48
+	self.p_bounds_x2 = -48
+	self.p_bounds_y1 = -self.h + math.max(4, math.floor(header_h/4))
+	self.p_bounds_y2 = -48
 end
 
 
@@ -173,32 +216,6 @@ function def:initiateResizeMode(axis_x, axis_y)
 end
 
 
-function def:setDefaultBounds()
-	-- Allow container to be moved partially out of bounds, but not
-	-- so much that the mouse wouldn't be able to drag it back.
-
-	local header_h = self.vp3_h
-
-	-- XXX: theme/scale
-	self.p_bounds_x1 = -48
-	self.p_bounds_x2 = -48
-	self.p_bounds_y1 = -self.h + math.max(4, math.floor(header_h/4))
-	self.p_bounds_y2 = -48
-end
-
-
-function def:setFrameTitle(text)
-	uiShared.type1(1, text, "string", "nil")
-
-	self:writeSetting("header_text", text)
-end
-
-
-function def:getFrameTitle()
-	return self.header_text
-end
-
-
 --- Controls what happens when the container has both scroll bars active and the user clicks
 -- on the square patch where the bars meet.
 local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
@@ -210,20 +227,19 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 		if not content then
 			return
 		end
+		if self.frame_resizable then
+			if content.press_busy then
+				return
+			end
 
-		if content.press_busy then
-			return
-		end
+			local ax, ay = content:getAbsolutePosition()
+			local mx, my = x - ax, y - ay
 
-		local ax, ay = content:getAbsolutePosition()
-		local mx, my = x - ax, y - ay
-
-		print(mx, my)
-
-		-- [XXX 14] support scroll bars on left or top side of container
-		if content.scr_h and content.scr_h.active and content.scr_v and content.scr_v.active
-		and mx >= content.vp_x + content.vp_w and my >= content.vp_y + content.vp_h then
-			self:initiateResizeMode(1, 1)
+			-- [XXX 14] support scroll bars on left or top side of container
+			if content.scr_h and content.scr_h.active and content.scr_v and content.scr_v.active
+			and mx >= content.vp_x + content.vp_w and my >= content.vp_y + content.vp_h then
+				self:initiateResizeMode(1, 1)
+			end
 		end
 	end
 end
@@ -479,7 +495,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
 		local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
-		if not self.maximized and not (axis_x == 0 and axis_y == 0) then
+		if not self.maximized and self.frame_resizable and not (axis_x == 0 and axis_y == 0) then
 			self.mouse_in_resize_zone = true
 			local cursor_id = getCursorCode(axis_x, axis_y)
 			self:setCursorLow(cursor_id)
@@ -602,8 +618,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				if self.context.cseq_presses == 1 then
 					self.cseq_header = true
 				end
+
 				-- Maximize
-				if self.context.cseq_button == 1 and self.context.cseq_presses % 2 == 0 then
+				if self.frame_resizable
+				and self.context.cseq_button == 1
+				and self.context.cseq_presses % 2 == 0
+				then
 					if self.wid_maximize and self.wid_unmaximize then
 						if not self.maximized then
 							self:wid_maximize()
@@ -631,7 +651,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if not header_action then
 			-- If we did not interact with the header, and the mouse pointer is outside of viewport #1, then this
 			-- is a resize action.
-			if not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h) then
+			if self.frame_resizable
+			and not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h)
+			then
 				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 				if not (axis_x == 0 and axis_y == 0) then
 					self:initiateResizeMode(axis_x, axis_y)
