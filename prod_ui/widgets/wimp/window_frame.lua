@@ -67,6 +67,8 @@ local def = {
 	default_settings = {
 		frame_render_shadow = false,
 		frame_resizable = true,
+		allow_drag_move = true,
+		header_visible = true,
 		header_button_side = "right", -- "left", "right"
 		header_enable_close_button = true,
 		header_enable_size_button = true,
@@ -79,6 +81,11 @@ local def = {
 
 
 def.trickle = {}
+
+
+local function _newSensor(id)
+	return {x=0, y=0, w=0, h=0, enabled=false, id=id}
+end
 
 
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
@@ -103,6 +110,17 @@ function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 			return button == 1
 		end
 	end
+end
+
+
+function def:setHeaderVisible(enabled)
+	self:writeSetting("header_visible", not not enabled)
+	self:reshape(true)
+end
+
+
+function def:getHeaderVisible()
+	return self.header_visible
 end
 
 
@@ -134,6 +152,16 @@ function def:getResizable()
 end
 
 
+function def:setDraggable(enabled)
+	self:writeSetting("allow_drag_move", not not enabled)
+end
+
+
+function def:getDraggable()
+	return self.allow_drag_move
+end
+
+
 function def:setCloseControlVisibility(visible)
 	self:writeSetting("header_show_close_button", not not visible)
 	self:reshape()
@@ -153,6 +181,28 @@ end
 
 function def:getSizeControlVisibility()
 	return self.header_show_size_button
+end
+
+
+function def:setCloseEnabled(enabled)
+	self:writeSetting("header_enable_close_button", not not enabled)
+	self.b_close.enabled = self.header_enable_close_button
+end
+
+
+function def:getCloseEnabled()
+	return self.header_enable_close_button
+end
+
+
+function def:setSizeEnabled(enabled)
+	self:writeSetting("header_enable_size_button", not not enabled)
+	self.b_size.enabled = self.header_enable_size_button
+end
+
+
+function def:getSizeEnabled()
+	return self.header_enable_size_button
 end
 
 
@@ -245,19 +295,6 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 end
 
 
-local function _configureButton(button, visible, hover)
-	if not visible then
-		button.visible = false
-		button.allow_hover = false
-	else
-		button.visible = not not visible
-		button.allow_hover = not not hover
-	end
-
-	-- Reshape the frame after calling.
-end
-
-
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -283,6 +320,9 @@ function def:uiCall_initialize()
 	self.banked_thimble1 = false
 
 	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
+
+	self.b_close = _newSensor("button-close")
+	self.b_size = _newSensor("button-size")
 
 	-- Valid while resizing. (0,0) is an error.
 	self.adjust_axis_x = 0 -- -1, 0, 1
@@ -468,12 +508,17 @@ local function _getCursorAxisInfo(self, mx, my)
 end
 
 
+local function _pointInSensor(sen, x, y)
+	return x >= sen.x and x < sen.x + sen.w and y >= sen.y and y < sen.y + sen.h
+end
+
+
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		self.hover_zone = self.header_show_close_button and widShared.pointInViewport(self, 5, mx, my) and "button-close"
-			or self.header_show_size_button and widShared.pointInViewport(self, 6, mx, my) and "button-size"
+		self.hover_zone = self.header_show_close_button and _pointInSensor(self.b_close, mx, my) and "button-close"
+			or self.header_show_size_button and _pointInSensor(self.b_size, mx, my) and "button-size"
 			or false
 
 		-- Resize sensors
@@ -600,51 +645,54 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		local mx, my = self:getRelativePosition(x, y)
 
 		if button == 1 and self.context.mouse_pressed_button == button then
-			if self.hover_zone == "button-close" then
-				self.cseq_header = false
-				self.press_busy = "button-close"
-				header_action = true
+			if self.header_visible then
+				if self.hover_zone == "button-close" then
+					self.press_busy = self.header_enable_close_button and "button-close" or "button-disabled"
+					self.cseq_header = false
+					header_action = true
 
-			elseif self.hover_zone == "button-size" then
-				self.cseq_header = false
-				self.press_busy = "button-size"
-				header_action = true
+				elseif self.hover_zone == "button-size" then
+					self.press_busy = self.header_enable_size_button and "button-size" or "button-disabled"
+					self.cseq_header = false
+					header_action = true
 
-			elseif not widShared.pointInViewport(self, 3, mx, my) then
-				self.cseq_header = false
+				elseif not widShared.pointInViewport(self, 3, mx, my) then
+					self.cseq_header = false
 
-			else
-				header_action = true
+				else
+					header_action = true
 
-				-- Maximize
-				if self.frame_resizable
-				and self.cseq_header
-				and self.context.cseq_button == 1
-				and self.context.cseq_presses % 2 == 0
-				then
-					if self.wid_maximize and self.wid_unmaximize then
-						if not self.maximized then
-							self:wid_maximize()
-						else
-							self:wid_unmaximize()
+					-- Maximize
+					if self.frame_resizable
+					and self.cseq_header
+					and self.context.cseq_button == 1
+					and self.context.cseq_presses % 2 == 0
+					then
+						if self.wid_maximize and self.wid_unmaximize then
+							if not self.maximized then
+								self:wid_maximize()
+							else
+								self:wid_unmaximize()
+							end
+
+							self:reshape(true)
 						end
 
-						self:reshape(true)
+					elseif self.allow_drag_move then
+						-- Drag (reposition) action
+						self.press_busy = "drag"
+
+						self.drag_ox, self.drag_oy = -mx, -my
+
+						self.adjust_mouse_orig_a_x = x
+						self.adjust_mouse_orig_a_y = y
+
+						self.drag_dc_fix_x = x
+						self.drag_dc_fix_y = y
 					end
-				else
-					-- Drag (reposition) action
-					self.press_busy = "drag"
 
-					self.drag_ox, self.drag_oy = -mx, -my
-
-					self.adjust_mouse_orig_a_x = x
-					self.adjust_mouse_orig_a_y = y
-
-					self.drag_dc_fix_x = x
-					self.drag_dc_fix_y = y
+					self.cseq_header = true
 				end
-
-				self.cseq_header = true
 			end
 		end
 
@@ -702,12 +750,12 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 			elseif x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h then
 				local mx, my = self:getRelativePosition(x, y)
-				if self.press_busy == "button-close" and widShared.pointInViewport(self, 5, mx, my) then
+				if self.press_busy == "button-close" and _pointInSensor(self.b_close, mx, my) then
 					self:remove()
 
 				elseif self.press_busy == "button-size"
 				and self.frame_resizable
-				and widShared.pointInViewport(self, 6, mx, my)
+				and _pointInSensor(self.b_size, mx, my)
 				then
 					if self.wid_maximize and self.wid_unmaximize then
 						if not self.maximized then
@@ -718,6 +766,9 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 						self:reshape(true)
 					end
+
+				elseif self.press_busy == "button-disabled" then
+					self.cseq_header = false
 				end
 			end
 			self.press_busy = false
@@ -764,7 +815,7 @@ function def:uiCall_update(dt)
 end
 
 
-local function _measureButtonShortenPort(self, skin, res, right, w, h)
+local function _measureButtonShortenPort(self, sensor, skin, res, right, w, h)
 	local bx, by, bw, bh
 	by = math.floor(0.5 + _lerp(self.vp4_y, self.vp4_y + self.vp4_h - h, res.button_align_v))
 	bw = w
@@ -778,7 +829,7 @@ local function _measureButtonShortenPort(self, skin, res, right, w, h)
 	end
 	self.vp4_w = math.max(0, self.vp4_w - w - res.button_pad_w)
 
-	return bx, by, bw, bh
+	sensor.x, sensor.y, sensor.w, sensor.h = bx, by, bw, bh
 end
 
 
@@ -789,9 +840,6 @@ function def:uiCall_reshape()
 	-- Viewport #2 is the area for all other elements.
 	-- Viewport #3 is the header area.
 	-- Viewport #4 is a subsection of the header area for rendering the frame title.
-	-- Viewport #5 is the "close window" sensor.
-	-- Viewport #6 is the "maximize" sensor.
-	-- Viewports #7-8 are reserved for future use.
 
 	local skin = self.skin
 	local res = _getHeaderSkinTable(self)
@@ -817,31 +865,39 @@ function def:uiCall_reshape()
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 2, skin.box.margin)
 
+	-- Update sensor enabled state
+	self.b_close.enabled = self.header_enable_close_button
+	self.b_size.enabled = self.header_enable_size_button
+
 	-- Header setup
-	self.vp3_h = res.header_h
-	local vx, vy, vw, vh = widShared.getViewportXYWH(self, res.viewport_fit)
-	self.vp3_x, self.vp3_y, self.vp3_w = vx, vy, vw
+	if not self.header_visible then
+		self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h = 0, 0, 0, 0
+		self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h = 0, 0, 0, 0
+	else
+		self.vp3_h = res.header_h
+		local vx, vy, vw, vh = widShared.getViewportXYWH(self, res.viewport_fit)
+		self.vp3_x, self.vp3_y, self.vp3_w = vx, vy, vw
 
-	widShared.copyViewport(self, 3, 4)
+		widShared.copyViewport(self, 3, 4)
 
-	local button_h = math.min(res.button_h, self.vp3_h)
-	local right = self.header_button_side == "right"
+		local button_h = math.min(res.button_h, self.vp3_h)
+		local right = self.header_button_side == "right"
 
-	-- The first bit of padding for buttons
-	if self.header_show_close_button or self.header_show_size_button then
-		self.vp4_w = self.vp4_w - res.button_pad_w
-		if not right then
-			self.vp4_x = self.vp4_x + res.button_pad_w
+		-- The first bit of padding for buttons
+		if self.header_show_close_button or self.header_show_size_button then
+			self.vp4_w = self.vp4_w - res.button_pad_w
+			if not right then
+				self.vp4_x = self.vp4_x + res.button_pad_w
+			end
 		end
-	end
 
-	if self.header_show_close_button then
-		self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h = _measureButtonShortenPort(self, skin, res, right, res.button_w, button_h)
-	end
+		if self.header_show_close_button then
+			_measureButtonShortenPort(self, self.b_close, skin, res, right, res.button_w, button_h)
+		end
 
-	if self.header_show_size_button then
-		self.vp6_x, self.vp6_y, self.vp6_w, self.vp6_h = _measureButtonShortenPort(self, skin, res, right, res.button_w, button_h)
-		--b_size.graphic = self.maximized and b_size.graphic_unmax or b_size.graphic_max
+		if self.header_show_size_button then
+			_measureButtonShortenPort(self, self.b_size, skin, res, right, res.button_w, button_h)
+		end
 	end
 
 	self.needs_update = true
@@ -903,11 +959,11 @@ function def:uiCall_destroy(inst)
 end
 
 
-local function _getHeaderSensorResource(self, res, busy_code)
-	return self.press_busy == busy_code and res.res_btn_pressed
-		or self.hover_zone == busy_code and res.res_btn_hover
+local function _getHeaderSensorResource(self, btn, res)
+	return not btn.enabled and res.res_btn_disabled
+		or self.press_busy == btn.id and res.res_btn_pressed
+		or self.hover_zone == btn.id and res.res_btn_hover
 		or res.res_btn_idle
-	-- TODO: disabled but visible buttons
 end
 
 
@@ -961,77 +1017,77 @@ def.default_skinner = {
 		uiGraphics.drawSlice(skin.slc_body, 0, 0, self.w, self.h)
 
 		-- Window header
-		local res = _getHeaderSkinTable(self)
-		local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
-		local slc_header_body = res.header_slc_body
-		love.graphics.setColor(res2.col_header_fill)
-		uiGraphics.drawSlice(slc_header_body, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+		if self.header_visible then
+			local res = _getHeaderSkinTable(self)
+			local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
+			local slc_header_body = res.header_slc_body
+			love.graphics.setColor(res2.col_header_fill)
+			uiGraphics.drawSlice(slc_header_body, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
 
-		if self.header_text then
-			local font = res.header_font
+			if self.header_text then
+				local font = res.header_font
 
-			love.graphics.setColor(res2.col_header_text)
-			love.graphics.setFont(font)
+				love.graphics.setColor(res2.col_header_text)
+				love.graphics.setFont(font)
 
+				local sx, sy, sw, sh = love.graphics.getScissor()
+				uiGraphics.intersectScissor(ox + self.x + self.vp4_x, oy + self.y + self.vp4_y, self.vp4_w, self.vp4_h)
+
+				love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
+
+				love.graphics.setScissor(sx, sy, sw, sh)
+			end
+
+			-- Header buttons
 			local sx, sy, sw, sh = love.graphics.getScissor()
-			uiGraphics.intersectScissor(ox + self.x + self.vp4_x, oy + self.y + self.vp4_y, self.vp4_w, self.vp4_h)
+			love.graphics.setScissor(ox + self.x + self.vp3_x, oy + self.y + self.vp3_y, self.vp3_w, self.vp3_h)
 
-			love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
+			if self.header_show_close_button then
+				local b_close = self.b_close
+				local res_b = _getHeaderSensorResource(self, b_close, res)
+
+				love.graphics.setColor(res_b.color_body)
+				uiGraphics.drawSlice(res_b.slice, b_close.x, b_close.y, b_close.w, b_close.h)
+				love.graphics.setColor(res_b.color_quad)
+
+				local graphic = res.btn_close.graphic
+				local _, _, qw, qh = graphic.quad:getViewport()
+
+				local box_x = math.floor(0.5 + _lerp(b_close.x, b_close.x + b_close.w - graphic.w, skin.sensor_tex_align_h))
+				local box_y = math.floor(0.5 + _lerp(b_close.y, b_close.y + b_close.h - graphic.h, skin.sensor_tex_align_v))
+
+				uiGraphics.quadXYWH(
+					res.btn_close.graphic,
+					box_x + res_b.label_ox,
+					box_y + res_b.label_oy,
+					qw, qh)
+			end
+
+			if self.header_show_size_button then
+				local b_size = self.b_size
+				local btn_size = res.btn_size
+				local res_b = _getHeaderSensorResource(self, b_size, res)
+
+				love.graphics.setColor(res_b.color_body)
+				uiGraphics.drawSlice(res_b.slice, b_size.x, b_size.y, b_size.w, b_size.h)
+				love.graphics.setColor(res_b.color_quad)
+
+				local graphic = self.maximized and btn_size.graphic_unmax or btn_size.graphic_max
+
+				local _, _, qw, qh = graphic.quad:getViewport()
+
+				local box_x = math.floor(0.5 + _lerp(b_size.x, b_size.x + b_size.w - graphic.w, skin.sensor_tex_align_h))
+				local box_y = math.floor(0.5 + _lerp(b_size.y, b_size.y + b_size.h - graphic.h, skin.sensor_tex_align_v))
+
+				uiGraphics.quadXYWH(
+					graphic,
+					box_x + res_b.label_ox,
+					box_y + res_b.label_oy,
+					qw, qh)
+			end
 
 			love.graphics.setScissor(sx, sy, sw, sh)
 		end
-
-		-- Header buttons
-		local sx, sy, sw, sh = love.graphics.getScissor()
-		love.graphics.setScissor(ox + self.x + self.vp3_x, oy + self.y + self.vp3_y, self.vp3_w, self.vp3_h)
-
-		if not self.header_show_close_button then
-			self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h = 0, 0, 0, 0
-		else
-			local res_b = _getHeaderSensorResource(self, res, "button-close")
-
-			love.graphics.setColor(res_b.color_body)
-			uiGraphics.drawSlice(res_b.slice, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
-			love.graphics.setColor(res_b.color_quad)
-
-			local graphic = res.btn_close.graphic
-			local _, _, qw, qh = graphic.quad:getViewport()
-
-			local box_x = math.floor(0.5 + _lerp(self.vp5_x, self.vp5_x + self.vp5_w - graphic.w, skin.sensor_tex_align_h))
-			local box_y = math.floor(0.5 + _lerp(self.vp5_y, self.vp5_y + self.vp5_h - graphic.h, skin.sensor_tex_align_v))
-
-			uiGraphics.quadXYWH(
-				res.btn_close.graphic,
-				box_x + res_b.label_ox,
-				box_y + res_b.label_oy,
-				qw, qh)
-		end
-
-		if not self.header_show_size_button then
-			self.vp6_x, self.vp6_y, self.vp6_w, self.vp6_h = 0, 0, 0, 0
-		else
-			local btn_size = res.btn_size
-			local res_b = _getHeaderSensorResource(self, res, "button-size")
-
-			love.graphics.setColor(res_b.color_body)
-			uiGraphics.drawSlice(res_b.slice, self.vp6_x, self.vp6_y, self.vp6_w, self.vp6_h)
-			love.graphics.setColor(res_b.color_quad)
-
-			local graphic = self.maximized and btn_size.graphic_unmax or btn_size.graphic_max
-
-			local _, _, qw, qh = graphic.quad:getViewport()
-
-			local box_x = math.floor(0.5 + _lerp(self.vp6_x, self.vp6_x + self.vp6_w - graphic.w, skin.sensor_tex_align_h))
-			local box_y = math.floor(0.5 + _lerp(self.vp6_y, self.vp6_y + self.vp6_h - graphic.h, skin.sensor_tex_align_v))
-
-			uiGraphics.quadXYWH(
-				graphic,
-				box_x + res_b.label_ox,
-				box_y + res_b.label_oy,
-				qw, qh)
-		end
-
-		love.graphics.setScissor(sx, sy, sw, sh)
 
 		if self.DEBUG_show_resize_range then
 			local rp = skin.sensor_resize_pad
