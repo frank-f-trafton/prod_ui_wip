@@ -62,7 +62,7 @@ function plan.make(parent)
 	if content then
 		content.layout_mode = "resize"
 
-		content:setScrollBars(false, false)
+		content:setScrollBars(false, true)
 
 		local xx, yy, ww, hh = 0, 0, 256, 40
 
