@@ -171,6 +171,55 @@ function plan.make(parent)
 			yy = yy + hh
 		end
 
+
+		-- Checkbox: Toggle 'Close' button visibility
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getCloseControlVisibility()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Show 'Close' control", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:setCloseControlVisibility(self.checked)
+				end
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
+
+		-- Checkbox: Toggle 'Size' button visibility
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getSizeControlVisibility()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Show 'Size' control", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:setSizeControlVisibility(self.checked)
+				end
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
+
 		-- Radio Buttons: Control placement
 		do
 			yy = yy + hh
