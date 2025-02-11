@@ -28,7 +28,7 @@ function plan.make(parent)
 	local content = frame:findTag("frame_content")
 	if content then
 		content.layout_mode = "resize"
-		content:setScrollBars(false, false)
+		content:setScrollBars(false, true)
 
 		local xx, yy, ww, hh = 16, 16, 192, 32
 

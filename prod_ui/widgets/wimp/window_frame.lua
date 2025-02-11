@@ -517,9 +517,13 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		self.hover_zone = self.header_show_close_button and _pointInSensor(self.b_close, mx, my) and "button-close"
-			or self.header_show_size_button and _pointInSensor(self.b_size, mx, my) and "button-size"
-			or false
+		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
+			self.hover_zone = self.header_show_close_button and _pointInSensor(self.b_close, mx, my) and "button-close"
+				or self.header_show_size_button and _pointInSensor(self.b_size, mx, my) and "button-size"
+				or false
+		else
+			self.hover_zone = false
+		end
 
 		-- Resize sensors
 		if not self.maximized
