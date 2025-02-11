@@ -196,6 +196,30 @@ function plan.make(parent)
 		end
 
 
+		-- Checkbox: 'Close' button enabled state
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getCloseEnabled()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Enable 'Close'", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:setCloseEnabled(self.checked)
+				end
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
+
 		-- Checkbox: Toggle 'Size' button visibility
 		do
 			local checkbox = content:addChild("base/checkbox")
@@ -212,6 +236,78 @@ function plan.make(parent)
 				local frame = commonWimp.getFrame(self)
 				if frame then
 					frame:setSizeControlVisibility(self.checked)
+				end
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
+
+		-- Checkbox: 'Size' button enabled state
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getSizeEnabled()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Enable 'Size'", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:setSizeEnabled(self.checked)
+				end
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
+
+		-- Checkbox: Toggle header visibility
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getHeaderVisible()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Visible header", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:setHeaderVisible(self.checked)
+				end
+			end
+			checkbox:reshape()
+
+			yy = yy + hh
+		end
+
+
+		-- Checkbox: Toggle draggable frame
+		do
+			local checkbox = content:addChild("base/checkbox")
+			checkbox.x = xx
+			checkbox.y = yy
+			checkbox.w = ww
+			checkbox.h = hh
+			checkbox:initialize()
+			checkbox.checked = frame:getDraggable()
+			checkbox.bijou_side = "right"
+			checkbox:setLabel("Draggable header", "single-ul")
+
+			checkbox.wid_buttonAction = function(self)
+				local frame = commonWimp.getFrame(self)
+				if frame then
+					frame:setDraggable(self.checked)
 				end
 			end
 			checkbox:reshape()
