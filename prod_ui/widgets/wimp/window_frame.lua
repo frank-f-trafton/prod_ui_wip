@@ -134,6 +134,28 @@ function def:getResizable()
 end
 
 
+function def:setCloseControlVisibility(visible)
+	self:writeSetting("header_show_close_button", not not visible)
+	self:reshape()
+end
+
+
+function def:getCloseControlVisibility()
+	return self.header_show_close_button
+end
+
+
+function def:setSizeControlVisibility(visible)
+	self:writeSetting("header_show_size_button", not not visible)
+	self:reshape()
+end
+
+
+function def:getSizeControlVisibility()
+	return self.header_show_size_button
+end
+
+
 function def:setFrameTitle(text)
 	uiShared.type1(1, text, "string", "nil")
 
@@ -450,8 +472,8 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		self.hover_zone = widShared.pointInViewport(self, 5, mx, my) and "button-close"
-			or widShared.pointInViewport(self, 6, mx, my) and "button-size"
+		self.hover_zone = self.header_show_close_button and widShared.pointInViewport(self, 5, mx, my) and "button-close"
+			or self.header_show_size_button and widShared.pointInViewport(self, 6, mx, my) and "button-size"
 			or false
 
 		-- Resize sensors
@@ -683,7 +705,10 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				if self.press_busy == "button-close" and widShared.pointInViewport(self, 5, mx, my) then
 					self:remove()
 
-				elseif self.press_busy == "button-size" and widShared.pointInViewport(self, 6, mx, my) then
+				elseif self.press_busy == "button-size"
+				and self.frame_resizable
+				and widShared.pointInViewport(self, 6, mx, my)
+				then
 					if self.wid_maximize and self.wid_unmaximize then
 						if not self.maximized then
 							self:wid_maximize()
@@ -960,7 +985,9 @@ def.default_skinner = {
 		local sx, sy, sw, sh = love.graphics.getScissor()
 		love.graphics.setScissor(ox + self.x + self.vp3_x, oy + self.y + self.vp3_y, self.vp3_w, self.vp3_h)
 
-		if self.header_show_close_button then
+		if not self.header_show_close_button then
+			self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h = 0, 0, 0, 0
+		else
 			local res_b = _getHeaderSensorResource(self, res, "button-close")
 
 			love.graphics.setColor(res_b.color_body)
@@ -980,7 +1007,9 @@ def.default_skinner = {
 				qw, qh)
 		end
 
-		if self.header_show_size_button then
+		if not self.header_show_size_button then
+			self.vp6_x, self.vp6_y, self.vp6_w, self.vp6_h = 0, 0, 0, 0
+		else
 			local btn_size = res.btn_size
 			local res_b = _getHeaderSensorResource(self, res, "button-size")
 
