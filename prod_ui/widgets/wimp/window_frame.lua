@@ -534,12 +534,12 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			if not (axis_x == 0 and axis_y == 0) then
 				self.mouse_in_resize_zone = true
 				local cursor_id = getCursorCode(axis_x, axis_y)
-				self:setCursorLow(cursor_id)
+				self.cursor_press = cursor_id
 			end
 		else
 			if self.mouse_in_resize_zone then
 				self.mouse_in_resize_zone = false
-				self:setCursorLow()
+				self.cursor_press = nil
 			end
 		end
 	end
@@ -551,7 +551,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		self.hover_zone = false
 
 		self.mouse_in_resize_zone = false
-		self:setCursorLow()
+		self.cursor_press = nil
 	end
 end
 

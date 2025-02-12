@@ -144,7 +144,7 @@ function lgcButton.uiCall_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx,
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
-			self:setCursorLow(self.skin.cursor_on)
+			self.cursor_hover = self.skin.cursor_on
 		end
 	end
 end
@@ -156,7 +156,7 @@ function lgcButton.uiCall_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mou
 		if self.enabled then
 			if not self.pressed then
 				self.hovered = true
-				self:setCursorLow(self.skin.cursor_on)
+				self.cursor_hover = self.skin.cursor_on
 			end
 		end
 	end
@@ -168,7 +168,7 @@ function lgcButton.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 	end
 end
@@ -185,7 +185,7 @@ function lgcButton.uiCall_pointerPress(self, inst, x, y, button, istouch, presse
 
 				if button == 1 then
 					self.pressed = true
-					self:setCursorHigh(self.skin.cursor_press)
+					self.cursor_press = self.skin.cursor_press
 
 				elseif button == 2 then
 					-- Instant second action.
@@ -212,7 +212,7 @@ function lgcButton.uiCall_pointerPressActivate(self, inst, x, y, button, istouch
 
 				if button == 1 then
 					self.pressed = true
-					self:setCursorHigh(self.skin.cursor_press)
+					self.cursor_press = self.skin.cursor_press
 
 					-- First-press action.
 					self:wid_buttonAction()
@@ -294,7 +294,7 @@ function lgcButton.uiCall_pointerPressSticky(self, inst, x, y, button, istouch, 
 
 						-- Do not set the high cursor ID.
 						-- Clear the low cursor ID.
-						self:setCursorLow()
+						self.cursor_hover = nil
 
 						-- Press action
 						self:wid_buttonAction()
@@ -402,7 +402,7 @@ function lgcButton.uiCall_pointerUnpress(self, inst, x, y, button, istouch, pres
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
-					self:setCursorHigh()
+					self.cursor_press = nil
 				end
 			end
 		end

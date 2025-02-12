@@ -1,0 +1,36 @@
+<documentation>
+    <page>
+        <title>Mouse Cursor State</title>
+
+		The mouse cursor is set by assigning cursor IDs to these fields:
+
+		* <pre>context.cursor_high</pre>: (Priority: 1) Overrides all other cursor fields.
+
+		* <pre>widget.cursor_press</pre>: (Priority: 2) Used when the pointer is pressing on a widget. (Travels up the hierarchy until a cursor ID is found.)
+
+		* <pre>widget.cursor_hover</pre>: (Priority: 3) Used when the pointer hovers over a widget. (Travels up the hierarchy until a cursor ID is found.)
+
+		* <pre>context.cursor_low</pre>: (Priority: 4) Used when no other cursor fields are active.
+
+		The populated field with the lowest priority is selected.
+
+
+		<h2>Cursor IDs</h2>
+
+		The default cursor IDs are pulled from the <a href="https://love2d.org/wiki/CursorType">built-in hardware cursors</a>). ProdUI includes an invisible cursor with the ID `nothing`; this is easier to use within widget code, versus trying to control the application-wide mouse visibility state.
+
+		* "arrow"
+		* "crosshair"
+		* "ibeam"
+		* "hand"
+		* "no"
+		* "nothing"
+		* "sizeall"
+		* "sizenesw"
+		* "sizens"
+		* "sizenwse"
+		* "sizewe"
+		* "wait"
+		* "waitarrow"
+
+    </page>

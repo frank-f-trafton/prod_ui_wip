@@ -187,6 +187,9 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
+
+	self.cursor_hover = self.skin.cursor_on
+	self.cursor_press = self.skin.cursor_press
 end
 
 
@@ -217,7 +220,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if button == 1 then
 			self.press_busy = "adjusting"
-			self:setCursorHigh(self.skin.cursor_press)
 
 			-- NOTE: The primary button action is keyboard-only (via thimble code in the root widget).
 
@@ -257,7 +259,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	and button == self.context.mouse_pressed_button
 	then
 		self.press_busy = false
-		self:setCursorHigh()
 	end
 end
 

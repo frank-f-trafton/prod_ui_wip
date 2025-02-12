@@ -465,11 +465,11 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		-- Hovering over an active sash
 		if self.sash_enabled and widShared.pointInViewport(self, 5, mx, my) then
-			self:setCursorLow(self.skin.cursor_sash)
+			self.cursor_hover = self.skin.cursor_sash
 
 		-- Hovering over labels and controls
 		elseif widShared.pointInViewport(self, 2, mx, my) then
-			self:setCursorLow()
+			self.cursor_hover = nil
 
 			mx = mx + self.scr_x
 			my = my + self.scr_y
@@ -486,7 +486,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		else
 			-- Clear the sash cursor
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 
 		if self.MN_item_hover and not hover_ok then
@@ -499,7 +499,7 @@ end
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		commonScroll.widgetClearHover(self)
-		self:setCursorLow()
+		self.cursor_hover = nil
 		self.MN_item_hover = false
 	end
 end

@@ -581,13 +581,13 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if press_code == "column-press" then
 			self.column_hovered = column
 			header_box_hovered = true
-			self:setCursorLow()
+			self.cursor_hover = nil
 
 		elseif press_code == "column-edge" then
-			self:setCursorLow("sizewe")
+			self.cursor_hover = "sizewe"
 
 		else
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 
 		if not header_box_hovered then
@@ -653,7 +653,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		commonScroll.widgetClearHover(self)
 
 		self.column_hovered = false
-		self:setCursorLow()
+		self.cursor_hover = nil
 
 		if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
 			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
