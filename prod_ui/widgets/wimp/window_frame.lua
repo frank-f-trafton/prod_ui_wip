@@ -626,7 +626,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	-- Press events that create a pop-up menu should block propagation (return truthy)
 	-- so that this and the WIMP root do not cause interference.
 
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 
 	-- Frame-modal check
 	local modal_next = self.ref_modal_next
@@ -944,7 +944,7 @@ function def:uiCall_destroy(inst)
 
 			-- Clean up the target's focus a bit.
 			--[[
-			local root = self:getTopWidgetInstance()
+			local root = self:getRootWidget()
 			root:setSelectedFrame(target, true)
 
 			target:reorder("last")
@@ -955,7 +955,7 @@ function def:uiCall_destroy(inst)
 		end
 
 		-- Clean up root-level modal level, if applicable.
-		local root = self:getTopWidgetInstance()
+		local root = self:getRootWidget()
 		if self == root.modals[#root.modals] then
 			root:sendEvent("rootCall_clearModalFrame", self)
 		end

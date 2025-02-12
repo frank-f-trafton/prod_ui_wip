@@ -213,7 +213,7 @@ local function activateCommand(client, item)
 		item.callback(wid_ref, item)
 	end
 
-	local root = client:getTopWidgetInstance()
+	local root = client:getRootWidget()
 	root:sendEvent("rootCall_destroyPopUp", client, "concluded")
 end
 
@@ -497,8 +497,8 @@ function def:updateDimensions()
 	end
 
 
-	-- (We assume that the top-level widget's dimensions match the display area.)
-	local wid_top = self:getTopWidgetInstance()
+	-- (We assume that the root widget's dimensions match the display area.)
+	local wid_top = self:getRootWidget()
 
 	self.w = math.min(w + skin.box.margin.x1 + skin.box.margin.x2, wid_top.w)
 	self.h = math.min(h + skin.box.margin.y1 + skin.box.margin.y2, wid_top.h)
@@ -770,7 +770,7 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		local root = self:getTopWidgetInstance()
+		local root = self:getRootWidget()
 
 		if key == "escape" then
 
@@ -1084,7 +1084,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
-				local root = self:getTopWidgetInstance()
+				local root = self:getRootWidget()
 				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 				return
 			end

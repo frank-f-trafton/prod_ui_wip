@@ -54,7 +54,7 @@ function plan.make(parent)
 			btn:initialize()
 			btn:setLabel("Root-Modal Test")
 			btn.wid_buttonAction = function(self)
-				local root = self:getTopWidgetInstance()
+				local root = self:getRootWidget()
 
 				local frame, dialog
 				frame = commonWimp.getFrame(self)
@@ -111,7 +111,7 @@ function plan.make(parent)
 						end
 					end
 					dialog:center(true, true)
-					local root = dialog:getTopWidgetInstance()
+					local root = dialog:getRootWidget()
 					root:setSelectedFrame(dialog)
 
 					local try_host = dialog:getOpenThimbleDepthFirst()
@@ -132,7 +132,7 @@ function plan.make(parent)
 			btn:initialize()
 			btn:setLabel("Frame-Modal Test")
 			btn.wid_buttonAction = function(self)
-				local root = self:getTopWidgetInstance()
+				local root = self:getRootWidget()
 
 				local frame, dialog
 				frame = commonWimp.getFrame(self)
@@ -189,7 +189,7 @@ function plan.make(parent)
 						end
 					end
 					dialog:center(true, true)
-					local root = dialog:getTopWidgetInstance()
+					local root = dialog:getRootWidget()
 					root:setSelectedFrame(dialog)
 
 					local try_host = dialog:getOpenThimbleDepthFirst()

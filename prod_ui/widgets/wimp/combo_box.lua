@@ -323,7 +323,7 @@ end
 function def:_openPopUpMenu()
 	if not self.wid_drawer then
 		local skin = self.skin
-		local root = self:getTopWidgetInstance()
+		local root = self:getRootWidget()
 
 		local ax, ay = self:getAbsolutePosition()
 

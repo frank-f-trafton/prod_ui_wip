@@ -6,7 +6,7 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 local function _getSiblings(self)
 	if not self.parent then
-		error("can't get siblings of top-level (root) widget instances.")
+		error("can't get siblings of the root widget.")
 	end
 
 	return self.parent.children
@@ -142,7 +142,7 @@ function stepHandlers.proximity(self, px, py, dx, dy, wrap)
 	local wid = false
 	local dist_closest = math.huge
 
-	local siblings = _getSiblings(self) -- asserts 'self' has a parent / is not top-level.
+	local siblings = _getSiblings(self) -- asserts 'self' has a parent / is not the root.
 	local parent = self.parent
 
 	local i = 1

@@ -193,7 +193,7 @@ end
 local function invokePopUpMenu(self, x, y)
 	setupCategoryPopUp(self)
 
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 
 	local pop_up = commonWimp.makePopUpMenu(self, cat_pop_up_def, x, y)
 	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")

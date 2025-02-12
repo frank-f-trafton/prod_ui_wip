@@ -72,7 +72,7 @@ _mt_widget.sort_max = 0
 
 
 -- Default sorting ID / lane for widgets. Ranges from 1 to parent.sort_max (or n/a if sort_max is 0).
--- Sorting is performed at the sibling level. This value is unused for top-level widgets.
+-- Sorting is performed at the sibling level. This value is unused for the root widget.
 _mt_widget.sort_id = 1
 
 
@@ -331,25 +331,10 @@ function _mt_widget:tryReleaseThimble2(a, b, c, d)
 end
 
 
---- Gets the top-level widget instance. In widget code, prefer this over referencing 'self.context.root' because it can work outside of the current root (unless you really do want to interact with the current root).
+--- Gets the root widget instance.
 -- @return The root widget.
-function _mt_widget:getTopWidgetInstance()
-	-- This is safe for the root itself to run.
-
-	local wid = self
-	local failsafe = 2^16
-
-	for i = 1, failsafe do
-		if not wid.parent then
-			return wid
-
-		else
-			wid = wid.parent
-		end
-	end
-
-	-- Catch cycles in the tree?
-	error("failed to get top-level widget instance after " .. failsafe .. " iterations.")
+function _mt_widget:getRootWidget()
+	return context.root
 end
 
 
@@ -482,14 +467,22 @@ function _mt_widget:addChild(id, pos)
 	uiShared.notNilNotFalseNotNaN(1, id)
 	uiShared.numberNotNaNEval(2, pos)
 
+	local children = self.children
+	pos = pos or #children + 1
+	if pos < 1 or pos > #children + 1 then
+		error("position is out of range.")
+	end
+
 	if context.locks[self] then
 		uiShared.errLocked("add child")
 
-	elseif self.children == _mt_no_descendants then
+	elseif children == _mt_no_descendants then
 		errNoDescendants()
 	end
 
-	return context:_prepareWidgetInstance(id, self, self.children, pos)
+	local retval = context:_prepareWidgetInstance(id, self)
+	table.insert(children, pos, retval)
+	return retval
 end
 
 
@@ -558,31 +551,9 @@ function _mt_widget:remove()
 		end
 
 		self.parent = false
-	-- No parent: top-level widget special handling
+	-- No parent: special handling for the root widget.
 	else
-		-- IMPORTANT: Removing a top-level widget will not automatically trigger uiCall_rootPop().
-		-- Delete from 'instances' table
-		local seq = context.instances
-		for i = #seq, 1, -1 do
-			local instance = seq[i]
-			if self == instance then
-				table.remove(seq, i)
-				break
-			end
-		end
-
-		-- Delete from instance stack, if applicable
-		for i = #context.stack, 1, -1 do
-			if context.stack[i] == self then
-				table.remove(context.stack, i)
-				break
-			end
-		end
-
-		-- If applicable, refresh the instance tree (stack top) reference.
-		if context.root == self then
-			context.root = context.stack[#context.stack] or false
-		end
+		context.root = false
 	end
 
 	-- Release thimbles, if applicable
@@ -737,7 +708,7 @@ end
 
 
 function _mt_widget:getIndex(seq)
-	seq = seq or (self.parent and self.parent.children) or (context.instances)
+	seq = seq or (self.parent and self.parent.children)
 
 	for i, child in ipairs(seq) do
 		if self == child then
@@ -751,7 +722,7 @@ end
 
 local function getSiblingDelta(self, delta, wrap)
 	if not self.parent then
-		error("can't get siblings for top-level (root) widget instances.")
+		error("can't get siblings for the root widget.")
 	end
 
 	local siblings = self.parent.children
@@ -862,7 +833,11 @@ function _mt_widget:reorder(var)
 		uiShared.errLockedParent("reorder")
 	end
 
-	local seq = (self.parent and self.parent.children) or (context.instances)
+	if not self.parent then
+		error("cannot reorder the root widget.")
+	end
+
+	local seq = self.parent.children
 
 	local self_i = self:getIndex(seq)
 	local dest_i
@@ -937,8 +912,13 @@ end
 
 -- Flat search of siblings for a specific string tag.
 function _mt_widget:findSiblingTag(str, i)
+	if not self.parent then
+		error("the root widget does not have siblings.")
+	end
+
 	i = i or 1
-	local seq = (self.parent and self.parent.children) or (context.instances)
+
+	local seq = self.parent.children
 	local instance = seq[i]
 
 	while instance do

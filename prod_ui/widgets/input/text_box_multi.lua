@@ -605,7 +605,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			elseif button == 2 then
 				lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
-				local root = self:getTopWidgetInstance()
+				local root = self:getRootWidget()
 
 				--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
@@ -749,7 +749,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 			lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
-			local root = self:getTopWidgetInstance()
+			local root = self:getRootWidget()
 			local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
 			pop_up:tryTakeThimble2()
 
@@ -985,7 +985,7 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		-- Destroy pop-up menu if it exists in reference to this widget.
-		local root = self:getTopWidgetInstance()
+		local root = self:getRootWidget()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
 			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end

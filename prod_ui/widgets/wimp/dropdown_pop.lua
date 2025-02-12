@@ -71,7 +71,7 @@ function def:_closeSelf(update_chosen)
 			end
 		end
 
-		local root = self:getTopWidgetInstance()
+		local root = self:getRootWidget()
 		if root.pop_up_menu == self then
 			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end
@@ -137,8 +137,8 @@ function def:updateDimensions()
 		self.pad_text_x2
 	)
 
-	-- (We assume that the top-level widget's dimensions match the display area.)
-	local wid_top = self:getTopWidgetInstance()
+	-- (We assume that the root widget's dimensions match the display area.)
+	local wid_top = self:getRootWidget()
 
 	self.w = math.min(w, wid_top.w)
 	self.h = math.min(h, wid_top.h)
@@ -237,7 +237,7 @@ end
 function def:uiCall_resize()
 	local skin = self.skin
 	local wid_ref = self.wid_ref
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 
 	if not wid_ref or wid_ref._dead then
 		return
@@ -298,7 +298,7 @@ end
 
 -- Used instead of 'uiCall_keypressed'. The dropdown body passes keyboard events through here.
 function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 
 	if scancode == "up" then
 		self:movePrev(1, true)

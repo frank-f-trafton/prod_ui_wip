@@ -226,7 +226,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local wid_cur = not context.thimble2 and context.thimble1
 		local mods = context.key_mgr.mod
 
-		-- Tab through top-level frames.
+		-- Tab through 2nd-gen frames.
 		if scancode == "tab" and mods["ctrl"] then
 			if mods["shift"] then
 				self:stepSelectedFrame(1)

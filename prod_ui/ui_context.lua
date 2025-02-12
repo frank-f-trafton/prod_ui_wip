@@ -164,14 +164,8 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- defs are of type "table" and serve as the metatable for instances.
 	self.widget_defs = {}
 
-	-- Sequence of top-level widget instances associated with this context.
-	self.instances = {}
-
-	-- Only one top-level widget may be active (root) at a time.
+	-- The root widget must be created as soon as possible.
 	self.root = false
-
-	-- Maintain a stack of top-level widgets to help with layered UI roots and drawing order.
-	self.stack = {}
 
 	-- Some context actions are locked during the update function.
 	self.locked = false
@@ -1135,14 +1129,17 @@ local function _unloadFindWidgetByID(wid, id)
 end
 
 
---- Unloads (unregisters) a widget def from the UI Context. It's an error if any instances exist in the context at the time of calling.
+--- Unloads (unregisters) a widget def from the UI Context. It's an error if any instances exist within the context at
+--	the time of calling.
 -- @param id The widget def to unload.
 -- @return Nothing.
 function _mt_context:_unloadWidgetDef(id)
-	for i, instance in ipairs(self.instances) do
-		if _unloadFindWidgetByID(instance, id) then
-			error("attempt to unload widget def which still has live instances in this context. ID: " .. tostring(id))
-		end
+	if not self.widget_defs[id] then
+		error("no widget definition with this ID: " .. tostring(id))
+	end
+
+	if self.root and _unloadFindWidgetByID(self.root, id) then
+		error("attempt to unload widget def which still has live instances in this context. ID: " .. tostring(id))
 	end
 
 	self.widget_defs[id] = nil
@@ -1169,12 +1166,7 @@ end
 
 
 --- Sets up a new widget instance table. Internal use.
-function _mt_context:_prepareWidgetInstance(id, parent, siblings, pos)
-	pos = pos or #siblings + 1
-	if pos < 1 or pos > #siblings + 1 then
-		error("position is out of range.")
-	end
-
+function _mt_context:_prepareWidgetInstance(id, parent)
 	local def = self.widget_defs[id]
 
 	-- Unsupported type. (Corrupt widget defs collection?)
@@ -1193,27 +1185,35 @@ function _mt_context:_prepareWidgetInstance(id, parent, siblings, pos)
 		inst.children = {}
 	end
 
-	table.insert(siblings, pos, inst)
-
 	return inst
 end
 
 
---- Add a top-level widget instance to the context.
+--- Add a root widget to the context. There must not be an existing root.
 --  Locked during update: yes (context)
 -- @param id The widget def ID.
--- @param pos (#children + 1) Where to add the widget within the caller's children array. Must be from 1 to
---	#children + 1.
--- @return A reference to the new instance.
-function _mt_context:addWidget(id, pos)
+-- @return A reference to the new root instance.
+function _mt_context:addRoot(id)
 	uiShared.notNilNotFalseNotNaN(1, id)
-	uiShared.numberNotNaNEval(2, pos)
 
 	if self.locked then
-		uiShared.errLockedContext("add top-level instance widget")
+		uiShared.errLockedContext("add root widget")
 	end
 
-	return self:_prepareWidgetInstance(id, nil, self.instances, pos)
+	if self.root then
+		error("this context already has a root widget.")
+	end
+
+	local retval = self:_prepareWidgetInstance(id, nil)
+	self.root = retval
+	return retval
+end
+
+
+--- Get the context's current root widget.
+-- @return The root widget table, or false if there is no root.
+function _mt_context:getRoot()
+	return self.root
 end
 
 
@@ -1256,142 +1256,12 @@ function _mt_context:loadSkinnersInDirectory(dir_path, recursive, id_prepend)
 end
 
 
---- Get the context's current root widget.
--- @return The root widget table, or false if there is no root.
-function _mt_context:getRoot()
-	return self.root
-end
-
-
-function _mt_context:bankRootContextState()
-	return {
-		current_hover = self.current_hover,
-		current_pressed = self.current_pressed,
-		--current_drag_dest ???
-		thimble1 = self.thimble1,
-		thimble2 = self.thimble2,
-		captured_focus = self.captured_focus
-		--mouse_start ???
-		--mouse_pressed_x ???
-		--mouse_pressed_y ???
-	}
-end
-
-
-function _mt_context:applyRootContextState(t)
-	if t then
-		self.current_hover = t.current_hover or false
-		self.current_pressed = t.current_pressed or false
-		self.thimble1 = t.thimble1 or false
-		self.thimble2 = t.thimble2 or false
-		self.captured_focus = t.captured_focus or false
-	else
-		self.current_hover = false
-		self.current_pressed = false
-		self.thimble1 = false
-		self.thimble2 = false
-		self.captured_focus = false
-	end
-end
-
-
---- Push a new root instance onto the context tree.
---  Locked during update: yes (context)
--- @param new_root The new root instance.
-function _mt_context:pushRoot(new_root)
-	uiShared.type1(1, new_root, "table")
-
-	if self.locked then
-		uiShared.errLockedContext("push top-level root instance")
-
-	elseif new_root.context ~= self then
-		error("new root doesn't belong to this context.")
-
-	elseif new_root.parent then
-		error("only top-level widget instances can become the context root.")
-	end
-
-	local old_root = self.root
-
-	if old_root then
-		old_root._ctx_banked = self:bankRootContextState()
-	end
-
-	self:applyRootContextState(new_root._ctx_banked or {})
-
-	self.stack[#self.stack + 1] = new_root
-	self.root = new_root
-	new_root:sendEvent("uiCall_rootPush", new_root) -- no ancestors
-end
-
-
---- Pop the current root off of the context. Safe to call on an empty instance stack.
---  Locked during update: yes (context)
--- @return The popped root widget, or nothing if the stack was empty.
-function _mt_context:popRoot()
-	-- Assertions
-	-- [[
-	if self.locked then
-		uiShared.errLockedContext("pop top-level root instance")
-	end
-	--]]
-
-	local stack = self.stack
-	if #stack == 0 then
-		return nil
-	end
-
-	local old_root = self.root
-	if old_root then
-		old_root:sendEvent("uiCall_rootPop", old_root) -- no ancestors
-	end
-	stack[#stack] = nil
-	self.root = stack[#stack] or false
-
-	local new_root = self.root
-	self:applyRootContextState(new_root and new_root._ctx_banked)
-
-	return old_root
-end
-
-
---- Set or clear the top-level widget as the root and top of the stack, by popping the existing root (if applicable) and pushing this one onto it.
---  Locked during update: yes (context)
---	Callbacks:
---	* uiCall_rootPop() -> the popped widget, if applicable.
---	* uiCall_rootPush() -> the newly pushed root widget, if applicable.
---	NOTE: calling setRoot() on the current-root widget will fire both callbacks on it.
--- @param instance The widget table which should become the new root (must be owned by the context). Pass nil/false to unset the current root.
--- @return The old root widget, or nil if the stack was empty.
-function _mt_context:setRoot(instance)
-	local old_root = self:popRoot()
-	self:pushRoot(instance)
-
-	return old_root
-end
-
-
 function _mt_context:releaseThimbles()
 	if self.thimble2 then
 		self.thimble2:releaseThimble2()
 	end
 	if self.thimble1 then
 		self.thimble1:releaseThimble1()
-	end
-end
-
-
--- Depth-first widget tag search.
-function _mt_context:findTag(str)
-	for i, instance in ipairs(self.instances) do
-		if instance.tag == str then
-			return instance, i
-		else
-			local ret1, ret2 = instance:findTag(str)
-			if ret1 then
-				return ret1, ret2
-			end
-		end
 	end
 end
 
