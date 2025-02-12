@@ -33,7 +33,7 @@ function def:uiCall_initialize()
 	self.drag_max_y = 2^16
 
 	-- Cursor IDs for hover and press states.
-	self.cursor_on = "hand"
+	self.cursor_hover = "hand"
 	self.cursor_press = "hand"
 
 	-- Status flags.
@@ -47,7 +47,6 @@ function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
-			self:setCursorLow(self.cursor_on)
 		end
 	end
 end
@@ -57,7 +56,6 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
-			self:setCursorLow()
 		end
 	end
 end
@@ -79,7 +77,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					self.mouse_oy = y - a_y
 				end
 
-				self:setCursorHigh(self.cursor_press)
 				self:captureFocus()
 			end
 		end
@@ -113,8 +110,6 @@ function def:uiCap_mouseReleased(x, y, button, istouch, presses)
 	if button == 1 then
 		self.context.current_pressed = false
 		self.context.mouse_pressed_button = false
-
-		self:setCursorHigh()
 
 		self:uncaptureFocus() -- XXX need to refresh hover state in case the widget has moved away from the pointer
 

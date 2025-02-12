@@ -1,5 +1,5 @@
 --[[
-CursorMgr (Manager)
+CursorMgr (Manager) (Modified)
 Version 0.0.1 (Beta)
 See README.md for more info.
 
@@ -7,7 +7,7 @@ License: Source code is MIT, demo cursor art is CC0
 
 MIT License
 
-Copyright (c) 2022 RBTS
+Copyright (c) 2022 - 2025 RBTS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -70,6 +70,13 @@ cursorMgr.system_cursors = {}
 
 for i, id in ipairs(cursorMgr.system_list) do
 	cursorMgr.system_cursors[id] = love.mouse.getSystemCursor(id)
+end
+
+
+local cursor_nothing
+do
+	local idata = love.image.newImageData(1, 1)
+	cursor_nothing = love.mouse.newCursor(idata, 0, 0)
 end
 
 
@@ -197,6 +204,15 @@ function cursorMgr.newManager(n_slots)
 		self.cursor_defs[k] = def
 	end
 
+	do
+		local def = cursorMgr.newAnimatedCursorDef()
+		local frame = cursorMgr.newFrame(cursor_nothing, nil, nil, nil, nil, math.huge)
+
+		def.frames[1] = frame
+
+		self.cursor_defs["nothing"] = def
+	end
+
 	return self
 end
 
@@ -240,13 +256,16 @@ function _mt_mgr_cursor:assignCursor(id, slot_n)
 	slot_n = slot_n or #self.slots
 	id = id or false
 
-	-- Assertions
-	-- [[
-	if id and not self.cursor_defs[id] then error("mgr_cursor is missing cursor: " .. tostring(id))
-	elseif slot_n < 1 or slot_n > #self.slots then error("'slot_n' is out of bounds.") end
-	--]]
+	if slot_n < 1 or slot_n > #self.slots then
+		error("'slot_n' is out of bounds.")
+	end
 
-	self.slots[slot_n] = id
+	self.slots[slot_n] = self.cursor_defs[id] and id or false
+
+	-- TODO
+	if id ~= false and id ~= nil and not self.cursor_defs[id] then
+		print("DEBUG: no cursor def with ID: ", id)
+	end
 end
 
 
@@ -307,7 +326,6 @@ function _mt_mgr_cursor:refreshMouseState(dt)
 
 			if not frame then
 				break
-
 			else
 				-- Forwards animation
 				if self.timer > frame.duration then
@@ -378,7 +396,7 @@ function _mt_mgr_cursor:drawCurrentFrame(x, y)
 				love.graphics.draw(frame.image, x - frame.hx, y - frame.hy)
 			end
 		end
-	end	
+	end
 end
 
 

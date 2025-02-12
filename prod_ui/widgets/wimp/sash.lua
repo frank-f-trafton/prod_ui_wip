@@ -114,9 +114,9 @@ function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 			if widShared.pointInViewport(self, 1, mx, my) then
 				local skin = self.skin
-				self:setCursorLow(self.vertical and skin.cursor_v or skin.cursor_h)
+				self.cursor_hover = self.vertical and skin.cursor_v or skin.cursor_h
 			else
-				self:setCursorLow()
+				self.cursor_hover = nil
 			end
 		end
 	end
@@ -127,7 +127,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 	end
 end
@@ -149,7 +149,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 							self.att_len = att.h
 						end
 						local skin = self.skin
-						self:setCursorHigh(self.vertical and skin.cursor_v or skin.cursor_h)
+						self.cursor_press = self.vertical and skin.cursor_v or skin.cursor_h
 					end
 				end
 			end
@@ -201,7 +201,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
-					self:setCursorHigh()
+					self.cursor_press = nil
 				end
 			end
 		end

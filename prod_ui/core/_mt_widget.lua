@@ -63,6 +63,11 @@ _mt_widget.draw_child_first = -math.huge
 _mt_widget.draw_child_last = math.huge
 
 
+-- Cursor codes
+_mt_widget.cursor_hover = false
+_mt_widget.cursor_press = false
+
+
 -- Sorting variables.
 
 
@@ -1118,42 +1123,6 @@ function _mt_widget:findAncestorByField(field, value)
 	end
 
 	return nil
-end
-
-
---- Set the high-priority cursor for widgets.
-function _mt_widget:setCursorHigh(id)
-	if context.cursor_mgr then
-		context.cursor_mgr:assignCursor(id, 3)
-	end
-end
-
-
---- Get the current high-priority cursor ID, or false if none is set.
-function _mt_widget:getCursorHigh()
-	if context.cursor_mgr then
-		return context.cursor_mgr:getCursorID(3)
-	else
-		return false
-	end
-end
-
-
---- Set the low-priority cursor for widgets.
-function _mt_widget:setCursorLow(id)
-	if context.cursor_mgr then
-		context.cursor_mgr:assignCursor(id, 4)
-	end
-end
-
-
---- Get the current low-priority cursor ID, or false if none is set.
-function _mt_widget:getCursorLow()
-	if context.cursor_mgr then
-		return context.cursor_mgr:getCursorID(4)
-	else
-		return false
-	end
 end
 
 

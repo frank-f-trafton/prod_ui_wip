@@ -518,9 +518,9 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
 		if widShared.pointInViewport(self, 1, mx, my) then
-			self:setCursorLow(self.skin.cursor_on)
+			self.cursor_hover = self.skin.cursor_on
 		else
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 	end
 end
@@ -530,7 +530,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 	end
 end

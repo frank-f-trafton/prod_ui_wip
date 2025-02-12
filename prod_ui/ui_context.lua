@@ -286,19 +286,13 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.key_mgr.cb_keyDown = cb_keyDown
 	self.key_mgr.cb_keyUp = cb_keyUp
 
-	-- Mouse cursor repository
+	-- Mouse cursor state.
 	if cursorMgr then
-		self.cursor_mgr = cursorMgr.newManager(5)
+		self.cursor_mgr = cursorMgr.newManager(4)
 	end
 
-	--[[
-	Cursor priority slots:
-	1: Busy / wait
-	2: Context, high priority
-	3: Widget, high priority (press)
-	4: Widget, low priority (hover)
-	5: Context, low priority (idle pointer)
-	--]]
+	self.cursor_low = false
+	self.cursor_high = false
 
 	-- Fields beginning with 'app' or 'usr' are reserved for use by the
 	-- host application.
@@ -418,6 +412,19 @@ end
 -- * LÖVE Callbacks *
 
 
+local function _getAscending(wid, key)
+	while wid do
+		print("wid", wid, "key", key, "wid[key]", wid[key])
+		if wid[key] ~= nil then
+			print("_getAscending(): return: ", wid, wid[key])
+			return wid, wid[key]
+		end
+		wid = wid.parent
+	end
+	print("_getAscending(): no result")
+end
+
+
 function _mt_context:love_update(dt)
 	-- Make virtual input events here.
 	-- Mouse
@@ -507,7 +514,16 @@ function _mt_context:love_update(dt)
 	end
 
 	-- Update cursor state
-	if self.cursor_mgr then
+	local cursor_mgr = self.cursor_mgr
+	if cursor_mgr then
+		cursor_mgr:assignCursor(self.cursor_low, 4)
+		local w, k
+		w, k = _getAscending(self.current_hover, "cursor_hover")
+		cursor_mgr:assignCursor(k, 3)
+		w, k = _getAscending(self.current_pressed, "cursor_press")
+		cursor_mgr:assignCursor(k, 2)
+		cursor_mgr:assignCursor(self.cursor_high, 1)
+
 		self.cursor_mgr:refreshMouseState(dt)
 	end
 
@@ -1262,38 +1278,6 @@ function _mt_context:releaseThimbles()
 	end
 	if self.thimble1 then
 		self.thimble1:releaseThimble1()
-	end
-end
-
-
-function _mt_context:setCursorHigh(id)
-	if self.cursor_mgr then
-		self.cursor_mgr:assignCursor(id, 2)
-	end
-end
-
-
-function _mt_context:getCursorHigh()
-	if self.cursor_mgr then
-		return self.cursor_mgr:getCursorID(2)
-	else
-		return false
-	end
-end
-
-
-function _mt_context:setCursorLow(id)
-	if self.cursor_mgr then
-		self.cursor_mgr:assignCursor(id, 5)
-	end
-end
-
-
-function _mt_context:getCursorLow()
-	if self.cursor_mgr then
-		return self.cursor_mgr:getCursorID(5)
-	else
-		return false
 	end
 end
 

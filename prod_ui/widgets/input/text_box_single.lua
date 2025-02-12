@@ -85,9 +85,9 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 
-	local skin = self.skin
+	self.cursor_hover = self.skin.cursor_on
 
-	self.line_ed = lineEdS.new(skin.font)
+	self.line_ed = lineEdS.new(self.skin.font)
 
 	lgcInputS.updateCaretShape(self)
 
@@ -114,7 +114,6 @@ function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
-			self:setCursorLow(self.skin.cursor_on)
 		end
 	end
 end
@@ -124,7 +123,6 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
-			self:setCursorLow()
 		end
 	end
 end

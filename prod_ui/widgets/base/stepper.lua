@@ -264,6 +264,8 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 
+	self.cursor_press = self.skin.cursor_press
+
 	self:reshape()
 end
 
@@ -301,7 +303,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				if button == 1 then
 					self.pressed = true
-					self:setCursorHigh(self.skin.cursor_press)
 
 					x, y = self:getRelativePosition(x, y)
 
@@ -355,7 +356,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
-					self:setCursorHigh()
 
 					self.b_pressing = false
 				end

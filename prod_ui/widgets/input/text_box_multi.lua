@@ -509,9 +509,9 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if mouse_x >= self.vp2_x and mouse_x < self.vp2_x + self.vp2_w
 		and mouse_y >= self.vp2_y and mouse_y < self.vp2_y + self.vp2_h
 		then
-			self:setCursorLow(self.skin.cursor_on)
+			self.cursor_hover = self.skin.cursor_on
 		else
-			self:setCursorLow()
+			self.cursor_hover = nil
 		end
 	end
 end
@@ -521,7 +521,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		commonScroll.widgetClearHover(self)
 
-		self:setCursorLow()
+		self.cursor_hover = nil
 	end
 end
 
