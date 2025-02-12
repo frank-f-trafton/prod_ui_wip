@@ -291,8 +291,6 @@ end
 -- @param context The context to draw.
 -- @param x, y The top-left origin point.
 function contextDraw.draw(context, x, y)
-	local stack = context.stack
-
 	-- Discard recycled canvas layers if the window's graphical dimensions have changed.
 	local win_w, win_h = love.graphics.getDimensions()
 	if last_w ~= win_w or last_h ~= win_h then
@@ -300,16 +298,14 @@ function contextDraw.draw(context, x, y)
 	end
 	last_w, last_h = win_w, win_h
 
-	for i = 1, #stack do
-		local wid = stack[i]
+	local wid = context.root
 
-		love.graphics.push("all") -- [s]
+	love.graphics.push("all") -- [s]
 
-		love.graphics.translate(x + wid.x, y + wid.y)
-		drawLoop(context, wid, x, y, context.thimble1, context.thimble2)
+	love.graphics.translate(x + wid.x, y + wid.y)
+	drawLoop(context, wid, x, y, context.thimble1, context.thimble2)
 
-		love.graphics.pop() -- []
-	end
+	love.graphics.pop() -- []
 end
 
 

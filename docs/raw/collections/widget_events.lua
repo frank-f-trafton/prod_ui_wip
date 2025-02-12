@@ -286,8 +286,6 @@ return {
                 There are many limitations in effect when the context is locked for updating. Anything that is likely to mess up tree traversal (remove or reorder widgets; change tree root) will raise an error. You can defer these actions to after the update loop using context:appendAsyncAction().
 
                 Widgets may or may not have a built-in 'uiCall_update' method. If not, you can supply your own. You can also assign 'self:userUpdate(dt)', which is run before 'uiCall_update'.
-
-                'uiCall_update' only fires for the current tree root and its descendants. Other top-level instances that are not the root are not updated.
 			]==],
 		},
 

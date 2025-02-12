@@ -88,7 +88,7 @@ end
 
 local function tree_userUpdate(self, dt)
 	local context = self.context
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 
 	if root then
 		self.usr_timer = self.usr_timer - dt

@@ -16,7 +16,7 @@ end
 
 local function _launchFrame(self, req_path)
 	local plan = require(req_path)
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 	local frame = plan.make(root)
 
 	root:setSelectedFrame(frame, true)

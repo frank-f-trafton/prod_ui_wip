@@ -176,10 +176,9 @@ local function newWimpContext()
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 	context.resources:loadSkinDefs("prod_ui/themes/vacuum/skins", true)
 
-	local wid_root = context:addWidget("wimp/root_wimp")
+	local wid_root = context:addRoot("wimp/root_wimp")
 	wid_root.w, wid_root.h = love.graphics.getDimensions()
 	wid_root:initialize()
-	context:setRoot(wid_root)
 
 	return context, wid_root
 end
@@ -458,7 +457,7 @@ do
 				type = "command",
 				text = "Open Selector",
 				callback = function(client, item)
-					local root = client:getTopWidgetInstance()
+					local root = client:getRootWidget()
 					if root then
 						_launchSelector(root)
 					end
@@ -468,7 +467,7 @@ do
 				type = "command",
 				text = "Widget Tree View",
 				callback = function(client, item)
-					local root = client:getTopWidgetInstance()
+					local root = client:getRootWidget()
 					if root then
 						_launchWidgetTreeView(root)
 					end

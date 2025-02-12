@@ -149,7 +149,7 @@ local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selec
 	local p_y = ay + client.h
 	--local p_y = ay + item.y + item.h
 
-	local root = client:getTopWidgetInstance()
+	local root = client:getRootWidget()
 
 	if client.chain_next then
 		root:sendEvent("rootCall_destroyPopUp", client)
@@ -179,7 +179,7 @@ end
 
 
 local function destroyPopUpMenu(client, reason_code)
-	local root = client:getTopWidgetInstance()
+	local root = client:getRootWidget()
 
 	root:sendEvent("rootCall_destroyPopUp", client, reason_code)
 
@@ -390,7 +390,7 @@ function def:widHook_pressed(key, scancode, isrepeat)
 
 		-- Menu deactivation
 		if key == "f10" then
-			local root = self:getTopWidgetInstance()
+			local root = self:getRootWidget()
 			if root.pop_up_menu then
 				destroyPopUpMenu(menu_bar, "concluded")
 				setStateIdle(menu_bar)
@@ -467,7 +467,7 @@ end
 --- Activate the menu bar, opening the first selectable category (if one exists).
 function def:widCall_keyboardActivate()
 	-- If there is already a pop-up menu (whether chained to the menu bar or just in general), destroy it
-	local root = self:getTopWidgetInstance()
+	local root = self:getRootWidget()
 	if root.pop_up_menu then
 		destroyPopUpMenu(self, "concluded")
 		setStateIdle(self)
@@ -939,7 +939,7 @@ def.default_skinner = {
 		love.graphics.setFont(self.context.resources.fonts.p)
 		local ww = love.graphics.getWidth() - 288
 
-		local root = self:getTopWidgetInstance()
+		local root = self:getRootWidget()
 
 		love.graphics.print("state: " .. self.state
 		.. "\npressed: " .. tostring(self == self.context.current_pressed)
