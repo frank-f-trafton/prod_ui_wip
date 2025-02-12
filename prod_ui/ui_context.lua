@@ -414,14 +414,11 @@ end
 
 local function _getAscending(wid, key)
 	while wid do
-		print("wid", wid, "key", key, "wid[key]", wid[key])
 		if wid[key] ~= nil then
-			print("_getAscending(): return: ", wid, wid[key])
 			return wid, wid[key]
 		end
 		wid = wid.parent
 	end
-	print("_getAscending(): no result")
 end
 
 
