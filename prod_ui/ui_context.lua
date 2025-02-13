@@ -315,14 +315,13 @@ local function _updateLoop(wid, dt, locks)
 	if not skip_children and #wid.children > 0 then
 		locks[wid] = true
 
-		local i = 1
 		local children = wid.children
-		local child = children[i]
+		local i = math.max(1, wid.update_child_first)
+		local j = math.min(#children, wid.update_child_last)
 
-		while child do
-			_updateLoop(child, dt, locks)
+		while i <= j do
+			_updateLoop(children[i], dt, locks)
 			i = i + 1
-			child = children[i]
 		end
 
 		locks[wid] = nil
@@ -410,16 +409,6 @@ end
 
 
 -- * LÖVE Callbacks *
-
-
-local function _getAscending(wid, key)
-	while wid do
-		if wid[key] ~= nil then
-			return wid, wid[key]
-		end
-		wid = wid.parent
-	end
-end
 
 
 function _mt_context:love_update(dt)
@@ -514,11 +503,21 @@ function _mt_context:love_update(dt)
 	local cursor_mgr = self.cursor_mgr
 	if cursor_mgr then
 		cursor_mgr:assignCursor(self.cursor_low, 4)
-		local w, k
-		w, k = _getAscending(self.current_hover, "cursor_hover")
-		cursor_mgr:assignCursor(k, 3)
-		w, k = _getAscending(self.current_pressed, "cursor_press")
-		cursor_mgr:assignCursor(k, 2)
+
+		if self.current_hover then
+			local _, k = self.current_hover:findAscendingKey("cursor_hover")
+			cursor_mgr:assignCursor(k, 3)
+		else
+			cursor_mgr:assignCursor(false, 3)
+		end
+
+		if self.current_pressed then
+			local _, k = self.current_pressed:findAscendingKey("cursor_press")
+			cursor_mgr:assignCursor(k, 2)
+		else
+			cursor_mgr:assignCursor(false, 2)
+		end
+
 		cursor_mgr:assignCursor(self.cursor_high, 1)
 
 		self.cursor_mgr:refreshMouseState(dt)

@@ -36,7 +36,7 @@ function plan.make(parent)
 		end
 		if self.usr_time >= self.usr_time_max then
 			local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
-			commonWimp.closeWindowFrame(self)
+			commonWimp.closeFrame(self)
 			return true
 		end
 	end

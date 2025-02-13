@@ -19,11 +19,11 @@ local def = {}
 def.trickle = {}
 
 
-local function _printFrames(self)
-	print("_printFrames()")
+local function _printWindowFrames(self)
+	print("_printWindowFrames()")
 	local selected = self.selected_frame
 	for i, child in ipairs(self.children) do
-		if child.is_frame then
+		if child.frame_type == "window" then
 			local frame_title = child:getFrameTitle() or ""
 			frame_title = frame_title == "" and "(Untitled)" or frame_title
 			print(i, child.order_id,
@@ -34,7 +34,7 @@ local function _printFrames(self)
 				.. (child._dead and " (Dead)" or "")
 			)
 		else
-			print(i, "(not a frame)")
+			print(i, "(not a window frame)")
 		end
 	end
 	print("-----------")
@@ -56,19 +56,15 @@ function def:uiCall_initialize()
 	uiLayout.initLayoutSequence(self)
 
 	-- Stack of modal 2nd-gen window frames. When populated, the top modal should get exclusive access, blocking
-	-- all other window frames. The user should still be able to interact with ephemeral widgets, such as pop-ups.
+	-- the active workspace and all other window frames. The user should still be able to interact with ephemeral
+	-- widgets, such as pop-ups.
 	self.modals = {}
 
-	-- One 2nd-gen window frame can be selected at a time.
+	-- One 2nd-gen frame (window frames, workspace frames) can be selected at a time.
 	self.selected_frame = false
 
 	-- Helps with ctrl+tabbing through 2nd-gen frames.
 	self.frame_order_counter = 0
-
-	-- When ctrl+tabbing through frames, and all candidates have been exhausted, move focus to the workspace
-	-- (or "nothing" if there is no active workspace).
-	self.step_off_frames = false
-	self.step_on_root = false
 
 	-- Reference to the base of a pop-up menu, if active.
 	self.pop_up_menu = false
@@ -155,7 +151,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	-- 2) If the top modal frame doesn't have root selection focus, then force it.
 	local modal_wid = self.modals[#self.modals]
 	if modal_wid then
-		if modal_wid.is_frame and self.selected_frame ~= modal_wid then
+		if modal_wid.frame_type and self.selected_frame ~= modal_wid then
 			self:setSelectedFrame(modal_wid, true)
 		end
 		if not inst:isInLineage(modal_wid) and not inst_in_pop_up then
@@ -299,7 +295,10 @@ end
 -- @param set_new_order When true, assign a new top order_id to the frame. This may be desired when clicking on a frame, and not when ctrl+tabbing through them.
 function def:setSelectedFrame(inst, set_new_order)
 	if inst and inst.parent ~= self then
-		error("instance is not a child of the root widget.")
+		error("can only select among children of the root widget.")
+
+	elseif not inst.frame_is_selectable then
+		error("cannot select this G2 widget.")
 	end
 
 	local old_selected = self.selected_frame
@@ -334,8 +333,9 @@ function def:selectTopWindowFrame(exclude)
 		--print("child #", i)
 		local child = self.children[i]
 
-		--print("is_frame", child.is_frame, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
-		if child.is_frame
+		--print("frame_type", child.frame_type, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
+		if child.frame_type
+		and child.frame_is_selectable
 		and not child.ref_modal_next
 		and child ~= exclude
 		then
@@ -354,7 +354,8 @@ local function frameSearch(self, dir, v1, v2)
 	local candidate = false
 
 	for i, child in ipairs(self.children) do
-		if child.is_frame
+		if child.frame_type
+		and child.frame_is_selectable
 		and not child.ref_modal_next
 		and child.order_id > v1 and child.order_id < v2
 		then
@@ -410,11 +411,7 @@ function def:stepSelectedFrame(dir)
 		return true
 
 	-- We are at the first or last selectable frame.
-	-- step_on_root: select "nothing"
-	elseif self.step_on_root then
-		self:setSelectedFrame(false)
-
-	-- Not step_on_root: try one more time, from the first or last point.
+	-- Try one more time, from the first or last point.
 	else
 		v1, v2 = 0, math.huge
 		candidate = frameSearch(self, dir, v1, v2)
@@ -464,9 +461,9 @@ function def:rootCall_assignPopUp(inst, pop_up)
 		clearPopUp(self, "concluded")
 	end
 
-	-- If invoking widget is part of a window-frame, bring it to the front.
-	local frame = inst:findAncestorByField("is_frame", true)
-	if frame then
+	-- If invoking widget is part of a selectable Window Frame, then bring it to the front.
+	local frame = inst:findAscendingKeyValue("frame_type", "window")
+	if frame and frame.frame_is_selectable then
 		self:setSelectedFrame(frame, true)
 	end
 
@@ -563,8 +560,8 @@ function def:uiCall_destroy(inst)
 	-- Bubbled events from children
 	if self ~= inst then
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
-		if inst.is_frame and self.selected_frame == inst then
-			--_printFrames(self)
+		if inst.frame_type == "window" and self.selected_frame == inst then
+			--_printWindowFrames(self)
 			self:selectTopWindowFrame(inst)
 		end
 	end
