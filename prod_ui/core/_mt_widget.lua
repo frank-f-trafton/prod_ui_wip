@@ -63,6 +63,11 @@ _mt_widget.draw_child_first = -math.huge
 _mt_widget.draw_child_last = math.huge
 
 
+-- Range of children for emitting userUpdate and uiCall_update.
+_mt_widget.update_child_first = -math.huge
+_mt_widget.update_child_last = math.huge
+
+
 -- Cursor codes
 _mt_widget.cursor_hover = false
 _mt_widget.cursor_press = false
@@ -1110,19 +1115,30 @@ function _mt_widget:renderThimble()
 end
 
 
-function _mt_widget:findAncestorByField(field, value)
-	--print("findAncestorByField: start: ", field, value)
-	local par = self.parent
-	while par do
-		--print("findAncestorByField: ancestor: ", par.id, par[field], par[value])
-		if par[field] == value then
-			--print("^ MATCH")
-			return par
+-- @returns the first widget where wid[key] has a non-nil value, plus the value.
+function _mt_widget:findAscendingKey(key)
+	local wid = self
+	while wid do
+		if wid[key] ~= nil then
+			return wid, wid[key]
 		end
-		par = par.parent
+		wid = wid.parent
 	end
+end
 
-	return nil
+
+-- @returns the first widget where wid[key] == value.
+function _mt_widget:findAscendingKeyValue(key, value)
+	--print("findAscendingKeyValue: start: ", key, value)
+	local wid = self
+	while wid do
+		--print("findAscendingKeyValue: ancestor: ", wid.id, wid[key], wid[value])
+		if wid[key] == value then
+			--print("^ MATCH")
+			return wid
+		end
+		wid = wid.parent
+	end
 end
 
 

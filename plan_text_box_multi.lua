@@ -113,7 +113,7 @@ function plan.make(parent)
 				type = "command",
 				text = "_Q_uit",
 				text_shortcut = "Ctrl+W",
-				callback = function(client, item) commonWimp.closeWindowFrame(client) end,
+				callback = function(client, item) commonWimp.closeFrame(client) end,
 				key_mnemonic = "w",
 				key_shortcut = "KC w",
 			},
@@ -136,7 +136,7 @@ function plan.make(parent)
 
 	-- Hook shortcuts to Window Frame
 	local shortcuts = {
-		["KC w"] = function(self, key, scancode, isrepeat) commonWimp.closeWindowFrame(self) end,
+		["KC w"] = function(self, key, scancode, isrepeat) commonWimp.closeFrame(self) end,
 	}
 	local hook_pressed = function(self, key, scancode, isrepeat)
 		local key_mgr = self.context.key_mgr

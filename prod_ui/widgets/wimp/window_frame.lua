@@ -305,8 +305,16 @@ function def:uiCall_initialize()
 	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
 
-	-- Differentiates between 2nd-gen frame containers and other stuff at the same hierarchical level.
-	self.is_frame = true
+	self.frame_type = "window"
+
+	-- Set to false if you do not want this frame to be selectable by the root.
+	-- Intended for specialized interfaces, like a floating box that controls the
+	-- playback of music.
+	-- When false:
+	-- * No widget in the frame should be capable of taking the thimble.
+	--   (Otherwise, why not just make it selectable?)
+	-- * The frame should never be made modal, or be part of a modal chain.
+	self.frame_is_selectable = true
 
 	self.hover_zone = false -- false, "button-close", "button-size"
 	self.mouse_in_resize_zone = false
@@ -617,13 +625,15 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		return
 	end
 
-	root:setSelectedFrame(self, true)
-	self.order_id = root:sendEvent("rootCall_getFrameOrderID")
+	if self.frame_is_selectable then
+		root:setSelectedFrame(self, true)
+		self.order_id = root:sendEvent("rootCall_getFrameOrderID")
 
-	-- If thimble1 is not in this widget tree, move it to the container.
-	local thimble1 = self.context.thimble1
-	if not thimble1 or not thimble1:hasThisAncestor(self) then
-		self:_trySettingThimble1()
+		-- If thimble1 is not in this widget tree, move it to the container.
+		local thimble1 = self.context.thimble1
+		if not thimble1 or not thimble1:hasThisAncestor(self) then
+			self:_trySettingThimble1()
+		end
 	end
 
 	local header_action = false

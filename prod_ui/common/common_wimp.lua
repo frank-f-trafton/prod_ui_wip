@@ -15,13 +15,13 @@ function commonWimp.async_widget_remove(self)
 end
 
 
--- Gets the WIMP Window Frame that a widget belongs to.
--- @param self Any widget descendent of a window frame, or the window frame itself.
--- @return The Window Frame, or nil if a frame was not found.
+-- Gets the UI Frame that a widget belongs to.
+-- @param self Any descendent of a UI Frame, or the UI Frame itself.
+-- @return The UI Frame, or nil if no UI Frame was found.
 function commonWimp.getFrame(self)
 	local wid = self
 	while wid do
-		if wid.is_frame then
+		if wid.frame_type then
 			return wid
 		end
 		wid = wid.parent
@@ -29,13 +29,13 @@ function commonWimp.getFrame(self)
 end
 
 
---- Destroy the window frame that this widget belongs to. If called in update, the removal will be handled as an async action after the update loop is complete.
--- @param self Any widget belonging to the current window frame, or the window frame itself.
+--- Destroy the UI Frame that this widget belongs to. If called in update, the removal will be handled as an async action after the update loop is complete.
+-- @param self Any widget belonging to the current UI Frame, or the UI Frame itself.
 -- @return Nothing.
-function commonWimp.closeWindowFrame(self)
+function commonWimp.closeFrame(self)
 	local wid = self
 	while wid do
-		if wid.is_frame then
+		if wid.frame_type then
 			if not self.context:isLocked() then
 				wid:remove()
 			else

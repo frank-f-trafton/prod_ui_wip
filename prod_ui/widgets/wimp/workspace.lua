@@ -54,6 +54,8 @@ function def:uiCall_initialize()
 	self.can_have_thimble = true
 	self.sort_id = 2
 
+	self.frame_type = "workspace"
+
 	-- When true, doc_w and doc_h are set to the combined dimensions of the container's direct descendants.
 	self.auto_doc_update = true
 
