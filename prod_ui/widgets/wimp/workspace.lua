@@ -90,6 +90,7 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
+	--self:applyAllSettings()
 end
 
 
@@ -340,4 +341,3 @@ def.default_skinner = {
 
 
 return def
-

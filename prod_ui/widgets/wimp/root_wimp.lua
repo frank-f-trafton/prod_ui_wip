@@ -48,28 +48,12 @@ function def:uiCall_initialize()
 	self.visible = true
 	self.clip_hover = true
 
-	--[[
-	WIMP 2nd-gen sort_id lanes:
-	1: Background elements
-	2: Workspace panels
-	3: Workspace frames, normal priority
-	4: Workspace frames, always on top
-	5: Application menu bar
-	6: Pop-up menus
-	--]]
 	self.sort_max = 6
 
 	-- Viewport #2 is used as the boundary for window-frame placement.
 	widShared.setupViewports(self, 2)
 
-	-- Widget layout sequence for children.
 	uiLayout.initLayoutSequence(self)
-	-- Assigns:
-	--self.lp_seq (table)
-	--self.lp_x
-	--self.lp_y
-	--self.lp_w
-	--self.lp_h
 
 	-- Stack of modal 2nd-gen window frames. When populated, the top modal should get exclusive access, blocking
 	-- all other window frames. The user should still be able to interact with ephemeral widgets, such as pop-ups.
@@ -81,7 +65,9 @@ function def:uiCall_initialize()
 	-- Helps with ctrl+tabbing through 2nd-gen frames.
 	self.frame_order_counter = 0
 
-	-- When true, include a "nothing" selection while ctrl+tabbing through frames.
+	-- When ctrl+tabbing through frames, and all candidates have been exhausted, move focus to the workspace
+	-- (or "nothing" if there is no active workspace).
+	self.step_off_frames = false
 	self.step_on_root = false
 
 	-- Reference to the base of a pop-up menu, if active.
@@ -339,27 +325,27 @@ end
 function def:selectTopWindowFrame(exclude)
 	print("selectTopWindowFrame: start")
 	if #self.modals > 0 then
-		print("modals > 0")
+		--print("modals > 0")
 		self:setSelectedFrame(self.modals[#self.modals], false)
 		return
 	end
 
 	for i = #self.children, 1, -1 do
-		print("child #", i)
+		--print("child #", i)
 		local child = self.children[i]
 
-		print("is_frame", child.is_frame, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
+		--print("is_frame", child.is_frame, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
 		if child.is_frame
 		and not child.ref_modal_next
 		and child ~= exclude
 		then
-			print("this child was selected")
+			--print("this child was selected")
 			self:setSelectedFrame(child, false)
 			return
 		end
 	end
 
-	print("no child was selected")
+	--print("no child was selected")
 	self:setSelectedFrame(false)
 end
 
