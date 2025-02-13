@@ -102,6 +102,7 @@ WIMP widgets.
 | wimp/sash | **Partial** |
 | wimp/tree_box | Working |
 | wimp/window_frame | Working |
+| wimp/workspace | **Barely started** |
 
 
 ## Compound Objects

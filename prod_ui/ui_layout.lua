@@ -453,6 +453,15 @@ function uiLayout.fitRemaining(parent, wid)
 end
 
 
+function uiLayout.overlayRemaining(parent, wid)
+	wid.x = parent.lp_x
+	wid.y = parent.lp_y
+	wid.w = math.max(0, parent.lp_w)
+	wid.h = math.max(0, parent.lp_h)
+end
+
+
+
 --- Place a widget based on an absolute position (and optional width and height) stored in the widget. 'Absolute'
 -- in this case means without regard for the layout rectangle.
 -- @param parent The parent widget (technically unused).

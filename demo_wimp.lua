@@ -328,6 +328,7 @@ do
 	end
 	--]]
 
+
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 		bar_menu:initialize()
@@ -557,6 +558,49 @@ do
 		bar_button:reshape()
 		--]]
 	end
+
+
+	do
+		local ws1 = wimp_root:addChild("wimp/workspace")
+		ws1:initialize()
+		ws1.tag = "main_workspace"
+
+		ws1.lc_func = uiLayout.overlayRemaining
+		uiLayout.register(wimp_root, ws1)
+
+		local btn = ws1:addChild("base/button")
+		btn.x = 32
+		btn.y = 32
+		btn.w = 256
+		btn.h = 64
+		btn:initialize()
+		btn:setLabel("I'm a button")
+
+		btn.wid_buttonAction = function(self)
+			self:setLabel("in a workspace")
+		end
+
+
+		-- Goofing off
+		--[[
+		local snow = {}
+		for i = 1, 1024 do
+			snow[i] = {x=love.math.random(love.graphics.getWidth()), y=love.math.random(love.graphics.getHeight())}
+		end
+		ws1.render = function(self, ox, oy)
+			love.graphics.setColor(0.2, 0.2, 0.5, 1.0)
+			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+
+			love.graphics.setColor(0.9, 0.9, 0.9, 1.0)
+			for i, s in ipairs(snow) do
+				s.x = (s.x + 0.15 + love.math.random(0.0, 0.12)) % (self.w + 64)
+				s.y = (s.y + 0.32 + love.math.random(0.0, 0.18)) % (self.h + 64)
+				love.graphics.circle("fill", s.x - 32, s.y - 32, 1.5)
+			end
+		end
+		--]]
+	end
+
 
 	--love.mouse.setGrabbed(true)
 	--love.mouse.setRelativeMode(true)

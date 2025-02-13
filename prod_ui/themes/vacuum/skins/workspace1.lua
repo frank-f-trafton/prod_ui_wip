@@ -1,7 +1,7 @@
 -- WIMP workspace container.
 
 return {
-	skinner_id = "base/container",
+	skinner_id = "wimp/workspace",
 
 	box = "*style/boxes/frame_norm",
 	data_scroll = "*common/scroll_bar1",

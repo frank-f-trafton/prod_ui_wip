@@ -298,12 +298,12 @@ function contextDraw.draw(context, x, y)
 	end
 	last_w, last_h = win_w, win_h
 
-	local wid = context.root
+	local root = context.root
 
 	love.graphics.push("all") -- [s]
 
-	love.graphics.translate(x + wid.x, y + wid.y)
-	drawLoop(context, wid, x, y, context.thimble1, context.thimble2)
+	love.graphics.translate(x + root.x, y + root.y)
+	drawLoop(context, root, x, y, context.thimble1, context.thimble2)
 
 	love.graphics.pop() -- []
 end

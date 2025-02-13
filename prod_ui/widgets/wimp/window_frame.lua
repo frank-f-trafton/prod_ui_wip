@@ -299,9 +299,11 @@ function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.can_have_thimble = false
-	--self.clip_hover = false
-	--self.clip_scissor = false
 	self.sort_id = 3
+
+	widShared.setupViewports(self, 4)
+	widShared.setupMinMaxDimensions(self)
+	uiLayout.initLayoutSequence(self)
 
 	-- Differentiates between 2nd-gen frame containers and other stuff at the same hierarchical level.
 	self.is_frame = true
@@ -338,14 +340,6 @@ function def:uiCall_initialize()
 	self.p_bounds_x2 = 0
 	self.p_bounds_y2 = 0
 
-	widShared.setupViewports(self, 4)
-
-	-- Layout rectangle
-	self.lp_x = 0
-	self.lp_y = 0
-	self.lp_w = 1
-	self.lp_h = 1
-
 	-- Used when unmaximizing as a result of dragging.
 	self.adjust_mouse_orig_a_x = 0
 	self.adjust_mouse_orig_a_y = 0
@@ -363,14 +357,6 @@ function def:uiCall_initialize()
 	self.drag_ox = 0
 	self.drag_oy = 0
 
-	-- Minimum container size
-	self.min_w = 64
-	self.min_h = 64
-
-	-- Maximum container size
-	self.max_w = 2^16
-	self.max_h = 2^16
-
 	self:skinSetRefs()
 	self:skinInstall()
 	self:applyAllSettings()
@@ -383,9 +369,6 @@ function def:uiCall_initialize()
 	self.header_text_oy = 0
 
 	self.needs_update = true
-
-	-- Layout rectangle
-	uiLayout.initLayoutRectangle(self)
 
 	-- Don't let inter-generational thimble stepping leave this widget's children.
 	self.block_step_intergen = true
@@ -533,13 +516,12 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 			if not (axis_x == 0 and axis_y == 0) then
 				self.mouse_in_resize_zone = true
-				local cursor_id = getCursorCode(axis_x, axis_y)
-				self.cursor_press = cursor_id
+				self.cursor_hover = getCursorCode(axis_x, axis_y)
 			end
 		else
 			if self.mouse_in_resize_zone then
 				self.mouse_in_resize_zone = false
-				self.cursor_press = nil
+				self.cursor_hover = nil
 			end
 		end
 	end
