@@ -37,7 +37,6 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 local def = {
 	skin_id = "list_box1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
 
 	default_settings = {
 		icon_side = "left", -- "left", "right"
@@ -52,7 +51,7 @@ widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
-def.arrange = lgcMenu.arrangeListVerticalTB
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 -- * Scroll helpers *
@@ -202,7 +201,7 @@ function def:addItem(text, pos, bijou_id)
 
 	table.insert(items, pos, item)
 
-	self:arrange(1, pos, #items)
+	self:arrangeItems(1, pos, #items)
 
 	print("addItem text:", item.text, "y: ", item.y)
 
@@ -245,7 +244,7 @@ function def:removeItemByIndex(item_i)
 		self.index = self.index - 1
 	end
 
-	self:arrange(1, item_i, #items)
+	self:arrangeItems(1, item_i, #items)
 
 	return removed_item
 end
@@ -659,18 +658,7 @@ def.default_skinner = {
 		love.graphics.setColor(1, 1, 1, 1)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
-		-- Embedded scroll bars, if present and active.
-		local data_scroll = skin.data_scroll
-
-		local scr_h = self.scr_h
-		local scr_v = self.scr_v
-
-		if scr_h and scr_h.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-		end
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsHV(self, skin.data_scroll)
 
 		love.graphics.push("all")
 

@@ -10,9 +10,15 @@ return {
 		},
 
 		wimp_frame = {
+			-- For the frame border
 			outpad = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
 			border = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
-			margin = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+			margin = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
+
+			-- For the content viewport
+			outpad2 = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
+			border2 = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
+			margin2 = {x1 = 0, x2 = 0, y1 = 0, y2 = 0},
 		},
 
 		wimp_frame_header_normal = {

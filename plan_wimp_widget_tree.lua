@@ -67,7 +67,7 @@ local function _buildTree(tree_box, root)
 	_buildLoop(tree_box, tree_box.tree, root, context.thimble1, context.thimble2, _collapsed)
 
 	tree_box:orderItems()
-	tree_box:arrange()
+	tree_box:arrangeItems()
 
 	-- Restore the selection, if any.
 	local restored
@@ -140,85 +140,82 @@ function plan.make(root)
 	frame:setHeaderSize("small")
 	frame:setFrameTitle("Widget Tree")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		--content.layout_mode = "resize" -- XXX needs a rethink
-		content.layout_mode = "auto"
-		content:setScrollBars(false, false)
+	frame.auto_layout = true
+	frame:setScrollBars(false, false)
 
-		local tree_box = content:addChild("wimp/tree_box")
-		tree_box:initialize()
-		local chk_vp = content:addChild("base/checkbox")
-		chk_vp:initialize()
-		local chk_highlight = content:addChild("base/checkbox")
-		chk_highlight:initialize()
-		local chk_exclude = content:addChild("base/checkbox")
-		chk_exclude:initialize()
+	local tree_box = frame:addChild("wimp/tree_box")
+	tree_box:initialize()
+	local chk_vp = frame:addChild("base/checkbox")
+	chk_vp:initialize()
+	local chk_highlight = frame:addChild("base/checkbox")
+	chk_highlight:initialize()
+	local chk_exclude = frame:addChild("base/checkbox")
+	chk_exclude:initialize()
 
-		chk_vp:setLabel("Show Viewports")
-		chk_vp:setChecked(content.context.app.dbg_vp.active)
+	chk_vp:setLabel("Show Viewports")
+	chk_vp:setChecked(frame.context.app.dbg_vp.active)
 
-		chk_vp.wid_buttonAction = function(self)
-			local vp = self.context.app.dbg_vp
-			vp.active = not not self.checked
-		end
-
-		chk_vp.h = 32
-		chk_vp.lc_func = uiLayout.fitBottom
-
-
-		chk_highlight:setLabel("Highlight Selected")
-		chk_highlight:setChecked(content.context.app.dbg_outline.active)
-
-		chk_highlight.wid_buttonAction = function(self)
-			local outline = self.context.app.dbg_outline
-			outline.active = not not self.checked
-		end
-
-		chk_highlight.h = 32
-		chk_highlight.lc_func = uiLayout.fitBottom
-
-
-		chk_exclude:setLabel("Exclude this window frame")
-		content.usr_exclude = true
-		chk_exclude:setChecked(content.usr_exclude)
-
-		chk_exclude.wid_buttonAction = function(self)
-			self.parent.usr_exclude = not self.parent.usr_exclude
-		end
-
-		chk_exclude.h = 32
-		chk_exclude.lc_func = uiLayout.fitBottom
-
-
-		tree_box:setExpandersActive(true)
-
-		tree_box.lc_func = uiLayout.fitRemaining
-
-		uiLayout.register(content, chk_exclude)
-		uiLayout.register(content, chk_highlight)
-		uiLayout.register(content, chk_vp)
-		uiLayout.register(content, tree_box)
-
-		tree_box.x = 0
-		tree_box.y = 0
-		tree_box.w = 224
-		tree_box.h = 256
-
-		tree_box:setScrollBars(false, true)
-
-		tree_box:reshape()
-
-		tree_box.MN_drag_scroll = true
-		tree_box.MN_drag_select = true
-
-		-- User code
-		tree_box.usr_timer_max = 0.5
-		tree_box.usr_timer = tree_box.usr_timer_max
-		tree_box.userUpdate = tree_userUpdate
-		tree_box.userDestroy = tree_userDestroy
-		-- Also reads 'self.parent.usr_exclude'
+	chk_vp.wid_buttonAction = function(self)
+		local vp = self.context.app.dbg_vp
+		vp.active = not not self.checked
 	end
+
+	chk_vp.h = 32
+	chk_vp.lc_func = uiLayout.fitBottom
+
+
+	chk_highlight:setLabel("Highlight Selected")
+	chk_highlight:setChecked(frame.context.app.dbg_outline.active)
+
+	chk_highlight.wid_buttonAction = function(self)
+		local outline = self.context.app.dbg_outline
+		outline.active = not not self.checked
+	end
+
+	chk_highlight.h = 32
+	chk_highlight.lc_func = uiLayout.fitBottom
+
+
+	chk_exclude:setLabel("Exclude this window frame")
+	frame.usr_exclude = true
+	chk_exclude:setChecked(frame.usr_exclude)
+
+	chk_exclude.wid_buttonAction = function(self)
+		self.parent.usr_exclude = not self.parent.usr_exclude
+	end
+
+	chk_exclude.h = 32
+	chk_exclude.lc_func = uiLayout.fitBottom
+
+
+	tree_box:setExpandersActive(true)
+
+	tree_box.lc_func = uiLayout.fitRemaining
+
+	uiLayout.register(frame, chk_exclude)
+	uiLayout.register(frame, chk_highlight)
+	uiLayout.register(frame, chk_vp)
+	uiLayout.register(frame, tree_box)
+
+	tree_box.x = 0
+	tree_box.y = 0
+	tree_box.w = 224
+	tree_box.h = 256
+
+	tree_box:setScrollBars(false, true)
+
+	tree_box:reshape()
+
+	tree_box.MN_drag_scroll = true
+	tree_box.MN_drag_select = true
+
+	-- User code
+	tree_box.usr_timer_max = 0.5
+	tree_box.usr_timer = tree_box.usr_timer_max
+	tree_box.userUpdate = tree_userUpdate
+	tree_box.userDestroy = tree_userDestroy
+	-- Also reads 'self.parent.usr_exclude'
+
 
 	frame:reshape(true)
 

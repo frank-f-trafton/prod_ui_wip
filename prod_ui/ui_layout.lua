@@ -98,7 +98,6 @@ end
 
 --- Bind a widget to the layout system. Only one widget may be bound at a time.
 -- @param wid The widget to bind.
--- @return Nothing.
 function uiLayout.bindWidget(wid)
 	if type(wid) ~= "table" then
 		error("argument #1 bad type: expected table, got " .. type(wid))
@@ -114,7 +113,6 @@ end
 --- Unbind a widget previously bound to the layout system. The layout stack must be empty at time of call, and the widget
 -- must be currently bound.
 -- @param wid The widget to unbind.
--- @return Nothing.
 function uiLayout.unbindWidget(wid)
 	if type(wid) ~= "table" then
 		error("argument #1 bad type: expected table, got " .. type(wid))
@@ -135,7 +133,6 @@ end
 
 --- Clear all layout state. For use in scenarios where the entire layout procedure is abandoned, like cleaning
 -- up after an error.
--- @return Nothing.
 function uiLayout.unwindAll()
 	lo_bind = false
 	lo_stack_i = 0
@@ -150,7 +147,6 @@ end
 -- @param y Layout Y position.
 -- @param w Layout width.
 -- @param h Layout height.
--- @return Nothing.
 function uiLayout.push(x, y, w, h)
 	if not lo_bind then
 		error("no widget is bound to the layout system.")
@@ -166,7 +162,7 @@ end
 
 
 --- Pop the layout stack, applying its layout rectangle to the bound widget.
--- @return Nothing. Bound rectangle is modified in-place.
+--  Bound rectangle is modified in-place.
 function uiLayout.pop()
 	local wid = getBoundWidget()
 	local rect = decrementStackPointer()
@@ -188,7 +184,6 @@ end
 
 -- Push left slice onto the stack.
 -- @param w Width of the slice.
--- @return Nothing.
 function uiLayout.pushLeft(w)
 	local wid = getBoundWidget()
 
@@ -205,7 +200,6 @@ end
 
 --- Push right slice onto the stack.
 -- @param w Width of the slice.
--- @return Nothing.
 function uiLayout.pushRight(w)
 	local wid = getBoundWidget()
 
@@ -222,7 +216,6 @@ end
 
 --- Push top slice onto the stack.
 -- @param h Height of the slice.
--- @return Nothing.
 function uiLayout.pushTop(h)
 	local wid = getBoundWidget()
 
@@ -239,7 +232,6 @@ end
 
 --- Push bottom slice onto the stack.
 -- @param h Height of the slice.
--- @return Nothing.
 function uiLayout.pushBottom(h)
 	local wid = getBoundWidget()
 
@@ -259,7 +251,6 @@ end
 
 --- Reset a widget's layout rectangle to match its dimensions.
 -- @param wid The widget to reset.
--- @return Nothing.
 function uiLayout.resetLayout(wid)
 	wid.lp_x = 0
 	wid.lp_y = 0
@@ -268,10 +259,10 @@ function uiLayout.resetLayout(wid)
 end
 
 
---- Reset a widget's layout rectangle to match one of its viewports. The rectangle top-left is (0,0).
+--- Reset a widget's layout rectangle to match one of its viewports. Because scrolling is assumed, the
+--	rectangle top-left is (0,0).
 -- @param wid The widget to reset.
 -- @param v The Viewport ID.
--- @return Nothing.
 function uiLayout.resetLayoutPort(wid, v)
 	v = widShared.vp_keys[v]
 
@@ -285,7 +276,6 @@ end
 --- Reset a widget's layout rectangle to match one of its viewports. The rectangle top-left is the Viewport's top-left.
 -- @param wid The widget to reset.
 -- @param v The Viewport ID.
--- @return Nothing.
 function uiLayout.resetLayoutPortFull(wid, v)
 	v = widShared.vp_keys[v]
 
@@ -302,7 +292,6 @@ end
 -- @param y_top Pixels to carve on the top side.
 -- @param x_right Pixels to carve on the right side.
 -- @param y_bottom Pixels to carve on the bottom side.
--- @return Nothing.
 function uiLayout.edgeCarvePixels(wid, x_left, y_top, x_right, y_bottom)
 	wid.lp_w = math.max(0, wid.lp_w - x_left - x_right)
 	wid.lp_h = math.max(0, wid.lp_h - y_top - y_bottom)
@@ -317,7 +306,6 @@ end
 -- @param y_top Percentage (0.0 - 1.0) of height to carve on the top side.
 -- @param x_right Percentage (0.0 - 1.0) of width to carve on the right side.
 -- @param y_bottom Percentage (0.0 - 1.0) of height to carve on the bottom side.
--- @return Nothing.
 function uiLayout.edgeCarveNorm(wid, x_left, y_top, x_right, y_bottom)
 	x_left = math.max(0.0, math.min(x_left, 1.0))
 	y_top = math.max(0.0, math.min(y_top, 1.0))
@@ -405,7 +393,6 @@ uiLayout.fit<Left|Top|Right|Bottom>(): Fit a widget on one side of its parent's 
 --- Fit a widget to the left.
 -- @param parent The parent widget.
 -- @param wid One of the parent's direct children.
--- @return Nothing.
 function uiLayout.fitLeft(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardLeft(parent, wid.w)
 end
@@ -414,7 +401,6 @@ end
 --- Fit a widget to the Right.
 -- @param parent The parent widget.
 -- @param wid One of the parent's direct children.
--- @return Nothing.
 function uiLayout.fitRight(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardRight(parent, wid.w)
 end
@@ -423,7 +409,6 @@ end
 --- Fit a widget to the top.
 -- @param parent The parent widget.
 -- @param wid One of the parent's direct children.
--- @return Nothing.
 function uiLayout.fitTop(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardTop(parent, wid.h)
 end
@@ -432,7 +417,6 @@ end
 --- Fit a widget to the bottom.
 -- @param parent The parent widget.
 -- @param wid One of the parent's direct children.
--- @return Nothing.
 function uiLayout.fitBottom(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardBottom(parent, wid.h)
 end
@@ -441,7 +425,6 @@ end
 --- Fit a widget to its parent's remaining layout rectangle.
 -- @param parent The parent widget.
 -- @param wid One of the parent's direct children.
--- @return Nothing.
 function uiLayout.fitRemaining(parent, wid)
 	wid.x = parent.lp_x
 	wid.y = parent.lp_y
@@ -466,7 +449,6 @@ end
 -- in this case means without regard for the layout rectangle.
 -- @param parent The parent widget (technically unused).
 -- @param wid The widget to position.
--- @return Nothing.
 function uiLayout.placeAbsolute(parent, wid)
 	wid.x = wid.lc_pos_x
 	wid.y = wid.lc_pos_y
@@ -479,7 +461,6 @@ end
 -- corner of the parent's layout rectangle.
 -- @param parent The parent widget.
 -- @param wid The widget to position.
--- @return Nothing.
 function uiLayout.placeRelative(parent, wid)
 	wid.x = parent.lp_x + wid.lc_pos_x
 	wid.y = parent.lp_y + wid.lc_pos_y
@@ -492,7 +473,6 @@ end
 -- fields 'w' and 'h' are optional, and the widget will keep its existing values if those are not present.
 -- @param parent The parent widget.
 -- @param wid The widget to position.
--- @return Nothing.
 function uiLayout.placeIndex(parent, wid)
 	local rect = parent.lp_rects[wid.lc_index]
 
@@ -511,7 +491,6 @@ end
 -- in the child. The child widget will be resized to fit the cell.
 -- @param parent The parent widget.
 -- @param wid The child widget.
--- @return Nothing.
 function uiLayout.placeGrid(parent, wid)
 	local cols = parent.lp_grid_cols
 	local rows = parent.lp_grid_rows
@@ -564,7 +543,6 @@ Code running from applyLayout() should not:
 --- Create a layout sequence table and rectangle in a widget. (You can really just assign a new table to self.lp_seq,
 -- but this forces the widget def to require uiLayout, which might be helpful for organizational purposes / grepping.)
 -- @param self The widget which will hold the layout sequence.
--- @return Nothing.
 function uiLayout.initLayoutSequence(self)
 	self.lp_seq = {}
 
@@ -577,7 +555,6 @@ end
 
 --- Like initLayoutSequence(), but assigns just the layout rectangle fields to a widget.
 -- @param self The widget which will hold the layout rectangle.
--- @return Nothing.
 function uiLayout.initLayoutRectangle(self)
 	self.lp_x = 0
 	self.lp_y = 0
@@ -590,7 +567,6 @@ end
 -- it should only appear once in the list.
 -- @param parent The parent widget.
 -- @param wid The child widget.
--- @return Nothing.
 function uiLayout.register(parent, wid)
 	local lp_seq = getLayoutTable(parent)
 
@@ -613,7 +589,6 @@ end
 -- must currently be in the list.
 -- @param parent The parent widget.
 -- @param wid The child widget to remove.
--- @return Nothing.
 function uiLayout.unregister(parent, wid)
 	local lp_seq = getLayoutTable(parent)
 
@@ -640,7 +615,6 @@ wrappers with error checking appropriate to your use case).
 
 --- Apply a widget's layout by looping through its layout sequence.
 -- @param parent The widget whose children will be arranged.
--- @return Nothing.
 function uiLayout.applyLayout(parent)
 	uiLayout.bindWidget(parent)
 

@@ -10,27 +10,24 @@ function plan.make(parent)
 	frame:initialize()
 	frame:setFrameTitle("Frame Test")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
+	frame.auto_layout = true
 
-		content:setScrollBars(false, false)
+	frame:setScrollBars(false, false)
 
-		local bb_lbl = content:addChild("barebones/label")
-		bb_lbl.x = 0
-		bb_lbl.y = 0
-		bb_lbl.w = 256
-		bb_lbl.h = 192
-		bb_lbl:initialize()
-		bb_lbl:setTag("countdown_label")
+	local bb_lbl = frame:addChild("barebones/label")
+	bb_lbl.x = 0
+	bb_lbl.y = 0
+	bb_lbl.w = 256
+	bb_lbl.h = 192
+	bb_lbl:initialize()
+	bb_lbl:setTag("countdown_label")
 
-		frame.usr_time = 0.0
-		frame.usr_time_max = 4.0
-	end
+	frame.usr_time = 0.0
+	frame.usr_time_max = 4.0
 
 	frame.userUpdate = function(self, dt)
 		self.usr_time = self.usr_time + dt
-		local bb_lbl = content:findTag("countdown_label")
+		local bb_lbl = frame:findTag("countdown_label")
 		if bb_lbl then
 			bb_lbl:setLabel(string.format("This frame will self-destruct, via userUpdate, in %.1f seconds.", self.usr_time_max - self.usr_time))
 		end

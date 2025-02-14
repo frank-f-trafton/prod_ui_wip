@@ -23,65 +23,60 @@ function plan.make(parent)
 	frame:initialize()
 	frame:setFrameTitle("LineEditor Test")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.w = 640
-		content.h = 480
+	frame.w = 640
+	frame.h = 480
+	frame.auto_layout = true
 
-		--content.layout_mode = "auto"
-		content.layout_mode = "resize"
+	frame:setScrollBars(false, false)
 
-		content:setScrollBars(false, false)
+	local c_bar = frame:addChild("base/container")
+	c_bar.h = 64
+	c_bar:initialize()
 
-		local c_bar = content:addChild("base/container")
-		c_bar.h = 64
-		c_bar:initialize()
+	c_bar.lc_func = uiLayout.fitTop
+	uiLayout.register(frame, c_bar)
 
-		c_bar.lc_func = uiLayout.fitTop
-		uiLayout.register(content, c_bar)
+	--[[
+	local cbox_wrap = c_bar:addChild("base/checkbox")
+	cbox_wrap.x = 0
+	cbox_wrap.y = 0
+	cbox_wrap.w = 160
+	cbox_wrap.h = 40
+	cbox_wrap:initialize()
+	cbox_wrap:setLabel("Wrap Mode (F5)", "single")
+	--]]
 
-		--[[
-		local cbox_wrap = c_bar:addChild("base/checkbox")
-		cbox_wrap.x = 0
-		cbox_wrap.y = 0
-		cbox_wrap.w = 160
-		cbox_wrap.h = 40
-		cbox_wrap:initialize()
-		cbox_wrap:setLabel("Wrap Mode (F5)", "single")
-		--]]
+	local temp_instructions = c_bar:addChild("base/text")
+	temp_instructions.font = context.resources.fonts.p
+	temp_instructions.x = 0
+	temp_instructions.w = 512
+	temp_instructions.h = c_bar.h
+	temp_instructions:initialize()
+	temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
+	temp_instructions:refreshText()
 
-		local temp_instructions = c_bar:addChild("base/text")
-		temp_instructions.font = context.resources.fonts.p
-		temp_instructions.x = 0
-		temp_instructions.w = 512
-		temp_instructions.h = c_bar.h
-		temp_instructions:initialize()
-		temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
-		temp_instructions:refreshText()
+	local text_box = frame:addChild("input/text_box_multi")
+	text_box.font = context.resources.fonts.p
+	text_box.x = 0
+	text_box.y = 0
+	text_box.w = 400
+	text_box.h = 350
+	text_box:initialize()
+	text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
+	text_box:setScrollBars(true, true)
 
-		local text_box = content:addChild("input/text_box_multi")
-		text_box.font = context.resources.fonts.p
-		text_box.x = 0
-		text_box.y = 0
-		text_box.w = 400
-		text_box.h = 350
-		text_box:initialize()
-		text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
-		text_box:setScrollBars(true, true)
+	text_box.ghost_text = "Ghost text"
 
-		text_box.ghost_text = "Ghost text"
+	--text_box.line_ed.allow_line_feed = false
+	text_box.line_ed.allow_tab = true
+	text_box.line_ed.allow_untab = true
+	text_box.line_ed.tabs_to_spaces = false
+	text_box.line_ed.auto_indent = true
 
-		--text_box.line_ed.allow_line_feed = false
-		text_box.line_ed.allow_tab = true
-		text_box.line_ed.allow_untab = true
-		text_box.line_ed.tabs_to_spaces = false
-		text_box.line_ed.auto_indent = true
+	text_box:reshape()
 
-		text_box:reshape()
-
-		text_box.lc_func = uiLayout.fitRemaining
-		uiLayout.register(content, text_box)
-	end
+	text_box.lc_func = uiLayout.fitRemaining
+	uiLayout.register(frame, text_box)
 
 
 	frame:reshape(true)
@@ -124,7 +119,7 @@ function plan.make(parent)
 			pop_up_def = def_file,
 		})
 
-		menu_bar:arrange()
+		menu_bar:arrangeItems()
 		menu_bar:resize()
 		menu_bar:reshape()
 		menu_bar:menuChangeCleanup()

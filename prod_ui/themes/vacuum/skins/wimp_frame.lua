@@ -17,6 +17,13 @@ return {
 	header_size = "*wimp/header_size",
 	-- /settings
 
+	data_scroll = "*common/scroll_bar1",
+	scr_style = "*style/scroll_bar_styles/norm",
+
+	-- Padding when scrolling to put a widget into view.
+	in_view_pad_x = 0,
+	in_view_pad_y = 0,
+
 	box = "*style/boxes/wimp_frame",
 
 	slc_body = "*tex_slices/win_body",
@@ -39,7 +46,7 @@ return {
 		-- Which rectangle to use for fitting the header.
 		-- false: 'self.w', 'self.h'
 		-- number: a corresponding viewport.
-		viewport_fit = 2,
+		viewport_fit = 4,
 		header_box = "*style/boxes/wimp_frame_header_normal",
 		header_slc_body = "*tex_slices/winheader_normal",
 		header_font = "*fonts/h4",

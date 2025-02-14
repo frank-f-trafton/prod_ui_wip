@@ -85,7 +85,7 @@ local def = {
 
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.arrange = lgcMenu.arrangeListVerticalTB
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 local function _blocking_ui_evaluateHover(self, mx, my, os_x, os_y)
@@ -447,7 +447,7 @@ function def:updateDimensions()
 	end
 
 	-- Arrange the items vertically.
-	self:arrange()
+	self:arrangeItems()
 
 	-- The work-in-progress widget dimensions.
 	local w = 1
@@ -639,7 +639,7 @@ end
 
 function def:menuChangeCleanup()
 	self:menuSetSelectionStep(0, false)
-	self:arrange()
+	self:arrangeItems()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
 	self:selectionInView()

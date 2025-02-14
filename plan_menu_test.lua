@@ -108,30 +108,24 @@ function plan.make(parent)
 	frame:initialize()
 	frame:setFrameTitle("Menu Test")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
-		content:setScrollBars(false, false)
+	frame.auto_layout = true
+	frame:setScrollBars(false, false)
 
-		local content_d = frame:findTag("frame_content")
-		if content_d then
-			content_d.w = 640
-			content_d.h = 480
+	frame.w = 640
+	frame.h = 480
 
-			local menu1 = content_d:addChild("base/menu")
-			menu1.x = 16
-			menu1.y = 16
-			menu1.w = 400
-			menu1.h = 350
-			menu1.wid_keyPressed = testMenuKeyPressed
-			menu1.MN_drag_select = true
-			menu1:initialize()
+	local menu1 = frame:addChild("base/menu")
+	menu1.x = 16
+	menu1.y = 16
+	menu1.w = 400
+	menu1.h = 350
+	menu1.wid_keyPressed = testMenuKeyPressed
+	menu1.MN_drag_select = true
+	menu1:initialize()
 
-			menu1:setScrollBars(true, true)
+	menu1:setScrollBars(true, true)
 
-			menu1:reshape()
-		end
-	end
+	menu1:reshape()
 
 	frame:reshape(true)
 	frame:center(true, true)

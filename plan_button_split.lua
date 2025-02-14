@@ -8,10 +8,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(content, x, y, w, h, text, label_mode)
+local function makeLabel(frame, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = content:addChild("base/label")
+	local label = frame:addChild("base/label")
 	label:initialize()
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:setLabel(text, label_mode)
@@ -102,153 +102,150 @@ function plan.make(parent)
 
 	frame:setFrameTitle("Split Button")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
-		content:setScrollBars(false, true)
+	frame.auto_layout = true
+	frame:setScrollBars(false, true)
 
-		-- SkinDef clone
-		local resources = content.context.resources
-		local clone = resources:cloneSkinDef("button_split1")
+	-- SkinDef clone
+	local resources = frame.context.resources
+	local clone = resources:cloneSkinDef("button_split1")
 
-		local function _userDestroy(self)
-			self.context.resources:removeSkinDef(clone)
-		end
+	local function _userDestroy(self)
+		self.context.resources:removeSkinDef(clone)
+	end
 
-		-- Split Button
-		local btn_spl = content:addChild("wimp/button_split")
-		btn_spl.x = 0
-		btn_spl.y = 0
-		btn_spl.w = 224
-		btn_spl.h = 64
-		btn_spl.userDestroy = _userDestroy
-		btn_spl:initialize()
-		btn_spl:setTag("demo_split_btn")
+	-- Split Button
+	local btn_spl = frame:addChild("wimp/button_split")
+	btn_spl.x = 0
+	btn_spl.y = 0
+	btn_spl.w = 224
+	btn_spl.h = 64
+	btn_spl.userDestroy = _userDestroy
+	btn_spl:initialize()
+	btn_spl:setTag("demo_split_btn")
 
-		btn_spl:setLabel("Split Button")
-		btn_spl.wid_buttonAction = function(self)
-			print("(Click)")
-		end
-		btn_spl.wid_buttonAction2 = _createPopUpMenu
-		btn_spl.wid_buttonActionAux = _createPopUpMenu
+	btn_spl:setLabel("Split Button")
+	btn_spl.wid_buttonAction = function(self)
+		print("(Click)")
+	end
+	btn_spl.wid_buttonAction2 = _createPopUpMenu
+	btn_spl.wid_buttonActionAux = _createPopUpMenu
 
-		local xx, yy, ww, hh = 256, 0, 256, 48
+	local xx, yy, ww, hh = 256, 0, 256, 48
 
-		do
-			local chk = content:addChild("base/checkbox")
-			chk.x = xx
-			chk.y = yy
-			chk.w = ww
-			chk.h = hh
-			chk:initialize()
-			chk:setLabel("Aux Enabled")
-			chk:setChecked(not not btn_spl.aux_enabled)
-			chk.wid_buttonAction = function(self)
-				local btn = self:findSiblingTag("demo_split_btn")
-				if btn then
-					btn:setAuxEnabled(self.checked)
-				end
+	do
+		local chk = frame:addChild("base/checkbox")
+		chk.x = xx
+		chk.y = yy
+		chk.w = ww
+		chk.h = hh
+		chk:initialize()
+		chk:setLabel("Aux Enabled")
+		chk:setChecked(not not btn_spl.aux_enabled)
+		chk.wid_buttonAction = function(self)
+			local btn = self:findSiblingTag("demo_split_btn")
+			if btn then
+				btn:setAuxEnabled(self.checked)
 			end
-			yy = yy + hh
 		end
-
-		makeLabel(content, xx, yy, ww, hh, "Aux Side", "single")
 		yy = yy + hh
+	end
 
-		do
-			local rdo = content:addChild("barebones/radio_button")
-			rdo.x = xx
-			rdo.y = yy
-			rdo.w = ww
-			rdo.h = hh
-			rdo:initialize()
-			rdo.radio_group = "split_placement"
-			rdo.usr_placement = "right"
-			rdo:setLabel("Right")
-			rdo.wid_buttonAction = _radioPlacement
-			if btn_spl.skin.aux_placement == rdo.usr_placement then
-				rdo:setChecked(true)
-			end
-			yy = yy + hh
+	makeLabel(frame, xx, yy, ww, hh, "Aux Side", "single")
+	yy = yy + hh
+
+	do
+		local rdo = frame:addChild("barebones/radio_button")
+		rdo.x = xx
+		rdo.y = yy
+		rdo.w = ww
+		rdo.h = hh
+		rdo:initialize()
+		rdo.radio_group = "split_placement"
+		rdo.usr_placement = "right"
+		rdo:setLabel("Right")
+		rdo.wid_buttonAction = _radioPlacement
+		if btn_spl.skin.aux_placement == rdo.usr_placement then
+			rdo:setChecked(true)
 		end
+		yy = yy + hh
+	end
 
-		do
-			local rdo = content:addChild("barebones/radio_button")
-			rdo.x = xx
-			rdo.y = yy
-			rdo.w = ww
-			rdo.h = hh
-			rdo:initialize()
-			rdo.radio_group = "split_placement"
-			rdo.usr_placement = "left"
-			rdo:setLabel("Left")
-			rdo.wid_buttonAction = _radioPlacement
-			if btn_spl.skin.aux_placement == rdo.usr_placement then
-				rdo:setChecked(true)
-			end
-			yy = yy + hh
+	do
+		local rdo = frame:addChild("barebones/radio_button")
+		rdo.x = xx
+		rdo.y = yy
+		rdo.w = ww
+		rdo.h = hh
+		rdo:initialize()
+		rdo.radio_group = "split_placement"
+		rdo.usr_placement = "left"
+		rdo:setLabel("Left")
+		rdo.wid_buttonAction = _radioPlacement
+		if btn_spl.skin.aux_placement == rdo.usr_placement then
+			rdo:setChecked(true)
 		end
+		yy = yy + hh
+	end
 
-		do
-			local rdo = content:addChild("barebones/radio_button")
-			rdo.x = xx
-			rdo.y = yy
-			rdo.w = ww
-			rdo.h = hh
-			rdo:initialize()
-			rdo.radio_group = "split_placement"
-			rdo.usr_placement = "top"
-			rdo:setLabel("Top")
-			rdo.wid_buttonAction = _radioPlacement
-			if btn_spl.skin.aux_placement == rdo.usr_placement then
-				rdo:setChecked(true)
-			end
-			yy = yy + hh
+	do
+		local rdo = frame:addChild("barebones/radio_button")
+		rdo.x = xx
+		rdo.y = yy
+		rdo.w = ww
+		rdo.h = hh
+		rdo:initialize()
+		rdo.radio_group = "split_placement"
+		rdo.usr_placement = "top"
+		rdo:setLabel("Top")
+		rdo.wid_buttonAction = _radioPlacement
+		if btn_spl.skin.aux_placement == rdo.usr_placement then
+			rdo:setChecked(true)
 		end
+		yy = yy + hh
+	end
 
-		do
-			local rdo = content:addChild("barebones/radio_button")
-			rdo.x = xx
-			rdo.y = yy
-			rdo.w = ww
-			rdo.h = hh
-			rdo:initialize()
-			rdo.radio_group = "split_placement"
-			rdo.usr_placement = "bottom"
-			rdo:setLabel("Bottom")
-			rdo.wid_buttonAction = _radioPlacement
-			for k, v in pairs(btn_spl.skin) do
-				print("", k, v)
-			end
-			if btn_spl.skin.aux_placement == rdo.usr_placement then
-				rdo:setChecked(true)
-			end
-			yy = yy + hh
+	do
+		local rdo = frame:addChild("barebones/radio_button")
+		rdo.x = xx
+		rdo.y = yy
+		rdo.w = ww
+		rdo.h = hh
+		rdo:initialize()
+		rdo.radio_group = "split_placement"
+		rdo.usr_placement = "bottom"
+		rdo:setLabel("Bottom")
+		rdo.wid_buttonAction = _radioPlacement
+		for k, v in pairs(btn_spl.skin) do
+			print("", k, v)
 		end
-
-		yy = yy + math.floor(hh/2)
-
-		do
-			local sld = content:addChild("barebones/slider_bar")
-			sld.x = xx
-			sld.y = yy
-			sld.w = ww
-			sld.h = hh
-			sld:initialize()
-			sld.trough_vertical = false
-			sld:setLabel("Aux Size")
-			sld.slider_def = btn_spl.skin.aux_size
-			sld.slider_pos = sld.slider_def
-			sld.slider_max = 224
-			sld.wid_actionSliderChanged = function(self)
-				local btn = self:findSiblingTag("demo_split_btn")
-				if btn then
-					btn.skin.aux_size = math.floor(self.slider_pos)
-					btn:reshape()
-				end
-			end
-			sld:reshape()
+		if btn_spl.skin.aux_placement == rdo.usr_placement then
+			rdo:setChecked(true)
 		end
+		yy = yy + hh
+	end
+
+	yy = yy + math.floor(hh/2)
+
+	do
+		local sld = frame:addChild("barebones/slider_bar")
+		sld.x = xx
+		sld.y = yy
+		sld.w = ww
+		sld.h = hh
+		sld:initialize()
+		sld.trough_vertical = false
+		sld:setLabel("Aux Size")
+		sld.slider_def = btn_spl.skin.aux_size
+		sld.slider_pos = sld.slider_def
+		sld.slider_max = 224
+		sld.wid_actionSliderChanged = function(self)
+			local btn = self:findSiblingTag("demo_split_btn")
+			if btn then
+				btn.skin.aux_size = math.floor(self.slider_pos)
+				btn:reshape()
+			end
+		end
+		sld:reshape()
 	end
 
 

@@ -50,8 +50,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "menu1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	skin_id = "menu1"
 }
 
 
@@ -62,11 +61,11 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 --- Override this to control how menu items are arranged.
---function def:arrange(first, last)
-def.arrange = lgcMenu.arrangeListVerticalTB
---def.arrange = lgcMenu.arrangeListVerticalLRTB
---def.arrange = lgcMenu.arrangeListHorizontalLR
---def.arrange = lgcMenu.arrangeListHorizontalTBLR
+--function def:arrangeItems(first, last)
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
+--def.arrangeItems = lgcMenu.arrangeItemsVerticalLRTB
+--def.arrangeItems = lgcMenu.arrangeItemsHorizontalLR
+--def.arrangeItems = lgcMenu.arrangeItemsHorizontalTBLR
 
 
 
@@ -206,8 +205,8 @@ end
 
 function def:menuChangeCleanup()
 	self:menuSetSelectionStep(0, false)
-	if self.arrange then
-		self:arrange()
+	if self.arrangeItems then
+		self:arrangeItems()
 	end
 	self:scrollClampViewport()
 	self:selectionInView()
@@ -274,8 +273,8 @@ function def:uiCall_reshape()
 			end
 		end
 
-		if self.arrange then
-			self:arrange()
+		if self.arrangeItems then
+			self:arrangeItems()
 		end
 
 		self:cacheUpdate(true)
@@ -718,17 +717,7 @@ def.default_skinner = {
 
 		--love.graphics.setScissor() -- XXX debug
 
-		local data_scroll = skin.data_scroll
-
-		local scr_h = self.scr_h
-		local scr_v = self.scr_v
-
-		if scr_h and scr_h.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-		end
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsHV(self, skin.data_scroll)
 
 		-- Outline for the back panel
 		love.graphics.setColor(skin.color_outline)

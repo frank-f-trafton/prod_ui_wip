@@ -61,8 +61,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "menu_tab1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	skin_id = "menu_tab1"
 }
 
 
@@ -1169,18 +1168,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		-- Embedded scroll bars.
-		local data_scroll = skin.data_scroll
-
-		local scr_h = self.scr_h
-		local scr_v = self.scr_v
-
-		if scr_h and scr_h.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-		end
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 	end,
 
 

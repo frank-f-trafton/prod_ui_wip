@@ -51,54 +51,51 @@ function plan.make(parent)
 
 	frame:setFrameTitle("Snapshot of '_G'")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
+	frame.auto_layout = true
 
-		content:setScrollBars(false, false)
+	frame:setScrollBars(false, false)
 
-		local menu_tab = content:addChild("wimp/menu_tab")
-		menu_tab:initialize()
-		commonTab.setDefaultMeasurements(menu_tab)
+	local menu_tab = frame:addChild("wimp/menu_tab")
+	menu_tab:initialize()
+	commonTab.setDefaultMeasurements(menu_tab)
 
-		menu_tab.renderThimble = widShared.dummy
+	menu_tab.renderThimble = widShared.dummy
 
-		menu_tab.MN_drag_select = true
-		menu_tab.MN_wrap_selection = false
+	menu_tab.MN_drag_select = true
+	menu_tab.MN_wrap_selection = false
 
-		menu_tab:setScrollBars(true, true)
+	menu_tab:setScrollBars(true, true)
 
-		menu_tab:reshape()
+	menu_tab:reshape()
 
-		menu_tab.lc_func = uiLayout.fitRemaining
-		uiLayout.register(content, menu_tab)
+	menu_tab.lc_func = uiLayout.fitRemaining
+	uiLayout.register(frame, menu_tab)
 
-		local col_key = menu_tab:addColumn("Key", true, columnSortGlobals) -- ID #1
-		col_key.lock_visibility = true
+	local col_key = menu_tab:addColumn("Key", true, columnSortGlobals) -- ID #1
+	col_key.lock_visibility = true
 
-		menu_tab:addColumn("Value", true, columnSortGlobals) -- ID #2
+	menu_tab:addColumn("Value", true, columnSortGlobals) -- ID #2
 
-		menu_tab.column_sort_ascending = true
+	menu_tab.column_sort_ascending = true
 
-		for k, v in pairs(_G) do
-			local item = menu_tab:addRow()
+	for k, v in pairs(_G) do
+		local item = menu_tab:addRow()
 
-			item.g_key = tostring(k)
-			item.g_val = tostring(v)
+		item.g_key = tostring(k)
+		item.g_val = tostring(v)
 
-			item.cells[1] = {text = tostring(k)}
-			item.cells[2] = {text = tostring(v)}
+		item.cells[1] = {text = tostring(k)}
+		item.cells[2] = {text = tostring(v)}
 
-			item.render = implTabCell.default_renderCell
-		end
-
-		local font = menu_tab.skin.cell_font
-		menu_tab.default_item_h = math.floor(font:getHeight() * 1.25)
-		menu_tab.default_item_text_x = math.floor(font:getWidth("M") / 16)
-		menu_tab.default_item_text_y = math.floor((menu_tab.default_item_h - font:getHeight()) / 2)
-
-		menu_tab:refreshRows()
+		item.render = implTabCell.default_renderCell
 	end
+
+	local font = menu_tab.skin.cell_font
+	menu_tab.default_item_h = math.floor(font:getHeight() * 1.25)
+	menu_tab.default_item_text_x = math.floor(font:getWidth("M") / 16)
+	menu_tab.default_item_text_y = math.floor((menu_tab.default_item_h - font:getHeight()) / 2)
+
+	menu_tab:refreshRows()
 
 	frame:reshape(true)
 	frame:center(true, true)

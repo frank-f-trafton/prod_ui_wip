@@ -880,6 +880,40 @@ function commonScroll.updateScrollState(self)
 end
 
 
+-- * Common scroll bar render methods *
+
+
+function commonScroll.drawScrollBarsHV(self, data_scroll)
+	local scr_h = self.scr_h
+	local scr_v = self.scr_v
+
+	if scr_h and scr_h.active then
+		self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+	end
+	if scr_v and scr_v.active then
+		self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+	end
+end
+
+
+function commonScroll.drawScrollBarsH(self, data_scroll)
+	local scr_h = self.scr_h
+
+	if scr_h and scr_h.active then
+		self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
+	end
+end
+
+
+function commonScroll.drawScrollBarsV(self, data_scroll)
+	local scr_v = self.scr_v
+
+	if scr_v and scr_v.active then
+		self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
+	end
+end
+
+
 -- * Standalone scroll bar calculations *
 
 

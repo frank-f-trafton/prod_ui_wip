@@ -75,7 +75,7 @@ def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
 
 
-def.arrange = lgcMenu.arrangeListVerticalTB
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 def.movePrev = lgcMenu.widgetMovePrev
