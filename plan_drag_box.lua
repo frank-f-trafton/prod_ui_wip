@@ -17,16 +17,13 @@ function plan.make(parent)
 
 	frame:setFrameTitle("DragBox Test")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
-		content:setScrollBars(false, false)
+	frame.auto_layout = true
+	frame:setScrollBars(false, false)
 
-		-- Drag box.
-		local dbox = content:addChild("test/drag_box")
-		dbox.x, dbox.y, dbox.w, dbox.h = 400, 16, 64, 64
-		dbox:initialize()
-	end
+	-- Drag box.
+	local dbox = frame:addChild("test/drag_box")
+	dbox.x, dbox.y, dbox.w, dbox.h = 400, 16, 64, 64
+	dbox:initialize()
 
 	frame:reshape(true)
 	frame:center(true, true)

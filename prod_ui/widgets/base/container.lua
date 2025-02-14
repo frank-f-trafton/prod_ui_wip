@@ -28,8 +28,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "container1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	skin_id = "container1"
 }
 
 
@@ -48,48 +47,21 @@ function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.can_have_thimble = false
-	self.allow_focus_capture = false
 
-	-- When true, doc_w and doc_h are set to the combined dimensions of the container's direct descendants.
 	self.auto_doc_update = true
+	self.auto_layout = false
+	self.halt_reshape = false
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self)
 	widShared.setupViewports(self, 2)
 	widShared.setupMinMaxDimensions(self)
-
-	-- Layout sequence
 	uiLayout.initLayoutSequence(self)
 
-	-- Layout mode for containers.
-	-- false: no effect
-	-- "auto": re-apply layout whenever uiCall_reshape() is fired.
-	-- "resize": re-apply layout whenever uiCall_reshape() is fired, but only if the container dimensions have changed.
-	self.layout_mode = false
-
-	-- Used with "resize" layout_mode.
-	self.lc_w_old = self.w
-	self.lc_h_old = self.h
-
-	-- false: pointer-drag not active
-	-- "h": dragging horizontal thumb
-	-- "v": dragging vertical thumb
-	-- "h1", "h2", "v1", "v2": pressing on a less/more button
 	self.press_busy = false
-
-	self:updateContentClipScissor()
-
-	self:scrollClampViewport()
 
 	self:skinSetRefs()
 	self:skinInstall()
-end
-
-
--- Needs to be reachable from WIMP window-frames.
-function def:updateContentClipScissor()
-	widShared.setClipScissorToViewport(self, 2)
-	widShared.setClipHoverToViewport(self, 2)
 end
 
 
@@ -124,47 +96,37 @@ function def:uiCall_reshape()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
-
-	-- Border and scroll bars.
 	widShared.carveViewport(self, 1, skin.box.border)
+
 	commonScroll.arrangeScrollBars(self)
 
-	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
-
-	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	self:updateContentClipScissor()
+	widShared.setClipScissorToViewport(self, 2)
+	widShared.setClipHoverToViewport(self, 2)
 
-	-- Layout handling.
-	local layout_mode = self.layout_mode
-	if layout_mode == "auto"
-	or layout_mode == "resize" and self.lc_w_old ~= self.w or self.lc_h_old ~= self.h
-	then
+	if self.auto_layout then
 		uiLayout.resetLayoutPort(self, 1)
 		uiLayout.applyLayout(self)
 	end
 
-	self.lc_w_old = self.w
-	self.lc_h_old = self.h
-
-	-- Optional: auto-update document dimensions.
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
 	end
 
-	-- Update scroll bar state.
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
+
+	return self.halt_reshape
 end
 
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+		commonScroll.widgetProcessHover(self, mx, my)
 	end
 end
 
@@ -299,20 +261,7 @@ def.default_skinner = {
 
 
 	renderLast = function(self, ox, oy)
-		local skin = self.skin
-
-		-- Draw the embedded scroll bars, if present and active.
-		local data_scroll = skin.data_scroll
-
-		local scr_h = self.scr_h
-		local scr_v = self.scr_v
-
-		if scr_h and scr_h.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-		end
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 
 		-- XXX Debug...
 		--[=[

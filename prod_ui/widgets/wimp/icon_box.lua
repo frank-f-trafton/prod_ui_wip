@@ -89,8 +89,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "icon_box1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	skin_id = "icon_box1"
 }
 
 

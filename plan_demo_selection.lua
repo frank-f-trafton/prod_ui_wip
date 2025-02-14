@@ -2,10 +2,10 @@
 local plan = {}
 
 
-local function makeLabel(content, x, y, w, h, text, label_mode)
+local function makeLabel(frame, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = content:addChild("base/label")
+	local label = frame:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -31,11 +31,11 @@ local function _button_launchFrame(self)
 end
 
 
-local function _makeButton(content, id, label, x, y, w, h)
+local function _makeButton(frame, id, label, x, y, w, h)
 	assert(type(id) == "string")
 	assert(type(label) == "string")
 
-	local bb_btn = content:addChild("barebones/button")
+	local bb_btn = frame:addChild("barebones/button")
 	bb_btn.x = x
 	bb_btn.y = y
 	bb_btn.w = w
@@ -58,65 +58,62 @@ function plan.make(parent)
 
 	frame:setFrameTitle("Plan launcher")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
+	frame.auto_layout = true
 
-		content:setScrollBars(false, true)
+	frame:setScrollBars(false, true)
 
-		local xx, yy, ww, hh = 0, 0, 256, 40
+	local xx, yy, ww, hh = 0, 0, 256, 40
 
-		local bb_btn
+	local bb_btn
 
-		bb_btn = content:addChild("barebones/button")
-		bb_btn.x = xx
-		bb_btn.y = yy
-		bb_btn.w = ww
-		bb_btn.h = hh
-		bb_btn:initialize()
-		bb_btn:setLabel("Open all (slow)")
-		bb_btn.wid_buttonAction = function(self)
-			local siblings = self:getParent().children
-			for i, sib in ipairs(siblings) do
-				if sib ~= self and type(sib.usr_plan) == "string" then
-					_button_launchFrame(sib)
-				end
+	bb_btn = frame:addChild("barebones/button")
+	bb_btn.x = xx
+	bb_btn.y = yy
+	bb_btn.w = ww
+	bb_btn.h = hh
+	bb_btn:initialize()
+	bb_btn:setLabel("Open all (slow)")
+	bb_btn.wid_buttonAction = function(self)
+		local siblings = self:getParent().children
+		for i, sib in ipairs(siblings) do
+			if sib ~= self and type(sib.usr_plan) == "string" then
+				_button_launchFrame(sib)
 			end
 		end
-
-		yy = yy + hh
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_demo_main", "Main Demo Window", xx, yy, ww, hh)
-		yy = yy + hh
-
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_sash", "Sashes", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_number_box", "Number Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_properties_box", "Properties Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_combo_box", "Combo Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_dropdown_box", "Dropdown Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_text_box_single", "Textbox (Single-Line)", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_text_box_multi", "Textbox (Multi-Line)", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_button_skinners", "Button Skinners", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_barebones", "Barebones Widgets", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_tree_box", "Tree Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_list_box", "List Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_button_work", "Button work", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_button_split", "Split Button", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_progress_bar", "Progress Bar", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_stepper", "Stepper", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_label_test", "Label test", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_drag_box", "Drag Box", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_container_work", "Container work", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_slider_work", "Slider work", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_dial", "Dials", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_menu_tab", "Tabular Menu", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_file_select", "File Selector", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_g_list", "List of Globals", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_test_destroy_frame_from_user_update", "Test: Destroy Frame from userUpdate()", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_menu_test", "Menu Test", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_widget_tree", "Widget Tree View", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
-		yy = yy + hh; bb_btn = _makeButton(content, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 	end
+
+	yy = yy + hh
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_demo_main", "Main Demo Window", xx, yy, ww, hh)
+	yy = yy + hh
+
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_sash", "Sashes", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_number_box", "Number Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_properties_box", "Properties Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_combo_box", "Combo Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_dropdown_box", "Dropdown Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_text_box_single", "Textbox (Single-Line)", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_text_box_multi", "Textbox (Multi-Line)", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_button_skinners", "Button Skinners", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_barebones", "Barebones Widgets", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_tree_box", "Tree Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_list_box", "List Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_button_work", "Button work", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_button_split", "Split Button", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_progress_bar", "Progress Bar", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_stepper", "Stepper", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_label_test", "Label test", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_drag_box", "Drag Box", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_container_work", "Container work", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_slider_work", "Slider work", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_dial", "Dials", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_menu_tab", "Tabular Menu", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_file_select", "File Selector", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_g_list", "List of Globals", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_test_destroy_frame_from_user_update", "Test: Destroy Frame from userUpdate()", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_menu_test", "Menu Test", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_widget_tree", "Widget Tree View", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 
 	-- To launch a frame from the main demo file: frame:launch("path.to.file")
 	frame.launch = _launchFrame

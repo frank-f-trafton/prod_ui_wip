@@ -150,7 +150,7 @@ end
 -- @param wid The widget to check.
 -- @param id The User Event string ID to run.
 -- @param a, b, c, d Generic arguments. Usage depends on the ID.
--- @return Nothing.
+
 function _mt_widget:_runUserEvent(id, a, b, c, d)
 	local user_event = self[id]
 
@@ -218,7 +218,6 @@ end
 --	'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget is
 --	already thimble1, nothing happens.
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
--- @return Nothing.
 function _mt_widget:takeThimble1(a, b, c, d)
 	--print("takeThimble1", debug.traceback())
 	_assertCanHaveThimble(self)
@@ -246,7 +245,6 @@ end
 --	'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget is
 --	already thimble2, nothing happens.
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
--- @return Nothing.
 function _mt_widget:takeThimble2(a, b, c, d)
 	--print("takeThimble2", debug.traceback())
 	_assertCanHaveThimble(self)
@@ -618,7 +616,7 @@ local function errEventBadType(field, var)
 end
 
 
---- Try to execute 'self[field](self, a,b,c,d,e,f)'. The field can be a function or nil (in which case, nothing
+--- Try to execute 'self[field](self, a,b,c,d,e,f)'. The field can be a function or false/nil (in which case, nothing
 --	happens).
 -- @param field The field in 'self' to try executing.
 -- @param a,b,c,d,e,f Additional arguments to pass.
@@ -634,7 +632,7 @@ function _mt_widget:sendEvent(field, a,b,c,d,e,f)
 	if type(var) == "function" then
 		return var(self, a,b,c,d,e,f)
 
-	elseif var ~= nil then
+	elseif var then
 		errEventBadType(field, var)
 	end
 end
@@ -651,7 +649,7 @@ local function _bubbleEvent(self, field, a,b,c,d,e,f)
 					return retval
 				end
 
-			elseif var ~= nil then
+			elseif var then
 				errEventBadType(field, var)
 			end
 		end
@@ -660,8 +658,8 @@ local function _bubbleEvent(self, field, a,b,c,d,e,f)
 end
 
 
---- Try to execute 'self[field](self, a,b,c,d,e,f)' on this widget and its ancestors, until one returns a success value
---	or all widgets are exhausted.
+--- Try to execute 'self[field](self, a,b,c,d,e,f)' on this widget and its ancestors, until one returns a non-false
+--	value or all widgets are exhausted.
 -- @param field The field in each widget to try executing.
 -- @param a,b,c,d,e,f Additional arguments to pass.
 -- @return the first return value that evaluates to true, or nil if that doesn't happen.
@@ -683,14 +681,14 @@ local function _trickleEvent(self, field, a,b,c,d,e,f)
 			return retval
 		end
 
-	elseif var ~= nil then
+	elseif var then
 		errEventBadType(field, var)
 	end
 end
 
 
---- Try to execute 'self.trickle[field](self, a,b,c,d,e,f)' from the root widget to this widget, until one returns a success
---	value or all widgets are exhausted.
+--- Try to execute 'self.trickle[field](self, a,b,c,d,e,f)' from the root widget to this widget, until one returns a
+--	success value or all widgets are exhausted.
 _mt_widget.trickleEvent = _trickleEvent -- _mt_widget:trickleEvent(field, a,b,c,d,e,f)
 
 
@@ -707,7 +705,7 @@ function _mt_widget:cycleEvent(field, a,b,c,d,e,f)
 			return retval
 		end
 
-	elseif var ~= nil then
+	elseif var then
 		errEventBadType(field, var)
 	end
 
@@ -765,7 +763,6 @@ local sort_count = {} -- sortChildren
 -- widget has a sort_max of 0 or fewer than two children. Otherwise, all children must have 'sort_id' set with integers
 -- between 1 and the parent widget's 'sort_max', inclusive.
 -- @param recurse If true, recursively sort children with the same function.
--- @return Nothing. Children are sorted in-place.
 function _mt_widget:sortChildren(recurse)
 	-- More info on counting sort: https://en.wikipedia.org/wiki/Counting_sort
 
@@ -967,41 +964,35 @@ function _mt_widget:isInLineage(wid)
 end
 
 
---- Run the 'reshape' UI callback on a widget, and optionally on its descendants.
--- @param recursive When true, recursively reshapes children, grandchildren, etc. Return a truthy value
--- in the callback to halt the reshaping of descendants.
--- @return Nothing.
-function _mt_widget:reshape(recursive)
-	recursive = not not recursive
-	local result = self:sendEvent("uiCall_reshape", self, recursive)
+--- Run the 'reshape' UI callback on a widget and its descendants. The event handler can return true to halt
+--	the reshaping of descendants.
+function _mt_widget:reshape()
+	local result = self.uiCall_reshape and self:uiCall_reshape()
 
-	-- Reshape children only if 'recursive' is truthy and the above statement returned falsy.
-	if recursive and not result then
+	if not result then
 		for _, child in ipairs(self.children) do
-			child:reshape(recursive)
+			child:reshape()
 		end
 	end
 end
 
 
 --- Convenience wrapper for reshape() which skips the calling widget and starts with its children.
--- @param recursive When true, the caller's grandchildren and onwards are recursively reshaped.
--- @return Nothing.
-function _mt_widget:reshapeChildren(recursive)
-	recursive = not not recursive
+function _mt_widget:reshapeDescendants()
 	for i, child in ipairs(self.children) do
-		child:reshape(recursive)
+		child:reshape()
 	end
 end
 
 
+--[=[
 function _mt_widget:setPosition(x, y) -- XXX under consideration
 	self.x = x
 	self.y = y
 
 	self:sendEvent("uiCall_reposition", self, x, y)
 end
-
+--]=]
 --[=[
 function _mt_widget:setDimensions(w, h) -- XXX under consideration
 	-- maybe disallow <0 width or height.

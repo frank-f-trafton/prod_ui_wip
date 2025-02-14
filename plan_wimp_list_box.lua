@@ -22,10 +22,10 @@ local function getDisplayInfo()
 end
 
 
-local function makeLabel(content, x, y, w, h, text, label_mode)
+local function makeLabel(frame, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = content:addChild("base/label")
+	local label = frame:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -43,7 +43,7 @@ local function keyPressed_swapItems(self, key, scancode, isrepeat)
 			if self:menuCanSelect(dest_i) and self:menuCanSelect(self.index) then
 				self:menuSwapItems(self.index, dest_i)
 				self:menuSetSelectedIndex(dest_i)
-				self:arrange()
+				self:arrangeItems()
 
 				return true
 			end
@@ -96,7 +96,7 @@ local function wid_droppedReorder(self, drop_state)
 				--self:menuSwapItems(old_i, overlap_i)
 			end
 			self.index = overlap_i
-			self:arrange()
+			self:arrangeItems()
 			return true
 		end
 	end
@@ -129,16 +129,16 @@ local function wid_droppedTransfer(self, drop_state)
 end
 
 
-local function makeListBox1(content, x, y)
+local function makeListBox1(frame, x, y)
 	-- SkinDef clone
-	local resources = content.context.resources
+	local resources = frame.context.resources
 	local skin_clone = resources:cloneSkinDef("list_box1")
 
 	local function _userDestroy(self)
 		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-	local list_box = content:addChild("wimp/list_box")
+	local list_box = frame:addChild("wimp/list_box")
 	list_box.skin_id = skin_clone
 	list_box.userDestroy = _userDestroy
 	list_box:initialize()
@@ -220,12 +220,12 @@ local function makeListBox1(content, x, y)
 	end
 
 	local wx, wy, ww, wh = x + 256, y + 0, 128, 32
-	makeLabel(content, wx, wy, ww, wh, "Text Alignment", "single")
+	makeLabel(frame, wx, wy, ww, wh, "Text Alignment", "single")
 
 	wy = wy + wh
 
 	local rdo_btn
-	rdo_btn = content:addChild("barebones/radio_button")
+	rdo_btn = frame:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
@@ -235,7 +235,7 @@ local function makeListBox1(content, x, y)
 
 	wy = wy + wh
 
-	rdo_btn = content:addChild("barebones/radio_button")
+	rdo_btn = frame:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
@@ -245,7 +245,7 @@ local function makeListBox1(content, x, y)
 
 	wy = wy + wh
 
-	rdo_btn = content:addChild("barebones/radio_button")
+	rdo_btn = frame:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
@@ -258,7 +258,7 @@ local function makeListBox1(content, x, y)
 	wy = wy + wh
 	wy = wy + wh
 
-	local chk = content:addChild("barebones/checkbox")
+	local chk = frame:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
 	chk:setChecked(list_box.show_icons)
@@ -275,7 +275,7 @@ local function makeListBox1(content, x, y)
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
 
-	makeLabel(content, wx, wy, ww, wh, "Icon Side", "single")
+	makeLabel(frame, wx, wy, ww, wh, "Icon Side", "single")
 
 	wy = wy + wh
 
@@ -287,7 +287,7 @@ local function makeListBox1(content, x, y)
 		end
 	end
 
-	rdo_btn = content:addChild("barebones/radio_button")
+	rdo_btn = frame:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_icon_side"
@@ -297,7 +297,7 @@ local function makeListBox1(content, x, y)
 
 	wy = wy + wh
 
-	rdo_btn = content:addChild("barebones/radio_button")
+	rdo_btn = frame:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_icon_side"
@@ -310,8 +310,8 @@ local function makeListBox1(content, x, y)
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
 
-	makeLabel(content, wx, wy, ww, wh, "skin.pad_text_x (left/right align)")
-	local sld = content:addChild("base/slider_bar")
+	makeLabel(frame, wx, wy, ww, wh, "skin.pad_text_x (left/right align)")
+	local sld = frame:addChild("base/slider_bar")
 
 	wy = wy + wh
 
@@ -342,8 +342,8 @@ local function makeListBox1(content, x, y)
 end
 
 
-local function makeListBox2(content, x, y)
-	local list_box = content:addChild("wimp/list_box")
+local function makeListBox2(frame, x, y)
+	local list_box = frame:addChild("wimp/list_box")
 	list_box.x = x
 	list_box.y = y
 	list_box.w = 224
@@ -384,8 +384,8 @@ local function makeListBox2(content, x, y)
 end
 
 
-local function makeListBox3(content, x, y)
-	local lb1 = content:addChild("wimp/list_box")
+local function makeListBox3(frame, x, y)
+	local lb1 = frame:addChild("wimp/list_box")
 	lb1.x = x
 	lb1.y = y
 	lb1.w = 224
@@ -417,7 +417,7 @@ local function makeListBox3(content, x, y)
 	lb1:reshape()
 
 
-	local lb2 = content:addChild("wimp/list_box")
+	local lb2 = frame:addChild("wimp/list_box")
 	lb2.x = x + 320
 	lb2.y = y
 	lb2.w = 224
@@ -450,8 +450,8 @@ local function makeListBox3(content, x, y)
 end
 
 
-local function makeListBox4(content, x, y)
-	local lb1 = content:addChild("wimp/list_box")
+local function makeListBox4(frame, x, y)
+	local lb1 = frame:addChild("wimp/list_box")
 	lb1.x = x
 	lb1.y = y
 	lb1.w = 224
@@ -483,7 +483,7 @@ local function makeListBox4(content, x, y)
 
 	lb1:reshape()
 
-	local b1 = content:addChild("base/button")
+	local b1 = frame:addChild("base/button")
 	b1.x = lb1.x + lb1.w + 32
 	b1.y = lb1.y
 	b1.w = 32
@@ -507,7 +507,7 @@ local function makeListBox4(content, x, y)
 	b1:reshape()
 
 
-	local b2 = content:addChild("base/button")
+	local b2 = frame:addChild("base/button")
 	b2.x = lb1.x + lb1.w + 32
 	b2.y = lb1.y + lb1.h - 32
 	b2.w = 32
@@ -531,7 +531,7 @@ local function makeListBox4(content, x, y)
 	b2:reshape()
 
 
-	local lb2 = content:addChild("wimp/list_box")
+	local lb2 = frame:addChild("wimp/list_box")
 	lb2.x = x + 320
 	lb2.y = y
 	lb2.w = 224
@@ -574,16 +574,13 @@ function plan.make(parent)
 
 	frame:setFrameTitle("ListBox Test")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
-		content:setScrollBars(false, true)
+	frame.auto_layout = true
+	frame:setScrollBars(false, true)
 
-		makeListBox1(content, 0, 0)
-		makeListBox2(content, 0, 320)
-		makeListBox3(content, 0, 640)
-		makeListBox4(content, 0, 960)
-	end
+	makeListBox1(frame, 0, 0)
+	makeListBox2(frame, 0, 320)
+	makeListBox3(frame, 0, 640)
+	makeListBox4(frame, 0, 960)
 
 	frame:reshape(true)
 	frame:center(true, true)

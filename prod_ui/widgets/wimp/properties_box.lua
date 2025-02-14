@@ -33,8 +33,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "properties_box1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	skin_id = "properties_box1"
 }
 
 
@@ -43,7 +42,7 @@ widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
-def.arrange = lgcMenu.arrangeListVerticalTB
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 -- * Scroll helpers *
@@ -189,7 +188,7 @@ function def:addControl(wid_id, text, pos, bijou_id)
 	wid.bijou_id = bijou_id
 	wid.tq_bijou = self.context.resources.tex_quads[bijou_id]
 
-	self:arrange(4, pos, #self.children)
+	self:arrangeItems(4, pos, #self.children)
 
 	print("addControl text:", wid.text, "xywh: ", wid.x, wid.y, wid.w, wid.h)
 
@@ -227,7 +226,7 @@ function def:removeControlByIndex(wid_i)
 		self.index = self.index - 1
 	end
 
-	self:arrange(4, wid_i, #children)
+	self:arrangeItems(4, wid_i, #children)
 end
 
 
@@ -740,18 +739,7 @@ def.default_skinner = {
 		love.graphics.setColor(1, 1, 1, 1)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
-		-- Embedded scroll bars, if present and active.
-		local data_scroll = skin.data_scroll
-
-		local scr_h = self.scr_h
-		local scr_v = self.scr_v
-
-		if scr_h and scr_h.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-		end
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsHV(self, skin.data_scroll) -- maybe do vertical bars only?
 
 		love.graphics.push("all")
 

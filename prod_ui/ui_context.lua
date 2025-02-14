@@ -344,15 +344,10 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 	local cur_pres = self.current_pressed
 
 	if cur_pres then
-		local a_x, a_y = cur_pres:getAbsolutePosition()
-		local m_x = x - a_x
-		local m_y = y - a_y
-
-		if cur_pres.click_repeat_oob
-		or (m_x >= 0 and m_y >= 0 and m_x < cur_pres.w and m_y < cur_pres.h)
-		then
-			self.current_pressed:cycleEvent("uiCall_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
-		end
+		-- If necessary, the widget needs to check if the pointer is in bounds.
+		-- We don't check that here, because what is "in bounds" depends on the
+		-- widget's design.
+		self.current_pressed:cycleEvent("uiCall_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
 	end
 end
 

@@ -59,7 +59,7 @@ local def = {
 lgcMenu.attachMenuMethods(def)
 
 
-def.arrange = lgcMenu.arrangeListVerticalTB
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 def.movePrev = lgcMenu.widgetMovePrev

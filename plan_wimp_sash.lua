@@ -35,45 +35,42 @@ function plan.make(parent)
 
 	frame:setFrameTitle("Sashes")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "auto"
-		content:setScrollBars(false, false)
+	frame.auto_layout = true
+	frame:setScrollBars(false, false)
 
-		local wid_a = content:addChild("base/label")
-		wid_a.x = 0
-		wid_a.y = 0
-		wid_a.w = 256
-		wid_a.h = 256
-		wid_a.lc_func = uiLayout.fitLeft
-		wid_a:initialize()
-		uiLayout.register(content, wid_a)
-		wid_a:setLabel(_text1, "multi")
-		wid_a:reshape(true)
+	local wid_a = frame:addChild("base/label")
+	wid_a.x = 0
+	wid_a.y = 0
+	wid_a.w = 256
+	wid_a.h = 256
+	wid_a.lc_func = uiLayout.fitLeft
+	wid_a:initialize()
+	uiLayout.register(frame, wid_a)
+	wid_a:setLabel(_text1, "multi")
+	wid_a:reshape(true)
 
-		local wid_sash = content:addChild("wimp/sash")
-		wid_a.x = 0
-		wid_a.y = 0
-		wid_a.w = 8
-		wid_a.h = 256
-		wid_sash.lc_func = uiLayout.fitLeft
-		wid_sash:initialize()
-		wid_sash:setAttachedWidget(wid_a)
-		uiLayout.register(content, wid_sash)
+	local wid_sash = frame:addChild("wimp/sash")
+	wid_a.x = 0
+	wid_a.y = 0
+	wid_a.w = 8
+	wid_a.h = 256
+	wid_sash.lc_func = uiLayout.fitLeft
+	wid_sash:initialize()
+	wid_sash:setAttachedWidget(wid_a)
+	uiLayout.register(frame, wid_sash)
 
-		local wid_b = content:addChild("base/label")
-		wid_a.x = 0
-		wid_a.y = 0
-		wid_a.w = 256
-		wid_a.h = 256
-		wid_b.lc_func = uiLayout.fitRemaining
-		wid_b:initialize()
-		uiLayout.register(content, wid_b)
-		wid_b:setLabel(_text2, "multi")
-		wid_b:reshape(true)
+	local wid_b = frame:addChild("base/label")
+	wid_a.x = 0
+	wid_a.y = 0
+	wid_a.w = 256
+	wid_a.h = 256
+	wid_b.lc_func = uiLayout.fitRemaining
+	wid_b:initialize()
+	uiLayout.register(frame, wid_b)
+	wid_b:setLabel(_text2, "multi")
+	wid_b:reshape(true)
 
-		content:reshape(true)
-	end
+	frame:reshape(true)
 
 	frame:reshape(true)
 	frame:center(true, true)

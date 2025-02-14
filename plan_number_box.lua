@@ -8,10 +8,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(content, x, y, w, h, text, label_mode)
+local function makeLabel(frame, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = content:addChild("base/label")
+	local label = frame:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -30,25 +30,22 @@ function plan.make(parent)
 
 	frame:setFrameTitle("Number Box")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
-		content:setScrollBars(false, false)
+	frame.auto_layout = true
+	frame:setScrollBars(false, false)
 
-		-- [=[
-		local num_box = content:addChild("wimp/number_box")
-		num_box.x = 32
-		num_box.y = 96
-		num_box.w = 256
-		num_box.h = 32
+	-- [=[
+	local num_box = frame:addChild("wimp/number_box")
+	num_box.x = 32
+	num_box.y = 96
+	num_box.w = 256
+	num_box.h = 32
 
-		num_box.wid_action = function(self)
-			-- WIP
-		end
-
-		num_box:initialize()
-		--]=]
+	num_box.wid_action = function(self)
+		-- WIP
 	end
+
+	num_box:initialize()
+	--]=]
 
 	frame:reshape(true)
 	frame:center(true, true)

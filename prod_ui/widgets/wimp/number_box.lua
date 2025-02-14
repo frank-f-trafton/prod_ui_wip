@@ -43,9 +43,6 @@ local def = {
 }
 
 
-def.click_repeat_oob = true -- for the inc/dec buttons
-
-
 widShared.scrollSetMethods(def)
 -- No integrated scroll bars for single-line text inputs.
 
@@ -57,9 +54,6 @@ def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
 def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
 def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
-
-
-def.arrange = lgcMenu.arrangeListVerticalTB
 
 
 def.movePrev = lgcMenu.widgetMovePrev

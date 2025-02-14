@@ -324,23 +324,17 @@ return {
 		{
 			name = "uiCall_reshape",
 			propagation_method = "broadcast down",
-			event_origin = "widget:reshape()",
-			description = "A widget called self:reshape() or self:reshapeChildren().",
-			signature = "def:uiCall_reshape(recursive)",
-			parameters = {
-				{
-					name = "recursive",
-					type = "boolean",
-					description = "True if reshape() was called with the recursive argument.",
-				},
-			},
+			event_origin = "widget:reshape(), widget:reshapeDescendants()",
+			description = "A widget called self:reshape() or self:reshapeDescendants().",
+			signature = "def:uiCall_reshape()",
+			parameters = {},
 			returns = "True to halt event propagation.",
 			notes = [==[
-                Be careful about calling wid:reshape() on children within uiCall_reshape(), since wid:reshape() itself can be configured to be called on descendants recursively.
+                Be careful about calling wid:reshape() on children within uiCall_reshape(), since wid:reshape() itself can call descendants recursively.
 
                 Reshaping is intended to modify a widget's content (children, minor visual details etc.), and not its current dimensions and position within its parent. There are some exceptions:
 
-                1) It might be sensible to resize the tree root in uiCall_reshape() because it does not have a parent.
+                1) The root widget doesn't have a parent, so it makes sense to update its dimensions to match the application window.
 
                 2) You have free-floating window frames which must be clamped to their parent container, and their positions and sizes do not affect their siblings.
 			]==],
@@ -555,7 +549,7 @@ return {
 
                 This is a virtual event, with no equivalent LÖVE callback.
 
-                It will only fire in relation to the button value held in `self.context.mouse_pressed_button`, so the check suggested in `uiCall_pointerPress()` is not necessary here (though including it would be harmless).
+                It will only fire in relation to the button value held in `self.context.mouse_pressed_button`, so the check suggested in `uiCall_pointerPress()` is not necessary here (but including it would cause no harm).
 			]==],
 		},
 

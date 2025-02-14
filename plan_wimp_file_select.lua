@@ -299,59 +299,56 @@ function plan.make(parent)
 
 	frame:setFrameTitle("File Selector")
 
-	local content = frame:findTag("frame_content")
-	if content then
-		content.layout_mode = "resize"
+	frame.auto_layout = true
 
-		content:setScrollBars(false, false)
+	frame:setScrollBars(false, false)
 
-		local menu_tab = content:addChild("wimp/menu_tab")
-		menu_tab:initialize()
-		commonTab.setDefaultMeasurements(menu_tab)
-		menu_tab.renderThimble = widShared.dummy
+	local menu_tab = frame:addChild("wimp/menu_tab")
+	menu_tab:initialize()
+	commonTab.setDefaultMeasurements(menu_tab)
+	menu_tab.renderThimble = widShared.dummy
 
-		menu_tab.MN_drag_select = true
-		menu_tab.MN_wrap_selection = false
+	menu_tab.MN_drag_select = true
+	menu_tab.MN_wrap_selection = false
 
-		--[[
-		menu_tab.x = 16
-		menu_tab.y = 16
-		menu_tab.w = 400
-		menu_tab.h = 350
-		--]]
-		menu_tab:setScrollBars(true, true)
+	--[[
+	menu_tab.x = 16
+	menu_tab.y = 16
+	menu_tab.w = 400
+	menu_tab.h = 350
+	--]]
+	menu_tab:setScrollBars(true, true)
 
-		menu_tab:reshape()
+	menu_tab:reshape()
 
-		menu_tab.lc_func = uiLayout.fitRemaining
-		uiLayout.register(content, menu_tab)
+	menu_tab.lc_func = uiLayout.fitRemaining
+	uiLayout.register(frame, menu_tab)
 
-		enforceDefaultPrimaryColumn(menu_tab)
+	enforceDefaultPrimaryColumn(menu_tab)
 
-		local col_name = menu_tab:addColumn("Name", true, columnSortFiles) -- ID #1
-		col_name.lock_visibility = true
+	local col_name = menu_tab:addColumn("Name", true, columnSortFiles) -- ID #1
+	col_name.lock_visibility = true
 
-		menu_tab:addColumn("Size", true, columnSortFiles) -- ID #2
-		menu_tab:addColumn("ModTime", true, columnSortFiles) -- ID #3
+	menu_tab:addColumn("Size", true, columnSortFiles) -- ID #2
+	menu_tab:addColumn("ModTime", true, columnSortFiles) -- ID #3
 
-		--[[
-		-- Reserved for future use (determining types beyond just "directory", "file", etc.)
-		menu_tab:addColumn("FileType", true, columnSortFiles) -- ID #?
-		--]]
+	--[[
+	-- Reserved for future use (determining types beyond just "directory", "file", etc.)
+	menu_tab:addColumn("FileType", true, columnSortFiles) -- ID #?
+	--]]
 
-		menu_tab.reorder_limit = 1
+	menu_tab.reorder_limit = 1
 
-		menu_tab:refreshColumnBar()
-		menu_tab:sort()
+	menu_tab:refreshColumnBar()
+	menu_tab:sort()
 
-		menu_tab.getDirectoryItems = menu_getDirectoryItems
-		menu_tab.wid_defaultKeyNav = fileSelectorKeyNav
-		menu_tab.trySetPath = menu_trySetPath
+	menu_tab.getDirectoryItems = menu_getDirectoryItems
+	menu_tab.wid_defaultKeyNav = fileSelectorKeyNav
+	menu_tab.trySetPath = menu_trySetPath
 
-		menu_tab:trySetPath("/home/tmd/test_prod_ui")
+	menu_tab:trySetPath("/home/tmd/test_prod_ui")
 
-		menu_tab:reshape()
-	end
+	menu_tab:reshape()
 
 	frame:reshape(true)
 	frame:center(true, true)

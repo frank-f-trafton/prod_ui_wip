@@ -57,8 +57,7 @@ local function dummy() end
 
 local def = {
 	skin_id = "text_box_m1",
-	renderThimble = dummy,
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	renderThimble = dummy
 }
 
 
@@ -1144,18 +1143,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		-- Scroll bars.
-		local data_scroll = skin.data_scroll
-
-		local scr_h = self.scr_h
-		local scr_v = self.scr_v
-
-		if scr_h and scr_h.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_h, 0, 0)
-		end
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsHV(self, skin.data_scroll)
 
 		-- DEBUG: draw history state
 		--[[

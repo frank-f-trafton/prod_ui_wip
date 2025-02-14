@@ -188,7 +188,7 @@ local function destroyPopUpMenu(client, reason_code)
 end
 
 
-function def:arrange()
+function def:arrangeItems()
 	local items = self.items
 	local xx = 0
 
@@ -255,7 +255,7 @@ def.moveNext = lgcMenu.widgetMoveNext
 function def:menuChangeCleanup()
 	setStateIdle(self)
 
-	self:arrange()
+	self:arrangeItems()
 	self:scrollClampViewport()
 	self:selectionInView()
 

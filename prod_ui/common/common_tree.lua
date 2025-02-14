@@ -25,7 +25,7 @@ end
 function commonTree.setExpanded(self, item, exp)
 	item.expanded = exp
 	self:orderItems()
-	self:arrange()
+	self:arrangeItems()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
 
@@ -297,11 +297,11 @@ function commonTree.removeNode(self, node)
 	_removeNode(self, node, 1)
 
 	self:orderItems()
-	self:arrange()
+	self:arrangeItems()
 end
 
 
-function commonTree.arrange(self)
+function commonTree.arrangeItems(self)
 	local skin, items = self.skin, self.items
 	local font = skin.font
 

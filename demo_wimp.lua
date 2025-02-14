@@ -508,7 +508,7 @@ do
 		bar_menu.w = wimp_root.w
 		bar_menu:resize()
 
-		bar_menu:arrange()
+		bar_menu:arrangeItems()
 		bar_menu:reshape()
 		bar_menu:menuChangeCleanup()
 

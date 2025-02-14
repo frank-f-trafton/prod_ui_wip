@@ -23,8 +23,7 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
-	skin_id = "dropdown_pop1",
-	click_repeat_oob = true, -- Helps with integrated scroll bar buttons
+	skin_id = "dropdown_pop1"
 }
 
 
@@ -32,7 +31,7 @@ lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
-def.arrange = lgcMenu.arrangeListVerticalTB
+def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 -- * Scroll helpers *
@@ -113,7 +112,7 @@ function def:updateDimensions()
 	end
 
 	-- Arrange the items vertically.
-	self:arrange()
+	self:arrangeItems()
 
 	-- The work-in-progress widget dimensions.
 	local w = 1
@@ -171,7 +170,7 @@ def.keepInBounds = widShared.keepInBoundsOfParent
 
 function def:menuChangeCleanup()
 	self:menuSetSelectionStep(0, false)
-	self:arrange()
+	self:arrangeItems()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
 	self:selectionInView(true)
@@ -571,13 +570,7 @@ def.default_skinner = {
 		love.graphics.setColor(skin.color_body)
 		uiGraphics.drawSlice(skin.slice, 0, 0, self.w, self.h)
 
-		-- Embedded scroll bars, if present and active.
-		local data_scroll = skin.data_scroll
-		local scr_v = self.scr_v
-
-		if scr_v and scr_v.active then
-			self.impl_scroll_bar.draw(data_scroll, self.scr_v, 0, 0)
-		end
+		commonScroll.drawScrollBarsV(self, self.skin.data_scroll)
 
 		-- Scroll offsets.
 		love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)

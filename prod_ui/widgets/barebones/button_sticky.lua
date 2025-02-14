@@ -40,10 +40,6 @@ function def:uiCall_initialize()
 
 	lgcLabelBare.setup(self)
 
-	-- (Optional) If true, click-repeat actions can fire if the pointer is outside the widget bounds.
-	-- If false/nil, the pointer must be in range.
-	--self.click_repeat_oob = false
-
 	-- [XXX 8] (Optional) image associated with the button.
 	--self.graphic = <tq>
 

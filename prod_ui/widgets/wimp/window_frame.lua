@@ -5,33 +5,20 @@ wimp/window_frame: A WIMP-style window frame.
 
 ........................  <─ Resize area
 .┌────────────────────┐.
-.│       Window [o][x]│.  <─ Window frame header, drag sensor and control buttons
+.│      Window  [o][x]│.  <─ Window frame header, drag sensor and control buttons
 .├────────────────────┤.
-.│File Edit View Help │.  <─ Optional menu bar
-.├────────────────────┤.
-.│┌─────────────────┐^│.  <─ Content container, with optional scroll bars
-.││                 │║│.
-.││                 │║│.
-.││                 │║│.
-.││                 │║│.
-.│└─────────────────┘v│.
-.│<═════════════════> │.
-.├────────────────────┤.
-.│Condition: Green    │.  <─ Optional status bar ([XXX 13] TODO)
+.│```````````````````^│.  <- '`': Viewport #1
+.│`                 `║│.
+.│`                 `║│.
+.│`                 `║│.
+.│`                 `║│.
+.│```````````````````v│.
+.│<═════════════════> │.  <─ Optional scroll bars
 .└────────────────────┘.
 ........................
 
-Your widgets go into the 'content' container widget. You can get a reference to this widget with:
-
-```lua
-local content = frame:findTag("frame_content")
-if content then
-	-- etc.
-end
-```
-
-Frames support modal relationships: Frame A can be blocked until Frame B is dismissed. Compare with
-root-modal frames, where only the one frame (and pop-ups) can be interacted with.
+Window Frames support modal relationships: Frame A can be blocked until Frame B is dismissed. Compare
+with root-modal state, where only the one Window Frame (and pop-ups) can be interacted with.
 
 Frame-modals are harder to manage than root-modals, and should only be used when really necessary
 (ie the user needs to open a prompt in one frame, while looking up information in another frame).
@@ -44,6 +31,7 @@ local commonFrame = require(context.conf.prod_ui_req .. "common.common_frame")
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
@@ -81,6 +69,17 @@ local def = {
 
 
 def.trickle = {}
+
+
+widShared.scrollSetMethods(def)
+def.setScrollBars = commonScroll.setScrollBars
+def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
+
+
+def.center = widShared.centerInParent
+def.wid_maximize = widShared.wid_maximize
+def.wid_unmaximize = widShared.wid_unmaximize
+--def.wid_patchPressed = frame_wid_patchPressed
 
 
 local function _newSensor(id)
@@ -266,6 +265,7 @@ function def:initiateResizeMode(axis_x, axis_y)
 end
 
 
+--[===[
 --- Controls what happens when the container has both scroll bars active and the user clicks
 -- on the square patch where the bars meet.
 local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
@@ -293,6 +293,7 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 		end
 	end
 end
+--]===]
 
 
 function def:uiCall_initialize()
@@ -301,7 +302,13 @@ function def:uiCall_initialize()
 	self.can_have_thimble = false
 	self.sort_id = 3
 
-	widShared.setupViewports(self, 4)
+	self.auto_doc_update = true
+	self.auto_layout = false
+	self.halt_reshape = false
+
+	widShared.setupDoc(self)
+	widShared.setupScroll(self)
+	widShared.setupViewports(self, 6)
 	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
 
@@ -381,33 +388,6 @@ function def:uiCall_initialize()
 	-- Don't let inter-generational thimble stepping leave this widget's children.
 	self.block_step_intergen = true
 
-	-- Optional menu bar
-	if self.make_menu_bar then
-		local menu_bar = self:addChild("wimp/menu_bar")
-		menu_bar:initialize()
-		menu_bar.tag = "frame_menu_bar"
-	end
-
-	-- Main content container
-	local content = self:addChild("base/container")
-	content:initialize()
-	content.tag = "frame_content"
-	--content.render = content.renderBlank
-
-	content:setScrollBars(true, true)
-
-	content:reshape()
-
-	content.can_have_thimble = true
-
-	--self:setDefaultBounds()
-
-	self.center = widShared.centerInParent
-
-	self.wid_maximize = widShared.wid_maximize
-	self.wid_unmaximize = widShared.wid_unmaximize
-	--self.wid_patchPressed = frame_wid_patchPressed
-
 	-- Helps with ctrl+tabbing through frames.
 	self.order_id = self:bubbleEvent("rootCall_getFrameOrderID")
 
@@ -421,8 +401,6 @@ function def:uiCall_initialize()
 	self.hooks_trickle_key_released = {}
 	self.hooks_key_pressed = {}
 	self.hooks_key_released = {}
-
-	-- Call reshape(true) on this once you've set the initial size.
 end
 
 
@@ -433,11 +411,6 @@ function def:_trySettingThimble1()
 
 	if wid_banked and wid_banked.can_have_thimble and wid_banked:hasThisAncestor(self) then
 		wid_banked:takeThimble1()
-	else
-		local content = self:findTag("frame_content")
-		if content and content.can_have_thimble then
-			content:takeThimble1()
-		end
 	end
 end
 
@@ -490,10 +463,10 @@ end
 
 
 local function _getCursorAxisInfo(self, mx, my)
-	-- Check that (mx,my) is outside of Viewport #1 before calling.
+	-- Check that (mx,my) is outside of Viewport #3 before calling.
 	local diag = self.skin.sensor_resize_diagonal
-	local axis_x = mx < self.vp_x + diag and -1 or mx >= self.vp_x + self.vp_w - diag and 1 or 0
-	local axis_y = my < self.vp_y + diag and -1 or my >= self.vp_y + self.vp_h - diag and 1 or 0
+	local axis_x = mx < self.vp3_x + diag and -1 or mx >= self.vp3_x + self.vp3_w - diag and 1 or 0
+	local axis_y = my < self.vp3_y + diag and -1 or my >= self.vp3_y + self.vp3_h - diag and 1 or 0
 
 	return axis_x, axis_y
 end
@@ -508,6 +481,8 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
+		commonScroll.widgetProcessHover(self, mx, my)
+
 		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
 			self.hover_zone = self.header_show_close_button and _pointInSensor(self.b_close, mx, my) and "button-close"
 				or self.header_show_size_button and _pointInSensor(self.b_size, mx, my) and "button-size"
@@ -519,7 +494,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		-- Resize sensors
 		if not self.maximized
 		and self.frame_resizable
-		and not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h)
+		and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
 		then
 			local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 			if not (axis_x == 0 and axis_y == 0) then
@@ -538,17 +513,25 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		self.hover_zone = false
+		commonScroll.widgetClearHover(self)
 
+		self.hover_zone = false
 		self.mouse_in_resize_zone = false
 		self.cursor_press = nil
 	end
 end
 
 
-function def:uiCall_thimble1Take(inst)
+function def:uiCall_thimble1Take(inst, keep_in_view)
 	--print("thimbleTake", self.id, inst.id)
 	self.banked_thimble1 = inst
+
+	if inst ~= self then -- don't try to center the container itself
+		if keep_in_view == "widget_in_view" then
+			self:keepWidgetInView(inst)
+			commonScroll.updateScrollBarShapes(self)
+		end
+	end
 end
 
 
@@ -636,27 +619,31 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	local header_action = false
+	local handled = false
 	if self == inst then
 		local mx, my = self:getRelativePosition(x, y)
 
 		if button == 1 and self.context.mouse_pressed_button == button then
-			if self.header_visible then
+			-- Check for pressing on scroll bar components.
+			local fixed_step = 24 -- [XXX 2] style/config
+			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+
+			if not handled and self.header_visible then
 				if self.hover_zone == "button-close" then
 					self.press_busy = self.header_enable_close_button and "button-close" or "button-disabled"
 					self.cseq_header = false
-					header_action = true
+					handled = true
 
 				elseif self.hover_zone == "button-size" then
 					self.press_busy = self.header_enable_size_button and "button-size" or "button-disabled"
 					self.cseq_header = false
-					header_action = true
+					handled = true
 
-				elseif not widShared.pointInViewport(self, 3, mx, my) then
+				elseif not widShared.pointInViewport(self, 5, mx, my) then
 					self.cseq_header = false
 
 				else
-					header_action = true
+					handled = true
 
 					-- Maximize
 					if self.frame_resizable
@@ -692,11 +679,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 		end
 
-		if not header_action then
-			-- If we did not interact with the header, and the mouse pointer is outside of viewport #1, then this
-			-- is a resize action.
+		if not handled then
+			-- If we did not interact with the header or scroll bars, and the mouse pointer is outside of viewport #3,
+			-- then this is a resize action.
 			if self.frame_resizable
-			and not (mx >= self.vp_x and my >= self.vp_y and mx < self.vp_x + self.vp_w and my < self.vp_y + self.vp_h)
+			and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
 			then
 				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 				if not (axis_x == 0 and axis_y == 0) then
@@ -706,7 +693,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	-- XXX: These should be initiated with callbacks from the content container.
+	-- TODO: Figure out what to do with this stuff.
 	--[=[
 	-- Callback for when the user clicks on the scroll dead-patch.
 	if self.wid_patchPressed and self:wid_patchPressed(x, y, button, istouch, presses) then
@@ -720,6 +707,17 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		--self:captureFocus()
 	end
 	--]=]
+end
+
+
+function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+	if self == inst then
+		if button == 1 and button == self.context.mouse_pressed_button then
+			local fixed_step = 24 -- [XXX 2] style/config
+
+			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+		end
+	end
 end
 
 
@@ -767,9 +765,21 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 					self.cseq_header = false
 				end
 			end
+
+			commonScroll.widgetClearPress(self)
 			self.press_busy = false
 		end
 	end
+end
+
+
+function def:uiCall_pointerWheel(inst, x, y)
+	-- Catch wheel events from descendants that did not block it.
+	local caught = widShared.checkScrollWheelScroll(self, x, y)
+	commonScroll.updateScrollBarShapes(self)
+
+	-- Stop bubbling if the view scrolled.
+	return caught
 end
 
 
@@ -781,6 +791,18 @@ end
 
 
 function def:uiCall_update(dt)
+	dt = math.min(dt, 1.0)
+
+	if commonScroll.press_busy_codes[self.press_busy] then
+		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		local button_step = 350 -- [XXX 6] style/config
+		commonScroll.widgetDragLogic(self, mx, my, button_step*dt)
+	end
+
+	self:scrollUpdate(dt)
+	commonScroll.updateScrollState(self)
+	commonScroll.updateScrollBarShapes(self)
+
 	if self.needs_update then
 		local skin = self.skin
 		local res = _getHeaderSkinTable(self)
@@ -796,15 +818,15 @@ function def:uiCall_update(dt)
 
 		self.header_text_ox = math.floor(0.5 + _lerp(self.vp3_x, self.vp3_x + self.vp3_w - text_w, skin.header_text_align_h))
 
-		if self.header_button_side == "right" and self.header_text_ox + text_w >= self.vp4_w then
-			self.header_text_ox = self.vp4_w - text_w
+		if self.header_button_side == "right" and self.header_text_ox + text_w >= self.vp6_w then
+			self.header_text_ox = self.vp6_w - text_w
 
-		elseif self.header_button_side == "left" and self.header_text_ox < self.vp4_x then
-			self.header_text_ox = self.vp4_x
+		elseif self.header_button_side == "left" and self.header_text_ox < self.vp6_x then
+			self.header_text_ox = self.vp6_x
 		end
 
 		self.header_text_ox = math.max(0, self.header_text_ox)
-		self.header_text_oy = math.floor(0.5 + _lerp(self.vp3_y, self.vp3_y + self.vp3_h - text_h, skin.header_text_align_v))
+		self.header_text_oy = math.floor(0.5 + _lerp(self.vp6_y, self.vp6_y + self.vp6_h - text_h, skin.header_text_align_v))
 
 		self.needs_update = false
 	end
@@ -813,29 +835,31 @@ end
 
 local function _measureButtonShortenPort(self, sensor, skin, res, right, w, h)
 	local bx, by, bw, bh
-	by = math.floor(0.5 + _lerp(self.vp4_y, self.vp4_y + self.vp4_h - h, res.button_align_v))
+	by = math.floor(0.5 + _lerp(self.vp6_y, self.vp6_y + self.vp6_h - h, res.button_align_v))
 	bw = w
 	bh = h
 
 	if right then
-		bx = self.vp4_x + self.vp4_w - w
+		bx = self.vp6_x + self.vp6_w - w
 	else -- left
-		bx = self.vp4_x
-		self.vp4_x = self.vp4_x + w + res.button_pad_w
+		bx = self.vp6_x
+		self.vp6_x = self.vp6_x + w + res.button_pad_w
 	end
-	self.vp4_w = math.max(0, self.vp4_w - w - res.button_pad_w)
+	self.vp6_w = math.max(0, self.vp6_w - w - res.button_pad_w)
 
 	sensor.x, sensor.y, sensor.w, sensor.h = bx, by, bw, bh
 end
 
 
 function def:uiCall_reshape()
-	-- self.w, self.h, excluding viewport #1, is the outer frame border. This area is considered an inward extension
+	-- Viewport #1 is the main content viewport.
+	-- Viewport #2 separates embedded controls (scroll bars, header bar, etc.) from the content.
+	-- self.w, self.h, excluding viewport #3, is the outer frame border. This area is considered an inward extension
 	-- of the invisible resize zone surrounding the frame.
-	-- Viewport #1, excluding #2, is the inner frame border. This area does nothing when clicked.
-	-- Viewport #2 is the area for all other elements.
-	-- Viewport #3 is the header area.
-	-- Viewport #4 is a subsection of the header area for rendering the frame title.
+	-- Viewport #3, excluding #4, is the inner frame border. This area does nothing when clicked.
+	-- Viewport #4 is the area for all other elements.
+	-- Viewport #5 is the header area.
+	-- Viewport #6 is a subsection of the header area for rendering the frame title.
 
 	local skin = self.skin
 	local res = _getHeaderSkinTable(self)
@@ -856,10 +880,10 @@ function def:uiCall_reshape()
 
 	widShared.enforceLimitedDimensions(self)
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 2, skin.box.margin)
+	widShared.resetViewport(self, 3)
+	widShared.carveViewport(self, 3, skin.box.border)
+	widShared.copyViewport(self, 3, 4)
+	widShared.carveViewport(self, 4, skin.box.margin)
 
 	-- Update sensor enabled state
 	self.b_close.enabled = self.header_enable_close_button
@@ -867,23 +891,23 @@ function def:uiCall_reshape()
 
 	-- Header setup
 	if not self.header_visible then
-		self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h = 0, 0, 0, 0
-		self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h = 0, 0, 0, 0
+		self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h = 0, 0, 0, 0
+		self.vp6_x, self.vp6_y, self.vp6_w, self.vp6_h = 0, 0, 0, 0
 	else
-		self.vp3_h = res.header_h
+		self.vp5_h = res.header_h
 		local vx, vy, vw, vh = widShared.getViewportXYWH(self, res.viewport_fit)
-		self.vp3_x, self.vp3_y, self.vp3_w = vx, vy, vw
+		self.vp5_x, self.vp5_y, self.vp5_w = vx, vy, vw
 
-		widShared.copyViewport(self, 3, 4)
+		widShared.copyViewport(self, 5, 6)
 
-		local button_h = math.min(res.button_h, self.vp3_h)
+		local button_h = math.min(res.button_h, self.vp5_h)
 		local right = self.header_button_side == "right"
 
 		-- The first bit of padding for buttons
 		if self.header_show_close_button or self.header_show_size_button then
-			self.vp4_w = self.vp4_w - res.button_pad_w
+			self.vp6_w = self.vp6_w - res.button_pad_w
 			if not right then
-				self.vp4_x = self.vp4_x + res.button_pad_w
+				self.vp6_x = self.vp6_x + res.button_pad_w
 			end
 		end
 
@@ -899,21 +923,35 @@ function def:uiCall_reshape()
 	self.needs_update = true
 
 	-- The rest
-	uiLayout.resetLayoutPortFull(self, 2)
-	uiLayout.discardTop(self, self.vp3_y - self.vp2_y + self.vp3_h)
+	widShared.copyViewport(self, 4, 1)
+	self.vp_y = self.vp_y + self.vp5_h
+	self.vp_h = self.vp_h - self.vp5_h
 
-	local menu_bar = self:findTag("frame_menu_bar")
-	local content = self:findTag("frame_content")
+	widShared.carveViewport(self, 1, skin.box.border2)
 
-	if menu_bar then
-		menu_bar:resize()
-		uiLayout.fitTop(self, menu_bar)
+	commonScroll.arrangeScrollBars(self)
+
+	widShared.copyViewport(self, 1, 2)
+	widShared.carveViewport(self, 2, skin.box.margin2)
+
+	widShared.setClipScissorToViewport(self, 2)
+	widShared.setClipHoverToViewport(self, 2)
+
+	if self.auto_layout then
+		uiLayout.resetLayoutPort(self, 1)
+		uiLayout.applyLayout(self)
 	end
 
-	if content then
-		uiLayout.fitRemaining(self, content)
-		content:updateContentClipScissor()
+	uiLayout.resetLayoutPortFull(self, 4)
+	uiLayout.discardTop(self, self.vp5_y - self.vp4_y + self.vp5_h)
+
+	if self.auto_doc_update then
+		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
 	end
+
+	self:scrollClampViewport()
+	commonScroll.updateScrollBarShapes(self)
+	commonScroll.updateScrollState(self)
 
 	-- Needs to happen after shaping the header bar, as the header height factors into the default bounds.
 	self:setDefaultBounds()
@@ -923,7 +961,7 @@ function def:uiCall_reshape()
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
-	-- The rest should take care of themselves with their own reshape calls.
+	return self.halt_reshape
 end
 
 
@@ -968,6 +1006,8 @@ def.default_skinner = {
 		main = {
 			header_text_align_h = "unit-interval",
 			header_text_align_v = "unit-interval",
+			in_view_pad_x = "scaled-int",
+			in_view_pad_y = "scaled-int",
 			sensor_resize_pad = "scaled-int",
 			shadow_extrude = "scaled-int",
 			res_normal = "&res",
@@ -1018,7 +1058,7 @@ def.default_skinner = {
 			local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
 			local slc_header_body = res.header_slc_body
 			love.graphics.setColor(res2.col_header_fill)
-			uiGraphics.drawSlice(slc_header_body, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+			uiGraphics.drawSlice(slc_header_body, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
 
 			if self.header_text then
 				local font = res.header_font
@@ -1027,7 +1067,7 @@ def.default_skinner = {
 				love.graphics.setFont(font)
 
 				local sx, sy, sw, sh = love.graphics.getScissor()
-				uiGraphics.intersectScissor(ox + self.x + self.vp4_x, oy + self.y + self.vp4_y, self.vp4_w, self.vp4_h)
+				uiGraphics.intersectScissor(ox + self.x + self.vp6_x, oy + self.y + self.vp6_y, self.vp6_w, self.vp6_h)
 
 				love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
 
@@ -1036,7 +1076,7 @@ def.default_skinner = {
 
 			-- Header buttons
 			local sx, sy, sw, sh = love.graphics.getScissor()
-			love.graphics.setScissor(ox + self.x + self.vp3_x, oy + self.y + self.vp3_y, self.vp3_w, self.vp3_h)
+			love.graphics.setScissor(ox + self.x + self.vp5_x, oy + self.y + self.vp5_y, self.vp5_w, self.vp5_h)
 
 			if self.header_show_close_button then
 				local b_close = self.b_close
@@ -1101,6 +1141,10 @@ def.default_skinner = {
 			love.graphics.pop()
 		end
 	end,
+
+	renderLast = function(self, ox, oy)
+		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+	end
 }
 
 

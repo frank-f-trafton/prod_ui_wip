@@ -715,7 +715,7 @@ end
 
 
 -- Vertical list, top to bottom
-function lgcMenu.arrangeListVerticalTB(self, v, first, last) -- ('v' is unused)
+function lgcMenu.arrangeItemsVerticalTB(self, v, first, last) -- ('v' is unused)
 	local items = self.items
 
 	first = first or 1
@@ -746,7 +746,7 @@ end
 
 
 -- Vertical list, left-to-right then top-to-bottom.
-function lgcMenu.arrangeListVerticalLRTB(self, v, first, last)
+function lgcMenu.arrangeItemsVerticalLRTB(self, v, first, last)
 	local items = self.items
 
 	v = v or 1
@@ -784,7 +784,7 @@ end
 
 
 -- Horizontal list, left to right
-function lgcMenu.arrangeListHorizontalLR(self, v, first, last) -- ('v' is unused)
+function lgcMenu.arrangeItemsHorizontalLR(self, v, first, last) -- ('v' is unused)
 	local items = self.items
 
 	first = first or 1
@@ -815,7 +815,7 @@ end
 
 
 -- Horizontal list, top to bottom then left to right.
-function lgcMenu.arrangeListHorizontalTBLR(self, v, first, last)
+function lgcMenu.arrangeItemsHorizontalTBLR(self, v, first, last)
 	local items = self.items
 
 	v = v or 1
