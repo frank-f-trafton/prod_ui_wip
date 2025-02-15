@@ -110,7 +110,7 @@ return {
 	},
 
 	res_small = {
-		viewport_fit = 2,
+		viewport_fit = 4,
 		header_box = "*style/boxes/wimp_frame_header_small",
 		header_slc_body = "*tex_slices/winheader_small",
 		header_font = "*fonts/small",
@@ -175,7 +175,7 @@ return {
 	},
 
 	res_large = {
-		viewport_fit = 2,
+		viewport_fit = 4,
 		header_box = "*style/boxes/wimp_frame_header_large",
 		header_slc_body = "*tex_slices/winheader_large",
 		header_font = "*fonts/h3",

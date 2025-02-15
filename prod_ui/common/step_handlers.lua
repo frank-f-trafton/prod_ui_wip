@@ -33,7 +33,7 @@ function stepHandlers.linear(self, start, delta, wrap)
 			i = (i-1) % #seq + 1
 		end
 		if i == start then
-			return nil
+			return
 		end
 		next_wid = seq[i]
 	end
@@ -77,7 +77,7 @@ function stepHandlers.intergenerationalNext(wid)
 
 		-- Failsafe: Reached end of tree twice without finding a suitable new host.
 		elseif failsafe_loops >= 2 then
-			return nil
+			return
 		end
 	end
 end
@@ -119,7 +119,7 @@ function stepHandlers.intergenerationalPrevious(wid)
 
 		-- Failsafe: Reached end of tree twice without finding a suitable new host.
 		elseif failsafe_loops >= 2 then
-			return nil
+			return
 		end
 	end
 end

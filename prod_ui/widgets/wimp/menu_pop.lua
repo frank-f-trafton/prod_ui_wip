@@ -659,7 +659,7 @@ function def:uiCall_initialize()
 	self.sort_id = 6
 
 	widShared.setupDoc(self)
-	widShared.setupScroll(self)
+	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
 
 	self.press_busy = false
@@ -800,7 +800,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false
-				--temp_chain_prev:tryTakeThimble?() -- XTHM
 
 				return true
 			end

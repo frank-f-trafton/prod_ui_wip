@@ -252,7 +252,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 3)
 
-	widShared.setupScroll(self)
+	widShared.setupScroll(self, -1, -1)
 	widShared.setupDoc(self)
 
 	lgcMenu.setup(self)

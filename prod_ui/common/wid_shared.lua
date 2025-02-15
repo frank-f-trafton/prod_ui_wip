@@ -227,27 +227,6 @@ function widShared.getChildrenPerimeter(self)
 end
 
 
---[[
-Scroll registers:
-
-scr_x: Public X Scroll value. Rounded to integer.
-scr_y: Public Y Scroll value. Rounded to integer.
-
-scr_fx: Private scroll X value. Double.
-scr_fy: Private scroll Y value. Double.
-
-scr_tx: Target X scroll value. Double.
-scr_ty: Target Y scroll value. Double.
-
-The public values are provided just so that other code doesn't have to constantly round the values
-when drawing or performing intersection tests.
-
-In widgets that use the viewport system, The scroll values are offset by Viewport #1's position. The plug-in scroll
-methods take this into account, but if you read the registers directly, you may find that the scroll values for
-the top-left position go into the negative. To get the expected value, add viewport 1's position.
---]]
-
-
 --- Calculate a scroll-to-target step for a client.
 -- @param scr_p The current scroll position.
 -- @param scr_t The target scroll position.
@@ -399,6 +378,21 @@ function widShared.scrollDeltaHV(self, dx, dy, immediate)
 end
 
 
+function widShared.scrollGetXY(self)
+	return self.scr_x + self.vp_x, self.scr_y + self.vp_y
+end
+
+
+function widShared.scrollGetX(self)
+	return self.scr_x + self.vp_x
+end
+
+
+function widShared.scrollGetY(self)
+	return self.scr_y + self.vp_y
+end
+
+
 function widShared.scrollSetMethods(self)
 	self.scrollClampViewport = widShared.scrollClampViewport
 	self.scrollUpdate = widShared.scrollUpdate
@@ -415,6 +409,10 @@ function widShared.scrollSetMethods(self)
 
 	self.scrollHV = widShared.scrollHV
 	self.scrollDeltaHV = widShared.scrollDeltaHV
+
+	self.scrollGetXY = widShared.scrollGetXY
+	self.scrollGetX = widShared.scrollGetX
+	self.scrollGetY = widShared.scrollGetY
 end
 
 
@@ -646,20 +644,23 @@ end
 --- Assigns scroll registers to the widget. These offsets affect the widget's children, and may be used to position
 --  components such as menus.
 -- @param self The widget to set up.
+-- @param x_side, y_side Initial settings for X and Y. -1: as far left/top as possible, 1: as far right/bottom
+--	as possible, 0: zero. The values should be clamped by the widget's reshape handler. Note that zero is only the
+--	"top-left" if Viewport #1 is also at (0,0).
 -- @return Nothing.
-function widShared.setupScroll(self)
+function widShared.setupScroll(self, x_side, y_side)
 	-- Integral / external-facing.
 	-- The base widget metatable contains default / dummy values for these as well.
-	self.scr_x = 0
-	self.scr_y = 0
+	self.scr_x = x_side * math.huge
+	self.scr_y = y_side * math.huge
 
 	-- Floating point / internal
-	self.scr_fx = 0
-	self.scr_fy = 0
+	self.scr_fx = x_side * math.huge
+	self.scr_fy = y_side * math.huge
 
 	-- Scrolling target
-	self.scr_tx = 0
-	self.scr_ty = 0
+	self.scr_tx = x_side * math.huge
+	self.scr_ty = y_side * math.huge
 end
 
 

@@ -26,6 +26,7 @@ local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local lgcContainer = context:getLua("shared/lgc_container")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
@@ -60,7 +61,7 @@ function def:uiCall_initialize()
 	self.halt_reshape = false
 
 	widShared.setupDoc(self)
-	widShared.setupScroll(self)
+	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
 	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
@@ -77,33 +78,6 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 	--self:applyAllSettings()
-end
-
-
-function def:keepWidgetInView(wid)
-	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
-	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
-
-	-- Get widget position relative to this container.
-	local x, y = wid:getPositionInAncestor(self)
-	local w, h = wid.w, wid.h
-
-	if wid.focal_x then -- [XXX 1] Untested
-		x = x + wid.focal_x
-		y = y + wid.focal_y
-		w = wid.focal_w
-		h = wid.focal_h
-	end
-
-	local skin = self.skin
-
-	self:scrollRectInBounds(
-		x - skin.in_view_pad_x,
-		y - skin.in_view_pad_y,
-		x + w + skin.in_view_pad_x,
-		y + h + skin.in_view_pad_y,
-		false
-	)
 end
 
 
@@ -211,7 +185,8 @@ end
 function def:uiCall_thimble1Take(inst, keep_in_view)
 	if inst ~= self then -- don't try to center the container itself
 		if keep_in_view == "widget_in_view" then
-			self:keepWidgetInView(inst)
+			local skin = self.skin
+			lgcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
 			commonScroll.updateScrollBarShapes(self)
 		end
 	end
