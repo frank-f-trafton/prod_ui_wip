@@ -224,6 +224,8 @@ function _mt_widget:takeThimble1(a, b, c, d)
 
 	local thimble1, thimble2 = context.thimble1, context.thimble2
 
+	print(thimble1 == self)
+
 	if thimble1 ~= self then
 		if thimble1 then
 			thimble1:releaseThimble1(a, b, c, d)

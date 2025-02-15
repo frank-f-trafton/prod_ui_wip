@@ -358,7 +358,7 @@ function def:uiCall_initialize()
 	self.allow_hover = true
 	self.can_have_thimble = true
 
-	widShared.setupScroll(self)
+	widShared.setupScroll(self, -1, -1)
 	widShared.setupDoc(self)
 	widShared.setupViewports(self, 3)
 

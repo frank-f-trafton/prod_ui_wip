@@ -66,6 +66,9 @@ function def:uiCall_initialize()
 	-- Helps with ctrl+tabbing through 2nd-gen frames.
 	self.frame_order_counter = 0
 
+	-- Don't let inter-generational thimble stepping leave the 2nd-gen UI Frames.
+	self.block_step_intergen = true
+
 	-- Reference to the base of a pop-up menu, if active.
 	self.pop_up_menu = false
 
@@ -217,7 +220,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			end
 
 		-- Try to close the current window frame.
-		elseif self.selected_frame and scancode == "f4" and mods["ctrl"] then
+		elseif self.selected_frame and scancode == "w" and mods["ctrl"] then
 			self.selected_frame:remove()
 
 		else
@@ -231,6 +234,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					else
 						dest_cur = stepHandlers.intergenerationalNext(wid_cur)
 					end
+
+					print("dest_cur", dest_cur)
 
 					if dest_cur then
 						dest_cur:takeThimble1("widget_in_view")
@@ -294,11 +299,13 @@ end
 
 -- @param set_new_order When true, assign a new top order_id to the frame. This may be desired when clicking on a frame, and not when ctrl+tabbing through them.
 function def:setSelectedFrame(inst, set_new_order)
-	if inst and inst.parent ~= self then
-		error("can only select among children of the root widget.")
+	if inst then
+		if inst.parent ~= self then
+			error("can only select among children of the root widget.")
 
-	elseif not inst.frame_is_selectable then
-		error("cannot select this G2 widget.")
+		elseif not inst.frame_is_selectable then
+			error("cannot select this G2 widget.")
+		end
 	end
 
 	local old_selected = self.selected_frame

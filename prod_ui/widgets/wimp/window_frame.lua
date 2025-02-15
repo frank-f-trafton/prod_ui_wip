@@ -31,6 +31,7 @@ local commonFrame = require(context.conf.prod_ui_req .. "common.common_frame")
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local lgcContainer = context:getLua("shared/lgc_container")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -41,9 +42,6 @@ local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local _lerp = commonMath.lerp
-
-
-local function dummy_renderThimble() end
 
 
 local _header_sizes = pTable.makeLUT({"small", "normal", "large"})
@@ -63,8 +61,8 @@ local def = {
 		header_show_close_button = true,
 		header_show_size_button = true,
 		header_text = "",
-		header_size = "normal"
-	}
+		header_size = "normal" -- enum: `_header_sizes`
+	},
 }
 
 
@@ -124,13 +122,19 @@ end
 
 
 function def:setHeaderSize(size)
-	if not _header_sizes[size] then
+	size = size and size
+	if size and not _header_sizes[size] then
 		error("invalid header size.")
 	end
 
 	if self.header_size ~= size then
+		local sx, sy = self:scrollGetXY()
+		--local vp_y_old = self.vp_y
 		self:writeSetting("header_size", size)
 		self:reshape(true)
+		self:scrollHV(sx, sy, true)
+		--print("vp_y_old", vp_y_old, "self.vp_y", self.vp_y)
+		--widShared.scrollDeltaV(self, vp_y_old - self.vp_y, true)
 	end
 end
 
@@ -218,10 +222,10 @@ end
 
 
 function def:setDefaultBounds()
-	-- Allow container to be moved partially out of bounds, but not
+	-- Allow the Window Frame to be moved partially out of bounds, but not
 	-- so much that the mouse wouldn't be able to drag it back.
 
-	local header_h = self.vp3_h
+	local header_h = self.vp5_h
 
 	-- XXX: theme/scale
 	self.p_bounds_x1 = -48
@@ -299,7 +303,7 @@ end
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = false
+	self.can_have_thimble = true
 	self.sort_id = 3
 
 	self.auto_doc_update = true
@@ -307,7 +311,7 @@ function def:uiCall_initialize()
 	self.halt_reshape = false
 
 	widShared.setupDoc(self)
-	widShared.setupScroll(self)
+	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 6)
 	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
@@ -332,9 +336,9 @@ function def:uiCall_initialize()
 	-- Set true to draw a red box around the frame's resize area.
 	--self.DEBUG_show_resize_range
 
-	-- Link to the last widget within this tree which held thimble1.
+	-- Link to the last widget within this tree that held thimble1.
 	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
-	self.banked_thimble1 = false
+	self.banked_thimble1 = self
 
 	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
 
@@ -365,8 +369,8 @@ function def:uiCall_initialize()
 	self.maxim_w = 128
 	self.maxim_h = 128
 
-	-- Set true to allow dragging the container by clicking on its body
-	self.allow_body_drag = false -- XXX moved from container, maybe not the correct place here.
+	-- Set true to allow dragging the Window Frame by clicking on its body
+	--self.allow_body_drag = false
 
 	-- Used to position frame relative to pointer when dragging.
 	self.drag_ox = 0
@@ -385,9 +389,6 @@ function def:uiCall_initialize()
 
 	self.needs_update = true
 
-	-- Don't let inter-generational thimble stepping leave this widget's children.
-	self.block_step_intergen = true
-
 	-- Helps with ctrl+tabbing through frames.
 	self.order_id = self:bubbleEvent("rootCall_getFrameOrderID")
 
@@ -401,6 +402,10 @@ function def:uiCall_initialize()
 	self.hooks_trickle_key_released = {}
 	self.hooks_key_pressed = {}
 	self.hooks_key_released = {}
+
+	-- If the frame contents are scrolling, then set the scroll position after reshaping.
+	-- For example, to scroll to the top-left:
+	-- frame:scrollHV(0, 0)
 end
 
 
@@ -409,7 +414,7 @@ function def:_trySettingThimble1()
 
 	local wid_banked = self.banked_thimble1
 
-	if wid_banked and wid_banked.can_have_thimble and wid_banked:hasThisAncestor(self) then
+	if wid_banked and wid_banked.can_have_thimble and wid_banked:isInLineage(self) then
 		wid_banked:takeThimble1()
 	end
 end
@@ -517,7 +522,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		self.hover_zone = false
 		self.mouse_in_resize_zone = false
-		self.cursor_press = nil
+		self.cursor_hover = nil
 	end
 end
 
@@ -526,9 +531,10 @@ function def:uiCall_thimble1Take(inst, keep_in_view)
 	--print("thimbleTake", self.id, inst.id)
 	self.banked_thimble1 = inst
 
-	if inst ~= self then -- don't try to center the container itself
+	if inst ~= self then -- don't try to center the Window Frame itself
 		if keep_in_view == "widget_in_view" then
-			self:keepWidgetInView(inst)
+			local skin = self.skin
+			lgcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
 			commonScroll.updateScrollBarShapes(self)
 		end
 	end
@@ -610,11 +616,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 	if self.frame_is_selectable then
 		root:setSelectedFrame(self, true)
-		self.order_id = root:sendEvent("rootCall_getFrameOrderID")
 
-		-- If thimble1 is not in this widget tree, move it to the container.
+		-- If thimble1 is not in this widget tree, move it to the Window Frame.
 		local thimble1 = self.context.thimble1
-		if not thimble1 or not thimble1:hasThisAncestor(self) then
+		if not thimble1 or not thimble1:isInLineage(self) then
 			self:_trySettingThimble1()
 		end
 	end
@@ -679,10 +684,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 		end
 
+		-- We did not interact with the header or scroll bars.
 		if not handled then
-			-- If we did not interact with the header or scroll bars, and the mouse pointer is outside of viewport #3,
-			-- then this is a resize action.
-			if self.frame_resizable
+			-- If the pointer is within Viewport #2, then have the Window Frame try to take thimble1.
+			if mx >= self.vp2_x and my >= self.vp2_y and mx < self.vp2_x + self.vp2_w and self.y < self.vp2_y + self.vp2_h then
+				self:tryTakeThimble1()
+
+			-- If the mouse pointer is outside of Viewport #3, then this is a resize action.
+			elseif self.frame_resizable
 			and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
 			then
 				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
@@ -699,7 +708,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self.wid_patchPressed and self:wid_patchPressed(x, y, button, istouch, presses) then
 		-- ...
 
-	-- Dragging can also be started by clicking on the container body if 'allow_body_drag' is truthy.
+	-- Dragging can also be started by clicking on the Window Frame body if 'allow_body_drag' is true.
 	elseif self.allow_body_drag then
 		self.press_busy = "drag"
 		self.adjust_mouse_orig_a_x = x
@@ -830,6 +839,8 @@ function def:uiCall_update(dt)
 
 		self.needs_update = false
 	end
+
+	--print(self.scr_fx, self.scr_fy)
 end
 
 
@@ -1144,7 +1155,10 @@ def.default_skinner = {
 
 	renderLast = function(self, ox, oy)
 		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
-	end
+	end,
+
+	-- Don't highlight when holding the UI thimble.
+	renderThimble = widShared.dummy
 }
 
 

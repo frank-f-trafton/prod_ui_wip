@@ -271,7 +271,7 @@ function def:uiCall_initialize()
 	self.can_have_thimble = true
 
 	widShared.setupDoc(self)
-	widShared.setupScroll(self)
+	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
 
 	self.press_busy = false
