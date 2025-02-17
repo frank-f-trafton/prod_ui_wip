@@ -2,16 +2,14 @@
 local plan = {}
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.w, frame.h = 300, 300
 	frame:initialize()
 	frame:setFrameTitle("Frame Test")
-
 	frame.auto_layout = true
-
 	frame:setScrollBars(false, false)
 
 	local bb_lbl = frame:addChild("barebones/label")

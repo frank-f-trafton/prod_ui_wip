@@ -132,7 +132,7 @@ end
 function plan.make(root)
 	local context = root.context
 
-	local frame = root:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.w = 400
 	frame.h = 384
 	frame:initialize()
@@ -214,7 +214,6 @@ function plan.make(root)
 	tree_box.userUpdate = tree_userUpdate
 	tree_box.userDestroy = tree_userDestroy
 	-- Also reads 'self.parent.usr_exclude'
-
 
 	frame:reshape(true)
 

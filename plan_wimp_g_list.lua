@@ -39,20 +39,17 @@ local function columnSortGlobals(wid, column)
 end
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
 	local implTabCell = context:getLua("shared/impl_tab_cell")
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
 	frame:initialize()
-
 	frame:setFrameTitle("Snapshot of '_G'")
-
 	frame.auto_layout = true
-
 	frame:setScrollBars(false, false)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")

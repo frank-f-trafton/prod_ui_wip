@@ -92,10 +92,10 @@ local function _radioPlacement(self)
 end
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 640
 	frame:initialize()

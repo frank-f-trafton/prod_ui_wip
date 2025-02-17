@@ -8,13 +8,12 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-function plan.make(parent)
-	local context = parent.context
-	local frame = parent:addChild("wimp/window_frame")
+function plan.make(root)
+	local context = root.context
+	local frame = root:newWindowFrame()
 	frame.w = 300
 	frame.h = 300
 	frame:initialize()
-
 	frame:setFrameTitle("Canvas Layering Test")
 
 	frame.ly_enabled = true

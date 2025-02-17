@@ -13,20 +13,16 @@ local uiLayout = require("prod_ui.ui_layout")
 local plan = {}
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.make_menu_bar = true
 	frame.w = 640--350
 	frame.h = 480--240
 	frame:initialize()
 	frame:setFrameTitle("LineEditor Test")
-
-	frame.w = 640
-	frame.h = 480
 	frame.auto_layout = true
-
 	frame:setScrollBars(false, false)
 
 	local c_bar = frame:addChild("base/container")

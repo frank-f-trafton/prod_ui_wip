@@ -209,6 +209,18 @@ function def:getMaximizeEnabled()
 end
 
 
+function def:setAlwaysOnTop(enabled)
+	self.always_on_top = not not enabled
+	self.sort_id = self.always_on_top and 3 or 4
+	self.parent:sortChildren()
+end
+
+
+function def:getAlwaysOnTop()
+	return self.always_on_top
+end
+
+
 function def:setFrameTitle(text)
 	uiShared.type1(1, text, "string", "nil")
 
@@ -300,11 +312,13 @@ end
 --]===]
 
 
-function def:uiCall_initialize()
+function def:uiCall_initialize(always_on_top)
 	self.visible = true
 	self.allow_hover = true
 	self.can_have_thimble = true
-	self.sort_id = 3
+
+	self.always_on_top = not not always_on_top
+	self.sort_id = self.always_on_top and 4 or 3
 
 	self.auto_doc_update = true
 	self.auto_layout = false
@@ -598,7 +612,7 @@ end
 
 
 function def:bringToFront()
-	self:reorder("last")
+	self:reorder(math.huge)
 	self.parent:sortChildren()
 end
 
@@ -998,7 +1012,7 @@ function def:uiCall_destroy(inst)
 			local root = self:getRootWidget()
 			root:setSelectedFrame(target, true)
 
-			target:reorder("last")
+			target:reorder(math.huge)
 			target.parent:sortChildren()
 
 			target:_trySettingThimble1()

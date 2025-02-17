@@ -6,8 +6,8 @@ local commonWimp = require("prod_ui.common.common_wimp")
 local pTable = require("prod_ui.lib.pile_table")
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
 	-- Clone the skin to avoid messing up other frames.
 	local skin_clone = context.resources:cloneSkinDef("wimp_frame")
@@ -16,15 +16,13 @@ function plan.make(parent)
 		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.skin_id = skin_clone
 	frame.w = 640
 	frame.h = 480
 	frame.userDestroy = _userDestroy
 	frame:initialize()
-
 	frame:setFrameTitle("WIMP Window Frame")
-
 	frame.auto_layout = true
 	frame:setScrollBars(false, true)
 

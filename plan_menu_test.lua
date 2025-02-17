@@ -99,20 +99,16 @@ local function testMenuKeyPressed(self, key, scancode, isrepeat)
 end
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
 	frame:initialize()
 	frame:setFrameTitle("Menu Test")
-
 	frame.auto_layout = true
 	frame:setScrollBars(false, false)
-
-	frame.w = 640
-	frame.h = 480
 
 	local menu1 = frame:addChild("base/menu")
 	menu1.x = 16
