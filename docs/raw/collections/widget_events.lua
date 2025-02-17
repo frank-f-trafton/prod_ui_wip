@@ -1017,7 +1017,7 @@ return {
 			propagation_method = "cycleEvent",
 			event_origin = "[love.keypressed](https://love2d.org/wiki/love.keypressed)",
 			description = "The user pressed a key while this widget had the thimble.",
-			signature = "def:uiCall_keyPressed(inst, key, scancode, isrepeat)",
+			signature = "def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)",
 			parameters = {
 				{
 					name = "inst",
@@ -1035,6 +1035,14 @@ return {
 					name = "isrepeat",
 					type = "boolean",
 					description = "True if this is a repeat key event.",
+				}, {
+					name = "hot_key",
+					type = "string",
+					description = "A hotkey string, as determined by the current pressed key combined with the state of modifier keys. This field is false when a valid hotkey string cannot be generated (the pressed key must not be a modifier).",
+				}, {
+					name = "hot_scan",
+					type = "string",
+					description = "A hotkey string, as determined by the current pressed scancode combined with the state of modifier keys. This field is false when a valid hotkey string cannot be generated (the pressed scancode must not be a modifier).",
 				},
 			},
 			returns = "True to halt event propagation.",
@@ -1189,7 +1197,7 @@ resize event? — but are included for the sake of completeness.
 
 function def:uiCap_windowResize(w, h) — (love.resize)
 
-function def:uiCap_keyPressed(key, scancode, isrepeat)
+function def:uiCap_keyPressed(key, scancode, isrepeat, hot_kc, hot_sc)
 function def:uiCap_keyReleased(key, scancode)
 
 function def:uiCap_textEdited(text, start, length)

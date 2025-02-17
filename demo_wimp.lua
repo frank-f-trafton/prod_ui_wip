@@ -50,7 +50,7 @@ end
 -- Libs: ProdUI
 local commonWimp = require("prod_ui.common.common_wimp")
 local itemOps = require("prod_ui.common.item_ops")
-local keyCombo = require("prod_ui.lib.key_combo")
+local keyMgr = require("prod_ui.lib.key_mgr")
 local uiContext = require("prod_ui.ui_context")
 local uiGraphics = require("prod_ui.ui_graphics")
 local uiLayout = require("prod_ui.ui_layout")
@@ -97,6 +97,10 @@ love.graphics.setFont(font_test)
 -- WIMP config/settings. Eventually, this will be placed in a separate file.
 local wimp_settings = {
 	wimp = {
+		key_bindings = {
+			close_window_frame = "C+w",
+		},
+
 		navigation = {
 			-- Scroll animation parameters. See: widShared.scrollTargetUpdate()
 			scroll_snap = 1,
@@ -523,7 +527,7 @@ do
 				local key_mgr = self.context.key_mgr
 				local mod = key_mgr.mod
 
-				local input_str = keyCombo.getKeyString(false, mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], key)
+				local input_str = keyMgr.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
 				if shortcuts[input_str] then
 					shortcuts[input_str](self, key, scancode, isrepeat)
 					return true

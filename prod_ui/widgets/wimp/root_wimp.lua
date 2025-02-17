@@ -6,6 +6,7 @@
 
 local context = select(1, ...)
 
+local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
@@ -194,7 +195,7 @@ function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if #self.modals == 0 then
 		if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
 			return true
@@ -220,7 +221,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			end
 
 		-- Try to close the current window frame.
-		elseif self.selected_frame and scancode == "w" and mods["ctrl"] then
+		elseif self.selected_frame and keyMgr.keyStringsEqual(context.settings.wimp.key_bindings.close_window_frame, hot_scan, hot_key) then
 			self.selected_frame:closeFrame(false)
 
 		else

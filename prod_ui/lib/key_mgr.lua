@@ -9,6 +9,8 @@ local keyMgr = {}
 	matching KeyConstant, but the internal representation of each key revolves around Scancodes. The only exception
 	is modifier key state (self.mod), which is based on KeyConstants.
 
+	TODO: The behavior described below probably depends on the desktop environment in use, the version of SDL, etc.
+	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	On Linux, 'isrepeat' normally doesn't trigger for ctrl, shift and alt. It may trigger sometimes, if the user
 	presses the key on the very first application frame, or while using the mouse to drag or resize the window. It can
 	be duplicated by sleeping for a second on the first frame and holding the ctrl, shift or alt keys.
@@ -17,6 +19,7 @@ local keyMgr = {}
 
 	On Linux, if a given frame is excessively long, repeated key-down events can occur multiple times per frame.
 	On Windows, key-repeat events are limited to one per frame.
+	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 	Some key-combos may be intercepted by the user's OS, such as gui+l to lock the computer.
 
@@ -662,6 +665,9 @@ end
 mods_up["rgui"] = mods_up["lgui"]
 
 
+local mod_key_codes = {lctrl=true, rctrl=true, lshift=true, rshift=true, lalt=true, ralt=true, lgui=true, rgui=true}
+
+
 --- Place in love.keypressed().
 -- @param owner An optional state table to be passed to the 'cb_keyDown' callback.
 -- @param kc The 'key' argument provided by love.keypressed().
@@ -678,7 +684,6 @@ function _mt_mgr:keyDown(owner, kc, sc, isrepeat)
 	local check_mod_key = self.mods_use_kc and kc or sc
 	if mods_down[check_mod_key] then
 		mods_down[check_mod_key](self, check_mod_key)
-
 	else
 		self.sc_last = sc
 	end
@@ -715,11 +720,19 @@ function _mt_mgr:keyDown(owner, kc, sc, isrepeat)
 		self.sc_recent = false
 	end
 
+	-- Hotkey strings, if applicable.
+	local mods = self.mod
+	local hot_kc, hot_sc = false, false
+
+	if not mods[check_mod_key] then
+		hot_kc = keyMgr.getKeyString(mods["ctrl"], mods["shift"], mods["alt"], mods["gui"], false, kc)
+		hot_sc = keyMgr.getKeyString(mods["ctrl"], mods["shift"], mods["alt"], mods["gui"], true, sc)
+	end
+
 	-- Fire callback, if applicable
 	if self.cb_keyDown then
-		return self.cb_keyDown(owner, kc, sc, isrepeat, self.sc_last == sc)
+		return self.cb_keyDown(owner, kc, sc, isrepeat, self.sc_last == sc, hot_kc, hot_sc)
 	end
-	-- return nil
 end
 
 
@@ -755,9 +768,6 @@ function _mt_mgr:keyUp(owner, kc, sc)
 	-- Fire callback, if applicable
 	if self.cb_keyUp then
 		return self.cb_keyUp(owner, kc, sc)
-
-	else
-		return nil
 	end
 end
 
@@ -1001,6 +1011,120 @@ function _mt_mgr:isKeyPressedRep(...)
 		end
 	end
 
+	return false
+end
+
+
+--[[
+Functions for parsing key combinations (like ctrl+s).
+
+The KeyString format:
+
+C? S? A? G? (-|+) code
+
+C: Ctrl modifier key
+S: Shift modifier key
+A: Alt modifier key
+G: Gui modifier key
+-: This is a Scancode
++: This is a KeyConstant
+code: A Scancode or KeyConstant enum.
+
+
+KeyString examples:
+
+Ctrl + W: C+w
+Ctrl + Shift + Alt + S: CSA+s
+Gui + Q (Scancode): G-q
+--]]
+
+
+local _h_ctrl = {[true] = "C", [false] = ""}
+local _h_shift = {[true] = "S", [false] = ""}
+local _h_alt = {[true] = "A", [false] = ""}
+local _h_gui = {[true] = "G", [false] = ""}
+local _h_is_sc = {[true] = "-", [false] = "+"}
+
+local _d_ctrl = {[true] = "Ctrl +", [false] = ""}
+local _d_shift = {[true] = "Shift +", [false] = ""}
+local _d_alt = {[true] = "Alt +", [false] = ""}
+local _d_gui = {[true] = "Gui +", [false] = ""}
+local _d_is_sc = {[true] = " (Scancode)", [false] = ""}
+
+
+--- Produce a KeyString based on a set of input parameters.
+-- @param ctrl, shift, alt, gui Booleans representing the state of the four modifier keys.
+-- @param is_sc True for a Scancode KeyString, false for a KeyConstant KeyString.
+-- @param code The Scancode if 'is_sc' is true or KeyConstant if 'is_sc' is false.
+-- @return A KeyString representing the key combination, or nil plus error message if there was an issue reading the input.
+function keyMgr.getKeyString(ctrl, shift, alt, gui, is_sc, code)
+	-- Validate key
+	if is_sc and not keyMgr.scancodes[code] then
+		return nil, "unknown scancode: |" .. tostring(code) .. "|"
+
+	elseif not is_sc and not keyMgr.key_constants[code] then
+		return nil, "unknown keyConstant: |" .. tostring(code) .. "|"
+	end
+
+	local str = _h_ctrl[ctrl] .. _h_shift[shift] .. _h_alt[alt] .. _h_is_sc[is_sc] .. code
+
+	return str
+end
+
+
+--- Generate a string suitable for displaying to the end user.
+-- @param ctrl True for the ctrl modifier key.
+-- @param shift True for shift.
+-- @param alt True for alt.
+-- @param gui True for gui.
+-- @param code The key label string. (Not validated.)
+-- @return A string for displaying to the user.
+function keyMgr.getDisplayString(ctrl, shift, alt, gui, is_sc, code)
+	-- Validate key
+	if is_sc and not keyMgr.scancodes[code] then
+		return nil, "unknown scancode: |" .. tostring(code) .. "|"
+
+	elseif not is_sc and not keyMgr.key_constants[code] then
+		return nil, "unknown keyConstant: |" .. tostring(code) .. "|"
+	end
+
+	local str = _h_ctrl[ctrl] .. _h_shift[shift] .. _h_alt[alt] .. code .. _h_is_sc[is_sc]
+
+	return str
+end
+
+
+--- Try to parse a KeyString. (See top of source file for formatting.)
+-- @param str The input KeyString.
+-- @return The state of the Ctrl, Alt, Shift and Gui modifiers, 'Is Scancode' (bool), and the KeyConstant/Scancode, or nil plus error string if there was an issue parsing the input.
+function keyMgr.parseKeyString(str)
+
+	local ctrl, shift, alt, gui, is_sc, code = str:find("(C?)(S?)(A?)(G)?([%-%+].+)")
+	if not code then
+		return nil, "failed to parse KeyString."
+	end
+
+	-- Validate the code.
+	if is_sc and not keyMgr.scancodes[code] then
+		return nil, "invalid Scancode: |" .. tostring(code) .. "|"
+
+	elseif not is_sc and not keyMgr.key_constants[code] then
+		return nil, "invalid KeyConstant: |" .. tostring(code) .. "|"
+	end
+
+	-- Looks good.
+	return not not ctrl, not not shift, not not alt, not not gui, not not is_sc, code
+end
+
+
+-- Compare a KeyString against one or multiple other KeyStrings.
+function keyMgr.keyStringsEqual(first, ...)
+	for i = 1, select("#", ...) do
+		local str = select(i, ...)
+		if first == str then
+			return true
+		end
+	end
 	return false
 end
 

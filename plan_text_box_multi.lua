@@ -6,7 +6,7 @@
 -- ProdUI
 local commonWimp = require("prod_ui.common.common_wimp")
 local itemOps = require("prod_ui.common.item_ops")
-local keyCombo = require("prod_ui.lib.key_combo")
+local keyMgr = require("prod_ui.lib.key_mgr")
 local uiLayout = require("prod_ui.ui_layout")
 
 
@@ -128,22 +128,6 @@ function plan.make(parent)
 		table.insert(frame.hooks_key_pressed, menu_bar.widHook_pressed)
 		table.insert(frame.hooks_key_released, menu_bar.widHook_released)
 	end
-
-	-- Hook shortcuts to Window Frame
-	local shortcuts = {
-		["KC w"] = function(self, key, scancode, isrepeat) commonWimp.closeFrame(self) end,
-	}
-	local hook_pressed = function(self, key, scancode, isrepeat)
-		local key_mgr = self.context.key_mgr
-		local mod = key_mgr.mod
-
-		local input_str = keyCombo.getKeyString(false, mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], key)
-		if shortcuts[input_str] then
-			shortcuts[input_str](self, key, scancode, isrepeat)
-			return true
-		end
-	end
-	table.insert(frame.hooks_key_pressed, hook_pressed)
 
 	return frame
 end

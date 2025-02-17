@@ -23,7 +23,6 @@ local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
-local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
@@ -191,14 +190,14 @@ function def:uiCall_textInput(inst, text)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		if self.enabled then
 			if scancode == "return" or scancode == "kpenter" then
 				self:wid_action()
 				return true
 			else
-				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 			end
 		end
 	end
