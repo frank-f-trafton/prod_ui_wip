@@ -193,8 +193,6 @@ function themeDef.newInstance(scale)
 	inst.wimp.frame_render_shadow = true
 	inst.wimp.header_button_side = "right"
 	inst.wimp.header_size = "normal"
-	inst.wimp.header_enable_close_button = true
-	inst.wimp.header_enable_size_button = true
 	inst.wimp.header_show_close_button = true
 	inst.wimp.header_show_size_button = true
 	inst.wimp.header_text = "Untitled Frame"

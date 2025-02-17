@@ -92,7 +92,7 @@ function plan.make(parent)
 				button_y:initialize()
 				button_y:setLabel("O")
 				button_y.wid_buttonAction = function(self)
-					self:bubbleEvent("frameCall_close")
+					self:bubbleEvent("frameCall_close", true)
 				end
 
 				local button_n = dialog:addChild("base/button")
@@ -103,7 +103,7 @@ function plan.make(parent)
 				button_n:initialize()
 				button_n:setLabel("K")
 				button_n.wid_buttonAction = function(self)
-					self:bubbleEvent("frameCall_close")
+					self:bubbleEvent("frameCall_close", true)
 				end
 
 				dialog:center(true, true)
@@ -168,7 +168,7 @@ function plan.make(parent)
 				button_y:initialize()
 				button_y:setLabel("O")
 				button_y.wid_buttonAction = function(self)
-					self:bubbleEvent("frameCall_close")
+					self:bubbleEvent("frameCall_close", true)
 				end
 
 				local button_n = dialog:addChild("base/button")
@@ -179,7 +179,7 @@ function plan.make(parent)
 				button_n:initialize()
 				button_n:setLabel("K")
 				button_n.wid_buttonAction = function(self)
-					self:bubbleEvent("frameCall_close")
+					self:bubbleEvent("frameCall_close", true)
 				end
 
 				dialog:center(true, true)

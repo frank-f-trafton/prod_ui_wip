@@ -51,13 +51,13 @@ local def = {
 	skin_id = "wimp_frame",
 
 	default_settings = {
-		frame_render_shadow = false,
-		frame_resizable = true,
+		allow_close = true,
 		allow_drag_move = true,
+		allow_maximize = true,
+		allow_resize = true,
+		frame_render_shadow = false,
 		header_visible = true,
 		header_button_side = "right", -- "left", "right"
-		header_enable_close_button = true,
-		header_enable_size_button = true,
 		header_show_close_button = true,
 		header_show_size_button = true,
 		header_text = "",
@@ -88,14 +88,14 @@ end
 -- We need to catch mouse hover+press events that occur in the frame's resize area.
 function def:ui_evaluateHover(mx, my, os_x, os_y)
 	local wx, wy = self.x + os_x, self.y + os_y
-	local rp = not self.maximized and self.frame_resizable and self.skin.sensor_resize_pad or 0
+	local rp = not self.maximized and self.allow_resize and self.skin.sensor_resize_pad or 0
 	return mx >= wx - rp and my >= wy - rp and mx < wx + self.w + rp and my < wy + self.h + rp
 end
 
 
 function def:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 	local wx, wy, ww, wh = self.x + os_x, self.y + os_y, self.w, self.h
-	local rp = not self.maximized and self.frame_resizable and self.skin.sensor_resize_pad or 0
+	local rp = not self.maximized and self.allow_resize and self.skin.sensor_resize_pad or 0
 	-- in frame + padding area
 	if mx >= wx - rp and my >= wy - rp and mx < wx + ww + rp and my < wy + wh + rp then
 		-- just in frame
@@ -146,12 +146,12 @@ end
 
 -- (Resizable by the user.)
 function def:setResizable(enabled)
-	self:writeSetting("frame_resizable", not not enabled)
+	self:writeSetting("allow_resize", not not enabled)
 end
 
 
 function def:getResizable()
-	return self.frame_resizable
+	return self.allow_resize
 end
 
 
@@ -188,24 +188,24 @@ end
 
 
 function def:setCloseEnabled(enabled)
-	self:writeSetting("header_enable_close_button", not not enabled)
-	self.b_close.enabled = self.header_enable_close_button
+	self:writeSetting("allow_close", not not enabled)
+	self.b_close.enabled = self.allow_close
 end
 
 
 function def:getCloseEnabled()
-	return self.header_enable_close_button
+	return self.allow_close
 end
 
 
-function def:setSizeEnabled(enabled)
-	self:writeSetting("header_enable_size_button", not not enabled)
-	self.b_size.enabled = self.header_enable_size_button
+function def:setMaximizeEnabled(enabled)
+	self:writeSetting("allow_maximize", not not enabled)
+	self.b_size.enabled = self.allow_maximize
 end
 
 
-function def:getSizeEnabled()
-	return self.header_enable_size_button
+function def:getMaximizeEnabled()
+	return self.allow_maximize
 end
 
 
@@ -281,7 +281,7 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 		if not content then
 			return
 		end
-		if self.frame_resizable then
+		if self.allow_resize then
 			if content.press_busy then
 				return
 			end
@@ -451,10 +451,20 @@ function def:clearModal()
 end
 
 
-function def:frameCall_close(inst)
-	self:remove() -- XXX fortify against calls during update-lock
+function def:closeFrame(force)
+	-- XXX fortify against calls during update-lock
+	print("self.allow_close", self.allow_close, "force", force)
+	if self.allow_close or force then
+		self:remove()
+		return true
+	end
 
-	-- Stop bubbling
+	return false
+end
+
+
+function def:frameCall_close(force)
+	self:closeFrame(force)
 	return true
 end
 
@@ -498,7 +508,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		-- Resize sensors
 		if not self.maximized
-		and self.frame_resizable
+		and self.allow_resize
 		and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
 		then
 			local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
@@ -635,12 +645,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 			if not handled and self.header_visible then
 				if self.hover_zone == "button-close" then
-					self.press_busy = self.header_enable_close_button and "button-close" or "button-disabled"
+					self.press_busy = self.allow_close and "button-close" or "button-disabled"
 					self.cseq_header = false
 					handled = true
 
 				elseif self.hover_zone == "button-size" then
-					self.press_busy = self.header_enable_size_button and "button-size" or "button-disabled"
+					self.press_busy = self.allow_maximize and "button-size" or "button-disabled"
 					self.cseq_header = false
 					handled = true
 
@@ -651,7 +661,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					handled = true
 
 					-- Maximize
-					if self.frame_resizable
+					if self.allow_resize
 					and self.cseq_header
 					and self.context.cseq_button == 1
 					and self.context.cseq_presses % 2 == 0
@@ -691,7 +701,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				self:tryTakeThimble1()
 
 			-- If the mouse pointer is outside of Viewport #3, then this is a resize action.
-			elseif self.frame_resizable
+			elseif self.allow_resize
 			and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
 			then
 				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
@@ -757,7 +767,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 					self:remove()
 
 				elseif self.press_busy == "button-size"
-				and self.frame_resizable
+				and self.allow_resize
 				and _pointInSensor(self.b_size, mx, my)
 				then
 					if self.wid_maximize and self.wid_unmaximize then
@@ -897,8 +907,8 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 4, skin.box.margin)
 
 	-- Update sensor enabled state
-	self.b_close.enabled = self.header_enable_close_button
-	self.b_size.enabled = self.header_enable_size_button
+	self.b_close.enabled = self.allow_close
+	self.b_size.enabled = self.allow_maximize
 
 	-- Header setup
 	if not self.header_visible then

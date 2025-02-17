@@ -640,8 +640,7 @@ function _mt_widget:sendEvent(field, a,b,c,d,e,f)
 end
 
 
-local function _bubbleEvent(self, field, a,b,c,d,e,f)
-	local wid = self
+local function _bubbleEvent(wid, field, a,b,c,d,e,f)
 	while wid do
 		if wid[field] then
 			local var = wid[field]
