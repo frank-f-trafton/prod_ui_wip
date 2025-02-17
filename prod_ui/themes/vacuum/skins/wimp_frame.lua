@@ -4,13 +4,13 @@ return {
 	skinner_id = "wimp/window_frame",
 
 	-- settings
+	--allow_close
+	--allow_drag_move
+	--allow_maximize
+	--allow_resize
 	frame_render_shadow = "*wimp/frame_render_shadow",
-	--frame_resizable = true,
 	--header_visible = true,
-	--allow_drag_move = true,
 	header_button_side = "*wimp/header_button_side",
-	header_enable_close_button = "*wimp/header_enable_close_button",
-	header_enable_size_button = "*wimp/header_enable_size_button",
 	header_show_close_button = "*wimp/header_show_close_button",
 	header_show_size_button = "*wimp/header_show_size_button",
 	header_text = "*wimp/header_text",

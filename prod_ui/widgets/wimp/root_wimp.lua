@@ -221,7 +221,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- Try to close the current window frame.
 		elseif self.selected_frame and scancode == "w" and mods["ctrl"] then
-			self.selected_frame:remove()
+			self.selected_frame:closeFrame(false)
 
 		else
 			-- Thimble is held:

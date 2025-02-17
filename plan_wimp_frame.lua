@@ -136,9 +136,9 @@ function plan.make(parent)
 			end
 			print(
 				"self.checked", self.checked, "\n",
-				"frame.frame_resizable", frame.frame_resizable, "\n",
-				"frame.settings.frame_resizable", frame.settings.frame_resizable, "\n",
-				"frame.default_settings.frame_resizable", frame.default_settings.frame_resizable
+				"frame.allow_resize", frame.allow_resize, "\n",
+				"frame.settings.allow_resize", frame.settings.allow_resize, "\n",
+				"frame.default_settings.allow_resize", frame.default_settings.allow_resize
 			)
 		end
 		checkbox:reshape()
@@ -194,7 +194,7 @@ function plan.make(parent)
 	end
 
 
-	-- Checkbox: 'Close' button enabled state
+	-- Checkbox: Enable closing the frame
 	do
 		local checkbox = frame:addChild("base/checkbox")
 		checkbox.x = xx
@@ -250,14 +250,14 @@ function plan.make(parent)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
-		checkbox.checked = frame:getSizeEnabled()
+		checkbox.checked = frame:getMaximizeEnabled()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Enable 'Size'", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
 			local frame = commonWimp.getFrame(self)
 			if frame then
-				frame:setSizeEnabled(self.checked)
+				frame:setMaximizeEnabled(self.checked)
 			end
 		end
 		checkbox:reshape()
@@ -480,9 +480,9 @@ function plan.make(parent)
 		btn.w = ww
 		btn.h = hh
 		btn:initialize()
-		btn:setLabel("Close Window")
+		btn:setLabel("Close (forcefully)")
 		btn.wid_buttonAction = function(self)
-			self:bubbleEvent("frameCall_close")
+			self:bubbleEvent("frameCall_close", true)
 		end
 		yy = yy + hh
 	end
