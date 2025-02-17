@@ -885,4 +885,27 @@ function widShared.pointInViewport(self, v, x, y)
 end
 
 
+function widShared.getSortLaneEdge(seq, lane, side)
+	if side == "first" then
+		for i = 1, #seq do
+			local comp = seq[i]
+			if comp.sort_id >= lane then
+				return i
+			end
+		end
+
+	elseif side == "last" then
+		for i = #seq, 1, -1 do
+			local comp = seq[i]
+			if comp.sort_id <= lane then
+				return i + 1
+			end
+		end
+
+	else
+		error("invalid 'side' argument (must be 'first' or 'last').")
+	end
+end
+
+
 return widShared

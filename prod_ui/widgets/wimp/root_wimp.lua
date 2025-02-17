@@ -529,6 +529,19 @@ local function resetToolTipState(self)
 end
 
 
+--[[
+Saves one call to sortChildren(). Use when:
+* You know ahead of time whether or not the frame is "always on top"
+* The root's existing children are fully sorted
+--]]
+function def:newWindowFrame(always_on_top)
+	local lane = always_on_top and 4 or 3
+	local pos = widShared.getSortLaneEdge(self.children, lane, "last")
+	local w_frame = self:addChild("wimp/window_frame", pos)
+	return w_frame
+end
+
+
 function def:uiCall_update(dt)
 	local tool_tip = self.tool_tip
 	local current_hover = self.context.current_hover

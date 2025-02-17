@@ -471,7 +471,7 @@ end
 --- Adds a new child widget instance.
 --  Locked during update: yes (self)
 -- @param id The widget def ID.
--- @param pos (default: #self.children + 1) Where to place the new widget in the children table.
+-- @param pos (default: #self.children + 1) Where to place the new widget in the table of children.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, pos)
 	uiShared.notNilNotFalseNotNaN(1, id)
@@ -824,7 +824,7 @@ function _mt_widget:sortChildren(recurse)
 		-- down to a sensible maximum, or replace them with fresh tables.
 	end
 
-	-- Optionally run on all children, depth-first.
+	-- Optionally run on all descendants, depth-first.
 	if recurse then
 		for i, child in ipairs(seq) do
 			child:sortChildren(true)
@@ -835,8 +835,10 @@ end
 
 --- Reorder a widget among its siblings. Do not call while iterating through widgets. Note that sorting is left to the caller.
 --  Locked during update: yes (parent)
--- @param var "first" to move to the beginning of the list, "last" to move to the end, or a number to move by a relative number of steps (clamped to the list boundaries.)
+-- @param var The new position. This value is clamped, so you may pass 0 for the first position and math.huge for the last.
 function _mt_widget:reorder(var)
+	uiShared.numberNotNaN(1, var)
+
 	if context.locks[self.parent] then
 		uiShared.errLockedParent("reorder")
 	end
@@ -848,29 +850,13 @@ function _mt_widget:reorder(var)
 	local seq = self.parent.children
 
 	local self_i = self:getIndex(seq)
-	local dest_i
-
-	if var == "first" then
-		dest_i = 1
-
-	elseif var == "last" then
-		dest_i = #seq
-
-	-- Relative
-	elseif type(var) == "number" then
-		dest_i = math.max(1, math.min(self_i + var, #seq))
-
-	else
-		error("unknown reorder variable: " .. tostring(var))
-	end
+	local dest_i = math.max(1, math.min(var, #seq))
 
 	if self_i == dest_i then
 		return
 	end
 
-	local temp = table.remove(seq, self_i)
-
-	table.insert(seq, dest_i, temp)
+	table.insert(seq, dest_i, table.remove(seq, self_i))
 end
 
 

@@ -21,24 +21,19 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
-	local frame = parent:addChild("wimp/window_frame")
+	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
 	frame:initialize()
 	frame:setFrameTitle("WIMP Demo")
-
 	frame.auto_layout = true
-
 	frame:setScrollBars(false, false)
-
 	frame.DEBUG = "dimensions" -- XXX: see base/container.lua
-
 	frame.w = 640
 	frame.h = 550
-
 	frame:reshape(true)
 	frame:center(false, true)
 
@@ -58,7 +53,7 @@ function plan.make(parent)
 			frame = commonWimp.getFrame(self)
 
 			if frame then
-				dialog = root:addChild("wimp/window_frame")
+				dialog = root:newWindowFrame()
 				dialog.w = 448
 				dialog.h = 256
 				dialog:initialize()
@@ -134,7 +129,7 @@ function plan.make(parent)
 			frame = commonWimp.getFrame(self)
 
 			if frame then
-				dialog = root:addChild("wimp/window_frame")
+				dialog = root:newWindowFrame()
 				dialog.w = 448
 				dialog.h = 256
 				dialog:initialize()
@@ -201,7 +196,7 @@ function plan.make(parent)
 		local root2 = context:addWidget("wimp/root_wimp")
 		--context:pushRoot(root2)
 		context:setRoot(root2)
-		local dialog = root2:addChild("wimp/window_frame")
+		local dialog = root2:newWindowFrame()
 		dialog.userDestroy = function(self)
 			--self.context:popRoot()
 			self.context:setRoot(root)

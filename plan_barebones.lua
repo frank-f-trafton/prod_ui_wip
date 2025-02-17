@@ -7,20 +7,15 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-function plan.make(parent)
-	local context = parent.context
+function plan.make(root)
+	local context = root.context
 
-	local frame = parent:addChild("wimp/window_frame")
-
+	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
-
 	frame:initialize()
-
 	frame:setFrameTitle("Barebones widgets")
-
 	frame.auto_layout = true
-
 	frame:setScrollBars(false, true)
 
 	local xx, yy = 0, 0
