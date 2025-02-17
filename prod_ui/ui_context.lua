@@ -41,23 +41,25 @@ _mt_context.updateLast = dummyFunc
 
 
 -- (Key-down and key-up handling is fed through callbacks in a keyboard manager table.)
-local function cb_keyDown(self, kc, sc, rep, latest)
+local function cb_keyDown(self, kc, sc, rep, latest, hot_kc, hot_sc)
 	-- XXX not handling 'latest' for now.
+
+	print("hot_kc", hot_kc, "hot_sc", hot_sc)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_keyPressed and cap_cur:uiCap_keyPressed(kc, sc, rep) then
+	if cap_cur and cap_cur.uiCap_keyPressed and cap_cur:uiCap_keyPressed(kc, sc, rep, hot_kc, hot_sc) then
 		return
 	end
 
 	-- Any widget has thimble focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_keyPressed", wid_cur, kc, sc, rep)
+		wid_cur:cycleEvent("uiCall_keyPressed", wid_cur, kc, sc, rep, hot_kc, hot_sc)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_keyPressed", self.root, kc, sc, rep) -- no ancestors
+		self.root:sendEvent("uiCall_keyPressed", self.root, kc, sc, rep, hot_kc, hot_sc) -- no ancestors
 	end
 end
 

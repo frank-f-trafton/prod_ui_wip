@@ -42,7 +42,6 @@ local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
-local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
@@ -730,7 +729,7 @@ function def:uiCall_textInput(inst, text)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		local line_ed = self.line_ed
 		local disp = line_ed.disp
@@ -854,8 +853,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			key = love.keyboard.getKeyFromScancode(scancode)
 		end
 
-		local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
-		local bind_action = editBindM[key_string]
+		local bind_action = editBindM[hot_scan] or editBindM[hot_key]
 
 		if bind_action then
 			-- NOTE: most history ledger changes are handled in executeBoundAction().

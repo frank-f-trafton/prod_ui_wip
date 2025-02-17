@@ -39,7 +39,6 @@ local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
-local keyCombo = require(context.conf.prod_ui_req .. "lib.key_combo")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -244,7 +243,7 @@ end
 
 
 -- @return true if event propagation should halt.
-function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	local line_ed = self.line_ed
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
@@ -273,8 +272,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local key_string = keyCombo.getKeyString(true, ctrl_down, shift_down, alt_down, gui_down, scancode)
-	local bound_func = editBindS[key_string]
+	local bound_func = editBindS[hot_scan] or editBindS[hot_key]
 
 	if bound_func then
 		-- XXX: cleanup (just do a return) once the old debug stuff is removed below.
