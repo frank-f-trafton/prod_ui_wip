@@ -220,7 +220,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 				self:stepSelectedFrame(-1)
 			end
 
-		-- Try to close the current window frame.
+		-- Try to close the selected window frame.
 		elseif self.selected_frame and keyMgr.keyStringsEqual(context.settings.wimp.key_bindings.close_window_frame, hot_scan, hot_key) then
 			self.selected_frame:closeFrame(false)
 

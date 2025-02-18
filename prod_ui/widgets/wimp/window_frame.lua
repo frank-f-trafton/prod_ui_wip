@@ -234,6 +234,21 @@ function def:getFrameTitle()
 end
 
 
+function def:setFrameSelectable(enabled)
+	if not enabled and self.context.root.selected_frame == self then
+		self.context.root:setSelectedFrame(false)
+	end
+
+	self.frame_is_selectable = not not enabled
+	self.can_have_thimble = self.frame_is_selectable
+end
+
+
+function def:getFrameSelectable()
+	return self.frame_is_selectable
+end
+
+
 function def:setDefaultBounds()
 	-- Allow the Window Frame to be moved partially out of bounds, but not
 	-- so much that the mouse wouldn't be able to drag it back.
@@ -313,11 +328,17 @@ end
 --]===]
 
 
-function def:uiCall_initialize(always_on_top)
+function def:uiCall_initialize(unselectable, always_on_top)
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = true
 
+	-- When false:
+	-- * No widget in the frame should be capable of taking the thimble.
+	--   (Otherwise, why not just make it selectable?)
+	-- * The frame should never be made modal, or be part of a modal chain.
+	self.frame_is_selectable = not unselectable
+
+	self.can_have_thimble = self.frame_is_selectable
 	self.always_on_top = not not always_on_top
 	self.sort_id = self.always_on_top and 4 or 3
 
@@ -332,15 +353,6 @@ function def:uiCall_initialize(always_on_top)
 	uiLayout.initLayoutSequence(self)
 
 	self.frame_type = "window"
-
-	-- Set to false if you do not want this frame to be selectable by the root.
-	-- Intended for specialized interfaces, like a floating box that controls the
-	-- playback of music.
-	-- When false:
-	-- * No widget in the frame should be capable of taking the thimble.
-	--   (Otherwise, why not just make it selectable?)
-	-- * The frame should never be made modal, or be part of a modal chain.
-	self.frame_is_selectable = true
 
 	self.hover_zone = false -- false, "button-close", "button-size"
 	self.mouse_in_resize_zone = false
