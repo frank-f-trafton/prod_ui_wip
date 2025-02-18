@@ -194,7 +194,7 @@ function themeDef.newInstance(scale)
 	inst.wimp.header_button_side = "right"
 	inst.wimp.header_size = "normal"
 	inst.wimp.header_show_close_button = true
-	inst.wimp.header_show_size_button = true
+	inst.wimp.header_show_max_button = true
 	inst.wimp.header_text = "Untitled Frame"
 	inst.wimp.header_text_align_h = 0.5
 	inst.wimp.header_text_align_v = 0.5

@@ -12,7 +12,7 @@ return {
 	--header_visible = true,
 	header_button_side = "*wimp/header_button_side",
 	header_show_close_button = "*wimp/header_show_close_button",
-	header_show_size_button = "*wimp/header_show_size_button",
+	header_show_max_button = "*wimp/header_show_max_button",
 	header_text = "*wimp/header_text",
 	header_size = "*wimp/header_size",
 	-- /settings

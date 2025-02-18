@@ -68,7 +68,7 @@ function commonFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 
 	local old_x, old_y = self.context.mouse_x, self.context.mouse_y
 
-	if self.maximized then
+	if self.maximized and self.allow_resize and self.allow_maximize then
 		-- Unmaximize only if the mouse has wandered a bit from its original click-point.
 		if self.context.mouse_x < self.adjust_mouse_orig_a_x - 32
 		or self.context.mouse_x >= self.adjust_mouse_orig_a_x + 32

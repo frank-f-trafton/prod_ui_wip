@@ -53,13 +53,13 @@ local def = {
 	default_settings = {
 		allow_close = true,
 		allow_drag_move = true,
-		allow_maximize = true,
+		allow_maximize = true, -- depends on 'allow_resize' being true
 		allow_resize = true,
 		frame_render_shadow = false,
 		header_visible = true,
 		header_button_side = "right", -- "left", "right"
 		header_show_close_button = true,
-		header_show_size_button = true,
+		header_show_max_button = true,
 		header_text = "",
 		header_size = "normal" -- enum: `_header_sizes`
 	},
@@ -147,6 +147,7 @@ end
 -- (Resizable by the user.)
 function def:setResizable(enabled)
 	self:writeSetting("allow_resize", not not enabled)
+	self.b_max.enabled = self.allow_resize and self.allow_maximize and true or false
 end
 
 
@@ -176,14 +177,14 @@ function def:getCloseControlVisibility()
 end
 
 
-function def:setSizeControlVisibility(visible)
-	self:writeSetting("header_show_size_button", not not visible)
+function def:setMaximizeControlVisibility(visible)
+	self:writeSetting("header_show_max_button", not not visible)
 	self:reshape()
 end
 
 
-function def:getSizeControlVisibility()
-	return self.header_show_size_button
+function def:getMaximizeControlVisibility()
+	return self.header_show_max_button
 end
 
 
@@ -200,7 +201,7 @@ end
 
 function def:setMaximizeEnabled(enabled)
 	self:writeSetting("allow_maximize", not not enabled)
-	self.b_size.enabled = self.allow_maximize
+	self.b_max.enabled = self.allow_resize and self.allow_maximize and true or false
 end
 
 
@@ -357,7 +358,7 @@ function def:uiCall_initialize(always_on_top)
 	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
 
 	self.b_close = _newSensor("button-close")
-	self.b_size = _newSensor("button-size")
+	self.b_max = _newSensor("button-size")
 
 	-- Valid while resizing. (0,0) is an error.
 	self.adjust_axis_x = 0 -- -1, 0, 1
@@ -514,7 +515,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
 			self.hover_zone = self.header_show_close_button and _pointInSensor(self.b_close, mx, my) and "button-close"
-				or self.header_show_size_button and _pointInSensor(self.b_size, mx, my) and "button-size"
+				or self.header_show_max_button and _pointInSensor(self.b_max, mx, my) and "button-size"
 				or false
 		else
 			self.hover_zone = false
@@ -664,7 +665,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					handled = true
 
 				elseif self.hover_zone == "button-size" then
-					self.press_busy = self.allow_maximize and "button-size" or "button-disabled"
+					self.press_busy = (self.allow_resize and self.allow_maximize) and "button-size" or "button-disabled"
 					self.cseq_header = false
 					handled = true
 
@@ -676,6 +677,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					-- Maximize
 					if self.allow_resize
+					and self.allow_maximize
 					and self.cseq_header
 					and self.context.cseq_button == 1
 					and self.context.cseq_presses % 2 == 0
@@ -782,7 +784,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 				elseif self.press_busy == "button-size"
 				and self.allow_resize
-				and _pointInSensor(self.b_size, mx, my)
+				and _pointInSensor(self.b_max, mx, my)
 				then
 					if self.wid_maximize and self.wid_unmaximize then
 						if not self.maximized then
@@ -922,7 +924,7 @@ function def:uiCall_reshape()
 
 	-- Update sensor enabled state
 	self.b_close.enabled = self.allow_close
-	self.b_size.enabled = self.allow_maximize
+	self.b_max.enabled = self.allow_resize and self.allow_maximize and true or false
 
 	-- Header setup
 	if not self.header_visible then
@@ -939,7 +941,7 @@ function def:uiCall_reshape()
 		local right = self.header_button_side == "right"
 
 		-- The first bit of padding for buttons
-		if self.header_show_close_button or self.header_show_size_button then
+		if self.header_show_close_button or self.header_show_max_button then
 			self.vp6_w = self.vp6_w - res.button_pad_w
 			if not right then
 				self.vp6_x = self.vp6_x + res.button_pad_w
@@ -950,8 +952,8 @@ function def:uiCall_reshape()
 			_measureButtonShortenPort(self, self.b_close, skin, res, right, res.button_w, button_h)
 		end
 
-		if self.header_show_size_button then
-			_measureButtonShortenPort(self, self.b_size, skin, res, right, res.button_w, button_h)
+		if self.header_show_max_button then
+			_measureButtonShortenPort(self, self.b_max, skin, res, right, res.button_w, button_h)
 		end
 	end
 
@@ -1134,21 +1136,21 @@ def.default_skinner = {
 					qw, qh)
 			end
 
-			if self.header_show_size_button then
-				local b_size = self.b_size
+			if self.header_show_max_button then
+				local b_max = self.b_max
 				local btn_size = res.btn_size
-				local res_b = _getHeaderSensorResource(self, b_size, res)
+				local res_b = _getHeaderSensorResource(self, b_max, res)
 
 				love.graphics.setColor(res_b.color_body)
-				uiGraphics.drawSlice(res_b.slice, b_size.x, b_size.y, b_size.w, b_size.h)
+				uiGraphics.drawSlice(res_b.slice, b_max.x, b_max.y, b_max.w, b_max.h)
 				love.graphics.setColor(res_b.color_quad)
 
 				local graphic = self.maximized and btn_size.graphic_unmax or btn_size.graphic_max
 
 				local _, _, qw, qh = graphic.quad:getViewport()
 
-				local box_x = math.floor(0.5 + _lerp(b_size.x, b_size.x + b_size.w - graphic.w, skin.sensor_tex_align_h))
-				local box_y = math.floor(0.5 + _lerp(b_size.y, b_size.y + b_size.h - graphic.h, skin.sensor_tex_align_v))
+				local box_x = math.floor(0.5 + _lerp(b_max.x, b_max.x + b_max.w - graphic.w, skin.sensor_tex_align_h))
+				local box_y = math.floor(0.5 + _lerp(b_max.y, b_max.y + b_max.h - graphic.h, skin.sensor_tex_align_v))
 
 				uiGraphics.quadXYWH(
 					graphic,
