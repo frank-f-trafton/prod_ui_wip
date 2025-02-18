@@ -480,7 +480,7 @@ end
 
 function def:closeFrame(force)
 	-- XXX fortify against calls during update-lock
-	print("self.allow_close", self.allow_close, "force", force)
+	--print("self.allow_close", self.allow_close, "force", force)
 	if self.allow_close or force then
 		self:remove()
 		return true
