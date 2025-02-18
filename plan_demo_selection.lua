@@ -19,7 +19,9 @@ local function _launchFrame(self, req_path)
 	local root = self:getRootWidget()
 	local frame = plan.make(root)
 
-	root:setSelectedFrame(frame, true)
+	if frame.frame_is_selectable then
+		root:setSelectedFrame(frame, true)
+	end
 
 	return frame
 end
@@ -111,6 +113,7 @@ function plan.make(root)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_widget_tree", "Widget Tree View", xx, yy, ww, hh)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_frame_unselectable", "Unselectable Window Frame", xx, yy, ww, hh)
 
 	-- To launch a frame from the main demo file: frame:launch("path.to.file")
 	frame.launch = _launchFrame
