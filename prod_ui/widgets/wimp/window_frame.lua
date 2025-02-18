@@ -661,9 +661,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	local handled = false
 	if self == inst then
 		local mx, my = self:getRelativePosition(x, y)
+		local handled = false
 
 		if button == 1 and self.context.mouse_pressed_button == button then
 			-- Check for pressing on scroll bar components.
@@ -725,10 +725,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- We did not interact with the header or scroll bars.
 		if not handled then
 			-- If the pointer is within Viewport #2, then have the Window Frame try to take thimble1.
-			if mx >= self.vp2_x and my >= self.vp2_y and mx < self.vp2_x + self.vp2_w and self.y < self.vp2_y + self.vp2_h then
+			if mx >= self.vp2_x and my >= self.vp2_y and mx < self.vp2_x + self.vp2_w and my < self.vp2_y + self.vp2_h then
 				self:tryTakeThimble1()
 
-			-- If the mouse pointer is outside of Viewport #3, then this is a resize action.
+			-- Outside of viewport #3: treat as a resize action.
 			elseif self.allow_resize
 			and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
 			then
