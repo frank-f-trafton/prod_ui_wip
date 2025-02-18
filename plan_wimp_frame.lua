@@ -128,16 +128,9 @@ function plan.make(root)
 
 		checkbox.wid_buttonAction = function(self)
 			local frame = commonWimp.getFrame(self)
-			print(frame)
 			if frame then
 				frame:setResizable(self.checked)
 			end
-			print(
-				"self.checked", self.checked, "\n",
-				"frame.allow_resize", frame.allow_resize, "\n",
-				"frame.settings.allow_resize", frame.settings.allow_resize, "\n",
-				"frame.default_settings.allow_resize", frame.default_settings.allow_resize
-			)
 		end
 		checkbox:reshape()
 
@@ -216,7 +209,7 @@ function plan.make(root)
 	end
 
 
-	-- Checkbox: Toggle 'Size' button visibility
+	-- Checkbox: Toggle 'Maximize' button visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
 		checkbox.x = xx
@@ -224,14 +217,14 @@ function plan.make(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
-		checkbox.checked = frame:getSizeControlVisibility()
+		checkbox.checked = frame:getMaximizeControlVisibility()
 		checkbox.bijou_side = "right"
-		checkbox:setLabel("Show 'Size' control", "single-ul")
+		checkbox:setLabel("Show 'Maximize' control", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
 			local frame = commonWimp.getFrame(self)
 			if frame then
-				frame:setSizeControlVisibility(self.checked)
+				frame:setMaximizeControlVisibility(self.checked)
 			end
 		end
 		checkbox:reshape()
@@ -240,7 +233,7 @@ function plan.make(root)
 	end
 
 
-	-- Checkbox: 'Size' button enabled state
+	-- Checkbox: Allow maximize
 	do
 		local checkbox = frame:addChild("base/checkbox")
 		checkbox.x = xx
@@ -250,7 +243,7 @@ function plan.make(root)
 		checkbox:initialize()
 		checkbox.checked = frame:getMaximizeEnabled()
 		checkbox.bijou_side = "right"
-		checkbox:setLabel("Enable 'Size'", "single-ul")
+		checkbox:setLabel("Enable 'Maximize'", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
 			local frame = commonWimp.getFrame(self)
