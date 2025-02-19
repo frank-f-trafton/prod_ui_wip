@@ -32,11 +32,11 @@ function plan.make(root)
 	local context = root.context
 
 	local unselectable = true
-	local always_on_top = true
-	local frame = root:newWindowFrame(always_on_top)
+	local view_level = "high"
+	local frame = root:newWindowFrame(view_level)
 	frame.w = 320
 	frame.h = 350
-	frame:initialize(unselectable, always_on_top)
+	frame:initialize(unselectable, view_level)
 	frame:setFrameTitle("Unselectable Frame")
 	frame.auto_layout = true
 	frame:setScrollBars(false, false)

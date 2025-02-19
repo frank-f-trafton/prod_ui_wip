@@ -1,12 +1,9 @@
--- WIMP UI root widget.
-
-
---local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-
 local context = select(1, ...)
 
+
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
+local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
@@ -61,6 +58,9 @@ function def:uiCall_initialize()
 	-- widgets, such as pop-ups.
 	self.modals = {}
 
+	-- Up to one workspace can be active at a time.
+	self.workspace = false
+
 	-- One 2nd-gen frame (window frames, workspace frames) can be selected at a time.
 	self.selected_frame = false
 
@@ -86,11 +86,7 @@ function def:uiCall_initialize()
 	-- table: a DropState object.
 	self.drop_state = false
 
-	-- Table of widgets to offer keyPressed and keyReleased input.
-	self.hooks_trickle_key_pressed = {}
-	self.hooks_trickle_key_released = {}
-	self.hooks_key_pressed = {}
-	self.hooks_key_released = {}
+	lgcKeyHooks.setupInstance(self)
 
 	self:reshape(true)
 	-- You may need to call reshape(true) again after creating the initial 2nd-gen widgets to properly
@@ -298,6 +294,7 @@ function def:rootCall_getFrameOrderID()
 end
 
 
+--- Select a UI Frame to have root focus.
 -- @param set_new_order When true, assign a new top order_id to the frame. This may be desired when clicking on a frame, and not when ctrl+tabbing through them.
 function def:setSelectedFrame(inst, set_new_order)
 	if inst then
@@ -313,9 +310,14 @@ function def:setSelectedFrame(inst, set_new_order)
 	self.selected_frame = inst or false
 
 	if inst then
-		inst:bringToFront()
+		if inst.frame_type == "window" then
+			inst:bringWindowToFront()
+		else -- frame_type == "workspace"
+			self:sortChildren()
+		end
+
 		if old_selected ~= inst then
-			inst:_trySettingThimble1()
+			lgcUIFrame.tryUnbankingThimble1(inst)
 
 			if set_new_order then
 				inst.order_id = self:rootCall_getFrameOrderID()
@@ -325,12 +327,12 @@ function def:setSelectedFrame(inst, set_new_order)
 end
 
 
--- Select the topmost window frame.
--- @param exclude Optionally provide one window frame to exclude from the search. Use this when the
+-- Select the topmost active Window Frame, or the active workspace, or nothing.
+-- @param exclude Optionally provide one frame to exclude from the search. Use this when the
 -- current selected frame is in the process of being destroyed. (Root-modal state should have been cleaned
 -- up before this point.)
-function def:selectTopWindowFrame(exclude)
-	print("selectTopWindowFrame: start")
+function def:selectTopFrame(exclude)
+	print("selectTopFrame: start")
 	if #self.modals > 0 then
 		--print("modals > 0")
 		self:setSelectedFrame(self.modals[#self.modals], false)
@@ -342,15 +344,22 @@ function def:selectTopWindowFrame(exclude)
 		local child = self.children[i]
 
 		--print("frame_type", child.frame_type, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
-		if child.frame_type
+		if child.frame_type == "window"
 		and child.frame_is_selectable
+		and (not child.workspace or child.workspace == self.workspace)
 		and not child.ref_modal_next
 		and child ~= exclude
 		then
-			--print("this child was selected")
+			--print("selected window: ", i, child, child.id, child.frame_is_selectable)
 			self:setSelectedFrame(child, false)
 			return
 		end
+	end
+
+	if self.workspace and self.workspace.frame_is_selectable then
+		--print("the active workspace was selected")
+		self:setSelectedFrame(self.workspace)
+		return
 	end
 
 	--print("no child was selected")
@@ -531,11 +540,13 @@ end
 
 --[[
 Saves one call to sortChildren(). Use when:
-* You know ahead of time whether or not the frame is "always on top"
+* You know the frame's view level ahead of time
 * The root's existing children are fully sorted
 --]]
-function def:newWindowFrame(always_on_top)
-	local lane = always_on_top and 4 or 3
+function def:newWindowFrame(view_level)
+	view_level = view_level or "normal"
+
+	local lane = lgcUIFrame.view_levels[view_level]
 	local pos = widShared.getSortLaneEdge(self.children, lane, "last")
 	local w_frame = self:addChild("wimp/window_frame", pos)
 	return w_frame
@@ -583,7 +594,7 @@ function def:uiCall_destroy(inst)
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
 		if inst.frame_type == "window" and self.selected_frame == inst then
 			--_printWindowFrames(self)
-			self:selectTopWindowFrame(inst)
+			self:selectTopFrame(inst)
 		end
 	end
 end

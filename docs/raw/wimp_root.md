@@ -2,9 +2,10 @@
 
 ## Gen2 Sort Lanes
 
-1. Background elements
-2. Workspaces
-3. Window frames, normal priority
-4. Window frames, always on top
-5. Application menu bar
-6. Pop-up menus
+1. Inactive Workspaces and Window Frames
+2. The active Workspace
+3. Window Frames, low
+4. Window Frames, normal priority
+5. Window Frames, always on top
+6. Application menu bar, status bar, etc.
+7. Pop-up menus

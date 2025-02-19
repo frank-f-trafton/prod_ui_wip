@@ -517,7 +517,7 @@ do
 		bar_menu:reshape()
 		bar_menu:menuChangeCleanup()
 
-		bar_menu.sort_id = 5
+		bar_menu.sort_id = 6
 
 		-- Hook application-level shortcuts to WIMP root
 		do
@@ -610,8 +610,11 @@ do
 	--love.mouse.setGrabbed(true)
 	--love.mouse.setRelativeMode(true)
 
+	-- TODO: need to deal with initial sort state, so that Workspaces don't obscure Window Frames.
+	wimp_root:sortChildren()
+
 	-- Start with the top-most window selected, if any.
-	wimp_root:selectTopWindowFrame()
+	wimp_root:selectTopFrame()
 
 	-- Refresh everything.
 	wimp_root:reshape(true)

@@ -189,7 +189,7 @@ function def:uiCall_initialize()
 	self.allow_hover = true
 	self.clip_scissor = true
 
-	self.sort_id = 6
+	self.sort_id = 7
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)

@@ -1,37 +1,12 @@
-
---[[
-
-wimp/window_frame: A WIMP-style window frame.
-
-........................  <─ Resize area
-.┌────────────────────┐.
-.│      Window  [o][x]│.  <─ Window frame header, drag sensor and control buttons
-.├────────────────────┤.
-.│```````````````````^│.  <- '`': Viewport #1
-.│`                 `║│.
-.│`                 `║│.
-.│`                 `║│.
-.│`                 `║│.
-.│```````````````````v│.
-.│<═════════════════> │.  <─ Optional scroll bars
-.└────────────────────┘.
-........................
-
-Window Frames support modal relationships: Frame A can be blocked until Frame B is dismissed. Compare
-with root-modal state, where only the one Window Frame (and pop-ups) can be interacted with.
-
-Frame-modals are harder to manage than root-modals, and should only be used when really necessary
-(ie the user needs to open a prompt in one frame, while looking up information in another frame).
---]]
-
-
 local context = select(1, ...)
 
-local commonFrame = require(context.conf.prod_ui_req .. "common.common_frame")
+
+local commonDragResize = require(context.conf.prod_ui_req .. "common.common_drag_resize")
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcContainer = context:getLua("shared/lgc_container")
+local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -67,6 +42,9 @@ local def = {
 
 
 def.trickle = {}
+
+
+lgcUIFrame.definitionSetup(def)
 
 
 widShared.scrollSetMethods(def)
@@ -210,15 +188,19 @@ function def:getMaximizeEnabled()
 end
 
 
-function def:setAlwaysOnTop(enabled)
-	self.always_on_top = not not enabled
-	self.sort_id = self.always_on_top and 3 or 4
+function def:setWindowViewLevel(view_level)
+	if not lgcUIFrame.view_levels[view_level] then
+		error("invalid view level.")
+	end
+
+	self.view_level = view_level
+	self.sort_id = lgcUIFrame.view_levels[view_level]
 	self.parent:sortChildren()
 end
 
 
-function def:getAlwaysOnTop()
-	return self.always_on_top
+function def:getWindowViewLevel()
+	return self.view_level
 end
 
 
@@ -234,18 +216,34 @@ function def:getFrameTitle()
 end
 
 
-function def:setFrameSelectable(enabled)
-	if not enabled and self.context.root.selected_frame == self then
-		self.context.root:setSelectedFrame(false)
-	end
-
-	self.frame_is_selectable = not not enabled
-	self.can_have_thimble = self.frame_is_selectable
+function def:bringWindowToFront()
+	self:reorder(math.huge)
+	self.parent:sortChildren()
 end
 
 
-function def:getFrameSelectable()
-	return self.frame_is_selectable
+-- WIP
+function def:setWindowWorkspace(workspace)
+	if workspace and workspace.frame_type ~= "workspace" then
+		error("argument #1: expected a Workspace widget.")
+	end
+	self.workspace = workspace
+
+	local root = self.context.root
+
+	-- Become active
+	if not self.workspace or self.workspace == root.workspace then
+		self.visible = true
+		self.allow_hover = true
+		self.sort_id = lgcUIFrame.view_levels[self.view_level]
+		root:sortChildren()
+	-- Become inactive
+	else
+		self.visible = false
+		self.allow_hover = false
+		self.sort_id = 1
+		root:sortChildren()
+	end
 end
 
 
@@ -328,19 +326,20 @@ end
 --]===]
 
 
-function def:uiCall_initialize(unselectable, always_on_top)
+function def:uiCall_initialize(unselectable, view_level)
+	-- UI Frame
+	self.frame_type = "window"
+	lgcUIFrame.instanceSetup(self, unselectable)
+	self.view_level = view_level or "normal"
+	self.sort_id = lgcUIFrame.view_levels[self.view_level]
+
+	-- When a Window Frame is connected to a Workspace, it will only be visible and active
+	-- when that Workspace is active.
+	-- Window Frames that are not connected to any Workspace (self.workspace == false) are always active.
+	self.workspace = false
+
 	self.visible = true
 	self.allow_hover = true
-
-	-- When false:
-	-- * No widget in the frame should be capable of taking the thimble.
-	--   (Otherwise, why not just make it selectable?)
-	-- * The frame should never be made modal, or be part of a modal chain.
-	self.frame_is_selectable = not unselectable
-
-	self.can_have_thimble = self.frame_is_selectable
-	self.always_on_top = not not always_on_top
-	self.sort_id = self.always_on_top and 4 or 3
 
 	self.auto_doc_update = true
 	self.auto_layout = false
@@ -351,8 +350,7 @@ function def:uiCall_initialize(unselectable, always_on_top)
 	widShared.setupViewports(self, 6)
 	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
-
-	self.frame_type = "window"
+	lgcKeyHooks.setupInstance(self)
 
 	self.hover_zone = false -- false, "button-close", "button-size"
 	self.mouse_in_resize_zone = false
@@ -362,10 +360,6 @@ function def:uiCall_initialize(unselectable, always_on_top)
 
 	-- Set true to draw a red box around the frame's resize area.
 	--self.DEBUG_show_resize_range
-
-	-- Link to the last widget within this tree that held thimble1.
-	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
-	self.banked_thimble1 = self
 
 	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
 
@@ -380,7 +374,7 @@ function def:uiCall_initialize(unselectable, always_on_top)
 	self.adjust_ox = 0
 	self.adjust_oy = 0
 
-	-- How far past the parent bounds this widget is permitted to go.
+	-- How far past the parent bounds this Window Frame is permitted to go.
 	self.p_bounds_x1 = 0
 	self.p_bounds_y1 = 0
 	self.p_bounds_x2 = 0
@@ -416,34 +410,10 @@ function def:uiCall_initialize(unselectable, always_on_top)
 
 	self.needs_update = true
 
-	-- Helps with ctrl+tabbing through frames.
-	self.order_id = self:bubbleEvent("rootCall_getFrameOrderID")
-
 	-- Frame-modal widget links. Truthy-checks are used to determine if a frame is currently
 	-- being blocked or is blocking another frame.
 	self.ref_modal_prev = false
 	self.ref_modal_next = false
-
-	-- Table of widgets to offer keyPressed and keyReleased input.
-	self.hooks_trickle_key_pressed = {}
-	self.hooks_trickle_key_released = {}
-	self.hooks_key_pressed = {}
-	self.hooks_key_released = {}
-
-	-- If the frame contents are scrolling, then set the scroll position after reshaping.
-	-- For example, to scroll to the top-left:
-	-- frame:scrollHV(0, 0)
-end
-
-
-function def:_trySettingThimble1()
-	-- Check modal state before calling.
-
-	local wid_banked = self.banked_thimble1
-
-	if wid_banked and wid_banked.can_have_thimble and wid_banked:isInLineage(self) then
-		wid_banked:takeThimble1()
-	end
 end
 
 
@@ -522,7 +492,6 @@ end
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-
 		commonScroll.widgetProcessHover(self, mx, my)
 
 		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
@@ -564,101 +533,18 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_thimble1Take(inst, keep_in_view)
-	--print("thimbleTake", self.id, inst.id)
-	self.banked_thimble1 = inst
-
-	if inst ~= self then -- don't try to center the Window Frame itself
-		if keep_in_view == "widget_in_view" then
-			local skin = self.skin
-			lgcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
-			commonScroll.updateScrollBarShapes(self)
-		end
-	end
-end
-
-
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	-- Frame-modal check
-	if self.ref_modal_next then
-		return
-	end
-
-	if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
-		return true
-	end
-end
-
-
-function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
-	if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
-		return true
-	end
-end
-
-
-function def:uiCall_keyReleased(inst, key, scancode)
-	-- Frame-modal check
-	if self.ref_modal_next then
-		return
-	end
-
-	if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
-		return true
-	end
-end
-
-
-function def.trickle:uiCall_keyReleased(inst, key, scancode)
-	if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
-		return true
-	end
-end
-
-
-function def:uiCall_textInput(inst, text)
-	-- Frame-modal check
-	if self.ref_modal_next then
-		return
-	end
-end
-
-
-function def:bringToFront()
-	self:reorder(math.huge)
-	self.parent:sortChildren()
-end
-
-
-function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if self.ref_modal_next then
-		self.context.current_pressed = false
-		return true
-	end
-end
+def.uiCall_thimble1Take = lgcUIFrame.logic_thimble1Take
+def.trickle.uiCall_keyPressed = lgcUIFrame.logic_trickleKeyPressed
+def.uiCall_keyPressed = lgcUIFrame.logic_keyPressed
+def.trickle.uiCall_keyReleased = lgcUIFrame.logic_trickleKeyReleased
+def.uiCall_keyReleased = lgcUIFrame.logic_keyReleased
+def.uiCall_textInput = lgcUIFrame.logic_textInput
+def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	-- Press events that create a pop-up menu should block propagation (return truthy)
-	-- so that this and the WIMP root do not cause interference.
-
-	local root = self:getRootWidget()
-
-	-- Frame-modal check
-	local modal_next = self.ref_modal_next
-	if modal_next then
-		root:setSelectedFrame(modal_next, true)
+	if lgcUIFrame.partial_pointerPress(self) then
 		return
-	end
-
-	if self.frame_is_selectable then
-		root:setSelectedFrame(self, true)
-
-		-- If thimble1 is not in this widget tree, move it to the Window Frame.
-		local thimble1 = self.context.thimble1
-		if not thimble1 or not thimble1:isInLineage(self) then
-			self:_trySettingThimble1()
-		end
 	end
 
 	if self == inst then
@@ -757,24 +643,16 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
-		if button == 1 and button == self.context.mouse_pressed_button then
-			local fixed_step = 24 -- [XXX 2] style/config
-
-			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
-		end
-	end
-end
+def.uiCall_pointerPressRepeat = lgcUIFrame.logic_pointerPressRepeat
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.press_busy == "resize" then
-			commonFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
+			commonDragResize.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		elseif self.press_busy == "drag" then
-			commonFrame.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
+			commonDragResize.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		end
 	end
 end
@@ -820,14 +698,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
-	-- Catch wheel events from descendants that did not block it.
-	local caught = widShared.checkScrollWheelScroll(self, x, y)
-	commonScroll.updateScrollBarShapes(self)
-
-	-- Stop bubbling if the view scrolled.
-	return caught
-end
+def.uiCall_pointerWheel = lgcUIFrame.logic_pointerWheel
 
 
 local function _getHeaderSkinTable(self)
@@ -1029,7 +900,7 @@ function def:uiCall_destroy(inst)
 			target:reorder(math.huge)
 			target.parent:sortChildren()
 
-			target:_trySettingThimble1()
+			lgcUIFrame.tryUnbankingThimble1(target)
 			--]]
 		end
 
