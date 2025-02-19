@@ -1,40 +1,24 @@
-
---[[
-
-wimp/workspace: A container that serves as one unit of "state" for WIMP applications.
-
-This is similar to base/container, but with some additions and removals to better
-work as 2nd-gen WIMP widgets.
-
-
-┌┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┬┈┐
-│`````````````````````│^│    [`] == Viewport 2
-│`:::::::::::::::::::`├┈┤    [:] == Viewport 1
-│`:                 :`│ │
-│`:                 :`│ │
-│`:                 :`│ │
-│`:::::::::::::::::::`├┈┤
-│`````````````````````│v│
-├┈┬┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┬┈┼┈┤
-│<│                 │>│ │    <- Optional scroll bars
-└┈┴┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┴┈┴┈┘
-
---]]
-
-
 local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcContainer = context:getLua("shared/lgc_container")
+local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {
 	skin_id = "workspace1"
 }
+
+
+def.trickle = {}
+
+
+lgcUIFrame.definitionSetup(def)
 
 
 widShared.scrollSetMethods(def)
@@ -48,13 +32,14 @@ function def:wid_pressed(x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_initialize()
+function def:uiCall_initialize(unselectable, will_set_as_active)
+	-- UI Frame
+	self.frame_type = "workspace"
+	lgcUIFrame.instanceSetup(self, unselectable)
+	self.sort_id = will_set_as_active and 2 or 1
+
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = false
-	self.sort_id = 2
-
-	self.frame_type = "workspace"
 
 	self.auto_doc_update = true
 	self.auto_layout = false
@@ -65,19 +50,13 @@ function def:uiCall_initialize()
 	widShared.setupViewports(self, 2)
 	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
+	lgcKeyHooks.setupInstance(self)
 
 	self.press_busy = false
 
-	-- Link to the last widget within this tree which held thimble1.
-	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
-	self.banked_thimble1 = false
-
-	-- Don't let inter-generational thimble stepping leave this widget's children.
-	self.block_step_intergen = true
-
 	self:skinSetRefs()
 	self:skinInstall()
-	--self:applyAllSettings()
+	self:applyAllSettings()
 end
 
 
@@ -114,8 +93,8 @@ end
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		mouse_x, mouse_y = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+		commonScroll.widgetProcessHover(self, mx, my)
 	end
 end
 
@@ -128,6 +107,18 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	-- Press events that create a pop-up menu should block propagation (return truthy)
+	-- so that this and the WIMP root do not cause interference.
+
+	local root = self:getRootWidget()
+
+	-- Frame-modal check
+	local modal_next = self.ref_modal_next
+	if modal_next then
+		root:setSelectedFrame(modal_next, true)
+		return
+	end
+
 	if self == inst then
 		local handled = false
 
@@ -148,15 +139,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
-		if button == 1 and button == self.context.mouse_pressed_button then
-			local fixed_step = 24 -- [XXX 2] style/config
-
-			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
-		end
-	end
-end
+def.uiCall_pointerPressRepeat = lgcUIFrame.logic_pointerPressRepeat
 
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
@@ -170,25 +153,19 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
-	-- Catch wheel events from descendants that did not block it.
-	local caught = widShared.checkScrollWheelScroll(self, x, y)
-	commonScroll.updateScrollBarShapes(self)
+def.uiCall_pointerWheel = lgcUIFrame.logic_pointerWheel
+def.uiCall_thimble1Take = lgcUIFrame.logic_thimble1Take
+def.trickle.uiCall_keyPressed = lgcUIFrame.logic_trickleKeyPressed
+def.uiCall_keyPressed = lgcUIFrame.logic_keyPressed
+def.trickle.uiCall_keyReleased = lgcUIFrame.logic_trickleKeyReleased
+def.uiCall_keyReleased = lgcUIFrame.logic_keyReleased
+def.uiCall_textInput = lgcUIFrame.logic_textInput
+def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
 
-	-- Stop bubbling if the view scrolled.
-	return caught
-end
 
-
--- Catch focus step actions so that we can ensure the hosted widget is in view.
--- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
-function def:uiCall_thimble1Take(inst, keep_in_view)
-	if inst ~= self then -- don't try to center the container itself
-		if keep_in_view == "widget_in_view" then
-			local skin = self.skin
-			lgcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
-			commonScroll.updateScrollBarShapes(self)
-		end
+function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	if lgcUIFrame.partial_pointerPress(self) then
+		return
 	end
 end
 
@@ -204,6 +181,11 @@ function def:uiCall_update(dt)
 	self:scrollUpdate(dt)
 	commonScroll.updateScrollState(self)
 	commonScroll.updateScrollBarShapes(self)
+end
+
+
+function def:uiCall_destroy(inst)
+	-- TODO
 end
 
 

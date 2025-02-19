@@ -4,8 +4,11 @@ UI Frames are the main unit of state in ProdUI. All UI Frames are direct childre
 
 There are two kinds of UI Frame:
 
-* Workspace Frame: Fills most (or all) of the application window's space. There can be 0-1 active workspaces, and any number of inactive workspaces.
+* Workspace Frame: Fills most (or all) of the application window. There can be up to one active workspace at a time, and any number of inactive workspaces.
 
-* Window Frame: A floating box that renders on top of the Workspace. There can be any number of window frames, and they can be configured to be modal (meaning they can block interaction with other frames, or all other 2nd-gen widgets, until they are dismissed).
+* Window Frame: A floating box that renders on top of the Workspace. There can be any number of window frames, and they support the following configurations:
+  * Modal: they block interaction with other parts of the application until dismissed.
+  * Three sorting levels: "low", "normal", and "high"
+  * Workspace association: When tied to a Workspace, Window Frames are only active and visible when the Workspace is also active. Unassociated Window Frames are always active.
 
-One UI Frame may have root focus at any given time.
+Up to one UI Frame may be "selected" by the Root at any given time.
