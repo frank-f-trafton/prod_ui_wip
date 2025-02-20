@@ -17,12 +17,12 @@ local def = {}
 def.trickle = {}
 
 
-local function _printWindowFrames(self)
-	print("_printWindowFrames()")
+local function _printUIFrames(self)
+	print("_printUIFrames()")
 	local selected = self.selected_frame
 	for i, child in ipairs(self.children) do
-		if child.frame_type == "window" then
-			local frame_title = child:getFrameTitle() or ""
+		if child.frame_type then
+			local frame_title = child.frame_type == "window" and (child:getFrameTitle() or "") or "(Workspace)"
 			frame_title = frame_title == "" and "(Untitled)" or frame_title
 			print(i, child.order_id,
 				frame_title
@@ -32,7 +32,7 @@ local function _printWindowFrames(self)
 				.. (child._dead and " (Dead)" or "")
 			)
 		else
-			print(i, "(not a window frame)")
+			print(i, "(not a UI Frame)")
 		end
 	end
 	print("-----------")
@@ -48,15 +48,10 @@ function def:uiCall_initialize()
 
 	self.sort_max = 6
 
-	-- Viewport #2 is used as the boundary for window-frame placement.
+	-- Viewport #2 is the initial shape for layout space.
 	widShared.setupViewports(self, 2)
 
 	uiLayout.initLayoutSequence(self)
-
-	-- Stack of modal 2nd-gen window frames. When populated, the top modal should get exclusive access, blocking
-	-- the active workspace and all other window frames. The user should still be able to interact with ephemeral
-	-- widgets, such as pop-ups.
-	self.modals = {}
 
 	-- Up to one workspace can be active at a time.
 	self.workspace = false
@@ -64,14 +59,20 @@ function def:uiCall_initialize()
 	-- One 2nd-gen frame (window frames, workspace frames) can be selected at a time.
 	self.selected_frame = false
 
+	-- Reference to the base of a pop-up menu, if active.
+	self.pop_up_menu = false
+
+	-- Stack of modal 2nd-gen Window Frames. When populated, the top modal should get exclusive access, blocking
+	-- the active Workspace and all other Window Frames. The user should still be able to interact with ephemeral
+	-- widgets, such as pop-ups.
+	-- Workspaces should never be part of the modal stack.
+	self.modals = {}
+
 	-- Helps with ctrl+tabbing through 2nd-gen frames.
 	self.frame_order_counter = 0
 
 	-- Don't let inter-generational thimble stepping leave the 2nd-gen UI Frames.
 	self.block_step_intergen = true
-
-	-- Reference to the base of a pop-up menu, if active.
-	self.pop_up_menu = false
 
 	-- ToolTip state.
 	self.tool_tip = notifMgr.newToolTip(self.context.resources.fonts.p) -- XXX font ref needs to be refresh-able
@@ -87,10 +88,6 @@ function def:uiCall_initialize()
 	self.drop_state = false
 
 	lgcKeyHooks.setupInstance(self)
-
-	self:reshape(true)
-	-- You may need to call reshape(true) again after creating the initial 2nd-gen widgets to properly
-	-- set up viewports.
 end
 
 
@@ -105,7 +102,8 @@ function def:uiCall_reshape()
 end
 
 
---- Clears the current pop-up menu and runs a cleanup callback on the reference widget (wid_ref). Check that 'self.pop_up_menu' is valid before calling.
+--- Clears the current pop-up menu and runs a cleanup callback on the reference widget (wid_ref). Check that
+--	'self.pop_up_menu' is valid before calling.
 -- @param self The root widget.
 -- @param reason_code A string to pass to the wid_ref indicating the context for clearing the menu.
 local function clearPopUp(self, reason_code)
@@ -115,7 +113,9 @@ local function clearPopUp(self, reason_code)
 	-- the context table.
 	-- We exclude `wid_ref` which may be part of the chain (to the left of the base pop-up) because it is not
 	-- being destroyed by this function.
-	if self.context.current_pressed and widShared.chainHasThisWidgetRight(self.pop_up_menu, self.context.current_pressed) then
+	if self.context.current_pressed
+	and widShared.chainHasThisWidgetRight(self.pop_up_menu, self.context.current_pressed)
+	then
 		self.context.current_pressed = false
 	end
 
@@ -295,7 +295,8 @@ end
 
 
 --- Select a UI Frame to have root focus.
--- @param set_new_order When true, assign a new top order_id to the frame. This may be desired when clicking on a frame, and not when ctrl+tabbing through them.
+-- @param set_new_order When true, assign a new top order_id to the UI Frame. This may be desired when clicking on a
+--	UI Frame, and not when cycling through them with ctrl+tab or ctrl+shift+tab.
 function def:setSelectedFrame(inst, set_new_order)
 	if inst then
 		if inst.parent ~= self then
@@ -327,10 +328,10 @@ function def:setSelectedFrame(inst, set_new_order)
 end
 
 
--- Select the topmost active Window Frame, or the active workspace, or nothing.
--- @param exclude Optionally provide one frame to exclude from the search. Use this when the
--- current selected frame is in the process of being destroyed. (Root-modal state should have been cleaned
--- up before this point.)
+-- Select the topmost active Window Frame, or the active Workspace, or nothing.
+-- @param exclude Optionally provide one frame to exclude from the search. Use this when the current selected
+--	UI Frame is in the process of being destroyed. (Root-modal state should have been cleaned up before this
+--	point.)
 function def:selectTopFrame(exclude)
 	print("selectTopFrame: start")
 	if #self.modals > 0 then
@@ -539,9 +540,7 @@ end
 
 
 --[[
-Saves one call to sortChildren(). Use when:
-* You know the frame's view level ahead of time
-* The root's existing children are fully sorted
+Use this instead of root:addChild("wimp/window_frame").
 --]]
 function def:newWindowFrame(view_level)
 	view_level = view_level or "normal"
@@ -593,7 +592,7 @@ function def:uiCall_destroy(inst)
 	if self ~= inst then
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
 		if inst.frame_type == "window" and self.selected_frame == inst then
-			--_printWindowFrames(self)
+			--_printUIFrames(self)
 			self:selectTopFrame(inst)
 		end
 	end
