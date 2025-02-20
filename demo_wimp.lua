@@ -5,6 +5,7 @@ print("Start WIMP Demo.")
 
 -- Plans to launch upon starting the demo.
 local demo_quick_launch = {
+	"plan_wimp_workspaces",
 	--"plan_frame_unselectable",
 	--"plan_dial",
 	--"plan_wimp_menu_tab",
@@ -309,14 +310,27 @@ end
 
 
 local function _launchSelector(root)
-	local planDemoSelect = require("plan_demo_selection")
-	return planDemoSelect.make(root)
+	local plan_name = "plan_demo_selection"
+	local frame = root:findTag("FRAME:" .. plan_name)
+	if not frame then
+		local planDemoSelect = require(plan_name)
+		frame = planDemoSelect.make(root)
+		frame.tag = "FRAME:" .. plan_name
+	end
+	return frame
 end
 
 
 local function _launchWidgetTreeView(root)
-	local planWidgetTreeView = require("plan_wimp_widget_tree")
-	return planWidgetTreeView.make(root)
+	local plan_name = "plan_wimp_widget_tree"
+	local frame = root:findTag("FRAME:" .. plan_name)
+	if not frame then
+		local planWidgetTreeView = require(plan_name)
+		frame = planWidgetTreeView.make(root)
+		frame.tag = "FRAME:" .. plan_name
+	end
+
+	return frame
 end
 
 
@@ -570,41 +584,6 @@ do
 		ws1:initialize()
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
-
-		ws1.lc_func = uiLayout.overlayRemaining
-		uiLayout.register(wimp_root, ws1)
-
-		local btn = ws1:addChild("base/button")
-		btn.x = 32
-		btn.y = 32
-		btn.w = 256
-		btn.h = 64
-		btn:initialize()
-		btn:setLabel("I'm a button")
-
-		btn.wid_buttonAction = function(self)
-			self:setLabel("in a workspace")
-		end
-
-
-		-- Goofing off
-		--[[
-		local snow = {}
-		for i = 1, 1024 do
-			snow[i] = {x=love.math.random(love.graphics.getWidth()), y=love.math.random(love.graphics.getHeight())}
-		end
-		ws1.render = function(self, ox, oy)
-			love.graphics.setColor(0.2, 0.2, 0.5, 1.0)
-			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
-
-			love.graphics.setColor(0.9, 0.9, 0.9, 1.0)
-			for i, s in ipairs(snow) do
-				s.x = (s.x + 0.15 + love.math.random(0.0, 0.12)) % (self.w + 64)
-				s.y = (s.y + 0.32 + love.math.random(0.0, 0.18)) % (self.h + 64)
-				love.graphics.circle("fill", s.x - 32, s.y - 32, 1.5)
-			end
-		end
-		--]]
 	end
 
 

@@ -48,9 +48,7 @@ function def:uiCall_initialize()
 
 	self.sort_max = 7
 
-	-- Viewport #2 is the initial shape for layout space.
 	widShared.setupViewports(self, 2)
-
 	uiLayout.initLayoutSequence(self)
 
 	-- Up to one workspace can be active at a time.
@@ -92,6 +90,7 @@ end
 
 
 function def:uiCall_reshape()
+	-- Viewport #2 serves as the rectangle for Workspaces and maximized Window Frames.
 	uiLayout.resetLayout(self)
 	uiLayout.applyLayout(self)
 
@@ -417,21 +416,28 @@ function def:selectTopFrame(exclude)
 end
 
 
+local function _isActiveFrame(root, wid)
+	return wid.frame_type == "window" and (not wid.workspace or wid.workspace == root.workspace)
+		or wid.frame_type == "workspace" and root.workspace == wid
+end
+
+
 local function frameSearch(self, dir, v1, v2)
 	local candidate = false
 
-	for i, child in ipairs(self.children) do
-		if child.frame_type
-		and child.frame_is_selectable
-		and not child.ref_modal_next
-		and child.order_id > v1 and child.order_id < v2
+	for i, wid_g2 in ipairs(self.children) do
+		if wid_g2.frame_type
+		and wid_g2.frame_is_selectable
+		and not wid_g2.ref_modal_next
+		and _isActiveFrame(self, wid_g2)
+		and wid_g2.order_id > v1 and wid_g2.order_id < v2
 		then
 			if dir == 1 then
-				v2 = child.order_id
-				candidate = child
+				v2 = wid_g2.order_id
+				candidate = wid_g2
 			else
-				v1 = child.order_id
-				candidate = child
+				v1 = wid_g2.order_id
+				candidate = wid_g2
 			end
 		end
 	end

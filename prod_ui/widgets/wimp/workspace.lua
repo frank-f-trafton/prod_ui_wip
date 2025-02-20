@@ -62,6 +62,9 @@ end
 
 function def:uiCall_reshape()
 	local skin = self.skin
+	local root = self.context.root
+
+	self.x, self.y, self.w, self.h = root.vp2_x, root.vp2_y, root.vp2_w, root.vp2_h
 
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, skin.box.border)
@@ -172,7 +175,17 @@ end
 
 
 function def:uiCall_destroy(inst)
-	-- TODO
+	if self == inst then
+		-- Remove any Window Frames that are associated with this Workspace.
+		local root = self.context.root
+		for i, wid_g2 in ipairs(root.children) do
+			if wid_g2.frame_type == "window" and wid_g2.workspace == self then
+				wid_g2:remove()
+			end
+		end
+
+		root:sortG2()
+	end
 end
 
 
