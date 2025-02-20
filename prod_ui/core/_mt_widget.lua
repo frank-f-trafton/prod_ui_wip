@@ -789,7 +789,6 @@ function _mt_widget:sortChildren(recurse)
 			-- "attempt to perform arithmetic on a nil value" -> ensure the child's sort_id is in
 			-- the range of 1 to 'parent.sort_max'.
 			local c = seq[i].sort_id
-			print("i", i, "#seq", #seq, "c", c, "#sort_count", #sort_count)
 			sort_count[c] = sort_count[c] + 1
 		end
 
