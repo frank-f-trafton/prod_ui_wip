@@ -58,15 +58,9 @@ _mt_widget.scr_x = 0
 _mt_widget.scr_y = 0
 
 
--- Draw range for children
-_mt_widget.draw_child_first = -math.huge
-_mt_widget.draw_child_last = math.huge
-
-
--- Range of children for emitting userUpdate and uiCall_update.
-_mt_widget.update_child_first = -math.huge
-_mt_widget.update_child_last = math.huge
-
+-- "Active" range for children. Affects drawing, ticking (uiCall_update, userUpdate) and mouse events.
+_mt_widget.active_first = -math.huge
+_mt_widget.active_last = math.huge
 
 -- Cursor codes
 _mt_widget.cursor_hover = false

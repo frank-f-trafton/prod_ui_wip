@@ -294,6 +294,41 @@ function def:rootCall_getFrameOrderID()
 end
 
 
+function def:setActiveWorkspace(inst)
+	if inst.frame_type ~= "workspace" then
+		error("argument #1: expected a Workspace widget.")
+	end
+
+	self.workspace = inst or false
+	inst.sort_id = 2
+
+	for i, child in ipairs(self.children) do
+		if child.frame_type == "window" then
+			child:_refreshWorkspaceState()
+		end
+	end
+
+	self:sortG2()
+end
+
+
+function def:sortG2()
+	self:sortChildren()
+
+	-- Widgets with a sort_id of 1 are inactive.
+	local start_index = 1
+	for i = 1, #self.children do
+		if self.children[i].sort_id > 1 then
+			start_index = i
+			break
+		end
+	end
+
+	self.active_first = start_index
+end
+
+
+
 --- Select a UI Frame to have root focus.
 -- @param set_new_order When true, assign a new top order_id to the UI Frame. This may be desired when clicking on a
 --	UI Frame, and not when cycling through them with ctrl+tab or ctrl+shift+tab.
@@ -304,6 +339,9 @@ function def:setSelectedFrame(inst, set_new_order)
 
 		elseif not inst.frame_is_selectable then
 			error("cannot select this G2 widget.")
+
+		elseif inst.workspace and inst.workspace ~= self.context.root.workspace then
+			error("cannot select a Window Frame whose Workspace is inactive.")
 		end
 	end
 
@@ -314,7 +352,7 @@ function def:setSelectedFrame(inst, set_new_order)
 		if inst.frame_type == "window" then
 			inst:bringWindowToFront()
 		else -- frame_type == "workspace"
-			self:sortChildren()
+			self:sortG2()
 		end
 
 		if old_selected ~= inst then
@@ -550,6 +588,16 @@ function def:newWindowFrame(view_level)
 	local w_frame = self:addChild("wimp/window_frame", pos)
 	return w_frame
 end
+
+
+function def:newWorkspace()
+	local w_space = self:addChild("wimp/workspace")
+
+	self:sortG2()
+
+	return w_space
+end
+
 
 
 function def:uiCall_update(dt)
