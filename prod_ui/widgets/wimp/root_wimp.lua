@@ -46,7 +46,7 @@ function def:uiCall_initialize()
 	self.visible = true
 	self.clip_hover = true
 
-	self.sort_max = 6
+	self.sort_max = 7
 
 	-- Viewport #2 is the initial shape for layout space.
 	widShared.setupViewports(self, 2)
@@ -216,8 +216,11 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 				self:stepSelectedFrame(-1)
 			end
 
-		-- Try to close the selected window frame.
-		elseif self.selected_frame and keyMgr.keyStringsEqual(context.settings.wimp.key_bindings.close_window_frame, hot_scan, hot_key) then
+		-- Try to close the selected Window Frame.
+		elseif self.selected_frame
+		and self.selected_frame.frame_type == "window"
+		and keyMgr.keyStringsEqual(context.settings.wimp.key_bindings.close_window_frame, hot_scan, hot_key)
+		then
 			self.selected_frame:closeFrame(false)
 
 		else
@@ -295,16 +298,24 @@ end
 
 
 function def:setActiveWorkspace(inst)
-	if inst.frame_type ~= "workspace" then
-		error("argument #1: expected a Workspace widget.")
+	if inst and inst.frame_type ~= "workspace" then
+		error("argument #1: expected a Workspace widget or false.")
 	end
 
 	self.workspace = inst or false
-	inst.sort_id = 2
+	if inst then
+		inst.sort_id = 2
+	end
 
-	for i, child in ipairs(self.children) do
-		if child.frame_type == "window" then
-			child:_refreshWorkspaceState()
+	for i, wid_g2 in ipairs(self.children) do
+		if wid_g2 ~= inst then
+			local frame_type = wid_g2.frame_type
+			if frame_type == "workspace" then
+				wid_g2.sort_id = 1
+
+			elseif frame_type == "window" then
+				wid_g2:_refreshWorkspaceState()
+			end
 		end
 	end
 
@@ -315,7 +326,7 @@ end
 function def:sortG2()
 	self:sortChildren()
 
-	-- Widgets with a sort_id of 1 are inactive.
+	-- G2 Widgets with a sort_id of 1 are inactive.
 	local start_index = 1
 	for i = 1, #self.children do
 		if self.children[i].sort_id > 1 then
