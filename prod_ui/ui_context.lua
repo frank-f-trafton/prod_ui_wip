@@ -318,8 +318,8 @@ local function _updateLoop(wid, dt, locks)
 		locks[wid] = true
 
 		local children = wid.children
-		local i = math.max(1, wid.update_child_first)
-		local j = math.min(#children, wid.update_child_last)
+		local i = math.max(1, wid.active_first)
+		local j = math.min(#children, wid.active_last)
 
 		while i <= j do
 			_updateLoop(children[i], dt, locks)

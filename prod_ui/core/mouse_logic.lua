@@ -29,7 +29,7 @@ local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
 			end
 
 			local children = widget.children
-			for i = #children, 1, -1 do
+			for i = math.min(#children, widget.active_last), math.max(1, widget.active_first), -1 do
 				local wid = children[i]
 				local sub = _hoverLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid, x1, y1, x2, y2)
 				if sub then
@@ -74,7 +74,7 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 			end
 
 			local children = widget.children
-			for i = #children, 1, -1 do
+			for i = math.min(#children, widget.active_last), math.max(1, widget.active_first), -1 do
 				local wid = children[i]
 				local sub = _pressLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid,
 					x1, y1, x2, y2, button, istouch, presses

@@ -32,11 +32,11 @@ function def:wid_pressed(x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_initialize(unselectable, will_set_as_active)
+function def:uiCall_initialize(unselectable)
 	-- UI Frame
 	self.frame_type = "workspace"
 	lgcUIFrame.instanceSetup(self, unselectable)
-	self.sort_id = will_set_as_active and 2 or 1
+	self.sort_id = 1
 
 	self.visible = true
 	self.allow_hover = true
@@ -107,17 +107,11 @@ end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	-- Press events that create a pop-up menu should block propagation (return truthy)
-	-- so that this and the WIMP root do not cause interference.
-
-	local root = self:getRootWidget()
-
-	-- Frame-modal check
-	local modal_next = self.ref_modal_next
-	if modal_next then
-		root:setSelectedFrame(modal_next, true)
+	if lgcUIFrame.partial_pointerPress(self) then
 		return
 	end
+
+	local root = self:getRootWidget()
 
 	if self == inst then
 		local handled = false
@@ -129,7 +123,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 
 		-- Scroll bars were not activated: take thimble1
-		if (button == 1 or button == 2) and not handled then
+		if not handled then
 			if self.can_have_thimble then
 				self:takeThimble1()
 			end
@@ -161,13 +155,6 @@ def.trickle.uiCall_keyReleased = lgcUIFrame.logic_trickleKeyReleased
 def.uiCall_keyReleased = lgcUIFrame.logic_keyReleased
 def.uiCall_textInput = lgcUIFrame.logic_textInput
 def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
-
-
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if lgcUIFrame.partial_pointerPress(self) then
-		return
-	end
-end
 
 
 function def:uiCall_update(dt)

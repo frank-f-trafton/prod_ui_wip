@@ -195,7 +195,7 @@ function def:setWindowViewLevel(view_level)
 
 	self.view_level = view_level
 	self.sort_id = lgcUIFrame.view_levels[view_level]
-	self.parent:sortChildren()
+	self.context.root:sortG2()
 end
 
 
@@ -218,32 +218,52 @@ end
 
 function def:bringWindowToFront()
 	self:reorder(math.huge)
-	self.parent:sortChildren()
+	self.context.root:sortG2()
 end
 
 
--- WIP
-function def:setWindowWorkspace(workspace)
-	if workspace and workspace.frame_type ~= "workspace" then
-		error("argument #1: expected a Workspace widget.")
+function def:setFrameHidden(enabled)
+	self.frame_hidden = not not enabled
+
+	if not self.workspace or self.workspace == self.context.root.workspace then
+		self.visible = not enabled
+		self.allow_hover = not enabled
+	else
+		self.visible = false
+		self.allow_hover = false
 	end
-	self.workspace = workspace
+end
 
-	local root = self.context.root
 
+function def:getFrameHidden()
+	return self.frame_hidden
+end
+
+
+function def:_refreshWorkspaceState()
 	-- Become active
-	if not self.workspace or self.workspace == root.workspace then
-		self.visible = true
-		self.allow_hover = true
+	if not self.workspace or self.workspace == self.context.root.workspace then
+		local assign = not self.frame_hidden
+		self.visible = assign
+		self.allow_hover = assign
 		self.sort_id = lgcUIFrame.view_levels[self.view_level]
-		root:sortChildren()
 	-- Become inactive
 	else
 		self.visible = false
 		self.allow_hover = false
 		self.sort_id = 1
-		root:sortChildren()
 	end
+end
+
+
+function def:setFrameWorkspace(workspace)
+	if workspace and workspace.frame_type ~= "workspace" then
+		error("argument #1: expected a Workspace widget.")
+	end
+	self.workspace = workspace
+
+	self:_refreshWorkspaceState()
+	self.context.root:sortG2()
 end
 
 
@@ -333,10 +353,13 @@ function def:uiCall_initialize(unselectable, view_level)
 	self.view_level = view_level or "normal"
 	self.sort_id = lgcUIFrame.view_levels[self.view_level]
 
-	-- When a Window Frame is connected to a Workspace, it will only be visible and active
-	-- when that Workspace is active.
-	-- Window Frames that are not connected to any Workspace (self.workspace == false) are always active.
+	-- If associated with a Workspace, a Window Frame is only active if that Workspace is also active.
+	-- Window Frames associated with the root are always active.
 	self.workspace = false
+
+	-- "Hidden" Window Frames are invisible and cannot be interacted with, but they can still tick in the background,
+	-- according to the associated Workspace/Root rules.
+	self.frame_hidden = false
 
 	self.visible = true
 	self.allow_hover = true

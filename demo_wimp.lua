@@ -566,8 +566,9 @@ do
 
 
 	do
-		local ws1 = wimp_root:addChild("wimp/workspace")
+		local ws1 = wimp_root:newWorkspace()
 		ws1:initialize()
+		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
 
 		ws1.lc_func = uiLayout.overlayRemaining
@@ -611,7 +612,7 @@ do
 	--love.mouse.setRelativeMode(true)
 
 	-- TODO: need to deal with initial sort state, so that Workspaces don't obscure Window Frames.
-	wimp_root:sortChildren()
+	wimp_root:sortG2()
 
 	-- Start with the top-most window selected, if any.
 	wimp_root:selectTopFrame()
