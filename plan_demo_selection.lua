@@ -15,9 +15,14 @@ end
 
 
 local function _launchFrame(self, req_path)
-	local plan = require(req_path)
 	local root = self:getRootWidget()
-	local frame = plan.make(root)
+	-- If the frame already exists, just switch to it.
+	local frame = root:findTag("FRAME:" .. req_path)
+	if not frame then
+		local plan = require(req_path)
+		frame = plan.make(root)
+		frame.tag = "FRAME:" .. req_path
+	end
 
 	if frame.frame_is_selectable then
 		root:setSelectedFrame(frame, true)
@@ -114,6 +119,7 @@ function plan.make(root)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_frame_unselectable", "Unselectable Window Frame", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_workspaces", "Workspace Frames", xx, yy, ww, hh)
 
 	-- To launch a frame from the main demo file: frame:launch("path.to.file")
 	frame.launch = _launchFrame
