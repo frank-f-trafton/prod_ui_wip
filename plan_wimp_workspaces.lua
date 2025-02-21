@@ -39,7 +39,7 @@ local function _setupWS2(root)
 	local frame_ws2_text = frame_ws2:addChild("base/label")
 	frame_ws2_text.x, frame_ws2_text.y, frame_ws2_text.w, frame_ws2_text.h = 0, 0, 440, 100
 	frame_ws2_text:initialize()
-	frame_ws2_text:setLabel("This Window Frame is \"associated\" with Workspace #2. It is visible and active only when Workspace #2 is also active.", "multi")
+	frame_ws2_text:setLabel("This Window Frame is \"associated\" with Workspace #2. It is visible and active only when Workspace #2 is also active.\n\n(Other Window Frames in this demo are \"unassociated\", and will appear in any Workspace.)", "multi")
 
 	-- Make Workspace #2 distinguishable from the main Workspace at a glance.
 	local radius = 1
