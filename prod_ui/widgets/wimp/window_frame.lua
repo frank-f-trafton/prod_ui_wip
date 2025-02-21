@@ -232,6 +232,10 @@ function def:setFrameHidden(enabled)
 		self.visible = false
 		self.allow_hover = false
 	end
+
+	if self.frame_hidden and self.context.root.selected_frame == self then
+		self.context.root:stepSelectedFrame(-1)
+	end
 end
 
 

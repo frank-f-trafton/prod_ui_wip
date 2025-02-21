@@ -352,6 +352,9 @@ function def:setSelectedFrame(inst, set_new_order)
 
 		elseif inst.workspace and inst.workspace ~= self.context.root.workspace then
 			error("cannot select a Window Frame whose Workspace is inactive.")
+
+		elseif inst.frame_type == "window" and inst.frame_hidden then
+			error("cannot select a Window Frame that is hidden.")
 		end
 	end
 
@@ -376,7 +379,8 @@ function def:setSelectedFrame(inst, set_new_order)
 end
 
 
--- Select the topmost active Window Frame, or the active Workspace, or nothing.
+-- Select the topmost active Window Frame, or the active Workspace, or nothing. Hidden Window
+--	Frames are excluded.
 -- @param exclude Optionally provide one frame to exclude from the search. Use this when the current selected
 --	UI Frame is in the process of being destroyed. (Root-modal state should have been cleaned up before this
 --	point.)
@@ -395,6 +399,7 @@ function def:selectTopFrame(exclude)
 		--print("frame_type", child.frame_type, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
 		if child.frame_type == "window"
 		and child.frame_is_selectable
+		and not child.frame_hidden
 		and (not child.workspace or child.workspace == self.workspace)
 		and not child.ref_modal_next
 		and child ~= exclude
@@ -428,6 +433,7 @@ local function frameSearch(self, dir, v1, v2)
 	for i, wid_g2 in ipairs(self.children) do
 		if wid_g2.frame_type
 		and wid_g2.frame_is_selectable
+		and not wid_g2.frame_hidden
 		and not wid_g2.ref_modal_next
 		and _isActiveFrame(self, wid_g2)
 		and wid_g2.order_id > v1 and wid_g2.order_id < v2

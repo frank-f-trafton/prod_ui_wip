@@ -10,5 +10,6 @@ There are two kinds of UI Frame:
   * Modal: they block interaction with other parts of the application until dismissed.
   * Three sorting levels: "low", "normal", and "high"
   * Workspace association: When tied to a Workspace, Window Frames are only active and visible when the Workspace is also active. Unassociated Window Frames are always active.
+  * Hidden: Active Window Frames can be placed out of site while still running.
 
 Up to one UI Frame may be "selected" by the Root at any given time.

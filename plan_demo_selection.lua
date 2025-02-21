@@ -24,7 +24,7 @@ local function _launchFrame(self, req_path)
 		frame.tag = "FRAME:" .. req_path
 	end
 
-	if frame.frame_is_selectable then
+	if frame.frame_is_selectable and not frame.frame_hidden then
 		root:setSelectedFrame(frame, true)
 	end
 
@@ -120,6 +120,7 @@ function plan.make(root)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_frame_unselectable", "Unselectable Window Frame", xx, yy, ww, hh)
 	yy = yy + hh; bb_btn = _makeButton(frame, "plan_wimp_workspaces", "Workspace Frames", xx, yy, ww, hh)
+	yy = yy + hh; bb_btn = _makeButton(frame, "plan_hidden_frame", "Hiding Window Frames", xx, yy, ww, hh)
 
 	-- To launch a frame from the main demo file: frame:launch("path.to.file")
 	frame.launch = _launchFrame
