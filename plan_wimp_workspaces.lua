@@ -3,7 +3,6 @@ local plan = {}
 
 
 local commonWimp = require("prod_ui.common.common_wimp")
-local pTable = require("prod_ui.lib.pile_table")
 
 
 local function _setupWS2(root)
