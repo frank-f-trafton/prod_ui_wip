@@ -222,28 +222,6 @@ function def:bringWindowToFront()
 end
 
 
-function def:setFrameHidden(enabled)
-	self.frame_hidden = not not enabled
-
-	if not self.workspace or self.workspace == self.context.root.workspace then
-		self.visible = not enabled
-		self.allow_hover = not enabled
-	else
-		self.visible = false
-		self.allow_hover = false
-	end
-
-	if self.frame_hidden and self.context.root.selected_frame == self then
-		self.context.root:stepSelectedFrame(-1)
-	end
-end
-
-
-function def:getFrameHidden()
-	return self.frame_hidden
-end
-
-
 function def:_refreshWorkspaceState()
 	-- Become active
 	if not self.workspace or self.workspace == self.context.root.workspace then
@@ -261,10 +239,15 @@ end
 
 
 function def:setFrameWorkspace(workspace)
+	workspace = workspace or false
+
 	if workspace and workspace.frame_type ~= "workspace" then
 		error("argument #1: expected a Workspace widget.")
 	end
+
 	self.workspace = workspace
+
+	lgcUIFrame.assertFrameModalWorkspaces(self)
 
 	self:_refreshWorkspaceState()
 	self.context.root:sortG2()
@@ -361,10 +344,6 @@ function def:uiCall_initialize(unselectable, view_level)
 	-- Window Frames associated with the root are always active.
 	self.workspace = false
 
-	-- "Hidden" Window Frames are invisible and cannot be interacted with, but they can still tick in the background,
-	-- according to the associated Workspace/Root rules.
-	self.frame_hidden = false
-
 	self.visible = true
 	self.allow_hover = true
 
@@ -437,16 +416,20 @@ function def:uiCall_initialize(unselectable, view_level)
 
 	self.needs_update = true
 
-	-- Frame-modal widget links. Truthy-checks are used to determine if a frame is currently
-	-- being blocked or is blocking another frame.
+	-- Frame-modal widget links.
 	self.ref_modal_prev = false
 	self.ref_modal_next = false
 end
 
 
 function def:setModal(target)
+	uiShared.type1(1, target, "table")
+
+	if not target.frame_type or (target.frame_type ~= "window" and target.frame_type ~= "workspace") then
+		error("target must be a UI Frame of type 'window' or 'workspace'.")
+
 	-- You can chain modal frames together, but only one frame may be modal to another frame at a time.
-	if target.ref_modal_next then
+	elseif target.ref_modal_next then
 		error("target frame already has a modal reference set (target.ref_modal_next).")
 
 	elseif self.ref_modal_prev then
@@ -565,7 +548,7 @@ def.trickle.uiCall_keyPressed = lgcUIFrame.logic_trickleKeyPressed
 def.uiCall_keyPressed = lgcUIFrame.logic_keyPressed
 def.trickle.uiCall_keyReleased = lgcUIFrame.logic_trickleKeyReleased
 def.uiCall_keyReleased = lgcUIFrame.logic_keyReleased
-def.uiCall_textInput = lgcUIFrame.logic_textInput
+def.trickle.uiCall_textInput = lgcUIFrame.logic_trickleTextInput
 def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
 
 
@@ -725,6 +708,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
+def.trickle.uiCall_pointerWheel = lgcUIFrame.logic_tricklePointerWheel
 def.uiCall_pointerWheel = lgcUIFrame.logic_pointerWheel
 
 

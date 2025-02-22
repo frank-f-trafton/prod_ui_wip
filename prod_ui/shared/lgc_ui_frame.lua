@@ -16,8 +16,50 @@ local lgcContainer = context:getLua("shared/lgc_container")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
+lgcUIFrame.types = {workspace=true, window=true}
+
 -- View levels for Window Frames. Both Window Frames and the WIMP Root need access to this.
 lgcUIFrame.view_levels = {low=3, normal=4, high=5}
+
+
+function lgcUIFrame.assertRootModalNoWorkspace(self)
+	local modals = self.context.root.modals
+	for i, wid_g2 in ipairs(modals) do
+		if wid_g2 == self then
+			error("Root-modal Window Frames cannot be associated with any Workspace.")
+		end
+	end
+end
+
+
+function lgcUIFrame.assertFrameModalWorkspaces(self)
+	local workspace = self.workspace
+	local wid = self
+
+	-- check back-to-front
+	while wid.ref_modal_next do
+		wid = wid.ref_modal_next
+	end
+	while wid do
+		if wid.frame_type == "window" and workspace ~= wid.workspace then
+			error("all Frame-modal Window Frames must share the same Workspace (or all be unassociated).")
+		end
+
+		wid = self.ref_modal_prev
+	end
+end
+
+
+function lgcUIFrame.getLastModalFrame(self)
+	if not self.ref_modal_next then
+		return
+	end
+	local wid = self
+	while wid.ref_modal_next do
+		wid = wid.ref_modal_next
+	end
+	return wid
+end
 
 
 function lgcUIFrame.tryUnbankingThimble1(self)
@@ -46,6 +88,30 @@ function lgcUIFrame.getFrameSelectable(self)
 end
 
 
+function lgcUIFrame.setFrameHidden(self, enabled)
+	self.frame_hidden = not not enabled
+
+	if self.frame_type == "workspace"
+	or (self.frame_type == "window" and not self.workspace or self.workspace == self.context.root.workspace)
+	then
+		self.visible = not enabled
+		self.allow_hover = not enabled
+	else
+		self.visible = false
+		self.allow_hover = false
+	end
+
+	if self.frame_hidden and self.context.root.selected_frame == self then
+		self.context.root:stepSelectedFrame(-1)
+	end
+end
+
+
+function lgcUIFrame.getFrameHidden(self)
+	return self.frame_hidden
+end
+
+
 -- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
 function lgcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
 	--print("thimbleTake", self.id, inst.id)
@@ -62,7 +128,6 @@ end
 
 
 function lgcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
-	-- Frame-modal check
 	if self.ref_modal_next then
 		return
 	end
@@ -74,6 +139,10 @@ end
 
 
 function lgcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
+	if self.ref_modal_next then
+		return
+	end
+
 	if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
 		return true
 	end
@@ -81,7 +150,6 @@ end
 
 
 function lgcUIFrame.logic_keyReleased(self, inst, key, scancode)
-	-- Frame-modal check
 	if self.ref_modal_next then
 		return
 	end
@@ -93,14 +161,17 @@ end
 
 
 function lgcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
-	if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
+	if self.ref_modal_next then
+		return
+	end
+
+	if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_released, key, scancode) then
 		return true
 	end
 end
 
 
-function lgcUIFrame.logic_textInput(self, inst, text)
-	-- Frame-modal check
+function lgcUIFrame.logic_trickleTextInput(self, inst, text)
 	if self.ref_modal_next then
 		return
 	end
@@ -109,6 +180,11 @@ end
 
 function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch, presses)
 	if self.ref_modal_next then
+		local modal_last = lgcUIFrame.getLastModalFrame(self)
+
+		if modal_last then
+			self.context.root:setSelectedFrame(modal_last, true)
+		end
 		self.context.current_pressed = false
 		return true
 	end
@@ -120,13 +196,6 @@ function lgcUIFrame.partial_pointerPress(self)
 	-- so that this and the WIMP root do not cause interference.
 
 	local root = self:getRootWidget()
-
-	-- Frame-modal check
-	local modal_next = self.ref_modal_next
-	if modal_next then
-		root:setSelectedFrame(modal_next, true)
-		return true
-	end
 
 	if self.frame_is_selectable then
 		root:setSelectedFrame(self, true)
@@ -151,7 +220,18 @@ function lgcUIFrame.logic_pointerPressRepeat(self, inst, x, y, button, istouch, 
 end
 
 
+function lgcUIFrame.logic_tricklePointerWheel(self, inst, x, y)
+	if self.ref_modal_next then
+		return
+	end
+end
+
+
 function lgcUIFrame.logic_pointerWheel(self, inst, x, y)
+	if self.ref_modal_next then
+		return
+	end
+
 	-- Catch wheel events from descendants that did not block it.
 	local caught = widShared.checkScrollWheelScroll(self, x, y)
 	commonScroll.updateScrollBarShapes(self)
@@ -164,6 +244,8 @@ end
 function lgcUIFrame.definitionSetup(def)
 	def.setFrameSelectable = lgcUIFrame.setFrameSelectable
 	def.getFrameSelectable = lgcUIFrame.getFrameSelectable
+	def.setFrameHidden = lgcUIFrame.setFrameHidden
+	def.getFrameHidden = lgcUIFrame.getFrameHidden
 end
 
 
@@ -179,6 +261,14 @@ function lgcUIFrame.instanceSetup(self, unselectable)
 	-- Link to the last widget within this tree that held thimble1.
 	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
 	self.banked_thimble1 = self
+
+	-- "Hidden" UI Frames are invisible and cannot be interacted with.
+	-- It can still tick in the background if:
+	-- * It's the active Workspace
+	-- * It's a Window Frame whose associated Workspace is active, or which is unassociated
+	-- Hidden UI Frames cannot be selected. If they are selected at the time of being hidden,
+	-- they will automatically step the selection backwards by one index.
+	self.frame_hidden = false
 
 	-- Helps with ctrl+tabbing through UI Frames.
 	self.order_id = self.context.root:rootCall_getFrameOrderID()

@@ -76,7 +76,7 @@ function plan.make(root)
 				text.h = 64
 				text:initialize()
 				text.align = "center"
-				text.text = "This frame should block interaction\nwith all other frame until it is dismissed."
+				text.text = "This frame should block interaction\nwith all other frames until it is dismissed."
 				text:refreshText()
 
 				local button_y = dialog:addChild("base/button")
