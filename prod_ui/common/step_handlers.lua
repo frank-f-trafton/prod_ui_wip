@@ -47,7 +47,6 @@ function stepHandlers.intergenerationalNext(wid)
 		-- Advance depth-first.
 		if #wid.children > 0 then
 			wid = wid.children[1]
-
 		else
 			while true do -- (ancestors)
 				local parent = wid.parent

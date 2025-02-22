@@ -350,11 +350,11 @@ function def:setSelectedFrame(inst, set_new_order)
 		elseif not inst.frame_is_selectable then
 			error("cannot select this G2 widget.")
 
-		elseif inst.workspace and inst.workspace ~= self.context.root.workspace then
+		elseif inst.frame_type == "window" and inst.workspace and inst.workspace ~= self.context.root.workspace then
 			error("cannot select a Window Frame whose Workspace is inactive.")
 
-		elseif inst.frame_type == "window" and inst.frame_hidden then
-			error("cannot select a Window Frame that is hidden.")
+		elseif inst.frame_hidden then
+			error("cannot select a UI Frame that is hidden.")
 		end
 	end
 
@@ -410,7 +410,7 @@ function def:selectTopFrame(exclude)
 		end
 	end
 
-	if self.workspace and self.workspace.frame_is_selectable then
+	if self.workspace and self.workspace.frame_is_selectable and not self.workspace.frame_hidden then
 		--print("the active workspace was selected")
 		self:setSelectedFrame(self.workspace)
 		return
@@ -563,6 +563,15 @@ end
 
 
 function def:rootCall_setModalFrame(inst)
+	uiShared.type1(1, inst, "table")
+
+	if inst.frame_type ~= "window" then
+		error("only Window Frames can be assigned as modal.")
+
+	elseif inst.workspace then
+		error("Window Frames that are associated with a Workspace cannot be assigned as root-modal.")
+	end
+
 	for i, child in ipairs(self.modals) do
 		if child == inst then
 			error("this frame is already in the stack of root-modals.")
@@ -575,6 +584,8 @@ end
 
 
 function def:rootCall_clearModalFrame(inst)
+	uiShared.type1(1, inst, "table")
+
 	if self.modals[#self.modals] ~= inst then
 		error("tried to clear the root-modal status of a frame that is not at the top of the 'modals' stack.")
 	end
@@ -585,8 +596,8 @@ end
 
 
 function def:rootCall_setDragAndDropState(inst, drop_state)
-	uiShared.type(1, inst, "table")
-	uiShared.type(2, drop_state, "table")
+	uiShared.type1(1, inst, "table")
+	uiShared.type1(2, drop_state, "table")
 
 	self.drop_state = drop_state
 end

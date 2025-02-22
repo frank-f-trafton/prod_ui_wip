@@ -54,6 +54,11 @@ function def:uiCall_initialize(unselectable)
 
 	self.press_busy = false
 
+	-- Frame-modal widget link.
+	-- Workspaces can be blocked by Window Frames, but they themselves cannot block
+	-- other UI Frames.
+	self.ref_modal_next = false
+
 	self:skinSetRefs()
 	self:skinInstall()
 	self:applyAllSettings()
@@ -150,13 +155,14 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
+def.trickle.uiCall_pointerWheel = lgcUIFrame.logic_tricklePointerWheel
 def.uiCall_pointerWheel = lgcUIFrame.logic_pointerWheel
 def.uiCall_thimble1Take = lgcUIFrame.logic_thimble1Take
 def.trickle.uiCall_keyPressed = lgcUIFrame.logic_trickleKeyPressed
 def.uiCall_keyPressed = lgcUIFrame.logic_keyPressed
 def.trickle.uiCall_keyReleased = lgcUIFrame.logic_trickleKeyReleased
 def.uiCall_keyReleased = lgcUIFrame.logic_keyReleased
-def.uiCall_textInput = lgcUIFrame.logic_textInput
+def.trickle.uiCall_textInput = lgcUIFrame.logic_trickleTextInput
 def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
 
 
