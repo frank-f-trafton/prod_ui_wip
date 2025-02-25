@@ -8,7 +8,8 @@ local mouseLogic = {}
 -- @param x1, y1, x2, y2 Left, top, right and bottom clipping boundaries.
 -- @return The widget that the mouse is hovering over, or nil if no match was found.
 local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
-	if widget.allow_hover
+	if widget.awake
+	and widget.allow_hover
 	and x >= x1 and y >= y1 and x < x2 and y < y2
 	and widget:ui_evaluateHover(x, y, os_x, os_y)
 	then
@@ -29,7 +30,7 @@ local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
 			end
 
 			local children = widget.children
-			for i = math.min(#children, widget.active_last), math.max(1, widget.active_first), -1 do
+			for i = #children, 1, -1 do
 				local wid = children[i]
 				local sub = _hoverLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid, x1, y1, x2, y2)
 				if sub then
@@ -53,7 +54,8 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 	'ui_evaluatePress' must evaluate to true.
 	--]]
 
-	if widget.allow_hover
+	if widget.awake
+	and widget.allow_hover
 	and x >= x1 and y >= y1 and x < x2 and y < y2
 	and widget:ui_evaluatePress(x, y, os_x, os_y, button, istouch, presses)
 	then
@@ -74,7 +76,7 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 			end
 
 			local children = widget.children
-			for i = math.min(#children, widget.active_last), math.max(1, widget.active_first), -1 do
+			for i = #children, 1, -1 do
 				local wid = children[i]
 				local sub = _pressLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid,
 					x1, y1, x2, y2, button, istouch, presses

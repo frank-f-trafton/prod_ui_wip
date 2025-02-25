@@ -208,8 +208,8 @@ local function drawLoop(context, wid, os_x, os_y, thimble1, thimble2)
 			local wy = wid.y - wid.scr_y + os_y
 
 			local children = wid.children
-			local first = math.max(wid.active_first, 1)
-			local last = math.min(wid.active_last, #children)
+			local first = math.max(wid.draw_first, 1)
+			local last = math.min(wid.draw_last, #children)
 
 			for i = first, last do
 				local child = children[i]

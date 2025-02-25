@@ -67,8 +67,8 @@ function lgcUIFrame.tryUnbankingThimble1(self)
 
 	local wid_banked = self.banked_thimble1
 
-	if wid_banked and wid_banked.can_have_thimble and wid_banked:isInLineage(self) then
-		wid_banked:takeThimble1()
+	if wid_banked and wid_banked:isInLineage(self) then
+		wid_banked:tryTakeThimble1()
 	end
 end
 

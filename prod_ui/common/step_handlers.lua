@@ -25,7 +25,7 @@ function stepHandlers.linear(self, start, delta, wrap)
 	local next_wid = seq[(i-1) % #seq + 1]
 
 	while next_wid do
-		if next_wid.can_have_thimble then
+		if next_wid:canTakeThimble() then
 			return next_wid
 		end
 		i = i + delta
@@ -71,7 +71,7 @@ function stepHandlers.intergenerationalNext(wid)
 			end
 		end
 
-		if wid.can_have_thimble then
+		if wid:canTakeThimble() then
 			return wid
 
 		-- Failsafe: Reached end of tree twice without finding a suitable new host.
@@ -113,7 +113,7 @@ function stepHandlers.intergenerationalPrevious(wid)
 			end
 		end
 
-		if wid.can_have_thimble then
+		if wid:canTakeThimble() then
 			return wid
 
 		-- Failsafe: Reached end of tree twice without finding a suitable new host.
@@ -165,7 +165,7 @@ function stepHandlers.proximity(self, px, py, dx, dy, wrap)
 			end
 		end
 
-		if self ~= sibling and sibling.can_have_thimble then
+		if self ~= sibling and sibling:canTakeThimble() then
 			local sx = math.max(sibling.x, math.min(px, sibling.x + sibling.w))
 			local sy = math.max(sibling.y, math.min(py, sibling.y + sibling.h))
 

@@ -125,9 +125,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Scroll bars were not activated: take thimble1
 		if (button == 1 or button == 2) and not handled then
-			if self.can_have_thimble then
-				self:takeThimble1()
-			end
+			self:tryTakeThimble1()
 			self:wid_pressed(x, y, button, istouch, presses)
 		end
 	end

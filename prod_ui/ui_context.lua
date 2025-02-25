@@ -308,29 +308,30 @@ end
 
 
 local function _updateLoop(wid, dt, locks)
-	local skip_children
+	if wid.awake then
+		local skip_children
 
-	if wid.userUpdate then
-		wid:_runUserEvent("userUpdate", dt)
-	end
-
-	if wid.uiCall_update then
-		skip_children = wid:uiCall_update(dt)
-	end
-
-	if not skip_children and #wid.children > 0 then
-		locks[wid] = true
-
-		local children = wid.children
-		local i = math.max(1, wid.active_first)
-		local j = math.min(#children, wid.active_last)
-
-		while i <= j do
-			_updateLoop(children[i], dt, locks)
-			i = i + 1
+		if wid.userUpdate then
+			wid:_runUserEvent("userUpdate", dt)
 		end
 
-		locks[wid] = nil
+		if wid.uiCall_update then
+			skip_children = wid:uiCall_update(dt)
+		end
+
+		if not skip_children and #wid.children > 0 then
+			locks[wid] = true
+
+			local children = wid.children
+			local i = 1
+
+			while i <= #children do
+				_updateLoop(children[i], dt, locks)
+				i = i + 1
+			end
+
+			locks[wid] = nil
+		end
 	end
 end
 

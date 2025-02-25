@@ -325,16 +325,16 @@ end
 function def:sortG2()
 	self:sortChildren()
 
-	-- G2 Widgets with a sort_id of 1 are inactive.
-	local start_index = 1
-	for i = 1, #self.children do
-		if self.children[i].sort_id > 1 then
+	-- G2 Widgets with a sort_id of 1 are asleep.
+	local start_index
+	for i, child in ipairs(self.children) do
+		child.awake = child.sort_id > 1
+		if child.sort_id > 1 and not start_index then
 			start_index = i
-			break
 		end
 	end
 
-	self.active_first = start_index
+	self.draw_first = start_index or 1
 end
 
 
@@ -355,6 +355,9 @@ function def:setSelectedFrame(inst, set_new_order)
 
 		elseif inst.frame_hidden then
 			error("cannot select a UI Frame that is hidden.")
+
+		elseif not inst.awake then
+			error("cannot select a widget that is asleep.")
 		end
 	end
 
@@ -631,6 +634,20 @@ function def:newWorkspace()
 	return w_space
 end
 
+
+local function _thimbleCheck(self, inst)
+	local wid = inst
+	while wid do
+		if not wid.awake then
+			error("instance is not within an awake part of the widget hierarchy.")
+		end
+		wid = wid.parent
+	end
+end
+
+
+def.trickle.uiCall_thimble1Take = _thimbleCheck
+def.trickle.uiCall_thimble2Take = _thimbleCheck
 
 
 function def:uiCall_update(dt)
