@@ -88,6 +88,12 @@
 
         <pre>scr_x, scr_y</pre>: Scroll registers, applicable to a widget's children.
 
+		<pre>awake</pre>: When false, the widget and its descendants are skipped when updating.
+
+        <pre>can_have_thimble</pre>: When true, widget can obtain the thimble (the UI cursor). As a prerequisite, <pre>awake</pre> must also be true.
+
+        <pre>allow_hover</pre>: When true, widget is eligible for the 'current_hover' context state. When false, it and all of its descendants are skipped.
+
 
         <title>Fields with per-instance metatable dummy values</title>
 
@@ -116,13 +122,6 @@
         * nil: the widget is still part of the context.
         * "dying": the widget is in the process of being removed from the context.
         * "dead": The widget has been removed from the context.
-
-
-        <title>Context-to-widget behavior flags</title>
-
-        <pre>can_have_thimble</pre>: When true, widget can obtain the thimble (the UI cursor).
-
-        <pre>allow_hover</pre>: When true, widget is eligible for the 'current_hover' context state. When false, it and all of its descendants are skipped.
 
 
         <title>Fields applicable to widgets with children</title>

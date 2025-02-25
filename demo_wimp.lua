@@ -24,8 +24,8 @@ local demo_quick_launch = {
 1) LÖVE Text Input should start in a disabled state, and it should not be changed by user code while the ProdUI
 context is active. Widgets will toggle this on and off as they take and release the thimble (the ProdUI keyboard focus).
 If we leave it on all the time, there is a chance that keystrokes will generate conflicting keypressed and textinput
-events. ProdUI discards any love.textinput events while love.keyboard.hasTextInput() is false, and by only turning on
-TextInput when it's needed, this should hopefully curb most instances of conflicts.
+events. ProdUI discards any love.textinput events while love.keyboard.hasTextInput() is false, and we can prevent
+conflicts by only turning on TextInput when it's needed.
 
 Here is one example of a conflict: User selects a command in a menu by pressing the space bar. The keypressed event
 callback processes the command, closes the menu, and moves keyboard focus to a text box. Then, the textinput event
