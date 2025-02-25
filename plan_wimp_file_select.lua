@@ -6,9 +6,6 @@ local commonWimp = require("prod_ui.common.common_wimp")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
--- NativeFS
-local nativefs = require("lib.nativefs")
-
 
 local plan = {}
 
@@ -135,10 +132,15 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 			local fs_type = selected_item.fs_type
 
 			if fs_type == "directory" or fs_type == "symlink" then
-				local ugh = self.usr_path .. "/" .. fs_name
-				--print("ugh", self.usr_path .. "/" .. fs_name)
-				--love.system.openURL(self.usr_path .. "/" .. fs_name)
-				self:trySetPath(ugh)
+				local path
+				if #self.usr_path > 0 then
+					path = self.usr_path .. "/" .. fs_name
+				else
+					path = fs_name
+				end
+
+				--love.system.openURL(path)
+				self:trySetPath(path)
 				self:reshape()
 				self:selectionInView(true)
 
@@ -156,7 +158,7 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 
 	elseif scancode == "backspace" then
 		-- Go up one directory
-		local up = string.match(self.usr_path, "^(.+)/.*$") or "/"
+		local up = string.match(self.usr_path, "^(.+)/.*$") or ""
 		print("up", up)
 		if up then
 			self:trySetPath(up)
@@ -238,7 +240,7 @@ local function menu_trySetPath(self, path)
 	-- XXX TODO
 	--]]
 
-	local info = nativefs.getInfo(path)
+	local info = love.filesystem.getInfo(path)
 	if not info
 	or (info.type == "symlink" and not love.filesystem.areSymlinksEnabled())
 	or (info.type ~= "directory" and info.type ~= "symlink")
@@ -250,6 +252,9 @@ local function menu_trySetPath(self, path)
 	self:getDirectoryItems()
 
 	self:reshape()
+
+	print("path: |" .. path .. "|")
+	print("self.usr_path: |" .. self.usr_path .. "|")
 end
 
 
@@ -270,17 +275,17 @@ local function menu_getDirectoryItems(self, filter_type)
 
 	self:menuSetDefaultSelection()
 
-	local items = nativefs.getDirectoryItemsInfo(self.usr_path, filter_type)
+	print("self.usr_path", self.usr_path, "filter_type", filter_type)
+	local items = love.filesystem.getDirectoryItems(self.usr_path)
+	local base_path = #self.usr_path > 0 and (self.usr_path .. "/") or ""
 
-	for k, v in pairs(items) do
-		local item = setupMenuItem(self, v)
-
-		--[[
-		print("", k, v)
-		for kk, vv in pairs(v) do
-			print("","",kk,vv)
+	for i, fs_path in ipairs(items) do
+		local v = love.filesystem.getInfo(base_path .. fs_path)
+		print("i", base_path .. fs_path, v)
+		if v then
+			v.name = fs_path
+			local item = setupMenuItem(self, v)
 		end
-		--]]
 	end
 
 	enforceDefaultPrimaryColumn(self)
@@ -342,7 +347,7 @@ function plan.make(root)
 	menu_tab.wid_defaultKeyNav = fileSelectorKeyNav
 	menu_tab.trySetPath = menu_trySetPath
 
-	menu_tab:trySetPath("/home/tmd/test_prod_ui")
+	menu_tab:trySetPath("")
 
 	menu_tab:reshape()
 
