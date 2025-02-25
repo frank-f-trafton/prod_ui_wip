@@ -8,7 +8,6 @@ return {
 	--allow_drag_move
 	--allow_maximize
 	--allow_resize
-	frame_render_shadow = "*wimp/frame_render_shadow",
 	--header_visible = true,
 	header_button_side = "*wimp/header_button_side",
 	header_show_close_button = "*wimp/header_show_close_button",

@@ -190,7 +190,6 @@ function themeDef.newInstance(scale)
 	inst.wimp.frame_resize_diagonal = math.max(0, math.floor(12 * scale))
 
 	-- Theme -> Skin settings
-	inst.wimp.frame_render_shadow = true
 	inst.wimp.header_button_side = "right"
 	inst.wimp.header_size = "normal"
 	inst.wimp.header_show_close_button = true
