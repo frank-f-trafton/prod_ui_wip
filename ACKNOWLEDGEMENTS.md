@@ -4,7 +4,7 @@
 
 * [inspect.lua](https://github.com/kikito/inspect.lua) is used for debugging.
 
-* [nativefs](https://github.com/EngineerSmith/nativefs/tree/main) is used in the theme building script, and also in the file selector example.
+* [nativefs](https://github.com/EngineerSmith/nativefs/tree/main) is used in the theme building script.
 
 * strict.lua is used for testing.
 
