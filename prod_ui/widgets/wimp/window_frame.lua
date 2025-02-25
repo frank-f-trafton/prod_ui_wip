@@ -253,7 +253,7 @@ function def:setFrameWorkspace(workspace)
 
 	self.workspace = workspace
 
-	lgcUIFrame.assertFrameModalWorkspaces(self)
+	lgcUIFrame.assertFrameBlockWorkspaces(self)
 
 	self:_refreshWorkspaceState()
 	self.context.root:sortG2()
@@ -422,43 +422,43 @@ function def:uiCall_initialize(unselectable, view_level)
 
 	self.needs_update = true
 
-	-- Frame-modal widget links.
-	self.ref_modal_prev = false
-	self.ref_modal_next = false
+	-- Frame-blocking widget links.
+	self.ref_block_prev = false
+	self.ref_block_next = false
 end
 
 
-function def:setModal(target)
+function def:setFrameBlock(target)
 	uiShared.type1(1, target, "table")
 
 	if not target.frame_type or (target.frame_type ~= "window" and target.frame_type ~= "workspace") then
 		error("target must be a UI Frame of type 'window' or 'workspace'.")
 
-	-- You can chain modal frames together, but only one frame may be modal to another frame at a time.
-	elseif target.ref_modal_next then
-		error("target frame already has a modal reference set (target.ref_modal_next).")
+	-- You can chain blocked frames together, but only one frame may block another frame at a time.
+	elseif target.ref_block_next then
+		error("target frame already has a blocking reference set (target.ref_block_next).")
 
-	elseif self.ref_modal_prev then
-		error("this frame already has a modal reference set (self.ref_modal_prev).")
+	elseif self.ref_block_prev then
+		error("this frame already has a blocking reference set (self.ref_block_prev).")
 	end
 
-	self.ref_modal_prev = target
-	target.ref_modal_next = self
+	self.ref_block_prev = target
+	target.ref_block_next = self
 end
 
 
-function def:clearModal()
-	-- Frame-modal state must be popped last-to-first.
-	if self.ref_modal_next then
-		error("this frame still has a modal reference (self.ref_modal_next).")
+function def:clearFrameBlock()
+	-- Frame-blocking state must be popped last-to-first.
+	if self.ref_block_next then
+		error("this frame still has a blocking reference (self.ref_block_next).")
 
-	elseif not self.ref_modal_prev then
-		error("no modal target frame to clear (self.ref_modal_prev).")
+	elseif not self.ref_block_prev then
+		error("no blocking target frame to clear (self.ref_block_prev).")
 	end
 
-	local target = self.ref_modal_prev
-	self.ref_modal_prev = false
-	target.ref_modal_next = false
+	local target = self.ref_block_prev
+	self.ref_block_prev = false
+	target.ref_block_next = false
 
 	return target
 end
@@ -483,7 +483,7 @@ end
 
 
 function def.trickle:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		self.context.current_hover = false
 		return true
 	end
@@ -904,10 +904,10 @@ end
 
 function def:uiCall_destroy(inst)
 	if self == inst then
-		-- Clean up any existing frame-modal connection. Note that this function will raise an error if another frame
+		-- Clean up any existing frame-blocking connection. Note that this function will raise an error if another frame
 		-- is still blocking this frame.
-		if self.ref_modal_prev then
-			local target = self:clearModal()
+		if self.ref_block_prev then
+			local target = self:clearFrameBlock()
 
 			-- Clean up the target's focus a bit.
 			--[[
@@ -921,7 +921,7 @@ function def:uiCall_destroy(inst)
 			--]]
 		end
 
-		-- Clean up root-level modal level, if applicable.
+		-- Clean up modal level, if applicable.
 		local root = self:getRootWidget()
 		if self == root.modals[#root.modals] then
 			root:sendEvent("rootCall_clearModalFrame", self)

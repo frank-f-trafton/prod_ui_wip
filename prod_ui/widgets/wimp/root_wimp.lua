@@ -144,7 +144,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	-- If root-modal state is active:
+	-- If modal state is active:
 	-- 1) Block clicking on any widget that is not part of the top modal window frame
 	--    or pop-ups.
 	-- 2) If the top modal frame doesn't have root selection focus, then force it.
@@ -379,10 +379,9 @@ function def:setSelectedFrame(inst, set_new_order)
 end
 
 
--- Select the topmost active Window Frame, or the active Workspace, or nothing. Hidden Window
---	Frames are excluded.
+-- Select the topmost active Window Frame, or the active Workspace, or nothing. Hidden Window Frames are excluded.
 -- @param exclude Optionally provide one frame to exclude from the search. Use this when the current selected
---	UI Frame is in the process of being destroyed. (Root-modal state should have been cleaned up before this
+--	UI Frame is in the process of being destroyed. (Modal/frame-blocking state should have been cleaned up before this
 --	point.)
 function def:selectTopFrame(exclude)
 	print("selectTopFrame: start")
@@ -396,12 +395,12 @@ function def:selectTopFrame(exclude)
 		--print("child #", i)
 		local child = self.children[i]
 
-		--print("frame_type", child.frame_type, "ref_modal_next", child.ref_modal_next, "~= exclude", child ~= exclude)
+		--print("frame_type", child.frame_type, "ref_block_next", child.ref_block_next, "~= exclude", child ~= exclude)
 		if child.frame_type == "window"
 		and child.frame_is_selectable
 		and not child.frame_hidden
 		and (not child.workspace or child.workspace == self.workspace)
-		and not child.ref_modal_next
+		and not child.ref_block_next
 		and child ~= exclude
 		then
 			--print("selected window: ", i, child, child.id, child.frame_is_selectable)
@@ -434,7 +433,7 @@ local function frameSearch(self, dir, v1, v2)
 		if wid_g2.frame_type
 		and wid_g2.frame_is_selectable
 		and not wid_g2.frame_hidden
-		and not wid_g2.ref_modal_next
+		and not wid_g2.ref_block_next
 		and _isActiveFrame(self, wid_g2)
 		and wid_g2.order_id > v1 and wid_g2.order_id < v2
 		then
@@ -459,7 +458,7 @@ function def:stepSelectedFrame(dir)
 		error("argument #1: invalid direction.")
 	end
 
-	-- Don't step frames when any root-modal frame is active.
+	-- Don't step frames when any modal frame is active.
 	if #self.modals > 0 then
 		return false
 	end
@@ -468,8 +467,8 @@ function def:stepSelectedFrame(dir)
 	We need to keep the step-through order of frames separate from their position in the root's list of children.
 
 	Traveling left-to-right: find the next-biggest order ID. If this is the biggest, search again for the smallest
-	ID. Right-to-left is the opposite. Ignore widgets that are not frames, and frames which are being blocked by a
-	frame-modal reference.
+	ID. Right-to-left is the opposite. Ignore widgets that are not frames, and frames which are being blocked by
+	another frame.
 	--]]
 
 	local current = self.selected_frame
@@ -569,12 +568,12 @@ function def:rootCall_setModalFrame(inst)
 		error("only Window Frames can be assigned as modal.")
 
 	elseif inst.workspace then
-		error("Window Frames that are associated with a Workspace cannot be assigned as root-modal.")
+		error("Window Frames that are associated with a Workspace cannot be assigned as modal.")
 	end
 
 	for i, child in ipairs(self.modals) do
 		if child == inst then
-			error("this frame is already in the stack of root-modals.")
+			error("this frame is already in the stack of modals.")
 		end
 	end
 
@@ -587,7 +586,7 @@ function def:rootCall_clearModalFrame(inst)
 	uiShared.type1(1, inst, "table")
 
 	if self.modals[#self.modals] ~= inst then
-		error("tried to clear the root-modal status of a frame that is not at the top of the 'modals' stack.")
+		error("tried to clear the modal status of a frame that is not at the top of the 'modals' stack.")
 	end
 
 	self.modals[#self.modals] = nil

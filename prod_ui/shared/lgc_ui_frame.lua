@@ -22,48 +22,48 @@ lgcUIFrame.types = {workspace=true, window=true}
 lgcUIFrame.view_levels = {low=3, normal=4, high=5}
 
 
-function lgcUIFrame.assertRootModalNoWorkspace(self)
+function lgcUIFrame.assertModalNoWorkspace(self)
 	local modals = self.context.root.modals
 	for i, wid_g2 in ipairs(modals) do
 		if wid_g2 == self then
-			error("Root-modal Window Frames cannot be associated with any Workspace.")
+			error("Modal Window Frames cannot be associated with any Workspace.")
 		end
 	end
 end
 
 
-function lgcUIFrame.assertFrameModalWorkspaces(self)
+function lgcUIFrame.assertFrameBlockWorkspaces(self)
 	local workspace = self.workspace
 	local wid = self
 
 	-- check back-to-front
-	while wid.ref_modal_next do
-		wid = wid.ref_modal_next
+	while wid.ref_block_next do
+		wid = wid.ref_block_next
 	end
 	while wid do
 		if wid.frame_type == "window" and workspace ~= wid.workspace then
-			error("all Frame-modal Window Frames must share the same Workspace (or all be unassociated).")
+			error("all blocking Window Frames in a sequence must share the same Workspace (or all be unassociated).")
 		end
 
-		wid = self.ref_modal_prev
+		wid = self.ref_block_prev
 	end
 end
 
 
-function lgcUIFrame.getLastModalFrame(self)
-	if not self.ref_modal_next then
+function lgcUIFrame.getLastBlockingFrame(self)
+	if not self.ref_block_next then
 		return
 	end
 	local wid = self
-	while wid.ref_modal_next do
-		wid = wid.ref_modal_next
+	while wid.ref_block_next do
+		wid = wid.ref_block_next
 	end
 	return wid
 end
 
 
 function lgcUIFrame.tryUnbankingThimble1(self)
-	-- Check modal state before calling.
+	-- Check modal/frame-blocking state before calling.
 
 	local wid_banked = self.banked_thimble1
 
@@ -128,7 +128,7 @@ end
 
 
 function lgcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 
@@ -139,7 +139,7 @@ end
 
 
 function lgcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 
@@ -150,7 +150,7 @@ end
 
 
 function lgcUIFrame.logic_keyReleased(self, inst, key, scancode)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 
@@ -161,7 +161,7 @@ end
 
 
 function lgcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 
@@ -172,18 +172,18 @@ end
 
 
 function lgcUIFrame.logic_trickleTextInput(self, inst, text)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 end
 
 
 function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch, presses)
-	if self.ref_modal_next then
-		local modal_last = lgcUIFrame.getLastModalFrame(self)
+	if self.ref_block_next then
+		local block_last = lgcUIFrame.getLastBlockingFrame(self)
 
-		if modal_last then
-			self.context.root:setSelectedFrame(modal_last, true)
+		if block_last then
+			self.context.root:setSelectedFrame(block_last, true)
 		end
 		self.context.current_pressed = false
 		return true
@@ -221,14 +221,14 @@ end
 
 
 function lgcUIFrame.logic_tricklePointerWheel(self, inst, x, y)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 end
 
 
 function lgcUIFrame.logic_pointerWheel(self, inst, x, y)
-	if self.ref_modal_next then
+	if self.ref_block_next then
 		return
 	end
 
@@ -253,7 +253,7 @@ function lgcUIFrame.instanceSetup(self, unselectable)
 	-- When false:
 	-- * No widget in the frame should be capable of taking the thimble.
 	--   (Otherwise, why not just make it selectable?)
-	-- * The frame should never be made modal, or be part of a modal chain.
+	-- * The frame should never be made modal, or be part of a frame-blocking chain.
 	self.frame_is_selectable = not unselectable
 
 	self.can_have_thimble = self.frame_is_selectable
