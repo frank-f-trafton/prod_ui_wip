@@ -89,8 +89,14 @@ end
 
 
 function def:setHeaderVisible(enabled)
-	self:writeSetting("header_visible", not not enabled)
-	self:reshape(true)
+	local old_visible = not not self.header_visible
+	enabled = not not enabled
+	self:writeSetting("header_visible", enabled)
+	if old_visible ~= self.header_visible then
+		local sx, sy = self:scrollGetXY()
+		self:reshape(true)
+		self:scrollHV(sx, sy, true)
+	end
 end
 
 
