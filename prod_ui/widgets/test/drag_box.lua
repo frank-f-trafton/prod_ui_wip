@@ -67,14 +67,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if button == self.context.mouse_pressed_button then
 			if button == 1 then
 				self.pressed = true
-				local a_x, a_y = self:getAbsolutePosition()
+				local ax, ay = self:getAbsolutePosition()
 
 				if self.center_on_pointer then
 					self.mouse_ox = self.w/2
 					self.mouse_oy = self.h/2
 				else
-					self.mouse_ox = x - a_x
-					self.mouse_oy = y - a_y
+					self.mouse_ox = x - ax
+					self.mouse_oy = y - ay
 				end
 
 				self:captureFocus()
@@ -96,8 +96,8 @@ function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
 
 	local p_x, p_y = parent:getAbsolutePosition()
 
-	self.x = x - p_x - self.mouse_ox
-	self.y = y - p_y - self.mouse_oy
+	self.x = x - p_x + parent.scr_x - self.mouse_ox
+	self.y = y - p_y + parent.scr_y - self.mouse_oy
 
 	self.x = math.max(self.drag_min_x, math.min(self.x, self.drag_max_x))
 	self.y = math.max(self.drag_min_y, math.min(self.y, self.drag_max_y))
