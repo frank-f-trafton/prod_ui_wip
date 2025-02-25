@@ -37,7 +37,7 @@ function plan.make(root)
 	frame:reshape(true)
 	frame:center(false, true)
 
-	-- Root-modal frame test
+	-- Modal frame test
 	do
 		local btn = frame:addChild("base/button")
 		btn.x = 64
@@ -45,7 +45,7 @@ function plan.make(root)
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
-		btn:setLabel("Root-Modal Test")
+		btn:setLabel("Modal Test")
 		btn.wid_buttonAction = function(self)
 			local root = self:getRootWidget()
 
@@ -59,7 +59,7 @@ function plan.make(root)
 				dialog:initialize()
 				root:sendEvent("rootCall_setModalFrame", dialog)
 				dialog:reshape(true)
-				dialog:setFrameTitle("Root-Modal Test")
+				dialog:setFrameTitle("Modal Test")
 
 				if dialog.scr_h then
 					dialog.scr_h.auto_hide = true
@@ -113,7 +113,7 @@ function plan.make(root)
 		end
 	end
 
-	-- Frame-modal test
+	-- Frame-blocking test
 	do
 		local btn = frame:addChild("base/button")
 		btn.x = 64
@@ -121,7 +121,7 @@ function plan.make(root)
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
-		btn:setLabel("Frame-Modal Test")
+		btn:setLabel("Frame-Blocking Test")
 		btn.wid_buttonAction = function(self)
 			local root = self:getRootWidget()
 
@@ -133,9 +133,9 @@ function plan.make(root)
 				dialog.w = 448
 				dialog.h = 256
 				dialog:initialize()
-				dialog:setModal(frame)
+				dialog:setFrameBlock(frame)
 				dialog:reshape(true)
-				dialog:setFrameTitle("Frame-Modal test")
+				dialog:setFrameTitle("Frame-Blocking test")
 
 				if dialog.scr_h then
 					dialog.scr_h.auto_hide = true

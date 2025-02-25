@@ -54,10 +54,10 @@ function def:uiCall_initialize(unselectable)
 
 	self.press_busy = false
 
-	-- Frame-modal widget link.
+	-- Frame-blocking widget link.
 	-- Workspaces can be blocked by Window Frames, but they themselves cannot block
 	-- other UI Frames.
-	self.ref_modal_next = false
+	self.ref_block_next = false
 
 	self:skinSetRefs()
 	self:skinInstall()
