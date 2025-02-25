@@ -216,6 +216,10 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.mouse_x = 0
 	self.mouse_y = 0
 
+	-- When true, 'wheelmoved' events target the current top thimble rather than the
+	-- currently hovered widget.
+	self.wheelmoved_to_thimble = false
+
 	--[[
 	XXX: ^ LÖVE 11.5+ will clamp to window bounds.
 	https://github.com/love2d/love/commit/e582677344954d43369fb1a16a520b75c610cb0a
@@ -659,7 +663,13 @@ function _mt_context:love_wheelmoved(x, y)
 
 	mouseLogic.checkHover(self, 0, 0)
 
-	if self.current_hover then
+	if self.wheelmoved_to_thimble then
+		local wid = self.thimble2 or self.thimble1
+		if wid then
+			wid:cycleEvent("uiCall_pointerWheel", wid, x, y)
+		end
+
+	elseif self.current_hover then
 		self.current_hover:cycleEvent("uiCall_pointerWheel", self.current_hover, x, y)
 	end
 end

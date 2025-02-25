@@ -30,7 +30,6 @@ local def = {
 		allow_drag_move = true,
 		allow_maximize = true, -- depends on 'allow_resize' being true
 		allow_resize = true,
-		frame_render_shadow = false,
 		header_visible = true,
 		header_button_side = "right", -- "left", "right"
 		header_show_close_button = true,
@@ -973,9 +972,11 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local root = self.context.root
 
 		-- Window shadow
-		if self.frame_render_shadow then
+		local render_shadow = self.context.settings.wimp.window_frame.render_shadow
+		if render_shadow == "all" or render_shadow == "active" and self == root.selected_frame then
 			love.graphics.setColor(skin.color_shadow)
 			uiGraphics.drawSlice(skin.slc_shadow,
 				-skin.shadow_extrude,
@@ -992,7 +993,7 @@ def.default_skinner = {
 		-- Window header
 		if self.header_visible then
 			local res = _getHeaderSkinTable(self)
-			local res2 = self.parent.selected_frame == self and res.res_selected or res.res_unselected
+			local res2 = root.selected_frame == self and res.res_selected or res.res_unselected
 			local slc_header_body = res.header_slc_body
 			love.graphics.setColor(res2.col_header_fill)
 			uiGraphics.drawSlice(slc_header_body, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
