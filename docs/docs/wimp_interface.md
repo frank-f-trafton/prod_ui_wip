@@ -2,7 +2,7 @@
 
 ## WIMP Root
 
-The [WIMP Root](wimp_widgets.md#wimp-root) is the base of the widget tree. It manages state related to the WIMP interface, such as enforcing modal state.
+The [WIMP Root](widgets/wimp/root_wimp.md) is the base of the widget tree. It manages state related to the WIMP interface, such as enforcing modal state.
 
 
 ## UI Frames
@@ -16,12 +16,12 @@ There are two kinds of UI Frame: **Workspaces** and **Window Frames**.
 
 ### Workspace Frames
 
-A [Workspace](wimp_widgets.md#wimp-workspace) fills most (or all) of the application window. There can be up to one active (awake) workspace at a time, and any number of dormant workspaces.
+A [Workspace](widgets/wimp/workspace.md) fills most (or all) of the application window. There can be up to one active (awake) workspace at a time, and any number of dormant workspaces.
 
 
 ### Window Frames
 
-[Window Frames](wimp_widgets.md#wimp-window-frame) are movable rectangles that appear over the Workspace. There can be any number of Window Frames, and they support the following configurations:
+[Window Frames](widgets/wimp/window_frame.md) are movable rectangles that appear over the Workspace. There can be any number of Window Frames, and they support the following configurations:
 
 * **Modal**: the topmost modal frame blocks interaction with all other frames until dismissed.
 
