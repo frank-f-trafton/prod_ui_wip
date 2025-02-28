@@ -1,1 +1,5 @@
+# Generated documentation
 /docs/site/
+
+# Kate (text editor) swap files
+*.kate-swp

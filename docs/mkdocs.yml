@@ -1,6 +1,0 @@
-site_name: ProdUI (Beta) Documentation
-nav:
-  - Home: 'index.md'
-  - Widgets: 'widgets.md'
-
-not_in_nav: widgets/* reference/*
