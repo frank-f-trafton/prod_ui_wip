@@ -7,8 +7,6 @@ This will eventually be a static site generated with [MkDocs](https://www.mkdocs
 
 * [Installation](reference/installation.md)
 
-* [Built-in Widgets](widgets.md)
-
 
 ## License
 
