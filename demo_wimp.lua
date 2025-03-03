@@ -5,16 +5,16 @@ print("Start WIMP Demo.")
 
 -- Plans to launch upon starting the demo.
 local demo_quick_launch = {
-	--"plan_wimp_workspaces",
-	--"plan_frame_unselectable",
-	--"plan_dial",
-	--"plan_wimp_menu_tab",
-	--"plan_wimp_frame",
-	--"plan_demo_main",
-	--"plan_properties_box",
-	--"plan_button_split",
-	--"plan_wimp_tree_box",
-	--"plan_wimp_list_box",
+	--"wimp_workspaces",
+	--"frame_unselectable",
+	--"dial",
+	--"wimp_menu_tab",
+	--"wimp_frame",
+	--"demo_main",
+	--"properties_box",
+	--"button_split",
+	--"wimp_tree_box",
+	--"wimp_list_box",
 }
 
 
@@ -101,8 +101,6 @@ local app_settings = require("prod_ui.default_settings")
 
 local function newWimpContext()
 	local context = uiContext.newContext("prod_ui", app_settings)
-
-
 
 	-- Config/settings specific to this demo.
 	context.app = {
@@ -275,10 +273,10 @@ end
 
 
 local function _launchSelector(root)
-	local plan_name = "plan_demo_selection"
+	local plan_name = "demo_selection"
 	local frame = root:findTag("FRAME:" .. plan_name)
 	if not frame then
-		local planDemoSelect = require(plan_name)
+		local planDemoSelect = uiRes.loadLuaFile("demo_wimp_plans/" .. plan_name .. ".lua")
 		frame = planDemoSelect.make(root)
 		frame.tag = "FRAME:" .. plan_name
 	end
@@ -287,10 +285,10 @@ end
 
 
 local function _launchWidgetTreeView(root)
-	local plan_name = "plan_wimp_widget_tree"
+	local plan_name = "wimp_widget_tree"
 	local frame = root:findTag("FRAME:" .. plan_name)
 	if not frame then
-		local planWidgetTreeView = require(plan_name)
+		local planWidgetTreeView = uiRes.loadLuaFile("demo_wimp_plans/" .. plan_name .. ".lua")
 		frame = planWidgetTreeView.make(root)
 		frame.tag = "FRAME:" .. plan_name
 	end
