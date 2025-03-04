@@ -6,7 +6,7 @@ local commonWimp = require("prod_ui.common.common_wimp")
 local pTable = require("prod_ui.lib.pile_table")
 
 
-function plan.make(root)
+function plan.makeWindowFrame(root)
 	local context = root.context
 
 	-- Clone the skin to avoid messing up other frames.

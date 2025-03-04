@@ -7,20 +7,14 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Widget Containers")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Widget Containers")
-
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
 	-- Base container
-	local ctnr = frame:addChild("base/container")
+	local ctnr = panel:addChild("base/container")
 	ctnr.x = 0
 	ctnr.y = 0
 	ctnr.w = 160
@@ -40,7 +34,7 @@ function plan.make(root)
 
 
 	-- Simple container
-	local cntr_s = frame:addChild("base/container_simple")
+	local cntr_s = panel:addChild("base/container_simple")
 	cntr_s.x, cntr_s.y, cntr_s.w, cntr_s.h = 400, 16, 64, 64
 	cntr_s.usr_text = "<Simple Container>"
 	cntr_s.wid_pressed = function()
@@ -60,11 +54,6 @@ function plan.make(root)
 		love.graphics.pop()
 	end
 	cntr_s:initialize()
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

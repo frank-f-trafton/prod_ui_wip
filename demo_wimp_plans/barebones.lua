@@ -7,21 +7,16 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Barebones widgets")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Barebones widgets")
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
 	local xx, yy = 0, 0
 	local ww, hh = 224, 64
 
-	local bb_button = frame:addChild("barebones/button")
+	local bb_button = panel:addChild("barebones/button")
 	bb_button.x = xx
 	bb_button.y = yy
 	bb_button.w = ww
@@ -36,7 +31,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	local bb_rep = frame:addChild("barebones/button_repeat")
+	local bb_rep = panel:addChild("barebones/button_repeat")
 	bb_rep.x = xx
 	bb_rep.y = yy
 	bb_rep.w = ww
@@ -53,7 +48,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	local bb_instant = frame:addChild("barebones/button_instant")
+	local bb_instant = panel:addChild("barebones/button_instant")
 	bb_instant.x = xx
 	bb_instant.y = yy
 	bb_instant.w = ww
@@ -70,7 +65,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	local bb_stick = frame:addChild("barebones/button_sticky")
+	local bb_stick = panel:addChild("barebones/button_sticky")
 	bb_stick.x = xx
 	bb_stick.y = yy
 	bb_stick.w = ww
@@ -85,7 +80,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	local bb_checkbox = frame:addChild("barebones/checkbox")
+	local bb_checkbox = panel:addChild("barebones/checkbox")
 	bb_checkbox.x = xx
 	bb_checkbox.y = yy
 	bb_checkbox.w = ww
@@ -97,7 +92,7 @@ function plan.make(root)
 	yy = yy + hh
 
 	local bb_radio
-	bb_radio = frame:addChild("barebones/radio_button")
+	bb_radio = panel:addChild("barebones/radio_button")
 	bb_radio.x = xx
 	bb_radio.y = yy
 	bb_radio.w = ww
@@ -109,7 +104,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	bb_radio = frame:addChild("barebones/radio_button")
+	bb_radio = panel:addChild("barebones/radio_button")
 	bb_radio.x = xx
 	bb_radio.y = yy
 	bb_radio.w = ww
@@ -122,7 +117,7 @@ function plan.make(root)
 	yy = yy + hh
 
 	local bb_lbl
-	bb_lbl = frame:addChild("barebones/label")
+	bb_lbl = panel:addChild("barebones/label")
 	bb_lbl.x = xx
 	bb_lbl.y = yy
 	bb_lbl.w = ww
@@ -134,7 +129,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	bb_lbl = frame:addChild("barebones/label")
+	bb_lbl = panel:addChild("barebones/label")
 	bb_lbl.x = xx
 	bb_lbl.y = yy
 	bb_lbl.w = ww
@@ -146,7 +141,7 @@ function plan.make(root)
 
 	yy = yy + hh
 
-	local bb_sl1 = frame:addChild("barebones/slider_bar")
+	local bb_sl1 = panel:addChild("barebones/slider_bar")
 	bb_sl1.x = xx
 	bb_sl1.y = yy
 	bb_sl1.w = ww
@@ -160,9 +155,9 @@ function plan.make(root)
 	bb_sl1.slider_def = 0
 	bb_sl1.slider_max = 64
 
-	--yy = yy + hh
+	yy = yy + hh
 
-	local bb_sl2 = frame:addChild("barebones/slider_bar")
+	local bb_sl2 = panel:addChild("barebones/slider_bar")
 	bb_sl2.x = xx
 	bb_sl2.y = yy
 	bb_sl2.w = ww
@@ -178,7 +173,7 @@ function plan.make(root)
 
 	yy = yy + ww
 
-	local bb_input = frame:addChild("barebones/input_box")
+	local bb_input = panel:addChild("barebones/input_box")
 	bb_input.x = xx
 	bb_input.y = yy
 	bb_input.w = ww
@@ -187,11 +182,6 @@ function plan.make(root)
 
 	bb_input:setText("Barebones Input Box")
 	--bb_input:setMaxCodePoints(4)
-
-	frame:reshape()
-	frame:center(true, true)
-
-	return frame
 end
 
 

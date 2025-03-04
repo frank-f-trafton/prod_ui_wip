@@ -13,24 +13,20 @@ local uiLayout = require("prod_ui.ui_layout")
 local plan = {}
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	local context = panel.context
 
-	local frame = root:newWindowFrame()
-	frame.make_menu_bar = true
-	frame.w = 640--350
-	frame.h = 480--240
-	frame:initialize()
-	frame:setFrameTitle("LineEditor Test")
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	--title("LineEditor Test")
 
-	local c_bar = frame:addChild("base/container")
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
+
+	local c_bar = panel:addChild("base/container")
 	c_bar.h = 64
 	c_bar:initialize()
 
 	c_bar.lc_func = uiLayout.fitTop
-	uiLayout.register(frame, c_bar)
+	uiLayout.register(panel, c_bar)
 
 	--[[
 	local cbox_wrap = c_bar:addChild("base/checkbox")
@@ -51,7 +47,7 @@ function plan.make(root)
 	temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
 	temp_instructions:refreshText()
 
-	local text_box = frame:addChild("input/text_box_multi")
+	local text_box = panel:addChild("input/text_box_multi")
 	text_box.font = context.resources.fonts.p
 	text_box.x = 0
 	text_box.y = 0
@@ -72,60 +68,7 @@ function plan.make(root)
 	text_box:reshape()
 
 	text_box.lc_func = uiLayout.fitRemaining
-	uiLayout.register(frame, text_box)
-
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-
-	-- Set up menu
-	local menu_bar = frame:findTag("frame_menu_bar")
-	if menu_bar then
-		local def_file = {
-			{
-				type = "command",
-				text = "_N_ew",
-				text_shortcut = "Ctrl+N",
-				key_mnemonic = "n",
-				key_shortcut = "KC n",
-				callback = function(client, item) print("NEW!") end,
-			},
-			{
-				type = "command",
-				text = "_O_pen",
-				text_shortcut = "Ctrl+O",
-				key_mnemonic = "o",
-				key_shortcut = "KC o",
-				callback = function(client, item) print("OPEN!") end,
-			},
-			itemOps.def_separator,
-			{
-				type = "command",
-				text = "_Q_uit",
-				text_shortcut = "Ctrl+W",
-				callback = function(client, item) commonWimp.closeFrame(client) end,
-				key_mnemonic = "w",
-				key_shortcut = "KC w",
-			},
-		}
-		menu_bar:appendItem("category", {
-			text = "_F_ile",
-			key_mnemonic = "f",
-			pop_up_def = def_file,
-		})
-
-		menu_bar:arrangeItems()
-		menu_bar:resize()
-		menu_bar:reshape()
-		menu_bar:menuChangeCleanup()
-
-		-- Hook menu bar key commands to Window Frame
-		table.insert(frame.hooks_key_pressed, menu_bar.widHook_pressed)
-		table.insert(frame.hooks_key_released, menu_bar.widHook_released)
-	end
-
-	return frame
+	uiLayout.register(panel, text_box)
 end
 
 

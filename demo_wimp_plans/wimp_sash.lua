@@ -25,29 +25,24 @@ James Slough Zerbe: AUTOMOBILES [1915]
 This is a subject in which every boy is interested. While few mechanics have the opportunity to actually build an automobile, it is the knowledge, which he must acquire about every particular device used, that enables him to repair and put such machines in order. The aim of this book is to make the boy acquainted with each element, so that he may understand why it is made in that special way, and what the advantages and disadvantages are of the different types. To that end each structure is shown in detail as much as possible, and the parts separated so as to give a clear insight of the different functions, all of which are explained by original drawings specially prepared to aid the reader.]]
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Sashes")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Sashes")
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
-	local wid_a = frame:addChild("base/label")
+	local wid_a = panel:addChild("base/label")
 	wid_a.x = 0
 	wid_a.y = 0
 	wid_a.w = 256
 	wid_a.h = 256
 	wid_a.lc_func = uiLayout.fitLeft
 	wid_a:initialize()
-	uiLayout.register(frame, wid_a)
+	uiLayout.register(panel, wid_a)
 	wid_a:setLabel(_text1, "multi")
 	wid_a:reshape(true)
 
-	local wid_sash = frame:addChild("wimp/sash")
+	local wid_sash = panel:addChild("wimp/sash")
 	wid_a.x = 0
 	wid_a.y = 0
 	wid_a.w = 8
@@ -55,25 +50,20 @@ function plan.make(root)
 	wid_sash.lc_func = uiLayout.fitLeft
 	wid_sash:initialize()
 	wid_sash:setAttachedWidget(wid_a)
-	uiLayout.register(frame, wid_sash)
+	uiLayout.register(panel, wid_sash)
 
-	local wid_b = frame:addChild("base/label")
+	local wid_b = panel:addChild("base/label")
 	wid_a.x = 0
 	wid_a.y = 0
 	wid_a.w = 256
 	wid_a.h = 256
 	wid_b.lc_func = uiLayout.fitRemaining
 	wid_b:initialize()
-	uiLayout.register(frame, wid_b)
+	uiLayout.register(panel, wid_b)
 	wid_b:setLabel(_text2, "multi")
 	wid_b:reshape(true)
 
-	frame:reshape(true)
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
+	panel:reshape(true)
 end
 
 

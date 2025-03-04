@@ -7,10 +7,10 @@
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -35,28 +35,21 @@ local rdo_item_align_h_action = function(self)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("TreeBox Test")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-
-	frame:setFrameTitle("TreeBox Test")
-
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
 	-- SkinDef clone
-	local resources = frame.context.resources
+	local resources = panel.context.resources
 	local skin_clone = resources:cloneSkinDef("tree_box1")
 
 	local function _userDestroy(self)
 		self.context.resources:removeSkinDef(skin_clone)
 	end
 
-	local tree_box = frame:addChild("wimp/tree_box")
+	local tree_box = panel:addChild("wimp/tree_box")
 	tree_box.x = 0
 	tree_box.y = 0
 	tree_box.w = 224
@@ -111,12 +104,12 @@ function plan.make(root)
 
 	local wx, wy, ww, wh = 256, 0, 256, 32
 
-	makeLabel(frame, wx, wy, ww, wh, "Item Horizontal Alignment", "single")
+	makeLabel(panel, wx, wy, ww, wh, "Item Horizontal Alignment", "single")
 
 	wy = wy + wh
 
 	local rdo_btn
-	rdo_btn = frame:addChild("barebones/radio_button")
+	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "tb_item_h_align"
@@ -126,7 +119,7 @@ function plan.make(root)
 
 	wy = wy + wh
 
-	rdo_btn = frame:addChild("barebones/radio_button")
+	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "tb_item_h_align"
@@ -137,7 +130,7 @@ function plan.make(root)
 	wy = wy + wh
 	wy = wy + wh
 
-	local sld = frame:addChild("barebones/slider_bar")
+	local sld = panel:addChild("barebones/slider_bar")
 	sld.x = wx
 	sld.y = wy
 	sld.w = ww
@@ -160,7 +153,7 @@ function plan.make(root)
 
 	wy = wy + wh
 
-	local sld = frame:addChild("barebones/slider_bar")
+	local sld = panel:addChild("barebones/slider_bar")
 	sld.x = wx
 	sld.y = wy
 	sld.w = ww
@@ -185,7 +178,7 @@ function plan.make(root)
 	wy = wy + wh
 
 
-	local chk = frame:addChild("barebones/checkbox")
+	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
 	chk:setLabel("Draw pipes")
@@ -202,7 +195,7 @@ function plan.make(root)
 
 	wy = wy + wh
 
-	local chk = frame:addChild("barebones/checkbox")
+	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
 	chk:setLabel("Draw icons")
@@ -217,7 +210,7 @@ function plan.make(root)
 
 	wy = wy + wh
 
-	local chk = frame:addChild("barebones/checkbox")
+	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
 	chk:setLabel("Expanders enabled")
@@ -231,11 +224,6 @@ function plan.make(root)
 	end
 
 	wy = wy + wh
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

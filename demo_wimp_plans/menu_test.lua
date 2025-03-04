@@ -99,18 +99,13 @@ local function testMenuKeyPressed(self, key, scancode, isrepeat)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Menu Test")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Menu Test")
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
-	local menu1 = frame:addChild("base/menu")
+	local menu1 = panel:addChild("base/menu")
 	menu1.x = 16
 	menu1.y = 16
 	menu1.w = 400
@@ -122,11 +117,6 @@ function plan.make(root)
 	menu1:setScrollBars(true, true)
 
 	menu1:reshape()
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

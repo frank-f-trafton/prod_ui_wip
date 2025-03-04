@@ -129,7 +129,7 @@ local function tree_userDestroy(self)
 end
 
 
-function plan.make(root)
+function plan.makeWindowFrame(root)
 	local context = root.context
 
 	local frame = root:newWindowFrame()
@@ -152,7 +152,7 @@ function plan.make(root)
 	chk_exclude:initialize()
 
 	chk_vp:setLabel("Show Viewports")
-	chk_vp:setChecked(frame.context.app.dbg_vp.active)
+	chk_vp:setChecked(context.app.dbg_vp.active)
 
 	chk_vp.wid_buttonAction = function(self)
 		local vp = self.context.app.dbg_vp
@@ -164,7 +164,7 @@ function plan.make(root)
 
 
 	chk_highlight:setLabel("Highlight Selected")
-	chk_highlight:setChecked(frame.context.app.dbg_outline.active)
+	chk_highlight:setChecked(context.app.dbg_outline.active)
 
 	chk_highlight.wid_buttonAction = function(self)
 		local outline = self.context.app.dbg_outline

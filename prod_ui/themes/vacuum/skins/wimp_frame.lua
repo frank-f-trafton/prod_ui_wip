@@ -16,14 +16,13 @@ return {
 	header_size = "*wimp/header_size",
 	-- /settings
 
+	box = "*style/boxes/wimp_frame",
 	data_scroll = "*common/scroll_bar1",
 	scr_style = "*style/scroll_bar_styles/norm",
 
 	-- Padding when scrolling to put a widget into view.
 	in_view_pad_x = 0,
 	in_view_pad_y = 0,
-
-	box = "*style/boxes/wimp_frame",
 
 	slc_body = "*tex_slices/win_body",
 	slc_shadow = "*tex_slices/win_shadow",

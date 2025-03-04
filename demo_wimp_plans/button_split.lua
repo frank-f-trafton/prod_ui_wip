@@ -8,10 +8,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label:initialize()
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:setLabel(text, label_mode)
@@ -92,21 +92,14 @@ local function _radioPlacement(self)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Split Button")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 640
-	frame:initialize()
-
-	frame:setFrameTitle("Split Button")
-
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
 	-- SkinDef clone
-	local resources = frame.context.resources
+	local resources = panel.context.resources
 	local clone = resources:cloneSkinDef("button_split1")
 
 	local function _userDestroy(self)
@@ -114,7 +107,7 @@ function plan.make(root)
 	end
 
 	-- Split Button
-	local btn_spl = frame:addChild("wimp/button_split")
+	local btn_spl = panel:addChild("wimp/button_split")
 	btn_spl.x = 0
 	btn_spl.y = 0
 	btn_spl.w = 224
@@ -133,7 +126,7 @@ function plan.make(root)
 	local xx, yy, ww, hh = 256, 0, 256, 48
 
 	do
-		local chk = frame:addChild("base/checkbox")
+		local chk = panel:addChild("base/checkbox")
 		chk.x = xx
 		chk.y = yy
 		chk.w = ww
@@ -150,11 +143,11 @@ function plan.make(root)
 		yy = yy + hh
 	end
 
-	makeLabel(frame, xx, yy, ww, hh, "Aux Side", "single")
+	makeLabel(panel, xx, yy, ww, hh, "Aux Side", "single")
 	yy = yy + hh
 
 	do
-		local rdo = frame:addChild("barebones/radio_button")
+		local rdo = panel:addChild("barebones/radio_button")
 		rdo.x = xx
 		rdo.y = yy
 		rdo.w = ww
@@ -171,7 +164,7 @@ function plan.make(root)
 	end
 
 	do
-		local rdo = frame:addChild("barebones/radio_button")
+		local rdo = panel:addChild("barebones/radio_button")
 		rdo.x = xx
 		rdo.y = yy
 		rdo.w = ww
@@ -188,7 +181,7 @@ function plan.make(root)
 	end
 
 	do
-		local rdo = frame:addChild("barebones/radio_button")
+		local rdo = panel:addChild("barebones/radio_button")
 		rdo.x = xx
 		rdo.y = yy
 		rdo.w = ww
@@ -205,7 +198,7 @@ function plan.make(root)
 	end
 
 	do
-		local rdo = frame:addChild("barebones/radio_button")
+		local rdo = panel:addChild("barebones/radio_button")
 		rdo.x = xx
 		rdo.y = yy
 		rdo.w = ww
@@ -227,7 +220,7 @@ function plan.make(root)
 	yy = yy + math.floor(hh/2)
 
 	do
-		local sld = frame:addChild("barebones/slider_bar")
+		local sld = panel:addChild("barebones/slider_bar")
 		sld.x = xx
 		sld.y = yy
 		sld.w = ww
@@ -247,12 +240,6 @@ function plan.make(root)
 		end
 		sld:reshape()
 	end
-
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

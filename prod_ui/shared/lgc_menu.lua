@@ -1302,7 +1302,6 @@ end
 -- Implements click-and-drag behavior for uiCall_pointerDrag().
 function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	-- Confirm 'self.press_busy == "menu-drag"' before calling.
-
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
 	-- "cursor" mark mode overrides MN_drag_drop_mode when active (hold shift while clicking and dragging).
 	if self.MN_drag_drop_mode and self.MN_mark_mode ~= "toggle" and not self.MN_mark_index then

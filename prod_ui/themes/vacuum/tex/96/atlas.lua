@@ -11,148 +11,154 @@ return {
     arrow2_down = {
       h = 24,
       w = 24,
-      x = 53,
+      x = 79,
       y = 139
     },
     arrow2_left = {
       h = 24,
       w = 24,
-      x = 27,
+      x = 53,
       y = 139
     },
     arrow2_right = {
       h = 24,
       w = 24,
-      x = 1,
+      x = 27,
       y = 139
     },
     arrow2_up = {
       h = 24,
       w = 24,
-      x = 209,
-      y = 113
+      x = 1,
+      y = 139
     },
     arrow_down = {
       h = 24,
       w = 24,
-      x = 183,
+      x = 209,
       y = 113
     },
     arrow_left = {
       h = 24,
       w = 24,
-      x = 157,
+      x = 183,
       y = 113
     },
     arrow_right = {
       h = 24,
       w = 24,
-      x = 131,
+      x = 157,
       y = 113
     },
     arrow_up = {
       h = 24,
       w = 24,
-      x = 105,
+      x = 131,
       y = 113
     },
     button = {
       h = 24,
       w = 24,
-      x = 79,
+      x = 105,
       y = 113
     },
     button_disabled = {
       h = 24,
       w = 24,
-      x = 53,
+      x = 79,
       y = 113
     },
     button_hover = {
       h = 24,
       w = 24,
-      x = 27,
+      x = 53,
       y = 113
     },
     button_minor = {
       h = 12,
       w = 12,
-      x = 99,
+      x = 127,
       y = 179
     },
     button_minor_disabled = {
       h = 12,
       w = 12,
-      x = 85,
+      x = 113,
       y = 179
     },
     button_minor_hover = {
       h = 12,
       w = 12,
-      x = 71,
+      x = 99,
       y = 179
     },
     button_minor_press = {
       h = 12,
       w = 12,
-      x = 57,
+      x = 85,
       y = 179
     },
     button_press = {
       h = 24,
       w = 24,
-      x = 1,
+      x = 27,
       y = 113
     },
     checkbox_off = {
       h = 24,
       w = 24,
-      x = 209,
-      y = 87
+      x = 1,
+      y = 113
     },
     checkbox_off_hover = {
       h = 24,
       w = 24,
-      x = 183,
+      x = 209,
       y = 87
     },
     checkbox_off_press = {
       h = 24,
       w = 24,
-      x = 157,
+      x = 183,
       y = 87
     },
     checkbox_on = {
       h = 24,
       w = 24,
-      x = 131,
+      x = 157,
       y = 87
     },
     checkbox_on_hover = {
       h = 24,
       w = 24,
-      x = 105,
+      x = 131,
       y = 87
     },
     checkbox_on_press = {
       h = 24,
       w = 24,
-      x = 79,
+      x = 105,
       y = 87
     },
     checkbox_tri = {
       h = 24,
       w = 24,
-      x = 53,
+      x = 79,
       y = 87
     },
     checkbox_tri_hover = {
       h = 24,
       w = 24,
-      x = 27,
+      x = 53,
       y = 87
     },
     checkbox_tri_press = {
+      h = 24,
+      w = 24,
+      x = 27,
+      y = 87
+    },
+    container_body1 = {
       h = 24,
       w = 24,
       x = 1,
@@ -161,13 +167,13 @@ return {
     dropdown_body = {
       h = 16,
       w = 16,
-      x = 205,
+      x = 231,
       y = 139
     },
     dropdown_drawer = {
       h = 16,
       w = 16,
-      x = 187,
+      x = 213,
       y = 139
     },
     group_perimeter_a = {
@@ -197,31 +203,31 @@ return {
     icon_file = {
       h = 16,
       w = 16,
-      x = 169,
+      x = 195,
       y = 139
     },
     icon_folder = {
       h = 16,
       w = 16,
-      x = 151,
+      x = 177,
       y = 139
     },
     icon_symlink_overlay = {
       h = 16,
       w = 16,
-      x = 133,
+      x = 159,
       y = 139
     },
     ind_decrement = {
       h = 8,
       w = 8,
-      x = 173,
+      x = 201,
       y = 179
     },
     ind_increment = {
       h = 8,
       w = 8,
-      x = 163,
+      x = 191,
       y = 179
     },
     input_box = {
@@ -257,37 +263,37 @@ return {
     label = {
       h = 12,
       w = 12,
-      x = 43,
+      x = 71,
       y = 179
     },
     label_disabled = {
       h = 12,
       w = 12,
-      x = 29,
+      x = 57,
       y = 179
     },
     list_box_body = {
       h = 16,
       w = 16,
-      x = 115,
+      x = 141,
       y = 139
     },
     menu_bar_body = {
       h = 12,
       w = 4,
-      x = 251,
+      x = 249,
       y = 139
     },
     menu_check_off = {
       h = 16,
       w = 16,
-      x = 97,
+      x = 123,
       y = 139
     },
     menu_check_on = {
       h = 16,
       w = 16,
-      x = 79,
+      x = 105,
       y = 139
     },
     menu_pop_body = {
@@ -317,13 +323,13 @@ return {
     progress_back = {
       h = 8,
       w = 8,
-      x = 153,
+      x = 181,
       y = 179
     },
     progress_ichor = {
       h = 8,
       w = 3,
-      x = 183,
+      x = 211,
       y = 179
     },
     progress_overlay = {
@@ -371,38 +377,38 @@ return {
     sash_lr = {
       h = 8,
       w = 8,
-      x = 143,
+      x = 171,
       y = 179
     },
     sash_tb = {
       h = 8,
       w = 8,
-      x = 133,
+      x = 161,
       y = 179
     },
     scroll_button = {
       h = 12,
       w = 12,
-      x = 15,
+      x = 43,
       y = 179
     },
     scroll_button_disabled = {
       h = 12,
       w = 12,
-      x = 1,
+      x = 29,
       y = 179
     },
     scroll_button_hover = {
       h = 12,
       w = 12,
-      x = 239,
-      y = 165
+      x = 15,
+      y = 179
     },
     scroll_button_press = {
       h = 12,
       w = 12,
-      x = 225,
-      y = 165
+      x = 1,
+      y = 179
     },
     scroll_trough = {
       h = 3,
@@ -425,13 +431,13 @@ return {
     slider_trough_active = {
       h = 8,
       w = 8,
-      x = 123,
+      x = 151,
       y = 179
     },
     slider_trough_empty = {
       h = 8,
       w = 8,
-      x = 113,
+      x = 141,
       y = 179
     },
     slider_trough_tick_major = {
@@ -467,19 +473,19 @@ return {
     tabular_category_body = {
       h = 12,
       w = 12,
-      x = 211,
+      x = 239,
       y = 165
     },
     tabular_category_body_hover = {
       h = 12,
       w = 12,
-      x = 197,
+      x = 225,
       y = 165
     },
     tabular_category_body_press = {
       h = 12,
       w = 12,
-      x = 183,
+      x = 211,
       y = 165
     },
     win_body = {
@@ -521,49 +527,49 @@ return {
     winbutton_normal_disabled = {
       h = 12,
       w = 12,
-      x = 169,
+      x = 197,
       y = 165
     },
     winbutton_normal_hover = {
       h = 12,
       w = 12,
-      x = 155,
+      x = 183,
       y = 165
     },
     winbutton_normal_idle = {
       h = 12,
       w = 12,
-      x = 141,
+      x = 169,
       y = 165
     },
     winbutton_normal_press = {
       h = 12,
       w = 12,
-      x = 127,
+      x = 155,
       y = 165
     },
     winbutton_small_disabled = {
       h = 12,
       w = 12,
-      x = 113,
+      x = 141,
       y = 165
     },
     winbutton_small_hover = {
       h = 12,
       w = 12,
-      x = 99,
+      x = 127,
       y = 165
     },
     winbutton_small_idle = {
       h = 12,
       w = 12,
-      x = 85,
+      x = 113,
       y = 165
     },
     winbutton_small_press = {
       h = 12,
       w = 12,
-      x = 71,
+      x = 99,
       y = 165
     },
     wingraphic_large_close = {
@@ -587,38 +593,38 @@ return {
     wingraphic_normal_close = {
       h = 12,
       w = 12,
-      x = 57,
+      x = 85,
       y = 165
     },
     wingraphic_normal_maximize = {
       h = 12,
       w = 12,
-      x = 43,
+      x = 71,
       y = 165
     },
     wingraphic_normal_unmaximize = {
       h = 12,
       w = 12,
-      x = 29,
+      x = 57,
       y = 165
     },
     wingraphic_small_close = {
       h = 12,
       w = 12,
-      x = 15,
+      x = 43,
       y = 165
     },
     wingraphic_small_maximize = {
       h = 12,
       w = 12,
-      x = 1,
+      x = 29,
       y = 165
     },
     wingraphic_small_unmaximize = {
       h = 12,
       w = 12,
-      x = 237,
-      y = 139
+      x = 15,
+      y = 165
     },
     winheader_large = {
       h = 32,
@@ -635,8 +641,8 @@ return {
     winheader_small = {
       h = 12,
       w = 12,
-      x = 223,
-      y = 139
+      x = 1,
+      y = 165
     }
   },
   slices = {
@@ -711,6 +717,16 @@ return {
       y = 0
     },
     button_press = {
+      h1 = 4,
+      h2 = 16,
+      h3 = 4,
+      w1 = 4,
+      w2 = 16,
+      w3 = 4,
+      x = 0,
+      y = 0
+    },
+    container_body1 = {
       h1 = 4,
       h2 = 16,
       h3 = 4,

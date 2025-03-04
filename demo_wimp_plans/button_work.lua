@@ -12,10 +12,10 @@ local function timeFormatted()
 end
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label:initialize()
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:setLabel(text, label_mode)
@@ -24,21 +24,16 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	local context = panel.context
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 640
-	frame:initialize()
+	--title("Button Work")
 
-	frame:setFrameTitle("Button Work")
-
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
 	-- Repeat-Button
-	local b_rep = frame:addChild("base/button_repeat")
+	local b_rep = panel:addChild("base/button_repeat")
 	b_rep.x = 0
 	b_rep.y = 0
 	b_rep.w = 128
@@ -56,7 +51,7 @@ function plan.make(root)
 
 
 	-- Checkbox
-	local chk = frame:addChild("base/checkbox")
+	local chk = panel:addChild("base/checkbox")
 	chk.x = 160
 	chk.y = 0
 	chk.w = 256
@@ -72,7 +67,7 @@ function plan.make(root)
 	end
 
 	-- Multi-state checkbox
-	local chk_m = frame:addChild("base/checkbox_multi")
+	local chk_m = panel:addChild("base/checkbox_multi")
 	chk_m.x = 160
 	chk_m.y = 96
 	chk_m.w = 256
@@ -84,7 +79,7 @@ function plan.make(root)
 	end
 
 	-- Button with a quad graphic
-	local btn_q = frame:addChild("base/button")
+	local btn_q = panel:addChild("base/button")
 	btn_q.skin_id = "button_tq1"
 	btn_q.graphic = context.resources.tex_quads["checkbox_on"]
 	btn_q.x = 64
@@ -104,7 +99,7 @@ function plan.make(root)
 	local rdo
 
 	py=py+py_plus
-	rdo = frame:addChild("base/radio_button")
+	rdo = panel:addChild("base/radio_button")
 	rdo.x = px
 	rdo.y = py
 	rdo.w = 192
@@ -115,7 +110,7 @@ function plan.make(root)
 	--rdo.wid_buttonAction
 
 	py=py+py_plus
-	rdo = frame:addChild("base/radio_button")
+	rdo = panel:addChild("base/radio_button")
 	rdo.x = px
 	rdo.y = py
 	rdo.w = 192
@@ -126,7 +121,7 @@ function plan.make(root)
 	--rdo.wid_buttonAction
 
 	py=py+py_plus
-	rdo = frame:addChild("base/radio_button")
+	rdo = panel:addChild("base/radio_button")
 	rdo.x = px
 	rdo.y = py
 	rdo.w = 192
@@ -137,7 +132,7 @@ function plan.make(root)
 	--radio.wid_buttonAction
 
 	py=py+py_plus
-	rdo = frame:addChild("base/radio_button")
+	rdo = panel:addChild("base/radio_button")
 	rdo.x = px
 	rdo.y = py
 	rdo.w = 192
@@ -149,7 +144,7 @@ function plan.make(root)
 
 
 	-- Sticky Button.
-	local sticky = frame:addChild("base/button_sticky")
+	local sticky = panel:addChild("base/button_sticky")
 	sticky.x = 256
 	sticky.y = 192
 	sticky.w = 240
@@ -169,7 +164,7 @@ function plan.make(root)
 
 
 	-- A normal button that unpresses the sticky button.
-	local b_unst = frame:addChild("base/button")
+	local b_unst = panel:addChild("base/button")
 	b_unst:setTag("button_unsticker")
 	b_unst.x = 256
 	b_unst.y = 192+48
@@ -190,7 +185,7 @@ function plan.make(root)
 	end
 
 	-- An instant-action button. Fires on click-down, without continuous action (at least from holding the mouse button).
-	local b_instant = frame:addChild("base/button_instant")
+	local b_instant = panel:addChild("base/button_instant")
 	b_instant.x = 256
 	b_instant.y = 192+48+48
 	b_instant.w = 240
@@ -205,8 +200,8 @@ function plan.make(root)
 
 
 	-- A button with a secondary action.
-	makeLabel(frame, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
-	local b_secondary = frame:addChild("base/button")
+	makeLabel(panel, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
+	local b_secondary = panel:addChild("base/button")
 	b_secondary.x = 256
 	b_secondary.y = 192+48+48+48+64
 	b_secondary.w = 240
@@ -228,7 +223,7 @@ function plan.make(root)
 	end
 
 
-	local btn_2c = frame:addChild("base/button_double_click")
+	local btn_2c = panel:addChild("base/button_double_click")
 	btn_2c.x = 256
 	btn_2c.y = 192+48+48+48+64+64
 	btn_2c.w = 256
@@ -240,11 +235,6 @@ function plan.make(root)
 	btn_2c.wid_buttonAction = function(self)
 		self:setLabel("Double-clicked! Time: " .. timeFormatted())
 	end
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 
