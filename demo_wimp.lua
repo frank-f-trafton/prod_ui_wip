@@ -806,7 +806,7 @@ function love.draw()
 		love.graphics.push("all")
 
 		local text_w = notif.font:getWidth(notif.text)
-		local text_h = notif.font:getHeight() * 6 -- Terrible.
+		local text_h = notif.font:getHeight() * 8 -- Terrible.
 
 		love.graphics.origin()
 		love.graphics.translate(

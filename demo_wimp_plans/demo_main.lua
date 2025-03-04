@@ -206,6 +206,7 @@ function plan.make(panel)
 			else
 				-- XXX hook up to an actual toast system at some point.
 				local notif = self.context.app.notif
+				-- TODO: get a proper source for this quote.
 				notif.text = "\
 A person who doubts himself is like a man who would enlist in the\
 ranks of his enemies and bear arms against himself. He makes his\
@@ -213,6 +214,7 @@ failure certain by himself being the first person to be convinced\
 of it.\
 \
 -Alexandre Dumas"
+
 				notif.time = 0.0
 			end
 		end
