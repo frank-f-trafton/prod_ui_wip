@@ -356,8 +356,6 @@ local function keyMnemonicSearch(items, key)
 			return i, item
 		end
 	end
-
-	return nil
 end
 
 

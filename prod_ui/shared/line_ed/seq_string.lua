@@ -227,7 +227,7 @@ function _mt_seq:offsetStepLeft(line_n, byte_n)
 
 		if byte_n == 0 then
 			if line_n == 1 then
-				return nil
+				return
 			else
 				line_n = line_n - 1
 				byte_n = #self[line_n] + 1

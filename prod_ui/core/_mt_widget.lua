@@ -868,6 +868,8 @@ end
 
 
 -- Depth-first tag search among descendants. Does not include self.
+-- @param str The string to find.
+-- @return The widget, plus its sibling index, or nil if there was no match.
 function _mt_widget:findTag(str)
 	for i, child in ipairs(self.children) do
 		--print("findTag", self.id, i, child.id, child.tag)
@@ -881,8 +883,6 @@ function _mt_widget:findTag(str)
 			end
 		end
 	end
-
-	-- return nil
 end
 
 
@@ -897,8 +897,6 @@ function _mt_widget:findTagFlat(str, pos)
 			return child, i
 		end
 	end
-
-	-- return nil
 end
 
 

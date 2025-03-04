@@ -245,8 +245,6 @@ function client:getHighlightedText()
 
 		return table.concat(text, "\n")
 	end
-
-	return nil
 end
 
 
@@ -585,8 +583,6 @@ function client:backspaceUChar(n_u_chars)
 	if u_count > 0 then
 		return line_ed:deleteText(true, line_1, byte_1, line_ed.car_line, line_ed.car_byte - 1)
 	end
-
-	return nil
 end
 
 
@@ -667,7 +663,7 @@ function client:deleteHighlightedText()
 	local line_ed = self.line_ed
 
 	if not self:isHighlighted() then
-		return nil
+		return
 	end
 
 	-- Clean up display highlight beforehand. Much harder to determine the offsets after deleting things.
@@ -751,8 +747,6 @@ function client:deleteUChar(n_u_chars)
 		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
 		return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_2, byte_2 - 1)
 	end
-
-	return nil
 end
 
 
@@ -787,8 +781,6 @@ function client:backspaceGroup()
 			return line_ed:deleteText(true, line_left, byte_left, line_ed.car_line, line_ed.car_byte - 1)
 		end
 	end
-
-	return nil
 end
 
 
@@ -822,8 +814,6 @@ function client:deleteGroup()
 	--print("DEL", "|"..(del or "<nil>").."|")
 	if del ~= "" then
 		return del
-	else
-		return nil
 	end
 end
 

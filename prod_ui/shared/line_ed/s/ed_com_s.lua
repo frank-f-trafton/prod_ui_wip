@@ -116,7 +116,7 @@ function edComS.offsetStepLeft(line, byte_n)
 		local byte = line:byte(byte_n)
 
 		if not byte then
-			return nil
+			return
 		end
 
 		-- Non-continuation byte
@@ -140,7 +140,7 @@ function edComS.offsetStepRight(line, byte_n)
 		local byte = line:byte(byte_n)
 
 		if not byte then
-			return nil
+			return
 
 		-- Continuation byte.
 		elseif (byte >= 0x80 and byte <= 0xbf) then

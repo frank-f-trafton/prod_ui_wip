@@ -190,8 +190,6 @@ function textUtil.processUnderline(str, font)
 
 		return s1 .. s2 .. s3, x, w
 	end
-
-	-- return nil
 end
 
 
