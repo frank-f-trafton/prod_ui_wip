@@ -227,8 +227,6 @@ local function keyMnemonicSearch(items, key)
 			return i, item
 		end
 	end
-
-	return nil
 end
 
 
@@ -969,8 +967,6 @@ local function findOriginItemIndex(c_prev, origin_item)
 			return i
 		end
 	end
-
-	-- return nil
 end
 
 

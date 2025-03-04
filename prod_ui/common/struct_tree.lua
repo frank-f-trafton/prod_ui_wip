@@ -17,8 +17,6 @@ local function _getNodeIndex(self, parent)
 			return i
 		end
 	end
-
-	-- return nil
 end
 
 
@@ -115,8 +113,6 @@ function _mt_tree:getNextNode()
 		self = self.parent
 		parent = self.parent
 	end
-
-	-- return nil
 end
 
 
@@ -144,8 +140,6 @@ function _mt_tree:getPreviousNode()
 		local up_node = parent.nodes[node_i - 1]
 		return getRightmostNode(up_node)
 	end
-
-	-- return nil
 end
 
 

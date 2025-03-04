@@ -1144,8 +1144,6 @@ local function _unloadFindWidgetByID(wid, id)
 			end
 		end
 	end
-
-	return nil
 end
 
 

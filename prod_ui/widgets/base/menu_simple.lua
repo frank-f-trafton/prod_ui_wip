@@ -51,12 +51,12 @@ local function getItemAtPoint(self, px, py)
 
 	-- Empty list
 	if #self.items == 0 then
-		return nil
+		return
 	end
 
 	-- Out of range: return nothing
 	if px < 0 or px >= self.w or py < 0 or py >= self.h then
-		return nil
+		return
 	end
 
 	local mouse_pos = self.horizontal and px or py

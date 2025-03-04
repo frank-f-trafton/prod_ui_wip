@@ -83,8 +83,6 @@ function lgcButtonBare.setCheckedRadioConditional(self, key, value)
 			return wid
 		end
 	end
-
-	-- return nil
 end
 
 
