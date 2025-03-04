@@ -7,18 +7,23 @@ local demoShared = require("demo_shared")
 print("Start WIMP Demo.")
 
 
--- Upon starting the demo, the first item in this array is selected and launched. (TODO: not implemented yet.)
-local demo_quick_launch = {
-	--"wimp_workspaces",
-	--"frame_unselectable",
-	--"dial",
-	--"wimp_menu_tab",
-	--"wimp_frame",
-	--"demo_main",
-	--"properties_box",
+-- The first panel to load.
+local demo_panel_launch = {
+	"demo_main",
 	--"button_split",
-	--"wimp_tree_box",
+	--"dial",
+	--"properties_box",
 	--"wimp_list_box",
+	--"wimp_tree_box",
+	--"wimp_workspaces",
+}
+
+
+-- Upon starting the demo, all of these Window Frame plans are instantiated.
+local demo_window_launch = {
+	--"window_frames.frame_unselectable",
+	--"window_frames.wimp_frame",
+	--"window_frames.wimp_menu_tab",
 }
 
 
@@ -595,6 +600,7 @@ do
 		end
 
 		list_box.wid_select = function(self, item, item_i)
+			print("!?")
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace then
 				local container = _instantiateDemoContainer(workspace)
@@ -615,6 +621,22 @@ do
 
 	--love.mouse.setGrabbed(true)
 	--love.mouse.setRelativeMode(true)
+
+	-- Quick-launch windows and up to one panel (see top of file for the lists).
+	local panel_id = demo_panel_launch[1]
+	local plan_list = wimp_root:findTag("plan_menu")
+	if panel_id and plan_list then
+		for i, item in ipairs(plan_list.items) do
+			if item.plan_id == panel_id then
+				plan_list:setSelection(item)
+				break
+			end
+		end
+	end
+
+	for i, window_id in ipairs(demo_window_launch) do
+		demoShared.launchWindowFrameFromPlan(wimp_root, window_id, true)
+	end
 
 	-- TODO: need to deal with initial sort state, so that Workspaces don't obscure Window Frames.
 	wimp_root:sortG2()
