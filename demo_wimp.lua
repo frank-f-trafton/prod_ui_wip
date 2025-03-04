@@ -9,6 +9,7 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"number_box",
 	"demo_main",
 	--"button_split",
 	--"dial",
@@ -508,7 +509,7 @@ do
 		-- Hook application-level shortcuts to WIMP root
 		do
 			local shortcuts = {
-				["KC q"] = function(self, key, scancode, isrepeat) love.event.quit() end,
+				["C+q"] = function(self, key, scancode, isrepeat) love.event.quit() end,
 			}
 			local hook_pressed = function(self, tbl, key, scancode, isrepeat)
 				local key_mgr = self.context.key_mgr
@@ -600,7 +601,6 @@ do
 		end
 
 		list_box.wid_select = function(self, item, item_i)
-			print("!?")
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace then
 				local container = _instantiateDemoContainer(workspace)
