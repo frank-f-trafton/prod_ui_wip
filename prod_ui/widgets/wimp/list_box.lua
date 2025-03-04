@@ -261,7 +261,11 @@ end
 function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
+	local old_index = self.index
 	self:menuSetSelectedIndex(item_i)
+	if old_index ~= self.index then
+		self:wid_select(self.items[self.index], self.index)
+	end
 end
 
 
