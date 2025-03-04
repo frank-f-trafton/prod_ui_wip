@@ -488,7 +488,7 @@ function def:uiCall_destroy(inst)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		if isrepeat then
 			if self.rep_sc ~= scancode then
@@ -522,7 +522,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		-- Standard text box controls (caret navigation, backspace, etc.)
 		else
-			local ok, hist_changed = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+			local ok, hist_changed = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 			if ok then
 				_textInputValue(self, hist_changed)
 			end

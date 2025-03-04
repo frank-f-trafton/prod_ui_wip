@@ -454,7 +454,7 @@ function def:uiCall_destroy(inst)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		-- Forward keyboard events to the pop-up menu.
 		if self.wid_drawer then
@@ -479,7 +479,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			-- Standard text box controls (caret navigation, etc.)
 			else
 				local old_line = self.line_ed.line
-				local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat)
+				local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 				if old_line ~= self.line_ed.line then
 					self:wid_inputChanged(self.line_ed.line)
 				end
