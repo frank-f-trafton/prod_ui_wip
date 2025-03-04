@@ -7,10 +7,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(parent, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = parent:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -22,20 +22,18 @@ end
 local function _assertNoThimble(self, inst)
 	if self == inst then
 		if self.context.thimble1 == self or self.context.thimble2 == self then
-			error("this widget is not supposed to be capable of holding the thimble.")
+			error("this widget should not be capable of holding the thimble.")
 		end
 	end
 end
 
 
-function plan.make(root)
-	local context = root.context
-
+function plan.makeWindowFrame(root)
 	local unselectable = true
 	local view_level = "high"
 	local frame = root:newWindowFrame(view_level)
 	frame.w = 320
-	frame.h = 350
+	frame.h = 380
 	frame:initialize(unselectable, view_level)
 	frame:setFrameTitle("Unselectable Frame")
 	frame.auto_layout = true
@@ -43,12 +41,11 @@ function plan.make(root)
 
 	frame.userUpdate = function(self, dt)
 		if self.context.root.selected_frame == self then
-			error("this frame is not supposed to be selectable.")
+			error("this frame should not be selectable.")
 		end
 	end
 	frame.uiCall_thimble1Take = _assertNoThimble
 	frame.uiCall_thimble2Take = _assertNoThimble
-
 
 	makeLabel(frame, 0, 0, 320, 190, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "multi")
 
@@ -68,7 +65,6 @@ function plan.make(root)
 	bb_button.can_have_thimble = false
 
 	bb_button:setLabel("Example Button")
-
 
 	yy = yy + hh
 

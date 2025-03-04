@@ -39,7 +39,7 @@ local function columnSortGlobals(wid, column)
 end
 
 
-function plan.make(root)
+function plan.makeWindowFrame(root)
 	local context = root.context
 
 	local implTabCell = context:getLua("shared/impl_tab_cell")

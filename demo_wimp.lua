@@ -1,9 +1,13 @@
 require("lib.test.strict")
 
+
+local demoShared = require("demo_shared")
+
+
 print("Start WIMP Demo.")
 
 
--- Plans to launch upon starting the demo.
+-- Upon starting the demo, the first item in this array is selected and launched. (TODO: not implemented yet.)
 local demo_quick_launch = {
 	--"wimp_workspaces",
 	--"frame_unselectable",
@@ -16,6 +20,34 @@ local demo_quick_launch = {
 	--"wimp_tree_box",
 	--"wimp_list_box",
 }
+
+
+local demo_plan_list = {
+	{"demo_main", "Main Demo Window"},
+	{"wimp_sash", "Sashes"},
+	{"number_box", "Number Box"},
+	{"properties_box", "Properties Box"},
+	{"combo_box", "Combo Box"},
+	{"dropdown_box", "Dropdown Box"},
+	{"text_box_single", "Textbox (Single-Line)"},
+	{"text_box_multi", "Textbox (Multi-Line)"},
+	{"button_skinners", "Button Skinners"},
+	{"barebones", "Barebones Widgets"},
+	{"wimp_tree_box", "Tree Box"},
+	{"wimp_list_box", "List Box"},
+	{"button_work", "Button work"},
+	{"button_split", "Split Button"},
+	{"progress_bar", "Progress Bar"},
+	{"stepper", "Stepper"},
+	{"label_test", "Label test"},
+	{"drag_box", "Drag Box"},
+	{"container_work", "Container work"},
+	{"slider_work", "Slider work"},
+	{"dial", "Dials"},
+	{"menu_test", "Menu Test"},
+	{"wimp_workspaces", "Workspace Frames"},
+}
+
 
 
 -- Setting up a ProdUI project:
@@ -272,45 +304,7 @@ function love.textinput(text)
 end
 
 
-local function _launchSelector(root)
-	local plan_name = "demo_selection"
-	local frame = root:findTag("FRAME:" .. plan_name)
-	if not frame then
-		local planDemoSelect = uiRes.loadLuaFile("demo_wimp_plans/" .. plan_name .. ".lua")
-		frame = planDemoSelect.make(root)
-		frame.tag = "FRAME:" .. plan_name
-	end
-	return frame
-end
-
-
-local function _launchWidgetTreeView(root)
-	local plan_name = "wimp_widget_tree"
-	local frame = root:findTag("FRAME:" .. plan_name)
-	if not frame then
-		local planWidgetTreeView = uiRes.loadLuaFile("demo_wimp_plans/" .. plan_name .. ".lua")
-		frame = planWidgetTreeView.make(root)
-		frame.tag = "FRAME:" .. plan_name
-	end
-
-	return frame
-end
-
-
 do
-	-- [[
-	do
-		local fr_demo_select = _launchSelector(wimp_root)
-		-- Quick-launch frames here:
-		for i, str in ipairs(demo_quick_launch) do
-			local frame = fr_demo_select:launch(str)
-			frame.x = 64 + (i-1) * 32
-			frame.y = 64 + (i-1) * 32
-		end
-	end
-	--]]
-
-
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 		bar_menu:initialize()
@@ -438,11 +432,11 @@ do
 		local def_demo = {
 			{
 				type = "command",
-				text = "Open Selector",
+				text = "Demo Config",
 				callback = function(client, item)
 					local root = client:getRootWidget()
 					if root then
-						_launchSelector(root)
+						demoShared.launchWindowFrameFromPlan(root, "window_frames.demo_config", true)
 					end
 				end,
 			},
@@ -452,7 +446,17 @@ do
 				callback = function(client, item)
 					local root = client:getRootWidget()
 					if root then
-						_launchWidgetTreeView(root)
+						demoShared.launchWindowFrameFromPlan(root, "window_frames.wimp_widget_tree", true)
+					end
+				end,
+			},
+			{
+				type = "command",
+				text = "Window Frame Selector",
+				callback = function(client, item)
+					local root = client:getRootWidget()
+					if root then
+						demoShared.launchWindowFrameFromPlan(root, "window_frames.window_frame_selector", true)
 					end
 				end,
 			},
@@ -545,10 +549,69 @@ do
 	do
 		local ws1 = wimp_root:newWorkspace()
 		ws1:initialize()
+		ws1.auto_layout = true
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
-	end
 
+		local list_box = ws1:addChild("wimp/list_box")
+		list_box:initialize()
+		list_box.tag = "plan_menu"
+
+		-- Uncomment this to continuously select menu items as you scrub the mouse cursor
+		-- over the ListBox.
+		--list_box.MN_drag_select = true
+
+		list_box:setScrollBars(false, true)
+
+		local function _addPlanToList(list_box, plan_id, display_name)
+			local item = list_box:addItem(display_name)
+			item.plan_id = plan_id
+		end
+
+		for plan_id, tbl in ipairs(demo_plan_list) do
+			_addPlanToList(list_box, tbl[1], tbl[2])
+		end
+
+		local function _instantiateDemoContainer(workspace)
+			-- First, destroy any existing containers with the same tag.
+			local wid
+			repeat
+				wid = context.root:findTag("plan_container")
+				if wid then
+					wid:remove()
+				end
+			until not wid
+
+			local plan_container = workspace:addChild("base/container")
+			plan_container:initialize()
+			plan_container.tag = "plan_container"
+
+			plan_container.lc_func = uiLayout.fitRemaining
+			uiLayout.register(workspace, plan_container)
+
+			workspace:reshape()
+
+			return plan_container
+		end
+
+		list_box.wid_select = function(self, item, item_i)
+			local workspace = self.context.root:findTag("main_workspace")
+			if workspace then
+				local container = _instantiateDemoContainer(workspace)
+				local plan = require("demo_wimp_plans." .. item.plan_id)
+				plan.make(container)
+				container:reshape()
+			end
+		end
+
+		list_box.w = 300
+		list_box.lc_func = uiLayout.fitLeft
+		uiLayout.register(ws1, list_box)
+
+		-- Inserts a gap between the ListBox and content container.
+		-- Need a better way of doing this.
+		table.insert(ws1.lp_seq, {lo_command = function(parent, opts) uiLayout.discardLeft(parent, 4) end})
+	end
 
 	--love.mouse.setGrabbed(true)
 	--love.mouse.setRelativeMode(true)

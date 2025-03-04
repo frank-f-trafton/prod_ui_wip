@@ -2,13 +2,12 @@
 local plan = {}
 
 
-function plan.make(root)
+function plan.makeWindowFrame(root)
 	local context = root.context
-
 	local frame = root:newWindowFrame()
 	frame.w, frame.h = 300, 300
 	frame:initialize()
-	frame:setFrameTitle("Frame Test")
+	frame:setFrameTitle("Frame Destroy Test")
 	frame.auto_layout = true
 	frame:setScrollBars(false, false)
 

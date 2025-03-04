@@ -7,10 +7,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -19,16 +19,11 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Progress Bar Stuff")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Progress Bar Stuff")
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
 	local starting_pos = 23
 	local starting_max = 42
@@ -36,7 +31,7 @@ function plan.make(root)
 	local h_bar_width, h_bar_height = 160, 40
 	local v_bar_width, v_bar_height = 100, 160
 
-	local p_bar = frame:addChild("status/progress_bar")
+	local p_bar = panel:addChild("status/progress_bar")
 	p_bar.x = 32
 	p_bar.y = 32
 	p_bar.w = h_bar_width
@@ -57,7 +52,7 @@ function plan.make(root)
 	p_bar:reshape()
 
 
-	local btn_active = frame:addChild("base/button")
+	local btn_active = panel:addChild("base/button")
 	btn_active.x = 256
 	btn_active.y = 32
 	btn_active.w = 128
@@ -74,7 +69,7 @@ function plan.make(root)
 	end
 
 
-	local btn_vertical = frame:addChild("base/button")
+	local btn_vertical = panel:addChild("base/button")
 	btn_vertical.x = 256
 	btn_vertical.y = 32+40
 	btn_vertical.w = 128
@@ -98,7 +93,7 @@ function plan.make(root)
 	end
 
 
-	local btn_far_end = frame:addChild("base/button")
+	local btn_far_end = panel:addChild("base/button")
 	btn_far_end.x = 256
 	btn_far_end.y = 32+40+40
 	btn_far_end.w = 128
@@ -127,7 +122,6 @@ function plan.make(root)
 
 			if p_bar.max == 0 then
 				p_bar:setLabel("(Div/0)")
-
 			else
 				p_bar:setLabel(string.format("%.2f%%", (p_bar.pos / p_bar.max) * 100))
 			end
@@ -144,10 +138,10 @@ function plan.make(root)
 		end
 	end
 
-	local lbl_pos = makeLabel(frame, 256, 160, 256, 32, "Position")
+	local lbl_pos = makeLabel(panel, 256, 160, 256, 32, "Position")
 	lbl_pos:setTag("position_label")
 
-	local sld_pos = frame:addChild("base/slider_bar")
+	local sld_pos = panel:addChild("base/slider_bar")
 	sld_pos.x = 256
 	sld_pos.y = 160+32+8
 	sld_pos.w = 256
@@ -166,10 +160,10 @@ function plan.make(root)
 	sld_pos:reshape()
 
 
-	local lbl_max = makeLabel(frame, 256, 160+32+8+32, 256, 32, "Maximum")
+	local lbl_max = makeLabel(panel, 256, 160+32+8+32, 256, 32, "Maximum")
 	lbl_max:setTag("maximum_label")
 
-	local sld_max = frame:addChild("base/slider_bar")
+	local sld_max = panel:addChild("base/slider_bar")
 	sld_max.x = 256
 	sld_max.y = 160+32+8+32+32+8
 	sld_max.w = 256
@@ -185,11 +179,6 @@ function plan.make(root)
 	sld_max.wid_actionSliderChanged = slider_action
 
 	sld_max:reshape()
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

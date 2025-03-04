@@ -8,10 +8,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -20,32 +20,22 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Button skin tests")
 
-	local frame = root:newWindowFrame()
-
-	frame.w = 640
-	frame.h = 480
-
-	frame:initialize()
-
-	frame:setFrameTitle("Button skin tests")
-
-	frame.auto_layout = true
-
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
 	-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.
 
-	local resources = frame.context.resources
+	local resources = panel.context.resources
 	local clone = resources:cloneSkinDef("button1")
 
 	local function _userDestroy(self)
 		self.context.resources:removeSkinDef(clone)
 	end
 
-	local button_norm = frame:addChild("base/button")
+	local button_norm = panel:addChild("base/button")
 	button_norm.skin_id = clone
 	button_norm.userDestroy = _userDestroy
 	button_norm.x = 256
@@ -64,12 +54,12 @@ function plan.make(root)
 
 	local xx, yy, ww1, ww2, hh1, hh2 = 0, 0, 64, 192, 40, 64
 
-	makeLabel(frame, xx, yy, ww2, hh1, "skin.label_align_h", "single")
+	makeLabel(panel, xx, yy, ww2, hh1, "skin.label_align_h", "single")
 
 	yy = yy + hh1
 
 	local bb_rdo
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww1
@@ -82,7 +72,7 @@ function plan.make(root)
 
 	xx = xx + ww1
 
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww1
@@ -95,7 +85,7 @@ function plan.make(root)
 
 	xx = xx + ww1
 
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww1
@@ -109,7 +99,7 @@ function plan.make(root)
 	xx = 0
 	yy = yy + hh2
 
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww2
@@ -126,12 +116,12 @@ function plan.make(root)
 
 	yy = yy + hh1
 
-	makeLabel(frame, xx, yy, ww2, hh1, "skin.label_align_v", "single")
+	makeLabel(panel, xx, yy, ww2, hh1, "skin.label_align_v", "single")
 
 	yy = yy + hh1
 
 	local bb_rdo
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww1
@@ -144,7 +134,7 @@ function plan.make(root)
 
 	xx = xx + ww1
 
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww1
@@ -157,7 +147,7 @@ function plan.make(root)
 
 	xx = xx + ww1
 
-	bb_rdo = frame:addChild("barebones/radio_button")
+	bb_rdo = panel:addChild("barebones/radio_button")
 	bb_rdo.x = xx
 	bb_rdo.y = yy
 	bb_rdo.w = ww1
@@ -171,11 +161,6 @@ function plan.make(root)
 	bb_rdo:setCheckedConditional("usr_align", button_norm.skin.label_align_v)
 
 	xx = xx + ww1
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

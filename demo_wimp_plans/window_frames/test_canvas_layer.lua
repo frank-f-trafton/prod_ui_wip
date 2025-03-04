@@ -8,9 +8,8 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-function plan.make(root)
-	local context = root.context
-	local frame = root:newWindowFrame()
+function plan.makeWindowFrame(root)
+	local frame = root.context.root:newWindowFrame()
 	frame.w = 300
 	frame.h = 300
 	frame:initialize()

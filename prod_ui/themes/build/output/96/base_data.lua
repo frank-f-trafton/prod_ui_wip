@@ -88,6 +88,16 @@ return {
       x = 0,
       y = 0
     },
+    container_body1 = {
+      h1 = 4,
+      h2 = 16,
+      h3 = 4,
+      w1 = 4,
+      w2 = 16,
+      w3 = 4,
+      x = 0,
+      y = 0
+    },
     dropdown_body = {
       h1 = 6,
       h2 = 4,

@@ -23,6 +23,7 @@ local context = select(1, ...)
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcContainer = context:getLua("shared/lgc_container")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
@@ -190,26 +191,6 @@ function def:uiCall_update(dt)
 	commonScroll.updateScrollBarShapes(self)
 end
 
--- Debug
---local OOPS = 0
-
-
--- Debug renderer.
---[=[
-function def:render()
-
-	-- [XXX 7] Debug: test cascading graphics state.
-	--[[
-	OOPS = OOPS + math.pi/512
-	local hx, hy = math.floor(self.w/2), math.floor(self.h/2)
-	love.graphics.translate(hx, hy)
-	love.graphics.scale(1, math.sin(OOPS / 32))
-	love.graphics.translate(-hx, -hy)
-	--]]
-
-end
---]=]
-
 
 def.default_skinner = {
 	schema = {
@@ -230,7 +211,15 @@ def.default_skinner = {
 
 	--refresh = function(self, skinner, skin)
 	--update = function(self, skinner, skin, dt)
-	--render = function(self, ox, oy)
+
+
+	render = function(self, ox, oy)
+		local skin = self.skin
+		if skin.slc_body then
+			love.graphics.setColor(skin.color_body)
+			uiGraphics.drawSlice(skin.slc_body, 0, 0, self.w, self.h)
+		end
+	end,
 
 
 	renderLast = function(self, ox, oy)

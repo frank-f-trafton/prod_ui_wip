@@ -7,10 +7,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -19,20 +19,14 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Properties Box Test")
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Properties Box Test")
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	makeLabel(panel, 32, 0, 512, 32, "***Under Construction***", "single")
 
-	makeLabel(frame, 32, 0, 512, 32, "***Under Construction***", "single")
-
-	local properties_box = frame:addChild("wimp/properties_box")
+	local properties_box = panel:addChild("wimp/properties_box")
 	properties_box.x = 0
 	properties_box.y = 64
 	properties_box.w = 400
@@ -51,11 +45,6 @@ function plan.make(root)
 
 	properties_box:setScrollBars(false, true)
 	properties_box:reshape()
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

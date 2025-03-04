@@ -12,10 +12,10 @@ local function timeFormatted()
 end
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -24,18 +24,13 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Stepper")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 640
-	frame:initialize()
-	frame:setFrameTitle("Stepper")
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
-	local stepper_h = frame:addChild("base/stepper")
+	local stepper_h = panel:addChild("base/stepper")
 	stepper_h.x = 32
 	stepper_h.y = 32
 	stepper_h.w = 240
@@ -52,7 +47,7 @@ function plan.make(root)
 	stepper_h:reshape()
 
 
-	local stepper_v = frame:addChild("base/stepper")
+	local stepper_v = panel:addChild("base/stepper")
 	stepper_v.x = 288
 	stepper_v.y = 32
 	stepper_v.w = 64
@@ -65,11 +60,6 @@ function plan.make(root)
 	stepper_v.vertical = true
 
 	stepper_v:reshape()
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

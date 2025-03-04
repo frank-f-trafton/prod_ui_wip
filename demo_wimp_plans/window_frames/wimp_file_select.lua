@@ -293,7 +293,7 @@ local function menu_getDirectoryItems(self, filter_type)
 end
 
 
-function plan.make(root)
+function plan.makeWindowFrame(root)
 	local context = root.context
 
 	local frame = root:newWindowFrame()

@@ -7,26 +7,16 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("DragBox Test")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("DragBox Test")
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
 	-- Drag box.
-	local dbox = frame:addChild("test/drag_box")
+	local dbox = panel:addChild("test/drag_box")
 	dbox.x, dbox.y, dbox.w, dbox.h = 400, 16, 64, 64
 	dbox:initialize()
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

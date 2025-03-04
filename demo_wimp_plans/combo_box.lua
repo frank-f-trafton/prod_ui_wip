@@ -7,10 +7,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -19,20 +19,14 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Combo Boxes")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Combo Boxes")
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
-
-	makeLabel(frame, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")
-	local combo_box = frame:addChild("wimp/combo_box")
+	makeLabel(panel, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")
+	local combo_box = panel:addChild("wimp/combo_box")
 	combo_box.x = 32
 	combo_box.y = 96
 	combo_box.w = 256
@@ -57,11 +51,6 @@ function plan.make(root)
 	combo_box.wid_thimble1Release = function(self)
 		print("ComboBox: user navigated away from this widget")
 	end
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

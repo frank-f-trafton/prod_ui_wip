@@ -104,26 +104,21 @@ local function _setupWS2(root)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Workspace Frames")
 
 	-- Does Workspace #2 already exist?
-	local ws2 = root:findTag("alt_workspace")
+	local ws2 = panel.context.root:findTag("alt_workspace")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Workspace Frames")
-	frame.auto_layout = true
-	frame:setScrollBars(false, true)
+	panel.auto_layout = true
+	panel:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32
 
 
 	-- Button: Create Workspace #2
 	do
-		local btn = frame:addChild("base/button")
+		local btn = panel:addChild("base/button")
 		btn.x = xx
 		btn.y = yy
 		btn.w = ww
@@ -135,9 +130,9 @@ function plan.make(root)
 		btn.wid_buttonAction = function(self)
 			if _setupWS2(self.context.root) then
 				self.enabled = false
-				local frame = self:findAscendingKeyValue("frame_type", "window")
-				if frame then
-					local button_select = frame:findTag("btn_sel")
+				local panel = self:findAscendingKeyValue("tag", "plan_container")
+				if panel then
+					local button_select = panel:findTag("btn_sel")
 					if button_select then
 						button_select.enabled = true
 					end
@@ -149,7 +144,7 @@ function plan.make(root)
 
 	-- Button: Select Workspace #2
 	do
-		local btn = frame:addChild("base/button")
+		local btn = panel:addChild("base/button")
 		btn.x = xx
 		btn.y = yy
 		btn.w = ww
@@ -163,9 +158,9 @@ function plan.make(root)
 			if ws2 then
 				self.context.root:setActiveWorkspace(ws2)
 
-				local frame = self:findAscendingKeyValue("frame_type", "window")
-				if frame then
-					local btn_dst = frame:findTag("btn_dst")
+				local panel = self:findAscendingKeyValue("tag", "plan_container")
+				if panel then
+					local btn_dst = panel:findTag("btn_dst")
 					if btn_dst then
 						btn_dst.enabled = true
 					end
@@ -178,7 +173,7 @@ function plan.make(root)
 
 	-- Button: Destroy Workspace #2
 	do
-		local btn = frame:addChild("base/button")
+		local btn = panel:addChild("base/button")
 		btn.x = xx
 		btn.y = yy
 		btn.w = ww
@@ -195,14 +190,15 @@ function plan.make(root)
 					self.context.root:setActiveWorkspace(ws1 or false)
 				end
 				ws2:remove()
+				self.context.root:sortG2()
 				self.enabled = false
-				local frame = self:findAscendingKeyValue("frame_type", "window")
-				if frame then
-					local btn_sel = frame:findTag("btn_sel")
+				local panel = self:findAscendingKeyValue("tag", "plan_container")
+				if panel then
+					local btn_sel = panel:findTag("btn_sel")
 					if btn_sel then
 						btn_sel.enabled = false
 					end
-					local btn_crt = frame:findTag("btn_crt")
+					local btn_crt = panel:findTag("btn_crt")
 					if btn_crt then
 						btn_crt.enabled = true
 					end
@@ -211,11 +207,6 @@ function plan.make(root)
 		end
 		yy = yy + hh
 	end
-
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
 end
 
 

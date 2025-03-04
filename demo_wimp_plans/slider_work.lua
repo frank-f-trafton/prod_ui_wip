@@ -7,10 +7,10 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(frame, x, y, w, h, text, label_mode)
+local function makeLabel(panel, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
-	local label = frame:addChild("base/label")
+	local label = panel:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
 	label:setLabel(text, label_mode)
@@ -19,16 +19,11 @@ local function makeLabel(frame, x, y, w, h, text, label_mode)
 end
 
 
-function plan.make(root)
-	local context = root.context
+function plan.make(panel)
+	--title("Slider Bar Work")
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:initialize()
-	frame:setFrameTitle("Slider Bar Work")
-	frame.auto_layout = true
-	frame:setScrollBars(false, false)
+	panel.auto_layout = true
+	panel:setScrollBars(false, false)
 
 	local label_w = 128
 	local label_h = 32
@@ -40,8 +35,8 @@ function plan.make(root)
 	local xx = 0
 
 	-- Horizontal slider
-	makeLabel(frame, xx, 0, label_w, label_h, "Horizontal")
-	local sliderh1 = frame:addChild("base/slider_bar")
+	makeLabel(panel, xx, 0, label_w, label_h, "Horizontal")
+	local sliderh1 = panel:addChild("base/slider_bar")
 	sliderh1.x = xx
 	sliderh1.y = 32
 	sliderh1.w = h_wid_w
@@ -69,8 +64,8 @@ function plan.make(root)
 	xx = xx + h_wid_w + space_w
 
 	-- Horizontal slider (user input disabled)
-	makeLabel(frame, xx, 0, label_w, label_h, "Read-Only")
-	local sliderh2 = frame:addChild("base/slider_bar")
+	makeLabel(panel, xx, 0, label_w, label_h, "Read-Only")
+	local sliderh2 = panel:addChild("base/slider_bar")
 	sliderh2.x = xx
 	sliderh2.y = 32
 	sliderh2.w = h_wid_w
@@ -99,8 +94,8 @@ function plan.make(root)
 	xx = xx + h_wid_w + space_w
 
 	-- Horizontal slider (whole widget disabled)
-	makeLabel(frame, xx, 0, label_w, label_h, "Widget Disabled")
-	local sliderh3 = frame:addChild("base/slider_bar")
+	makeLabel(panel, xx, 0, label_w, label_h, "Widget Disabled")
+	local sliderh3 = panel:addChild("base/slider_bar")
 	sliderh3.x = xx
 	sliderh3.y = 32
 	sliderh3.w = h_wid_w
@@ -129,8 +124,8 @@ function plan.make(root)
 	xx = 0
 
 	-- Vertical slider
-	makeLabel(frame, xx, 128, label_w, label_h, "Vertical")
-	local sliderv1 = frame:addChild("base/slider_bar")
+	makeLabel(panel, xx, 128, label_w, label_h, "Vertical")
+	local sliderv1 = panel:addChild("base/slider_bar")
 	sliderv1.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 	sliderv1.y = 160
 	sliderv1.w = v_wid_w
@@ -154,8 +149,8 @@ function plan.make(root)
 	xx = xx + h_wid_w + space_w
 
 	-- Vertical Read-Only
-	makeLabel(frame, xx, 128, label_w, label_h, "Read-Only")
-	local sliderv2 = frame:addChild("base/slider_bar")
+	makeLabel(panel, xx, 128, label_w, label_h, "Read-Only")
+	local sliderv2 = panel:addChild("base/slider_bar")
 	sliderv2.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 	sliderv2.y = 160
 	sliderv2.w = v_wid_w
@@ -181,8 +176,8 @@ function plan.make(root)
 	xx = xx + h_wid_w + space_w
 
 	-- Vertical (Disabled)
-	makeLabel(frame, xx, 128, label_w, label_h, "Widget Disabled")
-	local sliderv3 = frame:addChild("base/slider_bar")
+	makeLabel(panel, xx, 128, label_w, label_h, "Widget Disabled")
+	local sliderv3 = panel:addChild("base/slider_bar")
 	sliderv3.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 	sliderv3.y = 160
 	sliderv3.w = v_wid_w
@@ -207,10 +202,7 @@ function plan.make(root)
 
 	xx = xx + h_wid_w + space_w
 
-	frame:reshape(true)
-	frame:center(true, true)
-
-	return frame
+	return panel
 end
 
 
