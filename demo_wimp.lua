@@ -2,6 +2,7 @@ require("lib.test.strict")
 
 
 local demoShared = require("demo_shared")
+local inspect = require("lib.test.inspect")
 
 
 print("Start WIMP Demo.")
@@ -29,29 +30,35 @@ local demo_window_launch = {
 
 
 local demo_plan_list = {
-	{"demo_main", "Main Demo Window"},
-	{"wimp_sash", "Sashes"},
-	{"number_box", "Number Box"},
-	{"properties_box", "Properties Box"},
-	{"combo_box", "Combo Box"},
-	{"dropdown_box", "Dropdown Box"},
-	{"text_box_single", "Textbox (Single-Line)"},
-	{"text_box_multi", "Textbox (Multi-Line)"},
-	{"button_skinners", "Button Skinners"},
-	{"barebones", "Barebones Widgets"},
-	{"wimp_tree_box", "Tree Box"},
-	{"wimp_list_box", "List Box"},
-	{"button_work", "Button work"},
-	{"button_split", "Split Button"},
-	{"progress_bar", "Progress Bar"},
-	{"stepper", "Stepper"},
-	{"label_test", "Label test"},
-	{"drag_box", "Drag Box"},
-	{"container_work", "Container work"},
-	{"slider_work", "Slider work"},
-	{"dial", "Dials"},
-	{"menu_test", "Menu Test"},
-	{"wimp_workspaces", "Workspace Frames"},
+	nodes = {
+		{plan_id = nil, label = "Category 1", nodes = {
+			{plan_id = "demo_main", label = "Main Demo Window"},
+			{plan_id = "wimp_sash", label = "Sashes"},
+			{plan_id = "number_box", label = "Number Box"},
+			{plan_id = "properties_box", label = "Properties Box"},
+			{plan_id = "combo_box", label = "Combo Box"},
+			{plan_id = "dropdown_box", label = "Dropdown Box"},
+			{plan_id = "text_box_single", label = "Textbox (Single-Line)"},
+			{plan_id = "text_box_multi", label = "Textbox (Multi-Line)"},
+			{plan_id = "button_skinners", label = "Button Skinners"},
+			{plan_id = "barebones", label = "Barebones Widgets"},
+			{plan_id = "wimp_tree_box", label = "Tree Box"},
+			{plan_id = "wimp_list_box", label = "List Box"},
+		}},
+		{plan_id = nil, label = "Category 2", nodes = {
+			{plan_id = "button_work", label = "Button work"},
+			{plan_id = "button_split", label = "Split Button"},
+			{plan_id = "progress_bar", label = "Progress Bar"},
+			{plan_id = "stepper", label = "Stepper"},
+			{plan_id = "label_test", label = "Label test"},
+			{plan_id = "drag_box", label = "Drag Box"},
+		}},
+		{plan_id = "container_work", label = "Container work"},
+		{plan_id = "slider_work", label = "Slider work"},
+		{plan_id = "dial", label = "Dials"},
+		{plan_id = "menu_test", label = "Menu Test"},
+		{plan_id = "wimp_workspaces", label = "Workspace Frames"},
+	}
 }
 
 
@@ -559,24 +566,38 @@ do
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
 
-		local list_box = ws1:addChild("wimp/list_box")
-		list_box:initialize()
-		list_box.tag = "plan_menu"
+		local demo_list = ws1:addChild("wimp/tree_box")
+		demo_list:initialize()
+		demo_list.tag = "plan_menu"
 
 		-- Uncomment this to continuously select menu items as you scrub the mouse cursor
 		-- over the ListBox.
-		--list_box.MN_drag_select = true
+		--demo_list.MN_drag_select = true
 
-		list_box:setScrollBars(false, true)
+		demo_list:setScrollBars(false, true)
 
-		local function _addPlanToList(list_box, plan_id, display_name)
-			local item = list_box:addItem(display_name)
-			item.plan_id = plan_id
+		local function _addPlans(tree_box, parent, src_node)
+			print("parent", parent, "src_node.nodes", src_node.nodes)
+			print(inspect(src_node))
+			local item
+			if parent then
+				item = tree_box:addNode(src_node.label, parent)
+				item.plan_id = src_node.plan_id
+			end
+
+			if src_node.nodes then
+				item = item or tree_box.tree
+				for _, node in ipairs(src_node.nodes) do
+					_addPlans(tree_box, item, node)
+				end
+			end
 		end
 
-		for plan_id, tbl in ipairs(demo_plan_list) do
-			_addPlanToList(list_box, tbl[1], tbl[2])
-		end
+		_addPlans(demo_list, nil, demo_plan_list)
+		demo_list:orderItems()
+		demo_list:arrangeItems()
+
+		print(inspect(demo_list.tree))
 
 		local function _instantiateDemoContainer(workspace)
 			-- First, destroy any existing containers with the same tag.
@@ -600,9 +621,9 @@ do
 			return plan_container
 		end
 
-		list_box.wid_select = function(self, item, item_i)
+		demo_list.wid_select = function(self, item, item_i)
 			local workspace = self.context.root:findTag("main_workspace")
-			if workspace then
+			if workspace and item.plan_id then
 				local container = _instantiateDemoContainer(workspace)
 				local plan = require("demo_wimp_plans." .. item.plan_id)
 				plan.make(container)
@@ -610,9 +631,9 @@ do
 			end
 		end
 
-		list_box.w = 300
-		list_box.lc_func = uiLayout.fitLeft
-		uiLayout.register(ws1, list_box)
+		demo_list.w = 300
+		demo_list.lc_func = uiLayout.fitLeft
+		uiLayout.register(ws1, demo_list)
 
 		-- Inserts a gap between the ListBox and content container.
 		-- Need a better way of doing this.
