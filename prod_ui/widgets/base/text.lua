@@ -1,7 +1,5 @@
 --[[
 	Generic text widget. Unskinned.
-
-	XXX document usage of self.clip_scissor to prevent text spilling out of the widget bounds.
 --]]
 
 
@@ -25,7 +23,7 @@ function def:uiCall_initialize()
 
 	self.text = ""
 
-	-- These are set automatically by textRefresh().
+	-- These are set automatically by refreshText().
 	self.text_y = 0
 	self.text_w = 0
 	self.text_h = 0
