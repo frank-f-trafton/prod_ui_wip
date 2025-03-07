@@ -321,7 +321,6 @@ do
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 		bar_menu:initialize()
-
 		bar_menu.tag = "root_menu_bar"
 
 		-- Test the (normally commented out) debug render user event.
@@ -504,11 +503,7 @@ do
 			pop_up_def = def_help,
 		})
 
-		bar_menu.w = wimp_root.w
-		bar_menu:resize()
-
 		bar_menu:arrangeItems()
-		bar_menu:reshape()
 		bar_menu:menuChangeCleanup()
 
 		bar_menu.sort_id = 6
@@ -539,8 +534,7 @@ do
 		end
 
 		-- Add menu bar to root layout
-		bar_menu.lc_func = uiLayout.fitTop
-		uiLayout.register(wimp_root, bar_menu)
+		bar_menu:register("fit-top")
 
 		-- Test sneaking a button into a menu bar.
 		--[[
@@ -554,7 +548,6 @@ do
 		bar_button.can_have_thimble = false
 
 		bar_button:initialize()
-		bar_button:reshape()
 		--]]
 	end
 
@@ -562,6 +555,7 @@ do
 	do
 		local ws1 = wimp_root:newWorkspace()
 		ws1:initialize()
+		ws1:register("static") -- XXX temporary. Need to swap in the current active workspace whenever it changes.
 		ws1.auto_layout = true
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
@@ -577,8 +571,8 @@ do
 		demo_list:setScrollBars(false, true)
 
 		local function _addPlans(tree_box, parent, src_node)
-			print("parent", parent, "src_node.nodes", src_node.nodes)
-			print(inspect(src_node))
+			--print("parent", parent, "src_node.nodes", src_node.nodes)
+			--print(inspect(src_node))
 			local item
 			if parent then
 				item = tree_box:addNode(src_node.label, parent)
@@ -597,7 +591,7 @@ do
 		demo_list:orderItems()
 		demo_list:arrangeItems()
 
-		print(inspect(demo_list.tree))
+		--print(inspect(demo_list.tree))
 
 		local function _instantiateDemoContainer(workspace)
 			-- First, destroy any existing containers with the same tag.
@@ -612,9 +606,7 @@ do
 			local plan_container = workspace:addChild("base/container")
 			plan_container:initialize()
 			plan_container.tag = "plan_container"
-
-			plan_container.lc_func = uiLayout.fitRemaining
-			uiLayout.register(workspace, plan_container)
+			plan_container:register("fit-remaining")
 
 			workspace:reshape()
 
@@ -632,8 +624,7 @@ do
 		end
 
 		demo_list.w = 300
-		demo_list.lc_func = uiLayout.fitLeft
-		uiLayout.register(ws1, demo_list)
+		demo_list:register("fit-left")
 
 		-- Inserts a gap between the ListBox and content container.
 		-- Need a better way of doing this.
@@ -666,7 +657,7 @@ do
 	wimp_root:selectTopFrame()
 
 	-- Refresh everything.
-	wimp_root:reshape(true)
+	wimp_root:reshape()
 end
 
 

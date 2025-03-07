@@ -54,7 +54,7 @@ function commonFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, istouc
 	self.y, self.h = _resize(axis_y, self.y, self.h, self.min_h, my + self.adjust_oy)
 
 	if old_w ~= self.w or old_h ~= self.h then
-		self:reshape(true)
+		self:reshape()
 	end
 end
 
@@ -88,7 +88,7 @@ function commonFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 			local lerp_y = commonMath.lerp(0, self.h, mouse_rel_y / self.h) / self.h
 
 			self:wid_unmaximize()
-			self:reshape(true)
+			self:reshape()
 
 			-- Would need adjustments if dragging elsewhere (not along the top bar)
 			-- unmaximizes the window.

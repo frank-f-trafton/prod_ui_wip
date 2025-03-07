@@ -324,7 +324,7 @@ function plan.makeWindowFrame(root)
 			local frame = commonWimp.getFrame(self)
 			if frame then
 				frame:writeSetting("header_button_side", self.usr_button_side)
-				frame:reshape(true)
+				frame:reshape()
 			end
 		end
 
@@ -392,7 +392,7 @@ function plan.makeWindowFrame(root)
 			if frame then
 				skin_clone.header_text_align_h = self.usr_text_align_h
 				self.context.resources:refreshSkinDefInstance(skin_clone)
-				frame:reshape(true)
+				frame:reshape()
 				print("skin_clone.header_text_align_h", skin_clone.header_text_align_h)
 				print("frame.skin.header_text_align_h", frame.skin.header_text_align_h)
 			end
@@ -478,7 +478,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 	end
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

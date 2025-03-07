@@ -147,7 +147,7 @@ function def:updateDimensions()
 	-- Update item widths and then reshape their internals.
 	for i, item in ipairs(self.items) do
 		item.w = self.vp_w
-		item:reshape(self)
+		item:reshape()
 	end
 
 	-- Refresh document size.
@@ -256,7 +256,7 @@ function def:uiCall_resize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -279,6 +279,8 @@ function def:uiCall_reshape()
 	commonScroll.updateScrollState(self)
 
 	self:cacheUpdate()
+
+	return true
 end
 
 

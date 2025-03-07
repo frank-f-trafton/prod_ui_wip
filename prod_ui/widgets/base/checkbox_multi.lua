@@ -80,7 +80,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	local skin = self.skin
 
 	-- Viewport #1 is the text bounding box.
@@ -91,6 +91,8 @@ function def:uiCall_reshape()
 	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side == "right"))
 	widShared.carveViewport(self, 2, skin.box.margin)
 	lgcLabel.reshapeLabel(self)
+
+	return true
 end
 
 

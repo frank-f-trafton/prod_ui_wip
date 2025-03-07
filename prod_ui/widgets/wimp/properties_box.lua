@@ -280,7 +280,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 	-- Viewport #3 is the area for item labels.
@@ -320,6 +320,8 @@ function def:uiCall_reshape()
 	end
 
 	self:cacheUpdate(true)
+
+	return true
 end
 
 

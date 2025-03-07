@@ -187,9 +187,11 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
+
+	print("TreeBox xywh:", self.x, self.y, self.w, self.h)
 
 	local skin = self.skin
 
@@ -209,6 +211,8 @@ function def:uiCall_reshape()
 	commonScroll.updateScrollState(self)
 
 	self:cacheUpdate(true)
+
+	return true
 end
 
 

@@ -96,7 +96,7 @@ local function tree_userUpdate(self, dt)
 			_buildTree(self, root)
 			local frame = commonWimp.getFrame(self)
 			if frame then
-				frame:reshape(true)
+				frame:reshape()
 			end
 
 			-- Debug view stuff for the demo.
@@ -160,7 +160,6 @@ function plan.makeWindowFrame(root)
 	end
 
 	chk_vp.h = 32
-	chk_vp.lc_func = uiLayout.fitBottom
 
 
 	chk_highlight:setLabel("Highlight Selected")
@@ -172,7 +171,6 @@ function plan.makeWindowFrame(root)
 	end
 
 	chk_highlight.h = 32
-	chk_highlight.lc_func = uiLayout.fitBottom
 
 
 	chk_exclude:setLabel("Exclude this window frame")
@@ -184,17 +182,14 @@ function plan.makeWindowFrame(root)
 	end
 
 	chk_exclude.h = 32
-	chk_exclude.lc_func = uiLayout.fitBottom
 
 
 	tree_box:setExpandersActive(true)
 
-	tree_box.lc_func = uiLayout.fitRemaining
-
-	uiLayout.register(frame, chk_exclude)
-	uiLayout.register(frame, chk_highlight)
-	uiLayout.register(frame, chk_vp)
-	uiLayout.register(frame, tree_box)
+	chk_exclude:register("fit-bottom")
+	chk_highlight:register("fit-bottom")
+	chk_vp:register("fit-bottom")
+	tree_box:register("fit-remaining")
 
 	tree_box.x = 0
 	tree_box.y = 0
@@ -215,7 +210,7 @@ function plan.makeWindowFrame(root)
 	tree_box.userDestroy = tree_userDestroy
 	-- Also reads 'self.parent.usr_exclude'
 
-	frame:reshape(true)
+	frame:reshape()
 
 	return frame
 end

@@ -49,10 +49,6 @@ function widShared.getViewportXYWH(self, v)
 end
 
 
--- Widget must have 'min_w', 'min_h', 'max_w' and 'max_h' fields for these functions to work.
--- Both need to be greater than 0 to prevent issues (divide by zero, etc.)
-
-
 function widShared.enforceLimitedDimensions(self)
 	self.w = math.max(self.min_w, math.min(self.w, self.max_w))
 	self.h = math.max(self.min_h, math.min(self.h, self.max_h))

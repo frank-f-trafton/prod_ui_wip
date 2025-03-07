@@ -724,7 +724,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	widShared.resetViewport(self, 1)
 
 	-- Apply edge padding.
@@ -734,6 +734,8 @@ function def:uiCall_reshape()
 	widShared.copyViewport(self, 1, 2)
 
 	self:cacheUpdate()
+
+	return true
 end
 
 

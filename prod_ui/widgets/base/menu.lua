@@ -154,7 +154,7 @@ function def:addItem(item_instance, index)
 
 	table.insert(items, index, item_instance)
 
-	item_instance:reshape(self)
+	item_instance:reshape()
 
 	-- Call self:menuChangeCleanup() when you are done.
 end
@@ -248,7 +248,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
@@ -269,7 +269,7 @@ function def:uiCall_reshape()
 	then
 		for i, item in ipairs(self.items) do
 			if item.reshape then
-				item:reshape(self)
+				item:reshape()
 			end
 		end
 
@@ -287,6 +287,8 @@ function def:uiCall_reshape()
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollState(self)
+
+	return true
 end
 
 

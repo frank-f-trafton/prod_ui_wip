@@ -64,10 +64,12 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the checkbox rectangle.
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, self.skin.box.border)
+
+	return true
 end
 
 

@@ -25,8 +25,7 @@ function plan.make(panel)
 	c_bar.h = 64
 	c_bar:initialize()
 
-	c_bar.lc_func = uiLayout.fitTop
-	uiLayout.register(panel, c_bar)
+	c_bar:register("fit-top")
 
 	--[[
 	local cbox_wrap = c_bar:addChild("base/checkbox")
@@ -67,8 +66,7 @@ function plan.make(panel)
 
 	text_box:reshape()
 
-	text_box.lc_func = uiLayout.fitRemaining
-	uiLayout.register(panel, text_box)
+	text_box:register("fit-remaining")
 end
 
 

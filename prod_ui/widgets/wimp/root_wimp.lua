@@ -51,6 +51,8 @@ function def:uiCall_initialize()
 	widShared.setupViewports(self, 2)
 	uiLayout.initLayoutSequence(self)
 
+	self.halt_reshape = false
+
 	-- Up to one workspace can be active at a time.
 	self.workspace = false
 
@@ -89,15 +91,26 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
-	-- Viewport #2 serves as the rectangle for Workspaces and maximized Window Frames.
-	uiLayout.resetLayout(self)
-	uiLayout.applyLayout(self)
+function def:uiCall_reshapePre()
+	print("root_wimp: uiCall_reshapePre")
 
+	uiLayout.resetLayout(self)
+
+	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
 	self.vp2_x = self.lp_x
 	self.vp2_y = self.lp_y
 	self.vp2_w = self.lp_w
 	self.vp2_h = self.lp_h
+
+	return self.halt_reshape
+end
+
+
+-- The root doesn't receive 'uiCall_reshapeInner()' or 'uiCall_reshapeInner2()' events.
+
+
+function def:uiCall_reshapePost()
+	print("root_wimp: uiCall_reshape")
 end
 
 
@@ -286,7 +299,7 @@ function def:uiCall_windowResize(w, h)
 	self.w, self.h = w, h
 
 	-- Reshape self and descendants
-	self:reshape(true)
+	self:reshape()
 end
 
 

@@ -320,10 +320,7 @@ function plan.makeWindowFrame(root)
 	--]]
 	menu_tab:setScrollBars(true, true)
 
-	menu_tab:reshape()
-
-	menu_tab.lc_func = uiLayout.fitRemaining
-	uiLayout.register(frame, menu_tab)
+	menu_tab:register("fit-remaining")
 
 	enforceDefaultPrimaryColumn(menu_tab)
 
@@ -351,7 +348,7 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:reshape()
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

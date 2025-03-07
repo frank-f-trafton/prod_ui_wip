@@ -17,6 +17,9 @@
 local uiLayout = {}
 
 
+uiLayout.handlers = {}
+
+
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
@@ -80,16 +83,6 @@ local function decrementStackPointer()
 	lo_stack_i = lo_stack_i - 1
 
 	return retval
-end
-
-
-local function getLayoutTable(self) -- (For parent widgets)
-	local lp_seq = self.lp_seq
-	if not lp_seq then
-		error("missing layout table.", 2)
-	else
-		return lp_seq
-	end
 end
 
 
@@ -386,46 +379,46 @@ end
 
 
 --[[
-uiLayout.fit<Left|Top|Right|Bottom>(): Fit a widget on one side of its parent's layout rectangle, reducing the layout size in the process. The child widget's lateral size is set to that of its parent (so with left or right, the child's height is modified, and with top or bottom, its width is changed).
+fit-left
+fit-top
+fit-right
+fit-bottom
+
+Fits a widget on one side of its parent's layout rectangle, reducing the layout size in the process. The child widget's lateral size is set to that of its parent (so with left or right, the child's height is modified, and with top or bottom, its width is changed).
+
+
+fit-remaining
+
+Fits a widget to its parent's remaining layout rectangle.
+
+
+overlay-remaining
+
+Places a widget over its parent's remaining layout rectangle, without subtracting its width and height.
 --]]
 
 
---- Fit a widget to the left.
--- @param parent The parent widget.
--- @param wid One of the parent's direct children.
-function uiLayout.fitLeft(parent, wid)
+uiLayout.handlers["fit-left"] = function(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardLeft(parent, wid.w)
 end
 
 
---- Fit a widget to the Right.
--- @param parent The parent widget.
--- @param wid One of the parent's direct children.
-function uiLayout.fitRight(parent, wid)
+uiLayout.handlers["fit-right"] = function(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardRight(parent, wid.w)
 end
 
 
---- Fit a widget to the top.
--- @param parent The parent widget.
--- @param wid One of the parent's direct children.
-function uiLayout.fitTop(parent, wid)
+uiLayout.handlers["fit-top"] = function(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardTop(parent, wid.h)
 end
 
 
---- Fit a widget to the bottom.
--- @param parent The parent widget.
--- @param wid One of the parent's direct children.
-function uiLayout.fitBottom(parent, wid)
+uiLayout.handlers["fit-bottom"] = function(parent, wid)
 	wid.x, wid.y, wid.w, wid.h = uiLayout.discardBottom(parent, wid.h)
 end
 
 
---- Fit a widget to its parent's remaining layout rectangle.
--- @param parent The parent widget.
--- @param wid One of the parent's direct children.
-function uiLayout.fitRemaining(parent, wid)
+uiLayout.handlers["fit-remaining"] = function(parent, wid)
 	wid.x = parent.lp_x
 	wid.y = parent.lp_y
 	wid.w = math.max(0, parent.lp_w)
@@ -436,7 +429,7 @@ function uiLayout.fitRemaining(parent, wid)
 end
 
 
-function uiLayout.overlayRemaining(parent, wid)
+uiLayout.handlers["overlay-remaining"] = function(parent, wid)
 	wid.x = parent.lp_x
 	wid.y = parent.lp_y
 	wid.w = math.max(0, parent.lp_w)
@@ -444,12 +437,44 @@ function uiLayout.overlayRemaining(parent, wid)
 end
 
 
+--[[
+static
 
---- Place a widget based on an absolute position (and optional width and height) stored in the widget. 'Absolute'
--- in this case means without regard for the layout rectangle.
--- @param parent The parent widget (technically unused).
--- @param wid The widget to position.
-function uiLayout.placeAbsolute(parent, wid)
+No effect. Use to register a widget to the layout system so that it still gets attention
+with respect to clamping and reshaping.
+--]]
+
+
+uiLayout.handlers["static"] = function() end
+
+
+--[[
+place-absolute
+
+Places a widget based on an absolute position (and optional width and height) stored in the widget. 'Absolute'
+in this case means without regard for the layout rectangle.
+
+
+place-relative
+
+Places a widget based on a position (and optional width and height) stored in the widget, relative to the top-left
+corner of the parent's layout rectangle.
+
+
+place-index
+
+Places a widget based on a rectangle table stored in the parent widget and indexed by a value in the child. The
+fields 'w' and 'h' are optional, and the widget will keep its existing values if those are not present.
+
+
+place-grid
+
+Places a widget based on the parent's current layout rectangle, a count of rows and columns, and cell positions
+in the child. The child widget will be resized to fit the cell.
+--]]
+
+
+uiLayout.handlers["place-absolute"] = function(parent, wid)
 	wid.x = wid.lc_pos_x
 	wid.y = wid.lc_pos_y
 	wid.w = wid.lc_pos_w or wid.w
@@ -457,11 +482,7 @@ function uiLayout.placeAbsolute(parent, wid)
 end
 
 
---- Place a widget based on a position (and optional width and height) stored in the widget, relative to the top-left
--- corner of the parent's layout rectangle.
--- @param parent The parent widget.
--- @param wid The widget to position.
-function uiLayout.placeRelative(parent, wid)
+uiLayout.handlers["place-relative"] = function(parent, wid)
 	wid.x = parent.lp_x + wid.lc_pos_x
 	wid.y = parent.lp_y + wid.lc_pos_y
 	wid.w = wid.lc_pos_w or wid.w
@@ -469,11 +490,7 @@ function uiLayout.placeRelative(parent, wid)
 end
 
 
---- Place a widget based on a rectangle table stored in the parent widget and indexed by a value in the child. The
--- fields 'w' and 'h' are optional, and the widget will keep its existing values if those are not present.
--- @param parent The parent widget.
--- @param wid The widget to position.
-function uiLayout.placeIndex(parent, wid)
+uiLayout.handlers["place-index"] = function(parent, wid)
 	local rect = parent.lp_rects[wid.lc_index]
 
 	if not rect then
@@ -487,11 +504,7 @@ function uiLayout.placeIndex(parent, wid)
 end
 
 
---- Place a widget based on the parent's current layout rectangle, a count of rows and columns, and cell positions
--- in the child. The child widget will be resized to fit the cell.
--- @param parent The parent widget.
--- @param wid The child widget.
-function uiLayout.placeGrid(parent, wid)
+uiLayout.handlers["place-grid"] = function(parent, wid)
 	local cols = parent.lp_grid_cols
 	local rows = parent.lp_grid_rows
 
@@ -540,8 +553,7 @@ Code running from applyLayout() should not:
 --]]
 
 
---- Create a layout sequence table and rectangle in a widget. (You can really just assign a new table to self.lp_seq,
--- but this forces the widget def to require uiLayout, which might be helpful for organizational purposes / grepping.)
+--- Create a layout sequence table and rectangle in a widget.
 -- @param self The widget which will hold the layout sequence.
 function uiLayout.initLayoutSequence(self)
 	self.lp_seq = {}
@@ -550,94 +562,6 @@ function uiLayout.initLayoutSequence(self)
 	self.lp_y = 0
 	self.lp_w = 0
 	self.lp_h = 0
-end
-
-
---- Like initLayoutSequence(), but assigns just the layout rectangle fields to a widget.
--- @param self The widget which will hold the layout rectangle.
-function uiLayout.initLayoutRectangle(self)
-	self.lp_x = 0
-	self.lp_y = 0
-	self.lp_w = 0
-	self.lp_h = 0
-end
-
-
---- Register a child table to its parent layout sequence. The widget must be one of the parent's direct children, and
--- it should only appear once in the list.
--- @param parent The parent widget.
--- @param wid The child widget.
-function uiLayout.register(parent, wid)
-	local lp_seq = getLayoutTable(parent)
-
-	if wid.parent ~= parent then
-		error("attempt to register widget that isn't a direct child of the parent.")
-	end
-
-	-- Confirm widget doesn't already appear in the parent's layout sequence
-	for i = 1, #lp_seq do
-		if lp_seq[i] == wid then
-			error("widget is already in the parent's layout sequence.")
-		end
-	end
-
-	table.insert(lp_seq, wid)
-end
-
-
---- Unregister a widget from its parent layout sequence. The widget must be one of the parent's direct children, and it
--- must currently be in the list.
--- @param parent The parent widget.
--- @param wid The child widget to remove.
-function uiLayout.unregister(parent, wid)
-	local lp_seq = getLayoutTable(parent)
-
-	if wid.parent ~= parent then
-		error("attempt to unregister widget that isn't a direct child of the parent.")
-	end
-
-	for i = #lp_seq, 1, -1 do
-		if lp_seq[i] == wid then
-			table.remove(lp_seq, i)
-			return
-		end
-	end
-
-	error("widget not found in layout sequence.")
-end
-
-
---[[
-Use table.insert() and table.remove() to add or delete arbitrary command tables from lp_seq (maybe write some
-wrappers with error checking appropriate to your use case).
---]]
-
-
---- Apply a widget's layout by looping through its layout sequence.
--- @param parent The widget whose children will be arranged.
-function uiLayout.applyLayout(parent)
-	uiLayout.bindWidget(parent)
-
-	local lp_seq = getLayoutTable(parent)
-
-	for i, wid in ipairs(lp_seq) do
-		-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
-		if wid.lo_command then
-			wid.lo_command(parent, wid)
-		-- Otherwise, treat as a widget.
-		else
-			if wid._dead == "dead" then
-				error("dead widget reference in layout sequence. It should have been cleaned up when removed.")
-
-			elseif not wid.lc_func then
-				error("widget has no layout callback function.")
-			end
-
-			wid.lc_func(parent, wid, wid.lc_info)
-		end
-	end
-
-	uiLayout.unbindWidget(parent)
 end
 
 
