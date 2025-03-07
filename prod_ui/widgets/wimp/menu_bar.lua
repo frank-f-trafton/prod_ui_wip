@@ -329,9 +329,12 @@ function def:uiCall_reshapeInner2()
 
 	-- Reshape all items
 	for i, item in ipairs(self.items) do
-		print("!?", i)
 		item:reshape(self)
 	end
+
+	self:arrangeItems()
+	self:scrollClampViewport()
+	self:selectionInView()
 
 	self:cacheUpdate(true)
 end
