@@ -300,7 +300,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:uiCall_reshapeInner2()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -322,8 +322,6 @@ function def:uiCall_reshapePre()
 	commonScroll.updateScrollState(self)
 
 	self:cacheUpdate(true)
-
-	return true
 end
 
 
