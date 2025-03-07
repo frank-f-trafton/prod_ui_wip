@@ -67,17 +67,20 @@ end
 function def:uiCall_reshapePre()
 	print("workspace: uiCall_reshapePre")
 
-	uiLayout.resetLayout(self)
-
 	local root = self.context.root
 	self.x, self.y, self.w, self.h = root.vp2_x, root.vp2_y, root.vp2_w, root.vp2_h
+
+	uiLayout.resetLayout(self)
 
 	return self.halt_reshape
 end
 
 
-function def:uiCall_reshapeInner2()
-	print("workspace: uiCall_reshapeInner2")
+-- Workspaces don't receive 'uiCall_reshapeInner()' or 'uiCall_reshapeInner2()' events.
+
+
+function def:uiCall_reshapePost()
+	print("workspace: uiCall_reshapePost")
 
 	local skin = self.skin
 
@@ -100,9 +103,6 @@ function def:uiCall_reshapeInner2()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
 end
-
-
---function def:uiCall_reshapePost()
 
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
