@@ -66,12 +66,14 @@ end
 
 
 function def:uiCall_reshapePre()
+	print("container: uiCall_reshapePre")
+
 	uiLayout.resetLayout(self)
 end
 
 
-function def:uiCall_reshapeInner()
-	print("container: uiCall_reshapeInner")
+function def:uiCall_reshapeInner2()
+	print("container: uiCall_reshapeInner2")
 
 	local skin = self.skin
 
@@ -96,7 +98,11 @@ function def:uiCall_reshapeInner()
 end
 
 
---function def:uiCall_reshapePost()
+--[[
+function def:uiCall_reshapePost()
+	print("container: uiCall_reshapePost")
+end
+--]]
 
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
