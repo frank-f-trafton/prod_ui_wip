@@ -788,14 +788,7 @@ end
 
 
 function def:uiCall_reshapePre()
-	uiLayout.resetLayout(self)
-
-	return self.halt_reshape
-end
-
-
-function def:uiCall_reshapePre()
-	print("window_frame: uiCall_reshape")
+	print("window_frame: uiCall_reshapePre")
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars, header bar, etc.) from the content.
 	-- self.w, self.h, excluding viewport #3, is the outer frame border. This area is considered an inward extension
@@ -899,6 +892,8 @@ function def:uiCall_reshapePre()
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
+
+	--return self.halt_reshape -- ?
 end
 
 

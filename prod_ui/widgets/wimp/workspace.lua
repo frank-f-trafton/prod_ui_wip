@@ -67,20 +67,11 @@ end
 function def:uiCall_reshapePre()
 	print("workspace: uiCall_reshapePre")
 
+	-- Viewport #1 is the scrolling area.
+	-- Viewport #2 is an outer border.
+
 	local root = self.context.root
 	self.x, self.y, self.w, self.h = root.vp2_x, root.vp2_y, root.vp2_w, root.vp2_h
-
-	uiLayout.resetLayout(self)
-
-	return self.halt_reshape
-end
-
-
--- Workspaces don't receive 'uiCall_reshapeInner()' or 'uiCall_reshapeInner2()' events.
-
-
-function def:uiCall_reshapePost()
-	print("workspace: uiCall_reshapePost")
 
 	local skin = self.skin
 
@@ -94,6 +85,18 @@ function def:uiCall_reshapePost()
 
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
+
+	uiLayout.resetLayoutPort(self, 1)
+
+	return self.halt_reshape
+end
+
+
+-- Workspaces don't receive 'uiCall_reshapeInner()' or 'uiCall_reshapeInner2()' events.
+
+
+function def:uiCall_reshapePost()
+	print("workspace: uiCall_reshapePost")
 
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
