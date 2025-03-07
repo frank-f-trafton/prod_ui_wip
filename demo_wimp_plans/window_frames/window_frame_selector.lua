@@ -87,7 +87,7 @@ function plan.makeWindowFrame(root)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.frame_unselectable", "Unselectable Window Frame", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.hidden_frame", "Hiding Window Frames", xx, yy, ww, hh)
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

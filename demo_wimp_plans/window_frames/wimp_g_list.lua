@@ -63,10 +63,7 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:setScrollBars(true, true)
 
-	menu_tab:reshape()
-
-	menu_tab.lc_func = uiLayout.fitRemaining
-	uiLayout.register(frame, menu_tab)
+	menu_tab:register("fit-remaining")
 
 	local col_key = menu_tab:addColumn("Key", true, columnSortGlobals) -- ID #1
 	col_key.lock_visibility = true
@@ -94,7 +91,7 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:refreshRows()
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

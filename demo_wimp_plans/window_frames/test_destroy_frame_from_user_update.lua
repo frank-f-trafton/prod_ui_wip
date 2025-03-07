@@ -35,7 +35,7 @@ function plan.makeWindowFrame(root)
 		end
 	end
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

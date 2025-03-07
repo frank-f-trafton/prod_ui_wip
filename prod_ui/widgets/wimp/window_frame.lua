@@ -93,7 +93,7 @@ function def:setHeaderVisible(enabled)
 	self:writeSetting("header_visible", enabled)
 	if old_visible ~= self.header_visible then
 		local sx, sy = self:scrollGetXY()
-		self:reshape(true)
+		self:reshape()
 		self:scrollHV(sx, sy, true)
 	end
 end
@@ -114,7 +114,7 @@ function def:setHeaderSize(size)
 		local sx, sy = self:scrollGetXY()
 		--local vp_y_old = self.vp_y
 		self:writeSetting("header_size", size)
-		self:reshape(true)
+		self:reshape()
 		self:scrollHV(sx, sy, true)
 		--print("vp_y_old", vp_y_old, "self.vp_y", self.vp_y)
 		--widShared.scrollDeltaV(self, vp_y_old - self.vp_y, true)
@@ -602,7 +602,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 								self:wid_unmaximize()
 							end
 
-							self:reshape(true)
+							self:reshape()
 						end
 
 					elseif self.allow_drag_move then
@@ -698,7 +698,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 							self:wid_unmaximize()
 						end
 
-						self:reshape(true)
+						self:reshape()
 					end
 
 				elseif self.press_busy == "button-disabled" then
@@ -787,7 +787,15 @@ local function _measureButtonShortenPort(self, sensor, skin, res, right, w, h)
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
+	uiLayout.resetLayout(self)
+
+	return self.halt_reshape
+end
+
+
+function def:uiCall_reshapePre()
+	print("window_frame: uiCall_reshape")
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars, header bar, etc.) from the content.
 	-- self.w, self.h, excluding viewport #3, is the outer frame border. This area is considered an inward extension
@@ -873,9 +881,12 @@ function def:uiCall_reshape()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	if self.auto_layout then
-		uiLayout.resetLayoutPort(self, 1)
-		uiLayout.applyLayout(self)
+	-- Needs to happen after shaping the header bar, as the header height factors into the default bounds.
+	self:setDefaultBounds()
+
+	-- Hacky way of not interfering with the user resizing the frame. Call keepInBounds* before exiting the resize mode.
+	if self.press_busy ~= "resize" then
+		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
 	uiLayout.resetLayoutPortFull(self, 4)
@@ -888,17 +899,10 @@ function def:uiCall_reshape()
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
-
-	-- Needs to happen after shaping the header bar, as the header height factors into the default bounds.
-	self:setDefaultBounds()
-
-	-- Hacky way of not interfering with the user resizing the frame. Call keepInBounds* before exiting the resize mode.
-	if self.press_busy ~= "resize" then
-		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
-	end
-
-	return self.halt_reshape
 end
+
+
+--function def:uiCall_reshapePost()
 
 
 function def:uiCall_destroy(inst)

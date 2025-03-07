@@ -85,7 +85,7 @@ function def:setSide(side)
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the drag sensor region.
 
 	local skin = self.skin
@@ -102,6 +102,8 @@ function def:uiCall_reshape()
 	end
 
 	-- The layout system is responsible for placement of sashes.
+
+	return true
 end
 
 
@@ -186,7 +188,7 @@ function def:uiCall_pointerDrag(inst, x, y, dx, dy)
 						att.h = math.max(0, math.min(att.h, att.parent.vp_h))
 
 						-- Reshape the parent container and all descendants.
-						att.parent:reshape(true)
+						att.parent:reshape()
 					end
 				end
 			end

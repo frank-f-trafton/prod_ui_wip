@@ -413,7 +413,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is for text placement and offsetting.
 	-- Viewport #2 is the text scissor-box boundary.
 	-- Viewport #3 is the increment button.
@@ -437,6 +437,8 @@ function def:uiCall_reshape()
 
 	self:updateDocumentDimensions()
 	self:scrollClampViewport()
+
+	return true
 end
 
 

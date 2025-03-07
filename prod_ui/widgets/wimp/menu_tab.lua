@@ -302,7 +302,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the scrollable tabular content (excluding the column header).
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 	-- Viewport #3 is the column header.
@@ -332,6 +332,8 @@ function def:uiCall_reshape()
 
 	self:refreshColumnBar()
 	self:cacheUpdate(true)
+
+	return true
 end
 
 
@@ -365,7 +367,7 @@ function def:refreshRows()
 		item.h = self.default_item_h
 
 		if item.reshape then
-			item:reshape(self)
+			item:reshape()
 		end
 
 		yy = item.y + item.h

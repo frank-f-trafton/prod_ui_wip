@@ -104,7 +104,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 defines the trough bounding box (stored in self.trough_x|y|w|h).
 	-- Border applies to viewports: 1, 2
@@ -127,6 +127,8 @@ function def:uiCall_reshape()
 	lgcSlider.updateTroughHome(self)
 
 	lgcLabel.reshapeLabel(self)
+
+	return true
 end
 
 

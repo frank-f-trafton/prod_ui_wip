@@ -40,7 +40,7 @@ function plan.make(panel)
 				dialog.h = 256
 				dialog:initialize()
 				root:sendEvent("rootCall_setModalFrame", dialog)
-				dialog:reshape(true)
+				dialog:reshape()
 				dialog:setFrameTitle("Modal Test")
 
 				if dialog.scr_h then
@@ -116,7 +116,7 @@ function plan.make(panel)
 				dialog.h = 256
 				dialog:initialize()
 				dialog:setFrameBlock(frame)
-				dialog:reshape(true)
+				dialog:reshape()
 				dialog:setFrameTitle("Frame-Blocking test")
 
 				if dialog.scr_h then

@@ -58,7 +58,7 @@ function plan.makeWindowFrame(root)
 		--self.ly_sx = self.usr_time / 10
 	end
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

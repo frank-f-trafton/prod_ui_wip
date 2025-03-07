@@ -36,34 +36,29 @@ function plan.make(panel)
 	wid_a.y = 0
 	wid_a.w = 256
 	wid_a.h = 256
-	wid_a.lc_func = uiLayout.fitLeft
 	wid_a:initialize()
-	uiLayout.register(panel, wid_a)
+	wid_a:register("fit-left")
 	wid_a:setLabel(_text1, "multi")
-	wid_a:reshape(true)
 
 	local wid_sash = panel:addChild("wimp/sash")
 	wid_a.x = 0
 	wid_a.y = 0
 	wid_a.w = 8
 	wid_a.h = 256
-	wid_sash.lc_func = uiLayout.fitLeft
 	wid_sash:initialize()
+	wid_sash:register("fit-left")
 	wid_sash:setAttachedWidget(wid_a)
-	uiLayout.register(panel, wid_sash)
 
 	local wid_b = panel:addChild("base/label")
 	wid_a.x = 0
 	wid_a.y = 0
 	wid_a.w = 256
 	wid_a.h = 256
-	wid_b.lc_func = uiLayout.fitRemaining
 	wid_b:initialize()
-	uiLayout.register(panel, wid_b)
+	wid_b:register("fit-remaining")
 	wid_b:setLabel(_text2, "multi")
-	wid_b:reshape(true)
 
-	panel:reshape(true)
+	panel:reshape()
 end
 
 

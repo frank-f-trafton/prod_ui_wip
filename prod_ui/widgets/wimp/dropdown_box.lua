@@ -240,7 +240,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the chosen item text area.
 	-- Viewport #2 is the decorative button which indicates that this widget is clickable.
 
@@ -252,6 +252,8 @@ function def:uiCall_reshape()
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
 
 	widShared.partitionViewport(self, 1, 2, button_spacing, skin.button_placement, true)
+
+	return true
 end
 
 

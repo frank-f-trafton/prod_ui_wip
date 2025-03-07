@@ -312,20 +312,15 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self:resize()
-	self:reshape()
-
-	self:menuChangeCleanup()
 end
 
 
-function def:uiCall_resize()
+function def:uiCall_reshapePre()
 	self.h = self.base_height
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapeInner2()
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, self.skin.box.border)
 
@@ -334,6 +329,7 @@ function def:uiCall_reshape()
 
 	-- Reshape all items
 	for i, item in ipairs(self.items) do
+		print("!?", i)
 		item:reshape(self)
 	end
 

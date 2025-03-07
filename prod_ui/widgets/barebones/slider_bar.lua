@@ -52,7 +52,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- The label and trough both use the widget dimensions as bounding boxes.
 
 	self.trough_x = 0
@@ -80,6 +80,8 @@ function def:uiCall_reshape()
 		self:wid_actionSliderChanged()
 	end
 	-- 'trough home' is not supported.
+
+	return true
 end
 
 

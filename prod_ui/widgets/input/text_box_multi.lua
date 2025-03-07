@@ -389,7 +389,7 @@ function def:updateDocumentDimensions()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the scrollable region.
 	-- Viewport #2 includes margins and excludes borders.
 
@@ -423,6 +423,8 @@ function def:uiCall_reshape()
 	self.line_ed.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
 
 	self.update_flag = true
+
+	return true
 end
 
 

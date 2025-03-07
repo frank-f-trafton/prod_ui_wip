@@ -97,8 +97,8 @@ local function _setupWS2(root)
 		love.graphics.draw(canvas, quad, 0, 0)
 	end
 
-	ws2:reshape(true)
-	frame_ws2:reshape(true)
+	ws2:reshape()
+	frame_ws2:reshape()
 
 	return true
 end

@@ -182,7 +182,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the main text bounding box.
 	-- Viewport #2 is the main graphic drawing rectangle.
 	-- Viewport #3 is the aux bounding box.
@@ -206,6 +206,8 @@ function def:uiCall_reshape()
 	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement, true)
 	widShared.carveViewport(self, 2, skin.box.margin)
 	lgcLabel.reshapeLabel(self)
+
+	return true
 end
 
 

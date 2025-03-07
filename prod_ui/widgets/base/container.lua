@@ -51,8 +51,6 @@ function def:uiCall_initialize()
 	self.can_have_thimble = false
 
 	self.auto_doc_update = true
-	self.auto_layout = false
-	self.halt_reshape = false
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
@@ -67,7 +65,14 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
+	uiLayout.resetLayout(self)
+end
+
+
+function def:uiCall_reshapeInner()
+	print("container: uiCall_reshapeInner")
+
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
@@ -81,11 +86,6 @@ function def:uiCall_reshape()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	if self.auto_layout then
-		uiLayout.resetLayoutPort(self, 1)
-		uiLayout.applyLayout(self)
-	end
-
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
 	end
@@ -93,9 +93,10 @@ function def:uiCall_reshape()
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
-
-	return self.halt_reshape
 end
+
+
+--function def:uiCall_reshapePost()
 
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)

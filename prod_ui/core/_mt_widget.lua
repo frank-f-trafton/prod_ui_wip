@@ -15,6 +15,7 @@ _mt_widget.context = context
 -- For loading widget defs, see the UI Context source.
 
 
+local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
@@ -26,6 +27,16 @@ local dummy_table = {}
 
 local function errNoDescendants()
 	error("widget is not configured to have descendants.", 2)
+end
+
+
+local function getLayoutSequence(self) -- (For parent widgets)
+	local lp_seq = self.lp_seq
+	if not lp_seq then
+		error("this widget doesn't have a layout sequence.", 2)
+	else
+		return lp_seq
+	end
 end
 
 
@@ -50,6 +61,15 @@ _mt_widget.x = 0
 _mt_widget.y = 0
 _mt_widget.w = 0
 _mt_widget.h = 0
+
+
+_mt_widget.min_w = 0
+_mt_widget.min_h = 0
+_mt_widget.max_w = math.huge
+_mt_widget.max_h = math.huge
+
+_mt_widget.pref_w = false
+_mt_widget.pref_h = false
 
 
 -- Scroll offsets. These apply to a widget's children (a `scr_x` of 50 would offset all of a widget's
@@ -132,6 +152,26 @@ _mt_widget.ly_fn_end = dummyFunc -- XXX untested
 
 
 function _mt_widget:uiCall_initialize(...)
+
+end
+
+
+function _mt_widget:uiCall_reshapePre()
+
+end
+
+
+function _mt_widget:uiCall_reshapeInner()
+
+end
+
+
+function _mt_widget:uiCall_reshapeInner2()
+
+end
+
+
+function _mt_widget:uiCall_reshapePost()
 
 end
 
@@ -947,16 +987,105 @@ function _mt_widget:isInLineage(wid)
 end
 
 
---- Run the 'reshape' UI callback on a widget and its descendants. The event handler can return true to halt
---	the reshaping of descendants.
-function _mt_widget:reshape()
-	local result = self.uiCall_reshape and self:uiCall_reshape()
+function _mt_widget:register(lc_func)
+	uiShared.type(1, lc_func, "string", "table")
 
-	if not result then
-		for _, child in ipairs(self.children) do
-			child:reshape()
+	local parent = self:getParent()
+	local lp_seq = getLayoutSequence(parent)
+
+	-- Confirm widget doesn't already appear in the parent's layout sequence
+	for i = 1, #lp_seq do
+		if lp_seq[i] == self then
+			error("widget is already in the parent's layout sequence.")
 		end
 	end
+
+	self.lc_func = lc_func
+
+	table.insert(lp_seq, self)
+end
+
+
+function _mt_widget:unregister()
+	local parent = self:getParent()
+	local lp_seq = getLayoutSequence(parent)
+
+	for i = #lp_seq, 1, -1 do
+		if lp_seq[i] == wid then
+			table.remove(lp_seq, i)
+			return
+		end
+	end
+
+	error("widget not found in parent's layout sequence.")
+end
+
+
+local function _clampDimensions(self)
+	self.w = math.max(self.min_w, math.min(self.w, self.max_w))
+	self.h = math.max(self.min_h, math.min(self.h, self.max_h))
+end
+
+
+function _mt_widget:reshape()
+	print("_mt_widget:reshape() " .. tostring(self.id) .. ": start.")
+
+	if self:uiCall_reshapePre() then
+		print("_mt_widget:reshape(): ended by uiCall_reshapePre")
+		_clampDimensions(self)
+		return
+	end
+
+	self.w = self.pref_w or self.w
+	self.h = self.pref_h or self.h
+
+	for i, child in ipairs(self.children) do
+		print("_mt_widget:reshape() " .. tostring(self.id) .. ": child #" .. i .. " (" .. tostring(child.id) .. ")")
+		child:reshape()
+	end
+
+	if self.lp_seq then
+		uiLayout.bindWidget(self)
+
+		for i, wid in ipairs(self.lp_seq) do
+			print("_mt_widget:reshape() " .. tostring(self.id) .. ": lp_seq #" .. i .. "(" .. (self.lp_seq.id or "n/a") .. ")")
+			-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
+			if wid.lo_command then
+				wid.lo_command(self, wid)
+			-- Otherwise, treat as a widget.
+			else
+				if wid._dead == "dead" then
+					error("dead widget reference in layout sequence. It should have been cleaned up when removed.")
+				end
+
+				local lc_func = wid.lc_func
+				if type(lc_func) == "string" then
+					print("_mt_widget:reshape() " .. tostring(self.id) .. ": lc_func: " .. lc_func)
+					lc_func = uiLayout.handlers[lc_func]
+				end
+
+				if not lc_func then
+					error("widget has no layout enum or function.")
+				end
+
+				_clampDimensions(wid)
+
+				wid:uiCall_reshapeInner()
+
+				lc_func(self, wid, wid.lc_info)
+
+				_clampDimensions(wid)
+
+				wid:uiCall_reshapeInner2()
+			end
+		end
+
+		uiLayout.unbindWidget(self)
+	end
+
+	self:uiCall_reshapePost()
+
+	print("_mt_widget:reshape() " .. tostring(self.id) .. ": end")
 end
 
 
@@ -968,36 +1097,13 @@ function _mt_widget:reshapeDescendants()
 end
 
 
---[=[
-function _mt_widget:setPosition(x, y) -- XXX under consideration
-	self.x = x
-	self.y = y
+function _mt_widget:setPreferredDimensions(w, h)
+	uiShared.type1Eval(1, w, "number")
+	uiShared.type1Eval(2, h, "number")
 
-	self:sendEvent("uiCall_reposition", self, x, y)
+	self.pref_w = w and math.max(0, w) or false
+	self.pref_h = h and math.max(0, h) or false
 end
---]=]
---[=[
-function _mt_widget:setDimensions(w, h) -- XXX under consideration
-	-- maybe disallow <0 width or height.
-	self.w = w
-	self.h = h
-
-	self:sendEvent("uiCall_resize", self, w, h)
-end
---]=]
---[=[
-function _mt_widget:setXYWH(x, y, w, h) -- XXX under consideration
-	self.x = x
-	self.y = y
-
-	self:sendEvent("uiCall_reposition", self, x, y)
-
-	self.w = w
-	self.h = h
-
-	self:sendEvent("uiCall_resize", self, w, h)
-end
---]=]
 
 
 --- Run a widget's resize callback, if it exists. This allows widgets to update their dimensions without the caller

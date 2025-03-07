@@ -54,7 +54,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 	end
 
-	frame:reshape(true)
+	frame:reshape()
 	frame:center(true, true)
 
 	return frame

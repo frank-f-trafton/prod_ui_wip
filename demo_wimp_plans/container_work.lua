@@ -22,7 +22,7 @@ function plan.make(panel)
 	ctnr:initialize()
 	ctnr:setScrollBars(true, true)
 
-	ctnr:reshape(true)
+	ctnr:reshape()
 
 	local btn = ctnr:addChild("base/button")
 	btn.x = 0

@@ -94,7 +94,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshape()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is for text placement and offsetting.
 	-- Viewport #2 is the text scissor-box boundary.
 
@@ -106,6 +106,8 @@ function def:uiCall_reshape()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
+
+	return true
 end
 
 
