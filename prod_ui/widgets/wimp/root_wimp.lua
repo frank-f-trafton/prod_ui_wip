@@ -96,12 +96,6 @@ function def:uiCall_reshapePre()
 
 	uiLayout.resetLayout(self)
 
-	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
-	self.vp2_x = self.lp_x
-	self.vp2_y = self.lp_y
-	self.vp2_w = self.lp_w
-	self.vp2_h = self.lp_h
-
 	return self.halt_reshape
 end
 
@@ -110,7 +104,19 @@ end
 
 
 function def:uiCall_reshapePost()
-	print("root_wimp: uiCall_reshape")
+	print("root_wimp: uiCall_reshapePost")
+
+	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
+	self.vp2_x = self.lp_x
+	self.vp2_y = self.lp_y
+	self.vp2_w = self.lp_w
+	self.vp2_h = self.lp_h
+
+	-- Handle the current active Workspace.
+	local workspace = self.workspace
+	if workspace then
+		workspace:reshape()
+	end
 end
 
 
@@ -318,6 +324,8 @@ function def:setActiveWorkspace(inst)
 	if inst then
 		inst.sort_id = 2
 	end
+
+	inst:reshape()
 
 	for i, wid_g2 in ipairs(self.children) do
 		if wid_g2 ~= inst then

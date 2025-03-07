@@ -555,7 +555,8 @@ do
 	do
 		local ws1 = wimp_root:newWorkspace()
 		ws1:initialize()
-		ws1:register("static") -- XXX temporary. Need to swap in the current active workspace whenever it changes.
+		-- NOTE: Do not register Workspaces to the root layout. Internally, the root takes care of positioning and
+		-- reshaping the current active Workspace.
 		ws1.auto_layout = true
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
