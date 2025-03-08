@@ -306,6 +306,7 @@ function plan.makeWindowFrame(root)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
 	menu_tab:initialize()
+	menu_tab:register("fit-remaining")
 	commonTab.setDefaultMeasurements(menu_tab)
 	menu_tab.renderThimble = widShared.dummy
 
@@ -319,8 +320,6 @@ function plan.makeWindowFrame(root)
 	menu_tab.h = 350
 	--]]
 	menu_tab:setScrollBars(true, true)
-
-	menu_tab:register("fit-remaining")
 
 	enforceDefaultPrimaryColumn(menu_tab)
 

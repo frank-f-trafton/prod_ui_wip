@@ -54,6 +54,7 @@ function plan.makeWindowFrame(root)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
 	menu_tab:initialize()
+	menu_tab:register("fit-remaining")
 	commonTab.setDefaultMeasurements(menu_tab)
 
 	menu_tab.renderThimble = widShared.dummy
@@ -62,8 +63,6 @@ function plan.makeWindowFrame(root)
 	menu_tab.MN_wrap_selection = false
 
 	menu_tab:setScrollBars(true, true)
-
-	menu_tab:register("fit-remaining")
 
 	local col_key = menu_tab:addColumn("Key", true, columnSortGlobals) -- ID #1
 	col_key.lock_visibility = true

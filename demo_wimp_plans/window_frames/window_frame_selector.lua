@@ -11,18 +11,6 @@ local demoShared = require("demo_shared")
 local plan = {}
 
 
-local function makeLabel(parent, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = parent:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
-
-
 local function _button_launchFrame(self)
 	if type(self.usr_plan) ~= "string" then error("bad type or missing plan ID to launch") end
 
@@ -41,6 +29,7 @@ local function _makeButton(frame, id, label, x, y, w, h)
 	bb_btn.h = h
 	bb_btn.wid_buttonAction = _button_launchFrame
 	bb_btn:initialize()
+	bb_btn:register("static")
 	bb_btn:setLabel(label)
 	bb_btn.usr_plan = id
 	return bb_btn
@@ -67,6 +56,7 @@ function plan.makeWindowFrame(root)
 	bb_btn.w = ww
 	bb_btn.h = hh
 	bb_btn:initialize()
+	bb_btn:register("static")
 	bb_btn:setLabel("Open all")
 	bb_btn.wid_buttonAction = function(self)
 		local siblings = self:getParent().children

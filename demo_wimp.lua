@@ -321,6 +321,7 @@ do
 	do
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 		bar_menu:initialize()
+		bar_menu:register("fit-top")
 		bar_menu.tag = "root_menu_bar"
 
 		-- Test the (normally commented out) debug render user event.
@@ -533,8 +534,6 @@ do
 			table.insert(wimp_root.hooks_key_released, bar_menu.widHook_released)
 		end
 
-		-- Add menu bar to root layout
-		bar_menu:register("fit-top")
 
 		-- Test sneaking a button into a menu bar.
 		--[[
@@ -548,6 +547,7 @@ do
 		bar_button.can_have_thimble = false
 
 		bar_button:initialize()
+		bar_button:register("static")
 		--]]
 	end
 
@@ -563,7 +563,15 @@ do
 
 		local demo_list = ws1:addChild("wimp/tree_box")
 		demo_list:initialize()
+		demo_list:setPreferredDimensions(300, nil)
+		demo_list:register("fit-left")
+
+		-- Inserts a gap between the ListBox and content container.
+		-- Need a better way of doing this.
+		table.insert(ws1.lp_seq, {lo_command = function(parent, opts) uiLayout.discardLeft(parent, 4) end})
+
 		demo_list.tag = "plan_menu"
+
 
 		-- Uncomment this to continuously select menu items as you scrub the mouse cursor
 		-- over the ListBox.
@@ -606,8 +614,8 @@ do
 
 			local plan_container = workspace:addChild("base/container")
 			plan_container:initialize()
-			plan_container.tag = "plan_container"
 			plan_container:register("fit-remaining")
+			plan_container.tag = "plan_container"
 
 			workspace:reshape()
 
@@ -623,13 +631,6 @@ do
 				container:reshape()
 			end
 		end
-
-		demo_list.w = 300
-		demo_list:register("fit-left")
-
-		-- Inserts a gap between the ListBox and content container.
-		-- Need a better way of doing this.
-		table.insert(ws1.lp_seq, {lo_command = function(parent, opts) uiLayout.discardLeft(parent, 4) end})
 	end
 
 	--love.mouse.setGrabbed(true)
@@ -659,6 +660,7 @@ do
 
 	-- Refresh everything.
 	wimp_root:reshape()
+	--wimp_root:reshape()
 end
 
 

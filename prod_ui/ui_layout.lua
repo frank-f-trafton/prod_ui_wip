@@ -4,13 +4,8 @@
 --[[
 	Variable prefixes:
 	lo_ -- General layout variable, or something internal to uiLayout.
-	lp_ -- Layout variable associated with parent (bindable) widget
-	lc_ -- Layout variable associated with a child of a bound widget
-
-	Widgets can both be bound, and children of bound widgets at different times.
-
-	All functions in the 'Layout Binding API' section require that a widget is
-	bound to the layout system.
+	lp_ -- Layout variable associated with parent widget
+	lc_ -- Layout variable associated with a child widget
 --]]
 
 
@@ -39,20 +34,8 @@ local lo_stack_upper = 6
 -- Crash if stack exceeds this value
 local lo_stack_max = 2^16
 
--- Only one widget may be bound at a time.
-local lo_bind = false
-
 
 -- * Getter-assertion combos *
-
-
-local function getBoundWidget()
-	if not lo_bind then
-		error("no widget is currently bound to the layout system.", 2)
-	else
-		return lo_bind
-	end
-end
 
 
 local function incrementStackPointer()
@@ -86,48 +69,9 @@ local function decrementStackPointer()
 end
 
 
--- * Layout Binding API *
-
-
---- Bind a widget to the layout system. Only one widget may be bound at a time.
--- @param wid The widget to bind.
-function uiLayout.bindWidget(wid)
-	if type(wid) ~= "table" then
-		error("argument #1 bad type: expected table, got " .. type(wid))
-
-	elseif lo_bind then
-		error("a widget is already bound to the layout system.")
-	end
-
-	lo_bind = wid
-end
-
-
---- Unbind a widget previously bound to the layout system. The layout stack must be empty at time of call, and the widget
--- must be currently bound.
--- @param wid The widget to unbind.
-function uiLayout.unbindWidget(wid)
-	if type(wid) ~= "table" then
-		error("argument #1 bad type: expected table, got " .. type(wid))
-
-	elseif not lo_bind then
-		error("no widget is currently bound to the layout system.")
-
-	elseif lo_bind ~= wid then
-		error("this widget is not currently bound to the layout system.")
-
-	elseif lo_stack_i > 0 then
-		error("layout stack isn't empty. (More pushes than pops?)")
-	end
-
-	lo_bind = false
-end
-
-
 --- Clear all layout state. For use in scenarios where the entire layout procedure is abandoned, like cleaning
 -- up after an error.
 function uiLayout.unwindAll()
-	lo_bind = false
 	lo_stack_i = 0
 	for i = #lo_stack, 1, -1 do
 		lo_stack[i] = nil
@@ -135,16 +79,12 @@ function uiLayout.unwindAll()
 end
 
 
---- Push an arbitrary rectangle onto the layout stack, without affecting the bound widget's layout rectangle.
+--- Push an arbitrary rectangle onto the layout stack.
 -- @param x Layout X position.
 -- @param y Layout Y position.
 -- @param w Layout width.
 -- @param h Layout height.
 function uiLayout.push(x, y, w, h)
-	if not lo_bind then
-		error("no widget is bound to the layout system.")
-	end
-
 	local rect = incrementStackPointer()
 
 	rect.x = x
@@ -154,88 +94,11 @@ function uiLayout.push(x, y, w, h)
 end
 
 
---- Pop the layout stack, applying its layout rectangle to the bound widget.
---  Bound rectangle is modified in-place.
+--- Pop the layout stack.
 function uiLayout.pop()
-	local wid = getBoundWidget()
 	local rect = decrementStackPointer()
 
-	-- Restore bound widget's layout rectangle
-	wid.x = rect.x
-	wid.y = rect.y
-	wid.w = rect.w
-	wid.h = rect.h
-end
-
-
---[[
-	uiLayout.push<Left|Right|Top|Buttom>(): Take a slice of the bound widget's layout rectangle, apply it to the
-	widget, and push the remaining layout rectangle onto the layout stack. Later on, pop the stack rectangle
-	back onto the widget.
---]]
-
-
--- Push left slice onto the stack.
--- @param w Width of the slice.
-function uiLayout.pushLeft(w)
-	local wid = getBoundWidget()
-
-	w = math.max(0, w)
-
-	uiLayout.push(wid.x + w, wid.y, math.max(0, wid.w - w), wid.h)
-
-	--wid.x
-	--wid.y
-	wid.w = w
-	--wid.h
-end
-
-
---- Push right slice onto the stack.
--- @param w Width of the slice.
-function uiLayout.pushRight(w)
-	local wid = getBoundWidget()
-
-	w = math.max(0, w)
-
-	uiLayout.push(wid.x + wid.w - w, wid.y, math.max(0, wid.w - w), wid.h)
-
-	wid.x = wid.x + wid.w - w
-	--wid.y
-	wid.w = w
-	--wid.h
-end
-
-
---- Push top slice onto the stack.
--- @param h Height of the slice.
-function uiLayout.pushTop(h)
-	local wid = getBoundWidget()
-
-	h = math.max(0, h)
-
-	uiLayout.push(wid.x, wid.y + h, wid.w, math.max(0, wid.h - h))
-
-	--wid.x
-	--wid.y
-	--wid.w
-	wid.h = h
-end
-
-
---- Push bottom slice onto the stack.
--- @param h Height of the slice.
-function uiLayout.pushBottom(h)
-	local wid = getBoundWidget()
-
-	h = math.max(0, h)
-
-	uiLayout.push(wid.x, wid.y + wid.h - h, wid.w, math.max(0, wid.h - h))
-
-	--wid.x
-	wid.y = wid.y + wid.h - h
-	--wid.w
-	wid.h = h
+	return rect.x, rect.y, rect.w, rect.h
 end
 
 
@@ -542,12 +405,9 @@ Layout sequences are stored in widgets at 'self.lp_seq'. Entries in this table a
 children of the widget, with layout commands ready to be applied, or arbitrary tables with a function at 'lo_command'
 which mutate the parent.
 
-applyLayout() binds the current widget to the layout system, and then unbinds it before ending. Layout sequences do not
-touch deeper descendants, but you can include calls to applyLayout() in the reshape callbacks of descendants.
-
 The built-in widget remove() method automatically removes any instances of a widget from its parent's layout table.
 
-Code running from applyLayout() should not:
+Code running from reshape() should not:
 	* Add or remove widgets
 	* Add to, or delete from lp_seq
 --]]

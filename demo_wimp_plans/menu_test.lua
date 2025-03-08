@@ -113,6 +113,7 @@ function plan.make(panel)
 	menu1.wid_keyPressed = testMenuKeyPressed
 	menu1.MN_drag_select = true
 	menu1:initialize()
+	menu1:register("static")
 
 	menu1:setScrollBars(true, true)
 

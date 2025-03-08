@@ -17,6 +17,7 @@ function plan.make(panel)
 	local dbox = panel:addChild("test/drag_box")
 	dbox.x, dbox.y, dbox.w, dbox.h = 400, 16, 64, 64
 	dbox:initialize()
+	dbox:register("static")
 end
 
 

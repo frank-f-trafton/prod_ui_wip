@@ -1,5 +1,6 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
@@ -7,24 +8,12 @@ local widShared = require("prod_ui.common.wid_shared")
 local plan = {}
 
 
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
-
-
 function plan.make(panel)
 	--title("Properties Box Test")
 	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
-	makeLabel(panel, 32, 0, 512, 32, "***Under Construction***", "single")
+	demoShared.makeLabel(panel, 32, 0, 512, 32, "***Under Construction***", "single")
 
 	local properties_box = panel:addChild("wimp/properties_box")
 	properties_box.x = 0
@@ -32,6 +21,7 @@ function plan.make(panel)
 	properties_box.w = 400
 	properties_box.h = 300
 	properties_box:initialize()
+	properties_box:register("static")
 
 	properties_box:setTag("demo_properties_box")
 

@@ -191,8 +191,6 @@ function def:uiCall_reshapeInner2()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
-	print("TreeBox xywh:", self.x, self.y, self.w, self.h)
-
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)

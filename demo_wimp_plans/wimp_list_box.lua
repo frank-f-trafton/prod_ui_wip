@@ -134,6 +134,7 @@ local function makeListBox1(panel, x, y)
 	list_box.skin_id = skin_clone
 	list_box.userDestroy = _userDestroy
 	list_box:initialize()
+	list_box:register("static")
 	list_box:setTag("demo_listbox")
 
 	list_box:writeSetting("show_icons", true)
@@ -201,7 +202,6 @@ local function makeListBox1(panel, x, y)
 		list_box:removeItem(item1)
 	end
 	--]]
-	list_box:reshape()
 
 	local rdo_align_action = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
@@ -220,6 +220,7 @@ local function makeListBox1(panel, x, y)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_align = "left"
@@ -230,6 +231,7 @@ local function makeListBox1(panel, x, y)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("center")
 	rdo_btn.usr_align = "center"
@@ -240,6 +242,7 @@ local function makeListBox1(panel, x, y)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_align = "right"
@@ -253,6 +256,7 @@ local function makeListBox1(panel, x, y)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
+	chk:register("static")
 	chk:setChecked(list_box.show_icons)
 	chk:setLabel("Icons")
 	chk.wid_buttonAction = function(self)
@@ -282,6 +286,7 @@ local function makeListBox1(panel, x, y)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_icon_side = "left"
@@ -292,6 +297,7 @@ local function makeListBox1(panel, x, y)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_icon_side = "right"
@@ -309,6 +315,7 @@ local function makeListBox1(panel, x, y)
 
 	sld.x, sld.y, sld.w, sld.h = wx, wy, ww, wh
 	sld:initialize()
+	sld:register("static")
 
 	sld.slider_pos = 0
 	sld.slider_max = 64
@@ -341,6 +348,7 @@ local function makeListBox2(panel, x, y)
 	list_box.w = 224
 	list_box.h = 256
 	list_box:initialize()
+	list_box:register("static")
 
 	list_box:setTag("demo_listbox2")
 
@@ -383,6 +391,7 @@ local function makeListBox3(panel, x, y)
 	lb1.w = 224
 	lb1.h = 256
 	lb1:initialize()
+	lb1:register("static")
 	lb1:setTag("demo_listbox3a")
 
 	lb1.wid_action = function(self, item, index) print("[3a] wid_action()", item, index) end
@@ -415,6 +424,7 @@ local function makeListBox3(panel, x, y)
 	lb2.w = 224
 	lb2.h = 256
 	lb2:initialize()
+	lb2:register("static")
 	lb2:setTag("demo_listbox3b")
 
 	lb2.wid_action = function(self, item, index) print("[3b] wid_action()", item, index) end
@@ -449,6 +459,7 @@ local function makeListBox4(panel, x, y)
 	lb1.w = 224
 	lb1.h = 256
 	lb1:initialize()
+	lb1:register("static")
 	lb1:setTag("demo_listbox4a")
 
 	lb1.wid_action = function(self, item, index) print("[4a] wid_action()", item, index) end
@@ -481,6 +492,7 @@ local function makeListBox4(panel, x, y)
 	b1.w = 32
 	b1.h = 32
 	b1:initialize()
+	b1:register("static")
 
 	b1:setLabel(">")
 
@@ -496,15 +508,13 @@ local function makeListBox4(panel, x, y)
 		end
 	end
 
-	b1:reshape()
-
-
 	local b2 = panel:addChild("base/button")
 	b2.x = lb1.x + lb1.w + 32
 	b2.y = lb1.y + lb1.h - 32
 	b2.w = 32
 	b2.h = 32
 	b2:initialize()
+	b2:register("static")
 
 	b2:setLabel("<")
 
@@ -520,9 +530,6 @@ local function makeListBox4(panel, x, y)
 		end
 	end
 
-	b2:reshape()
-
-
 	local lb2 = panel:addChild("wimp/list_box")
 	lb2.x = x + 320
 	lb2.y = y
@@ -533,6 +540,7 @@ local function makeListBox4(panel, x, y)
 	lb2.wid_action3 = function(self, item, index) print("[4b] wid_action3()", item, index) end
 	lb2.wid_select = function(self, item, index) print("[4b] wid_select()", item, index) end
 	lb2:initialize()
+	lb2:register("static")
 	lb2:setTag("demo_listbox4b")
 
 	lb2:writeSetting("show_icons", true)
@@ -551,8 +559,6 @@ local function makeListBox4(panel, x, y)
 	--lb2.MN_mark_mode = "cursor" -- false, "toggle", "cursor"
 
 	lb2:setScrollBars(false, true)
-
-	lb2:reshape()
 end
 
 

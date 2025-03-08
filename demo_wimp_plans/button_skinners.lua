@@ -1,23 +1,12 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local pTable = require("prod_ui.lib.pile_table")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 function plan.make(panel)
@@ -42,6 +31,7 @@ function plan.make(panel)
 	button_norm.w = 224
 	button_norm.h = 64
 	button_norm:initialize()
+	button_norm:register("static")
 	button_norm:setLabel("Normal Skinned Button")
 
 	local function radioAlignH(self)
@@ -54,7 +44,7 @@ function plan.make(panel)
 
 	local xx, yy, ww1, ww2, hh1, hh2 = 0, 0, 64, 192, 40, 64
 
-	makeLabel(panel, xx, yy, ww2, hh1, "skin.label_align_h", "single")
+	demoShared.makeLabel(panel, xx, yy, ww2, hh1, "skin.label_align_h", "single")
 
 	yy = yy + hh1
 
@@ -65,6 +55,7 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "left"
 	bb_rdo:setLabel("Left")
@@ -78,6 +69,7 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "center"
 	bb_rdo:setLabel("Center")
@@ -91,6 +83,7 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "right"
 	bb_rdo:setLabel("Right")
@@ -105,6 +98,7 @@ function plan.make(panel)
 	bb_rdo.w = ww2
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "justify"
 	bb_rdo:setLabel("Justify")
@@ -116,7 +110,7 @@ function plan.make(panel)
 
 	yy = yy + hh1
 
-	makeLabel(panel, xx, yy, ww2, hh1, "skin.label_align_v", "single")
+	demoShared.makeLabel(panel, xx, yy, ww2, hh1, "skin.label_align_v", "single")
 
 	yy = yy + hh1
 
@@ -127,6 +121,7 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "top"
 	bb_rdo:setLabel("Top")
@@ -140,6 +135,7 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "middle"
 	bb_rdo:setLabel("Middle")
@@ -153,6 +149,7 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
+	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "bottom"
 	bb_rdo:setLabel("Bottom")

@@ -315,7 +315,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:uiCall_reshapeInner()
 	self.h = self.base_height
 end
 

@@ -1,22 +1,11 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(parent, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = parent:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 local function _assertNoThimble(self, inst)
@@ -47,7 +36,7 @@ function plan.makeWindowFrame(root)
 	frame.uiCall_thimble1Take = _assertNoThimble
 	frame.uiCall_thimble2Take = _assertNoThimble
 
-	makeLabel(frame, 0, 0, 320, 190, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "multi")
+	demoShared.makeLabel(frame, 0, 0, 320, 190, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "multi")
 
 	local xx, yy = 0, 200
 	local ww, hh = 224, 64
@@ -62,6 +51,7 @@ function plan.makeWindowFrame(root)
 	bb_button.uiCall_thimble2Take = _assertNoThimble
 
 	bb_button:initialize()
+	bb_button:register("static")
 	bb_button.can_have_thimble = false
 
 	bb_button:setLabel("Example Button")
@@ -78,6 +68,7 @@ function plan.makeWindowFrame(root)
 	bb_cbox.uiCall_thimble2Take = _assertNoThimble
 
 	bb_cbox:initialize()
+	bb_cbox:register("static")
 	bb_cbox.can_have_thimble = false
 
 	bb_cbox:setLabel("Example Checkbox")

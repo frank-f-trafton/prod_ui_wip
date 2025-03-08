@@ -1,22 +1,11 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 function plan.make(panel)
@@ -35,13 +24,14 @@ function plan.make(panel)
 	local xx = 0
 
 	-- Horizontal slider
-	makeLabel(panel, xx, 0, label_w, label_h, "Horizontal")
+	demoShared.makeLabel(panel, xx, 0, label_w, label_h, "Horizontal")
 	local sliderh1 = panel:addChild("base/slider_bar")
 	sliderh1.x = xx
 	sliderh1.y = 32
 	sliderh1.w = h_wid_w
 	sliderh1.h = h_wid_h
 	sliderh1:initialize()
+	sliderh1:register("static")
 
 	sliderh1.trough_vertical = false
 
@@ -64,13 +54,14 @@ function plan.make(panel)
 	xx = xx + h_wid_w + space_w
 
 	-- Horizontal slider (user input disabled)
-	makeLabel(panel, xx, 0, label_w, label_h, "Read-Only")
+	demoShared.makeLabel(panel, xx, 0, label_w, label_h, "Read-Only")
 	local sliderh2 = panel:addChild("base/slider_bar")
 	sliderh2.x = xx
 	sliderh2.y = 32
 	sliderh2.w = h_wid_w
 	sliderh2.h = h_wid_h
 	sliderh2:initialize()
+	sliderh2:register("static")
 
 	sliderh2.trough_vertical = false
 
@@ -94,13 +85,14 @@ function plan.make(panel)
 	xx = xx + h_wid_w + space_w
 
 	-- Horizontal slider (whole widget disabled)
-	makeLabel(panel, xx, 0, label_w, label_h, "Widget Disabled")
+	demoShared.makeLabel(panel, xx, 0, label_w, label_h, "Widget Disabled")
 	local sliderh3 = panel:addChild("base/slider_bar")
 	sliderh3.x = xx
 	sliderh3.y = 32
 	sliderh3.w = h_wid_w
 	sliderh3.h = h_wid_h
 	sliderh3:initialize()
+	sliderh3:register("static")
 
 	sliderh3.trough_vertical = false
 
@@ -124,13 +116,14 @@ function plan.make(panel)
 	xx = 0
 
 	-- Vertical slider
-	makeLabel(panel, xx, 128, label_w, label_h, "Vertical")
+	demoShared.makeLabel(panel, xx, 128, label_w, label_h, "Vertical")
 	local sliderv1 = panel:addChild("base/slider_bar")
 	sliderv1.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 	sliderv1.y = 160
 	sliderv1.w = v_wid_w
 	sliderv1.h = v_wid_h
 	sliderv1:initialize()
+	sliderv1:register("static")
 
 	sliderv1.trough_vertical = true
 
@@ -149,13 +142,14 @@ function plan.make(panel)
 	xx = xx + h_wid_w + space_w
 
 	-- Vertical Read-Only
-	makeLabel(panel, xx, 128, label_w, label_h, "Read-Only")
+	demoShared.makeLabel(panel, xx, 128, label_w, label_h, "Read-Only")
 	local sliderv2 = panel:addChild("base/slider_bar")
 	sliderv2.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 	sliderv2.y = 160
 	sliderv2.w = v_wid_w
 	sliderv2.h = v_wid_h
 	sliderv2:initialize()
+	sliderv2:register("static")
 
 	sliderv2.trough_vertical = true
 
@@ -176,13 +170,14 @@ function plan.make(panel)
 	xx = xx + h_wid_w + space_w
 
 	-- Vertical (Disabled)
-	makeLabel(panel, xx, 128, label_w, label_h, "Widget Disabled")
+	demoShared.makeLabel(panel, xx, 128, label_w, label_h, "Widget Disabled")
 	local sliderv3 = panel:addChild("base/slider_bar")
 	sliderv3.x = math.floor(xx + (128 - v_wid_w) * 0.5)
 	sliderv3.y = 160
 	sliderv3.w = v_wid_w
 	sliderv3.h = v_wid_h
 	sliderv3:initialize()
+	sliderv3:register("static")
 
 	sliderv3.trough_vertical = true
 

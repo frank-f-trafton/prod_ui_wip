@@ -75,6 +75,7 @@ function plan.makeWindowFrame(root)
 	menu_tab.w = 640
 	menu_tab.h = 480
 	menu_tab:initialize()
+	menu_tab:register("fit-remaining")
 	commonTab.setDefaultMeasurements(menu_tab)
 
 	menu_tab.renderThimble = widShared.dummy
@@ -84,7 +85,6 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:setScrollBars(true, true)
 
-	menu_tab:register("fit-remaining")
 
 	local primary_column = menu_tab:addColumn("Column 1", true, columnSortLabels) -- ID #1
 	primary_column.lock_visibility = true
