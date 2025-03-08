@@ -132,8 +132,6 @@ function themeDef.newInstance(scale)
 	-- General style defaults
 	inst.style_default = uiRes.loadLuaFile(BASE_PATH .. "data.lua")
 	inst.style = pTable.deepCopy(inst.style_default)
-	local inspect = require("lib.test.inspect") -- WIP
-	print(inspect(inst.style))
 
 	local _mt_box_style = uiTheme._mt_box_style
 	for k2, v2 in pairs(inst.style.boxes) do

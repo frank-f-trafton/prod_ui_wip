@@ -1,23 +1,12 @@
 
 -- ProdUI
 local commonWimp = require("prod_ui.common.common_wimp")
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label:initialize()
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 local function _dummy() end
@@ -114,6 +103,7 @@ function plan.make(panel)
 	btn_spl.h = 64
 	btn_spl.userDestroy = _userDestroy
 	btn_spl:initialize()
+	btn_spl:register("static")
 	btn_spl:setTag("demo_split_btn")
 
 	btn_spl:setLabel("Split Button")
@@ -132,6 +122,7 @@ function plan.make(panel)
 		chk.w = ww
 		chk.h = hh
 		chk:initialize()
+		chk:register("static")
 		chk:setLabel("Aux Enabled")
 		chk:setChecked(not not btn_spl.aux_enabled)
 		chk.wid_buttonAction = function(self)
@@ -143,7 +134,7 @@ function plan.make(panel)
 		yy = yy + hh
 	end
 
-	makeLabel(panel, xx, yy, ww, hh, "Aux Side", "single")
+	demoShared.makeLabel(panel, xx, yy, ww, hh, "Aux Side", "single")
 	yy = yy + hh
 
 	do
@@ -153,6 +144,7 @@ function plan.make(panel)
 		rdo.w = ww
 		rdo.h = hh
 		rdo:initialize()
+		rdo:register("static")
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "right"
 		rdo:setLabel("Right")
@@ -170,6 +162,7 @@ function plan.make(panel)
 		rdo.w = ww
 		rdo.h = hh
 		rdo:initialize()
+		rdo:register("static")
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "left"
 		rdo:setLabel("Left")
@@ -187,6 +180,7 @@ function plan.make(panel)
 		rdo.w = ww
 		rdo.h = hh
 		rdo:initialize()
+		rdo:register("static")
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "top"
 		rdo:setLabel("Top")
@@ -204,6 +198,7 @@ function plan.make(panel)
 		rdo.w = ww
 		rdo.h = hh
 		rdo:initialize()
+		rdo:register("static")
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "bottom"
 		rdo:setLabel("Bottom")
@@ -226,6 +221,7 @@ function plan.make(panel)
 		sld.w = ww
 		sld.h = hh
 		sld:initialize()
+		sld:register("static")
 		sld.trough_vertical = false
 		sld:setLabel("Aux Size")
 		sld.slider_def = btn_spl.skin.aux_size

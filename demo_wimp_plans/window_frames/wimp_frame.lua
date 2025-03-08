@@ -37,6 +37,7 @@ function plan.makeWindowFrame(root)
 		text1.h = hh
 		text1.font = context.resources.fonts.p
 		text1:initialize()
+		text1:register("static")
 		text1.text = "Header size"
 		text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
 		text1:refreshText()
@@ -57,6 +58,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Small")
@@ -78,6 +80,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Normal")
@@ -99,6 +102,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Large")
@@ -122,6 +126,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getResizable()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Resizable frame", "single-ul")
@@ -145,6 +150,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = false
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
@@ -169,6 +175,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getCloseControlVisibility()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show 'Close' control", "single-ul")
@@ -193,6 +200,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getCloseEnabled()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Enable 'Close'", "single-ul")
@@ -217,6 +225,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getMaximizeControlVisibility()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show 'Maximize' control", "single-ul")
@@ -241,6 +250,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getMaximizeEnabled()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Enable 'Maximize'", "single-ul")
@@ -265,6 +275,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getHeaderVisible()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Visible header", "single-ul")
@@ -289,6 +300,7 @@ function plan.makeWindowFrame(root)
 		checkbox.w = ww
 		checkbox.h = hh
 		checkbox:initialize()
+		checkbox:register("static")
 		checkbox.checked = frame:getDraggable()
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Draggable header", "single-ul")
@@ -315,6 +327,7 @@ function plan.makeWindowFrame(root)
 		text1.h = hh
 		text1.font = context.resources.fonts.p
 		text1:initialize()
+		text1:register("static")
 		text1.text = "Control Placement"
 		text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
 		text1:refreshText()
@@ -336,6 +349,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Left")
@@ -357,6 +371,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Right")
@@ -382,6 +397,7 @@ function plan.makeWindowFrame(root)
 		text1.h = hh
 		text1.font = context.resources.fonts.p
 		text1:initialize()
+		text1:register("static")
 		text1.text = "Header Text Alignment"
 		text1.x = text1.x + 9 -- XXX work on syncing padding with embedded widget labels
 		text1:refreshText()
@@ -406,6 +422,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Left")
@@ -427,6 +444,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Center")
@@ -448,6 +466,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.w = ww
 			rad_btn.h = hh
 			rad_btn:initialize()
+			rad_btn:register("static")
 			rad_btn.bijou_side = "right"
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Right")
@@ -471,6 +490,7 @@ function plan.makeWindowFrame(root)
 		btn.w = ww
 		btn.h = hh
 		btn:initialize()
+		btn:register("static")
 		btn:setLabel("Close (forcefully)")
 		btn.wid_buttonAction = function(self)
 			self:bubbleEvent("frameCall_close", true)

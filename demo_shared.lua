@@ -24,6 +24,7 @@ function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
 	local label = parent:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
+	label:register("static")
 	label:setLabel(text, label_mode)
 
 	return label

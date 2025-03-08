@@ -60,12 +60,10 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self:reshape()
 end
 
 
-function def:uiCall_reshapePre()
+function def:uiCall_reshapeInner2()
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the bijou drawing rectangle.
 
@@ -76,8 +74,6 @@ function def:uiCall_reshapePre()
 	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side == "right"))
 	widShared.carveViewport(self, 2, skin.box.margin)
 	lgcLabel.reshapeLabel(self)
-
-	return true
 end
 
 

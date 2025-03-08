@@ -1,22 +1,11 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 function plan.make(panel)
@@ -37,6 +26,7 @@ function plan.make(panel)
 	p_bar.w = h_bar_width
 	p_bar.h = h_bar_height
 	p_bar:initialize()
+	p_bar:register("static")
 	p_bar:setTag("demo_prog_bar")
 
 	p_bar.pos = starting_pos
@@ -58,6 +48,7 @@ function plan.make(panel)
 	btn_active.w = 128
 	btn_active.h = 40
 	btn_active:initialize()
+	btn_active:register("static")
 
 	btn_active:setLabel("setActive()")
 
@@ -75,6 +66,7 @@ function plan.make(panel)
 	btn_vertical.w = 128
 	btn_vertical.h = 40
 	btn_vertical:initialize()
+	btn_vertical:register("static")
 
 	btn_vertical:setLabel("Orientation")
 
@@ -99,6 +91,7 @@ function plan.make(panel)
 	btn_far_end.w = 128
 	btn_far_end.h = 40
 	btn_far_end:initialize()
+	btn_far_end:register("static")
 
 	btn_far_end:setLabel("Near/Far Start")
 
@@ -138,7 +131,7 @@ function plan.make(panel)
 		end
 	end
 
-	local lbl_pos = makeLabel(panel, 256, 160, 256, 32, "Position")
+	local lbl_pos = demoShared.makeLabel(panel, 256, 160, 256, 32, "Position")
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
@@ -147,6 +140,7 @@ function plan.make(panel)
 	sld_pos.w = 256
 	sld_pos.h = 32
 	sld_pos:initialize()
+	sld_pos:register("static")
 
 	sld_pos:setTag("position_slider")
 
@@ -160,7 +154,7 @@ function plan.make(panel)
 	sld_pos:reshape()
 
 
-	local lbl_max = makeLabel(panel, 256, 160+32+8+32, 256, 32, "Maximum")
+	local lbl_max = demoShared.makeLabel(panel, 256, 160+32+8+32, 256, 32, "Maximum")
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")
@@ -169,6 +163,7 @@ function plan.make(panel)
 	sld_max.w = 256
 	sld_max.h = 32
 	sld_max:initialize()
+	sld_max:register("static")
 	sld_max:setTag("maximum_slider")
 
 	sld_max.slider_pos = starting_max

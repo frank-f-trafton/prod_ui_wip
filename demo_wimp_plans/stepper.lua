@@ -12,18 +12,6 @@ local function timeFormatted()
 end
 
 
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
-
-
 function plan.make(panel)
 	--title("Stepper")
 
@@ -36,6 +24,7 @@ function plan.make(panel)
 	stepper_h.w = 240
 	stepper_h.h = 32
 	stepper_h:initialize()
+	stepper_h:register("static")
 
 	stepper_h:insertOption("Foobar")
 	stepper_h:insertOption("Bazbop")
@@ -53,6 +42,7 @@ function plan.make(panel)
 	stepper_v.w = 64
 	stepper_v.h = 128
 	stepper_v:initialize()
+	stepper_v:register("static")
 	stepper_v:insertOption("Foobar")
 	stepper_v:insertOption("Bazbop")
 	stepper_v:insertOption({text = "Dipdop"})

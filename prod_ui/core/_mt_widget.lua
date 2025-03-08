@@ -996,7 +996,7 @@ function _mt_widget:register(lc_func)
 	-- Confirm widget doesn't already appear in the parent's layout sequence
 	for i = 1, #lp_seq do
 		if lp_seq[i] == self then
-			error("widget is already in the parent's layout sequence.")
+			error("widget '" .. tostring(self.id) .. "' is already in the parent's layout sequence.")
 		end
 	end
 
@@ -1039,14 +1039,14 @@ function _mt_widget:reshape()
 	self.w = self.pref_w or self.w
 	self.h = self.pref_h or self.h
 
+	--[[
 	for i, child in ipairs(self.children) do
 		print("_mt_widget:reshape() " .. tostring(self.id) .. ": child #" .. i .. " (" .. tostring(child.id) .. ")")
 		child:reshape()
 	end
+	--]]
 
 	if self.lp_seq then
-		uiLayout.bindWidget(self)
-
 		for i, wid in ipairs(self.lp_seq) do
 			print("_mt_widget:reshape() " .. tostring(self.id) .. ": lp_seq #" .. i .. "(" .. (self.lp_seq.id or "n/a") .. ")")
 			-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
@@ -1077,10 +1077,11 @@ function _mt_widget:reshape()
 				_clampDimensions(wid)
 
 				wid:uiCall_reshapeInner2()
+
+				print("_mt_widget:reshape() " .. tostring(self.id) .. ": seq i #" .. i .. ": child #" .. wid:getIndex() .. " (" .. tostring(wid.id) .. ")")
+				wid:reshape()
 			end
 		end
-
-		uiLayout.unbindWidget(self)
 	end
 
 	self:uiCall_reshapePost()
@@ -1098,8 +1099,8 @@ end
 
 
 function _mt_widget:setPreferredDimensions(w, h)
-	uiShared.type1Eval(1, w, "number")
-	uiShared.type1Eval(2, h, "number")
+	uiShared.typeEval1(1, w, "number")
+	uiShared.typeEval1(2, h, "number")
 
 	self.pref_w = w and math.max(0, w) or false
 	self.pref_h = h and math.max(0, h) or false

@@ -1,5 +1,6 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
@@ -9,18 +10,6 @@ local plan = {}
 
 local function timeFormatted()
 	return string.format("%.2f", tostring(love.timer.getTime()))
-end
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label:initialize()
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:setLabel(text, label_mode)
-
-	return label
 end
 
 
@@ -39,6 +28,7 @@ function plan.make(panel)
 	b_rep.w = 128
 	b_rep.h = 64
 	b_rep:initialize()
+	b_rep:register("static")
 
 	b_rep:setLabel("Button (Rep)")
 
@@ -57,6 +47,7 @@ function plan.make(panel)
 	chk.w = 256
 	chk.h = 64
 	chk:initialize()
+	chk:register("static")
 
 	-- Test checkbox text label scissor-box.
 	local silly_string = "CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox"
@@ -73,6 +64,7 @@ function plan.make(panel)
 	chk_m.w = 256
 	chk_m.h = 64
 	chk_m:initialize()
+	chk_m:register("static")
 	chk_m:setLabel("Multi-State Checkbox", "single")
 	chk_m.wid_buttonAction = function(self)
 		print("Multi-Check state: " .. chk_m.value)
@@ -87,6 +79,7 @@ function plan.make(panel)
 	btn_q.w = 64
 	btn_q.h = 64
 	btn_q:initialize()
+	btn_q:register("static")
 
 	btn_q:setLabel("!?") -- XXX: was it intentional that this does not display?
 
@@ -105,6 +98,7 @@ function plan.make(panel)
 	rdo.w = 192
 	rdo.h = py_plus
 	rdo:initialize()
+	rdo:register("static")
 	rdo.radio_group = "rg_a"
 	rdo:setLabel("One (Group A)")
 	--rdo.wid_buttonAction
@@ -116,6 +110,7 @@ function plan.make(panel)
 	rdo.w = 192
 	rdo.h = py_plus
 	rdo:initialize()
+	rdo:register("static")
 	rdo.radio_group = "rg_a"
 	rdo:setLabel("Two (Group A)")
 	--rdo.wid_buttonAction
@@ -127,6 +122,7 @@ function plan.make(panel)
 	rdo.w = 192
 	rdo.h = py_plus
 	rdo:initialize()
+	rdo:register("static")
 	rdo.radio_group = "rg_b"
 	rdo:setLabel("Three (Group B)")
 	--radio.wid_buttonAction
@@ -138,6 +134,7 @@ function plan.make(panel)
 	rdo.w = 192
 	rdo.h = py_plus
 	rdo:initialize()
+	rdo:register("static")
 	rdo.radio_group = "rg_b"
 	rdo:setLabel("Four (Group B)")
 	--rdo.wid_buttonAction
@@ -150,6 +147,7 @@ function plan.make(panel)
 	sticky.w = 240
 	sticky.h = 32
 	sticky:initialize()
+	sticky:register("static")
 	sticky:setTag("button_sticky")
 	sticky:setLabel("Sticky Button")
 
@@ -171,6 +169,7 @@ function plan.make(panel)
 	b_unst.w = 240
 	b_unst.h = 32
 	b_unst:initialize()
+	b_unst:register("static")
 	b_unst:setLabel("Unpress Sticky Button")
 	b_unst:setEnabled(false)
 
@@ -191,6 +190,7 @@ function plan.make(panel)
 	b_instant.w = 240
 	b_instant.h = 32
 	b_instant:initialize()
+	b_instant:register("static")
 
 	b_instant:setLabel("Instant Action Button.")
 
@@ -200,13 +200,14 @@ function plan.make(panel)
 
 
 	-- A button with a secondary action.
-	makeLabel(panel, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
+	demoShared.makeLabel(panel, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
 	local b_secondary = panel:addChild("base/button")
 	b_secondary.x = 256
 	b_secondary.y = 192+48+48+48+64
 	b_secondary.w = 240
 	b_secondary.h = 32
 	b_secondary:initialize()
+	b_secondary:register("static")
 
 	b_secondary:setLabel("Alt. Action Button.")
 
@@ -229,6 +230,7 @@ function plan.make(panel)
 	btn_2c.w = 256
 	btn_2c.h = 32
 	btn_2c:initialize()
+	btn_2c:register("static")
 	btn_2c.radio_group = "bare1"
 	btn_2c:setLabel("Double-Click button")
 

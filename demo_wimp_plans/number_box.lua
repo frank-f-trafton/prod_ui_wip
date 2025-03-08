@@ -1,23 +1,12 @@
 
 
 -- ProdUI
+--local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 function plan.make(panel)
@@ -38,6 +27,7 @@ function plan.make(panel)
 	end
 
 	num_box:initialize()
+	num_box:register("static")
 	--]=]
 end
 

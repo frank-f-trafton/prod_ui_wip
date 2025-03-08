@@ -1,22 +1,11 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 --local uiLayout = require("prod_ui.ui_layout")
 --local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 local function _refreshTreeBox(self)
@@ -57,6 +46,7 @@ function plan.make(panel)
 	tree_box.skin_id = skin_clone
 	tree_box.userDestroy = _userDestroy
 	tree_box:initialize()
+	tree_box:register("static")
 	tree_box:setTag("demo_treebox")
 
 	tree_box.wid_action = function(self, item, index)
@@ -104,7 +94,7 @@ function plan.make(panel)
 
 	local wx, wy, ww, wh = 256, 0, 256, 32
 
-	makeLabel(panel, wx, wy, ww, wh, "Item Horizontal Alignment", "single")
+	demoShared.makeLabel(panel, wx, wy, ww, wh, "Item Horizontal Alignment", "single")
 
 	wy = wy + wh
 
@@ -112,6 +102,7 @@ function plan.make(panel)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "tb_item_h_align"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_item_align_h = "left"
@@ -122,6 +113,7 @@ function plan.make(panel)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	rdo_btn:register("static")
 	rdo_btn.radio_group = "tb_item_h_align"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_item_align_h = "right"
@@ -136,6 +128,7 @@ function plan.make(panel)
 	sld.w = ww
 	sld.h = wh
 	sld:initialize()
+	sld:register("static")
 	sld.trough_vertical = false
 	sld:setLabel("Item Vertical Pad")
 	sld.slider_pos = 0
@@ -159,6 +152,7 @@ function plan.make(panel)
 	sld.w = ww
 	sld.h = wh
 	sld:initialize()
+	sld:register("static")
 	sld.trough_vertical = false
 	sld:setLabel("Pipe width")
 	sld.slider_pos = 0
@@ -181,6 +175,7 @@ function plan.make(panel)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
+	chk:register("static")
 	chk:setLabel("Draw pipes")
 	chk:setChecked(tree_box.skin.draw_pipes)
 	chk.wid_buttonAction = function(self)
@@ -198,6 +193,7 @@ function plan.make(panel)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
+	chk:register("static")
 	chk:setLabel("Draw icons")
 	chk:setChecked(tree_box.TR_show_icons)
 	chk.wid_buttonAction = function(self)
@@ -213,6 +209,7 @@ function plan.make(panel)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
+	chk:register("static")
 	chk:setLabel("Expanders enabled")
 	chk:setChecked(tree_box.TR_expanders_active)
 	chk.wid_buttonAction = function(self)

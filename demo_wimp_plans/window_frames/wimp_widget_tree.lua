@@ -143,13 +143,13 @@ function plan.makeWindowFrame(root)
 	frame:setScrollBars(false, false)
 
 	local tree_box = frame:addChild("wimp/tree_box")
-	tree_box:initialize()
+	tree_box:initialize() -- registered below
 	local chk_vp = frame:addChild("base/checkbox")
-	chk_vp:initialize()
+	chk_vp:initialize() -- registered below
 	local chk_highlight = frame:addChild("base/checkbox")
-	chk_highlight:initialize()
+	chk_highlight:initialize() -- registered below
 	local chk_exclude = frame:addChild("base/checkbox")
-	chk_exclude:initialize()
+	chk_exclude:initialize() -- registered below
 
 	chk_vp:setLabel("Show Viewports")
 	chk_vp:setChecked(context.app.dbg_vp.active)

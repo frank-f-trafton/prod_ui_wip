@@ -13,6 +13,22 @@ function plan.make(panel)
 	local context = panel.context
 
 	--title("WIMP Demo")
+	do
+		local text_block = panel:addChild("wimp/text_block")
+		text_block:initialize()
+		text_block:register("fit-top")
+		text_block:setFontID("h1")
+		text_block:setText("WIMP Demo")
+		text_block:setAutoSize("v")
+	end
+	do
+		local text_block = panel:addChild("wimp/text_block")
+		text_block:initialize()
+		text_block:register("fit-top")
+		text_block:setFontID("p")
+		text_block:setText("Test one two three")
+		text_block:setAutoSize("v")
+	end
 
 	panel.auto_layout = true
 	panel:setScrollBars(false, false)
@@ -27,6 +43,7 @@ function plan.make(panel)
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
+		btn:register("static")
 		btn:setLabel("Modal Test")
 		btn.wid_buttonAction = function(self)
 			local root = self:getRootWidget()
@@ -57,6 +74,7 @@ function plan.make(panel)
 				text.w = dialog.w
 				text.h = 64
 				text:initialize()
+				text:register("static")
 				text.align = "center"
 				text.text = "This frame should block interaction\nwith all other frames until it is dismissed."
 				text:refreshText()
@@ -67,6 +85,7 @@ function plan.make(panel)
 				button_y.w = 96
 				button_y.h = 32
 				button_y:initialize()
+				button_y:register("static")
 				button_y:setLabel("O")
 				button_y.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -78,6 +97,7 @@ function plan.make(panel)
 				button_n.w = 96
 				button_n.h = 32
 				button_n:initialize()
+				button_n:register("static")
 				button_n:setLabel("K")
 				button_n.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -103,6 +123,7 @@ function plan.make(panel)
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
+		btn:register("static")
 		btn:setLabel("Frame-Blocking Test")
 		btn.wid_buttonAction = function(self)
 			local root = self:getRootWidget()
@@ -133,6 +154,7 @@ function plan.make(panel)
 				text.w = dialog.w
 				text.h = 64
 				text:initialize()
+				text:register("static")
 				text.align = "center"
 				text.text = "This frame should block interaction with the frame\nthat invoked it, until dismissed. Other elements should\nbe accessible."
 				text:refreshText()
@@ -143,6 +165,7 @@ function plan.make(panel)
 				button_y.w = 96
 				button_y.h = 32
 				button_y:initialize()
+				button_y:register("static")
 				button_y:setLabel("O")
 				button_y.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -154,6 +177,7 @@ function plan.make(panel)
 				button_n.w = 96
 				button_n.h = 32
 				button_n:initialize()
+				button_n:register("static")
 				button_n:setLabel("K")
 				button_n.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -191,11 +215,12 @@ function plan.make(panel)
 	-- Toast/Notification WIP
 	do
 		local button_close = panel:addChild("base/button")
-		button_close.x = 0
-		button_close.y = 0
+		button_close.x = 128
+		button_close.y = 128
 		button_close.w = 96
 		button_close.h = 24
 		button_close:initialize()
+		button_close:register("static")
 		button_close:setLabel("Inspiration")
 		button_close.str_tool_tip = "Click for an inspiring quote."
 

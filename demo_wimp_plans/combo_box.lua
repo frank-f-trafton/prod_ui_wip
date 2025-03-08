@@ -1,22 +1,11 @@
 
 -- ProdUI
+local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
-
-
-local function makeLabel(panel, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = panel:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
 
 
 function plan.make(panel)
@@ -25,13 +14,14 @@ function plan.make(panel)
 	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
-	makeLabel(panel, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")
+	demoShared.makeLabel(panel, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")
 	local combo_box = panel:addChild("wimp/combo_box")
 	combo_box.x = 32
 	combo_box.y = 96
 	combo_box.w = 256
 	combo_box.h = 32
 	combo_box:initialize()
+	combo_box:register("static")
 
 	combo_box:addItem("foo")
 	combo_box:addItem("bar")
