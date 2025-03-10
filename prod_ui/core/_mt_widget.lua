@@ -15,6 +15,7 @@ _mt_widget.context = context
 -- For loading widget defs, see the UI Context source.
 
 
+local reshapers = context:getLua("core/reshapers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
@@ -1021,73 +1022,8 @@ function _mt_widget:unregister()
 end
 
 
-local function _clampDimensions(self)
-	self.w = math.max(self.min_w, math.min(self.w, self.max_w))
-	self.h = math.max(self.min_h, math.min(self.h, self.max_h))
-end
-
-
-function _mt_widget:reshape()
-	print("_mt_widget:reshape() " .. tostring(self.id) .. ": start.")
-
-	if self:uiCall_reshapePre() then
-		print("_mt_widget:reshape(): ended by uiCall_reshapePre")
-		_clampDimensions(self)
-		return
-	end
-
-	self.w = self.pref_w or self.w
-	self.h = self.pref_h or self.h
-
-	--[[
-	for i, child in ipairs(self.children) do
-		print("_mt_widget:reshape() " .. tostring(self.id) .. ": child #" .. i .. " (" .. tostring(child.id) .. ")")
-		child:reshape()
-	end
-	--]]
-
-	if self.lp_seq then
-		for i, wid in ipairs(self.lp_seq) do
-			print("_mt_widget:reshape() " .. tostring(self.id) .. ": lp_seq #" .. i .. "(" .. (self.lp_seq.id or "n/a") .. ")")
-			-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
-			if wid.lo_command then
-				wid.lo_command(self, wid)
-			-- Otherwise, treat as a widget.
-			else
-				if wid._dead == "dead" then
-					error("dead widget reference in layout sequence. It should have been cleaned up when removed.")
-				end
-
-				local lc_func = wid.lc_func
-				if type(lc_func) == "string" then
-					print("_mt_widget:reshape() " .. tostring(self.id) .. ": lc_func: " .. lc_func)
-					lc_func = uiLayout.handlers[lc_func]
-				end
-
-				if not lc_func then
-					error("widget has no layout enum or function.")
-				end
-
-				_clampDimensions(wid)
-
-				wid:uiCall_reshapeInner()
-
-				lc_func(self, wid, wid.lc_info)
-
-				_clampDimensions(wid)
-
-				wid:uiCall_reshapeInner2()
-
-				print("_mt_widget:reshape() " .. tostring(self.id) .. ": seq i #" .. i .. ": child #" .. wid:getIndex() .. " (" .. tostring(wid.id) .. ")")
-				wid:reshape()
-			end
-		end
-	end
-
-	self:uiCall_reshapePost()
-
-	print("_mt_widget:reshape() " .. tostring(self.id) .. ": end")
-end
+--_mt_widget.reshape = reshapers.branch
+_mt_widget.reshape = reshapers.layout
 
 
 --- Convenience wrapper for reshape() which skips the calling widget and starts with its children.
