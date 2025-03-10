@@ -24,7 +24,6 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 -- LÖVE Supplemental

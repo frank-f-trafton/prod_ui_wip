@@ -47,8 +47,7 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local function dummy() end
@@ -1154,12 +1153,6 @@ def.default_skinner = {
 
 		--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
 		--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
-
-		-- DEBUG: draw viewports.
-		--[[
-		widDebug.debugDrawViewport(self, 1)
-		widDebug.debugDrawViewport(self, 2)
-		--]]
 
 		-- DEBUG: show editor details.
 		-- [[

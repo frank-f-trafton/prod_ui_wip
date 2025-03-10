@@ -1,7 +1,7 @@
 local context = select(1, ...)
 
 
-local commonDragResize = require(context.conf.prod_ui_req .. "common.common_drag_resize")
+local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
@@ -13,7 +13,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local _lerp = commonMath.lerp
@@ -664,10 +664,10 @@ def.uiCall_pointerPressRepeat = lgcUIFrame.logic_pointerPressRepeat
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.press_busy == "resize" then
-			commonDragResize.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
+			lgcWindowFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		elseif self.press_busy == "drag" then
-			commonDragResize.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
+			lgcWindowFrame.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		end
 	end
 end

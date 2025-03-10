@@ -3,7 +3,6 @@
 local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
 local pTable = require("prod_ui.lib.pile_table")
-local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}

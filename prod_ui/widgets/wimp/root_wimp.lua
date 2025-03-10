@@ -8,7 +8,7 @@ local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local def = {}

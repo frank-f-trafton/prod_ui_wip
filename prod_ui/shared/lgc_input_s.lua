@@ -43,7 +43,7 @@ local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 -- LÖVE 12 compatibility.

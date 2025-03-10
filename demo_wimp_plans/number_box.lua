@@ -3,7 +3,6 @@
 -- ProdUI
 --local demoShared = require("demo_shared")
 local uiLayout = require("prod_ui.ui_layout")
-local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}

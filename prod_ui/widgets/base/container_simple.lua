@@ -5,7 +5,7 @@
 local context = select(1, ...)
 
 
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local def = {}

@@ -1,3 +1,5 @@
+-- TODO: move to shared and use context:getLua() to load.
+
 --[[
 	Common scroll bar state and functions.
 
@@ -16,12 +18,6 @@
 
 
 local commonScroll = {}
-
-
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
-
-
-local widShared = require(REQ_PATH .. "wid_shared")
 
 
 local _mt_bar = {}

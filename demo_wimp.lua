@@ -102,8 +102,7 @@ local uiContext = require("prod_ui.ui_context")
 local uiGraphics = require("prod_ui.ui_graphics")
 local uiLayout = require("prod_ui.ui_layout")
 local uiRes = require("prod_ui.ui_res")
-local widDebug = require("prod_ui.common.wid_debug")
-local widShared = require("prod_ui.common.wid_shared")
+
 
 -- Libs: QuickPrint
 local quickPrint = require("lib.quick_print") -- (Helps with debug-printing to the framebuffer.)
@@ -175,7 +174,6 @@ local function newWimpContext()
 		},
 
 		-- Shows the widget's viewport rectangles in love.draw()
-		-- widDebug.debugDrawViewport(self, v, r, g, b, a)
 		dbg_vp = {
 			active = false,
 			wid = false
@@ -866,14 +864,15 @@ function love.draw()
 	end
 	local dbg_vp = context.app.dbg_vp
 	if dbg_vp and dbg_vp.active and dbg_vp.wid and not dbg_vp.wid._dead then
+		local widShared = context:getLua("core/wid_shared")
 		local wid = dbg_vp.wid
 		love.graphics.translate(wid:getAbsolutePosition())
 		if dbg_vp.wid.vp_x then
-			widDebug.debugDrawViewport(dbg_vp.wid, 1)
+			widShared.debug.debugDrawViewport(dbg_vp.wid, 1)
 		end
 		for i = 2, 8 do
 			if dbg_vp.wid["vp" .. i .. "_x"] then
-				widDebug.debugDrawViewport(dbg_vp.wid, i)
+				widShared.debug.debugDrawViewport(dbg_vp.wid, i)
 			end
 		end
 	end

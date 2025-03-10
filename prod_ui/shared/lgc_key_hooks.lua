@@ -7,9 +7,6 @@ local context = select(1, ...)
 local lgcKeyHooks = {}
 
 
---local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
-
-
 function lgcKeyHooks.setupInstance(self)
 	-- Table of widgets to offer keyPressed and keyReleased input.
 	self.hooks_trickle_key_pressed = {}

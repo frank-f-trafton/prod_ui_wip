@@ -13,7 +13,7 @@ local lgcUIFrame = {}
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcContainer = context:getLua("shared/lgc_container")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 lgcUIFrame.types = {workspace=true, window=true}

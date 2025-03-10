@@ -24,8 +24,7 @@ local lgcButton = context:getLua("shared/lgc_button")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local _lerp = commonMath.lerp

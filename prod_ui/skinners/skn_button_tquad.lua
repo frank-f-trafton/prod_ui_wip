@@ -8,7 +8,6 @@ local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
 
 
 return {
@@ -52,9 +51,6 @@ return {
 		if graphic then
 			lgcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
 		end
-
-		-- XXX: Debug border (viewport rectangle)
-		--widDebug.debugDrawViewport(self, 1)
 	end,
 
 	--renderLast
