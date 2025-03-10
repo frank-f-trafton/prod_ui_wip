@@ -325,8 +325,6 @@ function def:uiCall_reshapePre()
 	end
 
 	self:cacheUpdate(true)
-
-	return true
 end
 
 

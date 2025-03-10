@@ -24,7 +24,7 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
+def.reshape = widShared.reshapers.pre
 
 
 def.wid_buttonAction = lgcButton.wid_buttonAction
@@ -71,8 +71,6 @@ function def:uiCall_reshapePre()
 	-- Viewport #1 is the checkbox rectangle.
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, self.skin.box.border)
-
-	return true
 end
 
 
