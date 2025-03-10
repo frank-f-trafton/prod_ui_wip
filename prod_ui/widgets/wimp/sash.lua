@@ -26,6 +26,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true

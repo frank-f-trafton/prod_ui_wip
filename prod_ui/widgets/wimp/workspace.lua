@@ -15,6 +15,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.layout
+
+
 def.trickle = {}
 
 

@@ -14,6 +14,9 @@ local widShared = context:getLua("core/wid_shared")
 local def = {}
 
 
+def.reshape = widShared.reshapers.layout
+
+
 def.trickle = {}
 
 

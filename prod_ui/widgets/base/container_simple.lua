@@ -11,6 +11,9 @@ local widShared = context:getLua("core/wid_shared")
 local def = {}
 
 
+def.reshape = widShared.reshapers.branch
+
+
 -- Called when the user clicks on the container's blank space (no widgets, no embedded controls).
 function def:wid_pressed(x, y, button, istouch, presses)
 

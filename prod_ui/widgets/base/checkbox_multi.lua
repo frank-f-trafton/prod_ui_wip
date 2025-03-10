@@ -31,6 +31,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 def.wid_buttonAction = lgcButton.wid_buttonAction
 def.wid_buttonAction2 = lgcButton.wid_buttonAction2
 def.wid_buttonAction3 = lgcButton.wid_buttonAction3

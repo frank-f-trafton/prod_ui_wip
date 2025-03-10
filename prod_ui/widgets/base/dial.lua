@@ -35,6 +35,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 function def:wid_actionDialChanged()
 	print("Dial changed.", self.dial_pos, self.dial_min, "/", self.dial_max)
 end
