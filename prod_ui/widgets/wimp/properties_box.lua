@@ -37,6 +37,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.branch
+
+
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars

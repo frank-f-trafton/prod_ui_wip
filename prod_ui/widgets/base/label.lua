@@ -17,6 +17,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 def.setLabel = lgcLabel.widSetLabel
 
 

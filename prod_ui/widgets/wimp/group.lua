@@ -28,6 +28,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.branch -- TODO
+
+
 function def:setText(text)
 	self.text = text
 end

@@ -10,9 +10,14 @@ local lgcButtonBare = context:getLua("shared/lgc_button_bare")
 local lgcLabelBare = context:getLua("shared/lgc_label_bare")
 local lgcSlider = context:getLua("shared/lgc_slider")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local widShared = context:getLua("core/wid_shared")
 
 
 local def = {}
+
+
+-- XXX: No barebones widget should depend on reshaping.
+def.reshape = widShared.reshapers.prePost
 
 
 -- Called when the slider state changes.

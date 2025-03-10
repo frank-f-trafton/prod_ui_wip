@@ -42,6 +42,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 widShared.scrollSetMethods(def)
 -- No integrated scroll bars for single-line text inputs.
 

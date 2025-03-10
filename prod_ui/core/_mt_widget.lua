@@ -15,10 +15,10 @@ _mt_widget.context = context
 -- For loading widget defs, see the UI Context source.
 
 
-local reshapers = context:getLua("core/wid/reshapers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
+local widShared = context:getLua("core/wid_shared")
 
 
 local dummyFunc = function() end
@@ -1021,8 +1021,7 @@ function _mt_widget:unregister()
 end
 
 
---_mt_widget.reshape = reshapers.branch
-_mt_widget.reshape = reshapers.layout
+_mt_widget.reshape = widShared.reshapers.null
 
 
 --- Convenience wrapper for reshape() which skips the calling widget and starts with its children.

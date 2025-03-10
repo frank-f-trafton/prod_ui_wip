@@ -56,6 +56,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 lgcMenu.attachMenuMethods(def)
 
 

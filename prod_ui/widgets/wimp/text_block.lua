@@ -21,6 +21,9 @@ local def = {
 }
 
 
+def.reshape = widShared.reshapers.prePost
+
+
 function def:setFontID(id)
 	local skin = self.skin
 
