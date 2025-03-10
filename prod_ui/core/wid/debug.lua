@@ -1,13 +1,15 @@
+-- Access through 'wid_shared.lua'.
+
 -- ProdUI: Shared debug logic for widgets.
 
 
-local widDebug = {}
+local context = select(1, ...)
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+local debug = {} -- widShared.debug
 
 
-local widShared = require(REQ_PATH .. "wid_shared")
+local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
 
 
 local vp_colors = {
@@ -40,7 +42,7 @@ end
 -- @param r, g, b, a An optional color to use for the outline. If not provided, a default keyed to
 -- the viewport index will be used instead (see `vp_colors`). `r` can be a table of four numbers
 -- ({R, G, B, A}).
-function widDebug.debugDrawViewport(self, v, r, g, b, a)
+function debug.debugDrawViewport(self, v, r, g, b, a)
 	love.graphics.push("all")
 
 	if type(r) == "table" then
@@ -53,7 +55,7 @@ function widDebug.debugDrawViewport(self, v, r, g, b, a)
 		love.graphics.setColor(vp_colors[v])
 	end
 
-	v = widShared.vp_keys[v]
+	v = viewport_keys[v]
 
 	if isNum(self[v.x]) and isNum(self[v.y]) and isNum(self[v.w]) and isNum(self[v.h]) then
 		setupLineState()
@@ -64,4 +66,4 @@ function widDebug.debugDrawViewport(self, v, r, g, b, a)
 end
 
 
-return widDebug
+return debug -- widShared.debug

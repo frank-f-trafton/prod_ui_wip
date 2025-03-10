@@ -18,7 +18,7 @@ uiLayout.handlers = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local widShared = require(REQ_PATH .. "common.wid_shared")
+local viewport_keys = require(REQ_PATH .. "common.viewport_keys")
 
 
 -- Stack of layout rectangles
@@ -120,7 +120,7 @@ end
 -- @param wid The widget to reset.
 -- @param v The Viewport ID.
 function uiLayout.resetLayoutPort(wid, v)
-	v = widShared.vp_keys[v]
+	v = viewport_keys[v]
 
 	wid.lp_x = 0
 	wid.lp_y = 0
@@ -133,7 +133,7 @@ end
 -- @param wid The widget to reset.
 -- @param v The Viewport ID.
 function uiLayout.resetLayoutPortFull(wid, v)
-	v = widShared.vp_keys[v]
+	v = viewport_keys[v]
 
 	wid.lp_x = wid[v.x]
 	wid.lp_y = wid[v.y]

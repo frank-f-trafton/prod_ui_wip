@@ -4,7 +4,6 @@
 local commonTab = require("prod_ui.common.common_tab")
 local commonWimp = require("prod_ui.common.common_wimp")
 local uiLayout = require("prod_ui.ui_layout")
-local widShared = require("prod_ui.common.wid_shared")
 
 
 local plan = {}
@@ -308,7 +307,7 @@ function plan.makeWindowFrame(root)
 	menu_tab:initialize()
 	menu_tab:register("fit-remaining")
 	commonTab.setDefaultMeasurements(menu_tab)
-	menu_tab.renderThimble = widShared.dummy
+	menu_tab.renderThimble = function() end
 
 	menu_tab.MN_drag_select = true
 	menu_tab.MN_wrap_selection = false

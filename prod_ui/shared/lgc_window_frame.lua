@@ -1,13 +1,14 @@
--- Common window frame utility functions.
-
-local commonFrame = {}
+local context = select(1, ...)
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+-- Window frame utility functions.
 
 
-local commonMath = require(REQ_PATH .. "common_math")
-local widShared = require(REQ_PATH .. "wid_shared")
+local lgcWindowFrame = {}
+
+
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
+local widShared = context:getLua("core/wid_shared")
 
 
 -- @param dir 1 for right and bottom calculations, -1 for left and top calculations, 0 to return the old values.
@@ -27,7 +28,7 @@ local function _resize(dir, x, w, min_w, target)
 end
 
 
-function commonFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, istouch)
+function lgcWindowFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, istouch)
 	local mx, my = x, y
 	local old_w, old_h = self.w, self.h
 
@@ -59,7 +60,7 @@ function commonFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, istouc
 end
 
 
-function commonFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
+function lgcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 	--[[
 	Relies on the following fields:
 	self.drag_ox
@@ -122,4 +123,4 @@ function commonFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 end
 
 
-return commonFrame
+return lgcWindowFrame

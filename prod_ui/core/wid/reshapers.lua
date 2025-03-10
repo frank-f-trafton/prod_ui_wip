@@ -1,3 +1,6 @@
+-- Access through 'wid_shared.lua'.
+
+
 local context = select(1, ...)
 
 --[[

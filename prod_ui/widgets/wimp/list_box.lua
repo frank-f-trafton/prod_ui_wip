@@ -31,8 +31,7 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
@@ -753,9 +752,6 @@ def.default_skinner = {
 		end
 
 		love.graphics.pop()
-
-		--widDebug.debugDrawViewport(self, 1)
-		--widDebug.debugDrawViewport(self, 2)
 	end,
 
 	--renderLast = function(self, ox, oy) end,

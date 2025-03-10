@@ -6,7 +6,6 @@ local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widDebug = require(context.conf.prod_ui_req .. "common.wid_debug")
 
 
 local _lerp = commonMath.lerp
@@ -63,11 +62,5 @@ return {
 		if self.label_mode then
 			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
 		end
-
-		-- XXX: Debug border (viewport rectangle)
-		--[[
-		widDebug.debugDrawViewport(self, 1)
-		widDebug.debugDrawViewport(self, 2)
-		--]]
 	end
 }

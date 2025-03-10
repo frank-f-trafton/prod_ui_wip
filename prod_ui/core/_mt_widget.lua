@@ -15,11 +15,10 @@ _mt_widget.context = context
 -- For loading widget defs, see the UI Context source.
 
 
-local reshapers = context:getLua("core/reshapers")
+local reshapers = context:getLua("core/wid/reshapers")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local dummyFunc = function() end

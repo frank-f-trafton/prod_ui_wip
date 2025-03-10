@@ -16,10 +16,9 @@ local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
-local vp_keys = widShared.vp_keys
+local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
 
 
 local _sign = commonMath.sign
@@ -770,7 +769,7 @@ function lgcMenu.arrangeItemsVerticalLRTB(self, v, first, last)
 	for i = first, last do
 		local item = items[i]
 
-		if xx + item.w > self[vp_keys[v].w] then
+		if xx + item.w > self[viewport_keys[v].w] then
 			xx = 0
 			yy = yy + item.h
 		end
@@ -839,7 +838,7 @@ function lgcMenu.arrangeItemsHorizontalTBLR(self, v, first, last)
 	for i = first, last do
 		local item = items[i]
 
-		if yy + item.h > self[vp_keys[v].h] then
+		if yy + item.h > self[viewport_keys[v].h] then
 			xx = xx + item.w
 			yy = 0
 		end

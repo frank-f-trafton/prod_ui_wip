@@ -8,7 +8,6 @@ local context = select(1, ...)
 
 local lgcButtonBare = context:getLua("shared/lgc_button_bare")
 local lgcLabelBare = context:getLua("shared/lgc_label_bare")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {}
@@ -35,8 +34,6 @@ function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.can_have_thimble = true
-
-	widShared.setupViewports(self, 2)
 
 	lgcLabelBare.setup(self)
 

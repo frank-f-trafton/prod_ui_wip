@@ -1,37 +1,31 @@
--- ProdUI: Shared widget logic.
+-- To load: local lib = context:getLua("shared/lib")
+
+
+local context = select(1, ...)
 
 
 local widShared = {}
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 
 
-local commonMath = require(REQ_PATH .. "common_math")
+local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys");
+local vpk = viewport_keys
+
+
+widShared.debug = context:getLua("core/wid/debug")
+widShared.reshapers = context:getLua("core/wid/reshapers")
 
 
 -- A common dummy function for widgets.
 function widShared.dummy() end
 
 
--- Viewport key lookup.
-local vp_keys = {
-	--[[1]] {x = "vp_x", y = "vp_y", w = "vp_w", h = "vp_h"},
-	--[[2]] {x = "vp2_x", y = "vp2_y", w = "vp2_w", h = "vp2_h"},
-	--[[3]] {x = "vp3_x", y = "vp3_y", w = "vp3_w", h = "vp3_h"},
-	--[[4]] {x = "vp4_x", y = "vp4_y", w = "vp4_w", h = "vp4_h"},
-	--[[5]] {x = "vp5_x", y = "vp5_y", w = "vp5_w", h = "vp5_h"},
-	--[[6]] {x = "vp6_x", y = "vp6_y", w = "vp6_w", h = "vp6_h"},
-	--[[7]] {x = "vp7_x", y = "vp7_y", w = "vp7_w", h = "vp7_h"},
-	--[[8]] {x = "vp8_x", y = "vp8_y", w = "vp8_w", h = "vp8_h"},
-}
-widShared.vp_keys = vp_keys
-
-
 --- Gets the table keys for a widget viewport. (ie index 2 will return 'vp2_x', 'vp2_y', 'vp2_w' and 'vp2_h'.)
 function widShared.getViewportKeys(self, v)
-	assert(vp_keys[v], "invalid viewport index.")
-	return vp_keys[v].x, vp_keys[v].y, vp_keys[v].w, vp_keys[v].h
+	assert(vpk[v], "invalid viewport index.")
+	return vpk[v].x, vpk[v].y, vpk[v].w, vpk[v].h
 end
 
 
@@ -41,7 +35,7 @@ end
 -- @return The viewport / widget position and dimensions.
 function widShared.getViewportXYWH(self, v)
 	if v then
-		v = vp_keys[v]
+		v = vpk[v]
 		return self[v.x], self[v.y], self[v.w], self[v.h]
 	else
 		return 0, 0, self.w, self.h
@@ -160,7 +154,7 @@ end
 
 
 function widShared.wid_unmaximize(self)
-	-- Widget is required to have a parent.
+	-- The widget must have a parent.
 	local parent = self.parent
 
 	self.x = self.maxim_x or 64
@@ -588,7 +582,7 @@ end
 -- @param self The widget to modify.
 -- @param v The viewport index.
 function widShared.setClipHoverToViewport(self, v)
-	v = vp_keys[v]
+	v = vpk[v]
 
 	self.clip_hover = "manual"
 	self.clip_hover_x = self[v.x]
@@ -600,7 +594,7 @@ end
 
 --- Common setup code for setting a widget's scissor-box to match a viewport.
 function widShared.setClipScissorToViewport(self, v)
-	v = vp_keys[v]
+	v = vpk[v]
 
 	self.clip_scissor = "manual"
 	self.clip_scissor_x = self[v.x]
@@ -671,13 +665,13 @@ end
 
 --- Assigns viewport fields to a widget.
 -- @param self The widget.
--- @param n The number of viewports to assign, from 1 to `n`, up to `#widShared.vp_keys`.
+-- @param n The number of viewports to assign, from 1 to `n`, up to `#widShared.vpk`.
 function widShared.setupViewports(self, n)
-	if n > #vp_keys then
-		error("attempted to set too many viewports (max " .. #vp_keys .. ")")
+	if n > #vpk then
+		error("attempted to set too many viewports (max " .. #vpk .. ")")
 	end
 	for i = 1, n do
-		local v = vp_keys[i]
+		local v = vpk[i]
 		self[v.x], self[v.y], self[v.w], self[v.h] = 0, 0, 0, 0
 	end
 end
@@ -688,7 +682,7 @@ end
 -- @param v Viewport index to modify.
 -- @param e A table with the fields 'x1', 'y1', 'x2' and 'y2'.
 function widShared.carveViewport(self, v, e)
-	v = vp_keys[v]
+	v = vpk[v]
 	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
 
 	self[vx] = self[vx] + e.x1
@@ -702,7 +696,7 @@ end
 -- untested
 --[[
 function widShared.resizeViewportInPlace(self, v, x1, y1, x2, y2)
-	v = vp_keys[v]
+	v = vpk[v]
 	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
 
 	self[vx] = self[vx] + x1
@@ -718,7 +712,7 @@ end
 -- @param a Index of the viewport to copy from.
 -- @param b Indext of the viewport to overwrite.
 function widShared.copyViewport(self, a, b)
-	a, b = vp_keys[a], vp_keys[b]
+	a, b = vpk[a], vpk[b]
 
 	self[b.x] = self[a.x]
 	self[b.y] = self[a.y]
@@ -728,7 +722,7 @@ end
 
 
 function widShared.resetViewport(self, v)
-	v = vp_keys[v]
+	v = vpk[v]
 
 	self[v.x] = 0
 	self[v.y] = 0
@@ -781,7 +775,7 @@ end
 -- @param amount The desired length of the first viewport.
 -- @param far `true` to place Viewport B on the "far" end (right for horizontal, bottom for vertical).
 function widShared.splitViewport(self, a, b, vertical, amount, far)
-	a, b = vp_keys[a], vp_keys[b]
+	a, b = vpk[a], vpk[b]
 	local v1x, v1y, v1w, v1h, v2x, v2y, v2w, v2h
 
 	if vertical then
@@ -844,7 +838,7 @@ end
 -- @param coverage A number from 0.0 to 1.0 which controls how far in or out Viewport B is placed,
 --	0.0 is behind the edge, 0.5 is in the middle, and 1.0 is ahead of it. Default: 0.5
 function widShared.straddleViewport(self, a, b, side, coverage)
-	a, b = vp_keys[a], vp_keys[b]
+	a, b = vpk[a], vpk[b]
 	coverage = coverage or 0.5
 
 	if side == "left" then
@@ -874,7 +868,7 @@ end
 
 
 function widShared.pointInViewport(self, v, x, y)
-	v = vp_keys[v]
+	v = vpk[v]
 	local vx, vy, vw, vh = self[v.x], self[v.y], self[v.w], self[v.h]
 
 	return x >= vx and x < vx + vw and y >= vy and y < vy + vh

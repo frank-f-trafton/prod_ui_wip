@@ -7,7 +7,6 @@ local context = select(1, ...)
 
 
 local lgcLabelBare = context:getLua("shared/lgc_label_bare")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
 
 
 local def = {}

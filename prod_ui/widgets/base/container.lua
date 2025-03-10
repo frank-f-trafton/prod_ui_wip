@@ -26,7 +26,7 @@ local lgcContainer = context:getLua("shared/lgc_container")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local widShared = require(context.conf.prod_ui_req .. "common.wid_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
