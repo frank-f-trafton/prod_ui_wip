@@ -13,7 +13,7 @@
 
 ## Widget Reshaper Methods
 
-These are various implementations of the `Widget:reshape()` method. The default method is **reshapers.branch**.
+These are various implementations of the `Widget:reshape()` method. The default method is **reshapers.null**.
 
 * `reshapers.null`: Does nothing, besides clamp dimensions.
 
@@ -29,7 +29,7 @@ These are various implementations of the `Widget:reshape()` method. The default 
 
 
 | Name | reshapePre | reshapePost | reshapeInner | reshapeInner2 | Recursive |
-| - | - | - | - | - |
+| --- | :---: | :---: | :---: | :---: | :---: |
 | null | N | N | N | N | N |
 | pre | **Y** | N | N | N | N |
 | post | N | **Y** | N | N | N |
