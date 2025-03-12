@@ -66,7 +66,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapeInner2()
+function def:uiCall_relayoutPost()
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the bijou drawing rectangle.
 

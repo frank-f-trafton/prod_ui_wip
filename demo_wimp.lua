@@ -568,7 +568,7 @@ do
 
 		-- Inserts a gap between the ListBox and content container.
 		-- Need a better way of doing this.
-		table.insert(ws1.lp_seq, {lo_command = function(parent, opts) uiLayout.discardLeft(parent, 4) end})
+		table.insert(ws1.lay_seq, {lo_command = function(parent, opts) uiLayout.discardLeft(parent, 4) end})
 
 		demo_list.tag = "plan_menu"
 

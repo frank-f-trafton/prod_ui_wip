@@ -318,12 +318,12 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapeInner()
+function def:uiCall_relayoutPre()
 	self.h = self.base_height
 end
 
 
-function def:uiCall_reshapeInner2()
+function def:uiCall_relayoutPost()
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, self.skin.box.border)
 

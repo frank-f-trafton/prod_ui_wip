@@ -94,7 +94,7 @@ function def:uiCall_reshapePre()
 end
 
 
--- Workspaces don't receive 'uiCall_reshapeInner()' or 'uiCall_reshapeInner2()' events.
+-- Workspaces don't receive 'uiCall_relayoutPre()' or 'uiCall_relayoutPost()' events.
 
 
 function def:uiCall_reshapePost()

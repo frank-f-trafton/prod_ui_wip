@@ -893,8 +893,8 @@ local context = select(1, ...)
 
 --[[
 uiCall_reshapePre
-uiCall_reshapeInner
-uiCall_reshapeInner2
+uiCall_relayoutPre
+uiCall_relayoutPost
 uiCall_reshapePost
 --]]
 
@@ -970,9 +970,9 @@ function reshapers.layout(self)
 
 	self.w, self.h = self.pref_w or self.w, self.pref_h or self.h
 
-	if self.lp_seq then
-		for i, wid in ipairs(self.lp_seq) do
-			--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": lp_seq #" .. i .. "(" .. (self.lp_seq.id or "n/a") .. ")")
+	if self.lay_seq then
+		for i, wid in ipairs(self.lay_seq) do
+			--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": lay_seq #" .. i .. "(" .. (self.lay_seq.id or "n/a") .. ")")
 			-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
 			if wid.lo_command then
 				wid.lo_command(self, wid)
@@ -982,19 +982,19 @@ function reshapers.layout(self)
 					error("dead widget reference in layout sequence. It should have been cleaned up when removed.")
 				end
 
-				local lc_func = wid.lc_func
-				if type(lc_func) == "string" then
-					--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": lc_func: " .. lc_func)
-					lc_func = uiLayout.handlers[lc_func]
+				local lay_hand = wid.lay_hand
+				if type(lay_hand) == "string" then
+					--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": lay_hand: " .. lay_hand)
+					lay_hand = uiLayout.handlers[lay_hand]
 				end
 
-				if not lc_func then
-					error("widget has no layout enum or function.")
+				if not lay_hand then
+					error("missing or invalid layout handler in widget.")
 				end
 
 				_clampDimensions(wid)
 
-				lc_func(self, wid)
+				lay_hand(self, wid)
 
 				--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": seq i #" .. i .. ": child #" .. wid:getIndex() .. " (" .. TS(wid.id) .. ")")
 				wid:reshape()

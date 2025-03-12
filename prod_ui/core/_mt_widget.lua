@@ -31,11 +31,11 @@ end
 
 
 local function getLayoutSequence(self) -- (For parent widgets)
-	local lp_seq = self.lp_seq
-	if not lp_seq then
+	local lay_seq = self.lay_seq
+	if not lay_seq then
 		error("this widget doesn't have a layout sequence.", 2)
 	else
-		return lp_seq
+		return lay_seq
 	end
 end
 
@@ -161,12 +161,12 @@ function _mt_widget:uiCall_reshapePre()
 end
 
 
-function _mt_widget:uiCall_reshapeInner()
+function _mt_widget:uiCall_relayoutPre()
 
 end
 
 
-function _mt_widget:uiCall_reshapeInner2()
+function _mt_widget:uiCall_relayoutPost()
 
 end
 
@@ -588,11 +588,11 @@ function _mt_widget:remove()
 		end
 
 		-- Remove from parent layout, if applicable.
-		local lp_seq = parent.lp_seq
-		if lp_seq then
-			for i = #lp_seq, 1, -1 do
-				if lp_seq[i] == self then
-					table.remove(lp_seq, i)
+		local lay_seq = parent.lay_seq
+		if lay_seq then
+			for i = #lay_seq, 1, -1 do
+				if lay_seq[i] == self then
+					table.remove(lay_seq, i)
 					break
 				end
 			end
@@ -987,32 +987,32 @@ function _mt_widget:isInLineage(wid)
 end
 
 
-function _mt_widget:register(lc_func)
-	uiShared.type(1, lc_func, "string", "table")
+function _mt_widget:register(lay_hand)
+	uiShared.type(1, lay_hand, "string", "table")
 
 	local parent = self:getParent()
-	local lp_seq = getLayoutSequence(parent)
+	local lay_seq = getLayoutSequence(parent)
 
 	-- Confirm widget doesn't already appear in the parent's layout sequence
-	for i = 1, #lp_seq do
-		if lp_seq[i] == self then
+	for i = 1, #lay_seq do
+		if lay_seq[i] == self then
 			error("widget '" .. tostring(self.id) .. "' is already in the parent's layout sequence.")
 		end
 	end
 
-	self.lc_func = lc_func
+	self.lay_hand = lay_hand
 
-	table.insert(lp_seq, self)
+	table.insert(lay_seq, self)
 end
 
 
 function _mt_widget:unregister()
 	local parent = self:getParent()
-	local lp_seq = getLayoutSequence(parent)
+	local lay_seq = getLayoutSequence(parent)
 
-	for i = #lp_seq, 1, -1 do
-		if lp_seq[i] == wid then
-			table.remove(lp_seq, i)
+	for i = #lay_seq, 1, -1 do
+		if lay_seq[i] == wid then
+			table.remove(lay_seq, i)
 			return
 		end
 	end
@@ -1039,30 +1039,6 @@ function _mt_widget:setPreferredDimensions(w, h)
 	self.pref_w = w and math.max(0, w) or false
 	self.pref_h = h and math.max(0, h) or false
 end
-
-
---- Run a widget's resize callback, if it exists. This allows widgets to update their dimensions without the caller
---  having to know internal details about the widget. For example, a bar containing one line of text would probably
---  have a static height that is based on the size of the font used (plus maybe some padding).
-function _mt_widget:resize()
-	if self.uiCall_resize then
-		return self:uiCall_resize()
-	end
-end
-
-
---[[
---- Applies fixed width and/or height to widgets.
-function _mt_widget:applyFixedSize()
-	if self.w_fixed then
-		self.w = self.w_fixed
-	end
-
-	if self.h_fixed then
-		self.h = self.h_fixed
-	end
-end
---]]
 
 
 --- The default widget renderer.
