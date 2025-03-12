@@ -362,7 +362,6 @@ function def:uiCall_initialize(unselectable, view_level)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 6)
-	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
 	lgcKeyHooks.setupInstance(self)
 
@@ -818,7 +817,7 @@ function def:uiCall_reshapePre()
 		end
 	end
 
-	widShared.enforceLimitedDimensions(self)
+	widShared.clampDimensions(self)
 
 	widShared.resetViewport(self, 3)
 	widShared.carveViewport(self, 3, skin.box.border)

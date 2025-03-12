@@ -10,8 +10,9 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"demo_welcome",
 	--"number_box",
-	"demo_main",
+	--"demo_main",
 	--"button_split",
 	--"dial",
 	--"properties_box",
@@ -31,6 +32,7 @@ local demo_window_launch = {
 
 local demo_plan_list = {
 	nodes = {
+		{plan_id = "demo_welcome", label = "Welcome"},
 		{plan_id = nil, label = "Category 1", nodes = {
 			{plan_id = "demo_main", label = "Main Demo Window"},
 			{plan_id = "wimp_sash", label = "Sashes"},

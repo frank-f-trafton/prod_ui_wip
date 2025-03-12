@@ -50,7 +50,6 @@ function def:uiCall_initialize(unselectable)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
-	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
 	lgcKeyHooks.setupInstance(self)
 
