@@ -121,29 +121,37 @@ end
 -- Viewport #2 is the border.
 
 
-function def:uiCall_reshapeInner()
-	widShared.resetViewport(self, 1)
+--[[
+lp_x, lp_y, lp_w, lp_h
+--]]
 
+
+function def:uiCall_reshapeInner(x_axis, lw, lh)
 	local skin = self.skin
 	local font = skin.fonts[self.font_id]
 	if not font then
 		error("missing or invalid font. ID: " .. tostring(self.font_id))
 	end
+	local border = skin.box.border
 
-	self.vp_w = font:getWidth(self.text)
+	widShared.resetViewport(self, 1)
+	self.vp_h = lh - border.x1 - border.x2
+	self.vp_w = lw - border.y1 - border.y2
 
 	if self.wrap then
-		local w, lines = font:getWrap(self.text)
+		local w, lines = font:getWrap(self.text, self.vp_w)
 		self.vp_h = font:getHeight() * #lines
+		self.vp_w = w
 	else
 		self.vp_h = font:getHeight() * (1 + textUtil.countStringPatterns(self.text, "\n", true))
+		self.vp_w = font:getWidth(self.text)
 	end
 
 	if self.auto_size == "h" then
-		self.w = self.vp_w
+		self.w = self.vp_w + border.x1 + border.x2
 
 	elseif self.auto_size == "v" then
-		self.h = self.vp_h
+		self.h = self.vp_h + border.y1 + border.y2
 	end
 end
 

@@ -58,7 +58,6 @@ function def:uiCall_initialize()
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
-	widShared.setupMinMaxDimensions(self)
 	uiLayout.initLayoutSequence(self)
 
 	self.press_busy = false
@@ -71,7 +70,8 @@ end
 function def:uiCall_reshapePre()
 	print("container: uiCall_reshapePre")
 
-	uiLayout.resetLayout(self)
+	--uiLayout.resetLayout(self)
+	uiLayout.resetLayoutPort(self, 1)
 end
 
 

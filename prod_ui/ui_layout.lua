@@ -262,41 +262,65 @@ Places a widget over its parent's remaining layout rectangle, without subtractin
 
 
 uiLayout.handlers["fit-left"] = function(parent, wid)
-	wid.x, wid.y, wid.w, wid.h = uiLayout.discardLeft(parent, wid.w)
+	wid:uiCall_reshapeInner(true, wid.w, parent.lp_h)
+
+	wid.x, wid.y, wid.w, wid.h = uiLayout.discardLeft(parent, math.max(wid.min_w, math.min(wid.max_w, wid.w)))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
 uiLayout.handlers["fit-right"] = function(parent, wid)
-	wid.x, wid.y, wid.w, wid.h = uiLayout.discardRight(parent, wid.w)
+	wid:uiCall_reshapeInner(true, wid.w, parent.lp_h)
+
+	wid.x, wid.y, wid.w, wid.h = uiLayout.discardRight(parent, math.max(wid.min_w, math.min(wid.max_w, wid.w)))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
 uiLayout.handlers["fit-top"] = function(parent, wid)
-	wid.x, wid.y, wid.w, wid.h = uiLayout.discardTop(parent, wid.h)
+	wid:uiCall_reshapeInner(false, parent.lp_w, wid.h)
+
+	wid.x, wid.y, wid.w, wid.h = uiLayout.discardTop(parent, math.max(wid.min_h, math.min(wid.max_h, wid.h)))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
 uiLayout.handlers["fit-bottom"] = function(parent, wid)
-	wid.x, wid.y, wid.w, wid.h = uiLayout.discardBottom(parent, wid.h)
+	wid:uiCall_reshapeInner(false, parent.lp_w, wid.h)
+
+	wid.x, wid.y, wid.w, wid.h = uiLayout.discardBottom(parent, math.max(wid.min_h, math.min(wid.max_h, wid.h)))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
 uiLayout.handlers["fit-remaining"] = function(parent, wid)
+	wid:uiCall_reshapeInner(nil, parent.lp_w, parent.lp_h)
+
 	wid.x = parent.lp_x
 	wid.y = parent.lp_y
-	wid.w = math.max(0, parent.lp_w)
-	wid.h = math.max(0, parent.lp_h)
+	wid.w = math.max(wid.min_w, math.min(wid.max_w, parent.lp_w))
+	wid.h = math.max(wid.min_h, math.min(wid.max_h, parent.lp_h))
 
 	parent.lp_w = 0
 	parent.lp_h = 0
+
+	wid:uiCall_reshapeInner2()
 end
 
 
 uiLayout.handlers["overlay-remaining"] = function(parent, wid)
+	wid:uiCall_reshapeInner(nil, parent.lp_w, parent.lp_h)
+
 	wid.x = parent.lp_x
 	wid.y = parent.lp_y
-	wid.w = math.max(0, parent.lp_w)
-	wid.h = math.max(0, parent.lp_h)
+	wid.w = math.max(wid.min_w, math.min(wid.max_w, parent.lp_w))
+	wid.h = math.max(wid.min_h, math.min(wid.max_h, parent.lp_h))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
@@ -308,7 +332,10 @@ with respect to clamping and reshaping.
 --]]
 
 
-uiLayout.handlers["static"] = function() end
+uiLayout.handlers["static"] = function(parent, wid)
+	wid:uiCall_reshapeInner(nil, wid.w, wid.h)
+	wid:uiCall_reshapeInner2()
+end
 
 
 --[[
@@ -338,18 +365,30 @@ in the child. The child widget will be resized to fit the cell.
 
 
 uiLayout.handlers["place-absolute"] = function(parent, wid)
+	local ww, hh = wid.lc_pos_w or wid.w, wid.lc_pos_h or wid.h
+
+	wid:uiCall_reshapeInner(nil, ww, hh)
+
 	wid.x = wid.lc_pos_x
 	wid.y = wid.lc_pos_y
-	wid.w = wid.lc_pos_w or wid.w
-	wid.h = wid.lc_pos_h or wid.h
+	wid.w = math.max(wid.min_w, math.min(wid.max_w, ww))
+	wid.h = math.max(wid.min_h, math.min(wid.max_h, hh))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
 uiLayout.handlers["place-relative"] = function(parent, wid)
+	local ww, hh = wid.lc_pos_w or wid.w, wid.lc_pos_h or wid.h
+
+	wid:uiCall_reshapeInner(nil, ww, hh)
+
 	wid.x = parent.lp_x + wid.lc_pos_x
 	wid.y = parent.lp_y + wid.lc_pos_y
-	wid.w = wid.lc_pos_w or wid.w
-	wid.h = wid.lc_pos_h or wid.h
+	wid.w = math.max(wid.min_w, math.min(wid.max_w, ww))
+	wid.h = math.max(wid.min_h, math.min(wid.max_h, hh))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
@@ -360,10 +399,16 @@ uiLayout.handlers["place-index"] = function(parent, wid)
 		error("no layout rectangle in parent at index: " .. tostring(wid.lc_index))
 	end
 
+	local ww, hh = rect.w or wid.w, rect.h or wid.h
+
+	wid:uiCall_reshapeInner(nil, ww, hh)
+
 	wid.x = rect.x
 	wid.y = rect.y
-	wid.w = rect.w or wid.w
-	wid.h = rect.h or wid.h
+	wid.w = math.max(wid.min_w, math.min(wid.max_w, ww))
+	wid.h = math.max(wid.min_h, math.min(wid.max_h, hh))
+
+	wid:uiCall_reshapeInner2()
 end
 
 
@@ -390,10 +435,14 @@ uiLayout.handlers["place-grid"] = function(parent, wid)
 	local cell_w = math.floor(parent.lp_w / cols)
 	local cell_h = math.floor(parent.lp_h / rows)
 
+	wid:uiCall_reshapeInner(nil, cell_w, cell_h)
+
 	wid.x = parent.lp_x + (c-1) * cell_w
 	wid.y = parent.lp_y + (r-1) * cell_h
-	wid.w = cell_w
-	wid.h = cell_h
+	wid.w = math.max(wid.min_w, math.min(wid.max_w, cell_w))
+	wid.h = math.max(wid.min_h, math.min(wid.max_h, cell_h))
+
+	wid:uiCall_reshapeInner2()
 end
 
 

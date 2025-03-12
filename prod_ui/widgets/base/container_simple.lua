@@ -27,8 +27,6 @@ function def:uiCall_initialize()
 	--self.clip_hover = true
 	--self.clip_scissor = true
 
-	widShared.setupMinMaxDimensions(self)
-
 	-- Don't highlight when holding the UI thimble.
 	self.renderThimble = widShared.dummy
 end
@@ -49,7 +47,7 @@ end
 
 --[[
 function def:uiCall_reshape???()
-	widShared.enforceLimitedDimensions(self)
+	widShared.clampDimensions(self)
 end
 --]]
 
