@@ -283,7 +283,6 @@ function def:_openPopUpMenu()
 
 		self:setSelectionByIndex(self.chosen_i)
 
-		drawer:resize()
 		drawer:reshape()
 		drawer:menuChangeCleanup()
 	end

@@ -103,7 +103,7 @@ function def:uiCall_reshapePre()
 end
 
 
--- The root doesn't receive 'uiCall_reshapeInner()' or 'uiCall_reshapeInner2()' events.
+-- The root doesn't receive 'uiCall_relayoutPre()' or 'uiCall_relayoutPost()' events.
 
 
 function def:uiCall_reshapePost()

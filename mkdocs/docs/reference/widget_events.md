@@ -519,32 +519,6 @@ Reshaping is intended to modify a widget's content (children, minor visual detai
 
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
-## uiCall_resize
-
-(TODO: description.)
-
-
-### Propagation Method
-
-TODO
-
-
-### Event Origin
-
-`widget:resize()`
-
-
-### Signature
-
-TODO
-
-
-#### Returns
-
-TODO
-
-
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 ## uiCall_initialize
 
 A new widget is being initialized.

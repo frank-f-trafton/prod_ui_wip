@@ -126,7 +126,7 @@ lp_x, lp_y, lp_w, lp_h
 --]]
 
 
-function def:uiCall_reshapeInner(x_axis, lw, lh)
+function def:uiCall_relayoutPre(x_axis, lw, lh)
 	local skin = self.skin
 	local font = skin.fonts[self.font_id]
 	if not font then
@@ -156,7 +156,7 @@ function def:uiCall_reshapeInner(x_axis, lw, lh)
 end
 
 
-function def:uiCall_reshapeInner2()
+function def:uiCall_relayoutPost()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 2)

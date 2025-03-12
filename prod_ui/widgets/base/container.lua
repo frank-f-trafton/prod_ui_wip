@@ -75,8 +75,8 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_reshapeInner2()
-	print("container: uiCall_reshapeInner2")
+function def:uiCall_relayoutPost()
+	print("container: uiCall_relayoutPost")
 
 	local skin = self.skin
 

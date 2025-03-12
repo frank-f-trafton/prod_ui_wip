@@ -236,17 +236,19 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_resize()
+function def:uiCall_reshapePre()
+	-- Viewport #1 is the main content viewport.
+	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 	local skin = self.skin
 	local wid_ref = self.wid_ref
 	local root = self:getRootWidget()
 
 	if not wid_ref or wid_ref._dead then
-		return
+		return true
 	end
 
 	-- We assume that the root widget's dimensions match the display area.
-	-- Item dimensions must be up-to-date before calling.
+	-- Item dimensions must be up to date before calling.
 	local widest_item_width = 0
 	for i, item in ipairs(self.items) do
 		widest_item_width = math.max(widest_item_width, item.w)
@@ -256,14 +258,6 @@ function def:uiCall_resize()
 	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.items)))
 
 	self:keepInBounds()
-end
-
-
-function def:uiCall_reshapePre()
-	-- Viewport #1 is the main content viewport.
-	-- Viewport #2 separates embedded controls (scroll bars) from the content.
-
-	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
 
