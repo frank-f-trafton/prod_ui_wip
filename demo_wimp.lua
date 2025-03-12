@@ -33,33 +33,43 @@ local demo_window_launch = {
 local demo_plan_list = {
 	nodes = {
 		{plan_id = "demo_welcome", label = "Welcome"},
-		{plan_id = nil, label = "Category 1", nodes = {
-			{plan_id = "demo_main", label = "Main Demo Window"},
-			{plan_id = "wimp_sash", label = "Sashes"},
-			{plan_id = "number_box", label = "Number Box"},
-			{plan_id = "properties_box", label = "Properties Box"},
-			{plan_id = "combo_box", label = "Combo Box"},
-			{plan_id = "dropdown_box", label = "Dropdown Box"},
-			{plan_id = "text_box_single", label = "Textbox (Single-Line)"},
-			{plan_id = "text_box_multi", label = "Textbox (Multi-Line)"},
-			{plan_id = "button_skinners", label = "Button Skinners"},
-			{plan_id = "barebones", label = "Barebones Widgets"},
-			{plan_id = "wimp_tree_box", label = "Tree Box"},
-			{plan_id = "wimp_list_box", label = "List Box"},
+		{plan_id = "widgets", label = "Widgets", nodes = {
+			{plan_id = nil, label = "Controls", nodes = {
+				{plan_id = "button_work", label = "Button work"},
+				{plan_id = "button_split", label = "Split Button"},
+				{plan_id = "slider_work", label = "Slider work"},
+				{plan_id = "stepper", label = "Stepper"},
+				{plan_id = "demo_main", label = "Main Demo Window"},
+				{plan_id = "wimp_sash", label = "Sashes"},
+				{plan_id = "number_box", label = "Number Box"},
+				{plan_id = "properties_box", label = "Properties Box"},
+				{plan_id = "combo_box", label = "Combo Box"},
+				{plan_id = "dropdown_box", label = "Dropdown Box"},
+				{plan_id = "text_box_single", label = "Textbox (Single-Line)"},
+				{plan_id = "text_box_multi", label = "Textbox (Multi-Line)"},
+				{plan_id = "button_skinners", label = "Button Skinners"},
+				{plan_id = "barebones", label = "Barebones Widgets"},
+				{plan_id = "wimp_tree_box", label = "Tree Box"},
+				{plan_id = "wimp_list_box", label = "List Box"},
+			}},
+			{plan_id = nil, label = "Informational", nodes = {
+				{plan_id = "progress_bar", label = "Progress Bar"},
+				{plan_id = "label_test", label = "Label test"},
+				-- text blocks
+			}},
+			{plan_id = nil, label = "Containers", nodes = {
+				{plan_id = "root", label = "Root Widget"},
+				{plan_id = "container_work", label = "Container work"},
+			}},
 		}},
-		{plan_id = nil, label = "Category 2", nodes = {
-			{plan_id = "button_work", label = "Button work"},
-			{plan_id = "button_split", label = "Split Button"},
-			{plan_id = "progress_bar", label = "Progress Bar"},
-			{plan_id = "stepper", label = "Stepper"},
-			{plan_id = "label_test", label = "Label test"},
+		{plan_id = nil, label = "UI Frames", nodes = {
+			{plan_id = "wimp_workspaces", label = "Workspace Frames"},
+		}},
+		{plan_id = nil, label = "Testing; Unfinished Work", nodes = {
 			{plan_id = "drag_box", label = "Drag Box"},
+			{plan_id = "dial", label = "Dials"},
+			{plan_id = "menu_test", label = "Menu Test"},
 		}},
-		{plan_id = "container_work", label = "Container work"},
-		{plan_id = "slider_work", label = "Slider work"},
-		{plan_id = "dial", label = "Dials"},
-		{plan_id = "menu_test", label = "Menu Test"},
-		{plan_id = "wimp_workspaces", label = "Workspace Frames"},
 	}
 }
 

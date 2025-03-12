@@ -9,7 +9,7 @@ function plan.make(panel)
 		text_block:initialize()
 		text_block:register("fit-top")
 		text_block:setFontID("h1")
-		text_block:setText("Welcome")
+		text_block:setText("Widgets")
 		text_block:setAutoSize("v")
 	end
 	do
@@ -21,9 +21,18 @@ function plan.make(panel)
 		text_block:setWrapping(true)
 		text_block:setText([[
 
-ProdUI is a user interface library for the LÖVE Framework. It is currently in development, and not yet ready for real games and applications.
+Widgets are the programmable objects that make up an interface.
 
-Once complete, this demo will provide examples of all built-in widgets and most features of the library.]])
+Most widgets fall under one of the following broad categories:
+
+* Controls, like buttons and sliders
+
+* Containers (of other widgets)
+
+* Informational or cosmetic elements, like this text
+
+Note that there is not an explicit container type, or one superclass of buttons. All such widgets use the same system of event callbacks to implement their functionality.
+]])
 	end
 
 	panel.auto_layout = true
