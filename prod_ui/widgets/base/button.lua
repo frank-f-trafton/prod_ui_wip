@@ -61,8 +61,6 @@ function def:uiCall_initialize()
 	self:skinInstall()
 
 	self.cursor_hover = self.skin.cursor_on
-
-	self:reshape()
 end
 
 

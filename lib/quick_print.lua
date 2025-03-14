@@ -1,4 +1,4 @@
--- QuickPrint: A text drawing library for LÖVE.
+-- QuickPrint: A text drawing library for LÖVE. (Modified)
 -- Version: 1.1.0
 -- Supported LÖVE versions: 11.4, 11.5
 -- See LICENSE, README.md and the demos for more info.
@@ -43,6 +43,23 @@ end
 
 local function errEnumVAlign(arg_n, val)
 	error("argument #" .. arg_n .. ": invalid vertical align enum: " .. tostring(val), 3)
+end
+
+
+local function _updateRangeX(self)
+	self.x1 = math.min(self.x, self.x1)
+	self.x2 = math.max(self.x, self.x2)
+end
+
+
+local function _updateRangeY(self)
+	self.y1 = math.min(self.y, self.y1)
+	self.y2 = math.max(self.y, self.y2)
+end
+
+
+local function _resetRangeXY(self)
+	self.x1, self.y1, self.x2, self.y2 = 0, 0, 0, 0
 end
 
 
@@ -136,6 +153,8 @@ local function plainWrite(self, str, font, aux)
 	end
 
 	self.x = math.ceil(self.x + text_width * scale_x)
+	_updateRangeX(self)
+
 	self:advanceTab()
 end
 
@@ -178,6 +197,7 @@ function quickPrint.new(ref_w, ref_h)
 
 	self.x, self.y = 0, 0
 	self.sx, self.sy = 1, 1
+	self.x1, self.y1, self.x2, self.y2 = 0, 0, 0, 0
 	self.pad_v = 0
 
 	self.last_glyph = false
@@ -320,6 +340,7 @@ function _mt_qp:advanceX(width)
 	-- be used with virtual tab stops.
 
 	self.x = math.ceil(self.x + width)
+	_updateRangeX(self)
 
 	self:clearKerningMemory()
 end
@@ -332,6 +353,7 @@ function _mt_qp:advanceXStr(str)
 	local width = font:getWidth(str)
 
 	self.x = math.ceil(self.x + width)
+	_updateRangeX(self)
 
 	self:clearKerningMemory()
 end
@@ -341,6 +363,7 @@ function _mt_qp:setXMin(x_min)
 	if type(x_min) ~= "number" then errType(1, x_min, "number") end
 
 	self.x = math.max(self.x, x_min)
+	_updateRangeX(self)
 
 	self:clearKerningMemory()
 end
@@ -352,6 +375,7 @@ function _mt_qp:advanceXCoarse(coarse_x, margin)
 	elseif type(margin) ~= "number" then errType(2, margin, "nil/number") end
 
 	self.x = math.max(self.x, math.floor(((self.x + margin + coarse_x) / coarse_x)) * coarse_x)
+	_updateRangeX(self)
 
 	self:clearKerningMemory()
 end
@@ -365,6 +389,7 @@ function _mt_qp:advanceTab()
 		end
 		if tab_x and self.x < tab_x then
 			self.x = tab_x
+			_updateRangeX(self)
 			self:clearKerningMemory()
 		end
 
@@ -402,6 +427,7 @@ function _mt_qp:setXPosition(x)
 	if type(x) ~= "number" then errType(1, x, "number") end
 
 	self.x = x
+	_updateRangeX(self)
 
 	self.tab_i = math.huge
 	self:clearKerningMemory()
@@ -412,6 +438,7 @@ function _mt_qp:setYPosition(y)
 	if type(y) ~= "number" then errType(1, y, "number") end
 
 	self.y = y
+	_updateRangeY(self)
 
 	-- does not invalidate tab stop state
 	-- does not clear kerning memory
@@ -438,6 +465,8 @@ function _mt_qp:movePosition(dx, dy)
 	elseif type(dy) ~= "number" then errType(2, dy, "number") end
 
 	self.x, self.y = self.x + dx, self.y + dy
+	_updateRangeX(self)
+	_updateRangeY(self)
 
 	self.tab_i = math.huge
 	self:clearKerningMemory()
@@ -448,6 +477,7 @@ function _mt_qp:moveXPosition(dx)
 	if type(dx) ~= "number" then errType(1, dx, "number") end
 
 	self.x = self.x + dx
+	_updateRangeX(self)
 
 	self.tab_i = math.huge
 	self:clearKerningMemory()
@@ -458,6 +488,7 @@ function _mt_qp:moveYPosition(dy)
 	if type(dy) ~= "number" then errType(1, dy, "number") end
 
 	self.y = self.y + dy
+	_updateRangeY(self)
 
 	-- Does not invalidate tab stop state.
 	-- Does not clear kerning memory.
@@ -470,6 +501,7 @@ function _mt_qp:setOrigin(origin_x, origin_y)
 
 	self.origin_x, self.origin_y = origin_x, origin_y
 	self.x, self.y = 0, 0
+	_resetRangeXY(self)
 
 	self.tab_i = 1
 	self:clearKerningMemory()
@@ -481,6 +513,7 @@ function _mt_qp:setXOrigin(origin_x)
 
 	self.origin_x = origin_x
 	self.x, self.y = 0, 0
+	_resetRangeXY(self)
 
 	self.tab_i = 1
 	self:clearKerningMemory()
@@ -492,6 +525,7 @@ function _mt_qp:setYOrigin(origin_y)
 
 	self.origin_y = origin_y
 	self.x, self.y = 0, 0
+	_resetRangeXY(self)
 
 	self.tab_i = 1
 	self:clearKerningMemory()
@@ -519,6 +553,7 @@ function _mt_qp:moveOrigin(dx, dy)
 
 	self.origin_x, self.origin_y = self.origin_x + dx, self.origin_y + dy
 	self.x, self.y = 0, 0
+	_resetRangeXY(self)
 
 	self.tab_i = 1
 	self:clearKerningMemory()
@@ -597,18 +632,24 @@ function _mt_qp:getVerticalPadding()
 end
 
 
+function _mt_qp:getPrintedRange()
+	return self.x1, self.y1, self.x2, self.y2
+end
+
+
 function _mt_qp:reset()
 	self.x, self.y = 0, 0
 
 	self.tab_i = 1
 	self:clearKerningMemory()
+	_resetRangeXY(self)
 	self.align = self.default_align
 	self.v_align = self.default_v_align
 end
 
 
 function _mt_qp:down(qty)
-	if type(qty) ~= "number" and qty ~= nil then errType(1, pad_v, "number or nil") end
+	if type(qty) ~= "number" and qty ~= nil then errType(1, qty, "number or nil") end
 
 	qty = qty or 1
 
@@ -618,6 +659,28 @@ function _mt_qp:down(qty)
 		local scale_y = self.sy * aux.sy
 		self.x = 0
 		self.y = math.ceil(self.y + self.pad_v + (qty * (font:getHeight() * font:getLineHeight() * scale_y)))
+		_updateRangeX(self)
+		_updateRangeY(self)
+
+		self.tab_i = 1
+		self:clearKerningMemory()
+	end
+end
+
+
+function _mt_qp:up(qty)
+	if type(qty) ~= "number" and qty ~= nil then errType(1, qty, "number or nil") end
+
+	qty = qty or 1
+
+	if qty > 0 then
+		local font = self:getFont()
+		local aux = quickPrint.getAux(font)
+		local scale_y = self.sy * aux.sy
+		self.x = 0
+		self.y = math.floor(self.y - self.pad_v - (qty * (font:getHeight() * font:getLineHeight() * scale_y)))
+		_updateRangeX(self)
+		_updateRangeY(self)
 
 		self.tab_i = 1
 		self:clearKerningMemory()

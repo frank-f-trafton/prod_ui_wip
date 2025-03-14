@@ -116,15 +116,24 @@ local uiLayout = require("prod_ui.ui_layout")
 local uiRes = require("prod_ui.ui_res")
 
 
--- Libs: QuickPrint
-local quickPrint = require("lib.quick_print") -- (Helps with debug-printing to the framebuffer.)
-local qp = quickPrint.new()
+-- Libs: QuickPrint / DebugPanel
+local debugPanel = require("lib.debug_panel")
+
+
+local dpanel = debugPanel.new(320, love.graphics.getFont()) -- the font will be updated later.
+local dpanel_side_pad = 32
+dpanel.x = dpanel_side_pad
+dpanel.y = 40
+local dpanel_left = true
+local dpanel_cool = 0
+local dpanel_cool_max = 0.33
+local dpanel_tabs = {0, 24, 150}
 
 
 -- * Demo State *
 
 
-local demo_perf -- assigned at the end of love.draw
+local demo_perf -- assigned near love.draw
 
 
 -- * / Demo State *
@@ -142,12 +151,25 @@ love.filesystem.setSymlinksEnabled(true)
 --love.graphics.setLineStyle("rough")
 --love.window.setVSync(0)
 
-local font_sz = 12
-local function reloadFont(sz)
-	return love.graphics.newFont(sz)
+local font_sz = 14
+local font_test
+local function reloadFont()
+	local old_font = font_test
+	font_test = love.graphics.newFont(font_sz)
+	dpanel.qp.text_object:setFont(font_test)
+
+	-- Release the old font object and collect garbage twice to prevent
+	-- a buildup of rapidly-discarded fonts eating up RAM while pending
+	-- release.
+	if old_font then
+		old_font:release()
+		collectgarbage("collect")
+		collectgarbage("collect")
+	end
+
 end
-local font_test = reloadFont(font_sz)
-love.graphics.setFont(font_test)
+reloadFont()
+
 
 -- / LÖVE Setup
 
@@ -227,15 +249,12 @@ local function _assertNonZero(val)
 end
 
 
--- Demo helper functions
-
-local function demo_digUpFrameAndHeader(self)
-	local wid = commonWimp.getFrame(self)
-	if not wid then
-		print("Demo Error: couldn't locate ancestor frame")
+local function updateDPanelX(dpanel)
+	if dpanel_left then
+		dpanel.x = dpanel_side_pad
+	else
+		dpanel.x = love.graphics.getWidth() - dpanel.w - dpanel.x_pad*2 - dpanel_side_pad
 	end
-
-	return wid, header -- check the return values before accessing them
 end
 
 
@@ -260,6 +279,8 @@ function love.resize(w, h)
 	--]=]
 
 	context:love_resize(w, h)
+
+	updateDPanelX(dpanel)
 end
 
 
@@ -691,16 +712,10 @@ function love.update(dt)
 			font_sz = font_sz - 1
 		end
 
+		local old_sz = font_sz
 		font_sz = math.max(1, font_sz)
-		if sz_old ~= font_sz then
-			-- Release the old font object and collect garbage twice to prevent
-			-- a buildup of rapidly-discarded fonts eating up RAM while pending
-			-- release.
-			font_test:release()
-			font_test = reloadFont(font_sz)
-			love.graphics.setFont(font_test)
-			collectgarbage("collect")
-			collectgarbage("collect")
+		if old_sz ~= font_sz then
+			reloadFont()
 		end
 	end
 	--]]
@@ -711,6 +726,83 @@ function love.update(dt)
 	-- written a proper toast system.
 	local notif = context.app.notif
 	notif.time = notif.time + dt
+
+	dpanel_cool = math.max(0, dpanel_cool - dt)
+end
+
+
+local function _printDetails1(dpanel)
+	local qp = dpanel.qp
+
+	qp:print("Context State:")
+	qp:print("", "current_hover: ", context.current_hover)
+	qp:print("", "current_pressed: ", context.current_pressed)
+	qp:print("", "thimble1: ", context.thimble1)
+	qp:print("", "thimble2: ", context.thimble2)
+	qp:print("", "captured_focus: ", context.captured_focus)
+
+	qp:down()
+
+	qp:print("mouse_pressed_...")
+	qp:print("", "button: ", context.mouse_pressed_button)
+	qp:print("", "ticks: ", context.mouse_pressed_ticks)
+	qp:print("", "dt_acc: ", context.mouse_pressed_dt_acc)
+	qp:print("", "rep_n: ", context.mouse_pressed_rep_n)
+
+	qp:down()
+
+	qp:print("cseq_...")
+	qp:print("", "button: ", context.cseq_button)
+	qp:print("", "presses: ", context.cseq_presses)
+	qp:print("", "time: ", context.cseq_time)
+	qp:print("", "timeout: ", context.cseq_timeout)
+	qp:print("", "widget: ", context.cseq_widget)
+	qp:print("", "x: ", context.cseq_x)
+	qp:print("", "y: ", context.cseq_x)
+	qp:print("", "range: ", context.cseq_range)
+
+	qp:down()
+
+	qp:print("love.keyboard...")
+	qp:print("", ".hasTextInput(): ", love.keyboard.hasTextInput())
+
+	qp:down()
+end
+
+
+local function _printPerf1(dpanel)
+	local qp = dpanel.qp
+
+	-- Uncomment to estimate the demo's current Lua memory usage.
+	-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
+	--[[
+	qp:down()
+	collectgarbage("collect"); collectgarbage("collect")
+	qp:write("Mem (MB): ", collectgarbage("count") / 1024)
+	--]]
+
+	qp:print("GPU Stats:")
+	if not demo_perf or not next(demo_perf) then
+		qp:print("", "(waiting for stats)")
+	else
+		qp:print("", "drawcallsbatched: ", demo_perf.drawcallsbatched)
+		qp:print("", "shaderswitches: ", demo_perf.shaderswitches)
+		qp:print("", "fonts: ", demo_perf.fonts)
+
+
+		if love_major < 12 then
+			qp:print("", "canvases: ", demo_perf.canvases)
+			qp:print("", "images: ", demo_perf.images)
+		else
+			qp:print("", "textures: ", demo_perf.textures)
+		end
+		qp:print("", "drawcalls: ", demo_perf.drawcalls)
+	end
+
+	qp:down()
+	qp:print("Video Stats:")
+	qp:print("", "avg.dt: ", love.timer.getAverageDelta())
+	qp:print("", "FPS: ", love.timer.getFPS())
 end
 
 
@@ -723,88 +815,46 @@ function love.draw()
 
 	love.graphics.scale(app_scale_x, app_scale_y)
 
-	-- Set the printing region to the window dimensions,
-	-- minus 16 pixels of padding on each side.
-	local PAD = 16
-	qp:setOrigin(PAD, PAD)
-	qp:setReferenceDimensions(love.graphics.getWidth() - PAD*2, love.graphics.getHeight() - PAD*2)
-
-	-- XXX right... setScissor() won't work if the display is scaled, and especially if it has sub-pixel rendering precision.
-	love.graphics.setScissor()
+	love.graphics.push("all")
 
 	context:draw(0, 0)
 
-	love.graphics.setScissor()
-
-	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.pop()
 
 	local app = context.app
 
+	local qp = dpanel.qp
+	local draw_panel = app.show_details or app.show_perf
+
+	if draw_panel then
+		qp:reset()
+		qp:setTabs(dpanel_tabs)
+		qp.text_object:clear()
+	end
+
 	if app.show_details then
-		qp:reset()
-		qp:setOrigin(PAD, love.graphics.getHeight() - 150)
-
-		qp:print("current_hover:\t", context.current_hover)
-		qp:print("current_pressed:\t", context.current_pressed)
-		qp:print("thimble1:\t", context.thimble1)
-		qp:print("thimble2:\t", context.thimble2)
-		qp:print("captured_focus:\t", context.captured_focus)
-
-		qp:down()
-
-		qp:print("mouse_pressed_button: ", context.mouse_pressed_button)
-		qp:print("mouse_pressed_dt_acc: ", context.mouse_pressed_dt_acc)
-		qp:print("mouse_pressed_ticks: ", context.mouse_pressed_ticks)
-		qp:print("mouse_pressed_rep_n: ", context.mouse_pressed_rep_n)
-
-		qp:reset()
-		qp:moveOrigin(400, 0)
-
-		qp:print("cseq_button: ", context.cseq_button)
-		qp:print("cseq_presses: ", context.cseq_presses)
-		qp:print("cseq_time: ", context.cseq_time)
-		qp:print("cseq_timeout: ", context.cseq_timeout)
-		qp:print("cseq_widget: ", context.cseq_widget)
-		qp:print("cseq_x: ", context.cseq_x)
-		qp:print("cseq_y: ", context.cseq_x)
-		qp:print("cseq_range: ", context.cseq_range)
-
-		--[[
-		qp:down()
-
-		qp:print("love.keyboard.hasTextInput(): ", love.keyboard.hasTextInput())
-		--]]
+		_printDetails1(dpanel)
 	end
 
 	--print([[collectgarbage("count")*1024]], collectgarbage("count")*1024)
 
 	if app.show_perf then
-		qp:reset()
-		qp:setOrigin(love.graphics.getWidth() - 224, love.graphics.getHeight() - 160)
-		qp:print("FPS: ", love.timer.getFPS())
-		qp:print("avg.dt: ", love.timer.getAverageDelta())
+		_printPerf1(dpanel)
+	end
 
-		demo_perf = love.graphics.getStats(demo_perf)
-		qp:print("drawcalls: ", demo_perf.drawcalls)
-		if love_major < 12 then
-			qp:print("images: ", demo_perf.images)
-			qp:print("canvases: ", demo_perf.canvases)
+	if draw_panel then
+		dpanel:draw()
 
-		else
-			qp:print("textures: ", demo_perf.textures)
+		local mx, my = love.mouse.getPosition()
+		if dpanel_cool == 0 and dpanel.w < love.graphics.getWidth() and my > dpanel.y and my <= dpanel.y + dpanel.last_h + dpanel.y_pad*2 then
+			if (dpanel_left and mx < dpanel.x + dpanel.w + dpanel.x_pad*2)
+			or (not dpanel_left and mx >= dpanel.x)
+			then
+				dpanel_left = not dpanel_left
+				dpanel_cool = dpanel_cool_max
+				updateDPanelX(dpanel)
+			end
 		end
-
-		qp:print("fonts: ", demo_perf.fonts)
-		qp:print("shaderswitches: ", demo_perf.shaderswitches)
-		qp:print("drawcallsbatched: ", demo_perf.drawcallsbatched)
-
-		-- Uncomment to estimate the demo's current Lua memory usage.
-		-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
-		--[[
-		qp:down()
-		collectgarbage("collect"); collectgarbage("collect")
-		qp:print("Mem (MB): ", collectgarbage("count") / 1024)
-		--]]
 	end
 
 	if app.show_mouse_cross then
@@ -888,4 +938,6 @@ function love.draw()
 			end
 		end
 	end
+
+	demo_perf = love.graphics.getStats(demo_perf)
 end
