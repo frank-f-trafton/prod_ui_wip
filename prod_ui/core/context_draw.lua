@@ -61,10 +61,10 @@ love.graphics.newCanvas = function(...) -- untested
 	print(debug.traceback())
 	old_newCanv(...)
 end
-love.graphics.setCanvas = function(...) -- untested
+love.graphics.setCanvas = function(...)
 	io.write("love.graphics.setCanvas()")
 	for i = 1, select("#", ...) do
-		io.write("\t" .. select(i, ...))
+		io.write("\t" .. tostring(select(i, ...)))
 	end
 	io.write("\n")
 	print(debug.traceback())
