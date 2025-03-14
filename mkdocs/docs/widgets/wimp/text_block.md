@@ -48,6 +48,29 @@ Gets the current text.
 **Returns:** The current text.
 
 
+### TextBlock:setURL
+
+Sets a URL, and configures the Text Block to be pressable (or not, if the URL is being removed).
+
+`TextBlock:setURL(url)`
+
+* `url`: The URL string, to be activated upon pressing, or false/nil to remove the URL.
+
+
+#### Notes
+
+User events `wid_buttonAction` (left click, enter key, space key) and `wid_buttonAction3` (middle click) are assigned a default function which attempts to open the TextBlock's URL with [love.system.openURL()](https://love2d.org/wiki/love.system.openURL). This function can be replaced to provide more functionality, like in-program navigation.
+
+
+### TextBlock:getURL
+
+Gets the current URL.
+
+`local url = TextBlock:getURL()`
+
+**Returns:** The URL string, or false if there is no string set.
+
+
 ### TextBlock:setAlign
 
 Sets the text alignment.

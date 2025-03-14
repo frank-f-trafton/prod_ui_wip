@@ -3,11 +3,10 @@ return {
 
 	box = "*style/boxes/panel",
 
-	--[[
 	-- Cursor IDs for hover and press states.
+	-- Only used when the text block is configured as a hyperlink.
 	cursor_on = "hand",
 	cursor_press = "hand",
-	--]]
 
 	color = {1.0, 1.0, 1.0, 1.0},
 
