@@ -107,6 +107,7 @@ end
 
 
 -- Libs: ProdUI
+local commonMath = require("prod_ui.common.common_math")
 local commonWimp = require("prod_ui.common.common_wimp")
 local itemOps = require("prod_ui.common.item_ops")
 local keyMgr = require("prod_ui.lib.key_mgr")
@@ -114,6 +115,9 @@ local uiContext = require("prod_ui.ui_context")
 local uiGraphics = require("prod_ui.ui_graphics")
 local uiLayout = require("prod_ui.ui_layout")
 local uiRes = require("prod_ui.ui_res")
+
+
+local _lerp = commonMath.lerp
 
 
 -- Libs: QuickPrint / DebugPanel
@@ -134,6 +138,11 @@ local dpanel_tabs = {0, 24, 150}
 
 
 local demo_perf -- assigned near love.draw
+
+
+local demo_zoom_enable = false
+local demo_zoom = 1.0
+local demo_canvas
 
 
 -- * / Demo State *
@@ -233,22 +242,6 @@ end
 local context, wimp_root = newWimpContext()
 
 
-local app_scale_x = 1.0
-local app_scale_y = 1.0
-local app_base_w = 800
-local app_base_h = 600
-
-
-local app_w = app_base_w * app_scale_x
-local app_h = app_base_h * app_scale_y
-
-local function _assertNonZero(val)
-	if val == 0 then
-		error("Value cannot be zero.")
-	end
-end
-
-
 local function updateDPanelX(dpanel)
 	if dpanel_left then
 		dpanel.x = dpanel_side_pad
@@ -259,25 +252,6 @@ end
 
 
 function love.resize(w, h)
-	-- Assertions
-	-- [[
-	_assertNonZero(app_base_w)
-	_assertNonZero(app_base_h)
-	--]]
-
-	--[=[
-	print("app_base_w / w", app_base_w / w)
-	print("app_base_h / h", app_base_h / h)
-
-	local fit_scale = math.min(w / app_base_w, h / app_base_h)
-
-	app_w = w * fit_scale
-	app_h = h * fit_scale
-
-	app_scale_x = app_w / app_base_w
-	app_scale_y = app_h / app_base_h
-	--]=]
-
 	context:love_resize(w, h)
 
 	updateDPanelX(dpanel)
@@ -302,28 +276,16 @@ end
 
 
 function love.mousemoved(x, y, dx, dy, istouch)
-	x = x / app_scale_x
-	y = y / app_scale_y
-
-	dx = dx / app_scale_x
-	dy = dy / app_scale_y
-
 	context:love_mousemoved(x, y, dx, dy, istouch)
 end
 
 
 function love.mousepressed(x, y, button, istouch, presses)
-	x = x / app_scale_x
-	y = y / app_scale_y
-
 	context:love_mousepressed(x, y, button, istouch, presses)
 end
 
 
 function love.mousereleased(x, y, button, istouch, presses)
-	x = x / app_scale_x
-	y = y / app_scale_y
-
 	context:love_mousereleased(x, y, button, istouch, presses)
 end
 
@@ -728,6 +690,19 @@ function love.update(dt)
 	notif.time = notif.time + dt
 
 	dpanel_cool = math.max(0, dpanel_cool - dt)
+
+	if love.keyboard.isDown("-") then
+		demo_zoom = demo_zoom - dt * 5
+
+	elseif love.keyboard.isDown("=") then
+		demo_zoom = demo_zoom + dt * 5
+	end
+
+	if not demo_zoom_enable then
+		demo_zoom = 1.0
+	end
+
+	demo_zoom = math.max(1.0, demo_zoom)
 end
 
 
@@ -813,7 +788,16 @@ function love.draw()
 		return
 	end
 
-	love.graphics.scale(app_scale_x, app_scale_y)
+	if demo_zoom ~= 1.0 then
+		if not demo_canvas or demo_canvas:getWidth() ~= love.graphics.getWidth() or demo_canvas:getHeight() ~= love.graphics.getHeight() then
+			demo_canvas = love.graphics.newCanvas()
+			collectgarbage("collect")
+			collectgarbage("collect")
+		end
+
+		love.graphics.setCanvas(demo_canvas)
+		love.graphics.clear(0, 0, 0, 0)
+	end
 
 	love.graphics.push("all")
 
@@ -840,21 +824,6 @@ function love.draw()
 
 	if app.show_perf then
 		_printPerf1(dpanel)
-	end
-
-	if draw_panel then
-		dpanel:draw()
-
-		local mx, my = love.mouse.getPosition()
-		if dpanel_cool == 0 and dpanel.w < love.graphics.getWidth() and my > dpanel.y and my <= dpanel.y + dpanel.last_h + dpanel.y_pad*2 then
-			if (dpanel_left and mx < dpanel.x + dpanel.w + dpanel.x_pad*2)
-			or (not dpanel_left and mx >= dpanel.x)
-			then
-				dpanel_left = not dpanel_left
-				dpanel_cool = dpanel_cool_max
-				updateDPanelX(dpanel)
-			end
-		end
 	end
 
 	if app.show_mouse_cross then
@@ -935,6 +904,36 @@ function love.draw()
 		for i = 2, 8 do
 			if dbg_vp.wid["vp" .. i .. "_x"] then
 				widShared.debug.debugDrawViewport(dbg_vp.wid, i)
+			end
+		end
+	end
+
+	if demo_zoom ~= 1.0 then
+		love.graphics.setCanvas()
+
+		love.graphics.push("all")
+
+		love.graphics.translate(demo_canvas:getWidth() / 2, demo_canvas:getHeight() / 2)
+		love.graphics.scale(demo_zoom, demo_zoom)
+		love.graphics.translate(-context.mouse_x, -context.mouse_y)
+
+		love.graphics.setBlendMode("alpha", "premultiplied")
+		love.graphics.draw(demo_canvas, 0, 0)
+
+		love.graphics.pop()
+	end
+
+	if draw_panel then
+		dpanel:draw()
+
+		local mx, my = love.mouse.getPosition()
+		if dpanel_cool == 0 and dpanel.w < love.graphics.getWidth() and my > dpanel.y and my <= dpanel.y + dpanel.last_h + dpanel.y_pad*2 then
+			if (dpanel_left and mx < dpanel.x + dpanel.w + dpanel.x_pad*2)
+			or (not dpanel_left and mx >= dpanel.x)
+			then
+				dpanel_left = not dpanel_left
+				dpanel_cool = dpanel_cool_max
+				updateDPanelX(dpanel)
 			end
 		end
 	end
