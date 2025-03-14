@@ -1,6 +1,6 @@
--- QuickPrint: A text drawing library for LÖVE. (Modified)
--- Version: 1.1.0
--- Supported LÖVE versions: 11.4, 11.5
+-- QuickPrint: A text drawing library for LÖVE.
+-- Version: 1.1.1
+-- Supported LÖVE versions: 11.5
 -- See LICENSE, README.md and the demos for more info.
 
 
@@ -91,8 +91,9 @@ local function plainWrite(self, str, font, aux)
 	local scale_x = self.sx * aux.sx
 	local scale_y = self.sy * aux.sy
 
-	if font ~= self.line_font then
+	if font ~= self.line_font[1] then
 		self:clearKerningMemory()
+		self.line_font[1] = font
 	end
 
 	-- handle tab placement
@@ -201,7 +202,7 @@ function quickPrint.new(ref_w, ref_h)
 	self.pad_v = 0
 
 	self.last_glyph = false
-	self.line_font = false
+	self.line_font = setmetatable({}, {__mode="kv"})
 
 	self.default_align = "left" -- "left", "center", "right", "justify"
 	self.align = self.default_align
@@ -690,7 +691,7 @@ end
 
 function _mt_qp:clearKerningMemory()
 	self.last_glyph = false
-	self.line_font = false
+	self.line_font[1] = nil
 end
 
 
