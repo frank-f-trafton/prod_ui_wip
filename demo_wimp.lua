@@ -140,7 +140,6 @@ local dpanel_tabs = {0, 24, 150}
 local demo_perf -- assigned near love.draw
 
 
-local demo_zoom_enable = false
 local demo_zoom = 1.0
 local demo_canvas
 
@@ -191,9 +190,10 @@ local function newWimpContext()
 
 	-- Config/settings specific to this demo.
 	context.app = {
-		show_details = true,
-		show_perf = true,
+		show_details = false,
+		show_perf = false,
 		show_mouse_cross = false,
+		enable_zoom = false,
 
 		-- A crappy toast / notification system.
 		-- XXX Write a proper one sometime.
@@ -295,7 +295,43 @@ function love.wheelmoved(x, y)
 end
 
 
+local function cb_updateDebugControls(self)
+	if self.tag == "wimp-demo-show-state-details" then
+		self:setChecked(context.app.show_details)
+
+	elseif self.tag == "wimp-demo-show-perf" then
+		self:setChecked(context.app.show_perf)
+
+	elseif self.tag == "wimp-demo-mouse-cross" then
+		self:setChecked(context.app.show_mouse_cross)
+	end
+	-- There is no control for toggling demo zoom yet.
+end
+
+
 function love.keypressed(kc, sc, rep)
+	-- Debug stuff, specific to this demo.
+	-- [====[
+	if love.keyboard.isDown("lshift", "rshift") and love.keyboard.isDown("lctrl", "rctrl") then
+		if kc == "1" or kc == "kp1" then
+			context.app.show_details = not context.app.show_details
+			context.root:forEach(cb_updateDebugControls)
+
+		elseif kc == "2" or kc == "kp2" then
+			context.app.show_perf = not context.app.show_perf
+			context.root:forEach(cb_updateDebugControls)
+
+		elseif kc == "3" or kc == "kp3" then
+			context.app.show_mouse_cross = not context.app.show_mouse_cross
+			context.root:forEach(cb_updateDebugControls)
+
+		elseif kc == "4" or kc == "kp4" then
+			context.app.enable_zoom = not context.app.enable_zoom
+			context.root:forEach(cb_updateDebugControls)
+		end
+	end
+	--]====]
+
 	context:love_keypressed(kc, sc, rep)
 end
 
@@ -698,7 +734,7 @@ function love.update(dt)
 		demo_zoom = demo_zoom + dt * 5
 	end
 
-	if not demo_zoom_enable then
+	if not context.app.enable_zoom then
 		demo_zoom = 1.0
 	end
 

@@ -1267,4 +1267,46 @@ function _mt_widget:isAwake()
 end
 
 
+function _mt_widget:nextWidget()
+	if self.children[1] then
+		return self.children[1]
+	else
+		local wid = self
+		while wid do
+			if not wid.parent then
+				break
+			end
+			local siblings = wid.parent.children
+			local i = wid:getIndex(siblings)
+			if i < #siblings then
+				return siblings[i + 1]
+			else
+				wid = wid.parent
+			end
+		end
+	end
+end
+
+
+function _mt_widget:forEach(callback, ...)
+	callback(self, ...)
+	for i, child in ipairs(self) do
+		local a, b, c, d = child:forEach(callback, ...)
+		if a then
+			return a, b, c, d
+		end
+	end
+end
+
+
+function _mt_widget:forEachDescendant(callback, ...)
+	for i, child in ipairs(self) do
+		local a, b, c, d = child:forEach(callback, ...)
+		if a then
+			return a, b, c, d
+		end
+	end
+end
+
+
 return _mt_widget
