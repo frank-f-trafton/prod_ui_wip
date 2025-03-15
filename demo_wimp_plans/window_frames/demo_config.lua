@@ -28,6 +28,7 @@ function plan.makeWindowFrame(root)
 		checkbox.h = 32
 		checkbox:initialize()
 		checkbox:register("static")
+		checkbox.tag = "wimp-demo-show-state-details"
 		checkbox.checked = not not context.app.show_details
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show state details")
@@ -46,6 +47,7 @@ function plan.makeWindowFrame(root)
 		checkbox.h = 32
 		checkbox:initialize()
 		checkbox:register("static")
+		checkbox.tag = "wimp-demo-show-perf"
 		checkbox.checked = not not context.app.show_perf
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show perf info")
@@ -64,6 +66,7 @@ function plan.makeWindowFrame(root)
 		checkbox.h = 32
 		checkbox:initialize()
 		checkbox:register("static")
+		checkbox.tag = "wimp-demo-mouse-cross"
 		checkbox.checked = not not context.app.show_mouse_cross
 		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show cross at mouse location")
