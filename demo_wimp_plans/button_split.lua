@@ -83,7 +83,6 @@ end
 function plan.make(panel)
 	--title("Split Button")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	-- SkinDef clone

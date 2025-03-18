@@ -10,7 +10,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Slider Bar Work")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	local label_w = 128

@@ -8,7 +8,6 @@ local uiLayout = require("prod_ui.ui_layout")
 function plan.make(panel)
 	--title("Label Tests")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	-- Single-Line.

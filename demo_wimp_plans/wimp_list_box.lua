@@ -564,7 +564,6 @@ end
 function plan.make(panel)
 	--title("ListBox Test")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	makeListBox1(panel, 0, 0)

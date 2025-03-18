@@ -9,7 +9,6 @@ local plan = {}
 function plan.make(panel)
 	--title("DragBox Test")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	-- Drag box.

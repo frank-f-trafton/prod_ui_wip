@@ -11,7 +11,6 @@ function plan.makeWindowFrame(root)
 	frame.h = 480
 	frame:initialize()
 	frame:setFrameTitle("Hiding Window Frames")
-	frame.auto_layout = true
 	frame:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32

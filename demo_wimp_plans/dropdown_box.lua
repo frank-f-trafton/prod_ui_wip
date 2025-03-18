@@ -10,7 +10,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Dropdown Boxes")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	--demoShared.makeLabel(panel, 32, 0, 512, 32, "...", "single")

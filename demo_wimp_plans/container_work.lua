@@ -9,7 +9,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Widget Containers")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	-- Base container

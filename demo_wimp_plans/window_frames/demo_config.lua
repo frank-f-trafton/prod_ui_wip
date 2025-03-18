@@ -17,7 +17,6 @@ function plan.makeWindowFrame(root)
 	frame.h = 480
 	frame:initialize()
 	frame:setFrameTitle("Demo Config")
-	frame.auto_layout = true
 	frame:setScrollBars(false, true)
 
 	do

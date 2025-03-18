@@ -9,7 +9,6 @@ local plan = {}
 
 function plan.make(panel)
 	--title("Properties Box Test")
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	demoShared.makeLabel(panel, 32, 0, 512, 32, "***Under Construction***", "single")

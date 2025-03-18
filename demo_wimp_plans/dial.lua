@@ -10,7 +10,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Dials")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	local v_wid_w = 32

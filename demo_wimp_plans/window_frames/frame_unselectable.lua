@@ -24,7 +24,6 @@ function plan.makeWindowFrame(root)
 	frame.h = 380
 	frame:initialize(unselectable, view_level)
 	frame:setFrameTitle("Unselectable Frame")
-	frame.auto_layout = true
 	frame:setScrollBars(false, false)
 
 	frame.userUpdate = function(self, dt)

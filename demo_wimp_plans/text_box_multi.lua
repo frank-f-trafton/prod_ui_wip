@@ -18,7 +18,6 @@ function plan.make(panel)
 
 	--title("LineEditor Test")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	local c_bar = panel:addChild("base/container")

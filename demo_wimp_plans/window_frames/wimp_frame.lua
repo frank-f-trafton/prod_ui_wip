@@ -23,7 +23,6 @@ function plan.makeWindowFrame(root)
 	frame.userDestroy = _userDestroy
 	frame:initialize()
 	frame:setFrameTitle("WIMP Window Frame")
-	frame.auto_layout = true
 	frame:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32

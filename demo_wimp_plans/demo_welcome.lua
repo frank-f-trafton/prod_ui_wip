@@ -32,7 +32,6 @@ When zoom mode is enabled:
 	'=': Zoom in
 ]])
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 end
 

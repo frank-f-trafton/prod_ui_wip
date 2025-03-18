@@ -17,7 +17,6 @@ function plan.make(panel)
 
 	--title("Button Work")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	-- Repeat-Button

@@ -11,7 +11,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Number Box")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	-- [=[

@@ -102,7 +102,6 @@ end
 function plan.make(panel)
 	--title("Menu Test")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	local menu1 = panel:addChild("base/menu")

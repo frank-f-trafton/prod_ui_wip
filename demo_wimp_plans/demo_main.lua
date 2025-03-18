@@ -29,7 +29,6 @@ function plan.make(panel)
 		text_block:setAutoSize("v")
 	end
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	panel.DEBUG = "dimensions" -- XXX: see base/container.lua

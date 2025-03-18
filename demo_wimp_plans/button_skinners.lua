@@ -11,7 +11,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Button skin tests")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.
