@@ -156,17 +156,17 @@ function _mt_widget:uiCall_initialize(...)
 end
 
 
-function _mt_widget:uiCall_reshapePre()
-
-end
-
-
 function _mt_widget:uiCall_relayoutPre()
 
 end
 
 
 function _mt_widget:uiCall_relayoutPost()
+
+end
+
+
+function _mt_widget:uiCall_reshapePre()
 
 end
 
@@ -192,7 +192,6 @@ end
 -- @param wid The widget to check.
 -- @param id The User Event string ID to run.
 -- @param a, b, c, d Generic arguments. Usage depends on the ID.
-
 function _mt_widget:_runUserEvent(id, a, b, c, d)
 	local user_event = self[id]
 
