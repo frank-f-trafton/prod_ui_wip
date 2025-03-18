@@ -10,13 +10,13 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	"demo_welcome",
+	--"demo_welcome",
 	--"number_box",
 	--"demo_main",
 	--"button_split",
 	--"dial",
 	--"properties_box",
-	--"wimp_list_box",
+	"wimp_list_box",
 	--"wimp_tree_box",
 	--"wimp_workspaces",
 }
@@ -98,6 +98,7 @@ local love_major = love.getVersion()
 
 
 --[[
+-- Finds the origin of printed console text.
 local oldPrint = print
 print = function(...)
 	oldPrint(...)
@@ -152,11 +153,11 @@ local demo_canvas
 love.graphics.setDefaultFilter("nearest", "nearest")
 
 love.keyboard.setKeyRepeat(true)
---love.keyboard.setTextInput(true) -- Enabled by default on desktop platforms.
 
 love.filesystem.setSymlinksEnabled(true)
 
 --love.graphics.setLineStyle("rough")
+
 --love.window.setVSync(0)
 
 local font_sz = 14
@@ -348,6 +349,7 @@ end
 
 do
 	do
+		-- Construct the application menu bar.
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 		bar_menu:initialize()
 		bar_menu:register("fit-top")
@@ -646,8 +648,6 @@ do
 			plan_container:register("fit-remaining")
 			plan_container.tag = "plan_container"
 
-			workspace:reshape()
-
 			return plan_container
 		end
 
@@ -657,7 +657,7 @@ do
 				local container = _instantiateDemoContainer(workspace)
 				local plan = require("demo_wimp_plans." .. item.plan_id)
 				plan.make(container)
-				container:reshape()
+				workspace:reshape()
 			end
 		end
 	end
