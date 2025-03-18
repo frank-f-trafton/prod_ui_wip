@@ -440,7 +440,7 @@ end
 --- Sanitizes a string.
 -- @param bad_byte_policy Controls mitigation codepaths if the encoding is bad.
 --	"trim": Cut the string at the first bad byte.
---	"replacement_char": Replace every unrecognized bye with the Unicode replacement code point.
+--	"replacement_char": Replace every unrecognized byte with the Unicode replacement code point.
 --	otherwise: return an empty string on bad unput.
 function textUtil.sanitize(str, bad_byte_policy)
 	-- Input is good: nothing to do.
