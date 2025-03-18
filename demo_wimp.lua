@@ -16,9 +16,9 @@ local demo_panel_launch = {
 	--"button_split",
 	--"dial",
 	--"properties_box",
-	"wimp_list_box",
+	--"wimp_list_box",
 	--"wimp_tree_box",
-	--"wimp_workspaces",
+	"wimp_workspaces",
 }
 
 
