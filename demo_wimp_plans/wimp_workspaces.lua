@@ -5,6 +5,36 @@ local plan = {}
 local commonWimp = require("prod_ui.common.common_wimp")
 
 
+local function cb_refresh(self)
+	local root = self.context.root
+	local ws1 = root:findTag("main_workspace")
+	local ws2 = root:findTag("alt_workspace")
+
+	if self.tag == "btn_crt" then
+		self.enabled = not ws2
+
+	elseif self.tag == "btn_act" then
+		self.enabled = not not ws2
+
+	elseif self.tag == "btn_dst" then
+		self.enabled = not not ws2
+	end
+
+	print("cb_refresh: tag", self.tag, "enabled", self.enabled)
+end
+
+
+local function _refreshButtonState(self)
+	print("_refreshButtonState()")
+	local panel = self.tag == "plan_container" and self or self:findAscendingKeyValue("tag", "plan_container")
+	if not panel then
+		error("couldn't find this widget's container.")
+	end
+
+	panel:forEachDescendant(cb_refresh)
+end
+
+
 local function _setupWS2(root)
 	if root:findTag("alt_workspace") then
 		return
@@ -109,9 +139,6 @@ end
 function plan.make(panel)
 	--title("Workspace Frames")
 
-	-- Does Workspace #2 already exist?
-	local ws2 = panel.context.root:findTag("alt_workspace")
-
 	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
@@ -128,19 +155,10 @@ function plan.make(panel)
 		btn:initialize()
 		btn:register("static")
 		btn.tag = "btn_crt"
-		btn.enabled = not ws2
 		btn:setLabel("Create Workspace #2")
 		btn.wid_buttonAction = function(self)
-			if _setupWS2(self.context.root) then
-				self.enabled = false
-				local panel = self:findAscendingKeyValue("tag", "plan_container")
-				if panel then
-					local button_select = panel:findTag("btn_sel")
-					if button_select then
-						button_select.enabled = true
-					end
-				end
-			end
+			_setupWS2(self.context.root)
+			_refreshButtonState(self)
 		end
 		yy = yy + hh
 	end
@@ -154,21 +172,12 @@ function plan.make(panel)
 		btn.h = hh
 		btn:initialize()
 		btn:register("static")
-		btn.enabled = not not ws2
-		btn.tag = "btn_sel"
+		btn.tag = "btn_act"
 		btn:setLabel("Activate Workspace #2")
 		btn.wid_buttonAction = function(self)
 			local ws2 = self.context.root:findTag("alt_workspace")
 			if ws2 then
 				self.context.root:setActiveWorkspace(ws2)
-
-				local panel = self:findAscendingKeyValue("tag", "plan_container")
-				if panel then
-					local btn_dst = panel:findTag("btn_dst")
-					if btn_dst then
-						btn_dst.enabled = true
-					end
-				end
 			end
 		end
 		yy = yy + hh
@@ -184,7 +193,6 @@ function plan.make(panel)
 		btn.h = hh
 		btn:initialize()
 		btn:register("static")
-		btn.enabled = not not ws2
 		btn.tag = "btn_dst"
 		btn:setLabel("Destroy Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -196,22 +204,13 @@ function plan.make(panel)
 				end
 				ws2:remove()
 				self.context.root:sortG2()
-				self.enabled = false
-				local panel = self:findAscendingKeyValue("tag", "plan_container")
-				if panel then
-					local btn_sel = panel:findTag("btn_sel")
-					if btn_sel then
-						btn_sel.enabled = false
-					end
-					local btn_crt = panel:findTag("btn_crt")
-					if btn_crt then
-						btn_crt.enabled = true
-					end
-				end
+				_refreshButtonState(self)
 			end
 		end
 		yy = yy + hh
 	end
+
+	_refreshButtonState(panel)
 end
 
 

@@ -1289,7 +1289,7 @@ end
 
 function _mt_widget:forEach(callback, ...)
 	callback(self, ...)
-	for i, child in ipairs(self) do
+	for i, child in ipairs(self.children) do
 		local a, b, c, d = child:forEach(callback, ...)
 		if a then
 			return a, b, c, d
@@ -1299,7 +1299,7 @@ end
 
 
 function _mt_widget:forEachDescendant(callback, ...)
-	for i, child in ipairs(self) do
+	for i, child in ipairs(self.children) do
 		local a, b, c, d = child:forEach(callback, ...)
 		if a then
 			return a, b, c, d
