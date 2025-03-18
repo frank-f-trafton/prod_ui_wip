@@ -178,6 +178,14 @@ function lgcUIFrame.logic_trickleTextInput(self, inst, text)
 end
 
 
+function lgcUIFrame.logic_tricklePointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self.ref_block_next then
+		self.context.current_hover = false
+		return true
+	end
+end
+
+
 function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch, presses)
 	if self.ref_block_next then
 		local block_last = lgcUIFrame.getLastBlockingFrame(self)

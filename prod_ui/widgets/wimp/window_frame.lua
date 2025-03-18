@@ -483,12 +483,7 @@ function def:frameCall_close(force)
 end
 
 
-function def.trickle:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self.ref_block_next then
-		self.context.current_hover = false
-		return true
-	end
-end
+def.trickle.uiCall_pointerHoverOn = lgcUIFrame.logic_tricklePointerHoverOn
 
 
 local function _getCursorAxisInfo(self, mx, my)
