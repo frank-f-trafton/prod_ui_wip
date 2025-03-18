@@ -1,3 +1,5 @@
+(Comments are in parentheses.)
+
 MIT License
 
 ProdUI (WIP):
@@ -24,11 +26,14 @@ SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-docs/: (MkDocs ProdUI documentation)
+shared/line_ed/…:
 
-MIT License
+(Some of ProdUI's text input code is based on, or very heavily inspired by
+ReFreezed's InputField library.)
 
-Copyright (c) 2023 - 2025 RBTS
+https://github.com/ReFreezed/InputField
+
+Copyright © 2017-2022 Marcus 'ReFreezed' Thunström
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
