@@ -588,7 +588,6 @@ do
 		ws1:initialize()
 		-- NOTE: Do not register Workspaces to the root layout. Internally, the root takes care of positioning and
 		-- reshaping the current active Workspace.
-		ws1.auto_layout = true
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
 

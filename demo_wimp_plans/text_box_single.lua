@@ -10,7 +10,7 @@ local plan = {}
 
 function plan.make(panel)
 	--title("Input Boxes")
-	panel.auto_layout = true
+
 	panel:setScrollBars(false, false)
 
 	-- [=[

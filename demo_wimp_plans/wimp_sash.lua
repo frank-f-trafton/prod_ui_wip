@@ -27,7 +27,6 @@ This is a subject in which every boy is interested. While few mechanics have the
 function plan.make(panel)
 	--title("Sashes")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, false)
 
 	local wid_a = panel:addChild("base/label")

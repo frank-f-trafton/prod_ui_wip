@@ -9,7 +9,6 @@ local plan = {}
 function plan.make(panel)
 	--title("Barebones widgets")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	local xx, yy = 0, 0

@@ -14,7 +14,6 @@ end
 function plan.make(panel)
 	--title("Stepper")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	local stepper_h = panel:addChild("base/stepper")

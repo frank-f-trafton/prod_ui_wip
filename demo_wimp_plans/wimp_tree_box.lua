@@ -26,7 +26,6 @@ end
 function plan.make(panel)
 	--title("TreeBox Test")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	-- SkinDef clone

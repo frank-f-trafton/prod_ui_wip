@@ -153,7 +153,6 @@ end
 function plan.make(panel)
 	--title("Workspace Frames")
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32

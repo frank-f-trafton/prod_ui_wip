@@ -18,7 +18,6 @@ Only one root is allowed in the tree, and it must be, well, the *root*, so we ca
 TODO
 ]])
 
-	panel.auto_layout = true
 	panel:setScrollBars(false, true)
 end
 

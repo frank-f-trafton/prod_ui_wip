@@ -8,7 +8,6 @@ function plan.makeWindowFrame(root)
 	frame.w, frame.h = 300, 300
 	frame:initialize()
 	frame:setFrameTitle("Frame Destroy Test")
-	frame.auto_layout = true
 	frame:setScrollBars(false, false)
 
 	local bb_lbl = frame:addChild("barebones/label")

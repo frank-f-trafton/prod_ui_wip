@@ -356,7 +356,6 @@ function def:uiCall_initialize(unselectable, view_level)
 	self.allow_hover = true
 
 	self.auto_doc_update = true
-	self.auto_layout = false
 	self.halt_reshape = false
 
 	widShared.setupDoc(self)
