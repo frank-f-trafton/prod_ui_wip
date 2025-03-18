@@ -5,6 +5,9 @@ local plan = {}
 local commonWimp = require("prod_ui.common.common_wimp")
 
 
+local demoShared = require("demo_shared")
+
+
 local function cb_refresh(self)
 	local root = self.context.root
 	local ws1 = root:findTag("main_workspace")
@@ -66,11 +69,22 @@ local function _setupWS2(root)
 	frame_ws2:initialize()
 	frame_ws2:setFrameWorkspace(ws2)
 
+	do
+		demoShared.makeTitle(frame_ws2, nil, "Associated Window Frame")
+
+		demoShared.makeParagraph(frame_ws2, nil, [[
+This Window Frame is "associated" with Workspace #2. It is visible and active only when Workspace #2 is also active.
+
+Other Window Frames in this demo are "unassociated", and may appear in any Workspace.]])
+	end
+
+--[===[
 	local frame_ws2_text = frame_ws2:addChild("base/label")
 	frame_ws2_text.x, frame_ws2_text.y, frame_ws2_text.w, frame_ws2_text.h = 0, 0, 440, 100
 	frame_ws2_text:initialize()
 	frame_ws2_text:register("static")
 	frame_ws2_text:setLabel("This Window Frame is \"associated\" with Workspace #2. It is visible and active only when Workspace #2 is also active.\n\n(Other Window Frames in this demo are \"unassociated\", and will appear in any Workspace.)", "multi")
+--]===]
 
 	-- Make Workspace #2 distinguishable from the main Workspace at a glance.
 	local radius = 1
