@@ -16,7 +16,7 @@ Once complete, this demo will provide examples of all built-in widgets and most 
 
 	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI repository on GitHub", "https://www.github.com/rabbitboots/prod_ui_wip")
 
-	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI documentation (work in progress)", "https://github.com/rabbitboots/prod_ui_wip/tree/main/mkdocs/docs")
+	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI documentation (work in progress)", "https://github.com/rabbitboots/prod_ui_docs")
 
 	demoShared.makeParagraph(panel, nil, "\n\n")
 
