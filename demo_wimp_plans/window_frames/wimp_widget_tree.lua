@@ -8,7 +8,7 @@
 local commonWimp = require("prod_ui.common.common_wimp")
 local dbg = require("prod_ui.debug.dbg")
 --local itemOps = require("prod_ui.common.item_ops")
-local uiLayout = require("prod_ui.ui_layout")
+--local uiLayout = require("prod_ui.ui_layout")
 
 
 local plan = {}
@@ -143,10 +143,13 @@ function plan.makeWindowFrame(root)
 
 	local tree_box = frame:addChild("wimp/tree_box")
 	tree_box:initialize() -- registered below
+
 	local chk_vp = frame:addChild("base/checkbox")
 	chk_vp:initialize() -- registered below
+
 	local chk_highlight = frame:addChild("base/checkbox")
 	chk_highlight:initialize() -- registered below
+
 	local chk_exclude = frame:addChild("base/checkbox")
 	chk_exclude:initialize() -- registered below
 

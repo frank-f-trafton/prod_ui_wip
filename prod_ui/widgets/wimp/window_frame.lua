@@ -878,7 +878,7 @@ function def:uiCall_reshapePre()
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
-	uiLayout.resetLayoutPort(self, 4)
+	uiLayout.resetLayoutPort(self, 1)
 
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
@@ -890,9 +890,6 @@ function def:uiCall_reshapePre()
 
 	--return self.halt_reshape -- ?
 end
-
-
---function def:uiCall_reshapePost()
 
 
 function def:uiCall_destroy(inst)
