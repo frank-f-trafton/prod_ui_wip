@@ -879,8 +879,7 @@ function def:uiCall_reshapePre()
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
-	uiLayout.resetLayoutPortFull(self, 4)
-	uiLayout.discardTop(self, self.vp5_y - self.vp4_y + self.vp5_h)
+	uiLayout.resetLayoutPort(self, 4)
 
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
@@ -970,6 +969,8 @@ def.default_skinner = {
 		local skin = self.skin
 		local root = self.context.root
 
+		love.graphics.push("all")
+
 		-- Window shadow
 		local render_shadow = self.context.settings.wimp.window_frame.render_shadow
 		if render_shadow == "all" or render_shadow == "active" and self == root.selected_frame then
@@ -981,6 +982,8 @@ def.default_skinner = {
 				self.h + skin.shadow_extrude * 2
 			)
 		end
+
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 		-- Window body
 		love.graphics.setColor(skin.color_body)
@@ -1010,7 +1013,7 @@ def.default_skinner = {
 
 			-- Header buttons
 			local sx, sy, sw, sh = love.graphics.getScissor()
-			love.graphics.setScissor(ox + self.x + self.vp5_x, oy + self.y + self.vp5_y, self.vp5_w, self.vp5_h)
+			uiGraphics.intersectScissor(ox + self.x + self.vp5_x, oy + self.y + self.vp5_y, self.vp5_w, self.vp5_h)
 
 			if self.header_show_close_button then
 				local b_close = self.b_close
@@ -1058,6 +1061,8 @@ def.default_skinner = {
 
 			love.graphics.setScissor(sx, sy, sw, sh)
 		end
+
+		love.graphics.pop()
 
 		if self.DEBUG_show_resize_range then
 			local rp = skin.sensor_resize_pad

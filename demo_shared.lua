@@ -52,7 +52,6 @@ function demoShared.makeTitle(self, tag, text)
 	text_block:setFontID("h1")
 	text_block:setText(text)
 
-
 	return text_block
 end
 
