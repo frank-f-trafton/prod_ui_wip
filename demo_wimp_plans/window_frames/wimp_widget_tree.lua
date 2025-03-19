@@ -1,6 +1,9 @@
 
 --[[
 	A window frame with a text widget that is updated at intervals to show the current widget tree.
+
+	This tool is not very helpful for inspecting ephemeral widgets, like pop-up menus. In those cases,
+	you may have to add some debug code to their render callbacks.
 --]]
 
 

@@ -421,7 +421,7 @@ function def:updateDimensions()
 
 	* Handle vertical item layout
 	* Calculate item width by finding the widest single item
-	* Reshape the widget to correctly set viewport rectangles
+	* Resize and reshape the widget to update the viewports
 	* Set the width of all items to the width of viewport #1, and then reshape all items
 	--]]
 
@@ -499,11 +499,12 @@ function def:updateDimensions()
 	end
 
 
-	-- (We assume that the root widget's dimensions match the display area.)
-	local wid_top = self:getRootWidget()
+	-- We assume that the root widget's dimensions match the display area.
+	local root = self:getRootWidget()
+	local margin = skin.box.margin
 
-	self.w = math.min(w + skin.box.margin.x1 + skin.box.margin.x2, wid_top.w)
-	self.h = math.min(h + skin.box.margin.y1 + skin.box.margin.y2, wid_top.h)
+	self.w = math.min(w + margin.x1 + margin.x2, root.w)
+	self.h = math.min(h + margin.y1 + margin.y2, root.h)
 
 	self:reshape()
 
@@ -515,15 +516,6 @@ function def:updateDimensions()
 
 	-- Refresh document size.
 	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
-
-	print(
-		"self.w", self.w,
-		"self.h", self.h,
-		"self.vp_w", self.vp_w,
-		"self.vp_h", self.vp_h,
-		"self.doc_w", self.doc_w,
-		"self.doc_h", self.doc_h
-	)
 end
 
 
@@ -735,7 +727,7 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, self.skin.box.margin)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
+	widShared.copyViewport(self, 1, 2) -- TODO: maybe merge with viewport 1, since it's just a duplicate.
 
 	self:cacheUpdate()
 
@@ -1302,7 +1294,7 @@ def.default_skinner = {
 		uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
 		-- Scroll offsets.
-		love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+		love.graphics.translate(-self.scr_x, -self.scr_y)
 
 		-- Pop up menus do not render hover-glow.
 
@@ -1398,6 +1390,10 @@ def.default_skinner = {
 		end
 
 		love.graphics.pop()
+
+		-- Debug: draw viewports
+		--widShared.debug.debugDrawViewport(self, 1)
+		--widShared.debug.debugDrawViewport(self, 2)
 	end,
 
 

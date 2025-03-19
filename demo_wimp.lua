@@ -11,6 +11,7 @@ print("Start WIMP Demo.")
 -- The first panel to load.
 local demo_panel_launch = {
 	--"demo_welcome",
+	"text_box_single",
 	--"number_box",
 	--"demo_main",
 	--"button_split",
@@ -18,7 +19,7 @@ local demo_panel_launch = {
 	--"properties_box",
 	--"wimp_list_box",
 	--"wimp_tree_box",
-	"wimp_workspaces",
+	--"wimp_workspaces",
 }
 
 
