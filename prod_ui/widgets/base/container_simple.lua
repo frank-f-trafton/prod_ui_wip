@@ -14,12 +14,6 @@ local def = {}
 def.reshape = widShared.reshapers.branch
 
 
--- Called when the user clicks on the container's blank space (no widgets, no embedded controls).
-function def:wid_pressed(x, y, button, istouch, presses)
-
-end
-
-
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -38,8 +32,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			if button <= 3 then
 				self:tryTakeThimble1()
 			end
-
-			self:wid_pressed(x, y, button, istouch, presses)
 		end
 	end
 end

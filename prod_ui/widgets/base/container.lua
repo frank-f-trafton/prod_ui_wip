@@ -42,16 +42,9 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
---- Override to make something happen when the user clicks on blank space (no widgets, no embedded controls) in the container.
-function def:wid_pressed(x, y, button, istouch, presses)
-
-end
-
-
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = false
 
 	self.auto_doc_update = true
 
@@ -134,10 +127,19 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
 		end
 
-		-- Scroll bars were not activated: take thimble1
+		-- Scroll bars were not activated: take directing thimble1
+		-- to the container's UI Frame ancestor.
 		if (button == 1 or button == 2) and not handled then
-			self:tryTakeThimble1()
-			self:wid_pressed(x, y, button, istouch, presses)
+			local wid = self
+			while wid do
+				if wid.frame_type then
+					break
+				end
+				wid = wid.parent
+			end
+			if wid then
+				wid:tryTakeThimble1()
+			end
 		end
 	end
 end
