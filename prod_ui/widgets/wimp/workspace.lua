@@ -29,12 +29,6 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
---- Override to make something happen when the user clicks on blank space (no widgets, no embedded controls) in the workspace.
-function def:wid_pressed(x, y, button, istouch, presses)
-
-end
-
-
 function def:uiCall_initialize(unselectable)
 	-- UI Frame
 	self.frame_type = "workspace"
@@ -147,7 +141,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Scroll bars were not activated: take thimble1
 		if not handled then
 			self:tryTakeThimble1()
-			self:wid_pressed(x, y, button, istouch, presses)
 		end
 	end
 end
