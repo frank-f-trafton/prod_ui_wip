@@ -926,7 +926,7 @@ end
 
 function reshapers.post(self)
 	--[[DBG]] PR("reshaper.post: " .. ID(self))
-	self.w, self.h = self.pref_w or self.w, self.pref_h or self.h
+	self:applyPreferredDimensions()
 	_clampDimensions(self)
 	self:uiCall_reshapePost()
 end
@@ -938,7 +938,7 @@ function reshapers.prePost(self)
 		--[[DBG]] PR("reshaper.prePost: ended early by reshapePre.")
 		return
 	end
-	self.w, self.h = self.pref_w or self.w, self.pref_h or self.h
+	self:applyPreferredDimensions()
 	_clampDimensions(self)
 	self:uiCall_reshapePost()
 end
@@ -950,7 +950,7 @@ function reshapers.branch(self)
 		--[[DBG]] PR("reshaper.branch: ended early by reshapePre.")
 		return
 	end
-	self.w, self.h = self.pref_w or self.w, self.pref_h or self.h
+	self:applyPreferredDimensions()
 	for i, wid in ipairs(self.children) do
 		wid:reshape()
 	end
@@ -968,7 +968,7 @@ function reshapers.layout(self)
 		return
 	end
 
-	self.w, self.h = self.pref_w or self.w, self.pref_h or self.h
+	self:applyPreferredDimensions()
 
 	if self.lay_seq then
 		for i, wid in ipairs(self.lay_seq) do

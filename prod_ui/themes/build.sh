@@ -1,15 +1,35 @@
 
-# NOTE: This is a quick-and-dirty script that only outputs at 96 DPI (DPI scale of 1.0).
-# It also requires the following aliases:
+# NOTE: This is a quick-and-dirty script.
+# It requires the following aliases:
 # LÖVE 12 -> 'love12d'
 # Inkscape 1.3.2 -> 'inkscape132'
+
+
+# Stop script at the first failed command.
+set -e
+
+# Config
+dpi=96
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--dpi)
+			dpi="$2";
+			shift
+			shift
+		;;
+	esac
+done
+
+echo DPI: $dpi
 echo Running svg2png...
 cd build
-love12d svg2png.lua --source vacuum_dark --dpi 96
+love12d svg2png.lua --source vacuum_dark --dpi $dpi
 echo Running atlas_build...
-love12d atlas_build.lua --img-source output/96/vacuum_dark --dest output/96 --bleed 1
+love12d atlas_build.lua --img-source output/$dpi/vacuum_dark --dest output/$dpi --bleed 1
 echo Copying output to themes directory...
 cd ..
-rm -rf vacuum/text/96/*
-cp build/output/96/atlas.lua vacuum/tex/96/atlas.lua
-cp build/output/96/atlas.png vacuum/tex/96/atlas.png
+rm -rf vacuum/tex/$dpi
+mkdir -p vacuum/tex/$dpi
+cp build/output/$dpi/atlas.lua vacuum/tex/$dpi/atlas.lua
+cp build/output/$dpi/atlas.png vacuum/tex/$dpi/atlas.png

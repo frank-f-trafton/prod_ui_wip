@@ -19,10 +19,13 @@ local BASE_REQ = uiRes.pathToRequire(THIS_THEME_PATH, true) -- path.to.vacuum
 local BASE_PATH = uiRes.pathStripEnd(THIS_THEME_PATH) -- path/to/vacuum/
 
 
---- Creates a new theme instance.
--- @param scale The desired scaling value for resources (fonts, etc.) May be clamped or rounded by the function.
--- @return The new theme instance.
-function themeDef.newInstance(scale)
+function themeDef.newInstance()
+	local scale = context.scale
+	local dpi = context.dpi
+
+	assert(type(scale) == "number", "invalid scale type.")
+	assert(type(dpi) == "number", "invalid DPI type.")
+
 	local inst = uiTheme.newThemeInstance()
 
 	-- General fonts
@@ -54,8 +57,8 @@ function themeDef.newInstance(scale)
 	inst.tex_slices = {}
 
 	-- Setup atlas texture, plus its associated quads and slices.
-	local atlas_data = uiRes.loadLuaFile(BASE_PATH .. "tex/96/atlas.lua")
-	local atlas_tex = love.graphics.newImage(BASE_PATH .. "tex/96/atlas.png")
+	local atlas_data = uiRes.loadLuaFile(BASE_PATH .. "tex/" .. tostring(dpi) .. "/atlas.lua")
+	local atlas_tex = love.graphics.newImage(BASE_PATH .. "tex/" .. tostring(dpi) .. "/atlas.png")
 
 	local config = atlas_data.config
 	atlas_tex:setFilter(config.filter_min, config.filter_mag)
