@@ -144,6 +144,12 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- Usage of the settings table depends on the front-end.
 	self.settings = settings or {}
 
+	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
+	self.scale = 1.0
+
+	-- DPI class. Determines which set of textures and associated metadata to load.
+	self.dpi = 96
+
 	-- Place the theme instance (containing shared resources such as textures) here.
 	self.resources = false
 
@@ -1340,6 +1346,24 @@ end
 --- Check if the UI Context async updates are locked.
 function _mt_context:isAsyncLocked()
 	return not not self.async_lock
+end
+
+
+function _mt_context:setScale(scale)
+	uiShared.numberNotNaN(1, scale)
+
+	self.scale = math.max(0.1, math.min(scale, 10.0))
+
+	-- TODO: updating the scale of existing widgets, skins, etc.
+end
+
+
+function _mt_context:setDPI(dpi)
+	uiShared.numberNotNaN(1, dpi)
+
+	self.dpi = math.max(1, dpi)
+
+	-- TODO: updating the DPI of existing textures, slices, etc.
 end
 
 

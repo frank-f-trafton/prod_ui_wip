@@ -1040,6 +1040,17 @@ function _mt_widget:setPreferredDimensions(w, h)
 end
 
 
+function _mt_widget:applyPreferredDimensions()
+	local scale = context.scale
+	if type(self.pref_w) == "number" then
+		self.w = math.floor(self.pref_w * scale)
+	end
+	if type(self.pref_h) == "number" then
+		self.h = math.floor(self.pref_h * scale)
+	end
+end
+
+
 --- The default widget renderer.
 function _mt_widget:render(os_x, os_y)
 	-- Uncomment to draw a white rectangle for every widget that does not have a render method

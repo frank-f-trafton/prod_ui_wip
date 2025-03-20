@@ -60,12 +60,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
-	print("container: uiCall_reshapePre")
-
-	--uiLayout.resetLayout(self)
-	uiLayout.resetLayoutPort(self, 1)
-end
+--function def:uiCall_reshapePre()
 
 
 function def:uiCall_relayoutPost()
@@ -84,6 +79,13 @@ function def:uiCall_relayoutPost()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
+	uiLayout.resetLayoutPort(self, 1)
+end
+
+
+function def:uiCall_reshapePost()
+	print("container: uiCall_reshapePost")
+
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
 	end
@@ -92,13 +94,6 @@ function def:uiCall_relayoutPost()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
 end
-
-
---[[
-function def:uiCall_reshapePost()
-	print("container: uiCall_reshapePost")
-end
---]]
 
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)

@@ -339,19 +339,24 @@ end
 
 
 --[[
+('scaled' variants are affected by the context UI scale.)
+
 place-absolute
+place-absolute-scaled
 
 Places a widget based on an absolute position (and optional width and height) stored in the widget. 'Absolute'
 in this case means without regard for the layout rectangle.
 
 
 place-relative
+place-relative-scaled
 
 Places a widget based on a position (and optional width and height) stored in the widget, relative to the top-left
 corner of the parent's layout rectangle.
 
 
 place-index
+place-index-scaled
 
 Places a widget based on a rectangle table stored in the parent widget and indexed by a value in the child. The
 fields 'w' and 'h' are optional, and the widget will keep its existing values if those are not present.
@@ -378,6 +383,22 @@ uiLayout.handlers["place-absolute"] = function(parent, wid)
 end
 
 
+uiLayout.handlers["place-absolute-scaled"] = function(parent, wid)
+	local ww, hh = wid.lc_pos_w or wid.w, wid.lc_pos_h or wid.h
+
+	wid:uiCall_relayoutPre(nil, ww, hh)
+
+	local scale = wid.context.scale
+
+	wid.x = math.floor(wid.lc_pos_x * scale)
+	wid.y = math.floor(wid.lc_pos_y * scale)
+	wid.w = math.floor(math.max(wid.min_w, math.min(wid.max_w, ww)) * scale)
+	wid.h = math.floor(math.max(wid.min_h, math.min(wid.max_h, hh)) * scale)
+
+	wid:uiCall_relayoutPost()
+end
+
+
 uiLayout.handlers["place-relative"] = function(parent, wid)
 	local ww, hh = wid.lc_pos_w or wid.w, wid.lc_pos_h or wid.h
 
@@ -387,6 +408,22 @@ uiLayout.handlers["place-relative"] = function(parent, wid)
 	wid.y = parent.lp_y + wid.lc_pos_y
 	wid.w = math.max(wid.min_w, math.min(wid.max_w, ww))
 	wid.h = math.max(wid.min_h, math.min(wid.max_h, hh))
+
+	wid:uiCall_relayoutPost()
+end
+
+
+uiLayout.handlers["place-relative-scaled"] = function(parent, wid)
+	local ww, hh = wid.lc_pos_w or wid.w, wid.lc_pos_h or wid.h
+
+	wid:uiCall_relayoutPre(nil, ww, hh)
+
+	local scale = wid.context.scale
+
+	wid.x = math.floor((parent.lp_x + wid.lc_pos_x) * scale)
+	wid.y = math.floor((parent.lp_y + wid.lc_pos_y) * scale)
+	wid.w = math.floor(math.max(wid.min_w, math.min(wid.max_w, ww)) * scale)
+	wid.h = math.floor(math.max(wid.min_h, math.min(wid.max_h, hh)) * scale)
 
 	wid:uiCall_relayoutPost()
 end
@@ -407,6 +444,28 @@ uiLayout.handlers["place-index"] = function(parent, wid)
 	wid.y = rect.y
 	wid.w = math.max(wid.min_w, math.min(wid.max_w, ww))
 	wid.h = math.max(wid.min_h, math.min(wid.max_h, hh))
+
+	wid:uiCall_relayoutPost()
+end
+
+
+uiLayout.handlers["place-index-scaled"] = function(parent, wid)
+	local rect = parent.lp_rects[wid.lc_index]
+
+	if not rect then
+		error("no layout rectangle in parent at index: " .. tostring(wid.lc_index))
+	end
+
+	local ww, hh = rect.w or wid.w, rect.h or wid.h
+
+	wid:uiCall_relayoutPre(nil, ww, hh)
+
+	local scale = wid.context.scale
+
+	wid.x = math.floor(rect.x * scale)
+	wid.y = math.floor(rect.y * scale)
+	wid.w = math.floor(math.max(wid.min_w, math.min(wid.max_w, ww)) * scale)
+	wid.h = math.floor(math.max(wid.min_h, math.min(wid.max_h, hh)) * scale)
 
 	wid:uiCall_relayoutPost()
 end

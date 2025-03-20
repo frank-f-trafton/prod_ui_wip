@@ -10,8 +10,8 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	--"demo_welcome",
-	"text_box_single",
+	"demo_welcome",
+	--"text_box_single",
 	--"number_box",
 	--"demo_main",
 	--"button_split",
@@ -189,6 +189,9 @@ local app_settings = require("prod_ui.default_settings")
 
 local function newWimpContext()
 	local context = uiContext.newContext("prod_ui", app_settings)
+
+	context:setScale(1.0)
+	context:setDPI(96)
 
 	-- Config/settings specific to this demo.
 	context.app = {
