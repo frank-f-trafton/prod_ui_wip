@@ -1,5 +1,7 @@
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 local itemOps = require("prod_ui.common.item_ops")

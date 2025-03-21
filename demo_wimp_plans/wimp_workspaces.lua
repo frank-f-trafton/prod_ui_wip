@@ -1,5 +1,7 @@
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 local commonWimp = require("prod_ui.common.common_wimp")

@@ -111,7 +111,6 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		local handled = false
@@ -122,9 +121,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
 		end
 
-		-- Scroll bars were not activated: take directing thimble1
-		-- to the container's UI Frame ancestor.
-		if (button == 1 or button == 2) and not handled then
+		-- Scroll bars were not activated: try directing thimble1 to the
+		-- container's UI Frame ancestor.
+		if button <= 3 and not handled then
 			local wid = self
 			while wid do
 				if wid.frame_type then
@@ -266,9 +265,6 @@ def.default_skinner = {
 		love.graphics.pop("all")
 		--]=]
 	end,
-
-	-- Don't highlight when holding the UI thimble.
-	renderThimble = widShared.dummy,
 }
 
 

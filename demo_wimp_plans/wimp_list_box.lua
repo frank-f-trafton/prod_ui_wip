@@ -7,7 +7,9 @@ local uiLayout = require("prod_ui.ui_layout")
 local demoShared = require("demo_shared")
 
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 local function getDisplayInfo()

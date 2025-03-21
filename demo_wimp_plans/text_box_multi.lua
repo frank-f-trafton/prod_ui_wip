@@ -10,7 +10,9 @@ local keyMgr = require("prod_ui.lib.key_mgr")
 local uiLayout = require("prod_ui.ui_layout")
 
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 function plan.make(panel)

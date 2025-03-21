@@ -10,7 +10,8 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	"demo_welcome",
+	--"demo_welcome",
+	"wimp_divider",
 	--"text_box_single",
 	--"number_box",
 	--"demo_main",
@@ -35,13 +36,13 @@ local demo_plan_list = {
 	nodes = {
 		{plan_id = "demo_welcome", label = "Welcome"},
 		{plan_id = "widgets", label = "Widgets", nodes = {
-			{plan_id = nil, label = "Controls", nodes = {
+			{label = "Controls", nodes = {
 				{plan_id = "button_work", label = "Button work"},
 				{plan_id = "button_split", label = "Split Button"},
 				{plan_id = "slider_work", label = "Slider work"},
 				{plan_id = "stepper", label = "Stepper"},
 				{plan_id = "demo_main", label = "Main Demo Window"},
-				{plan_id = "wimp_sash", label = "Sashes"},
+				{plan_id = "wimp_divider", label = "Dividers"},
 				{plan_id = "number_box", label = "Number Box"},
 				{plan_id = "properties_box", label = "Properties Box"},
 				{plan_id = "combo_box", label = "Combo Box"},
@@ -53,20 +54,20 @@ local demo_plan_list = {
 				{plan_id = "wimp_tree_box", label = "Tree Box"},
 				{plan_id = "wimp_list_box", label = "List Box"},
 			}},
-			{plan_id = nil, label = "Informational", nodes = {
+			{label = "Informational", nodes = {
 				{plan_id = "progress_bar", label = "Progress Bar"},
 				{plan_id = "label_test", label = "Label test"},
 				-- text blocks
 			}},
-			{plan_id = nil, label = "Containers", nodes = {
+			{label = "Containers", nodes = {
 				{plan_id = "root", label = "Root Widget"},
 				{plan_id = "container_work", label = "Container work"},
 			}},
 		}},
-		{plan_id = nil, label = "UI Frames", nodes = {
+		{label = "UI Frames", nodes = {
 			{plan_id = "wimp_workspaces", label = "Workspace Frames"},
 		}},
-		{plan_id = nil, label = "Testing; Unfinished Work", nodes = {
+		{label = "Testing; Unfinished Work", nodes = {
 			{plan_id = "drag_box", label = "Drag Box"},
 			{plan_id = "dial", label = "Dials"},
 			{plan_id = "menu_test", label = "Menu Test"},
@@ -636,7 +637,7 @@ do
 
 		--print(inspect(demo_list.tree))
 
-		local function _instantiateDemoContainer(workspace)
+		local function _instantiateDemoContainer(workspace, c_type)
 			-- First, destroy any existing containers with the same tag.
 			local wid
 			repeat
@@ -646,7 +647,7 @@ do
 				end
 			until not wid
 
-			local plan_container = workspace:addChild("base/container")
+			local plan_container = workspace:addChild(c_type)
 			plan_container:initialize()
 			plan_container:register("fit-remaining")
 			plan_container.tag = "plan_container"
@@ -657,8 +658,9 @@ do
 		demo_list.wid_select = function(self, item, item_i)
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace and item.plan_id then
-				local container = _instantiateDemoContainer(workspace)
 				local plan = require("demo_wimp_plans." .. item.plan_id)
+				local container = _instantiateDemoContainer(workspace, plan.container_type)
+
 				plan.make(container)
 				workspace:reshape()
 			end
