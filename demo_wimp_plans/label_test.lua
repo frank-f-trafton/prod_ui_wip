@@ -1,5 +1,7 @@
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 local uiLayout = require("prod_ui.ui_layout")

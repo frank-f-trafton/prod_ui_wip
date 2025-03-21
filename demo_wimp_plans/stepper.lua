@@ -3,7 +3,9 @@
 local uiLayout = require("prod_ui.ui_layout")
 
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 local function timeFormatted()

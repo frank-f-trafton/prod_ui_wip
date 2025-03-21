@@ -5,7 +5,9 @@ local uiLayout = require("prod_ui.ui_layout")
 local pTable = require("prod_ui.lib.pile_table")
 
 
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 function plan.make(panel)

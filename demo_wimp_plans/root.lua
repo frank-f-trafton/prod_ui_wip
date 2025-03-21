@@ -1,4 +1,6 @@
-local plan = {}
+local plan = {
+	container_type = "base/container"
+}
 
 
 local demoShared = require("demo_shared")
