@@ -1,8 +1,3 @@
-
--- ProdUI
-local uiLayout = require("prod_ui.ui_layout")
-
-
 local plan = {
 	container_type = "base/container"
 }

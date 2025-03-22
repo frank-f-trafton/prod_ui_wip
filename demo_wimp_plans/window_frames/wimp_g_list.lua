@@ -1,9 +1,7 @@
 -- As seen in the Love Frames demo.
 
-
 -- ProdUI
 local commonTab = require("prod_ui.common.common_tab")
-local uiLayout = require("prod_ui.ui_layout")
 
 
 local plan = {}

@@ -7,7 +7,6 @@
 local commonWimp = require("prod_ui.common.common_wimp")
 local itemOps = require("prod_ui.common.item_ops")
 local keyMgr = require("prod_ui.lib.key_mgr")
-local uiLayout = require("prod_ui.ui_layout")
 
 
 local plan = {
