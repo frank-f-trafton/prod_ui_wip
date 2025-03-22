@@ -1,8 +1,4 @@
 
--- ProdUI
-local uiLayout = require("prod_ui.ui_layout")
-
-
 -- Demo-specific modules
 local demoShared = require("demo_shared")
 

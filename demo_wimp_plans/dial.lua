@@ -1,7 +1,6 @@
 
 -- ProdUI
 local demoShared = require("demo_shared")
-local uiLayout = require("prod_ui.ui_layout")
 
 
 local plan = {
