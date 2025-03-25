@@ -20,6 +20,7 @@ local _mt_node = {
 	-- "slice", "grid", "static", "null"
 	mode = "null",
 
+	parent = false, -- parent node, if applicable.
 	active = true,
 	wid_ref = false,
 	nodes = false, -- false, or array of child nodes.
@@ -28,6 +29,10 @@ local _mt_node = {
 	y = 0,
 	w = 0,
 	h = 0,
+
+	-- Parent original dimensions, before any splitting has occurred.
+	orig_w = 0,
+	orig_h = 0,
 
 	-- Shrinks the node along its four edges.
 	margin_x1 = 0,
@@ -38,12 +43,14 @@ local _mt_node = {
 	-- * Mode: slice
 
 	-- "px": unscaled pixels
-	-- "unit": value from 0.0 - 1.0, representing a portion of the parent area.
-	-- "unit-original": value from 0.0 - 1.0, representing a portion of the original parent area, before any slices
+	-- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any slices
 	-- were taken off at this level.
-	slice_mode = "unit", -- "px", "unit", "unit-original"
+	slice_mode = "unit", -- "px", "unit"
 	slice_edge = "left", -- "left", "top", "right", "bottom"
 	slice_amount = 0.5,
+
+	-- Used by the divider container to mark nodes as draggable bars.
+	slice_sash = false,
 
 	-- * Mode: grid
 	-- Number of tiles in the grid (for parents)
@@ -71,9 +78,24 @@ end
 
 function _mt_node:newNode(node_type)
 	self.nodes = self.nodes or {}
-	local node = setmetatable({}, _mt_node)
+	local node = setmetatable({parent = self}, _mt_node)
 	table.insert(self.nodes, node)
 	return node
+end
+
+
+function _mt_node:forEach(fn, ...)
+	if fn(self, ...) then
+		return self
+
+	elseif self.nodes then
+		for i, child in ipairs(self.nodes) do
+			local rv = child:forEach(fn, ...)
+			if rv then
+				return rv
+			end
+		end
+	end
 end
 
 
@@ -85,10 +107,9 @@ function _mt_node:setMargin(x1, y1, x2, y2)
 end
 
 
--- "slice": slice_mode, slice_edge, slice_amount
+-- "slice": slice_mode, slice_edge, slice_amount, [slice_sash]
 -- "grid": grid_x, grid_y
 -- "static": x, y, w, h
--- "remaining": No arguments.
 -- "null": No arguments.
 function _mt_node:setMode(mode, a, b, c, d)
 	-- TODO: assertions
@@ -98,6 +119,7 @@ function _mt_node:setMode(mode, a, b, c, d)
 		self.slice_mode = a
 		self.slice_edge = b
 		self.slice_amount = c
+		self.slice_sash = d or false
 
 	elseif mode == "grid" then
 		self.grid_x = a
@@ -172,16 +194,13 @@ function _mt_node:carveEdgeUnit(x_left, y_top, x_right, y_bottom)
 end
 
 
-function layout.partition(slice_mode, pos, length, original_length)
+function layout.applySlice(slice_mode, pos, length, original_length)
 	local cut
 	if slice_mode == "unit" then
-		cut = math.floor(length * math.max(0, math.min(pos, 1)))
-
-	elseif slice_mode == "unit-original" then
 		cut = math.floor(original_length * math.max(0, math.min(pos, 1)))
 
 	elseif slice_mode == "px" then
-		cut = math.floor(math.max(0, length - pos))
+		cut = math.floor(math.max(0, math.min(pos, length)))
 
 	else
 		error("invalid 'slice_mode' enum.")
@@ -191,69 +210,70 @@ function layout.partition(slice_mode, pos, length, original_length)
 end
 
 
-local function _executeLayout(n1, n2, w_orig, h_orig)
-	if n2.mode == "static" then
-		n2.x = n1.w > 0 and n1.x + (n2.static_x % n1.w) or 0
-		n2.y = n1.h > 0 and n1.y + (n2.static_y % n1.h) or 0
-		n2.w = n2.static_w
-		n2.h = n2.static_h
 
-	elseif n2.mode == "grid" then
-		if n1.grid_rows > 0 and n1.grid_cols > 0 then
-			n2.x = n1.x + math.floor(n2.grid_x * n1.w / n1.grid_rows)
-			n2.y = n1.y + math.floor(n2.grid_y * n1.h / n1.grid_cols)
-			n2.w = math.floor(n1.w / n1.grid_rows)
-			n2.h = math.floor(n1.h / n1.grid_cols)
+-- @param np Parent node.
+-- @param nc Child node.
+-- @param sib Previous sibling of 'nc', if applicable.
+local function _executeLayout(np, nc, sib)
+	if nc.mode == "static" then
+		nc.x = np.w > 0 and np.x + (nc.static_x % np.w) or 0
+		nc.y = np.h > 0 and np.y + (nc.static_y % np.h) or 0
+		nc.w = nc.static_w
+		nc.h = nc.static_h
+
+	elseif nc.mode == "grid" then
+		if np.grid_rows > 0 and np.grid_cols > 0 then
+			nc.x = np.x + math.floor(nc.grid_x * np.w / np.grid_rows)
+			nc.y = np.y + math.floor(nc.grid_y * np.h / np.grid_cols)
+			nc.w = math.floor(np.w / np.grid_rows)
+			nc.h = math.floor(np.h / np.grid_cols)
 		else
-			n2.x, n2.y, n2.w, n2.h = 0, 0, 0, 0
+			nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
 		end
 
-	elseif n2.mode == "slice" then
-		if n2.slice_edge == "left" then
-			n2.y = n1.y
-			n2.h = n1.h
-			n2.w, n1.w = layout.partition(n2.slice_mode, n2.slice_amount, n1.w, w_orig)
-			n2.x = n1.x
-			n1.x = n1.x + n2.w
+	elseif nc.mode == "slice" then
+		if nc.slice_edge == "left" then
+			nc.y = np.y
+			nc.h = np.h
+			nc.w, np.w = layout.applySlice(nc.slice_mode, nc.slice_amount, np.w, np.orig_w)
+			nc.x = np.x
+			np.x = np.x + nc.w
 
-		elseif n2.slice_edge == "right" then
-			n2.y = n1.y
-			n2.h = n1.h
-			n2.w, n1.w = layout.partition(n2.slice_mode, n2.slice_amount, n1.w, w_orig)
-			n2.x = n1.x + n1.w
+		elseif nc.slice_edge == "right" then
+			nc.y = np.y
+			nc.h = np.h
+			nc.w, np.w = layout.applySlice(nc.slice_mode, nc.slice_amount, np.w, np.orig_w)
+			nc.x = np.x + np.w
 
-		elseif n2.slice_edge == "top" then
-			n2.x = n1.x
-			n2.w = n1.w
-			n2.h, n1.h = layout.partition(n2.slice_mode, n2.slice_amount, n1.h, h_orig)
-			n2.y = n1.y
-			n1.y = n1.y + n2.h
+		elseif nc.slice_edge == "top" then
+			nc.x = np.x
+			nc.w = np.w
+			nc.h, np.h = layout.applySlice(nc.slice_mode, nc.slice_amount, np.h, np.orig_h)
+			nc.y = np.y
+			np.y = np.y + nc.h
 
-		elseif n2.slice_edge == "bottom" then
-			n2.x = n1.x
-			n2.w = n1.w
-			n2.h, n1.h = layout.partition(n2.slice_mode, n2.slice_amount, n1.h, h_orig)
-			n2.y = n1.y + n1.h
+		elseif nc.slice_edge == "bottom" then
+			nc.x = np.x
+			nc.w = np.w
+			nc.h, np.h = layout.applySlice(nc.slice_mode, nc.slice_amount, np.h, np.orig_h)
+			nc.y = np.y + np.h
 
 		else
 			error("bad slice_edge enum.")
 		end
 
-	elseif n2.mode == "remaining" then
-		n2.x, n2.y, n2.w, n2.h = n1.x, n1.y, n1.w, n1.h
-
-	elseif n2.mode == "null" then
+	elseif nc.mode == "null" then
 		-- Do nothing.
 
 	else
-		error("bad node placement enum: " .. tostring(n1.placement))
+		error("bad node mode enum: " .. tostring(nc.mode))
 	end
 end
 
 
 function layout.splitNode(n, _depth)
-	print("_splitNode() " .. _depth .. ": start")
-	print(n, "active:", n and n.active, "#nodes:", n and n.nodes and (#n.nodes))
+	--print("_splitNode() " .. _depth .. ": start")
+	--print(n, "active:", n and n.active, "#nodes:", n and n.nodes and (#n.nodes))
 
 	-- Apply margin reduction.
 	n.x = n.x + n.margin_x1
@@ -261,17 +281,22 @@ function layout.splitNode(n, _depth)
 	n.w = math.max(0, n.w - n.margin_x1 - n.margin_x2)
 	n.h = math.max(0, n.h - n.margin_y1 - n.margin_y2)
 
-	local w_orig, h_orig = n.w, n.h
+	n.orig_w, n.orig_h = n.w, n.h
 	if n.active and n.nodes then
-		print("old n XYWH", n.x, n.y, n.w, n.h)
-		for i, n2 in ipairs(n.nodes) do
-			_executeLayout(n, n2, w_orig, h_orig)
-			print("new n XYWH", n.x, n.y, n.w, n.h)
-			print("new child " .. i .. " XYWH", n2.x, n2.y, n2.w, n2.h)
+		--print("old n XYWH", n.x, n.y, n.w, n.h)
+		local nodes = n.nodes
+		for i, n2 in ipairs(nodes) do
+			local sib
+			if i > 1 then
+				sib = nodes[i - 1]
+			end
+			_executeLayout(n, n2, sib)
+			--print("new n XYWH", n.x, n.y, n.w, n.h)
+			--print("new child " .. i .. " XYWH", n2.x, n2.y, n2.w, n2.h)
 			layout.splitNode(n2, _depth + 1)
 		end
 	end
-	print("_splitNode() " .. _depth .. ": end")
+	--print("_splitNode() " .. _depth .. ": end")
 end
 
 

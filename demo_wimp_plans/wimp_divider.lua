@@ -19,15 +19,15 @@ function plan.make(divider)
 	--[[
 	┌┈┬┈┬┈┬┈┬┈┐
 	│A│C│ │ │ │
-	├┈┼┈┤E│F│G│
+	├┈┼┈┤E│FsG│
 	│B│D│ │ │ │
 	└─┴─┴─┴─┴─┘
 
 	      G
 	      |
-	   +-----+-+-+
-	   |     | | |
-	n_grid   E F G
+	   +-----+-+-+-+
+	   |     | | | |
+	n_grid   E F s G
 	   |
 	+-+-+-+
 	| | | |
@@ -40,12 +40,13 @@ function plan.make(divider)
 	local wd = _makeBox(divider, "lightmagenta", "magenta", "black", "(Grid 1,1)")
 	local we = _makeBox(divider, "lightyellow", "darkyellow", "black", "(E)")
 	local wf = _makeBox(divider, "darkgrey", "lightgrey", "white", "(F)")
+	-- s: no widget
 	local wg = _makeBox(divider, "darkblue", "lightblue", "white", "(G)")
 
 	divider.node.wid_ref = wg
 
 	local n_grid = divider.node:newNode()
-	n_grid:setMode("slice", "unit-original", "left", 0.4)
+	n_grid:setMode("slice", "unit", "left", 0.4)
 	n_grid:setMargin(4, 4, 4, 4)
 	n_grid:setGridDimensions(2, 2)
 
@@ -71,11 +72,16 @@ function plan.make(divider)
 
 	local ne = divider.node:newNode()
 	ne.wid_ref = we
-	ne:setMode("slice", "unit-original", "left", 0.2)
+	ne:setMode("slice", "unit", "left", 0.2)
 
 	local nf = divider.node:newNode()
 	nf.wid_ref = wf
-	nf:setMode("slice", "unit-original", "left", 0.2)
+	nf:setMode("slice", "px", "left", 140)
+	--nf:setMode("slice", "unit", "left", 0.2)
+
+	local ns = divider.node:newNode()
+	-- Sash nodes do not refer to widgets, at least not in the original design.
+	divider:configureSashNode(nf, ns)
 
 	-- 'wg' is part of the root node.
 
