@@ -83,9 +83,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
@@ -139,7 +136,6 @@ local function assignSubMenu(item, client, set_selection)
 			-- Add as a sibling and attach to the menu chain.
 			local client_sub = parent:addChild("wimp/menu_pop")
 			client_sub:initialize()
-			client_sub:register("static")
 
 			client.chain_next = client_sub
 			client_sub.chain_prev = client

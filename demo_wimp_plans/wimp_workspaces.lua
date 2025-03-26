@@ -55,7 +55,6 @@ local function _setupWS2(root)
 	btn.w = 256
 	btn.h = 64
 	btn:initialize()
-	btn:register("static")
 	btn:setLabel("Back to Workspace #1")
 
 	btn.wid_buttonAction = function(self)
@@ -84,7 +83,6 @@ Other Window Frames in this demo are "unassociated", and may appear in any Works
 	local frame_ws2_text = frame_ws2:addChild("base/label")
 	frame_ws2_text.x, frame_ws2_text.y, frame_ws2_text.w, frame_ws2_text.h = 0, 0, 440, 100
 	frame_ws2_text:initialize()
-	frame_ws2_text:register("static")
 	frame_ws2_text:setLabel("This Window Frame is \"associated\" with Workspace #2. It is visible and active only when Workspace #2 is also active.\n\n(Other Window Frames in this demo are \"unassociated\", and will appear in any Workspace.)", "multi")
 --]===]
 
@@ -168,7 +166,6 @@ function plan.make(panel)
 		btn.w = ww
 		btn.h = hh
 		btn:initialize()
-		btn:register("static")
 		btn.tag = "btn_crt"
 		btn:setLabel("Create Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -186,7 +183,6 @@ function plan.make(panel)
 		btn.w = ww
 		btn.h = hh
 		btn:initialize()
-		btn:register("static")
 		btn.tag = "btn_act"
 		btn:setLabel("Activate Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -207,7 +203,6 @@ function plan.make(panel)
 		btn.w = ww
 		btn.h = hh
 		btn:initialize()
-		btn:register("static")
 		btn.tag = "btn_dst"
 		btn:setLabel("Destroy Workspace #2")
 		btn.wid_buttonAction = function(self)

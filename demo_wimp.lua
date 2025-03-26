@@ -10,8 +10,8 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	--"demo_welcome",
-	"wimp_divider",
+	"demo_welcome",
+	--"wimp_divider",
 	--"text_box_single",
 	--"number_box",
 	--"demo_main",
@@ -116,7 +116,6 @@ local itemOps = require("prod_ui.common.item_ops")
 local keyMgr = require("prod_ui.lib.key_mgr")
 local uiContext = require("prod_ui.ui_context")
 local uiGraphics = require("prod_ui.ui_graphics")
-local uiLayout = require("prod_ui.ui_layout")
 local uiRes = require("prod_ui.ui_res")
 
 
@@ -224,6 +223,12 @@ local function newWimpContext()
 
 		-- Shows the widget's viewport rectangles in love.draw()
 		dbg_vp = {
+			active = false,
+			wid = false
+		},
+
+		-- Shows the widget's layout nodes in love.draw()
+		dbg_ly = {
 			active = false,
 			wid = false
 		}
@@ -357,7 +362,13 @@ do
 		-- Construct the application menu bar.
 		local bar_menu = wimp_root:addChild("wimp/menu_bar")
 		bar_menu:initialize()
-		bar_menu:register("fit-top")
+
+		-- [[
+		local node = wimp_root.layout_tree:newNode()
+		node:setMode("slice", "px", "top", 32)
+		wimp_root:setLayoutNode(bar_menu, node)
+		--]]
+
 		bar_menu.tag = "root_menu_bar"
 
 		-- Test the (normally commented out) debug render user event.
@@ -583,7 +594,6 @@ do
 		bar_button.can_have_thimble = false
 
 		bar_button:initialize()
-		bar_button:register("static")
 		--]]
 	end
 
@@ -598,12 +608,14 @@ do
 
 		local demo_list = ws1:addChild("wimp/tree_box")
 		demo_list:initialize()
-		demo_list:setPreferredDimensions(300, nil)
-		demo_list:register("fit-left")
 
-		-- Inserts a gap between the ListBox and content container.
-		-- Need a better way of doing this.
-		table.insert(ws1.lay_seq, {lo_command = function(parent, opts) uiLayout.discardLeft(parent, 4) end})
+		-- [[
+		local node = ws1.layout_tree:newNode()
+		node:setMode("slice", "px", "left", 300)
+		ws1:setLayoutNode(demo_list, node)
+		--]]
+
+		-- XYZ: put a sash here.
 
 		demo_list.tag = "plan_menu"
 
@@ -649,7 +661,7 @@ do
 
 			local plan_container = workspace:addChild(c_type)
 			plan_container:initialize()
-			plan_container:register("fit-remaining")
+			workspace:setLayoutNode(plan_container, workspace.layout_tree)
 			plan_container.tag = "plan_container"
 
 			return plan_container
@@ -936,6 +948,8 @@ function love.draw()
 	end
 	local dbg_vp = context.app.dbg_vp
 	if dbg_vp and dbg_vp.active and dbg_vp.wid and not dbg_vp.wid._dead then
+		love.graphics.push("all")
+
 		local widShared = context:getLua("core/wid_shared")
 		local wid = dbg_vp.wid
 		love.graphics.translate(wid:getAbsolutePosition())
@@ -947,6 +961,22 @@ function love.draw()
 				widShared.debug.debugDrawViewport(dbg_vp.wid, i)
 			end
 		end
+
+		love.graphics.pop()
+	end
+
+	local dbg_ly = context.app.dbg_ly
+	print("dbg_ly stuff", dbg_ly.active, dbg_ly.wid)
+	if dbg_ly and dbg_ly.active and dbg_ly.wid and not dbg_ly.wid._dead and dbg_ly.wid.layout_tree then
+		print("???")
+		love.graphics.push("all")
+
+		local widShared = context:getLua("core/wid_shared")
+		local wid = dbg_ly.wid
+		love.graphics.translate(wid:getAbsolutePosition())
+		widShared.debug.debugDrawLayoutNodes(dbg_ly.wid.layout_tree, 1)
+
+		love.graphics.pop()
 	end
 
 	if demo_zoom ~= 1.0 then

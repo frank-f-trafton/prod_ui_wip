@@ -24,7 +24,6 @@ function plan.makeWindowFrame(root)
 		btn.w = 250
 		btn.h = hh
 		btn:initialize()
-		btn:register("static")
 		btn.usr_time = 0.0
 		btn.usr_time_max = 5.0
 		btn:setLabel("Hide for " .. btn.usr_time_max .. " seconds")

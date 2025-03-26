@@ -33,7 +33,6 @@ function plan.make(panel)
 	cbox_wrap.w = 160
 	cbox_wrap.h = 40
 	cbox_wrap:initialize()
-	cbox_wrap:register("static")
 	cbox_wrap:setLabel("Wrap Mode (F5)", "single")
 	--]]
 
@@ -43,7 +42,6 @@ function plan.make(panel)
 	temp_instructions.w = 512
 	temp_instructions.h = c_bar.h
 	temp_instructions:initialize()
-	temp_instructions:register("static")
 	temp_instructions.text = "F5: Wrap Mode\nF6/F7/F8: Align (L, C, R)"
 	temp_instructions:refreshText()
 

@@ -22,9 +22,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 local function _openURL(self)
 	love.system.openURL(self.url)
 end
@@ -161,6 +158,10 @@ function def:uiCall_initialize()
 	self.auto_size = false -- false, "h", "v"
 	self.wrap = false -- only valid when auto_size is "v"
 
+	-- Determined while reshaping.
+	self.text_w = false
+	self.text_h = false
+
 	-- State flags
 	self.enabled = true
 	self.hovered = false
@@ -178,48 +179,62 @@ end
 -- Viewport #2 is the border.
 
 
-function def:uiCall_relayoutPre(x_axis, lw, lh)
+function def:uiCall_reshapePre()
+	widShared.resetViewport(self, 1)
+	self.text_w, self.text_h = false, false
+end
+
+
+local function _determineTextDimensions(self, wrap_limit)
+	--[[
+	The text dimensions may be requested at multiple points during reshaping. Stuff the work
+	into this function, and only execute it once per reshape event.
+	--]]
+
 	local skin = self.skin
 	local font = skin.fonts[self.font_id]
 	if not font then
 		error("missing or invalid font. ID: " .. tostring(self.font_id))
 	end
-	local border = skin.box.border
 
-	widShared.resetViewport(self, 1)
-	self.vp_h = lh - border.x1 - border.x2
-	self.vp_w = lw - border.y1 - border.y2
-
-	if self.wrap then
-		local w, lines = font:getWrap(self.text, self.vp_w)
-		self.vp_h = font:getHeight() * #lines
-		self.vp_w = w
+	if not self.wrap then
+		self.text_w = font:getWidth(self.text)
+		self.text_h = font:getHeight() * (1 + textUtil.countStringPatterns(self.text, "\n", true))
 	else
-		self.vp_h = font:getHeight() * (1 + textUtil.countStringPatterns(self.text, "\n", true))
-		self.vp_w = font:getWidth(self.text)
-	end
-
-	if self.auto_size == "h" then
-		self.w = self.vp_w + border.x1 + border.x2
-
-	elseif self.auto_size == "v" then
-		self.h = self.vp_h + border.y1 + border.y2
+		local lines
+		local border = skin.box.border
+		self.text_w, lines = font:getWrap(self.text, wrap_limit - border.x1 - border.x2)
+		self.text_h = font:getHeight() * #lines
 	end
 end
 
 
-function def:uiCall_relayoutPost()
+function def:uiCall_getSliceLength(x_axis, cross_length)
+	if not x_axis then
+		_determineTextDimensions(self, cross_length)
+		return self.text_h
+	end
+end
+
+
+function def:uiCall_reshapePost()
 	local skin = self.skin
 
 	widShared.resetViewport(self, 2)
 	widShared.carveViewport(self, 2, skin.box.border)
 
+	if not self.text_w then
+		_determineTextDimensions(self, self.w)
+	end
+
+	self.vp_w, self.vp_h = self.text_w, self.text_h
+
 	self.vp_x = self.vp2_x
 	self.vp_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h, self.align_v))
 
-	print("TextBlock dimensions: ", self.w, self.h)
-	print("TextBlock parent dimensions: ", self.parent.w, self.parent.h)
-	print(self.parent.id)
+	--print("TextBlock dimensions: ", self.w, self.h)
+	--print("TextBlock parent dimensions: ", self.parent.w, self.parent.h)
+	--print(self.parent.id)
 end
 
 

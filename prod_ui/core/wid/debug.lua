@@ -66,4 +66,38 @@ function debug.debugDrawViewport(self, v, r, g, b, a)
 end
 
 
+function debug.countLayoutNodes(n)
+	local c = 1
+	if n.nodes then
+		for i, child in ipairs(n.nodes) do
+			c = c + debug.countLayoutNodes(child)
+		end
+	end
+	return c
+end
+
+
+function debug.debugDrawLayoutNodes(node, _depth)
+	-- Translate to the widget's position before calling.
+	love.graphics.push("all")
+	love.graphics.setScissor()
+
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.rectangle("line", node.x, node.y, node.w, node.h)
+	love.graphics.print(_depth, node.x, node.y)
+	print("wid_ref:", node.wid_ref and node.wid_ref.id or "(n/a)")
+	print("depth", _depth, node.x, node.y)
+
+	if node.nodes then
+		love.graphics.translate(node.x, node.y)
+		for i, child in ipairs(node.nodes) do
+			debug.debugDrawLayoutNodes(child, _depth + 1)
+		end
+	end
+
+	love.graphics.pop()
+end
+
+
+
 return debug -- widShared.debug

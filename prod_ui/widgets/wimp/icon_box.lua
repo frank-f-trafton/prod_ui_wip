@@ -92,9 +92,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")

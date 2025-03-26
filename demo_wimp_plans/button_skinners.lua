@@ -30,7 +30,6 @@ function plan.make(panel)
 	button_norm.w = 224
 	button_norm.h = 64
 	button_norm:initialize()
-	button_norm:register("static")
 	button_norm:setLabel("Normal Skinned Button")
 
 	local function radioAlignH(self)
@@ -54,7 +53,6 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "left"
 	bb_rdo:setLabel("Left")
@@ -68,7 +66,6 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "center"
 	bb_rdo:setLabel("Center")
@@ -82,7 +79,6 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "right"
 	bb_rdo:setLabel("Right")
@@ -97,7 +93,6 @@ function plan.make(panel)
 	bb_rdo.w = ww2
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "justify"
 	bb_rdo:setLabel("Justify")
@@ -120,7 +115,6 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "top"
 	bb_rdo:setLabel("Top")
@@ -134,7 +128,6 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "middle"
 	bb_rdo:setLabel("Middle")
@@ -148,7 +141,6 @@ function plan.make(panel)
 	bb_rdo.w = ww1
 	bb_rdo.h = hh2
 	bb_rdo:initialize()
-	bb_rdo:register("static")
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "bottom"
 	bb_rdo:setLabel("Bottom")

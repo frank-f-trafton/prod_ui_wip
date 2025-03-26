@@ -30,7 +30,6 @@ function plan.make(panel)
 	sliderh1.w = h_wid_w
 	sliderh1.h = h_wid_h
 	sliderh1:initialize()
-	sliderh1:register("static")
 
 	sliderh1.trough_vertical = false
 
@@ -60,7 +59,6 @@ function plan.make(panel)
 	sliderh2.w = h_wid_w
 	sliderh2.h = h_wid_h
 	sliderh2:initialize()
-	sliderh2:register("static")
 
 	sliderh2.trough_vertical = false
 
@@ -91,7 +89,6 @@ function plan.make(panel)
 	sliderh3.w = h_wid_w
 	sliderh3.h = h_wid_h
 	sliderh3:initialize()
-	sliderh3:register("static")
 
 	sliderh3.trough_vertical = false
 
@@ -122,7 +119,6 @@ function plan.make(panel)
 	sliderv1.w = v_wid_w
 	sliderv1.h = v_wid_h
 	sliderv1:initialize()
-	sliderv1:register("static")
 
 	sliderv1.trough_vertical = true
 
@@ -148,7 +144,6 @@ function plan.make(panel)
 	sliderv2.w = v_wid_w
 	sliderv2.h = v_wid_h
 	sliderv2:initialize()
-	sliderv2:register("static")
 
 	sliderv2.trough_vertical = true
 
@@ -176,7 +171,6 @@ function plan.make(panel)
 	sliderv3.w = v_wid_w
 	sliderv3.h = v_wid_h
 	sliderv3:initialize()
-	sliderv3:register("static")
 
 	sliderv3.trough_vertical = true
 

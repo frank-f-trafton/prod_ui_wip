@@ -15,7 +15,6 @@ function plan.makeWindowFrame(root)
 	bb_lbl.w = 256
 	bb_lbl.h = 192
 	bb_lbl:initialize()
-	bb_lbl:register("static")
 	bb_lbl:setTag("countdown_label")
 
 	frame.usr_time = 0.0

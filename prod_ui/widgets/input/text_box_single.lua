@@ -37,9 +37,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 -- Override to make something happen when the user presses 'return' or 'kpenter' while the
 -- widget is active and has keyboard focus.
 def.wid_action = uiShared.dummyFunc -- args: (self)

@@ -48,7 +48,6 @@ function plan.makeWindowFrame(root)
 	bb_button.uiCall_thimble2Take = _assertNoThimble
 
 	bb_button:initialize()
-	bb_button:register("static")
 	bb_button.can_have_thimble = false
 
 	bb_button:setLabel("Example Button")
@@ -65,7 +64,6 @@ function plan.makeWindowFrame(root)
 	bb_cbox.uiCall_thimble2Take = _assertNoThimble
 
 	bb_cbox:initialize()
-	bb_cbox:register("static")
 	bb_cbox.can_have_thimble = false
 
 	bb_cbox:setLabel("Example Checkbox")

@@ -2,19 +2,16 @@ local context = select(1, ...)
 
 
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local widLayout = context:getLua("core/wid_layout")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = context:getLua("core/wid_shared")
 
 
 local def = {}
-
-
-def.reshape = widShared.reshapers.layout
 
 
 def.trickle = {}
@@ -52,7 +49,8 @@ function def:uiCall_initialize()
 	self.sort_max = 7
 
 	widShared.setupViewports(self, 2)
-	uiLayout.initLayoutSequence(self)
+
+	widLayout.initializeLayoutTree(self)
 
 	self.halt_reshape = false
 
@@ -97,23 +95,21 @@ end
 function def:uiCall_reshapePre()
 	print("root_wimp: uiCall_reshapePre")
 
-	uiLayout.resetLayout(self)
+	widLayout.resetLayout(self, "self")
 
 	return self.halt_reshape
 end
 
 
--- The root doesn't receive 'uiCall_relayoutPre()' or 'uiCall_relayoutPost()' events.
-
-
 function def:uiCall_reshapePost()
 	print("root_wimp: uiCall_reshapePost")
 
+	local lay = self.layout_tree
 	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
-	self.vp2_x = self.lp_x
-	self.vp2_y = self.lp_y
-	self.vp2_w = self.lp_w
-	self.vp2_h = self.lp_h
+	self.vp2_x = lay.x
+	self.vp2_y = lay.y
+	self.vp2_w = lay.w
+	self.vp2_h = lay.h
 
 	-- Handle the current active Workspace.
 	local workspace = self.workspace

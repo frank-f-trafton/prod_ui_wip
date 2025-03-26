@@ -58,7 +58,6 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 	pop_up.x = x
 	pop_up.y = y
 	pop_up:initialize()
-	pop_up:register("static")
 	pop_up.wid_ref = self
 
 	-- Append items to fresh menu.

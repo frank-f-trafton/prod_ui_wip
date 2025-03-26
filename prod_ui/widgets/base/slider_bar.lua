@@ -52,9 +52,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 -- Called when the slider state changes.
 function def:wid_actionSliderChanged()
 	--print("Slider changed.", self.slider_pos, "/", self.slider_max)

@@ -24,7 +24,6 @@ local function _makeButton(frame, id, label, x, y, w, h)
 	bb_btn.h = h
 	bb_btn.wid_buttonAction = _button_launchFrame
 	bb_btn:initialize()
-	bb_btn:register("static")
 	bb_btn:setLabel(label)
 	bb_btn.usr_plan = id
 	return bb_btn
@@ -50,7 +49,6 @@ function plan.makeWindowFrame(root)
 	bb_btn.w = ww
 	bb_btn.h = hh
 	bb_btn:initialize()
-	bb_btn:register("static")
 	bb_btn:setLabel("Open all")
 	bb_btn.wid_buttonAction = function(self)
 		local siblings = self:getParent().children

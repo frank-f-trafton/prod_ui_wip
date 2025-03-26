@@ -19,7 +19,6 @@ function plan.make(panel)
 	stepper_h.w = 240
 	stepper_h.h = 32
 	stepper_h:initialize()
-	stepper_h:register("static")
 
 	stepper_h:insertOption("Foobar")
 	stepper_h:insertOption("Bazbop")
@@ -37,7 +36,6 @@ function plan.make(panel)
 	stepper_v.w = 64
 	stepper_v.h = 128
 	stepper_v:initialize()
-	stepper_v:register("static")
 	stepper_v:insertOption("Foobar")
 	stepper_v:insertOption("Bazbop")
 	stepper_v:insertOption({text = "Dipdop"})

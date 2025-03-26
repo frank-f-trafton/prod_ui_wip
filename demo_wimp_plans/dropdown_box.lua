@@ -20,7 +20,6 @@ function plan.make(panel)
 	dropdown.w = 256
 	dropdown.h = 32
 	dropdown:initialize()
-	dropdown:register("static")
 
 	dropdown:addItem("foo")
 	dropdown:addItem("bar")

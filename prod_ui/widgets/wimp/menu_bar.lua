@@ -29,9 +29,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 
@@ -318,12 +315,15 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_relayoutPre()
-	self.h = self.base_height
+
+function def:uiCall_getSliceLength(x_axis, cross_length)
+	if not x_axis then
+		return self.base_height
+	end
 end
 
 
-function def:uiCall_relayoutPost()
+function def:uiCall_reshapePost()
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, self.skin.box.border)
 
