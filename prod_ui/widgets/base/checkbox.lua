@@ -19,9 +19,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 def.wid_buttonAction = lgcButton.wid_buttonAction
 def.wid_buttonAction2 = lgcButton.wid_buttonAction2
 def.wid_buttonAction3 = lgcButton.wid_buttonAction3
@@ -66,7 +63,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_relayoutPost()
+function def:uiCall_reshapePost()
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the bijou drawing rectangle.
 

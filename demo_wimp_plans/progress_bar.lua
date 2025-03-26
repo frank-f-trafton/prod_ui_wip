@@ -25,7 +25,6 @@ function plan.make(panel)
 	p_bar.w = h_bar_width
 	p_bar.h = h_bar_height
 	p_bar:initialize()
-	p_bar:register("static")
 	p_bar:setTag("demo_prog_bar")
 
 	p_bar.pos = starting_pos
@@ -47,7 +46,6 @@ function plan.make(panel)
 	btn_active.w = 128
 	btn_active.h = 40
 	btn_active:initialize()
-	btn_active:register("static")
 
 	btn_active:setLabel("setActive()")
 
@@ -65,7 +63,6 @@ function plan.make(panel)
 	btn_vertical.w = 128
 	btn_vertical.h = 40
 	btn_vertical:initialize()
-	btn_vertical:register("static")
 
 	btn_vertical:setLabel("Orientation")
 
@@ -90,7 +87,6 @@ function plan.make(panel)
 	btn_far_end.w = 128
 	btn_far_end.h = 40
 	btn_far_end:initialize()
-	btn_far_end:register("static")
 
 	btn_far_end:setLabel("Near/Far Start")
 
@@ -139,7 +135,6 @@ function plan.make(panel)
 	sld_pos.w = 256
 	sld_pos.h = 32
 	sld_pos:initialize()
-	sld_pos:register("static")
 
 	sld_pos:setTag("position_slider")
 
@@ -162,7 +157,6 @@ function plan.make(panel)
 	sld_max.w = 256
 	sld_max.h = 32
 	sld_max:initialize()
-	sld_max:register("static")
 	sld_max:setTag("maximum_slider")
 
 	sld_max.slider_pos = starting_max

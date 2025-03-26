@@ -10,7 +10,7 @@
 local context = select(1, ...)
 
 
-local layout = {}
+local widLayout = {}
 
 
 local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
@@ -21,7 +21,6 @@ local _mt_node = {
 	mode = "null",
 
 	parent = false, -- parent node, if applicable.
-	active = true,
 	wid_ref = false,
 	nodes = false, -- false, or array of child nodes.
 
@@ -29,6 +28,17 @@ local _mt_node = {
 	y = 0,
 	w = 0,
 	h = 0,
+
+	-- For widgets that support dynamic sizing.
+	flow = false, -- "x", "y", false
+
+	w_min = 0,
+	w_max = math.huge,
+	h_min = 0,
+	h_max = math.huge,
+
+	w_pref = false,
+	h_pref = false,
 
 	-- Parent original dimensions, before any splitting has occurred.
 	orig_w = 0,
@@ -45,7 +55,8 @@ local _mt_node = {
 	-- "px": unscaled pixels
 	-- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any slices
 	-- were taken off at this level.
-	slice_mode = "unit", -- "px", "unit"
+	-- "ask": Query the client widget for a pixel value; fall back to 'slice_amount' as a pixel value otherwise.
+	slice_mode = "unit", -- "px", "unit", "ask"
 	slice_edge = "left", -- "left", "top", "right", "bottom"
 	slice_amount = 0.5,
 
@@ -71,16 +82,34 @@ local _mt_node = {
 _mt_node.__index = _mt_node
 
 
-function layout.newRootNode()
-	return setmetatable({}, _mt_node)
-end
-
-
-function _mt_node:newNode(node_type)
+function _mt_node:newNode()
 	self.nodes = self.nodes or {}
 	local node = setmetatable({parent = self}, _mt_node)
 	table.insert(self.nodes, node)
 	return node
+end
+
+
+function _mt_node:reset()
+	for k in pairs(self) do
+		self[k] = nil
+	end
+end
+
+
+function widLayout.nodeInTree(root, node)
+	if node == root then
+		return true
+
+	elseif root.nodes then
+		for i, child in ipairs(root.nodes) do
+			if widLayout.nodeInTree(child, node) then
+				return true
+			end
+		end
+	end
+
+	return false
 end
 
 
@@ -143,31 +172,32 @@ function _mt_node:setGridDimensions(rows, cols)
 end
 
 
-
 function _mt_node:getMargin()
 	return self.margin_x1, self.margin_y1, self.margin_x2, self.margin_y2
 end
 
 
-function _mt_node:resizeToZero()
-	self.x, self.y, self.w, self.h = 0, 0, 0, 0
+function widLayout.initializeLayoutTree(self)
+	self.layout_tree = setmetatable({}, _mt_node)
 end
 
 
-function _mt_node:resizeToWidget(wid)
-	self.x, self.y, self.w, self.h = wid.x, wid.y, wid.w, wid.h
-end
+function widLayout.resetLayout(self, to, v)
+	local n = self.layout_tree
+	if to == "zero" then
+		n.x, n.y, n.w, n.h = 0, 0, 0, 0
 
+	elseif to == "self" then
+		n.x, n.y, n.w, n.h = 0, 0, self.w, self.h
 
-function _mt_node:resizeToViewport(wid, v)
-	v = viewport_keys[v]
-	self.x, self.y, self.w, self.h = 0, 0, wid[v.w], wid[v.h]
-end
+	elseif to == "viewport" then
+		v = viewport_keys[v]
+		n.x, n.y, n.w, n.h = 0, 0, self[v.w], self[v.h]
 
-
-function _mt_node:resizeToViewportFull(wid, v)
-	v = viewport_keys[v]
-	self.x, self.y, self.w, self.h = wid[v.x], wid[v.y], wid[v.w], wid[v.h]
+	elseif to == "viewport-full" then
+		v = viewport_keys[v]
+		n.x, n.y, n.w, n.h = self[v.x], self[v.y], self[v.w], self[v.h]
+	end
 end
 
 
@@ -194,13 +224,13 @@ function _mt_node:carveEdgeUnit(x_left, y_top, x_right, y_bottom)
 end
 
 
-function layout.applySlice(slice_mode, pos, length, original_length)
+function widLayout.applySlice(slice_mode, amount, length, original_length)
 	local cut
 	if slice_mode == "unit" then
-		cut = math.floor(original_length * math.max(0, math.min(pos, 1)))
+		cut = math.floor(original_length * math.max(0, math.min(amount, 1)))
 
 	elseif slice_mode == "px" then
-		cut = math.floor(math.max(0, math.min(pos, length)))
+		cut = math.floor(math.max(0, math.min(amount, length)))
 
 	else
 		error("invalid 'slice_mode' enum.")
@@ -210,107 +240,121 @@ function layout.applySlice(slice_mode, pos, length, original_length)
 end
 
 
+widLayout.handlers = {}
 
--- @param np Parent node.
--- @param nc Child node.
--- @param sib Previous sibling of 'nc', if applicable.
-local function _executeLayout(np, nc, sib)
-	if nc.mode == "static" then
-		nc.x = np.w > 0 and np.x + (nc.static_x % np.w) or 0
-		nc.y = np.h > 0 and np.y + (nc.static_y % np.h) or 0
-		nc.w = nc.static_w
-		nc.h = nc.static_h
 
-	elseif nc.mode == "grid" then
-		if np.grid_rows > 0 and np.grid_cols > 0 then
-			nc.x = np.x + math.floor(nc.grid_x * np.w / np.grid_rows)
-			nc.y = np.y + math.floor(nc.grid_y * np.h / np.grid_cols)
-			nc.w = math.floor(np.w / np.grid_rows)
-			nc.h = math.floor(np.h / np.grid_cols)
-		else
-			nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
-		end
+widLayout.handlers["static"] = function(np, nc)
+	nc.x = np.w > 0 and np.x + (nc.static_x % np.w) or 0
+	nc.y = np.h > 0 and np.y + (nc.static_y % np.h) or 0
+	nc.w = nc.static_w
+	nc.h = nc.static_h
+end
 
-	elseif nc.mode == "slice" then
-		if nc.slice_edge == "left" then
-			nc.y = np.y
-			nc.h = np.h
-			nc.w, np.w = layout.applySlice(nc.slice_mode, nc.slice_amount, np.w, np.orig_w)
-			nc.x = np.x
-			np.x = np.x + nc.w
 
-		elseif nc.slice_edge == "right" then
-			nc.y = np.y
-			nc.h = np.h
-			nc.w, np.w = layout.applySlice(nc.slice_mode, nc.slice_amount, np.w, np.orig_w)
-			nc.x = np.x + np.w
-
-		elseif nc.slice_edge == "top" then
-			nc.x = np.x
-			nc.w = np.w
-			nc.h, np.h = layout.applySlice(nc.slice_mode, nc.slice_amount, np.h, np.orig_h)
-			nc.y = np.y
-			np.y = np.y + nc.h
-
-		elseif nc.slice_edge == "bottom" then
-			nc.x = np.x
-			nc.w = np.w
-			nc.h, np.h = layout.applySlice(nc.slice_mode, nc.slice_amount, np.h, np.orig_h)
-			nc.y = np.y + np.h
-
-		else
-			error("bad slice_edge enum.")
-		end
-
-	elseif nc.mode == "null" then
-		-- Do nothing.
-
+widLayout.handlers["grid"] = function(np, nc)
+	if np.grid_rows > 0 and np.grid_cols > 0 then
+		nc.x = np.x + math.floor(nc.grid_x * np.w / np.grid_rows)
+		nc.y = np.y + math.floor(nc.grid_y * np.h / np.grid_cols)
+		nc.w = math.floor(np.w / np.grid_rows)
+		nc.h = math.floor(np.h / np.grid_cols)
 	else
-		error("bad node mode enum: " .. tostring(nc.mode))
+		nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
 	end
 end
 
 
-function layout.splitNode(n, _depth)
-	--print("_splitNode() " .. _depth .. ": start")
-	--print(n, "active:", n and n.active, "#nodes:", n and n.nodes and (#n.nodes))
+widLayout.handlers["slice"] = function(np, nc)
+	local wid = nc.wid_ref
 
-	-- Apply margin reduction.
+	if nc.slice_edge == "left" then
+		nc.y = np.y
+		nc.h = np.h
+		local amount = wid and wid:uiCall_getSliceLength(true, nc.h) or nc.slice_amount
+		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w)
+		nc.x = np.x
+		np.x = np.x + nc.w
+
+	elseif nc.slice_edge == "right" then
+		nc.y = np.y
+		nc.h = np.h
+		local amount = wid and wid:uiCall_getSliceLength(true, nc.h) or nc.slice_amount
+		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w)
+		nc.x = np.x + np.w
+
+	elseif nc.slice_edge == "top" then
+		nc.x = np.x
+		nc.w = np.w
+		local amount = wid and wid:uiCall_getSliceLength(false, nc.w) or nc.slice_amount
+		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h)
+		nc.y = np.y
+		np.y = np.y + nc.h
+
+	elseif nc.slice_edge == "bottom" then
+		nc.x = np.x
+		nc.w = np.w
+		local amount = wid and wid:uiCall_getSliceLength(false, nc.w) or nc.slice_amount
+		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h)
+		nc.y = np.y + np.h
+
+	else
+		error("bad slice_edge enum.")
+	end
+end
+
+
+widLayout.handlers["null"] = function(np, nc)
+	-- Do nothing.
+end
+
+
+function widLayout.splitNode(n, _depth)
+	--print("_splitNode() " .. _depth .. ": start")
+	--print(n, "#nodes:", n and n.nodes and (#n.nodes))
+
+	-- Min/max dimensions
+	n.w = math.max(n.w_min, math.min(n.w, n.w_max))
+	n.h = math.max(n.h_min, math.min(n.h, n.h_max))
+
+	-- Margin reduction
 	n.x = n.x + n.margin_x1
 	n.y = n.y + n.margin_y1
 	n.w = math.max(0, n.w - n.margin_x1 - n.margin_x2)
 	n.h = math.max(0, n.h - n.margin_y1 - n.margin_y2)
 
 	n.orig_w, n.orig_h = n.w, n.h
-	if n.active and n.nodes then
+
+	if n.nodes then
 		--print("old n XYWH", n.x, n.y, n.w, n.h)
 		local nodes = n.nodes
 		for i, n2 in ipairs(nodes) do
-			local sib
-			if i > 1 then
-				sib = nodes[i - 1]
+			local handler = widLayout.handlers[n2.mode]
+			if not handler then
+				error("invalid or missing layout handler: " .. tostring(n2.mode))
 			end
-			_executeLayout(n, n2, sib)
+
+			handler(n, n2)
+
 			--print("new n XYWH", n.x, n.y, n.w, n.h)
 			--print("new child " .. i .. " XYWH", n2.x, n2.y, n2.w, n2.h)
-			layout.splitNode(n2, _depth + 1)
+			widLayout.splitNode(n2, _depth + 1)
 		end
 	end
+
 	--print("_splitNode() " .. _depth .. ": end")
 end
 
 
-function layout.setWidgetSizes(n, _depth)
+function widLayout.setWidgetSizes(n, _depth)
 	local wid = n.wid_ref
 	if wid then
 		wid.x, wid.y, wid.w, wid.h = n.x, n.y, n.w, n.h
 	end
 	if n.nodes then
 		for i, n2 in ipairs(n.nodes) do
-			layout.setWidgetSizes(n2, _depth + 1)
+			widLayout.setWidgetSizes(n2, _depth + 1)
 		end
 	end
 end
 
 
-return layout
+return widLayout

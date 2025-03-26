@@ -20,7 +20,6 @@ function plan.make(panel)
 	properties_box.w = 400
 	properties_box.h = 300
 	properties_box:initialize()
-	properties_box:register("static")
 
 	properties_box:setTag("demo_properties_box")
 

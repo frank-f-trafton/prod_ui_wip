@@ -56,9 +56,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 lgcMenu.attachMenuMethods(def)
 
 
@@ -277,7 +274,6 @@ function def:_openPopUpMenu()
 		self.chain_next = drawer
 		drawer.chain_prev = self
 		drawer:initialize()
-		drawer:register("static")
 
 		commonWimp.assignPopUp(self, drawer)
 

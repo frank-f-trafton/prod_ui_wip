@@ -11,9 +11,6 @@ local widShared = context:getLua("core/wid_shared")
 local def = {}
 
 
-def.reshape = widShared.reshapers.branch
-
-
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true

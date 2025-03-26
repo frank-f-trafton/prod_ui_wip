@@ -45,7 +45,6 @@ function plan.make(panel)
 	tree_box.skin_id = skin_clone
 	tree_box.userDestroy = _userDestroy
 	tree_box:initialize()
-	tree_box:register("static")
 	tree_box:setTag("demo_treebox")
 
 	tree_box.wid_action = function(self, item, index)
@@ -101,7 +100,6 @@ function plan.make(panel)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
-	rdo_btn:register("static")
 	rdo_btn.radio_group = "tb_item_h_align"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_item_align_h = "left"
@@ -112,7 +110,6 @@ function plan.make(panel)
 	rdo_btn = panel:addChild("barebones/radio_button")
 	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
-	rdo_btn:register("static")
 	rdo_btn.radio_group = "tb_item_h_align"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_item_align_h = "right"
@@ -127,7 +124,6 @@ function plan.make(panel)
 	sld.w = ww
 	sld.h = wh
 	sld:initialize()
-	sld:register("static")
 	sld.trough_vertical = false
 	sld:setLabel("Item Vertical Pad")
 	sld.slider_pos = 0
@@ -151,7 +147,6 @@ function plan.make(panel)
 	sld.w = ww
 	sld.h = wh
 	sld:initialize()
-	sld:register("static")
 	sld.trough_vertical = false
 	sld:setLabel("Pipe width")
 	sld.slider_pos = 0
@@ -174,7 +169,6 @@ function plan.make(panel)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
-	chk:register("static")
 	chk:setLabel("Draw pipes")
 	chk:setChecked(tree_box.skin.draw_pipes)
 	chk.wid_buttonAction = function(self)
@@ -192,7 +186,6 @@ function plan.make(panel)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
-	chk:register("static")
 	chk:setLabel("Draw icons")
 	chk:setChecked(tree_box.TR_show_icons)
 	chk.wid_buttonAction = function(self)
@@ -208,7 +201,6 @@ function plan.make(panel)
 	local chk = panel:addChild("barebones/checkbox")
 	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
-	chk:register("static")
 	chk:setLabel("Expanders enabled")
 	chk:setChecked(tree_box.TR_expanders_active)
 	chk.wid_buttonAction = function(self)

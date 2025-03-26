@@ -42,7 +42,6 @@ function plan.make(panel)
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
-		btn:register("static")
 		btn:setLabel("Modal Test")
 		btn.wid_buttonAction = function(self)
 			local root = self:getRootWidget()
@@ -73,7 +72,6 @@ function plan.make(panel)
 				text.w = dialog.w
 				text.h = 64
 				text:initialize()
-				text:register("static")
 				text.align = "center"
 				text.text = "This frame should block interaction\nwith all other frames until it is dismissed."
 				text:refreshText()
@@ -84,7 +82,6 @@ function plan.make(panel)
 				button_y.w = 96
 				button_y.h = 32
 				button_y:initialize()
-				button_y:register("static")
 				button_y:setLabel("O")
 				button_y.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -96,7 +93,6 @@ function plan.make(panel)
 				button_n.w = 96
 				button_n.h = 32
 				button_n:initialize()
-				button_n:register("static")
 				button_n:setLabel("K")
 				button_n.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -122,7 +118,6 @@ function plan.make(panel)
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
-		btn:register("static")
 		btn:setLabel("Frame-Blocking Test")
 		btn.wid_buttonAction = function(self)
 			local root = self:getRootWidget()
@@ -153,7 +148,6 @@ function plan.make(panel)
 				text.w = dialog.w
 				text.h = 64
 				text:initialize()
-				text:register("static")
 				text.align = "center"
 				text.text = "This frame should block interaction with the frame\nthat invoked it, until dismissed. Other elements should\nbe accessible."
 				text:refreshText()
@@ -164,7 +158,6 @@ function plan.make(panel)
 				button_y.w = 96
 				button_y.h = 32
 				button_y:initialize()
-				button_y:register("static")
 				button_y:setLabel("O")
 				button_y.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -176,7 +169,6 @@ function plan.make(panel)
 				button_n.w = 96
 				button_n.h = 32
 				button_n:initialize()
-				button_n:register("static")
 				button_n:setLabel("K")
 				button_n.wid_buttonAction = function(self)
 					self:bubbleEvent("frameCall_close", true)
@@ -219,7 +211,6 @@ function plan.make(panel)
 		button_close.w = 96
 		button_close.h = 24
 		button_close:initialize()
-		button_close:register("static")
 		button_close:setLabel("Inspiration")
 		button_close.str_tool_tip = "Click for an inspiring quote."
 

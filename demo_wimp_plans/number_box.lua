@@ -25,7 +25,6 @@ function plan.make(panel)
 	end
 
 	num_box:initialize()
-	num_box:register("static")
 	--]=]
 end
 

@@ -20,7 +20,6 @@ function plan.make(panel)
 	combo_box.w = 256
 	combo_box.h = 32
 	combo_box:initialize()
-	combo_box:register("static")
 
 	combo_box:addItem("foo")
 	combo_box:addItem("bar")

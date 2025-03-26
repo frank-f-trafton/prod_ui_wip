@@ -8,7 +8,6 @@ local widShared = {}
 
 
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 
 
 local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys");
@@ -884,128 +883,6 @@ function widShared.getSortLaneEdge(seq, lane, side)
 	else
 		error("invalid 'side' argument (must be 'first' or 'last').")
 	end
-end
-
-
-widShared.reshapers = {}
-
-local context = select(1, ...)
-
---[[
-uiCall_reshapePre
-uiCall_relayoutPre
-uiCall_relayoutPost
-uiCall_reshapePost
---]]
-
-
---[[DBG]] local PR, TS = print, tostring
---[[DBG]] local ID = function(self) return tostring(self.id) end
-
-
-
-local _clampDimensions = widShared.clampDimensions
-
-
-local reshapers = {}
-widShared.reshapers = reshapers
-
-
-function reshapers.null(self)
-	--[[DBG]] PR("reshaper.null: " .. ID(self))
-	_clampDimensions(self)
-end
-
-
-function reshapers.pre(self)
-	--[[DBG]] PR("reshaper.pre: " .. ID(self))
-	self:uiCall_reshapePre()
-	_clampDimensions(self)
-end
-
-
-function reshapers.post(self)
-	--[[DBG]] PR("reshaper.post: " .. ID(self))
-	self:applyPreferredDimensions()
-	_clampDimensions(self)
-	self:uiCall_reshapePost()
-end
-
-
-function reshapers.prePost(self)
-	--[[DBG]] PR("reshaper.prePost: " .. ID(self))
-	if self:uiCall_reshapePre() then
-		--[[DBG]] PR("reshaper.prePost: ended early by reshapePre.")
-		return
-	end
-	self:applyPreferredDimensions()
-	_clampDimensions(self)
-	self:uiCall_reshapePost()
-end
-
-
-function reshapers.branch(self)
-	--[[DBG]] PR("reshaper.branch: " .. ID(self))
-	if self:uiCall_reshapePre() then
-		--[[DBG]] PR("reshaper.branch: ended early by reshapePre.")
-		return
-	end
-	self:applyPreferredDimensions()
-	for i, wid in ipairs(self.children) do
-		wid:reshape()
-	end
-
-	_clampDimensions(self)
-	self:uiCall_reshapePost()
-end
-
-
-function reshapers.layout(self)
-	--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": start.")
-
-	if self:uiCall_reshapePre() then
-		--[[DBG]] PR("reshaper.full: ended early by reshapePre.")
-		return
-	end
-
-	self:applyPreferredDimensions()
-
-	if self.lay_seq then
-		for i, wid in ipairs(self.lay_seq) do
-			--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": lay_seq #" .. i .. "(" .. (self.lay_seq.id or "n/a") .. ")")
-			-- lo_command is present: this is not a widget, but an arbitrary table with a command + optional data to run.
-			if wid.lo_command then
-				wid.lo_command(self, wid)
-			-- Otherwise, treat as a widget.
-			else
-				if wid._dead == "dead" then
-					error("dead widget reference in layout sequence. It should have been cleaned up when removed.")
-				end
-
-				local lay_hand = wid.lay_hand
-				if type(lay_hand) == "string" then
-					--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": lay_hand: " .. lay_hand)
-					lay_hand = uiLayout.handlers[lay_hand]
-				end
-
-				if not lay_hand then
-					error("missing or invalid layout handler in widget.")
-				end
-
-				_clampDimensions(wid)
-
-				lay_hand(self, wid)
-
-				--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": seq i #" .. i .. ": child #" .. wid:getIndex() .. " (" .. TS(wid.id) .. ")")
-				wid:reshape()
-			end
-		end
-	end
-
-	_clampDimensions(self)
-	self:uiCall_reshapePost()
-
-	--[[DBG]] PR("reshaper.full: " .. ID(self) .. ": end")
 end
 
 

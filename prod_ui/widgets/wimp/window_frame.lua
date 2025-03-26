@@ -10,9 +10,9 @@ local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -40,11 +40,7 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.layout
-
-
 def.trickle = {}
-
 
 lgcUIFrame.definitionSetup(def)
 
@@ -361,7 +357,7 @@ function def:uiCall_initialize(unselectable, view_level)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 6)
-	uiLayout.initLayoutSequence(self)
+	widLayout.initializeLayoutTree(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.hover_zone = false -- false, "button-close", "button-size"
@@ -878,7 +874,7 @@ function def:uiCall_reshapePre()
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
-	uiLayout.resetLayoutPort(self, 1)
+	widLayout.resetLayout(self, "viewport", 1)
 
 	if self.auto_doc_update then
 		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)

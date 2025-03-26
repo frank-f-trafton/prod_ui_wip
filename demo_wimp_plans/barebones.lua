@@ -17,7 +17,6 @@ function plan.make(panel)
 	bb_button.w = ww
 	bb_button.h = hh
 	bb_button:initialize()
-	bb_button:register("static")
 
 	bb_button:setLabel("<Button>")
 
@@ -33,7 +32,6 @@ function plan.make(panel)
 	bb_rep.w = ww
 	bb_rep.h = hh
 	bb_rep:initialize()
-	bb_rep:register("static")
 
 	bb_rep:setLabel("<Repeat #0>")
 	bb_rep.usr_count = 0
@@ -51,7 +49,6 @@ function plan.make(panel)
 	bb_instant.w = ww
 	bb_instant.h = hh
 	bb_instant:initialize()
-	bb_instant:register("static")
 
 	bb_instant:setLabel("Instant-Action Button")
 	bb_instant.usr_n = 0
@@ -69,7 +66,6 @@ function plan.make(panel)
 	bb_stick.w = ww
 	bb_stick.h = hh
 	bb_stick:initialize()
-	bb_stick:register("static")
 
 	bb_stick:setLabel("Sticky Button")
 
@@ -85,7 +81,6 @@ function plan.make(panel)
 	bb_checkbox.w = ww
 	bb_checkbox.h = hh
 	bb_checkbox:initialize()
-	bb_checkbox:register("static")
 
 	bb_checkbox:setLabel("Checkbox")
 
@@ -98,7 +93,6 @@ function plan.make(panel)
 	bb_radio.w = ww
 	bb_radio.h = hh
 	bb_radio:initialize()
-	bb_radio:register("static")
 
 	bb_radio.radio_group = "bare1"
 	bb_radio:setLabel("Radio1")
@@ -111,7 +105,6 @@ function plan.make(panel)
 	bb_radio.w = ww
 	bb_radio.h = hh
 	bb_radio:initialize()
-	bb_radio:register("static")
 
 	bb_radio.radio_group = "bare1"
 	bb_radio:setLabel("Radio2")
@@ -125,7 +118,6 @@ function plan.make(panel)
 	bb_lbl.w = ww
 	bb_lbl.h = hh
 	bb_lbl:initialize()
-	bb_lbl:register("static")
 
 	bb_lbl.enabled = true
 	bb_lbl:setLabel("Label (enabled)")
@@ -138,7 +130,6 @@ function plan.make(panel)
 	bb_lbl.w = ww
 	bb_lbl.h = hh
 	bb_lbl:initialize()
-	bb_lbl:register("static")
 
 	bb_lbl.enabled = false
 	bb_lbl:setLabel("Label (disabled)")
@@ -151,7 +142,6 @@ function plan.make(panel)
 	bb_sl1.w = ww
 	bb_sl1.h = hh
 	bb_sl1:initialize()
-	bb_sl1:register("static")
 
 	bb_sl1.trough_vertical = false
 	bb_sl1:setLabel("Barebones Slider Bar")
@@ -168,7 +158,6 @@ function plan.make(panel)
 	bb_sl2.w = ww
 	bb_sl2.h = hh
 	bb_sl2:initialize()
-	bb_sl2:register("static")
 
 	bb_sl2.trough_vertical = true
 	bb_sl2:setLabel("Vertical")
@@ -185,7 +174,6 @@ function plan.make(panel)
 	bb_input.w = ww
 	bb_input.h = 32
 	bb_input:initialize()
-	bb_input:register("static")
 
 	bb_input:setText("Barebones Input Box")
 	--bb_input:setMaxCodePoints(4)

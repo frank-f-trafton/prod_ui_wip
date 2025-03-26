@@ -43,43 +43,43 @@ function plan.make(divider)
 	-- s: no widget
 	local wg = _makeBox(divider, "darkblue", "lightblue", "white", "(G)")
 
-	divider.node.wid_ref = wg
+	divider:setLayoutNode(wg, divider.layout_tree)
 
-	local n_grid = divider.node:newNode()
+	local n_grid = divider.layout_tree:newNode()
 	n_grid:setMode("slice", "unit", "left", 0.4)
 	n_grid:setMargin(4, 4, 4, 4)
 	n_grid:setGridDimensions(2, 2)
 
 	local na = n_grid:newNode()
-	na.wid_ref = wa
+	divider:setLayoutNode(wa, na)
 	na:setMode("grid", 0, 0)
 	na:setMargin(4, 4, 4, 4)
 
 	local nb = n_grid:newNode()
-	nb.wid_ref = wb
+	divider:setLayoutNode(wb, nb)
 	nb:setMode("grid", 0, 1)
 	nb:setMargin(4, 4, 4, 4)
 
 	local nc = n_grid:newNode()
-	nc.wid_ref = wc
+	divider:setLayoutNode(wc, nc)
 	nc:setMode("grid", 1, 0)
 	nc:setMargin(4, 4, 4, 4)
 
 	local nd = n_grid:newNode()
-	nd.wid_ref = wd
+	divider:setLayoutNode(wd, nd)
 	nd:setMode("grid", 1, 1)
 	nd:setMargin(4, 4, 4, 4)
 
-	local ne = divider.node:newNode()
-	ne.wid_ref = we
+	local ne = divider.layout_tree:newNode()
+	divider:setLayoutNode(we, ne)
 	ne:setMode("slice", "unit", "left", 0.2)
 
-	local nf = divider.node:newNode()
-	nf.wid_ref = wf
+	local nf = divider.layout_tree:newNode()
+	divider:setLayoutNode(wf, nf)
 	nf:setMode("slice", "px", "left", 140)
 	--nf:setMode("slice", "unit", "left", 0.2)
 
-	local ns = divider.node:newNode()
+	local ns = divider.layout_tree:newNode()
 	-- Sash nodes do not refer to widgets, at least not in the original design.
 	divider:configureSashNode(nf, ns)
 

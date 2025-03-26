@@ -8,9 +8,9 @@
 local context = select(1, ...)
 
 
-local layout = context:getLua("core/layout")
+local debug = context:getLua("core/wid/debug")
+local widLayout = context:getLua("core/wid_layout")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
@@ -20,9 +20,6 @@ local def = {
 	skin_id = "divider1",
 	trickle = {}
 }
-
-
-def.reshape = widShared.reshapers.branch
 
 
 function def:getSashBreadth()
@@ -49,7 +46,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 2)
 
-	self.node = layout.newRootNode()
+	widLayout.initializeLayoutTree(self)
 
 	self.sash_hover = false
 	self.press_busy = false
@@ -76,12 +73,7 @@ function def:uiCall_reshapePre()
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, skin.box.border)
 
-	local n = self.node
-	if n then
-		n.x, n.y, n.w, n.h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
-		layout.splitNode(n, 1)
-		layout.setWidgetSizes(n, 1)
-	end
+	widLayout.resetLayout(self, "viewport-full", 1)
 end
 
 
@@ -132,7 +124,7 @@ end
 function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 	if not self.sash_hover then
-		local node = _checkMouseOverSash(self, self.node, mx, my)
+		local node = _checkMouseOverSash(self, self.layout_tree, mx, my)
 		if node then
 			self.sash_hover = node
 			local cursor_id = _getCursorID(node.slice_edge, false)

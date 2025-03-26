@@ -22,19 +22,19 @@ local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local debug = context:getLua("core/wid/debug")
 local lgcContainer = context:getLua("shared/lgc_container")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "container1"
+	skin_id = "container1",
+	trickle = {}
 }
-
-
-def.reshape = widShared.reshapers.layout
 
 
 widShared.scrollSetMethods(def)
@@ -51,7 +51,7 @@ function def:uiCall_initialize()
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
-	uiLayout.initLayoutSequence(self)
+	widLayout.initializeLayoutTree(self)
 
 	self.press_busy = false
 
@@ -60,11 +60,8 @@ function def:uiCall_initialize()
 end
 
 
---function def:uiCall_reshapePre()
-
-
-function def:uiCall_relayoutPost()
-	print("container: uiCall_relayoutPost")
+function def:uiCall_reshapePre()
+	print("container: uiCall_reshapePre")
 
 	local skin = self.skin
 
@@ -79,7 +76,7 @@ function def:uiCall_relayoutPost()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	uiLayout.resetLayoutPort(self, 1)
+	widLayout.resetLayout(self, "viewport", 1)
 end
 
 

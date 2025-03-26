@@ -22,7 +22,6 @@ function plan.makeWindowFrame(root)
 		checkbox.w = 192
 		checkbox.h = 32
 		checkbox:initialize()
-		checkbox:register("static")
 		checkbox.tag = "wimp-demo-show-state-details"
 		checkbox.checked = not not context.app.show_details
 		checkbox.bijou_side = "right"
@@ -41,7 +40,6 @@ function plan.makeWindowFrame(root)
 		checkbox.w = 192
 		checkbox.h = 32
 		checkbox:initialize()
-		checkbox:register("static")
 		checkbox.tag = "wimp-demo-show-perf"
 		checkbox.checked = not not context.app.show_perf
 		checkbox.bijou_side = "right"
@@ -60,7 +58,6 @@ function plan.makeWindowFrame(root)
 		checkbox.w = 192
 		checkbox.h = 32
 		checkbox:initialize()
-		checkbox:register("static")
 		checkbox.tag = "wimp-demo-mouse-cross"
 		checkbox.checked = not not context.app.show_mouse_cross
 		checkbox.bijou_side = "right"
@@ -82,7 +79,6 @@ function plan.makeWindowFrame(root)
 		local text_vsync = frame:addChild("base/text")
 		text_vsync.font = context.resources.fonts.p
 		text_vsync:initialize()
-		text_vsync:register("static")
 		text_vsync.text = "VSync Mode"
 		text_vsync.x = 64 + 9 -- XXX work on syncing padding with embedded widget labels
 		text_vsync.y = yy
@@ -102,7 +98,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.w = 192
 		rad_btn.h = hh
 		rad_btn:initialize()
-		rad_btn:register("static")
 		rad_btn.checked = false
 		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
@@ -120,7 +115,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.w = 192
 		rad_btn.h = hh
 		rad_btn:initialize()
-		rad_btn:register("static")
 		rad_btn.checked = false
 		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
@@ -139,7 +133,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.w = 192
 		rad_btn.h = hh
 		rad_btn:initialize()
-		rad_btn:register("static")
 		rad_btn.checked = false
 		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
@@ -157,7 +150,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.w = 192
 		rad_btn.h = hh
 		rad_btn:initialize()
-		rad_btn:register("static")
 		rad_btn.checked = false
 		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
@@ -175,7 +167,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.w = 192
 		rad_btn.h = hh
 		rad_btn:initialize()
-		rad_btn:register("static")
 		rad_btn.checked = false
 		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"

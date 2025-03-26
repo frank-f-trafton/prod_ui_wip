@@ -46,9 +46,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
@@ -189,7 +186,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_relayoutPost()
+function def:uiCall_reshapePost()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 

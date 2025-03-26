@@ -2,11 +2,12 @@ local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local debug = context:getLua("core/wid/debug")
 local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
+local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -15,11 +16,7 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.layout
-
-
 def.trickle = {}
-
 
 lgcUIFrame.definitionSetup(def)
 
@@ -44,7 +41,7 @@ function def:uiCall_initialize(unselectable)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
-	uiLayout.initLayoutSequence(self)
+	widLayout.initializeLayoutTree(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.press_busy = false
@@ -82,13 +79,13 @@ function def:uiCall_reshapePre()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	uiLayout.resetLayoutPort(self, 1)
+	widLayout.resetLayout(self, "viewport", 1)
+
+	local n = self.layout_tree
+	print("workspace node pre", n.x, n.y, n.w, n.h)
 
 	return self.halt_reshape
 end
-
-
--- Workspaces don't receive 'uiCall_relayoutPre()' or 'uiCall_relayoutPost()' events.
 
 
 function def:uiCall_reshapePost()
@@ -101,6 +98,9 @@ function def:uiCall_reshapePost()
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
+
+	local n = self.layout_tree
+	print("workspace node post", n.x, n.y, n.w, n.h)
 end
 
 
@@ -220,7 +220,6 @@ def.default_skinner = {
 	--refresh = function(self, skinner, skin)
 	--update = function(self, skinner, skin, dt)
 	--render = function(self, ox, oy)
-
 
 	renderLast = function(self, ox, oy)
 		local skin = self.skin

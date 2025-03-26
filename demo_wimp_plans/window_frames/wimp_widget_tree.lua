@@ -113,6 +113,10 @@ local function tree_userUpdate(self, dt)
 			if dbg_vp then
 				dbg_vp.wid = selected_wid
 			end
+			local dbg_ly = context.app.dbg_ly
+			if dbg_ly then
+				dbg_ly.wid = selected_wid
+			end
 		end
 	end
 end
@@ -144,16 +148,19 @@ function plan.makeWindowFrame(root)
 	frame:setScrollBars(false, false)
 
 	local tree_box = frame:addChild("wimp/tree_box")
-	tree_box:initialize() -- registered below
+	tree_box:initialize()
 
 	local chk_vp = frame:addChild("base/checkbox")
-	chk_vp:initialize() -- registered below
+	chk_vp:initialize()
+
+	local chk_ly = frame:addChild("base/checkbox")
+	chk_ly:initialize()
 
 	local chk_highlight = frame:addChild("base/checkbox")
-	chk_highlight:initialize() -- registered below
+	chk_highlight:initialize()
 
 	local chk_exclude = frame:addChild("base/checkbox")
-	chk_exclude:initialize() -- registered below
+	chk_exclude:initialize()
 
 	chk_vp:setLabel("Show Viewports")
 	chk_vp:setChecked(context.app.dbg_vp.active)
@@ -163,7 +170,14 @@ function plan.makeWindowFrame(root)
 		vp.active = not not self.checked
 	end
 
-	chk_vp.h = 32
+
+	chk_ly:setLabel("Show layout nodes")
+	chk_ly:setChecked(context.app.dbg_ly.active)
+
+	chk_ly.wid_buttonAction = function(self)
+		local ly = self.context.app.dbg_ly
+		ly.active = not not self.checked
+	end
 
 
 	chk_highlight:setLabel("Highlight Selected")
@@ -174,8 +188,6 @@ function plan.makeWindowFrame(root)
 		outline.active = not not self.checked
 	end
 
-	chk_highlight.h = 32
-
 
 	chk_exclude:setLabel("Exclude this window frame")
 	frame.usr_exclude = true
@@ -185,20 +197,32 @@ function plan.makeWindowFrame(root)
 		self.parent.usr_exclude = not self.parent.usr_exclude
 	end
 
-	chk_exclude.h = 32
-
-
 	tree_box:setExpandersActive(true)
 
-	chk_exclude:register("fit-bottom")
-	chk_highlight:register("fit-bottom")
-	chk_vp:register("fit-bottom")
-	tree_box:register("fit-remaining")
+	local n1 = frame.layout_tree:newNode()
+	n1:setMode("slice", "px", "bottom", 32)
+	frame:setLayoutNode(chk_exclude, n1)
 
+	local n2 = frame.layout_tree:newNode()
+	n2:setMode("slice", "px", "bottom", 32)
+	frame:setLayoutNode(chk_highlight, n2)
+
+	local n3 = frame.layout_tree:newNode()
+	n3:setMode("slice", "px", "bottom", 32)
+	frame:setLayoutNode(chk_vp, n3)
+
+	local n4 = frame.layout_tree:newNode()
+	n4:setMode("slice", "px", "bottom", 32)
+	frame:setLayoutNode(chk_ly, n4)
+
+	frame:setLayoutNode(tree_box, frame.layout_tree)
+
+	--[[
 	tree_box.x = 0
 	tree_box.y = 0
 	tree_box.w = 224
 	tree_box.h = 256
+	--]]
 
 	tree_box:setScrollBars(false, true)
 

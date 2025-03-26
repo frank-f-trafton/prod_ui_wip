@@ -26,7 +26,6 @@ local context = select(1, ...)
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
@@ -35,9 +34,6 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "properties_box1"
 }
-
-
-def.reshape = widShared.reshapers.branch
 
 
 lgcMenu.attachMenuMethods(def)
@@ -182,7 +178,6 @@ function def:addControl(wid_id, text, pos, bijou_id)
 
 	local wid = self:addChild(wid_id, pos)
 	wid:initialize()
-	wid:register("static")
 
 	wid.selectable = true
 	wid.marked = false -- multi-select
@@ -254,7 +249,6 @@ function def:uiCall_initialize()
 	self.allow_hover = true
 	self.can_have_thimble = true
 
-	uiLayout.initLayoutSequence(self)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 5)

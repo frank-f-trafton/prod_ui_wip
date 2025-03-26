@@ -15,7 +15,6 @@ function plan.make(panel)
 	ctnr.w = 160
 	ctnr.h = 160
 	ctnr:initialize()
-	ctnr:register("static")
 	ctnr:setScrollBars(true, true)
 
 	ctnr:reshape()
@@ -26,7 +25,6 @@ function plan.make(panel)
 	btn.w = 256
 	btn.h = 256
 	btn:initialize()
-	btn:register("static")
 	btn:setLabel("Button in container")
 
 
@@ -51,7 +49,6 @@ function plan.make(panel)
 		love.graphics.pop()
 	end
 	cntr_s:initialize()
-	cntr_s:register("static")
 end
 
 

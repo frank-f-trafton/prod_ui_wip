@@ -16,10 +16,6 @@ local widShared = context:getLua("core/wid_shared")
 local def = {}
 
 
--- XXX: No barebones widget should depend on reshaping.
-def.reshape = widShared.reshapers.prePost
-
-
 -- Called when the slider state changes.
 function def:wid_actionSliderChanged()
 
@@ -53,6 +49,7 @@ function def:uiCall_initialize()
 end
 
 
+-- XXX: No barebones widget should depend on reshaping.
 function def:uiCall_reshapePre()
 	-- The label and trough both use the widget dimensions as bounding boxes.
 

@@ -27,7 +27,6 @@ function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
 	local label = parent:addChild("base/label")
 	label.x, label.y, label.w, label.h = x, y, w, h
 	label:initialize()
-	label:register("static")
 	label:setLabel(text, label_mode)
 
 	return label
@@ -47,7 +46,11 @@ function demoShared.makeTitle(self, tag, text)
 	if tag then
 		text_block.tag = tag
 	end
-	text_block:register("fit-top")
+
+	local node = self.layout_tree:newNode()
+	node:setMode("slice", "px", "top", 32)
+	self:setLayoutNode(text_block, node)
+
 	text_block:setAutoSize("v")
 	text_block:setFontID("h1")
 	text_block:setText(text)
@@ -62,7 +65,11 @@ function demoShared.makeParagraph(self, tag, text)
 	if tag then
 		text_block.tag = tag
 	end
-	text_block:register("fit-top")
+
+	local node = self.layout_tree:newNode()
+	node:setMode("slice", "px", "top", 32)
+	self:setLayoutNode(text_block, node)
+
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
@@ -78,7 +85,11 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	if tag then
 		text_block.tag = tag
 	end
-	text_block:register("fit-top")
+
+	local node = self.layout_tree:newNode()
+	node:setMode("slice", "px", "top", 32)
+	self:setLayoutNode(text_block, node)
+
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
 	text_block:setFontID("p")

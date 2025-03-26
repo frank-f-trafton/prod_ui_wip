@@ -21,7 +21,6 @@ function plan.make(panel)
 	input_single.w = 256
 	input_single.h = 32
 	input_single:initialize()
-	input_single:register("static")
 
 	--input_single:setText("Single-Line Text Box")
 

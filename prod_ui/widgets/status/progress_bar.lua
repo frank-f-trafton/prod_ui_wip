@@ -20,9 +20,6 @@ local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 -- Called when the internal progress counter or maximum value change.
 function def:wid_barChanged(old_pos, old_max, new_pos, new_max)
 	-- Warning: Do not call self:setCounter() or self:setCounterMax() from within this function.

@@ -15,9 +15,10 @@ _mt_widget.context = context
 -- For loading widget defs, see the UI Context source.
 
 
-local uiLayout = require(context.conf.prod_ui_req .. "ui_layout")
+local widLayout = context:getLua("core/wid_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
+local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys");
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -27,16 +28,6 @@ local dummy_table = {}
 
 local function errNoDescendants()
 	error("widget is not configured to have descendants.", 2)
-end
-
-
-local function getLayoutSequence(self) -- (For parent widgets)
-	local lay_seq = self.lay_seq
-	if not lay_seq then
-		error("this widget doesn't have a layout sequence.", 2)
-	else
-		return lay_seq
-	end
 end
 
 
@@ -156,17 +147,12 @@ function _mt_widget:uiCall_initialize(...)
 end
 
 
-function _mt_widget:uiCall_relayoutPre()
-
-end
-
-
-function _mt_widget:uiCall_relayoutPost()
-
-end
-
-
 function _mt_widget:uiCall_reshapePre()
+
+end
+
+
+function _mt_widget:uiCall_getSliceLength(x_axis, cross_length)
 
 end
 
@@ -533,7 +519,7 @@ function _mt_widget:addChild(id, pos)
 end
 
 
---- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable, the widget is removed from its parent layout sequence.
+--- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable, the widget is removed from its layout node, though the node itself is not destroyed.
 --  Locked during update: yes (parent)
 --	Callbacks:
 --	* Bubble: uiCall_destroy()
@@ -569,6 +555,16 @@ function _mt_widget:remove()
 	self:_runUserEvent("userDestroy")
 	self:bubbleEvent("uiCall_destroy", self)
 
+	-- Remove from parent layout node, if applicable
+	if self.layout_ref then
+		if not self.parent then
+			error("the root widget should not have a layout node.")
+		end
+
+		self.layout_ref.wid_ref = false
+		self.layout_ref = false
+	end
+
 	-- If parent exists, find and remove self from parent's list of children
 	if self.parent then
 		local parent = self.parent
@@ -584,17 +580,6 @@ function _mt_widget:remove()
 
 		if not ok then
 			error("widget can't find itself in parent's list of children.")
-		end
-
-		-- Remove from parent layout, if applicable.
-		local lay_seq = parent.lay_seq
-		if lay_seq then
-			for i = #lay_seq, 1, -1 do
-				if lay_seq[i] == self then
-					table.remove(lay_seq, i)
-					break
-				end
-			end
 		end
 
 		self.parent = false
@@ -986,41 +971,34 @@ function _mt_widget:isInLineage(wid)
 end
 
 
-function _mt_widget:register(lay_hand)
-	uiShared.type(1, lay_hand, "string", "table")
-
-	local parent = self:getParent()
-	local lay_seq = getLayoutSequence(parent)
-
-	-- Confirm widget doesn't already appear in the parent's layout sequence
-	for i = 1, #lay_seq do
-		if lay_seq[i] == self then
-			error("widget '" .. tostring(self.id) .. "' is already in the parent's layout sequence.")
+function _mt_widget:hasDirectChild(wid)
+	for i, child in ipairs(self.children) do
+		if wid == child then
+			return true
 		end
 	end
 
-	self.lay_hand = lay_hand
-
-	table.insert(lay_seq, self)
+	return false
 end
 
 
-function _mt_widget:unregister()
-	local parent = self:getParent()
-	local lay_seq = getLayoutSequence(parent)
-
-	for i = #lay_seq, 1, -1 do
-		if lay_seq[i] == wid then
-			table.remove(lay_seq, i)
-			return
-		end
+function _mt_widget:reshape()
+	if self:uiCall_reshapePre() then
+		return
 	end
 
-	error("widget not found in parent's layout sequence.")
+	local n = self.layout_tree
+	if n then
+		widLayout.splitNode(n, 1)
+		widLayout.setWidgetSizes(n, 1)
+	end
+
+	for i, child in ipairs(self.children) do
+		child:reshape()
+	end
+
+	self:uiCall_reshapePost()
 end
-
-
-_mt_widget.reshape = widShared.reshapers.null
 
 
 --- Convenience wrapper for reshape() which skips the calling widget and starts with its children.
@@ -1315,6 +1293,32 @@ function _mt_widget:forEachDescendant(callback, ...)
 		if a then
 			return a, b, c, d
 		end
+	end
+end
+
+
+function _mt_widget:setLayoutNode(wid, node)
+	if not self.layout_tree then
+		error("this widget does not have a layout tree.")
+
+	elseif not self:hasDirectChild(wid) then
+		error("'wid' is not a direct child of this widget.")
+
+	elseif wid._dead then
+		error("attempted to attach a dead or dying widget to the layout node.")
+
+	elseif node and not widLayout.nodeInTree(self.layout_tree, node) then
+		error("'node' is not part of this widget's layout tree.")
+	end
+
+	if node then
+		if node.wid_ref then
+			node.wid_ref.layout_ref = false
+		end
+		node.wid_ref = wid
+		wid.layout_ref = node
+	else
+		wid.layout_ref = false
 	end
 end
 

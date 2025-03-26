@@ -49,9 +49,6 @@ local def = {
 }
 
 
-def.reshape = widShared.reshapers.prePost
-
-
 --- Called when the stepper value changes.
 -- @param index The current index.
 function def:wid_stepperChanged(index)
