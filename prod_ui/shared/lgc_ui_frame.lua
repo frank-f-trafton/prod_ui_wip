@@ -25,6 +25,80 @@ lgcUIFrame._enum_types = uiShared.makeLUTV("workspace", "window")
 lgcUIFrame.view_levels = {low=3, normal=4, high=5}
 
 
+lgcUIFrame.methods = {}
+local _methods = lgcUIFrame.methods
+
+
+function lgcUIFrame.definitionSetup(def)
+	uiShared.attachFields(lgcUIFrame.methods, def, false)
+end
+
+
+function _methods:setFrameSelectable(enabled)
+	if not enabled and self.context.root.selected_frame == self then
+		self.context.root:setSelectedFrame(false)
+	end
+
+	self.frame_is_selectable = not not enabled
+	self.can_have_thimble = self.frame_is_selectable
+end
+
+
+function _methods:getFrameSelectable()
+	return self.frame_is_selectable
+end
+
+
+function _methods:setFrameHidden(enabled)
+	self.frame_hidden = not not enabled
+
+	if self.frame_type == "workspace"
+	or (self.frame_type == "window" and not self.workspace or self.workspace == self.context.root.workspace)
+	then
+		self.visible = not enabled
+		self.allow_hover = not enabled
+	else
+		self.visible = false
+		self.allow_hover = false
+	end
+
+	if self.frame_hidden and self.context.root.selected_frame == self then
+		self.context.root:stepSelectedFrame(-1)
+	end
+end
+
+
+function _methods:getFrameHidden()
+	return self.frame_hidden
+end
+
+
+function lgcUIFrame.instanceSetup(self, unselectable)
+	-- When false:
+	-- * No widget in the frame should be capable of taking the thimble.
+	--   (Otherwise, why not just make it selectable?)
+	-- * The frame should never be made modal, or be part of a frame-blocking chain.
+	self.frame_is_selectable = not unselectable
+
+	self.can_have_thimble = self.frame_is_selectable
+
+	-- Link to the last widget within this tree that held thimble1.
+	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
+	self.banked_thimble1 = self
+
+	-- "Hidden" UI Frames are invisible and cannot be interacted with.
+	-- It can still tick in the background if:
+	-- * It's the active Workspace
+	-- * It's a Window Frame whose associated Workspace is active, or which is unassociated
+	-- Hidden UI Frames cannot be selected. If they are selected at the time of being hidden,
+	-- they will automatically step the selection backwards by one index.
+	self.frame_hidden = false
+
+	-- Helps with ctrl+tabbing through UI Frames.
+	self.order_id = self.context.root:rootCall_getFrameOrderID()
+end
+
+
 function lgcUIFrame.assertModalNoWorkspace(self)
 	local modals = self.context.root.modals
 	for i, wid_g2 in ipairs(modals) do
@@ -73,45 +147,6 @@ function lgcUIFrame.tryUnbankingThimble1(self)
 	if wid_banked and wid_banked:isInLineage(self) then
 		wid_banked:tryTakeThimble1()
 	end
-end
-
-
-function lgcUIFrame.setFrameSelectable(self, enabled)
-	if not enabled and self.context.root.selected_frame == self then
-		self.context.root:setSelectedFrame(false)
-	end
-
-	self.frame_is_selectable = not not enabled
-	self.can_have_thimble = self.frame_is_selectable
-end
-
-
-function lgcUIFrame.getFrameSelectable(self)
-	return self.frame_is_selectable
-end
-
-
-function lgcUIFrame.setFrameHidden(self, enabled)
-	self.frame_hidden = not not enabled
-
-	if self.frame_type == "workspace"
-	or (self.frame_type == "window" and not self.workspace or self.workspace == self.context.root.workspace)
-	then
-		self.visible = not enabled
-		self.allow_hover = not enabled
-	else
-		self.visible = false
-		self.allow_hover = false
-	end
-
-	if self.frame_hidden and self.context.root.selected_frame == self then
-		self.context.root:stepSelectedFrame(-1)
-	end
-end
-
-
-function lgcUIFrame.getFrameHidden(self)
-	return self.frame_hidden
 end
 
 
@@ -253,40 +288,6 @@ function lgcUIFrame.logic_pointerWheel(self, inst, x, y)
 
 	-- Stop bubbling if the view scrolled.
 	return caught
-end
-
-
-function lgcUIFrame.definitionSetup(def)
-	def.setFrameSelectable = lgcUIFrame.setFrameSelectable
-	def.getFrameSelectable = lgcUIFrame.getFrameSelectable
-	def.setFrameHidden = lgcUIFrame.setFrameHidden
-	def.getFrameHidden = lgcUIFrame.getFrameHidden
-end
-
-
-function lgcUIFrame.instanceSetup(self, unselectable)
-	-- When false:
-	-- * No widget in the frame should be capable of taking the thimble.
-	--   (Otherwise, why not just make it selectable?)
-	-- * The frame should never be made modal, or be part of a frame-blocking chain.
-	self.frame_is_selectable = not unselectable
-
-	self.can_have_thimble = self.frame_is_selectable
-
-	-- Link to the last widget within this tree that held thimble1.
-	-- The link may become stale, so confirm the widget is still alive and within the tree before using.
-	self.banked_thimble1 = self
-
-	-- "Hidden" UI Frames are invisible and cannot be interacted with.
-	-- It can still tick in the background if:
-	-- * It's the active Workspace
-	-- * It's a Window Frame whose associated Workspace is active, or which is unassociated
-	-- Hidden UI Frames cannot be selected. If they are selected at the time of being hidden,
-	-- they will automatically step the selection backwards by one index.
-	self.frame_hidden = false
-
-	-- Helps with ctrl+tabbing through UI Frames.
-	self.order_id = self.context.root:rootCall_getFrameOrderID()
 end
 
 
