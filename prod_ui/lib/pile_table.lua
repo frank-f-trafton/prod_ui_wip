@@ -1,4 +1,4 @@
--- PILE Table Helpers v1.1.5 (prerelease, needs testing)
+-- PILE Table Helpers v1.1.5 (modified)
 -- (C) 2024 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -47,6 +47,16 @@ function M.makeLUT(t)
 	end
 	return lut
 end
+
+
+function M.makeLUTV(...)
+	local lut = {}
+	for i = 1, select("#", ...) do
+		lut[select(i, ...)] = true
+	end
+	return lut
+end
+
 
 
 lang.err_dupe = "duplicate values in source table"

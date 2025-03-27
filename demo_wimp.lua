@@ -11,7 +11,7 @@ print("Start WIMP Demo.")
 -- The first panel to load.
 local demo_panel_launch = {
 	"demo_welcome",
-	--"wimp_divider",
+	--"layout",
 	--"text_box_single",
 	--"number_box",
 	--"demo_main",
@@ -42,7 +42,7 @@ local demo_plan_list = {
 				{plan_id = "slider_work", label = "Slider work"},
 				{plan_id = "stepper", label = "Stepper"},
 				{plan_id = "demo_main", label = "Main Demo Window"},
-				{plan_id = "wimp_divider", label = "Dividers"},
+				{plan_id = "layout", label = "Layout"},
 				{plan_id = "number_box", label = "Number Box"},
 				{plan_id = "properties_box", label = "Properties Box"},
 				{plan_id = "combo_box", label = "Combo Box"},

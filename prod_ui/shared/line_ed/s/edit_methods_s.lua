@@ -23,11 +23,11 @@ local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
-local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
-local _enum_align = pileTable.makeLUT({"left", "center", "right"})
+local _enum_align = uiShared.makeLUTV("left", "center", "right")
 
 
 local function _checkAlign(align)

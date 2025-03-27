@@ -13,8 +13,8 @@ local widShared = context:getLua("core/wid_shared")
 local _lerp = commonMath.lerp
 
 
-local _enum_align = {left=true, center=true, right=true, justify=true}
-local _enum_size_mode = {h=true, v=true}
+local _enum_align = uiShared.makeLUTV("left", "center", "right", "justify")
+local _enum_size_mode = uiShared.makeLUTV("h", "v")
 
 
 local def = {
@@ -97,7 +97,7 @@ end
 
 
 function def:setAlign(align)
-	uiShared.enum(1, align, "alignment", _enum_align)
+	uiShared.enum(1, align, "Alignment", _enum_align)
 
 	self.align = align
 end
@@ -121,7 +121,7 @@ end
 
 
 function def:setAutoSize(mode)
-	uiShared.enumEval(1, mode, "Size Mode", _enum_size_mode)
+	uiShared.enumEval(1, mode, "SizeMode", _enum_size_mode)
 
 	self.auto_size = mode
 end

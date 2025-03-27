@@ -8,7 +8,6 @@ local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -19,7 +18,7 @@ local widShared = context:getLua("core/wid_shared")
 local _lerp = commonMath.lerp
 
 
-local _header_sizes = pTable.makeLUT({"small", "normal", "large"})
+local _enum_header_sizes = uiShared.makeLUTV("small", "normal", "large")
 
 
 local def = {
@@ -36,7 +35,7 @@ local def = {
 		header_show_close_button = true,
 		header_show_max_button = true,
 		header_text = "",
-		header_size = "normal" -- enum: `_header_sizes`
+		header_size = "normal" -- _enum_header_sizes
 	}
 }
 
@@ -105,9 +104,7 @@ end
 
 function def:setHeaderSize(size)
 	size = size and size
-	if size and not _header_sizes[size] then
-		error("invalid header size.")
-	end
+	uiShared.enumEval(1, size, "HeaderSize", _enum_header_sizes)
 
 	if self.header_size ~= size then
 		local sx, sy = self:scrollGetXY()
