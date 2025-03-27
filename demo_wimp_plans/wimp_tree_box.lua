@@ -25,6 +25,8 @@ end
 function plan.make(panel)
 	--title("TreeBox Test")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	-- SkinDef clone

@@ -4,6 +4,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Barebones widgets")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local xx, yy = 0, 0

@@ -17,6 +17,8 @@ function plan.make(panel)
 
 	--title("LineEditor Test")
 
+	panel:setLayoutBase("viewport")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local c_bar = panel:addChild("base/container")

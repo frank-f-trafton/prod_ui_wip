@@ -9,6 +9,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Number Box")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	-- [=[

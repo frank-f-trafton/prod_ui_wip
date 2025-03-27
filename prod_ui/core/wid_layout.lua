@@ -13,7 +13,11 @@ local context = select(1, ...)
 local widLayout = {}
 
 
-local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+
+
+widLayout._enum_layout_base = pTable.makeLUT({"zero", "self", "viewport", "viewport-width", "viewport-height", "unbounded"})
 
 
 local _mt_node = {
@@ -182,7 +186,7 @@ function widLayout.initializeLayoutTree(self)
 end
 
 
-function widLayout.resetLayout(self, to, v)
+function widLayout.resetLayout(self, to)
 	local n = self.layout_tree
 	if to == "zero" then
 		n.x, n.y, n.w, n.h = 0, 0, 0, 0
@@ -191,12 +195,22 @@ function widLayout.resetLayout(self, to, v)
 		n.x, n.y, n.w, n.h = 0, 0, self.w, self.h
 
 	elseif to == "viewport" then
-		v = viewport_keys[v]
-		n.x, n.y, n.w, n.h = 0, 0, self[v.w], self[v.h]
+		n.x, n.y, n.w, n.h = 0, 0, self.vp_w, self.vp_h
 
 	elseif to == "viewport-full" then
-		v = viewport_keys[v]
-		n.x, n.y, n.w, n.h = self[v.x], self[v.y], self[v.w], self[v.h]
+		n.x, n.y, n.w, n.h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
+
+	elseif to == "viewport-width" then
+		n.x, n.y, n.w, n.h = 0, 0, self.vp_w, math.huge
+
+	elseif to == "viewport-height" then
+		n.x, n.y, n.w, n.h = 0, 0, math.huge, self.vp_h
+
+	elseif to == "unbounded" then
+		n.x, n.y, n.w, n.h = 0, 0, math.huge, math.huge
+
+	else
+		error("invalid layout base mode.")
 	end
 end
 

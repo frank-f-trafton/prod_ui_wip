@@ -9,6 +9,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Slider Bar Work")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local label_w = 128

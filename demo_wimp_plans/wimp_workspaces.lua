@@ -151,6 +151,8 @@ end
 function plan.make(panel)
 	--title("Workspace Frames")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32

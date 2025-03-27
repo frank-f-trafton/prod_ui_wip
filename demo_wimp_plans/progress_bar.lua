@@ -9,6 +9,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Progress Bar Stuff")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local starting_pos = 23

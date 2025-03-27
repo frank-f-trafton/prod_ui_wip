@@ -9,6 +9,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Combo Boxes")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	demoShared.makeLabel(panel, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")

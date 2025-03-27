@@ -5,7 +5,10 @@ local demoShared = require("demo_shared")
 
 
 function plan.make(panel)
-	local context = panel.context
+
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
+	panel:setScrollBars(false, true)
 
 	demoShared.makeTitle(panel, nil, "Widgets")
 
@@ -23,8 +26,6 @@ Most widgets fall under one of the following broad categories:
 
 Note that there is not an explicit container type, or one superclass of buttons. All such widgets use the same system of event callbacks to implement their functionality.
 ]])
-
-	panel:setScrollBars(false, true)
 end
 
 

@@ -11,6 +11,11 @@ function plan.make(panel)
 	local context = panel.context
 
 	--title("WIMP Demo")
+
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
+	panel:setScrollBars(false, false)
+
 	do
 		local text_block = panel:addChild("wimp/text_block")
 		text_block:initialize()
@@ -35,8 +40,6 @@ function plan.make(panel)
 		text_block:setText("Test one two three")
 		text_block:setAutoSize("v")
 	end
-
-	panel:setScrollBars(false, false)
 
 	panel.DEBUG = "dimensions" -- XXX: see base/container.lua
 

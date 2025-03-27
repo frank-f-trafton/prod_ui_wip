@@ -85,7 +85,10 @@ function debug.debugDrawLayoutNodes(node, _depth, _index)
 	love.graphics.setScissor()
 
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.rectangle("line", node.x, node.y, node.w, node.h)
+	-- Don't render nodes that are infinitely wide or tall.
+	if node.w ~= math.huge and node.h ~= math.huge then
+		love.graphics.rectangle("line", node.x, node.y, node.w, node.h)
+	end
 
 	-- [depth:index], where depth is the layout tree level, and index is the child slot at that level.
 	love.graphics.print("[" .. tostring(_depth) .. ":" .. tostring(_index) .. "]", node.x, node.y)

@@ -4,6 +4,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Label Tests")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	-- Single-Line.

@@ -14,6 +14,7 @@ end
 function plan.make(panel)
 	--title("Dividers")
 
+	panel:setLayoutBase("viewport")
 	panel:setScrollRangeMode("zero")
 	panel:setSashesEnabled(true)
 

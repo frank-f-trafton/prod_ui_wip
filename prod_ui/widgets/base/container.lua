@@ -58,6 +58,8 @@ function def:uiCall_initialize()
 	lgcContainer.sashStateSetup(self)
 	widLayout.initializeLayoutTree(self)
 
+	self.layout_base = "viewport"
+
 	self.press_busy = false
 
 	self:skinSetRefs()
@@ -81,7 +83,7 @@ function def:uiCall_reshapePre()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	widLayout.resetLayout(self, "viewport", 1)
+	widLayout.resetLayout(self, self.layout_base)
 end
 
 
