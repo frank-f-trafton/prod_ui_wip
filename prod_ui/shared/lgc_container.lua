@@ -20,19 +20,28 @@ local widLayout = context:getLua("core/wid_layout")
 local _enum_scr_rng = uiShared.makeLUTV("zero", "auto", "manual")
 
 
-function lgcContainer.wid_setScrollRangeMode(self, mode)
+lgcContainer.methods = {}
+local _methods = lgcContainer.methods
+
+
+function lgcContainer.setupMethods(self)
+	uiShared.attachFields(lgcContainer.methods, self, false)
+end
+
+
+function _methods:setScrollRangeMode(mode)
 	uiShared.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
 
 	self.scroll_range_mode = mode
 end
 
 
-function lgcContainer.wid_getScrollRangeMode(self)
+function _methods:getScrollRangeMode()
 	return self.scroll_range_mode
 end
 
 
-function lgcContainer.wid_setSashesEnabled(self, enabled)
+function _methods:setSashesEnabled(enabled)
 	self.sashes_enabled = not not enabled
 
 	if not self.sashes_enabled then
@@ -44,8 +53,40 @@ function lgcContainer.wid_setSashesEnabled(self, enabled)
 end
 
 
-function lgcContainer.wid_getSashesEnabled(self)
+function _methods:getSashesEnabled()
 	return self.sashes_enabled
+end
+
+
+function _methods:getSashBreadth()
+	return self.skin.sash_breadth
+end
+
+
+function _methods:configureSashNode(n1, n2)
+	uiShared.type1(1, n1, "table")
+	uiShared.type1(2, n2, "table")
+
+	if n1.mode ~= "slice" then
+		error("argument #1: expected a slice node.")
+	end
+	if n2.nodes and #n2.nodes > 0 then
+		error("argument #2: sashes are supposed to be leaf nodes.")
+	end
+
+	n2:setMode("slice", "px", n1.slice_edge, self.skin.sash_breadth, true)
+end
+
+
+function _methods:setLayoutBase(layout_base)
+	uiShared.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
+
+	self.layout_base = layout_base
+end
+
+
+function _methods:getLayoutBase()
+	return self.layout_base
 end
 
 
@@ -111,48 +152,6 @@ function lgcContainer.getSashCursorID(edge, is_drag)
 	else
 		return (edge == "left" or edge == "right") and "cursor_sash_hover_h" or "cursor_sash_hover_v"
 	end
-end
-
-
-function lgcContainer.wid_configureSashNode(self, n1, n2)
-	-- TODO: Assertions.
-	if n1.mode ~= "slice" then
-		error("argument #1: expected a slice node.")
-	end
-	if n2.nodes and #n2.nodes > 0 then
-		error("argument #2: sashes are supposed to be leaf nodes.")
-	end
-
-	n2:setMode("slice", "px", n1.slice_edge, self.skin.sash_breadth, true)
-end
-
-
-function lgcContainer.getSashBreadth(self)
-	return self.skin.sash_breadth
-end
-
-
-function lgcContainer.setLayoutBase(self, layout_base)
-	uiShared.enum(2, layout_base, "LayoutBase", widLayout._enum_layout_base)
-
-	self.layout_base = layout_base
-end
-
-
-function lgcContainer.getLayoutBase(self)
-	return self.layout_base
-end
-
-
-function lgcContainer.setupMethods(self)
-	self.setScrollRangeMode = lgcContainer.wid_setScrollRangeMode
-	self.getScrollRangeMode = lgcContainer.wid_getScrollRangeMode
-	self.setSashesEnabled = lgcContainer.wid_setSashesEnabled
-	self.getSashesEnabled = lgcContainer.wid_getSashesEnabled
-	self.getSashBreadth = lgcContainer.wid_getSashBreadth
-	self.configureSashNode = lgcContainer.wid_configureSashNode
-	self.setLayoutBase = lgcContainer.setLayoutBase
-	self.getLayoutBase = lgcContainer.getLayoutBase
 end
 
 
@@ -286,9 +285,7 @@ end
 
 
 function lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses)
-	if self.sashes_enabled
-	and self.press_busy == "sash"
-	then
+	if self.sashes_enabled and self.press_busy == "sash" then
 		self.press_busy = false
 		self.cursor_press = false
 
