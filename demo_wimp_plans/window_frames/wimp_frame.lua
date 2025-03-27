@@ -23,6 +23,9 @@ function plan.makeWindowFrame(root)
 	frame.userDestroy = _userDestroy
 	frame:initialize()
 	frame:setFrameTitle("WIMP Window Frame")
+
+	frame:setLayoutBase("viewport-width")
+	frame:setScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32

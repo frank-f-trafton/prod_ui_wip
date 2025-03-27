@@ -41,7 +41,10 @@ function def:uiCall_initialize(unselectable)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
+
+	self.layout_base = "viewport"
 	widLayout.initializeLayoutTree(self)
+
 	lgcContainer.sashStateSetup(self)
 	lgcKeyHooks.setupInstance(self)
 
@@ -83,7 +86,7 @@ function def:uiCall_reshapePre()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	widLayout.resetLayout(self, "viewport", 1)
+	widLayout.resetLayout(self, self.layout_base)
 
 	return self.halt_reshape
 end

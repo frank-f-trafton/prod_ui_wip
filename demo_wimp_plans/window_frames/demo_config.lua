@@ -13,6 +13,9 @@ function plan.makeWindowFrame(root)
 	frame.h = 480
 	frame:initialize()
 	frame:setFrameTitle("Demo Config")
+
+	frame:setLayoutBase("viewport-width")
+	frame:setScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
 	do

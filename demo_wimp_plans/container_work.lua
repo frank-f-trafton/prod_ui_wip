@@ -4,6 +4,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Widget Containers")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	-- Base container
@@ -13,6 +15,8 @@ function plan.make(panel)
 	ctnr.w = 160
 	ctnr.h = 160
 	ctnr:initialize()
+
+	ctnr:setScrollRangeMode("auto")
 	ctnr:setScrollBars(true, true)
 
 	ctnr:reshape()

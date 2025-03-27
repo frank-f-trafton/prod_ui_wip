@@ -101,6 +101,8 @@ end
 function plan.make(panel)
 	--title("Menu Test")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local menu1 = panel:addChild("base/menu")

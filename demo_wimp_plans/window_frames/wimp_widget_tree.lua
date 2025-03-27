@@ -145,6 +145,8 @@ function plan.makeWindowFrame(root)
 	frame:setHeaderSize("small")
 	frame:setFrameTitle("Widget Tree")
 
+	frame:setLayoutBase("viewport")
+	frame:setScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 	local tree_box = frame:addChild("wimp/tree_box")

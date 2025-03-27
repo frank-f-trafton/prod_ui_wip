@@ -16,6 +16,8 @@ function plan.make(panel)
 
 	--title("Button Work")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	-- Repeat-Button

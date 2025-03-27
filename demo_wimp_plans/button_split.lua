@@ -82,6 +82,8 @@ end
 function plan.make(panel)
 	--title("Split Button")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	-- SkinDef clone

@@ -48,6 +48,7 @@ function lgcContainer.wid_getSashesEnabled(self)
 	return self.sashes_enabled
 end
 
+
 function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
 	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
 	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
@@ -131,6 +132,18 @@ function lgcContainer.getSashBreadth(self)
 end
 
 
+function lgcContainer.setLayoutBase(self, layout_base)
+	uiShared.enum(2, layout_base, "LayoutBase", widLayout._enum_layout_base)
+
+	self.layout_base = layout_base
+end
+
+
+function lgcContainer.getLayoutBase(self)
+	return self.layout_base
+end
+
+
 function lgcContainer.setupMethods(self)
 	self.setScrollRangeMode = lgcContainer.wid_setScrollRangeMode
 	self.getScrollRangeMode = lgcContainer.wid_getScrollRangeMode
@@ -138,6 +151,8 @@ function lgcContainer.setupMethods(self)
 	self.getSashesEnabled = lgcContainer.wid_getSashesEnabled
 	self.getSashBreadth = lgcContainer.wid_getSashBreadth
 	self.configureSashNode = lgcContainer.wid_configureSashNode
+	self.setLayoutBase = lgcContainer.setLayoutBase
+	self.getLayoutBase = lgcContainer.getLayoutBase
 end
 
 

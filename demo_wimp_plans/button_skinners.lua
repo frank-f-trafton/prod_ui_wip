@@ -10,6 +10,8 @@ local plan = {}
 function plan.make(panel)
 	--title("Button skin tests")
 
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.

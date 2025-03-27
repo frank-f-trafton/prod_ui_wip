@@ -6,7 +6,11 @@ local demoShared = require("demo_shared")
 
 function plan.make(panel)
 	local context = panel.context
--- [====[
+
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
+	panel:setScrollBars(false, true)
+
 	demoShared.makeTitle(panel, nil, "Welcome")
 
 	demoShared.makeParagraph(panel, nil, [[
@@ -31,8 +35,6 @@ When zoom mode is enabled:
 	'-': Zoom out
 	'=': Zoom in
 ]])
-	--]====]
-	panel:setScrollBars(false, true)
 end
 
 

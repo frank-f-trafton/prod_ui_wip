@@ -8,6 +8,9 @@ local plan = {}
 
 function plan.make(panel)
 	--title("Properties Box Test")
+
+	panel:setLayoutBase("viewport-width")
+	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	demoShared.makeLabel(panel, 32, 0, 512, 32, "***Under Construction***", "single")

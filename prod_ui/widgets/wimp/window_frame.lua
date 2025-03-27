@@ -405,7 +405,10 @@ function def:uiCall_initialize(unselectable, view_level)
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 6)
+
+	self.layout_base = "viewport"
 	widLayout.initializeLayoutTree(self)
+
 	lgcContainer.sashStateSetup(self)
 	lgcKeyHooks.setupInstance(self)
 
@@ -890,7 +893,7 @@ function def:uiCall_reshapePre()
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
-	widLayout.resetLayout(self, "viewport", 1)
+	widLayout.resetLayout(self, self.layout_base)
 
 	widShared.updateDoc(self)
 
