@@ -1,8 +1,8 @@
 --[[
 	A generic container that holds other widgets, with built-in support for scroll bars,
-	viewport clipping and layouts.
+	viewport clipping, layouts and draggable dividers (window sashes).
 
-	For a pared-down container, see: 'base/container_simple.lua'
+	For a basic container, see: 'base/container_simple.lua'
 
 	┌┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┬┈┐
 	│`````````````````````│^│    [`] == Viewport 2
@@ -15,6 +15,8 @@
 	├┈┬┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┬┈┼┈┤
 	│<│                 │>│ │    <- Optional scroll bars
 	└┈┴┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┴┈┴┈┘
+
+	A container should not use both sashes and scrolling at the same time.
 --]]
 
 
@@ -22,7 +24,6 @@ local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
-local debug = context:getLua("core/wid/debug")
 local lgcContainer = context:getLua("shared/lgc_container")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -37,20 +38,24 @@ local def = {
 }
 
 
-widShared.scrollSetMethods(def)
 def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
+
+
+widShared.scrollSetMethods(def)
+lgcContainer.setupMethods(def)
 
 
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
 
-	self.auto_doc_update = true
+	self.scroll_range_mode = "zero"
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
+	lgcContainer.sashStateSetup(self)
 	widLayout.initializeLayoutTree(self)
 
 	self.press_busy = false
@@ -83,9 +88,7 @@ end
 function def:uiCall_reshapePost()
 	print("container: uiCall_reshapePost")
 
-	if self.auto_doc_update then
-		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
-	end
+	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
@@ -93,17 +96,33 @@ function def:uiCall_reshapePost()
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mx, my)
+function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	return lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+end
+
+
+def.uiCall_pointerHover = lgcContainer.wid_uiCall_pointerHover
+def.trickle.uiCall_pointerHoverOff = lgcContainer.wid_trickle_uiCall_pointerHoverOff
+def.uiCall_pointerHoverOff = lgcContainer.wid_uiCall_pointerHoverOff
+
+
+function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+	if lgcContainer.sash_tricklePointerPress(self, inst, x, y, button, istouch, presses) then
+		return true
 	end
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		commonScroll.widgetClearHover(self)
+function def.trickle:uiCall_pointerDrag(inst, x, y, dx, dy)
+	if lgcContainer.sash_tricklePointerDrag(self, inst, x, y, dx, dy) then
+		return true
+	end
+end
+
+
+function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+	if lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses) then
+		return true
 	end
 end
 
@@ -226,6 +245,10 @@ def.default_skinner = {
 
 
 	renderLast = function(self, ox, oy)
+		if self.sash_hover then
+			lgcContainer.renderSash(self.sash_hover, self, ox, oy)
+		end
+
 		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 
 		-- XXX Debug...

@@ -1,6 +1,4 @@
-local plan = {
-	container_type = "wimp/divider"
-}
+local plan = {}
 
 
 local function _makeBox(self, fill, outline, text_color, text)
@@ -13,8 +11,11 @@ local function _makeBox(self, fill, outline, text_color, text)
 end
 
 
-function plan.make(divider)
+function plan.make(panel)
 	--title("Dividers")
+
+	panel:setScrollRangeMode("zero")
+	panel:setSashesEnabled(true)
 
 	--[[
 	┌┈┬┈┬┈┬┈┬┈┐
@@ -34,58 +35,58 @@ function plan.make(divider)
 	A B C D
 	--]]
 
-	local wa = _makeBox(divider, "lightgreen", "green", "black", "(Grid 0,0)")
-	local wb = _makeBox(divider, "lightblue", "blue", "white", "(Grid 0,1)")
-	local wc = _makeBox(divider, "lightgrey", "darkgrey", "black", "(Grid 1,0)")
-	local wd = _makeBox(divider, "lightmagenta", "magenta", "black", "(Grid 1,1)")
-	local we = _makeBox(divider, "lightyellow", "darkyellow", "black", "(E)")
-	local wf = _makeBox(divider, "darkgrey", "lightgrey", "white", "(F)")
+	local wa = _makeBox(panel, "lightgreen", "green", "black", "(Grid 0,0)")
+	local wb = _makeBox(panel, "lightblue", "blue", "white", "(Grid 0,1)")
+	local wc = _makeBox(panel, "lightgrey", "darkgrey", "black", "(Grid 1,0)")
+	local wd = _makeBox(panel, "lightmagenta", "magenta", "black", "(Grid 1,1)")
+	local we = _makeBox(panel, "lightyellow", "darkyellow", "black", "(E)")
+	local wf = _makeBox(panel, "darkgrey", "lightgrey", "white", "(F)")
 	-- s: no widget
-	local wg = _makeBox(divider, "darkblue", "lightblue", "white", "(G)")
+	local wg = _makeBox(panel, "darkblue", "lightblue", "white", "(G)")
 
-	divider:setLayoutNode(wg, divider.layout_tree)
+	panel:setLayoutNode(wg, panel.layout_tree)
 
-	local n_grid = divider.layout_tree:newNode()
+	local n_grid = panel.layout_tree:newNode()
 	n_grid:setMode("slice", "unit", "left", 0.4)
 	n_grid:setMargin(4, 4, 4, 4)
 	n_grid:setGridDimensions(2, 2)
 
 	local na = n_grid:newNode()
-	divider:setLayoutNode(wa, na)
+	panel:setLayoutNode(wa, na)
 	na:setMode("grid", 0, 0)
 	na:setMargin(4, 4, 4, 4)
 
 	local nb = n_grid:newNode()
-	divider:setLayoutNode(wb, nb)
+	panel:setLayoutNode(wb, nb)
 	nb:setMode("grid", 0, 1)
 	nb:setMargin(4, 4, 4, 4)
 
 	local nc = n_grid:newNode()
-	divider:setLayoutNode(wc, nc)
+	panel:setLayoutNode(wc, nc)
 	nc:setMode("grid", 1, 0)
 	nc:setMargin(4, 4, 4, 4)
 
 	local nd = n_grid:newNode()
-	divider:setLayoutNode(wd, nd)
+	panel:setLayoutNode(wd, nd)
 	nd:setMode("grid", 1, 1)
 	nd:setMargin(4, 4, 4, 4)
 
-	local ne = divider.layout_tree:newNode()
-	divider:setLayoutNode(we, ne)
+	local ne = panel.layout_tree:newNode()
+	panel:setLayoutNode(we, ne)
 	ne:setMode("slice", "unit", "left", 0.2)
 
-	local nf = divider.layout_tree:newNode()
-	divider:setLayoutNode(wf, nf)
+	local nf = panel.layout_tree:newNode()
+	panel:setLayoutNode(wf, nf)
 	nf:setMode("slice", "px", "left", 140)
 	--nf:setMode("slice", "unit", "left", 0.2)
 
-	local ns = divider.layout_tree:newNode()
+	local ns = panel.layout_tree:newNode()
 	-- Sash nodes do not refer to widgets, at least not in the original design.
-	divider:configureSashNode(nf, ns)
+	panel:configureSashNode(nf, ns)
 
 	-- 'wg' is part of the root node.
 
-	divider:reshape()
+	panel:reshape()
 end
 
 

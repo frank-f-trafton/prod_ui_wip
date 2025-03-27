@@ -649,7 +649,7 @@ do
 
 		--print(inspect(demo_list.tree))
 
-		local function _instantiateDemoContainer(workspace, c_type)
+		local function _instantiateDemoContainer(workspace)
 			-- First, destroy any existing containers with the same tag.
 			local wid
 			repeat
@@ -659,7 +659,7 @@ do
 				end
 			until not wid
 
-			local plan_container = workspace:addChild(c_type)
+			local plan_container = workspace:addChild("base/container")
 			plan_container:initialize()
 			workspace:setLayoutNode(plan_container, workspace.layout_tree)
 			plan_container.tag = "plan_container"
@@ -671,7 +671,7 @@ do
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace and item.plan_id then
 				local plan = require("demo_wimp_plans." .. item.plan_id)
-				local container = _instantiateDemoContainer(workspace, plan.container_type)
+				local container = _instantiateDemoContainer(workspace)
 
 				plan.make(container)
 				workspace:reshape()
@@ -966,14 +966,13 @@ function love.draw()
 	end
 
 	local dbg_ly = context.app.dbg_ly
-	print("dbg_ly stuff", dbg_ly.active, dbg_ly.wid)
 	if dbg_ly and dbg_ly.active and dbg_ly.wid and not dbg_ly.wid._dead and dbg_ly.wid.layout_tree then
-		print("???")
 		love.graphics.push("all")
 
 		local widShared = context:getLua("core/wid_shared")
 		local wid = dbg_ly.wid
 		love.graphics.translate(wid:getAbsolutePosition())
+		love.graphics.translate(-wid.scr_x, -wid.scr_y)
 		widShared.debug.debugDrawLayoutNodes(dbg_ly.wid.layout_tree, 1)
 
 		love.graphics.pop()

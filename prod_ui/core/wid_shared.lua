@@ -661,6 +661,17 @@ function widShared.setupDoc(self)
 end
 
 
+function widShared.updateDoc(self)
+	-- For containers of widgets.
+	if self.scroll_range_mode == "auto" then
+		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
+
+	elseif self.scroll_range_mode == "zero" then
+		self.doc_w, self.doc_h = 0, 0
+	end
+end
+
+
 --- Assigns viewport fields to a widget.
 -- @param self The widget.
 -- @param n The number of viewports to assign, from 1 to `n`, up to `#widShared.vpk`.

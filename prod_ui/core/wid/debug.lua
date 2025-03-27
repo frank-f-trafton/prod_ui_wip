@@ -77,21 +77,23 @@ function debug.countLayoutNodes(n)
 end
 
 
-function debug.debugDrawLayoutNodes(node, _depth)
-	-- Translate to the widget's position before calling.
+function debug.debugDrawLayoutNodes(node, _depth, _index)
+	-- Translate to the widget's position and scroll offsets before calling.
+	_index = _index or 1
+
 	love.graphics.push("all")
 	love.graphics.setScissor()
 
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.rectangle("line", node.x, node.y, node.w, node.h)
-	love.graphics.print(_depth, node.x, node.y)
-	print("wid_ref:", node.wid_ref and node.wid_ref.id or "(n/a)")
-	print("depth", _depth, node.x, node.y)
+
+	-- [depth:index], where depth is the layout tree level, and index is the child slot at that level.
+	love.graphics.print("[" .. tostring(_depth) .. ":" .. tostring(_index) .. "]", node.x, node.y)
 
 	if node.nodes then
-		love.graphics.translate(node.x, node.y)
+		--love.graphics.translate(node.x, node.y)
 		for i, child in ipairs(node.nodes) do
-			debug.debugDrawLayoutNodes(child, _depth + 1)
+			debug.debugDrawLayoutNodes(child, _depth + 1, i)
 		end
 	end
 

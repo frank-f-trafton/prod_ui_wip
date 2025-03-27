@@ -4,9 +4,7 @@
 local commonWimp = require("prod_ui.common.common_wimp")
 
 
-local plan = {
-	container_type = "base/container"
-}
+local plan = {}
 
 
 function plan.make(panel)
@@ -16,7 +14,11 @@ function plan.make(panel)
 	do
 		local text_block = panel:addChild("wimp/text_block")
 		text_block:initialize()
-		text_block:register("fit-top")
+
+		local node = panel.layout_tree:newNode()
+		node:setMode("slice", "px", "top", 0)
+		panel:setLayoutNode(text_block, node)
+
 		text_block:setFontID("h1")
 		text_block:setText("WIMP Demo")
 		text_block:setAutoSize("v")
@@ -24,7 +26,11 @@ function plan.make(panel)
 	do
 		local text_block = panel:addChild("wimp/text_block")
 		text_block:initialize()
-		text_block:register("fit-top")
+
+		local node = panel.layout_tree:newNode()
+		node:setMode("slice", "px", "top", 0)
+		panel:setLayoutNode(text_block, node)
+
 		text_block:setFontID("p")
 		text_block:setText("Test one two three")
 		text_block:setAutoSize("v")

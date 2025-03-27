@@ -12,18 +12,18 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "workspace1"
+	skin_id = "workspace1",
+	trickle = {}
 }
 
 
-def.trickle = {}
-
-lgcUIFrame.definitionSetup(def)
+def.setScrollBars = commonScroll.setScrollBars
+def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 widShared.scrollSetMethods(def)
-def.setScrollBars = commonScroll.setScrollBars
-def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
+lgcUIFrame.definitionSetup(def)
+lgcContainer.setupMethods(def)
 
 
 function def:uiCall_initialize(unselectable)
@@ -35,13 +35,14 @@ function def:uiCall_initialize(unselectable)
 	self.visible = true
 	self.allow_hover = true
 
-	self.auto_doc_update = true
+	self.scroll_range_mode = "zero"
 	self.halt_reshape = false
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
 	widLayout.initializeLayoutTree(self)
+	lgcContainer.sashStateSetup(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.press_busy = false
@@ -57,11 +58,14 @@ function def:uiCall_initialize(unselectable)
 end
 
 
+--[[
+Viewport #1 is the scrolling area.
+Viewport #2 is an outer border.
+--]]
+
+
 function def:uiCall_reshapePre()
 	print("workspace: uiCall_reshapePre")
-
-	-- Viewport #1 is the scrolling area.
-	-- Viewport #2 is an outer border.
 
 	local root = self.context.root
 	self.x, self.y, self.w, self.h = root.vp2_x, root.vp2_y, root.vp2_w, root.vp2_h
@@ -81,9 +85,6 @@ function def:uiCall_reshapePre()
 
 	widLayout.resetLayout(self, "viewport", 1)
 
-	local n = self.layout_tree
-	print("workspace node pre", n.x, n.y, n.w, n.h)
-
 	return self.halt_reshape
 end
 
@@ -91,33 +92,37 @@ end
 function def:uiCall_reshapePost()
 	print("workspace: uiCall_reshapePost")
 
-	if self.auto_doc_update then
-		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
-	end
+	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)
 	commonScroll.updateScrollState(self)
-
-	local n = self.layout_tree
-	print("workspace node post", n.x, n.y, n.w, n.h)
 end
 
 
 def.trickle.uiCall_pointerHoverOn = lgcUIFrame.logic_tricklePointerHoverOn
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mx, my)
+function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	return lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+end
+
+
+def.uiCall_pointerHover = lgcContainer.wid_uiCall_pointerHover
+def.trickle.uiCall_pointerHoverOff = lgcContainer.wid_trickle_uiCall_pointerHoverOff
+def.uiCall_pointerHoverOff = lgcContainer.wid_uiCall_pointerHoverOff
+
+
+function def.trickle:uiCall_pointerDrag(inst, x, y, dx, dy)
+	if lgcContainer.sash_tricklePointerDrag(self, inst, x, y, dx, dy) then
+		return true
 	end
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		commonScroll.widgetClearHover(self)
+function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+	if lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses) then
+		return true
 	end
 end
 

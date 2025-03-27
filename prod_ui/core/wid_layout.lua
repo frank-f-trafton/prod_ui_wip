@@ -357,4 +357,16 @@ function widLayout.setWidgetSizes(n, _depth)
 end
 
 
+function widLayout.getPreviousSibling(node)
+	local parent = node.parent
+	if parent then
+		for i, child in ipairs(parent.nodes) do
+			if child == node then
+				return i > 1 and parent.nodes[i - 1]
+			end
+		end
+	end
+end
+
+
 return widLayout

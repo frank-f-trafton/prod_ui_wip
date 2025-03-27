@@ -210,9 +210,10 @@ end
 
 
 function def:uiCall_getSliceLength(x_axis, cross_length)
-	if not x_axis then
+	if not x_axis and self.auto_size == "v" then
 		_determineTextDimensions(self, cross_length)
-		return self.text_h
+		local border = self.skin.box.border
+		return self.text_h + border.y1 + border.y2
 	end
 end
 
