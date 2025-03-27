@@ -14,10 +14,12 @@ local lgcUIFrame = {}
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcContainer = context:getLua("shared/lgc_container")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = context:getLua("core/wid_shared")
 
 
-lgcUIFrame.types = {workspace=true, window=true}
+lgcUIFrame._enum_types = uiShared.makeLUTV("workspace", "window")
+
 
 -- View levels for Window Frames. Both Window Frames and the WIMP Root need access to this.
 lgcUIFrame.view_levels = {low=3, normal=4, high=5}

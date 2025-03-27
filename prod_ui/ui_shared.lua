@@ -5,6 +5,7 @@ local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local pileArgCheck = require(PATH .. "lib.pile_arg_check")
+local pTable = require(PATH .. "lib.pile_table")
 
 
 -- * Dummies *
@@ -97,6 +98,16 @@ end
 
 
 -- * / Assertions *
+
+
+-- * Type Utilities *
+
+
+uiShared.makeLUT = pTable.makeLUT -- (t); array of values to convert into a hash table.
+uiShared.makeLUTV = pTable.makeLUTV -- (...); varargs list of values to convert to a hash table.
+
+
+-- * / Type Utilities *
 
 
 return uiShared

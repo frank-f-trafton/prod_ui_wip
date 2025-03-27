@@ -13,11 +13,17 @@ local context = select(1, ...)
 local widLayout = {}
 
 
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
-widLayout._enum_layout_base = pTable.makeLUT({"zero", "self", "viewport", "viewport-width", "viewport-height", "unbounded"})
+widLayout._enum_layout_base = uiShared.makeLUTV(
+	"zero",
+	"self",
+	"viewport",
+	"viewport-width",
+	"viewport-height",
+	"unbounded"
+)
 
 
 local _mt_node = {

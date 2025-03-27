@@ -17,7 +17,7 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widLayout = context:getLua("core/wid_layout")
 
 
-local _enum_scr_rng = {["zero"]=true, ["auto"]=true, ["manual"]=true}
+local _enum_scr_rng = uiShared.makeLUTV("zero", "auto", "manual")
 
 
 function lgcContainer.wid_setScrollRangeMode(self, mode)

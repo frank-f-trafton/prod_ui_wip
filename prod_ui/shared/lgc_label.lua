@@ -45,17 +45,11 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-local modes = {["single"]=true, ["single-ul"]=true, ["multi"]=true}
+local _enum_modes = uiShared.makeLUTV("single", "single-ul", "multi")
+
 
 -- Numeric values from 0-1 that correspond to font rendering alignment enums.
 local align_h_num = {left=0.0, center=0.5, right=1.0, justify=0.0}
-
-
-local function _assertLabelMode(n, mode)
-	if not modes[mode] then
-		error("argument #" .. n .. ": invalid label mode: " .. tostring(mode), 2)
-	end
-end
 
 
 local function multiLineWrap(self, font)
@@ -71,7 +65,7 @@ end
 function lgcLabel.setup(self, mode)
 	mode = mode or "single"
 
-	_assertLabelMode(2, mode)
+	uiShared.enum(2, mode, "LabelMode", _enum_modes)
 
 	-- The label text to draw.
 	self.label = ""
@@ -136,7 +130,7 @@ function lgcLabel.widSetLabel(self, text, mode)
 	mode = mode or self.label_mode
 
 	uiShared.assertText(2, text)
-	_assertLabelMode(3, mode)
+	uiShared.enum(3, mode, "LabelMode", _enum_modes)
 
 	-- Check for mode update.
 	if mode ~= self.label_mode then
