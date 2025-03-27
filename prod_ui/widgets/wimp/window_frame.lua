@@ -1,13 +1,13 @@
 local context = select(1, ...)
 
 
-local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
+local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -24,6 +24,7 @@ local _header_sizes = pTable.makeLUT({"small", "normal", "large"})
 
 local def = {
 	skin_id = "wimp_frame",
+	trickle = {},
 
 	default_settings = {
 		allow_close = true,
@@ -36,18 +37,17 @@ local def = {
 		header_show_max_button = true,
 		header_text = "",
 		header_size = "normal" -- enum: `_header_sizes`
-	},
+	}
 }
 
 
-def.trickle = {}
-
-lgcUIFrame.definitionSetup(def)
+def.setScrollBars = commonScroll.setScrollBars
+def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 widShared.scrollSetMethods(def)
-def.setScrollBars = commonScroll.setScrollBars
-def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
+lgcUIFrame.definitionSetup(def)
+lgcContainer.setupMethods(def)
 
 
 def.center = widShared.centerInParent
@@ -337,93 +337,6 @@ end
 --]===]
 
 
-function def:uiCall_initialize(unselectable, view_level)
-	-- UI Frame
-	self.frame_type = "window"
-	lgcUIFrame.instanceSetup(self, unselectable)
-	self.view_level = view_level or "normal"
-	self.sort_id = lgcUIFrame.view_levels[self.view_level]
-
-	-- If associated with a Workspace, a Window Frame is only active if that Workspace is also active.
-	-- Window Frames associated with the root are always active.
-	self.workspace = false
-
-	self.visible = true
-	self.allow_hover = true
-
-	self.auto_doc_update = true
-	self.halt_reshape = false
-
-	widShared.setupDoc(self)
-	widShared.setupScroll(self, -1, -1)
-	widShared.setupViewports(self, 6)
-	widLayout.initializeLayoutTree(self)
-	lgcKeyHooks.setupInstance(self)
-
-	self.hover_zone = false -- false, "button-close", "button-size"
-	self.mouse_in_resize_zone = false
-
-	-- Helps to distinguish double-clicks on the frame header.
-	self.cseq_header = false
-
-	-- Set true to draw a red box around the frame's resize area.
-	--self.DEBUG_show_resize_range
-
-	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size"
-
-	self.b_close = _newSensor("button-close")
-	self.b_max = _newSensor("button-size")
-
-	-- Valid while resizing. (0,0) is an error.
-	self.adjust_axis_x = 0 -- -1, 0, 1
-	self.adjust_axis_y = 0 -- -1, 0, 1
-
-	-- Offsets from mouse when resizing.
-	self.adjust_ox = 0
-	self.adjust_oy = 0
-
-	-- How far past the parent bounds this Window Frame is permitted to go.
-	self.p_bounds_x1 = 0
-	self.p_bounds_y1 = 0
-	self.p_bounds_x2 = 0
-	self.p_bounds_y2 = 0
-
-	-- Used when unmaximizing as a result of dragging.
-	self.adjust_mouse_orig_a_x = 0
-	self.adjust_mouse_orig_a_y = 0
-
-	self.maximized = false
-	self.maxim_x = 0
-	self.maxim_y = 0
-	self.maxim_w = 128
-	self.maxim_h = 128
-
-	-- Set true to allow dragging the Window Frame by clicking on its body
-	--self.allow_body_drag = false
-
-	-- Used to position frame relative to pointer when dragging.
-	self.drag_ox = 0
-	self.drag_oy = 0
-
-	self:skinSetRefs()
-	self:skinInstall()
-	self:applyAllSettings()
-
-	-- Potentially shortened version of 'text' for display.
-	self.header_text_disp = ""
-
-	-- Text offsetting
-	self.header_text_ox = 0
-	self.header_text_oy = 0
-
-	self.needs_update = true
-
-	-- Frame-blocking widget links.
-	self.ref_block_prev = false
-	self.ref_block_next = false
-end
-
-
 function def:setFrameBlock(target)
 	uiShared.type1(1, target, "table")
 
@@ -472,6 +385,94 @@ function def:closeFrame(force)
 end
 
 
+function def:uiCall_initialize(unselectable, view_level)
+	-- UI Frame
+	self.frame_type = "window"
+	lgcUIFrame.instanceSetup(self, unselectable)
+	self.view_level = view_level or "normal"
+	self.sort_id = lgcUIFrame.view_levels[self.view_level]
+
+	-- If associated with a Workspace, a Window Frame is only active if that Workspace is also active.
+	-- Window Frames associated with the root are always active.
+	self.workspace = false
+
+	self.visible = true
+	self.allow_hover = true
+
+	self.scroll_range_mode = "zero"
+	self.halt_reshape = false
+
+	widShared.setupDoc(self)
+	widShared.setupScroll(self, -1, -1)
+	widShared.setupViewports(self, 6)
+	widLayout.initializeLayoutTree(self)
+	lgcContainer.sashStateSetup(self)
+	lgcKeyHooks.setupInstance(self)
+
+	self.hover_zone = false -- false, "button-close", "button-size"
+	self.mouse_in_resize_zone = false
+
+	-- Helps with double-clicks on the frame header.
+	self.cseq_header = false
+
+	-- Set true to draw a red box around the frame's resize area.
+	--self.DEBUG_show_resize_range
+
+	self.press_busy = false -- false, "drag", "resize", "button-close", "button-size", "sash"
+
+	self.b_close = _newSensor("button-close")
+	self.b_max = _newSensor("button-size")
+
+	-- Valid while resizing. (0,0) is an error.
+	self.adjust_axis_x = 0 -- -1, 0, 1
+	self.adjust_axis_y = 0 -- -1, 0, 1
+
+	-- Offsets from mouse when resizing.
+	self.adjust_ox = 0
+	self.adjust_oy = 0
+
+	-- How far past the parent bounds this Window Frame is permitted to go.
+	self.p_bounds_x1 = 0
+	self.p_bounds_y1 = 0
+	self.p_bounds_x2 = 0
+	self.p_bounds_y2 = 0
+
+	-- Used when unmaximizing as a result of dragging.
+	self.adjust_mouse_orig_a_x = 0
+	self.adjust_mouse_orig_a_y = 0
+
+	self.maximized = false
+	self.maxim_x = 0
+	self.maxim_y = 0
+	self.maxim_w = 128
+	self.maxim_h = 128
+
+	-- Set true to allow dragging the Window Frame by clicking on its body
+	--self.allow_body_drag = false
+
+	-- Used to position frame relative to pointer when dragging.
+	self.drag_ox = 0
+	self.drag_oy = 0
+
+	-- Potentially shortened version of 'text' for display.
+	self.header_text_disp = ""
+
+	-- Text offsetting
+	self.header_text_ox = 0
+	self.header_text_oy = 0
+
+	self.needs_update = true
+
+	-- Frame-blocking widget links.
+	self.ref_block_prev = false
+	self.ref_block_next = false
+
+	self:skinSetRefs()
+	self:skinInstall()
+	self:applyAllSettings()
+end
+
+
 function def:frameCall_close(force)
 	self:closeFrame(force)
 	return true
@@ -496,7 +497,7 @@ local function _pointInSensor(sen, x, y)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		commonScroll.widgetProcessHover(self, mx, my)
@@ -525,6 +526,13 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				self.cursor_hover = nil
 			end
 		end
+	end
+
+	if not self.mouse_in_resize_zone
+	and not self.hover_zone
+	and lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	then
+		return true
 	end
 end
 
@@ -653,7 +661,7 @@ end
 def.uiCall_pointerPressRepeat = lgcUIFrame.logic_pointerPressRepeat
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.press_busy == "resize" then
 			lgcWindowFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -662,10 +670,14 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			lgcWindowFrame.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		end
 	end
+
+	if lgcContainer.sash_tricklePointerDrag(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy) then
+		return true
+	end
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 and self.context.mouse_pressed_button == button then
 			if self.press_busy == "resize" or self.press_busy == "drag" then
@@ -701,6 +713,10 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			commonScroll.widgetClearPress(self)
 			self.press_busy = false
 		end
+	end
+
+	if lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses) then
+		return true
 	end
 end
 
@@ -876,9 +892,7 @@ function def:uiCall_reshapePre()
 
 	widLayout.resetLayout(self, "viewport", 1)
 
-	if self.auto_doc_update then
-		self.doc_w, self.doc_h = widShared.getCombinedChildrenDimensions(self)
-	end
+	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollBarShapes(self)

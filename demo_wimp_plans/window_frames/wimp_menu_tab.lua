@@ -71,7 +71,9 @@ function plan.makeWindowFrame(root)
 	menu_tab.w = 640
 	menu_tab.h = 480
 	menu_tab:initialize()
-	menu_tab:register("fit-remaining")
+
+	frame:setLayoutNode(menu_tab, frame.layout_tree)
+
 	commonTab.setDefaultMeasurements(menu_tab)
 
 	menu_tab.renderThimble = function() end

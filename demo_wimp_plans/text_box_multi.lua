@@ -9,9 +9,7 @@ local itemOps = require("prod_ui.common.item_ops")
 local keyMgr = require("prod_ui.lib.key_mgr")
 
 
-local plan = {
-	container_type = "base/container"
-}
+local plan = {}
 
 
 function plan.make(panel)
@@ -22,9 +20,13 @@ function plan.make(panel)
 	panel:setScrollBars(false, false)
 
 	local c_bar = panel:addChild("base/container")
-	c_bar.h = 64
 	c_bar:initialize()
-	c_bar:register("fit-top")
+
+	do
+		local node = panel.layout_tree:newNode()
+		node:setMode("slice", "px", "top", 64)
+		panel:setLayoutNode(c_bar, node)
+	end
 
 	--[[
 	local cbox_wrap = c_bar:addChild("base/checkbox")
@@ -52,7 +54,9 @@ function plan.make(panel)
 	text_box.w = 400
 	text_box.h = 350
 	text_box:initialize()
-	text_box:register("fit-remaining")
+
+	panel:setLayoutNode(text_box, panel.layout_tree)
+
 	text_box:setTag("demo_text_box") -- Helps identify the widget from the main demo.
 	text_box:setScrollBars(true, true)
 

@@ -4,9 +4,7 @@ local commonWimp = require("prod_ui.common.common_wimp")
 local demoShared = require("demo_shared")
 
 
-local plan = {
-	container_type = "base/container"
-}
+local plan = {}
 
 
 local function _dummy() end

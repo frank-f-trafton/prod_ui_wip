@@ -196,6 +196,10 @@ function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch,
 		self.context.current_pressed = false
 		return true
 	end
+
+	if lgcContainer.sash_tricklePointerPress(self, inst, x, y, button, istouch, presses) then
+		return true
+	end
 end
 
 

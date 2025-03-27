@@ -302,7 +302,9 @@ function plan.makeWindowFrame(root)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
 	menu_tab:initialize()
-	menu_tab:register("fit-remaining")
+
+	frame:setLayoutNode(menu_tab, frame.layout_tree)
+
 	commonTab.setDefaultMeasurements(menu_tab)
 	menu_tab.renderThimble = function() end
 
