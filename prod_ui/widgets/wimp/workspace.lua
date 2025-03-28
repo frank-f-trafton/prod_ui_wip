@@ -107,31 +107,47 @@ def.trickle.uiCall_pointerHoverOn = lgcUIFrame.logic_tricklePointerHoverOn
 
 
 function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	return lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	local skin = self.skin
+	return lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 end
 
 
-def.uiCall_pointerHover = lgcContainer.wid_uiCall_pointerHover
-def.trickle.uiCall_pointerHoverOff = lgcContainer.wid_trickle_uiCall_pointerHoverOff
-def.uiCall_pointerHoverOff = lgcContainer.wid_uiCall_pointerHoverOff
+function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == inst then
+		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+		commonScroll.widgetProcessHover(self, mx, my)
+	end
+end
+
+
+function def.trickle:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	lgcContainer.sashHoverOffLogic(self)
+end
+
+
+function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == inst then
+		commonScroll.widgetClearHover(self)
+	end
+end
 
 
 function def.trickle:uiCall_pointerDrag(inst, x, y, dx, dy)
-	if lgcContainer.sash_tricklePointerDrag(self, inst, x, y, dx, dy) then
+	if lgcContainer.sashDragLogic(self, x, y) then
 		return true
 	end
 end
 
 
 function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-	if lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses) then
+	if lgcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if lgcUIFrame.partial_pointerPress(self) then
+	if lgcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
