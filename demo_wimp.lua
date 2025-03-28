@@ -601,6 +601,11 @@ do
 	do
 		local ws1 = wimp_root:newWorkspace()
 		ws1:initialize()
+
+		ws1:setLayoutBase("viewport")
+		ws1:setScrollRangeMode("zero")
+		ws1:setSashesEnabled(true)
+
 		-- NOTE: Do not register Workspaces to the root layout. Internally, the root takes care of positioning and
 		-- reshaping the current active Workspace.
 		wimp_root:setActiveWorkspace(ws1)
@@ -610,12 +615,17 @@ do
 		demo_list:initialize()
 
 		-- [[
-		local node = ws1.layout_tree:newNode()
-		node:setMode("slice", "px", "left", 300)
-		ws1:setLayoutNode(demo_list, node)
+		local node_list = ws1.layout_tree:newNode()
+		node_list:setMode("slice", "px", "left", 300)
+		ws1:setLayoutNode(demo_list, node_list)
 		--]]
 
 		-- XYZ: put a sash here.
+		-- [[
+		local ns = ws1.layout_tree:newNode()
+		-- Sash nodes do not refer to widgets, at least not in the original design.
+		ws1:configureSashNode(node_list, ns)
+		--]]
 
 		demo_list.tag = "plan_menu"
 
