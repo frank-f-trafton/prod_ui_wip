@@ -500,7 +500,11 @@ end
 function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mx, my)
+		-- Because this widget accepts hover events outside of its boundaries (for resizing), we need to confirm
+		-- that the mouse cursor actually is within the Window Frame area before checking scroll bar hover.
+		if mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h then
+			commonScroll.widgetProcessHover(self, mx, my)
+		end
 
 		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
 			self.hover_zone = self.header_show_close_button and _pointInSensor(self.b_close, mx, my) and "button-close"
@@ -568,8 +572,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if button == 1 and self.context.mouse_pressed_button == button then
 			-- Check for pressing on scroll bar components.
-			local fixed_step = 24 -- [XXX 2] style/config
-			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+			-- See notes around the call to 'commonScroll.widgetProcessHover'.
+			if mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h then
+				local fixed_step = 24 -- [XXX 2] style/config
+				handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+			end
 
 			if not handled and self.header_visible then
 				if self.hover_zone == "button-close" then
@@ -1088,7 +1095,10 @@ def.default_skinner = {
 	end,
 
 	renderLast = function(self, ox, oy)
+		love.graphics.push("all")
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+		love.graphics.pop()
 	end,
 
 	-- Don't highlight when holding the UI thimble.

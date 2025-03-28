@@ -11,6 +11,8 @@ return {
 	in_view_pad_x = 0,
 	in_view_pad_y = 0,
 
+	-- * Sash State *
+
 	slc_sash_lr = "*tex_slices/sash_lr",
 	slc_sash_tb = "*tex_slices/sash_tb",
 
@@ -34,6 +36,8 @@ return {
 
 	cursor_sash_drag_h = "sizewe",
 	cursor_sash_drag_v = "sizens",
+
+	-- * / Sash State *
 
 	color_body = {1.0, 1.0, 1.0, 1.0},
 	slc_body = "*tex_slices/container_body1",

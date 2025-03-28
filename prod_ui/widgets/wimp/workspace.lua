@@ -7,6 +7,7 @@ local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -246,9 +247,12 @@ def.default_skinner = {
 	--render = function(self, ox, oy)
 
 	renderLast = function(self, ox, oy)
-		local skin = self.skin
+		love.graphics.push("all")
 
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+
+		love.graphics.pop()
 
 		-- XXX Debug...
 		--[=[
