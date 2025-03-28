@@ -29,6 +29,18 @@ function lgcContainer.setupMethods(self)
 end
 
 
+function _methods:setLayoutBase(layout_base)
+	uiShared.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
+
+	self.layout_base = layout_base
+end
+
+
+function _methods:getLayoutBase()
+	return self.layout_base
+end
+
+
 function _methods:setScrollRangeMode(mode)
 	uiShared.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
 
@@ -69,8 +81,8 @@ function _methods:configureSashNode(n1, n2)
 
 	if n1.mode ~= "slice" then
 		error("argument #1: expected a slice node.")
-	end
-	if n2.nodes and #n2.nodes > 0 then
+
+	elseif n2.nodes and #n2.nodes > 0 then
 		error("argument #2: sashes are supposed to be leaf nodes.")
 	end
 
@@ -78,26 +90,13 @@ function _methods:configureSashNode(n1, n2)
 end
 
 
-function _methods:setLayoutBase(layout_base)
-	uiShared.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
-
-	self.layout_base = layout_base
-end
-
-
-function _methods:getLayoutBase()
-	return self.layout_base
-end
-
-
 function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
-	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
-	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
-
 	-- Get widget position relative to this container.
 	local x, y = wid:getPositionInAncestor(self)
 	local w, h = wid.w, wid.h
 
+	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
+	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
 	if wid.focal_x then -- [XXX 1] Untested
 		x = x + wid.focal_x
 		y = y + wid.focal_y
@@ -105,19 +104,11 @@ function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
 		h = wid.focal_h
 	end
 
-	local skin = self.skin
-
-	self:scrollRectInBounds(
-		x - pad_x,
-		y - pad_y,
-		x + w + pad_x,
-		y + h + pad_y,
-		false
-	)
+	self:scrollRectInBounds(x - pad_x, y - pad_y, x + w + pad_x, y + h + pad_y, false)
 end
 
 
-function lgcContainer.checkMouseOverSash(self, node, mx, my, con_x, con_y)
+local function _checkMouseOverSash(self, node, mx, my, con_x, con_y)
 	if node.slice_sash then
 		if mx >= node.x + con_x
 		and mx < node.x + node.w - con_x
@@ -129,7 +120,7 @@ function lgcContainer.checkMouseOverSash(self, node, mx, my, con_x, con_y)
 
 	elseif node.nodes then
 		for i, child in ipairs(node.nodes) do
-			local rv = lgcContainer.checkMouseOverSash(self, child, mx, my, con_x, con_y)
+			local rv = _checkMouseOverSash(self, child, mx, my, con_x, con_y)
 			if rv then
 				return rv
 			end
@@ -141,7 +132,7 @@ end
 function lgcContainer.renderSash(node, wid, ox, oy)
 	if node.slice_sash then
 		love.graphics.setColor(1, 0, 0, 1)
-		love.graphics.rectangle("fill", node.x, node.y, node.w, node.h)
+		love.graphics.rectangle("fill", node.x - wid.scr_x, node.y - wid.scr_y, node.w, node.h)
 	end
 end
 
@@ -160,23 +151,24 @@ function lgcContainer.sashStateSetup(self)
 	self.sash_hover = false
 
 	-- Length of the node to resize at start of drag state
-	self.att_len = 0
+	self.sash_att_len = 0
 
 	-- Mouse cursor position (absolute) at start of drag state
-	self.att_ax, self.att_ay = 0, 0
+	self.sash_att_ax, self.sash_att_ay = 0, 0
 end
 
 
--- Call in def.trickle:uiCall_pointerHover().
-function lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+-- For widgets that support dragging sashes. Call in def.trickle:uiCall_pointerHover().
+-- @return true if a sash hover action occurred.
+function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	if not self.sashes_enabled then
 		return
 	end
 
-	local mx, my = self:getRelativePosition(mouse_x, mouse_y)
+	local mxs, mys = self:getRelativePositionScrolled(mouse_x, mouse_y)
 	if not self.sash_hover then
 		local skin = self.skin
-		local node = lgcContainer.checkMouseOverSash(self, self.layout_tree, mx, my, skin.sash_contract_x, skin.sash_contract_y)
+		local node = _checkMouseOverSash(self, self.layout_tree, mxs, mys, skin.sash_contract_x, skin.sash_contract_y)
 		if node then
 			self.sash_hover = node
 			local cursor_id = lgcContainer.getSashCursorID(node.slice_edge, false)
@@ -188,13 +180,14 @@ function lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_
 		end
 	else
 		local node = self.sash_hover
-		local expand_x = self.skin.sash_expand_x
-		local expand_y = self.skin.sash_expand_y
+		local skin = self.skin
+		local expand_x = skin.sash_expand_x
+		local expand_y = skin.sash_expand_y
 
-		if not (mx >= node.x - expand_x
-		and mx < node.x + node.w + expand_x
-		and my >= node.y - expand_y
-		and my < node.y + node.h + expand_y)
+		if not (mxs >= node.x - expand_x
+		and mxs < node.x + node.w + expand_x
+		and mys >= node.y - expand_y
+		and mys < node.y + node.h + expand_y)
 		then
 			self.sash_hover = false
 			self.cursor_hover = false
@@ -203,28 +196,14 @@ function lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_
 end
 
 
-function lgcContainer.wid_uiCall_pointerHover(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mx, my)
-	end
-end
-
-
-function lgcContainer.wid_uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
-		commonScroll.widgetClearHover(self)
-	end
-end
-
-
-function lgcContainer.wid_trickle_uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+-- For widgets with draggable sashes, call in def.trickle:uiCall_pointerHoverOff().
+function lgcContainer.sashHoverOffLogic(self)
 	self.sash_hover = false
 	self.cursor_hover = false
 end
 
 
-function lgcContainer.sash_tricklePointerPress(self, inst, x, y, button, istouch, presses)
+function lgcContainer.sashPressLogic(self, x, y, button)
 	if self.sashes_enabled
 	and self.sash_hover
 	and button == 1
@@ -233,11 +212,11 @@ function lgcContainer.sash_tricklePointerPress(self, inst, x, y, button, istouch
 		local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
 		if cn and cn.mode == "slice" and cn.slice_mode == "px" then
 			self.press_busy = "sash"
-			self.att_ax, self.att_ay = x, y
+			self.sash_att_ax, self.sash_att_ay = x, y
 			if cn.slice_edge == "right" or cn.slice_edge == "left" then
-				self.att_len = cn.w
+				self.sash_att_len = cn.w
 			else -- "top", "bottom"
-				self.att_len = cn.h
+				self.sash_att_len = cn.h
 			end
 			local cursor_id = lgcContainer.getSashCursorID(cn.slice_edge, true)
 			self.cursor_press = self.skin[cursor_id]
@@ -248,7 +227,7 @@ function lgcContainer.sash_tricklePointerPress(self, inst, x, y, button, istouch
 end
 
 
-function lgcContainer.sash_tricklePointerDrag(self, inst, x, y, dx, dy)
+function lgcContainer.sashDragLogic(self, x, y)
 	if self.sashes_enabled
 	and self.press_busy == "sash"
 	then
@@ -261,16 +240,16 @@ function lgcContainer.sash_tricklePointerDrag(self, inst, x, y, dx, dy)
 
 			local edge = cn.slice_edge
 			if edge == "right" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.w, self.att_len - (x - self.att_ax))
+				cn.slice_amount = math.min(cn.slice_amount + parent.w, self.sash_att_len - (x - self.sash_att_ax))
 
 			elseif edge == "left" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.w, self.att_len + (x - self.att_ax))
+				cn.slice_amount = math.min(cn.slice_amount + parent.w, self.sash_att_len + (x - self.sash_att_ax))
 
 			elseif edge == "top" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.h, self.att_len - (y - self.att_ay))
+				cn.slice_amount = math.min(cn.slice_amount + parent.h, self.sash_att_len - (y - self.sash_att_ay))
 
 			elseif edge == "bottom" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.h, self.att_len + (y - self.att_ay))
+				cn.slice_amount = math.min(cn.slice_amount + parent.h, self.sash_att_len + (y - self.sash_att_ay))
 
 			else
 				error("invalid slice edge.")
@@ -284,7 +263,7 @@ function lgcContainer.sash_tricklePointerDrag(self, inst, x, y, dx, dy)
 end
 
 
-function lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses)
+function lgcContainer.sashUnpressLogic(self)
 	if self.sashes_enabled and self.press_busy == "sash" then
 		self.press_busy = false
 		self.cursor_press = false

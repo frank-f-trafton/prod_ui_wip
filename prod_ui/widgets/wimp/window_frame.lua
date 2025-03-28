@@ -530,7 +530,7 @@ function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse
 
 	if not self.mouse_in_resize_zone
 	and not self.hover_zone
-	and lgcContainer.sashPointerHoverLogic(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	and lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	then
 		return true
 	end
@@ -558,7 +558,7 @@ def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if lgcUIFrame.partial_pointerPress(self) then
+	if lgcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
@@ -671,7 +671,7 @@ function def.trickle:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_
 		end
 	end
 
-	if lgcContainer.sash_tricklePointerDrag(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy) then
+	if lgcContainer.sashDragLogic(self, mouse_x, mouse_y) then
 		return true
 	end
 end
@@ -715,7 +715,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	if lgcContainer.sash_pointerUnpress(self, inst, x, y, button, istouch, presses) then
+	if lgcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end

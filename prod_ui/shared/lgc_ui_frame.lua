@@ -90,8 +90,9 @@ function lgcUIFrame.instanceSetup(self, unselectable)
 	-- It can still tick in the background if:
 	-- * It's the active Workspace
 	-- * It's a Window Frame whose associated Workspace is active, or which is unassociated
+	--
 	-- Hidden UI Frames cannot be selected. If they are selected at the time of being hidden,
-	-- they will automatically step the selection backwards by one index.
+	-- the UI Frame selection will automatically step backwards by one index.
 	self.frame_hidden = false
 
 	-- Helps with ctrl+tabbing through UI Frames.
@@ -99,14 +100,16 @@ function lgcUIFrame.instanceSetup(self, unselectable)
 end
 
 
+--[====[
 function lgcUIFrame.assertModalNoWorkspace(self)
 	local modals = self.context.root.modals
-	for i, wid_g2 in ipairs(modals) do
-		if wid_g2 == self then
+	for i, g2 in ipairs(modals) do
+		if g2 == self then
 			error("Modal Window Frames cannot be associated with any Workspace.")
 		end
 	end
 end
+--]====]
 
 
 function lgcUIFrame.assertFrameBlockWorkspaces(self)
@@ -150,7 +153,7 @@ function lgcUIFrame.tryUnbankingThimble1(self)
 end
 
 
--- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
+-- @param keep_in_view When true, the container scrolls to ensure that the widget is visible within the viewport.
 function lgcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
 	--print("thimbleTake", self.id, inst.id)
 	self.banked_thimble1 = inst
@@ -235,13 +238,13 @@ function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch,
 		return true
 	end
 
-	if lgcContainer.sash_tricklePointerPress(self, inst, x, y, button, istouch, presses) then
+	if lgcContainer.sashPressLogic(self, x, y, button) then
 		return true
 	end
 end
 
 
-function lgcUIFrame.partial_pointerPress(self)
+function lgcUIFrame.pointerPressLogicFirst(self)
 	-- Press events that create a pop-up menu should block propagation (return truthy)
 	-- so that this and the WIMP root do not cause interference.
 
