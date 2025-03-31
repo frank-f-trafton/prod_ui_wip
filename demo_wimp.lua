@@ -620,10 +620,9 @@ do
 		ws1:setLayoutNode(demo_list, node_list)
 		--]]
 
-		-- XYZ: put a sash here.
+		-- Put a sash between the items list and the demo panel.
 		-- [[
 		local ns = ws1.layout_tree:newNode()
-		-- Sash nodes do not refer to widgets, at least not in the original design.
 		ws1:configureSashNode(node_list, ns)
 		--]]
 
