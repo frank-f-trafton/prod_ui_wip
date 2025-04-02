@@ -83,7 +83,7 @@ local _mt_node = {
 	grid_y = 0,
 
 	-- * Mode: static
-	-- Position and dimensions. X and Y are wrapped with a modulo, so negative values will place the node on the far end.
+	-- Position and dimensions.
 	static_x = 0,
 	static_y = 0,
 	static_w = 0,
@@ -165,10 +165,10 @@ function _mt_node:setMode(mode, a, b, c, d)
 		self.grid_y = b
 
 	elseif mode == "static" then
-		self.x = a
-		self.y = b
-		self.w = c
-		self.h = d
+		self.static_x = a
+		self.static_y = b
+		self.static_w = c
+		self.static_h = d
 	end
 end
 
@@ -263,9 +263,9 @@ end
 widLayout.handlers = {}
 
 
-widLayout.handlers["static"] = function(np, nc)
-	nc.x = np.w > 0 and np.x + (nc.static_x % np.w) or 0
-	nc.y = np.h > 0 and np.y + (nc.static_y % np.h) or 0
+widLayout.handlers["static"] = function(np, nc) -- TODO: agh
+	nc.x = nc.static_x
+	nc.y = nc.static_y
 	nc.w = nc.static_w
 	nc.h = nc.static_h
 end

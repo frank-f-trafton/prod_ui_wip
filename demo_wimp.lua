@@ -10,11 +10,11 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	"demo_welcome",
+	--"demo_welcome",
 	--"layout",
 	--"text_box_single",
 	--"number_box",
-	--"demo_main",
+	"demo_main",
 	--"button_split",
 	--"dial",
 	--"properties_box",
@@ -246,6 +246,21 @@ local function newWimpContext()
 	wid_root.w, wid_root.h = love.graphics.getDimensions()
 	wid_root:initialize()
 
+	-- Test...
+	--[[
+	local counter = 0
+
+	wid_root.uiCall_quit = function(self)
+		counter = counter + 1
+		print("counter (allow quitting at 3):", counter)
+		if counter >= 3 then
+			return false
+		end
+
+		return true
+	end
+	--]]
+
 	return context, wid_root
 end
 
@@ -354,6 +369,11 @@ end
 
 function love.textinput(text)
 	context:love_textinput(text)
+end
+
+
+function love.quit()
+	return context:love_quit()
 end
 
 
