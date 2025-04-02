@@ -5,8 +5,6 @@ local demoShared = require("demo_shared")
 
 
 function plan.make(panel)
-	local context = panel.context
-
 	panel:setLayoutBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
@@ -14,9 +12,9 @@ function plan.make(panel)
 	demoShared.makeTitle(panel, nil, "Welcome")
 
 	demoShared.makeParagraph(panel, nil, [[
-ProdUI is a user interface library for the LÖVE Framework. It is currently in development, and not yet ready for real games and applications.
+ProdUI is a user interface library for the LÖVE Framework.]])
 
-Once complete, this demo will provide examples of all built-in widgets and most features of the library.]])
+	demoShared.makeParagraph(panel, nil, "")
 
 	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI repository on GitHub", "https://www.github.com/rabbitboots/prod_ui_wip")
 

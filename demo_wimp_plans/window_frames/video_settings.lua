@@ -1,9 +1,8 @@
-
--- Demo-specific modules
-local demoShared = require("demo_shared")
-
-
 local plan = {}
+
+
+-- WIMP Demo
+local demoShared = require("demo_shared")
 
 
 function plan.makeWindowFrame(root)
@@ -12,72 +11,18 @@ function plan.makeWindowFrame(root)
 	frame.w = 640
 	frame.h = 480
 	frame:initialize()
-	frame:setFrameTitle("Demo Config")
+	frame:setFrameTitle("Video Settings")
 
 	frame:setLayoutBase("viewport-width")
 	frame:setScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
 	do
-		local checkbox = frame:addChild("base/checkbox")
-		checkbox.x = 64
-		checkbox.y = 160
-		checkbox.w = 192
-		checkbox.h = 32
-		checkbox:initialize()
-		checkbox.tag = "wimp-demo-show-state-details"
-		checkbox.checked = not not context.app.show_details
-		checkbox.bijou_side = "right"
-		checkbox:setLabel("Show state details")
-
-		checkbox.wid_buttonAction = function(self)
-			local app = self.context.app
-			app.show_details = not not self.checked
-		end
-	end
-
-	do
-		local checkbox = frame:addChild("base/checkbox")
-		checkbox.x = 64
-		checkbox.y = 192
-		checkbox.w = 192
-		checkbox.h = 32
-		checkbox:initialize()
-		checkbox.tag = "wimp-demo-show-perf"
-		checkbox.checked = not not context.app.show_perf
-		checkbox.bijou_side = "right"
-		checkbox:setLabel("Show perf info")
-
-		checkbox.wid_buttonAction = function(self)
-			local app = self.context.app
-			app.show_perf = not not self.checked
-		end
-	end
-
-	do
-		local checkbox = frame:addChild("base/checkbox")
-		checkbox.x = 64
-		checkbox.y = 224
-		checkbox.w = 192
-		checkbox.h = 32
-		checkbox:initialize()
-		checkbox.tag = "wimp-demo-mouse-cross"
-		checkbox.checked = not not context.app.show_mouse_cross
-		checkbox.bijou_side = "right"
-		checkbox:setLabel("Show cross at mouse location")
-
-		checkbox.wid_buttonAction = function(self)
-			local app = self.context.app
-			app.show_mouse_cross = not not self.checked
-		end
-	end
-
-	do
 		-- Note on VSync: adaptive (-1) and per-frame (2+) may not be supported by graphics drivers.
 		-- Additionally, it's possible for the user and/or video drivers to override VSync settings.
 		local current_vsync = love.window.getVSync()
 
-		local yy, hh = 292, 32
+		local yy, hh = 32, 32
 
 		local text_vsync = frame:addChild("base/text")
 		text_vsync.font = context.resources.fonts.p
@@ -180,6 +125,64 @@ function plan.makeWindowFrame(root)
 			rad_btn:setChecked(true)
 		end
 	end
+
+
+	-- TODO: Move these old debug checkboxes.
+	--[====[
+	do
+		local checkbox = frame:addChild("base/checkbox")
+		checkbox.x = 64
+		checkbox.y = 160
+		checkbox.w = 192
+		checkbox.h = 32
+		checkbox:initialize()
+		checkbox.tag = "wimp-demo-show-state-details"
+		checkbox.checked = not not context.app.show_details
+		checkbox.bijou_side = "right"
+		checkbox:setLabel("Show state details")
+
+		checkbox.wid_buttonAction = function(self)
+			local app = self.context.app
+			app.show_details = not not self.checked
+		end
+	end
+
+	do
+		local checkbox = frame:addChild("base/checkbox")
+		checkbox.x = 64
+		checkbox.y = 192
+		checkbox.w = 192
+		checkbox.h = 32
+		checkbox:initialize()
+		checkbox.tag = "wimp-demo-show-perf"
+		checkbox.checked = not not context.app.show_perf
+		checkbox.bijou_side = "right"
+		checkbox:setLabel("Show perf info")
+
+		checkbox.wid_buttonAction = function(self)
+			local app = self.context.app
+			app.show_perf = not not self.checked
+		end
+	end
+
+	do
+		local checkbox = frame:addChild("base/checkbox")
+		checkbox.x = 64
+		checkbox.y = 224
+		checkbox.w = 192
+		checkbox.h = 32
+		checkbox:initialize()
+		checkbox.tag = "wimp-demo-mouse-cross"
+		checkbox.checked = not not context.app.show_mouse_cross
+		checkbox.bijou_side = "right"
+		checkbox:setLabel("Show cross at mouse location")
+
+		checkbox.wid_buttonAction = function(self)
+			local app = self.context.app
+			app.show_mouse_cross = not not self.checked
+		end
+	end
+	--]====]
 
 	frame:reshape()
 	frame:center(true, true)

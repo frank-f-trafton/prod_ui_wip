@@ -1,4 +1,5 @@
--- The main / old WIMP demo window.
+local plan = {}
+
 
 -- ProdUI
 local commonWimp = require("prod_ui.common.common_wimp")
@@ -7,9 +8,6 @@ local commonWimp = require("prod_ui.common.common_wimp")
 -- WIMP Demo
 local demoShared = require("demo_shared")
 local wimpWorks = require("wimp_works")
-
-
-local plan = {}
 
 
 local function _makeFrameBlock2(self)
@@ -106,40 +104,25 @@ end
 
 
 function plan.make(panel)
-	local context = panel.context
-
-	--title("WIMP Demo")
-
 	panel:setLayoutBase("viewport-width")
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	do
-		local text_block = panel:addChild("wimp/text_block")
-		text_block:initialize()
-
-		local node = panel.layout_tree:newNode()
-		node:setMode("slice", "px", "top", 0)
-		panel:setLayoutNode(text_block, node)
-
-		text_block:setFontID("h1")
-		text_block:setText("WIMP Demo")
-		text_block:setAutoSize("v")
-	end
+	demoShared.makeTitle(panel, nil, "Dialogs and Notifications")
 
 	panel.DEBUG = "dimensions" -- XXX: see base/container.lua
 
 	-- (Modal) Dialog box test
 	do
 		local btn = panel:addChild("base/button")
-		btn.x = 256
+		btn.x = 64
 		btn.y = 64
 		btn.w = 160
 		btn.h = 24
 		btn:initialize()
 		btn:setLabel("Modal Dialog Box")
 		btn.wid_buttonAction = function(self)
-			wimpWorks.makeDialogBox(context, "It's a dialog box", [[
+			wimpWorks.makeDialogBox(panel.context, "It's a dialog box", [[
 This frame is modal; while present, it should block interaction with any other part of the interface.
 
 Click a button below (or the 'X' in the header bar) to dismiss it.]]

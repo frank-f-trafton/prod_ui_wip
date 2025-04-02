@@ -1155,7 +1155,7 @@ def.default_skinner = {
 		--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
 
 		-- DEBUG: show editor details.
-		-- [[
+		--[[
 		love.graphics.push("all")
 		love.graphics.setScissor()
 		love.graphics.setColor(1, 1, 1, 1)
@@ -1166,9 +1166,8 @@ def.default_skinner = {
 			"h_byte:" .. line_ed.h_byte,
 			200, 200
 		)
-		--]]
-
 		love.graphics.pop()
+		--]]
 	end,
 }
 

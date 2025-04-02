@@ -10,17 +10,7 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	--"demo_welcome",
-	--"layout",
-	--"text_box_single",
-	--"number_box",
-	"demo_main",
-	--"button_split",
-	--"dial",
-	--"properties_box",
-	--"wimp_list_box",
-	--"wimp_tree_box",
-	--"wimp_workspaces",
+	"demo_welcome",
 }
 
 
@@ -35,64 +25,39 @@ local demo_window_launch = {
 local demo_plan_list = {
 	nodes = {
 		{plan_id = "demo_welcome", label = "Welcome"},
-		{plan_id = "widgets", label = "Widgets", nodes = {
-			{label = "Controls", nodes = {
-				{plan_id = "button_work", label = "Button work"},
-				{plan_id = "button_split", label = "Split Button"},
-				{plan_id = "slider_work", label = "Slider work"},
-				{plan_id = "stepper", label = "Stepper"},
-				{plan_id = "demo_main", label = "Main Demo Window"},
-				{plan_id = "layout", label = "Layout"},
-				{plan_id = "number_box", label = "Number Box"},
-				{plan_id = "properties_box", label = "Properties Box"},
-				{plan_id = "combo_box", label = "Combo Box"},
-				{plan_id = "dropdown_box", label = "Dropdown Box"},
-				{plan_id = "text_box_single", label = "Textbox (Single-Line)"},
-				{plan_id = "text_box_multi", label = "Textbox (Multi-Line)"},
-				{plan_id = "button_skinners", label = "Button Skinners"},
-				{plan_id = "barebones", label = "Barebones Widgets"},
-				{plan_id = "wimp_tree_box", label = "Tree Box"},
-				{plan_id = "wimp_list_box", label = "List Box"},
-			}},
-			{label = "Informational", nodes = {
-				{plan_id = "progress_bar", label = "Progress Bar"},
-				{plan_id = "label_test", label = "Label test"},
-				-- text blocks
-			}},
-			{label = "Containers", nodes = {
-				{plan_id = "root", label = "Root Widget"},
-				{plan_id = "container_work", label = "Container work"},
-			}},
+		{plan_id = "widgets.button_work", label = "Button work"},
+		{plan_id = "theming_skinning.button_skinners", label = "Button Skinners"},
+		{plan_id = "widgets.button_split", label = "Split Button"},
+		{plan_id = "widgets.slider_work", label = "Slider work"},
+		{plan_id = "widgets.stepper", label = "Stepper"},
+		{plan_id = "widgets.text_box_single", label = "Textbox (Single-Line)"},
+		{plan_id = "widgets.text_box_multi", label = "Textbox (Multi-Line)"},
+		{plan_id = "widgets.number_box", label = "Number Box"},
+		{plan_id = "widgets.properties_box", label = "Properties Box"},
+		{plan_id = "widgets.combo_box", label = "Combo Box"},
+		{plan_id = "widgets.dropdown_box", label = "Dropdown Box"},
+		{plan_id = "widgets.barebones", label = "Barebones Widgets"},
+		{plan_id = "widgets.tree_box", label = "Tree Box"},
+		{plan_id = "widgets.list_box", label = "List Box"},
+		{plan_id = "widgets.progress_bar", label = "Progress Bar"},
+		-- TODO: text blocks
+		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
+		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
+		--[[
+		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
+			{plan_id = "unfinished.drag_box", label = "Drag Box"},
+			{plan_id = "unfinished.dial", label = "Dials"},
+			{plan_id = "unfinished.menu_test", label = "Menu Test"},
+			{plan_id = "unfinished.container_work", label = "Container work"},
+			{plan_id = "unfinished.layout", label = "Layout"},
+			{plan_id = "unfinished.label_test", label = "Label test"},
 		}},
-		{label = "UI Frames", nodes = {
-			{plan_id = "wimp_workspaces", label = "Workspace Frames"},
-		}},
-		{label = "Testing; Unfinished Work", nodes = {
-			{plan_id = "drag_box", label = "Drag Box"},
-			{plan_id = "dial", label = "Dials"},
-			{plan_id = "menu_test", label = "Menu Test"},
-		}},
+		--]]
 	}
 }
 
 
-
--- Setting up a ProdUI project:
-
---[[
-1) LÖVE Text Input should start in a disabled state, and it should not be changed by user code while the ProdUI
-context is active. Widgets will toggle this on and off as they take and release the thimble (the ProdUI keyboard focus).
-If we leave it on all the time, there is a chance that keystrokes will generate conflicting keypressed and textinput
-events. ProdUI discards any love.textinput events while love.keyboard.hasTextInput() is false, and we can prevent
-conflicts by only turning on TextInput when it's needed.
-
-Here is one example of a conflict: User selects a command in a menu by pressing the space bar. The keypressed event
-callback processes the command, closes the menu, and moves keyboard focus to a text box. Then, the textinput event
-callback sends " " to the text box. The second action is undesired. However, if TextInput wasn't on while the menu had
-focus, then the " " textinput event wouldn't fire in the first place.
---]]
-
-
+-- ProdUI programs should start with text input disabled.
 love.keyboard.setTextInput(false)
 
 
@@ -400,6 +365,53 @@ do
 		end
 		--]]
 
+		local def_demo = {
+			{
+				type = "command",
+				text = "Video Settings",
+				callback = function(client, item)
+					local root = client:getRootWidget()
+					if root then
+						demoShared.launchWindowFrameFromPlan(root, "window_frames.video_settings", true)
+					end
+				end,
+			},
+			{
+				type = "command",
+				text = "Widget Tree View",
+				callback = function(client, item)
+					local root = client:getRootWidget()
+					if root then
+						demoShared.launchWindowFrameFromPlan(root, "window_frames.wimp_widget_tree", true)
+					end
+				end,
+			},
+			{
+				type = "command",
+				text = "Window Frame Selector",
+				callback = function(client, item)
+					local root = client:getRootWidget()
+					if root then
+						demoShared.launchWindowFrameFromPlan(root, "window_frames.window_frame_selector", true)
+					end
+				end,
+			},
+			itemOps.def_separator,
+			{
+				type = "command",
+				text = "_Q_uit",
+				text_shortcut = "Ctrl+Q",
+				--callback = function() print("QUIT!") end,
+				callback = function(client, item) love.event.quit() end,
+				key_mnemonic = "q",
+				key_shortcut = "KC q",
+			},
+		}
+		bar_menu:appendItem("category", {
+			text = "Demo",
+			pop_up_def = def_demo,
+		})
+
 		local def_sub2 = {
 			{
 				type = "command",
@@ -461,24 +473,14 @@ do
 				group_def = def_recent,
 				key_mnemonic = "r",
 			},
-			itemOps.def_separator,
-			{
-				type = "command",
-				text = "_Q_uit",
-				text_shortcut = "Ctrl+Q",
-				--callback = function() print("QUIT!") end,
-				callback = function(client, item) love.event.quit() end,
-				key_mnemonic = "q",
-				key_shortcut = "KC q",
-			},
 		}
 		bar_menu:appendItem("category", {
-			text = "_F_ile",
-			key_mnemonic = "f",
+			text = "_M_enu Example",
+			key_mnemonic = "m",
 			pop_up_def = def_file,
 		})
 
-
+		--[==[
 		local def_edit = {
 			{
 				type = "command",
@@ -507,46 +509,9 @@ do
 			key_mnemonic = "e",
 			pop_up_def = def_edit,
 		})
+		--]==]
 
-
-		local def_demo = {
-			{
-				type = "command",
-				text = "Demo Config",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						demoShared.launchWindowFrameFromPlan(root, "window_frames.demo_config", true)
-					end
-				end,
-			},
-			{
-				type = "command",
-				text = "Widget Tree View",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						demoShared.launchWindowFrameFromPlan(root, "window_frames.wimp_widget_tree", true)
-					end
-				end,
-			},
-			{
-				type = "command",
-				text = "Window Frame Selector",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						demoShared.launchWindowFrameFromPlan(root, "window_frames.window_frame_selector", true)
-					end
-				end,
-			},
-		}
-		bar_menu:appendItem("category", {
-			text = "Demo",
-			pop_up_def = def_demo,
-		})
-
-
+		--[==[
 		local def_help = {
 			{
 				type = "command",
@@ -570,6 +535,7 @@ do
 			key_mnemonic = "h",
 			pop_up_def = def_help,
 		})
+		--]==]
 
 		bar_menu:arrangeItems()
 		bar_menu:menuChangeCleanup()

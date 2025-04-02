@@ -26,7 +26,7 @@ return {
 
 	-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
 	-- "auto": size is based on Viewport #2
-	aux_size = 64,
+	aux_size = 28,
 
 	-- Quad (graphic) alignment within Viewport #2.
 	quad_align_h = "center", -- "left", "center", "right"
