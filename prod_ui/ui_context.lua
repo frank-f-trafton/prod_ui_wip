@@ -1058,6 +1058,20 @@ function _mt_context:love_directorydropped(path)
 end
 
 
+function _mt_context:love_quit()
+	-- Event capture
+	local cap_cur = self.captured_focus
+	if cap_cur and cap_cur.uiCap_quit and cap_cur:uiCap_quit() then
+		return
+	end
+
+	-- Send to root; return root's response to the love.quit() handler.
+	if self.root then
+		return self.root:sendEvent("uiCall_quit", self.root)
+	end
+end
+
+
 -- * <Unsorted> *
 
 
