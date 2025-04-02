@@ -9,9 +9,9 @@ function plan.make(panel)
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	demoShared.makeTitle(panel, nil, "Widgets")
+	demoShared.makeTitle(panel, nil, "Unfinished Stuff")
 
-	demoShared.makeParagraph(panel, nil, "A catalog of ProdUI's built-in widgets.")
+	demoShared.makeParagraph(panel, nil, "These panels are unfinished. Either their purpose is unclear, or they can crash the demo.")
 end
 
 

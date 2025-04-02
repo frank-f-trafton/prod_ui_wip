@@ -13,7 +13,6 @@ function plan.make(panel)
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	demoShared.makeLabel(panel, 32, 0, 512, 32, "**Under Construction** This widget doesn't work correctly yet.", "single")
 	local combo_box = panel:addChild("wimp/combo_box")
 	combo_box.x = 32
 	combo_box.y = 96

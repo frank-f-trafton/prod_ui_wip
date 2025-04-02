@@ -13,8 +13,6 @@ function plan.make(panel)
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	demoShared.makeLabel(panel, 32, 0, 512, 32, "***Under Construction***", "single")
-
 	local properties_box = panel:addChild("wimp/properties_box")
 	properties_box.x = 0
 	properties_box.y = 64
