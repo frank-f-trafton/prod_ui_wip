@@ -115,6 +115,8 @@ function plan.make(panel)
 	rdo_btn.usr_item_align_h = "right"
 	rdo_btn.wid_buttonAction = rdo_item_align_h_action
 
+	rdo_btn:setCheckedConditional("usr_item_align_h", tree_box.TR_item_align_h)
+
 	wy = wy + wh
 	wy = wy + wh
 
