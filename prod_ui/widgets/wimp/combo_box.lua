@@ -108,7 +108,8 @@ function def:wid_inputChanged(str)
 end
 
 
--- Callback for when the user types enter.
+-- Callback for when the user types enter. Return true to halt the code that checks for typing
+-- literal newlines via enter.
 function def:wid_action(str)
 
 end
@@ -475,8 +476,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 				self:_openPopUpMenu()
 				return true
 
-			elseif key == "return" or key == "kpenter" then
-				self:wid_action(self.line_ed.line)
+			elseif (key == "return" or key == "kpenter") and self:wid_action(self.line_ed.line) then
 				return true
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then

@@ -11,8 +11,7 @@ Instead, check for enter (or space) in the widget's 'uiCall_keyPressed' callback
 
 Example:
 ----
-if scancode == "return" or scancode == "kpenter" then
-	self:wid_action()
+if (scancode == "return" or scancode == "kpenter") and self:wid_action() then
 	return true
 else
 	return lgcInputS.keyPressLogic(self, key, scancode, isrepeat)

@@ -186,6 +186,13 @@ function client:replaceText(text)
 end
 
 
+-- Like replaceText(), but also wipes history.
+function client:setText(text)
+	self:replaceText(text)
+	editHistS.wipeEntries(self)
+end
+
+
 -- -1 == undo, 1 == redo
 function client:stepHistory(dir)
 	local line_ed = self.line_ed

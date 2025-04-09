@@ -61,7 +61,8 @@ def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
 
 
--- Called when the user presses 'enter'
+-- Called when the user presses 'enter'. Return true to halt the logic that checks for
+-- typing literal newlines with the enter key.
 def.wid_action = uiShared.dummyFunc
 
 
@@ -501,8 +502,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 
 		local value_old = self.value
 
-		if key == "return" or key == "kpenter" then
-			self:wid_action()
+		if (key == "return" or key == "kpenter") and self:wid_action() then
 			return true
 
 		elseif scancode == "up" then
