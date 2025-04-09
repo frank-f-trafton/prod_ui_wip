@@ -78,7 +78,7 @@ function lgcInputS.setupInstance(self)
 	-- Allows '\n' as text input (including pasting from the clipboard).
 	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
 	-- stop at line feeds.
-	-- In the external display string, line feed code points (0xa) are substituted for U+23CE (⏎).
+	-- In the external display string, line feed code points (0xa) are replaced with U+23CE (⏎).
 	self.allow_line_feed = false
 
 	-- Allows typing a line feed by pressing enter/return. `self.allow_line_feed` must be true.
@@ -94,6 +94,20 @@ function lgcInputS.setupInstance(self)
 
 	-- Helps with amending vs making new history entries.
 	self.input_category = false
+
+	-- When these fields are true, the widget should…
+	-- * Select all text upon receiving the thimble
+	self.select_all_on_thimble1_take = false
+
+	-- * Deselect all text upon releasing the thimble (the caret is moved to the first position).
+	self.deselect_all_on_thimble1_release = false
+
+	-- * Clear history when deselected
+	self.clear_history_on_deselect = false
+
+	-- * Clear the input category when deselected (forcing a new history entry to be made upon the
+	-- next user text input event). ('clear_history_on_deselect' also does this.)
+	self.clear_input_category_on_deselect = true
 
 	-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
 	self.caret_x = 0
@@ -454,6 +468,29 @@ function lgcInputS.mouseDragLogic(self)
 
 	-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
 	return (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
+end
+
+
+function lgcInputS.thimble1Take(self)
+	if self.select_all_on_thimble1_take then
+		self:highlightAll()
+		lgcInputS.updateCaretShape(self)
+	end
+end
+
+
+function lgcInputS.thimble1Release(self)
+	love.keyboard.setTextInput(false)
+	if self.deselect_all_on_thimble1_release then
+		self:caretFirst(true)
+		lgcInputS.updateCaretShape(self)
+	end
+	if self.clear_history_on_deselect then
+		editHistS.wipeEntries(self)
+	end
+	if self.clear_input_category_on_deselect then
+		self:resetInputCategory()
+	end
 end
 
 

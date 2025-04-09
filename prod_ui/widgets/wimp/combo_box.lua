@@ -45,6 +45,7 @@ local context = select(1, ...)
 
 
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
@@ -91,8 +92,7 @@ local function refreshLineEdText(self)
 
 	if chosen_tbl then
 		self:replaceText(chosen_tbl.text)
-		line_ed.hist:clearAll()
-		self.input_category = false
+		editHistS.wipeEntries(self)
 
 		if self.allow_highlight then
 			self:highlightAll()
@@ -162,7 +162,6 @@ function def:removeItem(item_t)
 
 	return removed_item
 end
-
 
 
 local function removeItemIndexCleanup(self, item_i, id)
@@ -429,14 +428,21 @@ function def:uiCall_thimbleTopRelease(inst)
 end
 
 
-function def:uiCall_thimble1Release(inst)
-	print("def:uiCall_thimble1Release", self, inst, self == inst)
-
+function def:uiCall_thimble1Take(inst)
 	if self == inst then
+		lgcInputS.resetCaretBlink(self)
+		lgcInputS.thimble1Take(self)
+	end
+end
+
+
+function def:uiCall_thimble1Release(inst)
+	if self == inst then
+		lgcInputS.thimble1Release(self)
+
 		if self.wid_drawer then
 			-- The drawer should not exist if the dropdown body does not have thimble1.
 			self:_closePopUpMenu(false)
-			return true
 		end
 
 		self:wid_thimble1Release(self.line_ed.line)

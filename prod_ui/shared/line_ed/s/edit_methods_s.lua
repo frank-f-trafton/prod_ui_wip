@@ -212,6 +212,12 @@ function client:stepHistory(dir)
 end
 
 
+function client:resetInputCategory()
+	-- ie to force a new history entry.
+	self.input_category = false
+end
+
+
 function client:getText()
 	return self.line_ed.line
 end

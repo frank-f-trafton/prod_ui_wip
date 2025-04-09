@@ -47,7 +47,7 @@ _mt_ed_s.__index = _mt_ed_s
 
 
 --- Creates a new Line Editor object.
--- @return the edit_field table.
+-- @return the line editor table.
 function lineEdS.new(font, text_color, text_h_color)
 	uiShared.loveType(1, font, "Font")
 	uiShared.typeEval(2, text_color, "table")
@@ -115,7 +115,7 @@ function lineEdS.new(font, text_color, text_h_color)
 	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
 	-- It does nothing else in terms of security.
 	self.masked = false
-	self.mask_glyph = "*" -- Must be exactly one glyph.
+	self.mask_glyph = "*" -- A string of one code point that references one glyph.
 
 	-- Set true to create a coloredtext table for the display text. Each coloredtext
 	-- table contains a color table and a code point string for every code point in the base
