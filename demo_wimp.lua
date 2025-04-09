@@ -408,7 +408,8 @@ do
 			},
 		}
 		bar_menu:appendItem("category", {
-			text = "Demo",
+			text = "_D_emo",
+			key_mnemonic = "d",
 			pop_up_def = def_demo,
 		})
 
