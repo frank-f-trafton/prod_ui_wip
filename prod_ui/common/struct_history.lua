@@ -101,7 +101,9 @@ function _mt_hist:writeEntry(do_advance)
 		error("history position is out of bounds")
 	end
 
-	if not self.enabled then return end
+	if not self.enabled then
+		return
+	end
 
 	local ledger = self.ledger
 

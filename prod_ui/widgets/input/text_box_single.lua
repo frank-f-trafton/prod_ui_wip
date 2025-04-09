@@ -69,12 +69,6 @@ function def:uiCall_initialize()
 
 	lgcInputS.setupInstance(self)
 
-	-- Highlights all text whenever this widget gets the thimble.
-	self.select_all_on_thimble1_take = false
-
-	-- Unhighlights all upon releasing the thimble (moving the caret to the first position).
-	self.deselect_all_on_thimble1_release = false
-
 	-- State flags.
 	self.enabled = true
 	self.hovered = false
@@ -161,25 +155,31 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_thimble1Take(inst)
+function def:uiCall_thimbleTopTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
+	end
+end
+
+
+function def:uiCall_thimbleTopRelease(inst)
+	if self == inst then
+		love.keyboard.setTextInput(false)
+	end
+end
+
+
+function def:uiCall_thimble1Take(inst)
+	if self == inst then
 		lgcInputS.resetCaretBlink(self)
-		if self.select_all_on_thimble1_take then
-			self:highlightAll()
-			lgcInputS.updateCaretShape(self)
-		end
+		lgcInputS.thimble1Take(self)
 	end
 end
 
 
 function def:uiCall_thimble1Release(inst)
 	if self == inst then
-		love.keyboard.setTextInput(false)
-		if self.deselect_all_on_thimble1_release then
-			self:caretFirst(true)
-			lgcInputS.updateCaretShape(self)
-		end
+		lgcInputS.thimble1Release(self)
 	end
 end
 
@@ -296,6 +296,7 @@ def.default_skinner = {
 			.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
 			.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
 			--.. "\ndoc_w: " .. self.doc_w
+			.. "\ninput_category: " .. tostring(self.input_category)
 			,
 			0, 64
 		)

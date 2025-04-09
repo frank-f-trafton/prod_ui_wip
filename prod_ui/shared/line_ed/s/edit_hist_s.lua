@@ -80,4 +80,15 @@ function editHistS.doctorCurrentCaretOffsets(hist, car_byte, h_byte)
 end
 
 
+-- Deletes all history entries, then writes a new entry based on the current line_ed state.
+-- Also clears the widget's input category.
+function editHistS.wipeEntries(self)
+	local line_ed = self.line_ed
+
+	line_ed.hist:clearAll()
+	self:resetInputCategory()
+	editHistS.writeEntry(line_ed, true)
+end
+
+
 return editHistS
