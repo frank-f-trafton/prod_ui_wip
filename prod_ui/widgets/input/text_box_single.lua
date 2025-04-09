@@ -38,7 +38,8 @@ local def = {
 
 
 -- Override to make something happen when the user presses 'return' or 'kpenter' while the
--- widget is active and has keyboard focus.
+-- widget is active and has keyboard focus. Return true to halt further processing
+-- (specifically, the logic to check if users typed literal newlines via 'return' and 'kpenter').
 def.wid_action = uiShared.dummyFunc -- args: (self)
 
 
@@ -194,8 +195,7 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		if self.enabled then
-			if scancode == "return" or scancode == "kpenter" then
-				self:wid_action()
+			if (scancode == "return" or scancode == "kpenter") and self:wid_action() then
 				return true
 			else
 				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
