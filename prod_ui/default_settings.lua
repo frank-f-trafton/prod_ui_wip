@@ -30,7 +30,7 @@ return {
 		},
 
 		pop_up_menu = {
-			-- When clicking off of a pop-up menu, stops the user from clicking
+			-- When clicking outside of a pop-up menu, this stops the user from clicking
 			-- any other widget that is behind the base menu.
 			-- May prevent accidental clicks, though some people (ahem) hate it.
 			block_1st_click_out = false,
