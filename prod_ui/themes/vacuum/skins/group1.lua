@@ -19,7 +19,7 @@ Slice B       Slice C
 return {
 	skinner_id = "wimp/group",
 
-	box = "*style/boxes/wimp_group",
+	box = "*boxes/wimp_group",
 	font = "*fonts/p",
 
 	show_perimeter = true,

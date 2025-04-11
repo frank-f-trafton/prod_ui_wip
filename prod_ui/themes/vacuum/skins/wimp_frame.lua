@@ -16,9 +16,9 @@ return {
 	header_size = "*wimp/header_size",
 	-- /settings
 
-	box = "*style/boxes/wimp_frame",
+	box = "*boxes/wimp_frame",
 	data_scroll = "*common/scroll_bar1",
-	scr_style = "*style/scroll_bar_styles/norm",
+	scr_style = "*scroll_bar_styles/norm",
 
 	-- Padding when scrolling to put a widget into view.
 	in_view_pad_x = 0,
@@ -73,7 +73,7 @@ return {
 		-- false: 'self.w', 'self.h'
 		-- number: a corresponding viewport.
 		viewport_fit = 4,
-		header_box = "*style/boxes/wimp_frame_header_normal",
+		header_box = "*boxes/wimp_frame_header_normal",
 		header_slc_body = "*tex_slices/winheader_normal",
 		header_font = "*fonts/h4",
 		header_h = 32,
@@ -137,7 +137,7 @@ return {
 
 	res_small = {
 		viewport_fit = 4,
-		header_box = "*style/boxes/wimp_frame_header_small",
+		header_box = "*boxes/wimp_frame_header_small",
 		header_slc_body = "*tex_slices/winheader_small",
 		header_font = "*fonts/small",
 		header_h = 18,
@@ -202,7 +202,7 @@ return {
 
 	res_large = {
 		viewport_fit = 4,
-		header_box = "*style/boxes/wimp_frame_header_large",
+		header_box = "*boxes/wimp_frame_header_large",
 		header_slc_body = "*tex_slices/winheader_large",
 		header_font = "*fonts/h3",
 		header_h = 48,

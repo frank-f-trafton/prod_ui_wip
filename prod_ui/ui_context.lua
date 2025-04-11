@@ -124,8 +124,19 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- DPI class. Determines which set of textures and associated metadata to load.
 	self.dpi = 96
 
-	-- Place the theme instance (containing shared resources such as textures) here.
-	self.resources = false
+	-- Assign a theme table here.
+	self.theme = false
+
+	-- Resources.
+	self.resources = {
+		boxes = {},
+		skinners = {},
+		skins = {},
+		fonts = {},
+		tex_defs = {},
+		tex_quads = {},
+		tex_slices = {},
+	}
 
 	-- Passed as the settings argument when creating new layer canvases.
 	self.canvas_settings = {}

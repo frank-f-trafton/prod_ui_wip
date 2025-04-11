@@ -7,8 +7,8 @@ This skin provides graphics for states 1-3.
 return {
 	skinner_id = "base/checkbox_multi",
 
-	box = "*style/boxes/button_bijou",
-	label_style = "*style/labels/norm",
+	box = "*boxes/button_bijou",
+	label_style = "*labels/norm",
 	tq_px = "*tex_quads/pixel",
 
 	-- Cursor IDs for hover and press states.

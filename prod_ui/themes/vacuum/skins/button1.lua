@@ -4,8 +4,8 @@
 return {
 	skinner_id = "skn_button",
 
-	box = "*style/boxes/button",
-	label_style = "*style/labels/norm",
+	box = "*boxes/button",
+	label_style = "*labels/norm",
 	tq_px = "*tex_quads/pixel",
 
 	-- Cursor IDs for hover and press states.
