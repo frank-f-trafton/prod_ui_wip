@@ -16,11 +16,10 @@ function plan.make(panel)
 
 	-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.
 
-	local resources = panel.context.resources
-	local clone = resources:cloneSkinDef("button1")
+	local clone = panel.context:cloneSkinDef("button1")
 
 	local function _userDestroy(self)
-		self.context.resources:removeSkinDef(clone)
+		self.context:removeSkinDef(clone)
 	end
 
 	local button_norm = panel:addChild("base/button")

@@ -3,7 +3,7 @@
 return {
 	skinner_id = "wimp/embed/checkbox",
 
-	box = "*style/boxes/button_bijou",
+	box = "*boxes/button_bijou",
 	tq_px = "*tex_quads/pixel",
 
 	-- Cursor IDs for hover and press states.

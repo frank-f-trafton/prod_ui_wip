@@ -5,7 +5,7 @@ return {
 	skinner_id = "wimp/menu_bar",
 
 	-- NOTE: Very large box borders will interfere with clicking on menu items.
-	box = "*style/boxes/menu_bar",
+	box = "*boxes/menu_bar",
 	tq_px = "*tex_quads/pixel",
 	sl_body = "*tex_slices/menu_bar_body",
 	font_item = "*fonts/p",

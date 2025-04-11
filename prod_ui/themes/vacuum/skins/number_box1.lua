@@ -4,7 +4,7 @@
 return {
 	skinner_id = "wimp/number_box",
 
-	box = "*style/boxes/input_box",
+	box = "*boxes/input_box",
 	font = "*fonts/p",
 	font_ghost = "*fonts/p",
 

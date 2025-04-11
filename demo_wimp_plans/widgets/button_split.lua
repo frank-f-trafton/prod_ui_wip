@@ -87,11 +87,10 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	-- SkinDef clone
-	local resources = panel.context.resources
-	local clone = resources:cloneSkinDef("button_split1")
+	local clone = panel.context:cloneSkinDef("button_split1")
 
 	local function _userDestroy(self)
-		self.context.resources:removeSkinDef(clone)
+		self.context:removeSkinDef(clone)
 	end
 
 	-- Split Button

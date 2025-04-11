@@ -4,7 +4,7 @@
 return {
 	skinner_id = "input/text_box_multi",
 
-	box = "*style/boxes/input_box",
+	box = "*boxes/input_box",
 	data_scroll = "*common/scroll_bar1",
 	font = "*fonts/p",
 	font_ghost = "*fonts/p",

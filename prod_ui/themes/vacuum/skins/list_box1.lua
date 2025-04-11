@@ -10,12 +10,12 @@ return {
 	--text_align_h = "left",
 	-- /settings
 
-	box = "*style/boxes/panel",
+	box = "*boxes/panel",
 	tq_px = "*tex_quads/pixel",
 	data_scroll = "*common/scroll_bar1",
-	scr_style = "*style/scroll_bar_styles/norm",
+	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
-	data_icon = "*style/icons/p",
+	data_icon = "*icons/p",
 
 	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 	item_pad_v = 2,

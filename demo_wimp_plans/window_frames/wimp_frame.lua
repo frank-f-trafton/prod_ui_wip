@@ -10,10 +10,10 @@ function plan.makeWindowFrame(root)
 	local context = root.context
 
 	-- Clone the skin to avoid messing up other frames.
-	local skin_clone = context.resources:cloneSkinDef("wimp_frame")
+	local skin_clone = context:cloneSkinDef("wimp_frame")
 
 	local function _userDestroy(self)
-		self.context.resources:removeSkinDef(skin_clone)
+		self.context:removeSkinDef(skin_clone)
 	end
 
 	local frame = root:newWindowFrame()
@@ -393,7 +393,7 @@ function plan.makeWindowFrame(root)
 			local frame = commonWimp.getFrame(self)
 			if frame then
 				skin_clone.header_text_align_h = self.usr_text_align_h
-				self.context.resources:refreshSkinDefInstance(skin_clone)
+				self.context:refreshSkinDefInstance(skin_clone)
 				frame:reshape()
 				print("skin_clone.header_text_align_h", skin_clone.header_text_align_h)
 				print("frame.skin.header_text_align_h", frame.skin.header_text_align_h)

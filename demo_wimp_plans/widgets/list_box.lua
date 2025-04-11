@@ -118,11 +118,10 @@ end
 
 local function makeListBox1(panel, x, y)
 	-- SkinDef clone
-	local resources = panel.context.resources
-	local skin_clone = resources:cloneSkinDef("list_box1")
+	local skin_clone = panel.context:cloneSkinDef("list_box1")
 
 	local function _userDestroy(self)
-		self.context.resources:removeSkinDef(skin_clone)
+		self.context:removeSkinDef(skin_clone)
 	end
 
 	local list_box = panel:addChild("wimp/list_box")
@@ -316,7 +315,7 @@ local function makeListBox1(panel, x, y)
 		if lb then
 			local skin_def = getmetatable(lb.skin)
 			skin_def.pad_text_x = self.slider_pos
-			self.context.resources:refreshSkinDefInstance(lb.skin_id)
+			self.context:refreshSkinDefInstance(lb.skin_id)
 			lb:reshape()
 		end
 	end

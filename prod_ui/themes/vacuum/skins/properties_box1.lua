@@ -4,12 +4,12 @@
 return {
 	skinner_id = "wimp/properties_box",
 
-	box = "*style/boxes/panel",
+	box = "*boxes/panel",
 	tq_px = "*tex_quads/pixel",
 	data_scroll = "*common/scroll_bar1",
-	scr_style = "*style/scroll_bar_styles/norm",
+	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
-	data_icon = "*style/icons/p",
+	data_icon = "*icons/p",
 
 	cursor_sash = "sizewe",
 	sash_w = 12,

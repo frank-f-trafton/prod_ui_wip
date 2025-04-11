@@ -1,7 +1,7 @@
 return {
 	skinner_id = "wimp/text_block",
 
-	box = "*style/boxes/panel",
+	box = "*boxes/panel",
 
 	-- Cursor IDs for hover and press states.
 	-- Only used when the text block is configured as a hyperlink.

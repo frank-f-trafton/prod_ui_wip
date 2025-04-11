@@ -14,6 +14,7 @@ local context = select(1, ...)
 
 local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local contextDraw = context:getLua("core/context_draw")
+local contextResources = context:getLua("core/context_resources")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
@@ -1104,6 +1105,9 @@ end
 function _mt_context:getDPI()
 	return self.dpi
 end
+
+
+contextResources.attachMethods(_mt_context)
 
 
 return _mt_context

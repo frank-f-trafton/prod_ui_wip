@@ -5,8 +5,8 @@ return {
 	skinner_id = "base/stepper",
 
 
-	box = "*style/boxes/button",
-	label_style = "*style/labels/norm",
+	box = "*boxes/button",
+	label_style = "*labels/norm",
 	tq_px = "*tex_quads/pixel",
 
 

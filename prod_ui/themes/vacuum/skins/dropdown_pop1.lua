@@ -4,10 +4,10 @@
 return {
 	skinner_id = "wimp/dropdown_pop",
 
-	box = "*style/boxes/panel",
+	box = "*boxes/panel",
 	font = "*fonts/p",
 	data_scroll = "*common/scroll_bar1",
-	scr_style = "*style/scroll_bar_styles/norm_hide",
+	scr_style = "*scroll_bar_styles/norm_hide",
 
 	text_align = "left", -- "left", "center", "right"
 

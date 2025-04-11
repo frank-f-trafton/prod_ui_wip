@@ -7,7 +7,7 @@ return {
 	-- The SkinDef ID for pop-ups made by this widget.
 	skin_id_pop = "dropdown_pop1",
 
-	box = "*style/boxes/input_box",
+	box = "*boxes/input_box",
 	font = "*fonts/p",
 	font_ghost = "*fonts/p",
 

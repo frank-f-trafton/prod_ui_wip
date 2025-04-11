@@ -4,7 +4,7 @@
 return {
 	skinner_id = "wimp/menu_pop",
 
-	box = "*style/boxes/panel",
+	box = "*boxes/panel",
 
 	separator_size = 1,
 

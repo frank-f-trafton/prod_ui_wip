@@ -4,8 +4,8 @@
 return {
 	skinner_id = "status/progress_bar",
 
-	box = "*style/boxes/button",
-	label_style = "*style/labels/norm",
+	box = "*boxes/button",
+	label_style = "*labels/norm",
 	tq_px = "*tex_quads/pixel",
 
 	-- Alignment of label text in Viewport #1.
