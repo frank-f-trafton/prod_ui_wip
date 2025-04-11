@@ -44,6 +44,7 @@ local demo_plan_list = {
 		-- TODO: text blocks
 		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
 		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
+		{plan_id = "scaling", label = "Scaling"},
 		--[[
 		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
 			{plan_id = "unfinished.drag_box", label = "Drag Box"},
@@ -202,7 +203,7 @@ local function newWimpContext()
 
 	-- Assign resources ASAP.
 	local theme_module = uiRes.loadLuaFileWithPath("prod_ui/themes/vacuum/vacuum.lua", context)
-	context.resources = theme_module.newInstance(1.0)
+	context.resources = theme_module.newInstance()
 
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)

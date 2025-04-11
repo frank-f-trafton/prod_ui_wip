@@ -61,12 +61,12 @@ function def:uiCall_reshapePre()
 	if self.trough_vertical then
 		self.thumb_x = 0
 		self.thumb_w = self.w
-		self.thumb_h = math.floor(math.max(1, 6 * self.context.resources.scale))
+		self.thumb_h = math.floor(math.max(1, 6 * self.context.scale))
 
 		self.trough_h = self.trough_h - self.thumb_h
 	else
 		self.thumb_y = 0
-		self.thumb_w = math.floor(math.max(1, 6 * self.context.resources.scale))
+		self.thumb_w = math.floor(math.max(1, 6 * self.context.scale))
 		self.thumb_h = self.h
 
 		self.trough_w = self.trough_w - self.thumb_w
@@ -152,7 +152,7 @@ def.render = function(self, ox, oy)
 	end
 
 	love.graphics.setLineStyle("smooth")
-	local line_width = math.max(1, math.floor(2 * self.context.resources.scale))
+	local line_width = math.max(1, math.floor(2 * self.context.scale))
 	love.graphics.setLineWidth(line_width)
 	love.graphics.setLineJoin("miter")
 	love.graphics.rectangle("line", line_width/2, line_width/2, self.w - line_width, self.h - line_width)

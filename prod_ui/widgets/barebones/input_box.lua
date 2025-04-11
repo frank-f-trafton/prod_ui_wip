@@ -232,7 +232,7 @@ end
 def.render = function(self, ox, oy)
 	love.graphics.push("all")
 
-	local scale = self.context.resources.scale
+	local scale = self.context.scale
 	local font = self.context.resources.fonts.internal
 
 	local line_w = math.floor(1.0 * scale)

@@ -37,7 +37,7 @@ return function(self, ox, oy)
 	end
 
 	love.graphics.setLineStyle("smooth")
-	local line_width = math.max(1, math.floor(2 * self.context.resources.scale))
+	local line_width = math.max(1, math.floor(2 * self.context.scale))
 	love.graphics.setLineWidth(line_width)
 	love.graphics.setLineJoin("miter")
 	love.graphics.rectangle("line", line_width/2, line_width/2, self.w - line_width, self.h - line_width)
