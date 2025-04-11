@@ -1,7 +1,13 @@
+-- To load: local lib = context:getLua("shared/lib")
+
+
 -- contextDraw: Implements the context draw loop.
 
 
 local contextDraw = {}
+
+
+local context = select(1, ...)
 
 
 --local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""

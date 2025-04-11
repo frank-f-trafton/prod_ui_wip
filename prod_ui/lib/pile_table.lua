@@ -119,4 +119,11 @@ function M.deepCopy(t)
 end
 
 
+function M.clear(t)
+	for k in pairs(t) do
+		t[k] = nil
+	end
+end
+
+
 return M

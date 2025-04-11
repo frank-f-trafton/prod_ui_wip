@@ -1,5 +1,24 @@
 -- Base style data.
 return {
+	fonts = {
+		h1 = 32,
+		h2 = 24,
+		h3 = 18,
+		h4 = 15,
+		internal = 13,
+		p = 14,
+		small = 12,
+
+		--[====[
+		-- XXX: Test symbol substitution in single-line text boxes
+		p = {
+			"fonts/noto_sans/NotoSans-Regular.ttf", 14,
+			"fonts/noto_sans/NotoSansSymbols-Regular.ttf", 14,
+			"fonts/noto_sans/NotoSansSymbols2-Regular.ttf", 14,
+		},
+		--]====]
+	},
+
 	boxes = {
 		panel = {
 			sl_body_id = "tex_slices/list_box_body",

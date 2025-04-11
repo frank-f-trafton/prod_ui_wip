@@ -26,10 +26,9 @@ function themeDef.newInstance()
 	assert(type(scale) == "number", "invalid scale type.")
 	assert(type(dpi) == "number", "invalid DPI type.")
 
-	local inst = uiTheme.newThemeInstance()
+	local inst = uiTheme.newThemeInstance(scale)
 
-	-- General fonts
-	inst.fonts = {}
+	-- * Fonts
 
 	-- For internal widgets.
 	inst.fonts.internal = love.graphics.newFont(math.floor(13 * scale))
@@ -51,10 +50,7 @@ function themeDef.newInstance()
 	inst.fonts.p = test_font
 
 
-	-- Textures, quads, slices
-	inst.tex_defs = {}
-	inst.tex_quads = {}
-	inst.tex_slices = {}
+	-- * Textures, Quads, Slices
 
 	-- Setup atlas texture, plus its associated quads and slices.
 	local atlas_data = uiRes.loadLuaFile(BASE_PATH .. "tex/" .. tostring(dpi) .. "/atlas.lua")
@@ -136,10 +132,7 @@ function themeDef.newInstance()
 	inst.style_default = uiRes.loadLuaFile(BASE_PATH .. "data.lua")
 	inst.style = pTable.deepCopy(inst.style_default)
 
-	local _mt_box_style = uiTheme._mt_box_style
 	for k2, v2 in pairs(inst.style.boxes) do
-		setmetatable(v2, _mt_box_style)
-
 		for k, v in pairs(v2) do
 			if k == "outpad" or k == "border" or k == "margin" then
 				v.x1 = math.max(0, math.floor(v.x1 * scale))

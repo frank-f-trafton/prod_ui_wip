@@ -28,6 +28,18 @@ local _drill = utilTable.drill
 function uiTheme.dummyFunc() end
 
 
+-- Cache of loaded fonts, where the keys are:
+-- TrueType: 'path .. ":" .. size'
+-- ImageFont: 'path .. ":ImageFont"'
+-- BMFont: 'path .. ":BMFont"
+local _fonts = setmetatable({}, {__mode="kv"})
+
+
+local function _fontHash(path, tag)
+	return path .. ":" .. tag
+end
+
+
 local _mt_themeInst = {}
 _mt_themeInst.__index = _mt_themeInst
 
@@ -36,29 +48,39 @@ local _mt_themeDataPack = {}
 _mt_themeDataPack.__index = _mt_themeDataPack
 
 
-local _mt_box_style = {}
-_mt_box_style.__index = _mt_box_style
-uiTheme._mt_box_style = _mt_box_style
-
 
 --- Create a new theme instance.
--- @param scale (1.0) UI scaling factor.
--- @return A theme instance table, which should be assigned to context.resources.
+-- @return A theme instance table, which should be assigned to 'context.resources'.
 function uiTheme.newThemeInstance(scale)
 	scale = scale or 1.0
 
-	uiTheme.assertScale(1, scale, false)
+	--uiTheme.assertScale(1, scale, false) -- deleted
 	scale = commonMath.clamp(scale, 0.1, 10.0)
 
-	local self = setmetatable({}, _mt_themeInst)
+	return setmetatable({
+		scale = scale,
 
-	self.scale = scale
-
-	self.skinners = {}
-	self.skins = {}
-
-	return self
+		skinners = {},
+		skins = {},
+		fonts = {},
+		tex_defs = {},
+		tex_quads = {},
+		tex_slices = {},
+	}, _mt_themeInst)
 end
+
+
+function _mt_themeInst:reset()
+	for k, v in pairs(self) do
+		pTable.clear(v)
+	end
+end
+
+
+function _mt_themeInst:loadFont(id, v)
+
+end
+
 
 
 function uiTheme.newThemeDataPack()
@@ -327,20 +349,81 @@ function uiTheme.skinnerClearData(self)
 end
 
 
---- Checks a scale number for issues (not a number, zero or negative value, etc.)
--- @param arg_n The argument number.
--- @param scale The scale number to check.
--- @param integral When true, the scale value must be an integer (math.floor(scale) == scale).
--- @return Nothing. Raises a Lua error if there's a problem.
-function uiTheme.assertScale(arg_n, scale, integral)
-	if type(scale) ~= "number" then
-		error("argument #" .. arg_n .. ": expected number, got " .. type(scale), 2)
+-- Workaround for Font:setFallbacks() not accepting a table of Fonts.
+local MAX_FALLBACKS = 16
 
-	elseif integral and math.floor(scale) ~= scale then
-		error("argument #" .. arg_n .. ": scale must be an integer.", 2)
 
-	elseif scale <= 0 then
-		error("argument #" .. arg_n .. ": scale must be greater than zero.", 2)
+function uiTheme.setFontFallbacks(font, f1, f2, f3, f4, f5, f6, f7, f8, f9, fa, fb, fc, fd, fe, ff)
+	if ff then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9, fa, fb, fc, fd, fe, ff)
+	elseif fe then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9, fa, fb, fc, fd, fe)
+	elseif fd then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9, fa, fb, fc, fd)
+	elseif fc then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9, fa, fb, fc)
+	elseif fb then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9, fa, fb)
+	elseif fa then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9, fa)
+	elseif f9 then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8, f9)
+	elseif f8 then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7, f8)
+	elseif f7 then font:setFallbacks(f1, f2, f3, f4, f5, f6, f7)
+	elseif f6 then font:setFallbacks(f1, f2, f3, f4, f5, f6)
+	elseif f5 then font:setFallbacks(f1, f2, f3, f4, f5)
+	elseif f4 then font:setFallbacks(f1, f2, f3, f4)
+	elseif f3 then font:setFallbacks(f1, f2, f3)
+	elseif f2 then font:setFallbacks(f1, f2)
+	elseif f1 then font:setFallbacks(f1)
+	else font:setFallbacks() end
+end
+
+
+function uiTheme.instantiateFont(v)
+	uiShared.type(1, v, "number", "table")
+
+	if type(v) == "number" then
+		local cached = _fonts[v]
+		if cached then
+			return cached
+		end
+
+		local font = love.graphics.newFont(v)
+		_fonts[v] = font
+		return font
+	else -- table
+		local path, size = v[1], v[2]
+		assert(type(path) == "string", "path: expected string.")
+		assert(type(size) == "number", "font size: expected number.")
+
+		if #v > 2 + MAX_FALLBACKS*2 then
+			error("max font fallbacks exceeded.")
+		end
+
+		local id = _fontHash(path, size)
+
+		local font
+		local cached = _fonts[id]
+		if cached then
+			font = cached
+		else
+			font = love.graphics.newFont(path, size)
+			_fonts[id] = font
+		end
+
+		if #v > 2 then
+			local fb = {}
+			for i = 3, math.max(#v, 8), 2 do
+				local path2, size2 = v[i], v[i + 1]
+				local id2 = _fontHash(path2, size2)
+				if not _fonts[id2] then
+					_fonts[id2] = love.graphics.newFont(path2, size2)
+				end
+				fb[#fb + 1] = _fonts[id2]
+			end
+			uiTheme.setFontFallbacks(font,
+				fb[3], fb[4], fb[5], fb[6], fb[7], fb[8], fb[9], fb[10],
+				fb[11], fb[12], fb[13], fb[14], fb[15], fb[16], fb[17], fb[18],
+				fb[19], fb[20], fb[21], fb[22], fb[23], fb[24], fb[25], fb[26],
+				fb[27], fb[28], fb[29], fb[30], fb[31], fb[32], fb[33], fb[34]
+			)
+		end
+
+		return font
 	end
 end
 
