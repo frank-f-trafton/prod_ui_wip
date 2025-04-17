@@ -7,92 +7,16 @@ local contextResources = {}
 local context = select(1, ...)
 
 
+local fontCache = context:getLua("core/res/font_cache")
+local pPath = require(context.conf.prod_ui_req .. "lib.pile_path")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 
 
 local _drill = utilTable.drill
-
-
--- Temporary cache of loaded fonts, where the keys are:
--- TrueType: 'path .. ":" .. size'
--- ImageFont: 'path .. ":ImageFont"'
--- BMFont: 'path .. ":BMFont"
-local _fonts = setmetatable({}, {__mode="kv"})
-
-
-local function _fontHash(path, tag)
-	return path .. ":" .. tag
-end
-
-
-local function _interpolatePath(path, theme_path)
-	if path:find("^%%theme%%") then
-		return path:gsub("%%theme%%", theme_path, 1)
-	end
-end
-
-
-local function _instantiateFont(v, theme_id)
-	uiShared.type(1, v, "table")
-
-	--[[
-	'v' table format:
-	v.path: The path to the font on disk, or "default" to use LÖVE's built-in font.
-		The path is relative to 'prod_ui/themes'. Start the path with "%theme%" to
-		point to this theme directory (like "%theme%/fonts/letters.ttf").
-	v.size: The size for TrueType fonts.
-	v.fallbacks: array of more tables with 'path' and 'size' fields, specifying this
-		font's fallbacks.
-
-	Note that fallbacks of fallbacks are not considered. That is, if 'A' sets 'B' as a
-	fallback, and 'C' sets 'A' as a fallback, then 'C' will not pull glyph data from 'B'
-	via 'A'.
-
-	TODO: ImageFonts, BMFonts
-	--]]
-
-	local path, size, fallbacks = v.path, v.size, v.fallbacks
-	assert(type(path) == "string", "path: expected string.")
-	if size and type(size) ~= "number" then
-		error("font size: expected number.")
-	end
-
-	path = _interpolatePath(path, theme_id)
-
-	local id = _fontHash(path, size)
-
-	local font
-	local cached = _fonts[id]
-	if cached then
-		font = cached
-	else
-		if path == "default" then
-			font = love.graphics.newFont(size)
-		else
-			font = love.graphics.newFont(path, size)
-		end
-
-		_fonts[id] = font
-	end
-
-	if fallbacks then
-		local fb = {}
-		for i, f in ipairs(fallbacks) do
-			local path2, size2 = _interpolatePath(f.path, theme_id), f.size
-			local id2 = _fontHash(path2, size2)
-			if not _fonts[id2] then
-				_fonts[id2] = love.graphics.newFont(path2, size2)
-			end
-			fb[#fb + 1] = _fonts[id2]
-		end
-		font:setFallbacks(unpack(fb))
-	end
-
-	return font
-end
 
 
 local methods = {}
@@ -113,30 +37,170 @@ function methods:resetResources()
 end
 
 
-function methods:applyTheme()
-	local theme = self.theme
+local function _loadTexture(paths, stem)
+	local path
+	for _, check_path in ipairs(paths) do
+		local check_full = pPath.join(check_path, stem)
+		if love.filesystem.getInfo(check_full) then
+			path = check_full
+			break
+		end
+	end
+
+	if not path then
+		error("unable to locate texture: " .. tostring(stem))
+	end
+
+	local tex = love.graphics.newImage(path)
+	local metadata
+	local path_lua = path:sub(1, -5) .. ".lua"
+	print("PATH_LUA", path_lua)
+	if love.filesystem.getInfo(path_lua) then
+		local err
+		local chunk, err = love.filesystem.load(path_lua)
+		if not chunk then
+			error(err)
+		end
+		metadata = chunk()
+	end
+	-- TODO: check config fields
+
+	local tex_info = {texture = tex}
+
+	if metadata then
+		if metadata.config then
+			for k, v in pairs(metadata.config) do
+				tex_info[k] = v
+			end
+		end
+	end
+
+	pTable.assignIfNil(tex_info, "alpha_mode", "alphamultiply")
+	pTable.assignIfNil(tex_info, "blend_mode", "alpha")
+	pTable.assignIfNil(tex_info, "filter_mag", "linear")
+	pTable.assignIfNil(tex_info, "filter_min", "linear")
+	pTable.assignIfNil(tex_info, "wrap_h", "clamp")
+	pTable.assignIfNil(tex_info, "wrap_v", "clamp")
+
+	tex:setFilter(tex_info.filter_min, tex_info.filter_mag)
+	tex:setWrap(tex_info.wrap_h, tex_info.wrap_v)
+
+	if metadata then
+		if metadata.quads then
+			tex_info.quads = {}
+			for k, v in pairs(metadata.quads) do
+				tex_info.quads[k] = {
+					x = v.x,
+					y = v.y,
+					w = v.w,
+					h = v.h,
+					texture = tex_info.texture,
+					quad = love.graphics.newQuad(v.x, v.y, v.w, v.h, tex_info.texture),
+					blend_mode = tex_info.blend_mode,
+					alpha_mode = tex_info.alpha_mode,
+				}
+			end
+		end
+
+		if metadata.slices then
+			tex_info.slices = {}
+			for k, v in pairs(metadata.slices) do
+				local base_tq = tex_info.quads[k]
+				if not base_tq then
+					error("missing base texture+quad pair for 9-Slice: " .. tostring(k))
+				end
+
+				local tex_slice = {
+					x = v.x, y = v.y,
+					w1 = v.w1, h1 = v.h1,
+					w2 = v.w2, h2 = v.h2,
+					w3 = v.w3, h3 = v.h3,
+
+					tex_quad = base_tq,
+					texture = base_tq.texture,
+					blend_mode = tex_info.blend_mode,
+					alpha_mode = tex_info.alpha_mode,
+				}
+
+				tex_slice.slice = quadSlice.newSlice(
+					base_tq.x + v.x, base_tq.y + v.y,
+					v.w1, v.h1,
+					v.w2, v.h2,
+					v.w3, v.h3,
+					tex_slice.texture:getDimensions()
+				)
+
+				-- If specified, attach a starting draw function.
+				if v.draw_fn_id then
+					local draw_fn = quadSlice.draw_functions[v.draw_fn_id]
+					if not draw_fn then
+						error("in 'quadSlice.draw_functions', cannot find function with ID: " .. v.draw_fn_id)
+					end
+
+					tex_slice.slice.drawFromParams = draw_fn
+				end
+
+				-- If specified, set the initial state of each tile.
+				-- 'tiles_state' is an array of bools. Only indexes 1-9 with true or
+				-- false are considered. All other values are ignored (so they will default
+				-- to being enabled).
+				if v.tiles_state then
+					for i = 1, 9 do
+						if type(v.tiles_state[i]) == "boolean" then
+							tex_slice.slice:setTileEnabled(i, false)
+						end
+					end
+				end
+
+				tex_info.slices[k] = tex_slice
+			end
+		end
+	end
+
+	return tex_info
+end
+
+
+function methods:applyTheme(theme_source)
 	local resources = self.resources
 	local scale = self.scale
 
 	self:resetResources()
 
-	pTable.clear(_fonts)
-	if theme.fonts then
-		for k, v in pairs(theme.fonts) do
-			local font = _instantiateFont(v)
-			self.resources.fonts[k] = v
+	local theme = pTable.deepCopy(theme_source)
+	self.theme = theme
+
+	for k, v in pairs(theme.paths) do
+		for i, path in ipairs(v) do
+			v[i] = pPath.interpolate(v[i], self.path_symbols)
 		end
 	end
-	pTable.clear(_fonts)
+	-- TODO: attach paths table somewhere?
 
+	if theme.fonts then
+		local cache = {}
 
-	-- Textures
-	local textures = uiRes.enumerate(base_path, ".lua", recursive)
+		for k, v in pairs(theme.fonts) do
+			resources.fonts[k] = fontCache.instantiateFont(theme.paths.fonts, v.path, v.size, v.fallbacks, cache)
+		end
 
-	--[[
-	local atlas_data = uiRes.loadLuaFile(BASE_PATH .. "tex/" .. tostring(dpi) .. "/atlas.lua")
-	local atlas_tex = love.graphics.newImage(BASE_PATH .. "tex/" .. tostring(dpi) .. "/atlas.png")
-	--]]
+		fontCache.assignFallbacks(cache)
+	end
+
+	if theme.textures then
+		for k, v in pairs(theme.textures) do
+			if not resources.textures[k] then
+				local tex_info = _loadTexture(theme.paths.textures, v)
+				resources.textures[k] = tex_info
+				if tex_info.quads then
+					resources.quads[k] = tex_info.quads
+				end
+				if tex_info.slices then
+					resources.slices[k] = tex_info.slices
+				end
+			end
+		end
+	end
 
 	if theme.boxes then
 		for k2, v2 in pairs(theme.boxes) do
@@ -154,6 +218,38 @@ function methods:applyTheme()
 	-- TODO: Icon classifications
 
 	-- TODO: Widget label styles
+
+	-- TODO: I need to give these proper handling and care, but for now, I just
+	-- want to get the library booting again.
+	resources.boxes = pTable.deepCopy(theme.boxes)
+	resources.paths = pTable.deepCopy(theme.paths)
+	resources.icons = pTable.deepCopy(theme.icons)
+	resources.labels = pTable.deepCopy(theme.labels)
+	resources.scroll_bar_styles = pTable.deepCopy(theme.scroll_bar_styles)
+	resources.scroll_bar_data = pTable.deepCopy(theme.scroll_bar_data)
+	resources.wimp = pTable.deepCopy(theme.wimp)
+	resources.thimble_info = pTable.deepCopy(theme.thimble_info)
+
+	-- TODO: Replace/rewrite this.
+	local function _recursiveDrill(t)
+		for k, v in pairs(t) do
+			if type(v) == "table" then
+				_recursiveDrill(v)
+
+			elseif type(v) == "string" and v:sub(1, 1) == "*" then
+				t[k] = _drill(resources, "/", v:sub(2))
+			end
+		end
+	end
+	_recursiveDrill(resources)
+
+	if theme.paths.skins then
+		for _, v in ipairs(theme.paths.skins) do
+			if love.filesystem.getInfo(v) then
+				self:loadSkinDefs(v, true)
+			end
+		end
+	end
 end
 
 
@@ -198,20 +294,19 @@ end
 
 
 --- Loads multiple SkinDefs from a directory. The SkinDef names are based on the file names with the base path and
---	file extension stripped.
+--	file extension stripped. Only registers SkinDefs for IDs that are not already populated.
 -- @param base_path The file path to scan.
--- @param id_prepend An optional string to insert before the SkinDef names.
-function methods:loadSkinDefs(base_path, recursive, id_prepend)
+-- @param recursive True to scan subdirectories (which become part of the ID).
+function methods:loadSkinDefs(base_path, recursive)
 	--[[
 	An example of how this method names SkinDefs:
 
-	inst:loadSkinDefs("game/ui_skins", "xtra/")
+	inst:loadSkinDefs("game/ui_skins", true)
 
-	The file "game/ui_skins/skeleton.lua" produces "xtra/skeleton".
-	The file "game/ui_skins/pads/lily.lua" produces "xtra/pads/lily".
+	The file "game/ui_skins/skeleton.lua" produces "skeleton".
+	The file "game/ui_skins/pads/lily.lua" produces "pads/lily".
 	--]]
 
-	id_prepend = id_prepend or ""
 	local source_files = uiRes.enumerate(base_path, ".lua", recursive)
 
 	for i, file_path in ipairs(source_files) do
@@ -220,9 +315,11 @@ function methods:loadSkinDefs(base_path, recursive, id_prepend)
 		if not id then
 			error("couldn't extract ID from file path: " .. file_path)
 		end
-		id = id_prepend .. uiRes.stripBaseDirectoryFromPath(base_path, id)
+		id = uiRes.stripBaseDirectoryFromPath(base_path, id)
 
-		self:loadSkinDef(id, file_path)
+		if not self.resources.skins[id] then
+			self:loadSkinDef(id, file_path)
+		end
 	end
 end
 
@@ -321,7 +418,7 @@ end
 function methods:refreshSkinDefInstance(id)
 	local skin_def, skin_inst = _getSkinTables(self, id)
 
-	local skinner = self.resources.skinners[skin_def.skinner_id]
+	local skinner = context.skinners[skin_def.skinner_id]
 	if not skinner then
 		error("missing skinner (the implementation). Skinner ID: " .. tostring(skin_def.skinner_id) .. ", requesting skin: " .. tostring(id))
 	end

@@ -5,8 +5,8 @@ return {
 	skinner_id = "wimp/properties_box",
 
 	box = "*boxes/panel",
-	tq_px = "*tex_quads/pixel",
-	data_scroll = "*common/scroll_bar1",
+	tq_px = "*quads/atlas/pixel",
+	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 	data_icon = "*icons/p",
@@ -17,7 +17,7 @@ return {
 	item_h = 40,
 	control_min_w = 128,
 
-	sl_body = "*tex_slices/list_box_body",
+	sl_body = "*slices/atlas/list_box_body",
 
 	-- Alignment of property name text:
 	text_align_h = "left", -- "left", "center", "right"

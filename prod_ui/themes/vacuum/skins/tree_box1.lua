@@ -11,21 +11,21 @@ return {
 	-- /settings
 
 	box = "*boxes/panel",
-	tq_px = "*tex_quads/pixel",
-	data_scroll = "*common/scroll_bar1",
+	tq_px = "*quads/atlas/pixel",
+	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 	data_icon = "*icons/p",
 
-	tq_expander_up = "*tex_quads/arrow2_up",
-	tq_expander_down = "*tex_quads/arrow2_down",
-	tq_expander_left = "*tex_quads/arrow2_left",
-	tq_expander_right = "*tex_quads/arrow2_right",
+	tq_expander_up = "*quads/atlas/arrow2_up",
+	tq_expander_down = "*quads/atlas/arrow2_down",
+	tq_expander_left = "*quads/atlas/arrow2_left",
+	tq_expander_right = "*quads/atlas/arrow2_right",
 
 	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 	item_pad_v = 2,
 
-	sl_body = "*tex_slices/list_box_body",
+	sl_body = "*slices/atlas/list_box_body",
 
 	-- Vertical text alignment is centered.
 

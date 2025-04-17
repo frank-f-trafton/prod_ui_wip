@@ -20,11 +20,11 @@ return {
 	button_alignment = "vertical", -- "horizontal", "vertical"
 
 	res_idle = {
-		slice = "*tex_slices/input_box",
-		slc_button_inc = "*tex_slices/button_minor",
-		slc_button_dec = "*tex_slices/button_minor",
-		tq_inc = "*tex_quads/ind_increment",
-		tq_dec = "*tex_quads/ind_decrement",
+		slice = "*slices/atlas/input_box",
+		slc_button_inc = "*slices/atlas/button_minor",
+		slc_button_dec = "*slices/atlas/button_minor",
+		tq_inc = "*quads/atlas/ind_increment",
+		tq_dec = "*quads/atlas/ind_decrement",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -36,11 +36,11 @@ return {
 	},
 
 	res_hover = {
-		slice = "*tex_slices/input_box_hover",
-		slc_button_inc = "*tex_slices/button_minor_hover",
-		slc_button_dec = "*tex_slices/button_minor_hover",
-		tq_inc = "*tex_quads/ind_increment",
-		tq_dec = "*tex_quads/ind_decrement",
+		slice = "*slices/atlas/input_box_hover",
+		slc_button_inc = "*slices/atlas/button_minor_hover",
+		slc_button_dec = "*slices/atlas/button_minor_hover",
+		tq_inc = "*quads/atlas/ind_increment",
+		tq_dec = "*quads/atlas/ind_decrement",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -52,11 +52,11 @@ return {
 	},
 
 	res_pressed = {
-		slice = "*tex_slices/input_box_hover",
-		slc_button_inc = "*tex_slices/button_minor_press",
-		slc_button_dec = "*tex_slices/button_minor_press",
-		tq_inc = "*tex_quads/ind_increment",
-		tq_dec = "*tex_quads/ind_decrement",
+		slice = "*slices/atlas/input_box_hover",
+		slc_button_inc = "*slices/atlas/button_minor_press",
+		slc_button_dec = "*slices/atlas/button_minor_press",
+		tq_inc = "*quads/atlas/ind_increment",
+		tq_dec = "*quads/atlas/ind_decrement",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -68,11 +68,11 @@ return {
 	},
 
 	res_disabled = {
-		slice = "*tex_slices/input_box_disabled",
-		slc_button_inc = "*tex_slices/button_minor_disabled",
-		slc_button_dec = "*tex_slices/button_minor_disabled",
-		tq_inc = "*tex_quads/ind_increment",
-		tq_dec = "*tex_quads/ind_decrement",
+		slice = "*slices/atlas/input_box_disabled",
+		slc_button_inc = "*slices/atlas/button_minor_disabled",
+		slc_button_dec = "*slices/atlas/button_minor_disabled",
+		tq_inc = "*quads/atlas/ind_increment",
+		tq_dec = "*quads/atlas/ind_decrement",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.5, 0.5, 0.5, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},

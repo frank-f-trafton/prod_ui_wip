@@ -126,4 +126,31 @@ function M.clear(t)
 end
 
 
+function M.assignIfNil(t, f, ...)
+	if t[f] == nil then
+		for i = 1, select("#", ...) do
+			local v = select(i, ...)
+			if v ~= nil then
+				t[f] = v
+				break
+			end
+		end
+	end
+end
+
+
+function M.assignIfNilOrFalse(t, f, ...)
+	if not t[f] then
+		for i = 1, select("#", ...) do
+			local v = select(i, ...)
+			if v then
+				t[f] = v
+				break
+			end
+		end
+	end
+end
+
+
+
 return M

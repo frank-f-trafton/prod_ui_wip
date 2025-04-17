@@ -18,15 +18,15 @@ return {
 	font_item = "*fonts/p",
 
 
-	slc_body = "*tex_slices/menu_pop_body",
-	tq_px = "*tex_quads/pixel",
+	slc_body = "*slices/atlas/menu_pop_body",
+	tq_px = "*quads/atlas/pixel",
 
-	tq_arrow = "*tex_quads/arrow_right",
+	tq_arrow = "*quads/atlas/arrow_right",
 
-	tq_check_on = "*tex_quads/menu_check_on",
-	tq_check_off = "*tex_quads/menu_check_off",
-	tq_radio_on = "*tex_quads/menu_radio_on",
-	tq_radio_off = "*tex_quads/menu_radio_off",
+	tq_check_on = "*quads/atlas/menu_check_on",
+	tq_check_off = "*quads/atlas/menu_check_off",
+	tq_radio_on = "*quads/atlas/menu_radio_on",
+	tq_radio_off = "*quads/atlas/menu_radio_off",
 
 
 	color_separator = {0.125, 0.125, 0.125, 1.0},

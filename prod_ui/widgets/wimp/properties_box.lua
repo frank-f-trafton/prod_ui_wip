@@ -185,7 +185,7 @@ function def:addControl(wid_id, text, pos, bijou_id)
 	updateItemDimensions(self, 4, wid)
 	wid.text = text
 	wid.bijou_id = bijou_id
-	wid.tq_bijou = self.context.resources.tex_quads[bijou_id]
+	wid.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix this up
 
 	self:arrangeItems(4, pos, #self.children)
 

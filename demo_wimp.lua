@@ -202,12 +202,11 @@ local function newWimpContext()
 	}
 
 	-- Assign resources ASAP.
-	local theme_module = uiRes.loadLuaFileWithPath("prod_ui/themes/vacuum/vacuum.lua", context)
-	context.theme = theme_module.newInstance()
-
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
-	context:loadSkinDefs("prod_ui/themes/vacuum/skins", true)
+
+	local theme_module = uiRes.loadLuaFileWithPath("prod_ui/themes/vacuum/data.lua")
+	context:applyTheme(theme_module)
 
 	local wid_root = context:addRoot("wimp/root_wimp")
 	wid_root.w, wid_root.h = love.graphics.getDimensions()

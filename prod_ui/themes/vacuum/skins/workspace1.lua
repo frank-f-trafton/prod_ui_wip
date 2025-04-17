@@ -4,7 +4,7 @@ return {
 	skinner_id = "wimp/workspace",
 
 	box = "*boxes/frame_norm",
-	data_scroll = "*common/scroll_bar1",
+	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 
 	-- Padding when scrolling to put a widget into view.
@@ -13,8 +13,8 @@ return {
 
 	-- * Sash State *
 
-	slc_sash_lr = "*tex_slices/sash_lr",
-	slc_sash_tb = "*tex_slices/sash_tb",
+	slc_sash_lr = "*slices/atlas/sash_lr",
+	slc_sash_tb = "*slices/atlas/sash_tb",
 
 	sash_breadth = 8,
 

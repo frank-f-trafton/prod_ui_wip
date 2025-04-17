@@ -218,10 +218,10 @@ local function setupMenuItem(self, source)
 	--item.cells[<?>] = {text = text_type} -- Reserved
 
 	if source.type == "file" then
-		item.cells[1].tq_bijou = self.context.resources.tex_quads["icon_file"]
+		item.cells[1].tq_bijou = self.context.resources.quads["atlas"]["icon_file"] -- TODO: fix
 
 	elseif source.type == "directory" or source.type == "symlink" then
-		item.cells[1].tq_bijou = self.context.resources.tex_quads["icon_folder"]
+		item.cells[1].tq_bijou = self.context.resources.quads["atlas"]["icon_folder"] -- TODO: fix
 	end
 
 	local implTabCell = self.context:getLua("shared/impl_tab_cell")

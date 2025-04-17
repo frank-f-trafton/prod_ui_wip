@@ -7,7 +7,7 @@ return {
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
-	tq_px = "*tex_quads/pixel",
+	tq_px = "*quads/atlas/pixel",
 
 
 	-- Cursor IDs for hover and press states.
@@ -39,13 +39,13 @@ return {
 	--]]
 
 	res_idle = {
-		sl_body = "*tex_slices/stepper_body",
-		sl_button_up = "*tex_slices/button",
-		sl_button = "*tex_slices/button",
-		tq_left = "*tex_quads/arrow2_left",
-		tq_right = "*tex_quads/arrow2_right",
-		tq_up = "*tex_quads/arrow2_up",
-		tq_down = "*tex_quads/arrow2_down",
+		sl_body = "*slices/atlas/stepper_body",
+		sl_button_up = "*slices/atlas/button",
+		sl_button = "*slices/atlas/button",
+		tq_left = "*quads/atlas/arrow2_left",
+		tq_right = "*quads/atlas/arrow2_right",
+		tq_up = "*quads/atlas/arrow2_up",
+		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
@@ -54,13 +54,13 @@ return {
 	},
 
 	res_hover = {
-		sl_body = "*tex_slices/stepper_body",
-		sl_button_up = "*tex_slices/button_hover",
-		sl_button = "*tex_slices/button_hover",
-		tq_left = "*tex_quads/arrow2_left",
-		tq_right = "*tex_quads/arrow2_right",
-		tq_up = "*tex_quads/arrow2_up",
-		tq_down = "*tex_quads/arrow2_down",
+		sl_body = "*slices/atlas/stepper_body",
+		sl_button_up = "*slices/atlas/button_hover",
+		sl_button = "*slices/atlas/button_hover",
+		tq_left = "*quads/atlas/arrow2_left",
+		tq_right = "*quads/atlas/arrow2_right",
+		tq_up = "*quads/atlas/arrow2_up",
+		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
@@ -69,13 +69,13 @@ return {
 	},
 
 	res_pressed = {
-		sl_body = "*tex_slices/stepper_body",
-		sl_button_up = "*tex_slices/button_hover",
-		sl_button = "*tex_slices/button_press",
-		tq_left = "*tex_quads/arrow2_left",
-		tq_right = "*tex_quads/arrow2_right",
-		tq_up = "*tex_quads/arrow2_up",
-		tq_down = "*tex_quads/arrow2_down",
+		sl_body = "*slices/atlas/stepper_body",
+		sl_button_up = "*slices/atlas/button_hover",
+		sl_button = "*slices/atlas/button_press",
+		tq_left = "*quads/atlas/arrow2_left",
+		tq_right = "*quads/atlas/arrow2_right",
+		tq_up = "*quads/atlas/arrow2_up",
+		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		--color_label_ul,
@@ -84,13 +84,13 @@ return {
 	},
 
 	res_disabled = {
-		sl_body = "*tex_slices/stepper_body",
-		sl_button_up = "*tex_slices/button_disabled",
-		sl_button = "*tex_slices/button_disabled",
-		tq_left = "*tex_quads/arrow2_left",
-		tq_right = "*tex_quads/arrow2_right",
-		tq_up = "*tex_quads/arrow2_up",
-		tq_down = "*tex_quads/arrow2_down",
+		sl_body = "*slices/atlas/stepper_body",
+		sl_button_up = "*slices/atlas/button_disabled",
+		sl_button = "*slices/atlas/button_disabled",
+		tq_left = "*quads/atlas/arrow2_left",
+		tq_right = "*quads/atlas/arrow2_right",
+		tq_up = "*quads/atlas/arrow2_up",
+		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		--color_label_ul,

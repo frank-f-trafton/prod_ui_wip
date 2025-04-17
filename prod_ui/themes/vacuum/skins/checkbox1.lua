@@ -5,7 +5,7 @@ return {
 
 	box = "*boxes/button_bijou",
 	label_style = "*labels/norm",
-	tq_px = "*tex_quads/pixel",
+	tq_px = "*quads/atlas/pixel",
 
 	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
@@ -31,8 +31,8 @@ return {
 
 
 	res_idle = {
-		quad_checked = "*tex_quads/checkbox_on",
-		quad_unchecked = "*tex_quads/checkbox_off",
+		quad_checked = "*quads/atlas/checkbox_on",
+		quad_unchecked = "*quads/atlas/checkbox_off",
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
@@ -42,8 +42,8 @@ return {
 	},
 
 	res_hover = {
-		quad_checked = "*tex_quads/checkbox_on_hover",
-		quad_unchecked = "*tex_quads/checkbox_off_hover",
+		quad_checked = "*quads/atlas/checkbox_on_hover",
+		quad_unchecked = "*quads/atlas/checkbox_off_hover",
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
@@ -53,8 +53,8 @@ return {
 	},
 
 	res_pressed = {
-		quad_checked = "*tex_quads/checkbox_on_press",
-		quad_unchecked = "*tex_quads/checkbox_off_press",
+		quad_checked = "*quads/atlas/checkbox_on_press",
+		quad_unchecked = "*quads/atlas/checkbox_off_press",
 
 		color_bijou = {0.7, 0.7, 0.7, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
@@ -64,8 +64,8 @@ return {
 	},
 
 	res_disabled = {
-		quad_checked = "*tex_quads/checkbox_on",
-		quad_unchecked = "*tex_quads/checkbox_off",
+		quad_checked = "*quads/atlas/checkbox_on",
+		quad_unchecked = "*quads/atlas/checkbox_off",
 
 		color_bijou = {0.5, 0.5, 0.5, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
