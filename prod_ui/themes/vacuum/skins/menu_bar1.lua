@@ -6,10 +6,10 @@ return {
 
 	-- NOTE: Very large box borders will interfere with clicking on menu items.
 	box = "*boxes/menu_bar",
-	tq_px = "*tex_quads/pixel",
-	sl_body = "*tex_slices/menu_bar_body",
+	tq_px = "*quads/atlas/pixel",
+	sl_body = "*slices/atlas/menu_bar_body",
 	font_item = "*fonts/p",
-	thimble_info = "*common/thimble_info",
+	thimble_info = "*thimble_info",
 
 	color_cat_enabled = {1.0, 1.0, 1.0, 1.0},
 	color_cat_selected = {0.1, 0.1, 0.1, 1.0},

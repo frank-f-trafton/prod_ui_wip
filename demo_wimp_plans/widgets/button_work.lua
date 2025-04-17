@@ -69,7 +69,7 @@ function plan.make(panel)
 	-- Button with a quad graphic
 	local btn_q = panel:addChild("base/button")
 	btn_q.skin_id = "button_tq1"
-	btn_q.graphic = context.resources.tex_quads["checkbox_on"]
+	btn_q.graphic = context.resources.quads["atlas"]["checkbox_on"] -- TODO: fix
 	btn_q.x = 64
 	btn_q.y = 64
 	btn_q.w = 64

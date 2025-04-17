@@ -6,7 +6,7 @@ return {
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
-	tq_px = "*tex_quads/pixel",
+	tq_px = "*quads/atlas/pixel",
 
 	-- Alignment of label text in Viewport #1.
 	label_align_h = "center", -- "left", "center", "right", "justify"
@@ -18,8 +18,8 @@ return {
 	-- How much space to assign the progress bar when not using "overlay" placement.
 	bar_spacing = 50,
 
-	slc_back = "*tex_slices/progress_back",
-	slc_ichor = "*tex_slices/progress_ichor",
+	slc_back = "*slices/atlas/progress_back",
+	slc_ichor = "*slices/atlas/progress_ichor",
 
 	res_active = {
 		color_back = {1.0, 1.0, 1.0, 1.0},

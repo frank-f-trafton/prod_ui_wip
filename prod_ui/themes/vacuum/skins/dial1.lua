@@ -7,7 +7,7 @@ return {
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
-	tq_px = "*tex_quads/pixel",
+	tq_px = "*quads/atlas/pixel",
 
 
 	-- Label placement and spacing.

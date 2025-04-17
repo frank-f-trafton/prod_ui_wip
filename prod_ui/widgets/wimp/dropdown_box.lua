@@ -110,7 +110,7 @@ function def:addItem(text, pos, bijou_id)
 
 	item.text = text
 	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
+	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix
 
 	table.insert(items, pos, item)
 

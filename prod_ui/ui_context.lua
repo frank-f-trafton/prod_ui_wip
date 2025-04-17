@@ -109,6 +109,15 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	local self = {}
 
+	-- DPI class. Determines which set of textures and associated metadata to load.
+	self.dpi = 96
+
+	self.path_symbols = {
+		[""] = "%", -- escapes '%%' to '%'
+		produi = prod_ui_path:sub(1, -2),
+		dpi = tostring(self.dpi),
+	}
+
 	-- Context config table. Internal use.
 	self.conf = {
 		prod_ui_req = REQ_PATH,
@@ -121,21 +130,19 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
 	self.scale = 1.0
 
-	-- DPI class. Determines which set of textures and associated metadata to load.
-	self.dpi = 96
-
-	-- Assign a theme table here.
+	-- Theme and resource state.
+	self.theme_path = false
 	self.theme = false
 
 	-- Resources.
 	self.resources = {
+		paths = {},
 		boxes = {},
-		skinners = {},
 		skins = {},
 		fonts = {},
-		tex_defs = {},
-		tex_quads = {},
-		tex_slices = {},
+		textures = {},
+		quads = {},
+		slices = {},
 	}
 
 	-- Passed as the settings argument when creating new layer canvases.
@@ -149,6 +156,8 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- Cache of loaded and prepped widget defs.
 	-- defs are of type "table" and serve as the metatable for instances.
 	self.widget_defs = {}
+
+	self.skinners = {}
 
 	-- The root widget must be created as soon as possible.
 	self.root = false

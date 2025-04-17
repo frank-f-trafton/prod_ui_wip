@@ -978,9 +978,9 @@ function _mt_context:registerSkinnerTable(skinner, id)
 	uiShared.type1(1, skinner, "table")
 	uiShared.type1(2, id, "string", "number")
 
-	uiRes.assertNotRegistered("skinner", self.resources.skinners, id)
+	uiRes.assertNotRegistered("skinner", self.skinners, id)
 
-	self.resources.skinners[id] = skinner
+	self.skinners[id] = skinner
 end
 
 
@@ -991,10 +991,10 @@ function _mt_context:loadSkinner(file_path, id)
 	uiShared.type1(1, file_path, "string")
 	uiShared.type1(2, id, "string", "number")
 
-	uiRes.assertNotRegistered("skinner", self.resources.skinners, id)
+	uiRes.assertNotRegistered("skinner", self.skinners, id)
 
 	local skinner = uiRes.loadLuaFile(file_path, self)
-	self.resources.skinners[id] = skinner
+	self.skinners[id] = skinner
 end
 
 

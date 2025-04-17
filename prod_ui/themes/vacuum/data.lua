@@ -1,34 +1,43 @@
--- Base style data.
 return {
 	paths = {
-		fonts = "themes/vacuum/fonts",
-		skins = "themes/vacuum/skins",
-		textures = "themes/vacuum/tex",
+		fonts = {
+			"%produi%/themes/vacuum/fonts",
+			"%produi%/themes/data/fonts"
+		},
+		skins = {
+			"%produi%/themes/vacuum/skins",
+			"%produi%/themes/data/skins"
+		},
+		textures = {
+			"%produi%/themes/vacuum/tex/%dpi%",
+			"%produi%/themes/data/tex/%dpi%"
+		},
 	},
 
-	theme_path = false,
 	fonts = {
 		h1 = {path="default", size=32},
 		h2 = {path="default", size=24},
 		h3 = {path="default", size=18},
 		h4 = {path="default", size=15},
 		internal = {path="default", size=13},
-		--p = {path="default", size=14},
+		p = {path="default", size=14},
 		-- XXX: Test symbol substitution in single-line text boxes
 		-- [====[
-		p = {path="data/fonts/noto_sans/NotoSans-Regular.ttf", size=14, fallbacks={
-				{path="data/fonts/noto_sans/NotoSansSymbols-Regular.ttf", size=14},
-				{path="data/fonts/noto_sans/NotoSansSymbols2-Regular.ttf", size=14},
+		p = {path="noto_sans/NotoSans-Regular.ttf", size=14, fallbacks={
+				{path="noto_sans/NotoSansSymbols-Regular.ttf", size=14},
+				{path="noto_sans/NotoSansSymbols2-Regular.ttf", size=14},
 			},
 		},
 		--]====]
 		small = {path="default", size=12},
 	},
 
+	textures = {
+		atlas = "atlas.png",
+	},
+
 	boxes = {
 		panel = {
-			sl_body_id = "tex_slices/list_box_body",
-
 			outpad = {x1 = 2, x2 = 2, y1 = 2, y2 = 2},
 			border = {x1 = 2, x2 = 2, y1 = 2, y2 = 2},
 			margin = {x1 = 2, x2 = 2, y1 = 2, y2 = 2}
@@ -65,8 +74,6 @@ return {
 		},
 
 		frame_norm = {
-			sl_body_id = "tex_slices/list_box_body",
-
 			outpad = {x1 = 2, x2 = 2, y1 = 2, y2 = 2},
 			border = {x1 = 2, x2 = 2, y1 = 2, y2 = 2},
 			margin = {x1 = 2, x2 = 2, y1 = 2, y2 = 2}
@@ -141,10 +148,10 @@ return {
 		-- ul_oy: Vertical offset for the underline.
 		-- Text color, text offsets (for inset buttons), etc. are provided by skin resource tables.
 		norm = {
-			font = "p", -- TODO: was inst.fonts.p
+			font = "*fonts/p",
 			ul_color = false,
-			ul_h = math.max(1, math.floor(0.5 + 1 * scale)),
-			ul_oy = math.floor(0.5 + (inst.style.labels.norm.font:getHeight() - inst.style.labels.norm.ul_h)),
+			ul_h = 1, --math.max(1, math.floor(0.5 + 1 * scale)),
+			ul_oy = 0, -- FIXME --math.floor(0.5 + (inst.style.labels.norm.font:getHeight() - inst.style.labels.norm.ul_h)),
 		},
 	},
 
@@ -188,21 +195,21 @@ return {
 			thumb_size_min = 16, --math.max(1, math.floor(16 * scale))
 			thumb_size_max = 2^16, --math.max(1, math.floor(2^16 * scale))
 
-			v_near_side = false
-			v_auto_hide = true
+			v_near_side = false,
+			v_auto_hide = true,
 
-			v_button1_enabled = true
-			v_button1_mode = "pend-cont"
-			v_button2_enabled = true
-			v_button2_mode = "pend-cont"
+			v_button1_enabled = true,
+			v_button1_mode = "pend-cont",
+			v_button2_enabled = true,
+			v_button2_mode = "pend-cont",
 
-			h_near_side = false
-			h_auto_hide = true
+			h_near_side = false,
+			h_auto_hide = true,
 
-			h_button1_enabled = true
-			h_button1_mode = "pend-cont"
-			h_button2_enabled = true
-			h_button2_mode = "pend-cont"
+			h_button1_enabled = true,
+			h_button1_mode = "pend-cont",
+			h_button2_enabled = true,
+			h_button2_mode = "pend-cont",
 		},
 
 		half = {
@@ -235,11 +242,11 @@ return {
 
 	scroll_bar_data = {
 		scroll_bar1 = {
-			tquad_pixel = "*tex_quads/pixel",
-			tq_arrow_down = "*tex_quads/arrow2_down",
-			tq_arrow_up = "*tex_quads/arrow2_up",
-			tq_arrow_left = "*tex_quads/arrow2_left",
-			tq_arrow_right = "*tex_quads/arrow2_right",
+			tquad_pixel = "*quads/atlas/pixel",
+			tq_arrow_down = "*quads/atlas/arrow2_down",
+			tq_arrow_up = "*quads/atlas/arrow2_up",
+			tq_arrow_left = "*quads/atlas/arrow2_left",
+			tq_arrow_right = "*quads/atlas/arrow2_right",
 
 			-- This might be helpful if the buttons and trough do not fit snugly into the scroll bar's rectangular body.
 			render_body = false,
@@ -250,22 +257,22 @@ return {
 			-- In this implementation, the thumb and buttons share slices and colors for idle, hover and press states.
 			shared = {
 				idle = {
-					slice = "*tex_slices/scroll_button",
+					slice = "*slices/atlas/scroll_button",
 					col_body = {1.0, 1.0, 1.0, 1.0},
 					col_symbol = {0.65, 0.65, 0.65, 1.0},
 				},
 				hover = {
-					slice = "*tex_slices/scroll_button_hover",
+					slice = "*slices/atlas/scroll_button_hover",
 					col_body = {1.0, 1.0, 1.0, 1.0},
 					col_symbol = {0.75, 0.75, 0.75, 1.0},
 				},
 				press = {
-					slice = "*tex_slices/scroll_button_press",
+					slice = "*slices/atlas/scroll_button_press",
 					col_body = {1.0, 1.0, 1.0, 1.0},
 					col_symbol = {0.3, 0.3, 0.3, 1.0},
 				},
 				disabled = {
-					slice = "*tex_slices/scroll_button_disabled",
+					slice = "*slices/atlas/scroll_button_disabled",
 					col_body = {0.5, 0.5, 0.5, 1.0},
 					col_symbol = {0.1, 0.1, 0.1, 1.0},
 				},

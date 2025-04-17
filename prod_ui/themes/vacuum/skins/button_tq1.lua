@@ -25,7 +25,7 @@ return {
 
 
 	res_idle = {
-		slice = "*tex_slices/button",
+		slice = "*slices/atlas/button",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
 		label_ox = 0,
@@ -33,7 +33,7 @@ return {
 	},
 
 	res_hover = {
-		slice = "*tex_slices/button_hover",
+		slice = "*slices/atlas/button_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
 		label_ox = 0,
@@ -41,7 +41,7 @@ return {
 	},
 
 	res_pressed = {
-		slice = "*tex_slices/button_press",
+		slice = "*slices/atlas/button_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.9, 0.9, 0.9, 1.0},
 		label_ox = 0,
@@ -49,7 +49,7 @@ return {
 	},
 
 	res_disabled = {
-		slice = "*tex_slices/button_disabled",
+		slice = "*slices/atlas/button_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_quad = {0.5, 0.5, 0.5, 1.0},
 		label_ox = 0,

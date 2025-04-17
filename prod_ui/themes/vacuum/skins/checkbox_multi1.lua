@@ -9,7 +9,7 @@ return {
 
 	box = "*boxes/button_bijou",
 	label_style = "*labels/norm",
-	tq_px = "*tex_quads/pixel",
+	tq_px = "*quads/atlas/pixel",
 
 	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
@@ -36,9 +36,9 @@ return {
 
 	res_idle = {
 		quads_state = {
-			"*tex_quads/checkbox_off",
-			"*tex_quads/checkbox_tri",
-			"*tex_quads/checkbox_on"
+			"*quads/atlas/checkbox_off",
+			"*quads/atlas/checkbox_tri",
+			"*quads/atlas/checkbox_on"
 		},
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
@@ -50,9 +50,9 @@ return {
 
 	res_hover = {
 		quads_state = {
-			"*tex_quads/checkbox_off_hover",
-			"*tex_quads/checkbox_tri_hover",
-			"*tex_quads/checkbox_on_hover"
+			"*quads/atlas/checkbox_off_hover",
+			"*quads/atlas/checkbox_tri_hover",
+			"*quads/atlas/checkbox_on_hover"
 		},
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
@@ -64,9 +64,9 @@ return {
 
 	res_pressed = {
 		quads_state = {
-			"*tex_quads/checkbox_off_press",
-			"*tex_quads/checkbox_tri_press",
-			"*tex_quads/checkbox_on_press"
+			"*quads/atlas/checkbox_off_press",
+			"*quads/atlas/checkbox_tri_press",
+			"*quads/atlas/checkbox_on_press"
 		},
 
 		color_bijou = {0.7, 0.7, 0.7, 1.0},
@@ -78,9 +78,9 @@ return {
 
 	res_disabled = {
 		quads_state = {
-			"*tex_quads/checkbox_off",
-			"*tex_quads/checkbox_tri",
-			"*tex_quads/checkbox_on"
+			"*quads/atlas/checkbox_off",
+			"*quads/atlas/checkbox_tri",
+			"*quads/atlas/checkbox_on"
 		},
 
 		color_bijou = {0.5, 0.5, 0.5, 1.0},

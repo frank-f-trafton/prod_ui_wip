@@ -12,7 +12,7 @@ return {
 	text_align = "left", -- "left", "center", "right"
 
 	res_idle = {
-		slice = "*tex_slices/input_box",
+		slice = "*slices/atlas/input_box",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -22,7 +22,7 @@ return {
 	},
 
 	res_hover = {
-		slice = "*tex_slices/input_box_hover",
+		slice = "*slices/atlas/input_box_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -32,7 +32,7 @@ return {
 	},
 
 	res_disabled = {
-		slice = "*tex_slices/input_box_disabled",
+		slice = "*slices/atlas/input_box_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.5, 0.5, 0.5, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},

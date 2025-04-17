@@ -5,8 +5,8 @@ return {
 	skinner_id = "wimp/menu_tab",
 
 	box = "*boxes/panel",
-	tq_px = "*tex_quads/pixel",
-	data_scroll = "*common/scroll_bar1",
+	tq_px = "*quads/atlas/pixel",
+	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 	data_icon = "*icons/p",
@@ -35,8 +35,8 @@ return {
 	color_col_sep = {0.4, 0.4, 0.4, 1.0}, -- vertical separator between columns
 	color_body_sep = {0.4, 0.4, 0.4, 1.0}, -- a line between the header body and rest of widget
 
-	tq_arrow_up = "*tex_quads/arrow2_up",
-	tq_arrow_down = "*tex_quads/arrow2_down",
+	tq_arrow_up = "*quads/atlas/arrow2_up",
+	tq_arrow_down = "*quads/atlas/arrow2_down",
 
 	-- Padding between:
 	-- * Category panel left and label text
@@ -44,7 +44,7 @@ return {
 	category_h_pad = 4,
 
 	res_column_idle = {
-		sl_body = "*tex_slices/tabular_category_body",
+		sl_body = "*slices/atlas/tabular_category_body",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.8, 0.8, 0.8, 1.0},
 		offset_x = 0,
@@ -52,7 +52,7 @@ return {
 	},
 
 	res_column_hover = {
-		sl_body = "*tex_slices/tabular_category_body_hover",
+		sl_body = "*slices/atlas/tabular_category_body_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		offset_x = 0,
@@ -60,7 +60,7 @@ return {
 	},
 
 	res_column_press = {
-		sl_body = "*tex_slices/tabular_category_body_press",
+		sl_body = "*slices/atlas/tabular_category_body_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {1.0, 1.0, 1.0, 1.0},
 		offset_x = 0,

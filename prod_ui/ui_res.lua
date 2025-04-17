@@ -203,16 +203,6 @@ function uiRes.enumerate(folder, ext, recursive, depth)
 end
 
 
--- Joins a path and file name, injecting a forward slash when necessary.
-function uiRes.join(path, file_name)
-	if path == "" or string.sub(path, -1) == "/" then
-		return path .. file_name
-	else
-		return path .. "/" .. file_name
-	end
-end
-
-
 function uiRes.assertNotRegistered(what, tbl, id)
 	if tbl[id] then
 		error(what .. ": ID '" .. tostring(id) .. "' is already registered.")

@@ -194,7 +194,7 @@ function commonTree.addNode(self, text, parent_node, tree_pos, bijou_id)
 
 	item.text = text
 	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.tex_quads[bijou_id]
+	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix
 
 	item.x, item.y = 0, 0
 	commonTree.updateItemDimensions(self, skin, item)
