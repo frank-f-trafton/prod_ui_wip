@@ -1,5 +1,9 @@
 return {
 	paths = {
+		font_data = {
+			"%produi%/themes/vacuum/font_data",
+			"%produi%/themes/data/font_data"
+		},
 		fonts = {
 			"%produi%/themes/vacuum/fonts",
 			"%produi%/themes/data/fonts"
@@ -12,24 +16,6 @@ return {
 			"%produi%/themes/vacuum/tex/%dpi%",
 			"%produi%/themes/data/tex/%dpi%"
 		},
-	},
-
-	fonts = {
-		h1 = {path="default", size=32},
-		h2 = {path="default", size=24},
-		h3 = {path="default", size=18},
-		h4 = {path="default", size=15},
-		internal = {path="default", size=13},
-		p = {path="default", size=14},
-		-- XXX: Test symbol substitution in single-line text boxes
-		-- [====[
-		p = {path="noto_sans/NotoSans-Regular.ttf", size=14, fallbacks={
-				{path="noto_sans/NotoSansSymbols-Regular.ttf", size=14},
-				{path="noto_sans/NotoSansSymbols2-Regular.ttf", size=14},
-			},
-		},
-		--]====]
-		small = {path="default", size=12},
 	},
 
 	textures = {

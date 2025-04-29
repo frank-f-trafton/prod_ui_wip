@@ -10,6 +10,23 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 local uiShared = require(REQ_PATH .. "ui_shared")
 
 
+local _info = {}
+
+
+--- Wrapper for love.filesystem.getInfo() that uses a shared 'info' table. (Do not assign this table elsewhere, under
+--	any circumstances.)
+-- @param path The path to check.
+-- @param filtertype The file system type.
+-- @return The recycled 'info' table, or nothing no file was found.
+function uiRes.getInfo(path, filtertype)
+	if filtertype then
+		return love.filesystem.getInfo(path, filtertype, _info)
+	else
+		return love.filesystem.getInfo(path, _info)
+	end
+end
+
+
 --- Load and execute a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
 -- @param path The path to the Lua file.
 -- @param ... An arbitrary set of arguments to pass to the Lua chunk.
@@ -131,7 +148,7 @@ function uiRes.stripBaseDirectoryFromPath(base_dir, path)
 end
 
 
-local function _enumerate(folder, fileTree, ext, recursive, depth)
+local function _enumerate(path, list, ext, recursive, depth)
 	--- Based on the LÖVE Wiki example: https://love2d.org/wiki/love.filesystem.getDirectoryItems
 
 	if depth <= 0 then
@@ -139,44 +156,47 @@ local function _enumerate(folder, fileTree, ext, recursive, depth)
 	end
 
 	local symlinks_enabled = love.filesystem.areSymlinksEnabled()
-	local filesTable = love.filesystem.getDirectoryItems(folder)
+	local files_array = love.filesystem.getDirectoryItems(path)
 
-	for i, v in ipairs(filesTable) do
-		local file = folder .. "/" .. v
-		local info = love.filesystem.getInfo(file)
+	for i, v in ipairs(files_array) do
+		local file = path .. (path == "" and "" or "/") .. v
+		local info = uiRes.getInfo(file)
 
 		if info.type == "file" then
 			if not ext
 			or type(ext) == "string" and string.match(v, "%..-$") == ext
 			or type(ext) == "table" and ext[string.match(v, "%..-$")]
-			or type(ext) == "function" and ext(folder, v)
+			or type(ext) == "function" and ext(path, v)
 			then
-				table.insert(fileTree, file)
+				table.insert(list, file)
 			end
 
 		elseif recursive and info.type == "directory" or (symlinks_enabled and info.type == "symlink") then
-			_enumerate(file, fileTree, ext, recursive, depth - 1)
+			_enumerate(file, list, ext, recursive, depth - 1)
 		end
 	end
 
-	return fileTree
+	return list
 end
 
 
---- Given a folder path, return a table of files, directories and symlinks (if enabled in love.filesystem).
--- @param folder The starting folder path to scan.
--- @param ext Extension filter. When a string, only files with a matching extension are included. When a table, any file with an extension that matches a key in the table is included. When a function (taking the folder path and file name as arguments), files are included if the function returns true. When false/nil, all files are included.
--- @param recursive When true, scan all sub-folders.
+--- Given a directory path, returns a table of files.
+-- @param path The starting path to scan.
+-- @param ext Extension filter. When a string, only files with a matching extension are included. When a table, any file with an extension that matches a key in the table is included. When a function (taking the directory path and file name as arguments), files are included if the function returns true. When false/nil, all files are included.
+-- @param recursive When true, scan all subdirectories.
 -- @param depth (1000) The maximum recursion depth permitted. Raises an error if exceeded. Must be at least 1.
--- @return A table of enumerated files and folders/symlinks.
-function uiRes.enumerate(folder, ext, recursive, depth)
-	uiShared.type1(1, folder, "string")
+-- @return A table of enumerated files.
+function uiRes.enumerate(path, ext, recursive, depth)
+	uiShared.type1(1, path, "string")
 	uiShared.typeEval(2, ext, "string", "table", "function")
 	-- don't assert 'recursive'
 	uiShared.intGEEval(4, depth, 1)
 
-	if not love.filesystem.getInfo(folder) then
-		error("folder not found at: " .. tostring(folder))
+	path = path:match("(.-)/?$")
+
+	local info = uiRes.getInfo(path)
+	if not info or (info.type ~= "directory" and (love.filesystem.areSymlinksEnabled() and info.type ~= "symlink")) then
+		error("directory not found at: " .. tostring(path))
 	end
 
 	--[[
@@ -189,7 +209,7 @@ function uiRes.enumerate(folder, ext, recursive, depth)
 		[".txt"] = true,
 	}
 
-	function: function(folder, file_name)
+	function: function(path, file_name)
 		if file_name == "some string comparison" then
 			return true -- enumerate file.
 		end
@@ -199,7 +219,29 @@ function uiRes.enumerate(folder, ext, recursive, depth)
 
 	depth = depth or 1000
 
-	return _enumerate(folder, {}, ext, recursive, depth)
+	return _enumerate(path, {}, ext, recursive, depth)
+end
+
+
+--- For an array of paths, enumerate files in each path with 'uiRes.enumerate()', and then return a hash
+--	table that combines all file names.
+-- @param paths An array of paths to check.
+-- @param ext Hash of extensions (see uiRes.enumerate()).
+-- @param recursive When true, check subdirectories within a path (see uiRes.enumerate()).
+-- @return The combined hash table.
+function uiRes.enumerateFromPaths(paths, ext, recursive)
+	local hash = {}
+
+	for i, path in ipairs(paths) do
+		local list = uiRes.enumerate(path, ext, recursive)
+		for j, str in ipairs(list) do
+			if not hash[str] then
+				hash[str] = true
+			end
+		end
+	end
+
+	return hash
 end
 
 
@@ -222,6 +264,13 @@ function uiRes.extractIDFromLuaFile(base_path, file_path)
 	str = uiRes.stripBaseDirectoryFromPath(base_path, str)
 	return str
 end
+
+
+--[[
+local function _join(base, name, ext)
+	return base:match("(.-)/?$") .. "/" .. name .. "." .. ext
+end
+--]]
 
 
 return uiRes
