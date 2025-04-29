@@ -1,6 +1,34 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
+--[====[
+WIP WIP WIP
+
+-- TrueType:
+return {
+	path = "path/to/font.ttf" -- use "default" to get the built-in font.
+	size = 12, -- optional
+	hinting = "normal", -- optional
+	-- 'dpiscale' is omitted here: the LÖVE default is used
+}
+
+
+-- BMFont:
+return {
+	path = "path/to/font.fnt"
+	imagefilename = "%symbol%/path/to/image.png" -- Optional. This is relative to the LÖVE game directory (whereas the .fnt file's image path is relative to the .fnt file). Path symbols are permitted so that ProdUI or the theme path can be specified.
+}
+
+
+-- ImageFont:
+return {
+	path = "path/to/font.png"
+	glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+	extraspacing = 0 -- optional
+}
+--]====]
+
+
 local contextResources = {}
 
 
@@ -11,12 +39,16 @@ local fontCache = context:getLua("core/res/font_cache")
 local pPath = require(context.conf.prod_ui_req .. "lib.pile_path")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
+local resourceCollection = require(context.conf.prod_ui_req .. "core.res.collection")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 
 
 local _drill = utilTable.drill
+
+
+local _lut_font_ext = pTable.makeLUT({".ttf", ".otf", ".fnt", ".png"})
 
 
 local methods = {}
@@ -177,14 +209,34 @@ function methods:applyTheme(theme_source)
 	end
 	-- TODO: attach paths table somewhere?
 
-	if theme.fonts then
-		local cache = {}
-
-		for k, v in pairs(theme.fonts) do
-			resources.fonts[k] = fontCache.instantiateFont(theme.paths.fonts, v.path, v.size, v.fallbacks, cache)
+	-- Fonts
+	if theme.paths.fonts then
+		local file_hash = uiRes.enumerateFromPaths(theme.paths.fonts, ".lua", false)
+		local font_info_set = {}
+		for k in pairs(file_hash) do
+			-- id == just the file name, no extension, no leading path
+			local id = k:gsub(".-/", ""):sub(1, -5)
+			local font_info, err = love.filesystem.load(k)
+			if not font_info then
+				error(err)
+			end
+			font_info = font_info()
+			font_info_set[id] = font_info
 		end
 
-		fontCache.assignFallbacks(cache)
+		fontCache.setupRawFontsCollection(theme.paths.font_data)
+
+		for k, v in pairs(font_info_set) do
+			resources.fonts[k] = fontCache.instantiateFont(v)
+		end
+
+		fontCache.assignFallbacks()
+		fontCache.clearRawFontsCollection()
+
+
+		for k, v in pairs(resources.fonts) do
+			print("???", k, v)
+		end
 	end
 
 	if theme.textures then

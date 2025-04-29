@@ -2,7 +2,7 @@
 
 
 --[[
-Loads and caches LÖVE Font objects.
+Loads and caches LÖVE Font objects, and also sets up fallback chains.
 
 This file is local to the ProdUI context that loads it.
 
@@ -16,8 +16,7 @@ local fontCache = {}
 local context = select(1, ...)
 
 
-local pPath = require(context.conf.prod_ui_req .. "lib.pile_path")
---local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local resourceCollection = require(context.conf.prod_ui_req .. "core.res.collection")
 
 
 -- The keys are:
@@ -38,59 +37,88 @@ function fontCache.unhash(hash)
 end
 
 
---- Sets up a Font object and caches it, or returns an existing cached Font.
--- @param paths Array of paths to check (not applicable for LÖVE's default font, but include it anyways).
--- @param stem The name of the font (such that joining the path and stem make a full path), or "default" to
---	use LÖVE's built-in font.
--- @param size_or_type The size for TrueType fonts, or "bmf" or "img" for BMFonts and ImageFonts, respectively.
--- @param fallbacks Table of fallbacks to load, if applicable. (Assignment of fallbacks is handled later.)
--- @param cache A temporary table of instantiated fonts.
--- @return The Font object.
-function fontCache.instantiateFont(paths, stem, size_or_type, fallbacks, cache)
-	local id = fontCache.hash(stem, size_or_type)
+fontCache.cb_look = function(self, path_id)
+	local path, size_or_type = fontCache.unhash(path_id)
+	print("cb_look", "path", path, "size_or_type", size_or_type)
 
-	if cache[id] then
-		return cache[id][1]
+	return love.filesystem.getInfo(path, "file")
+end
+
+
+fontCache.cb_lookFirst = function(self, id)
+	local path, size_or_type = fontCache.unhash(id)
+
+	print("lookFirst", id, path, size_or_type)
+
+	return path == "default"
+end
+
+
+fontCache.cb_load = function(self, path_id)
+	local path, size_or_type = fontCache.unhash(path_id)
+
+	return {love.graphics.newFont(path, tonumber(size_or_type))}
+end
+
+
+-- Handles LÖVE's built-in font.
+fontCache.cb_loadFirst = function(self, id)
+	local path, size_or_type = fontCache.unhash(id)
+
+	return {love.graphics.newFont(tonumber(size_or_type))}
+end
+
+
+fontCache.cb_missing = function(self, id)
+	error("missing font. ID: " .. tostring(id))
+end
+
+
+-- NOTE: The IDs include file extensions, unless they point to the built-in LÖVE font ("default").
+local raw_fonts
+
+
+function fontCache.setupRawFontsCollection(font_paths)
+	raw_fonts = resourceCollection.new()
+
+	raw_fonts.cb_look = fontCache.cb_look
+	raw_fonts.cb_lookFirst = fontCache.cb_lookFirst
+	raw_fonts.cb_load = fontCache.cb_load
+	raw_fonts.cb_loadFirst = fontCache.cb_loadFirst
+	raw_fonts.cb_missing = fontCache.cb_missing
+
+	for i, v in ipairs(font_paths) do
+		table.insert(raw_fonts.paths, v)
 	end
+end
 
-	local font
-	if stem == "default" then
-		font = love.graphics.newFont(size_or_type)
-	else
-		for _, path in ipairs(paths) do
-			local full_path = pPath.join(path, stem)
-			if love.filesystem.getInfo(full_path, "file") then
-				font = love.graphics.newFont(full_path, size_or_type)
-				break
-			end
+
+function fontCache.clearRawFontsCollection()
+	raw_fonts = nil
+end
+
+
+function fontCache.instantiateFont(info)
+	local id = fontCache.hash(info.path, info.size)
+
+	local font = raw_fonts:get(id)[1]
+
+	-- Ensure that fallbacks are loaded. The assignments happen later.
+	if info.fallbacks then
+		for i, v in ipairs(info.fallbacks) do
+			local hashed = fontCache.hash(v.path, v.size)
+			raw_fonts:get(hashed)
 		end
 	end
 
-	if font then
-		cache[id] = {font}
-
-		-- Ensure that fallbacks are loaded. The assignments happen later.
-		if fallbacks then
-			for _, v in ipairs(fallbacks) do
-				local font2 = fontCache.instantiateFont(paths, v.path, v.size, false, cache)
-				table.insert(cache[id], font2)
-			end
-		end
-
-		return font
-	end
-
-	for i, v in ipairs(paths) do
-		print("!", i, v)
-	end
-	error("unable to locate font: " .. stem)
+	return font
 end
 
 
 -- Run after all relevant fonts have been loaded.
-function fontCache.assignFallbacks(cache)
-	for hashed_id, font_list in pairs(cache) do
-		font_list[1]:setFallbacks(unpack(font_list, 2))
+function fontCache.assignFallbacks()
+	for k, list in pairs(raw_fonts.cache) do
+		list[1]:setFallbacks(unpack(list, 2))
 	end
 end
 
