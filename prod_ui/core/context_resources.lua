@@ -1,34 +1,6 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 
---[====[
-WIP WIP WIP
-
--- TrueType:
-return {
-	path = "path/to/font.ttf" -- use "default" to get the built-in font.
-	size = 12, -- optional
-	hinting = "normal", -- optional
-	-- 'dpiscale' is omitted here: the LÖVE default is used
-}
-
-
--- BMFont:
-return {
-	path = "path/to/font.fnt"
-	imagefilename = "%symbol%/path/to/image.png" -- Optional. This is relative to the LÖVE game directory (whereas the .fnt file's image path is relative to the .fnt file). Path symbols are permitted so that ProdUI or the theme path can be specified.
-}
-
-
--- ImageFont:
-return {
-	path = "path/to/font.png"
-	glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-	extraspacing = 0 -- optional
-}
---]====]
-
-
 local contextResources = {}
 
 
@@ -39,16 +11,20 @@ local fontCache = context:getLua("core/res/font_cache")
 local pPath = require(context.conf.prod_ui_req .. "lib.pile_path")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
-local resourceCollection = require(context.conf.prod_ui_req .. "core.res.collection")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
+local vPath = context:getLua("core/res/v_path")
 
 
 local _drill = utilTable.drill
 
 
 local _lut_font_ext = pTable.makeLUT({".ttf", ".otf", ".fnt", ".png"})
+local _lut_font_ext_vec = pTable.makeLUT({".ttf", ".otf"})
+
+
+local _info = {} -- for love.filesystem.getInfo()
 
 
 local methods = {}
@@ -69,35 +45,8 @@ function methods:resetResources()
 end
 
 
-local function _loadTexture(paths, stem)
-	local path
-	for _, check_path in ipairs(paths) do
-		local check_full = pPath.join(check_path, stem)
-		if love.filesystem.getInfo(check_full) then
-			path = check_full
-			break
-		end
-	end
-
-	if not path then
-		error("unable to locate texture: " .. tostring(stem))
-	end
-
-	local tex = love.graphics.newImage(path)
-	local metadata
-	local path_lua = path:sub(1, -5) .. ".lua"
-	print("PATH_LUA", path_lua)
-	if love.filesystem.getInfo(path_lua) then
-		local err
-		local chunk, err = love.filesystem.load(path_lua)
-		if not chunk then
-			error(err)
-		end
-		metadata = chunk()
-	end
-	-- TODO: check config fields
-
-	local tex_info = {texture = tex}
+local function _initTexture(texture, metadata)
+	local tex_info = {texture=texture}
 
 	if metadata then
 		if metadata.config then
@@ -193,6 +142,32 @@ local function _loadTexture(paths, stem)
 end
 
 
+--- Loads a PNG and an optional accompanying .lua file of metadata.
+local function _loadTextureFiles(paths, id)
+	local info, path = vPath.getInfo(paths, id, _info)
+	if not info then
+		error("unable to locate texture: " .. tostring(id))
+	end
+
+	local tex = love.graphics.newImage(path)
+	local metadata
+	local id_lua = id:sub(1, -5) .. ".lua"
+	print("ID_LUA", id_lua)
+
+	local info2, path2 = vPath.getInfo(paths, id_lua, _info)
+	if info2 then
+		local chunk, err = love.filesystem.load(path2)
+		if not chunk then
+			error(err)
+		end
+		metadata = chunk()
+	end
+	-- TODO: check config fields
+
+	return tex, metadata
+end
+
+
 function methods:applyTheme(theme_source)
 	local resources = self.resources
 	local scale = self.scale
@@ -209,14 +184,12 @@ function methods:applyTheme(theme_source)
 	end
 	-- TODO: attach paths table somewhere?
 
-	-- Fonts
 	if theme.paths.fonts then
-		local file_hash = uiRes.enumerateFromPaths(theme.paths.fonts, ".lua", false)
+		local file_hash = vPath.enumerate(theme.paths.fonts, ".lua", false)
 		local font_info_set = {}
-		for k in pairs(file_hash) do
-			-- id == just the file name, no extension, no leading path
-			local id = k:gsub(".-/", ""):sub(1, -5)
-			local font_info, err = love.filesystem.load(k)
+		for id, full_path in pairs(file_hash) do
+			id = id:gsub(".-/", ""):sub(1, -5)
+			local font_info, err = love.filesystem.load(full_path)
 			if not font_info then
 				error(err)
 			end
@@ -232,23 +205,43 @@ function methods:applyTheme(theme_source)
 
 		fontCache.assignFallbacks()
 		fontCache.clearRawFontsCollection()
-
-
-		for k, v in pairs(resources.fonts) do
-			print("???", k, v)
-		end
 	end
 
-	if theme.textures then
-		for k, v in pairs(theme.textures) do
-			if not resources.textures[k] then
-				local tex_info = _loadTexture(theme.paths.textures, v)
-				resources.textures[k] = tex_info
+
+	--[[
+	fontCache.clear()
+	for k, font_info in pairs(theme.fonts) do
+		fontCache.checkData(theme.paths.fonts, font_info)
+	end
+
+	for k, font_info in pairs(theme.fonts) do
+		fontCache.createFontObjects(font_info)
+	end
+
+	for k, font_info in pairs(theme.fonts) do
+		fontCache.setFallbacks(font_info)
+	end
+
+	for k, font_info in pairs(theme.fonts) do
+		resources.fonts[k] = fontCache.getFont(font_info)
+	end
+	--]]
+
+
+	if theme.paths.textures then
+		local file_hash = vPath.enumerate(theme.paths.textures, ".png", false)
+		local tex_info_set = {}
+		for id, path in pairs(file_hash) do
+			id = id:gsub(".-/", ""):sub(1, -5)
+			if not resources.textures[id] then
+				local tex, meta = _loadTextureFiles(theme.paths.textures, k)
+				local tex_info = _initTexture(tex, meta)
+				resources.textures[id] = tex_info
 				if tex_info.quads then
-					resources.quads[k] = tex_info.quads
+					resources.quads[id] = tex_info.quads
 				end
 				if tex_info.slices then
-					resources.slices[k] = tex_info.slices
+					resources.slices[id] = tex_info.slices
 				end
 			end
 		end
@@ -367,7 +360,7 @@ function methods:loadSkinDefs(base_path, recursive)
 		if not id then
 			error("couldn't extract ID from file path: " .. file_path)
 		end
-		id = uiRes.stripBaseDirectoryFromPath(base_path, id)
+		id = uiRes.stripFirstPartOfPath(base_path, id)
 
 		if not self.resources.skins[id] then
 			self:loadSkinDef(id, file_path)

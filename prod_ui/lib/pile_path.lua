@@ -17,11 +17,22 @@ end
 
 
 function pPath.join(a, b)
-	a, b = pPath.stripEdgeSlashes(a), pPath.stripEdgeSlashes(b)
-	if a == "" then
-		return b
+	return (a:match("^(.-)/?$") .. (a ~= "" and "/" or "") .. b):match("^(.-)/?$")
+end
+
+
+function pPath.getExtension(path)
+	return path:match("%..-$")
+end
+
+
+function pPath.splitPathAndExtension(path)
+	local a, b = path:match("^(.*)(%..-)$")
+	if a then
+		return a, b
+	else
+		return path, ""
 	end
-	return a .. "/" .. b
 end
 
 

@@ -35,9 +35,7 @@ function _mt_cf:get(id)
 		res = self:cb_loadFirst(id)
 	else
 		for i, path in ipairs(self.paths) do
-			print("i", i, "path", path)
 			local path_id = path .. (path ~= "" and "/" or "") .. id
-			print("path_id", path_id)
 			if self:cb_look(path_id) then
 				res = self:cb_load(path_id)
 				break
