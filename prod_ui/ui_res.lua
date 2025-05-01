@@ -7,27 +7,19 @@ local uiRes = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
+local pPath = require(REQ_PATH .. "lib.pile_path")
 local uiShared = require(REQ_PATH .. "ui_shared")
 
 
-local _info = {}
+local _info = {} -- For love.filesystem.getInfo().
 
 
---- Wrapper for love.filesystem.getInfo() that uses a shared 'info' table. (Do not assign this table elsewhere, under
---	any circumstances.)
--- @param path The path to check.
--- @param filtertype The file system type.
--- @return The recycled 'info' table, or nothing no file was found.
-function uiRes.getInfo(path, filtertype)
-	if filtertype then
-		return love.filesystem.getInfo(path, filtertype, _info)
-	else
-		return love.filesystem.getInfo(path, _info)
-	end
+function uiRes.infoIsDirectory(info)
+	return info and (info.type == "directory" or (love.filesystem.areSymlinksEnabled() and info.type == "symlink"))
 end
 
 
---- Load and execute a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
+--- Loads and execute a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
 -- @param path The path to the Lua file.
 -- @param ... An arbitrary set of arguments to pass to the Lua chunk.
 -- @return The result of executing the chunk.
@@ -35,7 +27,7 @@ function uiRes.loadLuaFile(path, ...)
 	local chunk, err = love.filesystem.load(path)
 
 	if not chunk then
-		error("couldn't load Lua file: " .. tostring(path) .. ", error: " .. err, 2)
+		error(err)
 	end
 
 	local retval = chunk(...)
@@ -50,90 +42,11 @@ function uiRes.loadLuaFileWithPath(path, ...)
 end
 
 
---- Converts a file path string to one that is suitable for the Lua function `require`.
--- @param path The path to convert. ("path/to/file.lua" becomes "path.to.file")
--- @omit_end When true, clip off the last word in the path. ("path.to.file" becomes "path.to.")
--- @return The converted path.
-function uiRes.pathToRequire(path, omit_end)
-	path = path:gsub("/", "."):gsub("%.lua$", "")
-
-	if omit_end then
-		path = string.match(path, "(.-)[^%.]*$")
-	end
-
-	return path
-end
-
-
---- Strip the last file or directory from a path.
--- @param path The file path to strip.
--- @param remove_trailing_slashes When true, omits any forward slashes at the end of the stripped path.
--- @return The stripped path, and the portion that was stripped.
-function uiRes.pathStripEnd(path, remove_trailing_slashes)
-	--[====[
-	Examples with `remove_trailing_slashes` off:
-
-	"foo/bar" -> "foo/", "bar"
-	"bar" -> "", "bar"
-	"" -> "", ""
-	"a/b/c/" -> "a/b/", "c"
-	"/foo" -> "/", "foo"
-	"/" -> "", ""
-	[[///]]" -> "//", ""
-	--]====]
-
-	local s1, s2 = path:match("^(.-)([^/]*)/?$")
-	if remove_trailing_slashes then
-		s1 = s1:match("^(.-)/*$")
-	end
-	return s1, s2
-end
-
---[===[
---- Strips the file extension from a path.
--- @param path The file path to strip.
--- @return The path without the file extension.
-function uiRes.stripFileExtension(path)
-	--[[
-	"hello.lua" -> "hello", "lua"
-	"foo/bar.txt" -> "foo/bar", "txt"
-	"zyp.tar.gz" -> "zyp", "tar.gz"
-	--]]
-
-	local a, b = uiRes.pathStripEnd(path)
-	local c, d = b:match("^([^%.]*)(.*)$")
-	return a .. c, d
-end
-
-
---- Strips the file extension from a path.
--- @param path The file path to strip.
--- @param omit_first_dot When true, removes the first dot in the returned extension (".lua" -> "lua")
--- @return The path without the extension, and the extension.
-function uiRes.stripFileExtension2(path, omit_first_dot)
-	--[[
-	"hello.lua" -> "hello", ".lua"
-	"foo/bar.txt" -> "foo/bar", ".txt"
-	"zyp.tar.gz" -> "zyp", ".tar.gz"
-	--]]
-
-	-- If the extension never changes, you can get away with a single call to string.match: "^(.-)%.lua$"
-
-	local a, b = uiRes.pathStripEnd(path)
-	local c, d = b:match("^([^%.]*)(.*)$")
-	if omit_first_dot then
-		d = d:sub(2)
-	end
-	return a .. c, d
-end
---]===]
-
-
---- Strip the first part of a path.
+--- Given a path and a substring that is anchored to the end, Strips the first part of a path.
 -- @param base_dir The initial part of the path. Any forward slash on the end is omitted.
 -- @param path The path to be shortened.
 -- @return The stripped path.
-function uiRes.stripBaseDirectoryFromPath(base_dir, path)
+function uiRes.stripFirstPartOfPath(base_dir, path)
 	-- "base/dir/", "base/dir/foobar.lua" -> "foobar.lua"
 	-- "base/dir", "base/dir/foobar.lua" -> "foobar.lua"
 
@@ -155,24 +68,22 @@ local function _enumerate(path, list, ext, recursive, depth)
 		error("file enumeration depth exceeded.")
 	end
 
-	local symlinks_enabled = love.filesystem.areSymlinksEnabled()
 	local files_array = love.filesystem.getDirectoryItems(path)
 
 	for i, v in ipairs(files_array) do
-		local file = path .. (path == "" and "" or "/") .. v
-		local info = uiRes.getInfo(file)
+		local id = pPath.join(path, v)
+		local info = love.filesystem.getInfo(id, _info)
 
 		if info.type == "file" then
 			if not ext
-			or type(ext) == "string" and string.match(v, "%..-$") == ext
-			or type(ext) == "table" and ext[string.match(v, "%..-$")]
-			or type(ext) == "function" and ext(path, v)
+			or type(ext) == "string" and v:match("%..-$") == ext
+			or type(ext) == "table" and ext[v:match("%..-$")]
 			then
-				table.insert(list, file)
+				table.insert(list, id)
 			end
 
-		elseif recursive and info.type == "directory" or (symlinks_enabled and info.type == "symlink") then
-			_enumerate(file, list, ext, recursive, depth - 1)
+		elseif recursive and uiRes.infoIsDirectory(info) then
+			_enumerate(id, list, ext, recursive, depth - 1)
 		end
 	end
 
@@ -182,66 +93,23 @@ end
 
 --- Given a directory path, returns a table of files.
 -- @param path The starting path to scan.
--- @param ext Extension filter. When a string, only files with a matching extension are included. When a table, any file with an extension that matches a key in the table is included. When a function (taking the directory path and file name as arguments), files are included if the function returns true. When false/nil, all files are included.
+-- @param ext Extension filter. When a string, only files with a matching extension are included. When a table, any file with an extension that matches a key in the table is included. When false/nil, all files are included.
 -- @param recursive When true, scan all subdirectories.
 -- @param depth (1000) The maximum recursion depth permitted. Raises an error if exceeded. Must be at least 1.
--- @return A table of enumerated files.
+-- @return A table of enumerated files. If the path does not point to a directory, then an empty table is returned.
 function uiRes.enumerate(path, ext, recursive, depth)
 	uiShared.type1(1, path, "string")
-	uiShared.typeEval(2, ext, "string", "table", "function")
+	uiShared.typeEval(2, ext, "string", "table")
 	-- don't assert 'recursive'
 	uiShared.intGEEval(4, depth, 1)
 
-	path = path:match("(.-)/?$")
-
-	local info = uiRes.getInfo(path)
-	if not info or (info.type ~= "directory" and (love.filesystem.areSymlinksEnabled() and info.type ~= "symlink")) then
-		error("directory not found at: " .. tostring(path))
-	end
-
-	--[[
-	'ext' examples:
-
-	string: ".lua"
-
-	table: {
-		[".lua"] = true,
-		[".txt"] = true,
-	}
-
-	function: function(path, file_name)
-		if file_name == "some string comparison" then
-			return true -- enumerate file.
-		end
-		-- do not enumerate file.
-	end
-	--]]
-
 	depth = depth or 1000
 
-	return _enumerate(path, {}, ext, recursive, depth)
-end
-
-
---- For an array of paths, enumerate files in each path with 'uiRes.enumerate()', and then return a hash
---	table that combines all file names.
--- @param paths An array of paths to check.
--- @param ext Hash of extensions (see uiRes.enumerate()).
--- @param recursive When true, check subdirectories within a path (see uiRes.enumerate()).
--- @return The combined hash table.
-function uiRes.enumerateFromPaths(paths, ext, recursive)
-	local hash = {}
-
-	for i, path in ipairs(paths) do
-		local list = uiRes.enumerate(path, ext, recursive)
-		for j, str in ipairs(list) do
-			if not hash[str] then
-				hash[str] = true
-			end
-		end
+	if uiRes.infoIsDirectory(love.filesystem.getInfo(path), _info) then
+		return _enumerate(path, {}, ext, recursive, depth)
 	end
 
-	return hash
+	return {}
 end
 
 
@@ -261,16 +129,9 @@ function uiRes.extractIDFromLuaFile(base_path, file_path)
 	end
 
 	local str = file_path:match("^(.-)%.lua$")
-	str = uiRes.stripBaseDirectoryFromPath(base_path, str)
+	str = uiRes.stripFirstPartOfPath(base_path, str)
 	return str
 end
-
-
---[[
-local function _join(base, name, ext)
-	return base:match("(.-)/?$") .. "/" .. name .. "." .. ext
-end
---]]
 
 
 return uiRes

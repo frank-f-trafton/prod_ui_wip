@@ -131,7 +131,6 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.scale = 1.0
 
 	-- Theme and resource state.
-	self.theme_path = false
 	self.theme = false
 
 	-- Resources.
