@@ -136,8 +136,7 @@ local function reloadFont()
 	dpanel.qp.text_object:setFont(font_test)
 
 	-- Release the old font object and collect garbage twice to prevent
-	-- a buildup of rapidly-discarded fonts eating up RAM while pending
-	-- release.
+	-- a buildup of rapidly-discarded fonts.
 	if old_font then
 		old_font:release()
 		collectgarbage("collect")
@@ -205,8 +204,8 @@ local function newWimpContext()
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
-	local theme_module = uiRes.loadLuaFileWithPath("prod_ui/themes/vacuum/data.lua")
-	context:applyTheme(theme_module)
+	local theme = uiRes.loadDirectoryAsTable("prod_ui/theme")
+	context:applyTheme(theme)
 
 	local wid_root = context:addRoot("wimp/root_wimp")
 	wid_root.w, wid_root.h = love.graphics.getDimensions()

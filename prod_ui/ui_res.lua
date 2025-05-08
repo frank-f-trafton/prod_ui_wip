@@ -14,7 +14,21 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 local _info = {} -- For love.filesystem.getInfo().
 
 
-function uiRes.infoIsDirectory(info)
+function uiRes.assertGetInfo(...)
+	local info = love.filesystem.getInfo(...)
+	if not info then
+		error("unable to read file: " .. tostring(select(1, ...)))
+	end
+end
+
+
+--[[
+NOTE: love.filesystem.getDirectoryItems() is affected by quirk in PhysicsFS, where the direct contents of
+symlinked directories cannot be listed:
+
+https://github.com/love2d/love/issues/1938
+--]]
+function uiRes.infoCanTraverse(info)
 	return info and (info.type == "directory" or (love.filesystem.areSymlinksEnabled() and info.type == "symlink"))
 end
 
@@ -61,8 +75,29 @@ function uiRes.stripFirstPartOfPath(base_dir, path)
 end
 
 
+function uiRes.assertNotRegistered(what, tbl, id)
+	if tbl[id] then
+		error(what .. ": ID '" .. tostring(id) .. "' is already registered.")
+	end
+end
+
+
+function uiRes.extractIDFromLuaFile(base_path, file_path)
+	uiShared.type1(1, base_path, "string")
+	uiShared.type1(2, file_path, "string")
+
+	if not file_path:find("%.lua$") then
+		error("file_path string doesn't end in '.lua'.")
+	end
+
+	local str = file_path:match("^(.-)%.lua$")
+	str = uiRes.stripFirstPartOfPath(base_path, str)
+	return str
+end
+
+
 local function _enumerate(path, list, ext, recursive, depth)
-	--- Based on the LÖVE Wiki example: https://love2d.org/wiki/love.filesystem.getDirectoryItems
+	-- Based on: https://love2d.org/wiki/love.filesystem.getDirectoryItems
 
 	if depth <= 0 then
 		error("file enumeration depth exceeded.")
@@ -82,7 +117,7 @@ local function _enumerate(path, list, ext, recursive, depth)
 				table.insert(list, id)
 			end
 
-		elseif recursive and uiRes.infoIsDirectory(info) then
+		elseif recursive and uiRes.infoCanTraverse(info) then
 			_enumerate(id, list, ext, recursive, depth - 1)
 		end
 	end
@@ -105,7 +140,7 @@ function uiRes.enumerate(path, ext, recursive, depth)
 
 	depth = depth or 1000
 
-	if uiRes.infoIsDirectory(love.filesystem.getInfo(path), _info) then
+	if uiRes.infoCanTraverse(love.filesystem.getInfo(path), _info) then
 		return _enumerate(path, {}, ext, recursive, depth)
 	end
 
@@ -113,25 +148,145 @@ function uiRes.enumerate(path, ext, recursive, depth)
 end
 
 
-function uiRes.assertNotRegistered(what, tbl, id)
-	if tbl[id] then
-		error(what .. ": ID '" .. tostring(id) .. "' is already registered.")
+local function _enumerateDirTable(path, tbl, handlers, depth, max_items)
+	-- Based on: https://love2d.org/wiki/love.filesystem.getDirectoryItems
+
+	if depth <= 0 then
+		error("directory enumeration depth exceeded.")
+	end
+
+	for _, file_name in ipairs(love.filesystem.getDirectoryItems(path)) do
+		max_items = max_items - 1
+		if max_items <= 0 then
+			error("max items exceeded.")
+		end
+
+		local item_path = pPath.join(path, file_name)
+		local info = love.filesystem.getInfo(item_path, _info)
+		if not info then
+			error("file was enumerated, but could not be queried for more info: " .. tostring(item_path))
+
+		elseif info.type == "file" then
+			local file_ext = pPath.getExtension(file_name)
+			local id, retval = handlers[file_ext](item_path, file_name, file_ext)
+			if id ~= nil then
+				if retval == nil then
+					error("no return value provided for ID: " .. tostring(id) .. ". Path: " .. item_path)
+
+				elseif tbl[id] then
+					error("This ID is already populated: " .. tostring(id) .. ". Path: " .. item_path)
+				end
+
+				tbl[id] = retval
+			end
+
+		elseif uiRes.infoCanTraverse(info) then
+			local id
+			if handlers["directory"] then
+				id = handlers["directory"](item_path, file_name)
+			else
+				id = file_name
+			end
+
+			if tbl[id] then
+				error("This ID is already populated: " .. tostring(id) .. ". Path: " .. item_path)
+			end
+			tbl[id] = {}
+			_enumerateDirTable(item_path, tbl[id], handlers, depth - 1, max_items)
+		end
 	end
 end
 
 
-function uiRes.extractIDFromLuaFile(base_path, file_path)
-	uiShared.type1(1, base_path, "string")
-	uiShared.type1(2, file_path, "string")
+--- Loads a set of files as one Lua table.
+-- @param path The path.
+-- @param handlers A table of extension handler functions. If not provided, a set of defaults will be substituted.
+--	(For more info, see the defaults and their comments below.)
+-- @param depth (1000) How deep to enumerate before raising an error.
+-- @param max_items (16384) How many items to check before raising an error.
+-- @return The table.
+function uiRes.loadDirectoryAsTable(path, handlers, depth, max_items)
+	uiShared.type1(1, path, "string")
+	uiShared.typeEval1(2, handlers, "table")
+	uiShared.typeEval1(3, depth, "number")
+	uiShared.typeEval1(4, max_items, "number")
 
-	if not file_path:find("%.lua$") then
-		error("file_path string doesn't end in '.lua'.")
+	handlers = handlers or uiRes.dir_handlers
+	depth = depth or 1000
+	max_items = max_items or 16384
+
+	local info = love.filesystem.getInfo(path, _info)
+	if uiRes.infoCanTraverse(love.filesystem.getInfo(path), info) then
+		local tbl = {}
+		_enumerateDirTable(path, tbl, handlers, depth, max_items)
+		return tbl
 	end
-
-	local str = file_path:match("^(.-)%.lua$")
-	str = uiRes.stripFirstPartOfPath(base_path, str)
-	return str
 end
+
+
+-- The default DirTable handlers.
+--[[
+For files, the arguments are:
+* full_path: the path, filename and extension.
+* name: The filename and extension.
+* ext: Just the extension.
+
+The last two are provided for convenience, since they are computed while iterating.
+
+The return values are a key and a value to assign to the table at this level. Return 'nil' to ignore the file and
+assign nothing.
+
+Directories are scanned by default, but a special handler named "directory" may be provided.
+* full_path
+* name
+
+Note the lack of an extension argument.
+
+Return just the key to use for the new table at this level, or 'nil' to ignore the directory and its contents.
+
+In these default functions, all files and directories that begin with an underscore are ignored.
+--]]
+uiRes.dir_handlers = {
+	[".lua"] = function(full_path, name, ext)
+		if name:sub(1, 1) == "_" then
+			return
+		end
+
+		local chunk, err = love.filesystem.load(full_path)
+		if not chunk then
+			error(err)
+		end
+
+		chunk = chunk()
+		local id = name:sub(1, -(#ext + 1))
+
+		return id, chunk
+	end,
+
+	--[[
+	[".txt"] = function(full_path, name, ext)
+		if name:sub(1, 1) == "_" then
+			return
+		end
+
+		local str, err = love.filesystem.read(full_path)
+		if not str then
+			error(err)
+		end
+
+		local id = name:sub(1, -(#ext + 1))
+
+		return id, str
+	end,
+	--]]
+
+	["directory"] = function(full_path, name)
+		if name:sub(1, 1) == "_" then
+			return
+		end
+		return name
+	end,
+}
 
 
 return uiRes

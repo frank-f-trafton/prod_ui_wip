@@ -96,7 +96,8 @@ function uiContext.newContext(prod_ui_path, settings)
 	uiShared.type1(1, prod_ui_path, "string")
 	uiShared.typeEval1(2, settings, "table")
 
-	-- Default to non-empty paths having a slash on the end.
+	-- Ensure that 'prod_ui_path' ends in a slash so that it doesn't need to be
+	-- appended upon later use.
 	if prod_ui_path ~= "" and string.sub(prod_ui_path, -1) ~= "/" then
 		prod_ui_path = prod_ui_path .. "/"
 	end
@@ -115,6 +116,7 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.path_symbols = {
 		[""] = "%", -- escapes '%%' to '%'
 		produi = prod_ui_path:sub(1, -2),
+		resources = prod_ui_path .. "resources",
 		dpi = tostring(self.dpi),
 	}
 
