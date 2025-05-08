@@ -3,3 +3,6 @@
 
 # A symlink to the documentation repo, used on my local machine for grepping.
 /docs
+
+# Temporary theme stuff.
+/theme_works/output

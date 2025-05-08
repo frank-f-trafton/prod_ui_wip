@@ -14,7 +14,6 @@ local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
-local vPath = context:getLua("core/res/v_path")
 
 
 local _drill = utilTable.drill
@@ -45,6 +44,13 @@ function methods:resetResources()
 end
 
 
+function methods:interpolatePath(path)
+	uiShared.type1(1, path, "string")
+
+	return pPath.interpolate(path, self.path_symbols)
+end
+
+
 local function _initTexture(texture, metadata)
 	local tex_info = {texture=texture}
 
@@ -63,8 +69,8 @@ local function _initTexture(texture, metadata)
 	pTable.assignIfNil(tex_info, "wrap_h", "clamp")
 	pTable.assignIfNil(tex_info, "wrap_v", "clamp")
 
-	tex:setFilter(tex_info.filter_min, tex_info.filter_mag)
-	tex:setWrap(tex_info.wrap_h, tex_info.wrap_v)
+	texture:setFilter(tex_info.filter_min, tex_info.filter_mag)
+	texture:setWrap(tex_info.wrap_h, tex_info.wrap_v)
 
 	if metadata then
 		if metadata.quads then
@@ -143,20 +149,18 @@ end
 
 
 --- Loads a PNG and an optional accompanying .lua file of metadata.
-local function _loadTextureFiles(paths, id)
-	local info, path = vPath.getInfo(paths, id, _info)
-	if not info then
-		error("unable to locate texture: " .. tostring(id))
-	end
+local function _loadTextureFiles(path)
+	path = context:interpolatePath(path)
+
+	local info = uiRes.assertGetInfo(path, "file", _info)
 
 	local tex = love.graphics.newImage(path)
 	local metadata
-	local id_lua = id:sub(1, -5) .. ".lua"
-	print("ID_LUA", id_lua)
+	local path_lua = path:sub(1, -5) .. ".lua"
 
-	local info2, path2 = vPath.getInfo(paths, id_lua, _info)
+	local info2 = love.filesystem.getInfo(path_lua, "file", _info)
 	if info2 then
-		local chunk, err = love.filesystem.load(path2)
+		local chunk, err = love.filesystem.load(path_lua)
 		if not chunk then
 			error(err)
 		end
@@ -168,81 +172,39 @@ local function _loadTextureFiles(paths, id)
 end
 
 
-function methods:applyTheme(theme_source)
+function methods:applyTheme(theme)
 	local resources = self.resources
 	local scale = self.scale
 
 	self:resetResources()
 
-	local theme = pTable.deepCopy(theme_source)
 	self.theme = theme
 
-	for k, v in pairs(theme.paths) do
-		for i, path in ipairs(v) do
-			v[i] = pPath.interpolate(v[i], self.path_symbols)
-		end
-	end
-	-- TODO: attach paths table somewhere?
-
-	if theme.paths.fonts then
-		local file_hash = vPath.enumerate(theme.paths.fonts, ".lua", false)
-		local font_info_set = {}
-		for id, full_path in pairs(file_hash) do
-			id = id:gsub(".-/", ""):sub(1, -5)
-			local font_info, err = love.filesystem.load(full_path)
-			if not font_info then
-				error(err)
-			end
-			font_info = font_info()
-			font_info_set[id] = font_info
-		end
-
-		fontCache.setupRawFontsCollection(theme.paths.font_data)
-
-		for k, v in pairs(font_info_set) do
-			resources.fonts[k] = fontCache.instantiateFont(v)
-		end
-
-		fontCache.assignFallbacks()
-		fontCache.clearRawFontsCollection()
-	end
-
-
-	--[[
 	fontCache.clear()
-	for k, font_info in pairs(theme.fonts) do
-		fontCache.checkData(theme.paths.fonts, font_info)
+	if theme.fonts then
+		for k, font_info in pairs(theme.fonts) do
+			fontCache.createFontObjects(font_info)
+		end
+
+		for k, font_info in pairs(theme.fonts) do
+			fontCache.setFallbacks(font_info)
+			resources.fonts[k] = fontCache.getFont(font_info)
+		end
 	end
+	fontCache.clear()
 
-	for k, font_info in pairs(theme.fonts) do
-		fontCache.createFontObjects(font_info)
-	end
+	-- TODO: support loading a directory of images as one group (like an uncompiled atlas).
 
-	for k, font_info in pairs(theme.fonts) do
-		fontCache.setFallbacks(font_info)
-	end
-
-	for k, font_info in pairs(theme.fonts) do
-		resources.fonts[k] = fontCache.getFont(font_info)
-	end
-	--]]
-
-
-	if theme.paths.textures then
-		local file_hash = vPath.enumerate(theme.paths.textures, ".png", false)
-		local tex_info_set = {}
-		for id, path in pairs(file_hash) do
-			id = id:gsub(".-/", ""):sub(1, -5)
-			if not resources.textures[id] then
-				local tex, meta = _loadTextureFiles(theme.paths.textures, k)
-				local tex_info = _initTexture(tex, meta)
-				resources.textures[id] = tex_info
-				if tex_info.quads then
-					resources.quads[id] = tex_info.quads
+	if theme.textures then
+		for k, tex_info in pairs(theme.textures) do
+			local tex, meta = _loadTextureFiles(tex_info.path)
+			local tex_tbl = _initTexture(tex, meta)
+			resources.textures[k] = tex_tbl
+			if tex_tbl.quads then
+					resources.quads[k] = tex_tbl.quads
 				end
-				if tex_info.slices then
-					resources.slices[id] = tex_info.slices
-				end
+			if tex_tbl.slices then
+				resources.slices[k] = tex_tbl.slices
 			end
 		end
 	end
@@ -267,7 +229,6 @@ function methods:applyTheme(theme_source)
 	-- TODO: I need to give these proper handling and care, but for now, I just
 	-- want to get the library booting again.
 	resources.boxes = pTable.deepCopy(theme.boxes)
-	resources.paths = pTable.deepCopy(theme.paths)
 	resources.icons = pTable.deepCopy(theme.icons)
 	resources.labels = pTable.deepCopy(theme.labels)
 	resources.scroll_bar_styles = pTable.deepCopy(theme.scroll_bar_styles)
@@ -288,11 +249,9 @@ function methods:applyTheme(theme_source)
 	end
 	_recursiveDrill(resources)
 
-	if theme.paths.skins then
-		for _, v in ipairs(theme.paths.skins) do
-			if love.filesystem.getInfo(v) then
-				self:loadSkinDefs(v, true)
-			end
+	if theme.skins then
+		for k, v in pairs(theme.skins) do
+			self:registerSkinDef(v, k)
 		end
 	end
 end
@@ -318,54 +277,6 @@ function methods:registerSkinDef(skin_def, id)
 	local skin_inst = setmetatable({}, skin_def)
 	skins[id] = skin_inst
 	self:refreshSkinDefInstance(id)
-end
-
-
---- Wrapper for loading a SkinDef from a file.
--- @param id The ID to use for the skin. Must not have already been registered.
--- @param path Path to the file containing the SkinDef.
--- @return The loaded SkinDef.
-function methods:loadSkinDef(id, path)
-	local def = uiRes.loadLuaFile(path, self)
-
-	if type(def) ~= "table" then
-		error("bad type for skin def (expected table, got " .. type(def) .. ") at path: " .. path)
-	end
-
-	self:registerSkinDef(def, id)
-
-	return def
-end
-
-
---- Loads multiple SkinDefs from a directory. The SkinDef names are based on the file names with the base path and
---	file extension stripped. Only registers SkinDefs for IDs that are not already populated.
--- @param base_path The file path to scan.
--- @param recursive True to scan subdirectories (which become part of the ID).
-function methods:loadSkinDefs(base_path, recursive)
-	--[[
-	An example of how this method names SkinDefs:
-
-	inst:loadSkinDefs("game/ui_skins", true)
-
-	The file "game/ui_skins/skeleton.lua" produces "skeleton".
-	The file "game/ui_skins/pads/lily.lua" produces "pads/lily".
-	--]]
-
-	local source_files = uiRes.enumerate(base_path, ".lua", recursive)
-
-	for i, file_path in ipairs(source_files) do
-		-- Use the file name without the '.lua' extension as the ID.
-		local id = file_path:match("^(.-)%.lua$")
-		if not id then
-			error("couldn't extract ID from file path: " .. file_path)
-		end
-		id = uiRes.stripFirstPartOfPath(base_path, id)
-
-		if not self.resources.skins[id] then
-			self:loadSkinDef(id, file_path)
-		end
-	end
 end
 
 

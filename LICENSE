@@ -116,7 +116,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 
 -------------------------------------------------------------------------------
-(Font) prod_ui/themes/data/font_data/noto_sans/NotoSans-Regular.ttf:
+(Font) prod_ui/resources/font_data/noto_sans/NotoSans-Regular.ttf:
 
 Copyright 2015-2021 Google LLC. All Rights Reserved.
 
@@ -214,7 +214,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-(Font) prod_ui/themes/data/font_data/noto_sans/NotoSansSymbols-Regular.ttf:
+(Font) prod_ui/resources/font_data/noto_sans/NotoSansSymbols-Regular.ttf:
 
 Copyright 2012 Google Inc. All Rights Reserved.
 
@@ -312,7 +312,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-(Font) prod_ui/themes/vacuum/data/font_data/noto_sans/NotoSansSymbols2-Regular.ttf:
+(Font) prod_ui/resources/font_data/noto_sans/NotoSansSymbols2-Regular.ttf:
 
 Copyright 2012 Google Inc. All Rights Reserved.
 
