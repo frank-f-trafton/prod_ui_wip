@@ -818,7 +818,6 @@ function def:uiCall_reshapePre()
 
 	-- (parent should be the WIMP root widget.)
 	local parent = self.parent
-	local wimp_res = self.context.resources.wimp
 
 	-- Refit if maximized and parent dimensions changed.
 	if self.maximized then

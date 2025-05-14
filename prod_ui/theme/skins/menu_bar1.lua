@@ -9,7 +9,7 @@ return {
 	tq_px = "*quads/atlas/pixel",
 	sl_body = "*slices/atlas/menu_bar_body",
 	font_item = "*fonts/p",
-	thimble_info = "*thimble_info",
+	thimble_info = "*info/thimble_info",
 
 	color_cat_enabled = {1.0, 1.0, 1.0, 1.0},
 	color_cat_selected = {0.1, 0.1, 0.1, 1.0},

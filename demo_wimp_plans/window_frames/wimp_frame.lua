@@ -9,18 +9,10 @@ local pTable = require("prod_ui.lib.pile_table")
 function plan.makeWindowFrame(root)
 	local context = root.context
 
-	-- Clone the skin to avoid messing up other frames.
-	local skin_clone = context:cloneSkinDef("wimp_frame")
-
-	local function _userDestroy(self)
-		self.context:removeSkinDef(skin_clone)
-	end
-
 	local frame = root:newWindowFrame()
-	frame.skin_id = skin_clone
+	frame.skin_id = frame.skin_id .. "_DEMO"
 	frame.w = 640
 	frame.h = 480
-	frame.userDestroy = _userDestroy
 	frame:initialize()
 	frame:setFrameTitle("WIMP Window Frame")
 
@@ -392,10 +384,8 @@ function plan.makeWindowFrame(root)
 		local r_action = function(self)
 			local frame = commonWimp.getFrame(self)
 			if frame then
-				skin_clone.header_text_align_h = self.usr_text_align_h
-				self.context:refreshSkinDefInstance(skin_clone)
+				frame.skin.header_text_align_h = self.usr_text_align_h
 				frame:reshape()
-				print("skin_clone.header_text_align_h", skin_clone.header_text_align_h)
 				print("frame.skin.header_text_align_h", frame.skin.header_text_align_h)
 			end
 		end

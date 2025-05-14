@@ -14,17 +14,8 @@ function plan.make(panel)
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	-- Make a one-off SkinDef clone that we can adjust without changing all other buttons with the default skin.
-
-	local clone = panel.context:cloneSkinDef("button1")
-
-	local function _userDestroy(self)
-		self.context:removeSkinDef(clone)
-	end
-
 	local button_norm = panel:addChild("base/button")
-	button_norm.skin_id = clone
-	button_norm.userDestroy = _userDestroy
+	button_norm.skin_id = button_norm.skin_id .. "_DEMO"
 	button_norm.x = 256
 	button_norm.w = 224
 	button_norm.h = 64

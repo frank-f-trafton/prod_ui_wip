@@ -9,11 +9,11 @@ return {
 	--allow_maximize
 	--allow_resize
 	--header_visible = true,
-	header_button_side = "*wimp/window_frames/header_button_side",
-	header_show_close_button = "*wimp/window_frames/header_show_close_button",
-	header_show_max_button = "*wimp/window_frames/header_show_max_button",
-	header_text = "*wimp/window_frames/header_text",
-	header_size = "*wimp/window_frames/header_size",
+	header_button_side = "*info/window_frames/header_button_side",
+	header_show_close_button = "*info/window_frames/header_show_close_button",
+	header_show_max_button = "*info/window_frames/header_show_max_button",
+	header_text = "*info/window_frames/header_text",
+	header_size = "*info/window_frames/header_size",
 	-- /settings
 
 	box = "*boxes/wimp_frame",
@@ -27,10 +27,10 @@ return {
 	slc_body = "*slices/atlas/win_body",
 	slc_shadow = "*slices/atlas/win_shadow",
 
-	header_text_align_h = "*wimp/window_frames/header_text_align_h",
-	header_text_align_v = "*wimp/window_frames/header_text_align_v",
-	sensor_resize_pad = "*wimp/window_frames/frame_resize_pad",
-	sensor_resize_diagonal = "*wimp/window_frames/frame_resize_diagonal",
+	header_text_align_h = "*info/window_frames/header_text_align_h",
+	header_text_align_v = "*info/window_frames/header_text_align_v",
+	sensor_resize_pad = "*info/window_frames/frame_resize_pad",
+	sensor_resize_diagonal = "*info/window_frames/frame_resize_diagonal",
 	shadow_extrude = 8,
 
 	-- Alignment of textures within control sensors

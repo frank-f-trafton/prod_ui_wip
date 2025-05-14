@@ -24,7 +24,6 @@ skin.label_style: The label style table, usually taken from the theme table.
 skin.label_style.font: The font to use when measuring and rendering text.
 skin.label_style.ul_color: Underline color table, or false to use the current text color.
 skin.label_style.ul_h: Underline height (thickness).
-skin.label_style.ul_oy: Underline Y offset from the top of text.
 
 
 Required widget fields:
@@ -192,7 +191,10 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 		self.vp_h
 	)
 
-	local height = self.label_h or math.floor(0.5 + font:getHeight() * font:getLineHeight())
+	local font_height = font:getHeight()
+	local font_line_height = font:getLineHeight()
+
+	local height = self.label_h or math.floor(0.5 + font_height * font_line_height)
 	local text_y
 	if skin.label_align_v == "top" then
 		text_y = math.floor(self.vp_y)
@@ -211,7 +213,7 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 		uiGraphics.quadXYWH(
 			tq_px,
 			self.vp_x + label_ox + self.label_ul_x + self.label_ul_ox,
-			text_y + label_oy + label_style.ul_oy,
+			text_y + font_height + label_oy,
 			self.label_ul_w,
 			label_style.ul_h
 		)

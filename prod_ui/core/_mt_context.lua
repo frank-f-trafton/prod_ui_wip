@@ -819,6 +819,7 @@ function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	out_def.default_settings = out_def.default_settings or {}
 
 	if out_def.default_skinner then
+		print("self.resources", self.resources)
 		if not self.resources then
 			error("a theme resource table must be instantiated to use widget default skinners.")
 		end

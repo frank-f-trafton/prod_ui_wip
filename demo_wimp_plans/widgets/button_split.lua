@@ -86,20 +86,13 @@ function plan.make(panel)
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	-- SkinDef clone
-	local clone = panel.context:cloneSkinDef("button_split1")
-
-	local function _userDestroy(self)
-		self.context:removeSkinDef(clone)
-	end
-
 	-- Split Button
 	local btn_spl = panel:addChild("wimp/button_split")
+	btn_spl.skin_id = btn_spl.skin_id .. "_DEMO"
 	btn_spl.x = 0
 	btn_spl.y = 0
 	btn_spl.w = 224
 	btn_spl.h = 64
-	btn_spl.userDestroy = _userDestroy
 	btn_spl:initialize()
 	btn_spl:setTag("demo_split_btn")
 
