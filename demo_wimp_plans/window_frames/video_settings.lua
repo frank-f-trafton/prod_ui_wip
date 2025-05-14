@@ -47,7 +47,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.h = hh
 		rad_btn:initialize()
 		rad_btn.checked = false
-		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("On")
 		rad_btn.usr_vsync_mode = 1
@@ -64,7 +63,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.h = hh
 		rad_btn:initialize()
 		rad_btn.checked = false
-		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Adaptive")
 		rad_btn.usr_vsync_mode = -1
@@ -82,7 +80,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.h = hh
 		rad_btn:initialize()
 		rad_btn.checked = false
-		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Half")
 		rad_btn.usr_vsync_mode = 2
@@ -99,7 +96,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.h = hh
 		rad_btn:initialize()
 		rad_btn.checked = false
-		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Third")
 		rad_btn.usr_vsync_mode = 3
@@ -116,7 +112,6 @@ function plan.makeWindowFrame(root)
 		rad_btn.h = hh
 		rad_btn:initialize()
 		rad_btn.checked = false
-		rad_btn.bijou_side = "right"
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Off")
 		rad_btn.usr_vsync_mode = 0
@@ -138,7 +133,6 @@ function plan.makeWindowFrame(root)
 		checkbox:initialize()
 		checkbox.tag = "wimp-demo-show-state-details"
 		checkbox.checked = not not context.app.show_details
-		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show state details")
 
 		checkbox.wid_buttonAction = function(self)
@@ -156,7 +150,6 @@ function plan.makeWindowFrame(root)
 		checkbox:initialize()
 		checkbox.tag = "wimp-demo-show-perf"
 		checkbox.checked = not not context.app.show_perf
-		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show perf info")
 
 		checkbox.wid_buttonAction = function(self)
@@ -174,7 +167,6 @@ function plan.makeWindowFrame(root)
 		checkbox:initialize()
 		checkbox.tag = "wimp-demo-mouse-cross"
 		checkbox.checked = not not context.app.show_mouse_cross
-		checkbox.bijou_side = "right"
 		checkbox:setLabel("Show cross at mouse location")
 
 		checkbox.wid_buttonAction = function(self)
