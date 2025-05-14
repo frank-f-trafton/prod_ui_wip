@@ -81,6 +81,7 @@ local commonMath = require("prod_ui.common.common_math")
 local commonWimp = require("prod_ui.common.common_wimp")
 local itemOps = require("prod_ui.common.item_ops")
 local keyMgr = require("prod_ui.lib.key_mgr")
+local pTable = require("prod_ui.lib.pile_table")
 local uiContext = require("prod_ui.ui_context")
 local uiGraphics = require("prod_ui.ui_graphics")
 local uiRes = require("prod_ui.ui_res")
@@ -205,6 +206,19 @@ local function newWimpContext()
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
 	local theme = uiRes.loadDirectoryAsTable("prod_ui/theme")
+
+	-- Duplicate skins so that demo widgets can be tweaked without
+	-- affecting the rest of the program.
+	if theme.skins then
+		local dupes = {}
+		for k, v in pairs(theme.skins) do
+			dupes[k .. "_DEMO"] = pTable.deepCopy(v)
+		end
+		for k, v in pairs(dupes) do
+			theme.skins[k] = v
+		end
+	end
+
 	context:applyTheme(theme)
 
 	local wid_root = context:addRoot("wimp/root_wimp")

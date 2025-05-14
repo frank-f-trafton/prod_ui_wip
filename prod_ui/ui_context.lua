@@ -132,20 +132,6 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
 	self.scale = 1.0
 
-	-- Theme and resource state.
-	self.theme = false
-
-	-- Resources.
-	self.resources = {
-		paths = {},
-		boxes = {},
-		skins = {},
-		fonts = {},
-		textures = {},
-		quads = {},
-		slices = {},
-	}
-
 	-- Passed as the settings argument when creating new layer canvases.
 	self.canvas_settings = {}
 
@@ -304,6 +290,9 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	local _mt_context = self:getLua("core/_mt_context")
 	setmetatable(self, _mt_context)
+
+	-- Resources. See context_resources.lua for for info.
+	self.resources = self:_initResourcesTable()
 
 	self._mt_widget = self:getLua("core/_mt_widget")
 

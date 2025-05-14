@@ -29,21 +29,12 @@ function plan.make(panel)
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	-- SkinDef clone
-	local context = panel.context
-	local skin_clone = context:cloneSkinDef("tree_box1")
-
-	local function _userDestroy(self)
-		self.context:removeSkinDef(skin_clone)
-	end
-
 	local tree_box = panel:addChild("wimp/tree_box")
+	tree_box.skin_id = tree_box.skin_id .. "_DEMO"
 	tree_box.x = 0
 	tree_box.y = 0
 	tree_box.w = 224
 	tree_box.h = 256
-	tree_box.skin_id = skin_clone
-	tree_box.userDestroy = _userDestroy
 	tree_box:initialize()
 	tree_box:setTag("demo_treebox")
 
@@ -136,7 +127,6 @@ function plan.make(panel)
 		if tb then
 			local skin_def = getmetatable(tb.skin)
 			skin_def.item_pad_v = math.floor(self.slider_pos)
-			self.context:refreshSkinDefInstance(skin_def)
 			_refreshTreeBox(tb)
 		end
 	end
@@ -159,7 +149,6 @@ function plan.make(panel)
 		if tb then
 			local skin_def = getmetatable(tb.skin)
 			skin_def.pipe_width = math.floor(self.slider_pos)
-			self.context:refreshSkinDefInstance(skin_def)
 			_refreshTreeBox(tb)
 		end
 	end
@@ -178,7 +167,6 @@ function plan.make(panel)
 		if tb then
 			local skin_def = getmetatable(tb.skin)
 			skin_def.draw_pipes = not not self.checked
-			self.context:refreshSkinDefInstance(skin_def)
 			_refreshTreeBox(tb)
 		end
 	end

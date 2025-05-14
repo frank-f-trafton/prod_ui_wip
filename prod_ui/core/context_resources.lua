@@ -39,7 +39,9 @@ end
 
 function methods:resetResources()
 	for k, v in pairs(self.resources) do
-		pTable.clear(v)
+		if type(v) == "table" then
+			pTable.clear(v)
+		end
 	end
 end
 
@@ -48,6 +50,19 @@ function methods:interpolatePath(path)
 	uiShared.type1(1, path, "string")
 
 	return pPath.interpolate(path, self.path_symbols)
+end
+
+
+-- If 'ta' is a table, then deep-copy its key-value pairs to table 'tb'.
+local function _deepCopyFields(ta, tb)
+	if type(tb) ~= "table" then
+		error("the destination does not exist, or it is not a table.")
+	end
+	if type(ta) == "table" then
+		for k, v in pairs(ta) do
+			tb[k] = pTable.deepCopy(v)
+		end
+	end
 end
 
 
@@ -172,15 +187,56 @@ local function _loadTextureFiles(path)
 end
 
 
+function methods:_initResourcesTable()
+	if self.resources then
+		error("'self.resources' is already populated. This method should only be called once.")
+	end
+
+	-- ie 'self.resources = self:_initResourcesTable()'
+	return {
+		boxes = {},
+		fonts = {},
+		icons = {},
+		info = {},
+		labels = {},
+		scroll_bar_data = {},
+		scroll_bar_styles = {},
+		user = {},
+
+		textures = {},
+		quads = {},
+		slices = {},
+
+		skins = {}
+	}
+end
+
+
+local function _applyReferences(t, resources)
+	for k, v in pairs(t) do
+		if type(v) == "table" then
+			_applyReferences(v, resources)
+
+		elseif type(v) == "string" and v:sub(1, 1) == "*" then
+			t[k] = _drill(resources, "/", v:sub(2))
+		end
+	end
+end
+
+
 function methods:applyTheme(theme)
 	local resources = self.resources
 	local scale = self.scale
 
 	self:resetResources()
-
-	self.theme = theme
-
 	fontCache.clear()
+
+	if not theme then
+		return
+	end
+
+	_deepCopyFields(theme.boxes, resources.boxes)
+
 	if theme.fonts then
 		for k, font_info in pairs(theme.fonts) do
 			fontCache.createFontObjects(font_info)
@@ -193,222 +249,39 @@ function methods:applyTheme(theme)
 	end
 	fontCache.clear()
 
+	_deepCopyFields(theme.icons, resources.icons)
+	_deepCopyFields(theme.info, resources.info)
+	_deepCopyFields(theme.labels, resources.labels)
+	_deepCopyFields(theme.scroll_bar_data, resources.scroll_bar_data)
+	_deepCopyFields(theme.scroll_bar_styles, resources.scroll_bar_styles)
+	_deepCopyFields(theme.user, resources.user)
+
 	-- TODO: support loading a directory of images as one group (like an uncompiled atlas).
 
 	if theme.textures then
 		for k, tex_info in pairs(theme.textures) do
 			local tex, meta = _loadTextureFiles(tex_info.path)
 			local tex_tbl = _initTexture(tex, meta)
+
 			resources.textures[k] = tex_tbl
+
 			if tex_tbl.quads then
-					resources.quads[k] = tex_tbl.quads
-				end
+				resources.quads[k] = tex_tbl.quads
+			end
+
 			if tex_tbl.slices then
 				resources.slices[k] = tex_tbl.slices
 			end
 		end
 	end
 
-	if theme.boxes then
-		for k2, v2 in pairs(theme.boxes) do
-			for k, v in pairs(v2) do
-				if k == "outpad" or k == "border" or k == "margin" then
-					v.x1 = math.max(0, math.floor(v.x1 * scale))
-					v.x2 = math.max(0, math.floor(v.x2 * scale))
-					v.y1 = math.max(0, math.floor(v.y1 * scale))
-					v.y2 = math.max(0, math.floor(v.y2 * scale))
-				end
-			end
-		end
-	end
-
-	-- TODO: Icon classifications
-
-	-- TODO: Widget label styles
-
-	-- TODO: I need to give these proper handling and care, but for now, I just
-	-- want to get the library booting again.
-	resources.boxes = pTable.deepCopy(theme.boxes)
-	resources.icons = pTable.deepCopy(theme.icons)
-	resources.labels = pTable.deepCopy(theme.labels)
-	resources.scroll_bar_styles = pTable.deepCopy(theme.scroll_bar_styles)
-	resources.scroll_bar_data = pTable.deepCopy(theme.scroll_bar_data)
-	resources.wimp = pTable.deepCopy(theme.wimp)
-	resources.thimble_info = pTable.deepCopy(theme.thimble_info)
-
-	-- TODO: Replace/rewrite this.
-	local function _recursiveDrill(t)
-		for k, v in pairs(t) do
-			if type(v) == "table" then
-				_recursiveDrill(v)
-
-			elseif type(v) == "string" and v:sub(1, 1) == "*" then
-				t[k] = _drill(resources, "/", v:sub(2))
-			end
-		end
-	end
-	_recursiveDrill(resources)
-
 	if theme.skins then
 		for k, v in pairs(theme.skins) do
-			self:registerSkinDef(v, k)
+			resources.skins[k] = v
 		end
 	end
-end
 
-
---- Registers a SkinDef table to the theming system and creates a SkinInstance.
--- @param skin_def The SkinDef table to assign.
--- @param id The SkinDef ID to use. It must be a string, a number or a table, and it cannot already be registerd.
---  If the value is a table, then it must be the SkinDef table (skin_def == id).
-function methods:registerSkinDef(skin_def, id)
-	uiShared.type1(1, skin_def, "table")
-	uiShared.type(1, id, "string", "number", "table")
-
-	if type(id) == "table" and skin_def ~= id then
-		error("when using a table as the ID, it must be the same table as the SkinDef (skin_def == id).")
-	end
-
-	local skins = self.resources.skins
-	if skins[id] then
-		error("a SkinDef is already registered with this ID: " .. tostring(id))
-	end
-
-	local skin_inst = setmetatable({}, skin_def)
-	skins[id] = skin_inst
-	self:refreshSkinDefInstance(id)
-end
-
-
-local _dummy_schema = {}
-
-
-local _ref_handlers = {
-	["*"] = function(self, v)
-		return false, _drill(self.resources, "/", v:sub(2))
-	end,
-	["#"] = function(self, v)
-		return true, _drill(self.resources, "/", v:sub(2))
-	end,
-	-- "&" is handled earlier in the function.
-}
-
-
-local _schema_commands = {
-	["scaled-int"] = function(self, v)
-		return math.floor(v * self.scale)
-	end,
-	["unit-interval"] = function(self, v)
-		return math.max(0, math.min(v, 1))
-	end
-}
-
-
--- @param schema_root The topmost schema table.
--- @param schema_table The current subtable (starting with 'main' at the first level).
-local function _skinDeepCopy(self, inst, def, schema_root, schema_table, _depth)
-	--print("_skinDeepCopy: start", _depth)
-
-	--[[
-	setmetatable(inst, inst)
-	inst.__index = def
-	--]]
-
-	for k, v in pairs(def) do
-		local symbol = type(v) == "string" and v:sub(1, 1)
-		if symbol == "&" then
-			local tbl = schema_table[v:sub(2)]
-			if not tbl then
-				error("schema table lookup failed. Address: " .. tostring(v))
-			end
-			inst[k] = _skinDeepCopy(self, {}, v, schema_root or _dummy_schema, tbl, _depth + 1)
-
-		elseif type(v) == "table" then
-			inst[k] = _skinDeepCopy(self, {}, v, schema_root or _dummy_schema, schema_table[k] or _dummy_schema, _depth + 1)
-
-		else
-			--print("***", "k", k, "v", v)
-			-- Pull in resources from the main theme table
-			local stop_processing
-			local ref_handler = _ref_handlers[symbol]
-			if ref_handler then
-				--print(">>> do lookup")
-				stop_processing, inst[k] = ref_handler(self, v)
-				--print(">>> value is now: ", tostring(inst[k]), "stop_processing: " .. tostring(stop_processing))
-			else
-				--print(">>> direct copy")
-				inst[k] = v
-			end
-
-			if schema_table[k] and not stop_processing then
-				local command = schema_table[k]
-				local func = _schema_commands[command]
-				if func then
-					--print("schema command", command, "inst[k]", inst[k])
-					inst[k] = func(self, inst[k])
-				else
-					error("unhandled schema command: " .. tostring(command))
-				end
-			end
-		end
-	end
-	--print("_skinDeepCopy: end", _depth)
-	return inst
-end
-
-
-local function _getSkinTables(self, id)
-	local skin_inst = self.resources.skins[id]
-	if not skin_inst then
-		error("no skin loaded with ID: " .. tostring(id))
-	end
-	local skin_def = getmetatable(skin_inst)
-	if not skin_def then
-		error("missing SkinDef for ID: " .. tostring(id))
-	end
-
-	return skin_def, skin_inst
-end
-
-
-function methods:refreshSkinDefInstance(id)
-	local skin_def, skin_inst = _getSkinTables(self, id)
-
-	local skinner = context.skinners[skin_def.skinner_id]
-	if not skinner then
-		error("missing skinner (the implementation). Skinner ID: " .. tostring(skin_def.skinner_id) .. ", requesting skin: " .. tostring(id))
-	end
-	local schema = skinner.schema or _dummy_schema
-	local main = schema and schema.main or schema
-
-	_skinDeepCopy(self, skin_inst, skin_def, schema, main, 1)
-end
-
-
-function methods:cloneSkinDef(skin_def_id)
-	local skin_def = _getSkinTables(self, skin_def_id)
-	local clone_def = pTable.deepCopy(skin_def)
-
-	self:registerSkinDef(clone_def, clone_def)
-
-	return clone_def
-end
-
-
---- Remove a SkinDef from the theme registry.
--- @param id ID of the SkinDef to remove.
-function methods:removeSkinDef(id) -- XXX Untested
-	--[[
-	The library user must *completely* uninstall the skin from all widgets.
-	Any de-skinned widgets which require a skin must have replacements ASAP.
-	--]]
-
-	local skin = self.resources.skins[id]
-	if not skin then
-		error("Skin not found. ID: " .. tostring(id))
-	end
-
-	self.resources.skins[id] = nil
+	_applyReferences(resources, resources)
 end
 
 
