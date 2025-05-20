@@ -237,7 +237,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "base/container")
 		check.box(skin, "box")
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")

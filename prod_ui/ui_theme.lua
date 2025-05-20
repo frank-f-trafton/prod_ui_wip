@@ -86,6 +86,7 @@ function skinCheck.exact(skin, k, ...)
 			return
 		end
 	end
+
 	error("exact test failed")
 end
 

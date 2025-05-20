@@ -1256,8 +1256,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/menu_pop")
-
 		check.box(skin, "box")
 		check.integer(skin, "separator_size", 0)
 

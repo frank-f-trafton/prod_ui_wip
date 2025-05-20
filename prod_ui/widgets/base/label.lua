@@ -73,7 +73,6 @@ end
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "base/label")
 		check.box(skin, "box")
 		check.labelStyle(skin, "label_style")
 		check.quad(skin, "tq_px")

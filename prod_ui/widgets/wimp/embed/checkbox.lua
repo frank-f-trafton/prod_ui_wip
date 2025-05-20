@@ -71,52 +71,38 @@ function def:uiCall_reshapePre()
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	skin_validation = {
-		main = {
-			keys_required = {
-				skinner_id = {id="exact", value="wimp/embed/checkbox"},
-				box = "theme-box",
-				tq_px = "resource-quad",
+	validate = function(skin)
+		check.box(skin, "box")
+		check.quad(skin, "tq_px")
 
-				-- Cursor IDs for hover and press states.
-				cursor_on = "hand",
-				cursor_press = "hand",
+		-- Cursor IDs for hover and press states.
+		check.type(skin, "cursor_on", "nil", "string")
+		check.type(skin, "cursor_press", "nil", "string")
 
-				-- Checkbox (quad) render size.
-				bijou_w = "integer",
-				bijou_h = "integer",
+		-- Checkbox (quad) render size.
+		check.integer(skin, "bijou_w", 0)
+		check.integer(skin, "bijou_h", 0)
 
-				-- Alignment of bijou within Viewport #1.
-				bijou_align_h = "unit-interval",
-				bijou_align_v = "unit-interval",
+		-- Alignment of bijou within Viewport #1.
+		check.unitInterval(skin, "bijou_align_h")
+		check.unitInterval(skin, "bijou_align_v")
 
-				res_idle = "&res",
-				res_hover = "&res",
-				res_pressed = "&res",
-				res_disabled = "&res"
-			}
-		},
+		check.quad(skin, "quad_checked")
+		check.quad(skin, "quad_unchecked")
 
-		res = {
-			keys_required = {
-				quad_checked = "resource-quad",
-				quad_unchecked = "resource-quad",
-
-				color_bijou = "color4"
-			}
-		}
-	},
+		check.colorTuple(skin, "color_bijou")
+	end,
 
 
-	skin_transformation = {
-		main = {
-			keys = {
-				bijou_w = "scaled-int",
-				bijou_h = "scaled-int"
-			}
-		}
-	},
+	transform = function(skin, scale)
+		change.integerScaled(skin, "bijou_w", scale)
+		change.integerScaled(skin, "bijou_h", scale)
+	end,
 
 
 	install = function(self, skinner, skin)

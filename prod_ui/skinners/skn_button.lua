@@ -28,7 +28,6 @@ end
 
 return {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "skn_button")
 		check.box(skin, "box")
 		check.labelStyle(skin, "label_style")
 		check.quad(skin, "tq_px")

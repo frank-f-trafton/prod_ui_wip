@@ -311,7 +311,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "base/menu_simple")
 		check.font(skin, "font")
 
 		check.colorTuple(skin, "color_background")

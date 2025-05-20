@@ -854,8 +854,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/menu_bar")
-
 		-- NOTE: Very large box borders will interfere with clicking on menu items.
 		check.box(skin, "box")
 		check.quad(skin, "tq_px")

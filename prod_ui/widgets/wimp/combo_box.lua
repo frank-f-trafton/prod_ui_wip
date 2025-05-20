@@ -670,8 +670,6 @@ end
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/combo_box")
-
 		-- The SkinDef ID for pop-ups made by this widget.
 		check.type(skin, "skin_id_pop", "string")
 

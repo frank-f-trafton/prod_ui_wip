@@ -629,8 +629,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/list_box")
-
 		-- Settings
 		check.exact(skin, "icon_side", nil, "left", "right")
 		check.type(skin, "show_icons", "nil", "boolean")
