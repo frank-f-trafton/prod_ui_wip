@@ -538,8 +538,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/tree_box")
-
 		-- settings
 		if skin.TR_item_align_h ~= nil then
 			check.exact(skin, "TR_item_align_h", "left", "right")

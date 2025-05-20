@@ -540,7 +540,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/dropdown_pop")
 		check.box(skin, "box")
 		check.font(skin, "font")
 		check.scrollBarData(skin, "data_scroll")

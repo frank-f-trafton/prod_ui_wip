@@ -695,7 +695,6 @@ end
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/number_box")
 		check.box(skin, "box")
 		check.font(skin, "font")
 		check.font(skin, "font_ghost")

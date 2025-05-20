@@ -704,7 +704,6 @@ local change = uiTheme.skinChange
 
 def.default_skinner = {
 	validate = function(skin)
-		check.exact(skin, "skinner_id", "wimp/properties_box")
 		check.box(skin, "box")
 		check.quad(skin, "tq_px")
 		check.scrollBarData(skin, "data_scroll")
