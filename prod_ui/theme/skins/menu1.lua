@@ -1,6 +1,3 @@
--- Generic Menu
-
-
 return {
 	skinner_id = "base/menu",
 

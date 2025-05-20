@@ -87,7 +87,7 @@ function def:uiCall_reshapePre()
 
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side == "right"))
+	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side_h == "right"))
 	widShared.carveViewport(self, 2, skin.box.margin)
 	lgcLabel.reshapeLabel(self)
 
@@ -95,25 +95,74 @@ function def:uiCall_reshapePre()
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.type(res, "quads_state", "table")
+	for i in ipairs(res.quads_state) do
+		check.quad(res, i)
+	end
+	check.colorTuple(res, "color_bijou")
+	check.colorTuple(res, "color_label")
+	check.integer(res, "label_ox")
+	check.integer(res, "label_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "label_ox", scale)
+	change.integerScaled(res, "label_oy", scale)
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			bijou_w = "scaled-int",
-			bijou_h = "scaled-int",
-			bijou_spacing = "scaled-int",
-			bijou_align_h = "unit-interval",
-			bijou_align_v = "unit-interval",
-			label_align_v = "unit-interval",
-			res_idle = "&res",
-			res_hover = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "base/checkbox_multi")
+		check.box(skin, "box")
+		check.labelStyle(skin, "label_style")
+		check.quad(skin, "tq_px")
+
+		-- Cursor IDs for hover and press states.
+		check.type(skin, "cursor_on", "nil", "string")
+		check.type(skin, "cursor_press", "nil", "string")
+
+		-- Checkbox (quad) render size.
+		check.integer(skin, "bijou_w", 0)
+		check.integer(skin, "bijou_h", 0)
+
+		-- Horizontal spacing between checkbox area and text label.
+		check.integer(skin, "bijou_spacing", 0)
+
+		-- Checkbox horizontal placement.
+		check.enum(skin, "bijou_side_h")
+
+		-- Alignment of bijou within Viewport #2.
+		check.unitInterval(skin, "bijou_align_h")
+		check.unitInterval(skin, "bijou_align_v")
+
+		-- Alignment of label text within Viewport #1.
+		check.enum(skin, "label_align_h")
+		check.enum(skin, "label_align_v")
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_hover"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.scaledInt(skin, "bijou_w", scale)
+		change.scaledInt(skin, "bijou_h", scale)
+		change.scaledInt(skin, "bijou_spacing", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_hover"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

@@ -11,7 +11,7 @@ function plan.make(panel)
 
 	demoShared.makeTitle(panel, nil, "Scaling")
 
-	demoShared.makeParagraph(panel, nil, "wip")
+	demoShared.makeParagraph(panel, nil, "***Under construction*** --> This feature doesn't work yet.")
 
 	local input
 

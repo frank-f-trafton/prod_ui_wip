@@ -1,28 +1,19 @@
--- Widget Skin: Application button.
 return {
 	skinner_id = "skn_button_tquad",
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
 
-
-	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
 	cursor_press = "hand",
 
-	-- A default graphic to use if the widget doesn't provide one.
 	-- graphic =
 
-	-- Quad (graphic) alignment within Viewport #1.
-	quad_align_h = "center", -- "left", "center", "right"
-	quad_align_v = "middle", -- "top", "middle", "bottom"
+	quad_align_h = "center",
+	quad_align_v = "middle",
 
-	-- Placement of graphic in relation to text labels.
-	graphic_placement = "overlay", -- "left", "right", "top", "bottom", "overlay"
-
-	-- Additional spacing between graphic and label.
+	graphic_placement = "overlay",
 	graphic_spacing = 0,
-
 
 	res_idle = {
 		slice = "*slices/atlas/button",

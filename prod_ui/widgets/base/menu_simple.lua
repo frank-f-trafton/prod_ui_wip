@@ -305,10 +305,29 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		outline_width = "scaled-int"
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "base/menu_simple")
+		check.font(skin, "font")
+
+		check.colorTuple(skin, "color_background")
+		check.colorTuple(skin, "color_outline")
+		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_active_glow")
+		check.colorTuple(skin, "color_scroll_ind")
+
+		check.integer(skin, "outline_width", 0)
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "outline_width", scale)
+	end,
 
 
 	install = function(self, skinner, skin)

@@ -1,5 +1,3 @@
--- WIMP frame outline.
-
 return {
 	skinner_id = "wimp/window_frame",
 
@@ -20,7 +18,6 @@ return {
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 
-	-- Padding when scrolling to put a widget into view.
 	in_view_pad_x = 0,
 	in_view_pad_y = 0,
 
@@ -33,30 +30,20 @@ return {
 	sensor_resize_diagonal = "*info/window_frames/frame_resize_diagonal",
 	shadow_extrude = 8,
 
-	-- Alignment of textures within control sensors
-	sensor_tex_align_h = 0.5, -- 0.0: left, 0.5: middle, 1.0: right
-	sensor_tex_align_v = 0.5, -- 0.0: top, 0.5: middle, 1.0: bottom
+	sensor_tex_align_h = 0.5,
+	sensor_tex_align_v = 0.5,
 
 	color_body = {1.0, 1.0, 1.0, 1.0},
 	color_shadow = {1.0, 1.0, 1.0, 1.0},
-
-	-- * Sash State *
 
 	slc_sash_lr = "*slices/atlas/sash_lr",
 	slc_sash_tb = "*slices/atlas/sash_tb",
 
 	sash_breadth = 8,
 
-	-- Reduces the intersection box when checking for the mouse *entering* a sash.
-	-- NOTE: overly large values will make the sash unclickable.
 	sash_contract_x = 0,
 	sash_contract_y = 0,
 
-	-- Increases the intersection box when checking for the mouse *leaving* a sash.
-	-- NOTES:
-	-- * Overly large values will prevent the user from clicking on widgets that
-	--   are descendants of the divider.
-	-- * The expansion does not go beyond the divider's body.
 	sash_expand_x = 2,
 	sash_expand_y = 2,
 
@@ -66,12 +53,7 @@ return {
 	cursor_sash_drag_h = "sizewe",
 	cursor_sash_drag_v = "sizens",
 
-	-- * / Sash State *
-
 	res_normal = {
-		-- Which rectangle to use for fitting the header.
-		-- false: 'self.w', 'self.h'
-		-- number: a corresponding viewport.
 		viewport_fit = 4,
 		header_box = "*boxes/wimp_frame_header_normal",
 		header_slc_body = "*slices/atlas/winheader_normal",
@@ -80,7 +62,7 @@ return {
 		button_pad_w = 2,
 		button_w = 30,
 		button_h = 28,
-		button_align_v = 0.5, -- from 0 (top) to 1 (bottom)
+		button_align_v = 0.5,
 
 		res_selected = {
 			col_header_fill = {0.3, 0.3, 0.5, 1.0},
@@ -144,7 +126,7 @@ return {
 		button_pad_w = 2,
 		button_w = 30,
 		button_h = 14,
-		button_align_v = 0.5, -- from 0 (top) to 1 (bottom)
+		button_align_v = 0.5,
 
 		res_selected = {
 			col_header_fill = {0.3, 0.3, 0.5, 1.0},
@@ -209,7 +191,7 @@ return {
 		button_pad_w = 2,
 		button_w = 40,
 		button_h = 46,
-		button_align_v = 0.5, -- from 0 (top) to 1 (bottom)
+		button_align_v = 0.5,
 
 		res_selected = {
 			col_header_fill = {0.3, 0.3, 0.5, 1.0},

@@ -534,10 +534,37 @@ function def:uiCall_destroy(inst)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		item_height = "scaled-int",
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/dropdown_pop")
+		check.box(skin, "box")
+		check.font(skin, "font")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+
+		check.exact(skin, "text_align", "left", "center", "right")
+
+		check.integer(skin, "item_height", 0)
+
+		-- The drawer's maximum height, as measured by the number of visible items (plus margins).
+		-- Drawer height is limited by the size of the application window.
+		check.integer(skin, "max_visible_items")
+
+		check.slice(skin, "slice")
+		check.colorTuple(skin, "color_body")
+		check.colorTuple(skin, "color_text")
+		check.colorTuple(skin, "color_selected")
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "item_height", scale)
+	end,
+
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)

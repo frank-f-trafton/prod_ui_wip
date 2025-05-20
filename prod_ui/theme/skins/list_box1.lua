@@ -1,13 +1,10 @@
--- ListBox.
-
-
 return {
 	skinner_id = "wimp/list_box",
 
 	-- settings
-	--icon_side = "left",
-	--show_icons = false,
-	--text_align_h = "left",
+	icon_side = nil,
+	show_icons = nil,
+	text_align_h = nil,
 	-- /settings
 
 	box = "*boxes/panel",
@@ -17,17 +14,12 @@ return {
 	font = "*fonts/p",
 	data_icon = "*icons/p",
 
-	-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 	item_pad_v = 2,
 
 	sl_body = "*slices/atlas/list_box_body",
 
-	-- Vertical text alignment is centered.
-
-	-- Icon column width and positioning, if active.
 	icon_spacing = 24,
 
-	-- Additional padding for left or right-aligned text. No effect with center alignment.
 	pad_text_x = 0,
 
 	color_item_text = {1.0, 1.0, 1.0, 1.0},

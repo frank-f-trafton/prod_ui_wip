@@ -1,42 +1,24 @@
--- * Widget Skin: Stepper button.
-
-
 return {
 	skinner_id = "base/stepper",
-
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
 	tq_px = "*quads/atlas/pixel",
 
-
-	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
 	cursor_press = "hand",
 
-	-- Alignment of label text in Viewport #1.
-	label_align_h = "center", -- "left", "center", "right", "justify"
-	label_align_v = "middle", -- "top", "middle", "bottom"
+	label_align_h = "center",
+	label_align_v = "middle",
 
-	-- Alignment of the 'prev' and 'next' arrow (or plus/minus, etc.) graphics within Viewports #2 and #3.
-	gfx_prev_align_h = "center", -- "left", "center", "right"
-	gfx_prev_align_v = "middle", -- "top", "middle", "bottom"
+	gfx_prev_align_h = "center",
+	gfx_prev_align_v = "middle",
 
-	gfx_next_align_h = "center", -- "left", "center", "right"
-	gfx_next_align_v = "middle", -- "top", "middle", "bottom"
+	gfx_next_align_h = "center",
+	gfx_next_align_v = "middle",
 
-	-- How much space to assign the next+prev buttons when not using "overlay" placement.
 	prev_spacing = 40,
 	next_spacing = 40,
-
-	--[[
-	Arrow quad mappings:
-
-	Orientation    Prev   Next
-	---------------------------
-	Horizontal     left   right
-	Vertical       up     down
-	--]]
 
 	res_idle = {
 		sl_body = "*slices/atlas/stepper_body",
@@ -48,7 +30,6 @@ return {
 		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
-		--color_label_ul,
 		button_ox = 0,
 		button_oy = 0,
 	},
@@ -63,7 +44,6 @@ return {
 		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
-		--color_label_ul,
 		button_ox = 0,
 		button_oy = 0,
 	},
@@ -78,7 +58,6 @@ return {
 		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
-		--color_label_ul,
 		button_ox = 0,
 		button_oy = 1,
 	},
@@ -93,7 +72,6 @@ return {
 		tq_down = "*quads/atlas/arrow2_down",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
-		--color_label_ul,
 		button_ox = 0,
 		button_oy = 0,
 	},

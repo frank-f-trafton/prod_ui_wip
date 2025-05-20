@@ -401,21 +401,82 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.slice(res, "sl_body")
+	check.slice(res, "sl_button_up")
+	check.slice(res, "sl_button")
+
+	check.quad(res, "tq_left")
+	check.quad(res, "tq_right")
+	check.quad(res, "tq_up")
+	check.quad(res, "tq_down")
+
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_label")
+
+	check.integer(res, "button_ox")
+	check.integer(res, "button_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "button_ox", scale)
+	change.integerScaled(res, "button_oy", scale)
+end
+
+
 def.default_skinner = {
-	scheme = {
-		main = {
-			prev_spacing = "scaled-int",
-			next_spacing = "scaled-int",
-			res_idle = "&res",
-			res_hover = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			button_ox = "scaled-int",
-			button_oy = "scaled-int"
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "base/stepper")
+		check.box(skin, "box")
+		check.labelStyle(skin, "label_style")
+		check.quad(skin, "tq_px")
+
+		-- Cursor IDs for hover and press states.
+		check.type(skin, "cursor_on", "nil", "string")
+		check.type(skin, "cursor_press", "nil", "string")
+
+		-- Alignment of label text in Viewport #1.
+		check.enum(skin, "label_align_h")
+		check.enum(skin, "label_align_v")
+
+		-- Alignment of the 'prev' and 'next' arrow (or plus/minus, etc.) graphics within Viewports #2 and #3.
+		check.exact(skin, "gfx_prev_align_h", "left", "center", "right")
+		check.exact(skin, "gfx_prev_align_v", "top", "middle", "bottom")
+		check.exact(skin, "gfx_next_align_h", "left", "center", "right")
+		check.exact(skin, "gfx_next_align_v", "top", "middle", "bottom")
+
+		-- How much space to assign the next+prev buttons when not using "overlay" placement.
+		check.integer(skin, "prev_spacing", 0)
+		check.integer(skin, "next_spacing", 0)
+
+		-- Arrow quad mappings:
+		--
+		-- Orientation    Prev   Next
+		-- ---------------------------
+		-- Horizontal     left   right
+		-- Vertical       up     down
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_hover"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "prev_spacing", scale)
+		change.integerScaled(skin, "next_spacing", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_hover"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

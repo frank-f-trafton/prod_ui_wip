@@ -1,6 +1,3 @@
--- Simplified menu.
-
-
 return {
 	skinner_id = "base/menu_simple",
 

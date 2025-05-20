@@ -1,22 +1,17 @@
--- * Widget skin: Embedded checkbox.
-
 return {
 	skinner_id = "wimp/embed/checkbox",
 
 	box = "*boxes/button_bijou",
 	tq_px = "*quads/atlas/pixel",
 
-	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
 	cursor_press = "hand",
 
-	-- Checkbox (quad) render size.
 	bijou_w = 24,
 	bijou_h = 24,
 
-	-- Alignment of bijou within Viewport #1.
-	bijou_align_h = 0.5, -- From 0.0 (left) to 1.0 (right)
-	bijou_align_v = 0.5, -- From 0.0 (top) to 1.0 (bottom)
+	bijou_align_h = 0.5,
+	bijou_align_v = 0.5,
 
 	res_idle = {
 		quad_checked = "*quads/atlas/checkbox_on",

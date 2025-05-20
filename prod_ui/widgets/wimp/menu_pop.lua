@@ -1250,10 +1250,41 @@ function def:uiCall_destroy(inst)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		separator_size = "scaled-int",
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/menu_pop")
+
+		check.box(skin, "box")
+		check.integer(skin, "separator_size", 0)
+
+		-- (Pop up menus do not render hover-glow.)
+
+		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
+
+		check.font(skin, "font_item")
+		check.slice(skin, "slc_body")
+		check.quad(skin, "tq_px")
+		check.quad(skin, "tq_arrow")
+		check.quad(skin, "tq_check_on")
+		check.quad(skin, "tq_check_off")
+		check.quad(skin, "tq_radio_on")
+		check.quad(skin, "tq_radio_off")
+
+		check.colorTuple(skin, "color_separator")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_actionable")
+		check.colorTuple(skin, "color_selected")
+		check.colorTuple(skin, "color_inactive")
+	end,
+
+
+	transform = function(skin, scale)
+		change.scaledInteger(skin, "separator_size", scale)
+	end,
 
 
 	install = function(self, skinner, skin)

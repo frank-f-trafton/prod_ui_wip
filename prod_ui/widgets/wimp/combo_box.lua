@@ -49,6 +49,7 @@ local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -641,20 +642,69 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
+local _makeLUTV = pTable.makeLUTV
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.slice(res, "slice")
+	check.slice(res, "slc_deco_button")
+	check.quad(res, "tq_deco_glyph")
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_text")
+	check.colorTuple(res, "color_highlight")
+	check.colorTuple(res, "color_highlight_active")
+	check.colorTuple(res, "color_caret_insert")
+	check.colorTuple(res, "color_replace")
+	check.number(res, "deco_ox")
+	check.number(res, "deco_oy")
+end
+
+
+local function _changeRes(res, scale)
+	check.numberScaled(res, "deco_ox")
+	check.numberScaled(res, "deco_oy")
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			button_spacing = "scaled-int",
-			item_pad_v = "scaled-int",
-			res_idle = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			deco_ox = "scaled-int",
-			deco_oy = "scaled-int"
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/combo_box")
+
+		-- The SkinDef ID for pop-ups made by this widget.
+		check.type(skin, "skin_id_pop", "string")
+
+		check.box(skin, "box")
+
+		check.font(skin, "font")
+		check.font(skin, "font_ghost")
+
+		check.type(skin, "cursor_on", "nil", "string")
+
+		-- Horizontal size of the expander button.
+		-- "auto": use Viewport #2's height.
+		check.numberOrExact(skin, "button_spacing", nil, nil, "auto")
+
+		-- Placement of the expander button.
+		check.exact(skin, "button_placement", "left", "right")
+
+		check.integer(skin, "item_pad_v", 0)
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "item_pad_v", scale)
+		change.numberScaled(skin, "button_spacing", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

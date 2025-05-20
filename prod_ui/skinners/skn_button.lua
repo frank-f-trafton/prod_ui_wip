@@ -7,20 +7,69 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.slice(res, "slice")
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_label")
+	check.integer(res, "label_ox")
+	check.integer(res, "label_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "label_ox", scale)
+	change.integerScaled(res, "label_oy", scale)
+end
+
+
 return {
-	schema = {
-		main = {
-			graphic_spacing = "scaled-int",
-			res_idle = "&res",
-			res_hover = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		},
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "skn_button")
+		check.box(skin, "box")
+		check.labelStyle(skin, "label_style")
+		check.quad(skin, "tq_px")
+
+		-- Cursor IDs for hover and press states.
+		check.type(skin, "cursor_on", "nil", "string")
+		check.type(skin, "cursor_press", "nil", "string")
+
+		-- Alignment of label text in Viewport #1.
+		check.enum(skin, "label_align_h")
+		check.enum(skin, "label_align_v")
+
+		-- A default graphic to use if the widget doesn't provide one.
+		-- TODO
+		-- graphic
+
+		-- Quad (graphic) alignment within Viewport #2.
+		check.enum(skin, "quad_align_h")
+		check.enum(skin, "quad_align_v")
+
+		-- Placement of graphic in relation to text labels.
+		check.enum(skin, "graphic_placement")
+
+		-- How much space to assign the graphic when not using "overlay" placement.
+		check.number(skin, "graphic_spacing", 0)
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_hover"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "graphic_spacing", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_hover"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

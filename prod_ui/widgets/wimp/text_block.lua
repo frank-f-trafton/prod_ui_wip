@@ -240,7 +240,8 @@ end
 
 
 def.default_skinner = {
-	--schema = {},
+	--validate = function(skin) -- TODO
+	--transform = function(skin, scale) -- TODO
 
 
 	install = function(self, skinner, skin)

@@ -1,6 +1,3 @@
--- Chart (column) menu.
-
-
 return {
 	skinner_id = "wimp/menu_tab",
 
@@ -21,7 +18,6 @@ return {
 
 	column_sep_width = 1,
 
-	-- Some default data for cell implementations.
 	color_cell_bijou = {1.0, 1.0, 1.0, 1.0},
 	color_cell_text = {1.0, 1.0, 1.0, 1.0},
 	cell_font = "*fonts/p",
@@ -32,15 +28,12 @@ return {
 	bijou_h = 12,
 
 	color_body = {0.25, 0.25, 0.25, 1.0},
-	color_col_sep = {0.4, 0.4, 0.4, 1.0}, -- vertical separator between columns
-	color_body_sep = {0.4, 0.4, 0.4, 1.0}, -- a line between the header body and rest of widget
+	color_col_sep = {0.4, 0.4, 0.4, 1.0},
+	color_body_sep = {0.4, 0.4, 0.4, 1.0},
 
 	tq_arrow_up = "*quads/atlas/arrow2_up",
 	tq_arrow_down = "*quads/atlas/arrow2_down",
 
-	-- Padding between:
-	-- * Category panel left and label text
-	-- * Category panel right and sorting badge
 	category_h_pad = 4,
 
 	res_column_idle = {

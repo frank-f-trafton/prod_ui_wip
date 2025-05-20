@@ -109,18 +109,56 @@ function def:uiCall_reshapePre()
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.colorTuple(res, "color_back")
+	check.colorTuple(res, "color_ichor")
+	check.colorTuple(res, "color_label")
+	check.integer(res, "label_ox")
+	check.integer(res, "label_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "label_ox", scale)
+	change.integerScaled(res, "label_oy", scale)
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			bar_spacing = "scaled-int",
-			res_active = "&res",
-			res_insactive = "&res"
-		},
-		res = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "status/progress_bar")
+		check.box(skin, "box")
+		check.labelStyle(skin, "label_style")
+		check.quad(skin, "tq_px")
+
+		-- Alignment of label text in Viewport #1.
+		check.enum(skin, "label_align_h")
+		check.enum(skin, "label_align_v")
+
+		-- Placement of the progress bar in relation to text labels.
+		check.exact(skin, "bar_placement", "left", "right", "top", "bottom", "overlay")
+
+		-- How much space to assign the progress bar when not using "overlay" placement.
+		check.integer(skin, "bar_spacing")
+
+		check.slice(skin, "slc_back")
+		check.slice(skin, "slc_ichor")
+
+		_checkRes(check.getRes(skin, "res_active"))
+		_checkRes(check.getRes(skin, "res_inactive"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "bar_spacing", scale)
+
+		_changeRes(check.getRes(skin, "res_active"), scale)
+		_changeRes(check.getRes(skin, "res_inactive"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

@@ -698,14 +698,50 @@ function def:uiCall_update(dt)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		sash_w = "scaled-int",
-		item_h = "scaled-int",
-		control_min_w = "scaled-int",
-		icon_spacing = "scaled-int",
-		pad_text_x = "scaled-int"
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/properties_box")
+		check.box(skin, "box")
+		check.quad(skin, "tq_px")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+		check.font(skin, "font")
+		check.iconData(skin, "data_icon")
+		check.type(skin, "cursor_sash", "nil", "string")
+		check.integer(skin, "sash_w", 0)
+		check.integer(skin, "item_h", 0)
+		check.integer(skin, "control_min_w", 0)
+		check.slice(skin, "sl_body")
+
+		-- Alignment of property name text:
+		check.exact(skin, "text_align_h", "left", "center", "right")
+		-- Vertical text alignment is centered.
+
+		-- Property name icon column width and positioning, if active.
+		check.integer(skin, "icon_spacing", 0)
+		check.exact(skin, "icon_side", "left", "right")
+
+		-- Additional padding for left or right-aligned text. No effect with center alignment.
+		check.integer(skin, "pad_text_x", 0)
+
+		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_active_glow")
+		check.colorTuple(skin, "color_item_marked")
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "sash_w", scale)
+		change.integerScaled(skin, "item_h", scale)
+		change.integerScaled(skin, "control_min_w", scale)
+		change.integerScaled(skin, "icon_spacing", scale)
+		change.integerScaled(skin, "pad_text_x", scale)
+	end,
 
 
 	install = function(self, skinner, skin)

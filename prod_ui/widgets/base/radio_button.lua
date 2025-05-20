@@ -73,7 +73,7 @@ function def:uiCall_initialize()
 	self.pressed = false
 
 	-- Placement of a single visual element.
-	--self.bijou_side = "left" -- left (default), right
+	--self.bijou_side_h = "left" -- left (default), right
 
 	self:skinSetRefs()
 	self:skinInstall()

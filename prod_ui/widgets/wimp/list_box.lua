@@ -623,12 +623,56 @@ function def:uiCall_update(dt)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		item_pad_v = "scaled-int",
-		icon_spacing = "scaled-int",
-		pad_text_x = "scaled-int"
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/list_box")
+
+		-- Settings
+		check.exact(skin, "icon_side", nil, "left", "right")
+		check.type(skin, "show_icons", "nil", "boolean")
+		check.exact(skin, "text_align_h", "left", "center", "right")
+		-- / Settings
+
+		check.box(skin, "box")
+		check.quad(skin, "tq_px")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+
+		check.font(skin, "font")
+		check.iconData(skin, "data_icon")
+
+		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
+		check.integer(skin, "item_pad_v")
+
+		check.slice(skin, "sl_body")
+
+		-- Vertical text alignment is centered.
+
+		-- Icon column width and positioning, if active.
+
+		check.integer(skin, "icon_spacing")
+
+		-- Additional padding for left or right-aligned text. No effect with center alignment.
+
+		check.integer(skin, "pad_text_x")
+
+		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_hover_glow")
+		check.colorTuple(skin, "color_active_glow")
+		check.colorTuple(skin, "color_item_marked")
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "item_pad_v")
+		change.integerScaled(skin, "icon_spacing")
+		change.integerScaled(skin, "pad_text_x")
+	end,
 
 
 	install = function(self, skinner, skin)

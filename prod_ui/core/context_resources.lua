@@ -19,8 +19,8 @@ local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 local _drill = utilTable.drill
 
 
-local _lut_font_ext = pTable.makeLUT({".ttf", ".otf", ".fnt", ".png"})
-local _lut_font_ext_vec = pTable.makeLUT({".ttf", ".otf"})
+local _lut_font_ext = pTable.makeLUTV(".ttf", ".otf", ".fnt", ".png")
+local _lut_font_ext_vec = pTable.makeLUTV(".ttf", ".otf")
 
 
 local _info = {} -- for love.filesystem.getInfo()
@@ -282,6 +282,15 @@ function methods:applyTheme(theme)
 	end
 
 	_applyReferences(resources, resources)
+
+	for k, v in pairs(resources.skins) do
+		local skinner = context.skinners[v.skinner_id]
+		if not skinner then
+			error("no skinner with ID: " .. tostring(v.skinner_id))
+		end
+		--skinner.validate(v)
+		--skinner.transform(v, scale)
+	end
 end
 
 

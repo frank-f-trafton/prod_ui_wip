@@ -1,10 +1,5 @@
--- Skin: ComboBox (the body).
-
-
 return {
 	skinner_id = "wimp/combo_box",
-
-	-- The SkinDef ID for pop-ups made by this widget.
 	skin_id_pop = "dropdown_pop1",
 
 	box = "*boxes/input_box",
@@ -12,14 +7,9 @@ return {
 	font_ghost = "*fonts/p",
 
 	cursor_on = "ibeam",
-	text_align = "left", -- "left", "center", "right"
 
-	-- Horizontal size of the expander button.
-	-- "auto": use Viewport #2's height.
 	button_spacing = 24,
-
-	-- Placement of the expander button.
-	button_placement = "right", -- "left", "right"
+	button_placement = "right",
 
 	item_pad_v = 2,
 

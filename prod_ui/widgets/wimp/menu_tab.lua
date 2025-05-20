@@ -1071,25 +1071,89 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 end
 
 
-def.default_skinner = {
-	schema = {
-		main = {
-			column_sep_width = "scaled-int",
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
 
-			bar_height = "scaled-int",
-			col_sep_line_width = "scaled-int",
-			bijou_w = "scaled-int",
-			bijou_h = "scaled-int",
-			category_h_pad = "scaled-int",
-			res_column_idle = "&res",
-			res_column_hover = "&res",
-			res_column_press = "&res"
-		},
-		res = {
-			offset_x = "scaled-int",
-			offset_y = "scaled-int"
-		},
-	},
+
+local function _checkRes(res)
+	check.slice(res, "sl_body")
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_text")
+	check.integer(res, "offset_x")
+	check.integer(res, "offset_y")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "offset_ox", scale)
+	change.integerScaled(res, "offset_oy", scale)
+end
+
+
+def.default_skinner = {
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/menu_tab")
+		check.box(skin, "box")
+		check.quad(skin, "tq_px")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+		check.font(skin, "font")
+		check.iconData(skin, "data_icon")
+
+		check.colorTuple(skin, "color_background")
+		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_hover_glow")
+		check.colorTuple(skin, "color_column_sep")
+
+		check.colorTuple(skin, "color_drag_col_bg")
+
+		check.integer(skin, "column_sep_width")
+
+		-- Some default data for cell implementations.
+		check.colorTuple(skin, "color_cell_bijou")
+		check.colorTuple(skin, "color_cell_text")
+		check.font(skin, "cell_font")
+
+		check.integer(skin, "bar_height", 0)
+		check.integer(skin, "col_sep_line_width", 0)
+		check.integer(skin, "bijou_w", 0)
+		check.integer(skin, "bijou_h", 0)
+
+		check.colorTuple(skin, "color_body")
+
+		-- vertical separator between columns
+		check.colorTuple(skin, "color_col_sep")
+
+		-- a line between the header body and rest of widget
+		check.colorTuple(skin, "color_body_sep")
+
+		check.quad(skin, "tq_arrow_up")
+		check.quad(skin, "tq_arrow_down")
+
+		-- Padding between:
+		-- * Category panel left and label text
+		-- * Category panel right and sorting badge
+		check.integer(skin, "category_h_pad")
+
+		_checkRes(check.getRes(skin, "res_column_idle"))
+		_checkRes(check.getRes(skin, "res_column_hover"))
+		_checkRes(check.getRes(skin, "res_column_press"))
+	end,
+
+
+	tranform = function(skin, scale)
+		change.integerScaled(skin, "column_sep_width", scale)
+		change.integerScaled(skin, "bar_height", scale)
+		change.integerScaled(skin, "col_sep_line_width", scale)
+		change.integerScaled(skin, "bijou_w", scale)
+		change.integerScaled(skin, "bijou_h", scale)
+		change.integerScaled(skin, "category_h_pad", scale)
+
+		_changeRes(check.getRes(skin, "res_column_idle"), scale)
+		_changeRes(check.getRes(skin, "res_column_hover"), scale)
+		_changeRes(check.getRes(skin, "res_column_press"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

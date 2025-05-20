@@ -1,6 +1,3 @@
--- Pop-Up (Context) menu
-
-
 return {
 	skinner_id = "wimp/menu_pop",
 
@@ -8,15 +5,7 @@ return {
 
 	separator_size = 1,
 
-
-	-- (Pop up menus do not render hover-glow.)
-
-
-	-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
-
-
 	font_item = "*fonts/p",
-
 
 	slc_body = "*slices/atlas/menu_pop_body",
 	tq_px = "*quads/atlas/pixel",
