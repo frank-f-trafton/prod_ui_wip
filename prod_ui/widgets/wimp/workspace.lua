@@ -225,11 +225,29 @@ function def:uiCall_destroy(inst)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		in_view_pad_x = "scaled-int",
-		in_view_pad_y = "scaled-int"
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/workspace")
+		check.box(skin, "box")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+
+		-- Padding when scrolling to put a widget into view.
+		check.integer(skin, "in_view_pad_x", 0)
+		check.integer(skin, "in_view_pad_y", 0)
+
+		check.sashState(skin)
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "in_view_pad_x", scale)
+		change.integerScaled(skin, "in_view_pad_y", scale)
+	end,
 
 
 	install = function(self, skinner, skin)
@@ -245,6 +263,7 @@ def.default_skinner = {
 	--refresh = function(self, skinner, skin)
 	--update = function(self, skinner, skin, dt)
 	--render = function(self, ox, oy)
+
 
 	renderLast = function(self, ox, oy)
 		love.graphics.push("all")
@@ -288,6 +307,7 @@ def.default_skinner = {
 		love.graphics.pop("all")
 		--]=]
 	end,
+
 
 	-- Don't highlight when holding the UI thimble.
 	renderThimble = widShared.dummy,

@@ -71,7 +71,7 @@ function def:uiCall_reshapePost()
 
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side == "right"))
+	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side_h == "right"))
 	widShared.carveViewport(self, 2, skin.box.margin)
 	lgcLabel.reshapeLabel(self)
 end

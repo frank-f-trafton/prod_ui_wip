@@ -72,9 +72,50 @@ end
 
 
 def.default_skinner = {
-	schema = {
-		bijou_w = "scaled-int",
-		bijou_h = "scaled-int"
+	skin_validation = {
+		main = {
+			keys_required = {
+				skinner_id = {id="exact", value="wimp/embed/checkbox"},
+				box = "theme-box",
+				tq_px = "resource-quad",
+
+				-- Cursor IDs for hover and press states.
+				cursor_on = "hand",
+				cursor_press = "hand",
+
+				-- Checkbox (quad) render size.
+				bijou_w = "integer",
+				bijou_h = "integer",
+
+				-- Alignment of bijou within Viewport #1.
+				bijou_align_h = "unit-interval",
+				bijou_align_v = "unit-interval",
+
+				res_idle = "&res",
+				res_hover = "&res",
+				res_pressed = "&res",
+				res_disabled = "&res"
+			}
+		},
+
+		res = {
+			keys_required = {
+				quad_checked = "resource-quad",
+				quad_unchecked = "resource-quad",
+
+				color_bijou = "color4"
+			}
+		}
+	},
+
+
+	skin_transformation = {
+		main = {
+			keys = {
+				bijou_w = "scaled-int",
+				bijou_h = "scaled-int"
+			}
+		}
 	},
 
 

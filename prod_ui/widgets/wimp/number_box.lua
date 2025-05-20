@@ -664,20 +664,68 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.slice(res, "slice")
+	check.slice(res, "slc_button_inc")
+	check.slice(res, "slc_button_dec")
+	check.quad(res, "tq_inc")
+	check.quad(res, "tq_dec")
+
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_text")
+	check.colorTuple(res, "color_highlight")
+	check.colorTuple(res, "color_highlight_active")
+	check.colorTuple(res, "color_caret_insert")
+	check.colorTuple(res, "color_caret_replace")
+
+	check.integer(res, "deco_ox")
+	check.integer(res, "deco_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "deco_ox", scale)
+	change.integerScaled(res, "deco_oy", scale)
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			button_spacing = "scaled-int",
-			res_idle = "&res",
-			res_hover = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			deco_ox = "scaled-int",
-			deco_oy = "scaled-int"
-		},
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/number_box")
+		check.box(skin, "box")
+		check.font(skin, "font")
+		check.font(skin, "font_ghost")
+
+		check.type(skin, "cursor_on", "nil", "string")
+		check.exact(skin, "text_align", "left", "center", "right")
+
+		-- Horizontal size of the increment and decrement buttons.
+		-- "auto": use Viewport #1's height.
+		check.numberOrExact(skin, "button_spacing", 0, nil, "auto")
+
+		-- Inc/dec button positioning
+		check.exact(skin, "button_placement", "left", "right")
+		check.exact(skin, "button_alignment", "horizontal", "vertical")
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_hover"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "button_spacing", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_hover"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

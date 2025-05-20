@@ -1,6 +1,3 @@
--- Skin: NumberBox.
-
-
 return {
 	skinner_id = "wimp/number_box",
 
@@ -9,15 +6,12 @@ return {
 	font_ghost = "*fonts/p",
 
 	cursor_on = "ibeam",
-	text_align = "right", -- "left", "center", "right"
+	text_align = "right",
 
-	-- Horizontal size of the increment and decrement buttons.
-	-- "auto": use Viewport #?'s (XXX) height.
 	button_spacing = 24,
 
-	-- Inc/dec button positioning
-	button_placement = "right", -- "left", "right"
-	button_alignment = "vertical", -- "horizontal", "vertical"
+	button_placement = "right",
+	button_alignment = "vertical",
 
 	res_idle = {
 		slice = "*slices/atlas/input_box",

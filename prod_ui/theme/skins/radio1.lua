@@ -1,6 +1,3 @@
--- * Widget skin: Application radio button.
-
-
 return {
 	skinner_id = "skn_button_bijou",
 
@@ -8,7 +5,6 @@ return {
 	label_style = "*labels/norm",
 	tq_px = "*quads/atlas/pixel",
 
-	-- Cursor IDs for hover and press states.
 	cursor_on = "hand",
 	cursor_press = "hand",
 
@@ -16,15 +12,13 @@ return {
 	bijou_h = 24,
 	bijou_spacing = 40,
 
-	bijou_side = "left", -- left (default), right
+	bijou_side_h = "left",
 
-	bijou_align_h = 0.5, -- From 0.0 (left) to 1.0 (right)
-	bijou_align_v = 0.5, -- From 0.0 (top) to 1.0 (bottom)
+	bijou_align_h = 0.5,
+	bijou_align_v = 0.5,
 
-	-- Alignment of label text in Viewport #1.
-	label_align_h = "left", -- "left", "center", "right", "justify"
-	label_align_v = 0.5, -- From 0.0 (top) to 1.0 (bottom)
-
+	label_align_h = "left",
+	label_align_v = 0.5,
 
 	res_idle = {
 		quad_checked = "*quads/atlas/radio_on",
@@ -32,7 +26,7 @@ return {
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
-		--color_label_ul
+
 		label_ox = 0,
 		label_oy = 0
 	},
@@ -43,7 +37,7 @@ return {
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {1.0, 1.0, 1.0, 1.0},
-		--color_label_ul,
+
 		label_ox = 0,
 		label_oy = 0
 	},
@@ -54,7 +48,7 @@ return {
 
 		color_bijou = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
-		--color_label_ul
+
 		label_ox = 0,
 		label_oy = 0
 	},
@@ -65,7 +59,7 @@ return {
 
 		color_bijou = {0.5, 0.5, 0.5, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
-		--color_label_ul
+
 		label_ox = 0,
 		label_oy = 0
 	}

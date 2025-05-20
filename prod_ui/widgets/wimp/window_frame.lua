@@ -944,27 +944,144 @@ local function _getHeaderSensorResource(self, btn, res)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkResSelection(res)
+	check.colorTuple(res, "col_header_fill")
+	check.colorTuple(res, "col_header_text")
+end
+
+
+local function _checkResBtnClose(res)
+	check.quad(res, "graphic")
+end
+
+
+local function _checkResBtnSize(res)
+	check.quad(res, "graphic")
+	check.quad(res, "graphic_max")
+	check.quad(res, "graphic_unmax")
+end
+
+
+local function _checkResBtnState(res)
+	check.slice(res, "slice")
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_quad")
+	check.integer(res, "label_ox")
+	check.integer(res, "label_oy")
+end
+
+
+local function _checkResTopLevel(res)
+	-- Which rectangle to use for fitting the header.
+	-- false: 'self.w', 'self.h'
+	-- number: a corresponding viewport.
+	check.integerOrExact(res, "viewport_fit", 1, nil, nil, false)
+
+	check.box(res, "header_box")
+	check.slice(res, "header_slc_body")
+	check.font(res, "header_font")
+	check.integer(res, "header_h", 0)
+	check.integer(res, "button_pad_w", 0)
+	check.integer(res, "button_w", 0)
+	check.integer(res, "button_h", 0)
+
+	-- From 0 (top) to 1 (bottom)
+	check.unitInterval(res, "button_align_v")
+
+	_checkResSelection(check.getRes(res, "res_selected"))
+	_checkResSelection(check.getRes(res, "res_unselected"))
+
+	_checkResBtnClose(check.getRes(res, "btn_close"))
+	_checkResBtnSize(check.getRes(res, "btn_size"))
+
+	_checkResBtnState(check.getRes(res, "res_btn_idle"))
+	_checkResBtnState(check.getRes(res, "res_btn_hover"))
+	_checkResBtnState(check.getRes(res, "res_btn_pressed"))
+	_checkResBtnState(check.getRes(res, "res_btn_disabled"))
+end
+
+
+local function _changeResBtnState(res, scale)
+	check.integerScaled(res, "label_ox", scale)
+	check.integerScaled(res, "label_oy", scale)
+end
+
+
+local function _changeResTopLevel(res, scale)
+	change.integerScaled(res, "header_h", scale)
+	change.integerScaled(res, "button_pad_w", scale)
+	change.integerScaled(res, "button_w", scale)
+	change.integerScaled(res, "button_h", scale)
+
+	_changeResBtnState(check.getRes(res, "res_btn_idle"))
+	_changeResBtnState(check.getRes(res, "res_btn_hover"))
+	_changeResBtnState(check.getRes(res, "res_btn_pressed"))
+	_changeResBtnState(check.getRes(res, "res_btn_disabled"))
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			header_text_align_h = "unit-interval",
-			header_text_align_v = "unit-interval",
-			in_view_pad_x = "scaled-int",
-			in_view_pad_y = "scaled-int",
-			sensor_resize_pad = "scaled-int",
-			shadow_extrude = "scaled-int",
-			res_normal = "&res",
-			res_small = "&res",
-			res_large = "&res"
-		},
-		res = {
-			header_h = "scaled-int",
-			button_pad_w = "scaled-int",
-			button_w = "scaled-int",
-			button_h = "scaled-int",
-			button_align_v = "unit-interval",
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/window_frame")
+
+		-- settings
+		-- TODO
+		-- /settings
+
+		check.box(skin, "box")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+
+		-- Padding when scrolling to put a widget into view.
+		check.integer(skin, "in_view_pad_x", 0)
+		check.integer(skin, "in_view_pad_y", 0)
+
+		check.slice(skin, "slc_body")
+		check.slice(skin, "slc_shadow")
+
+		-- TODO
+		--[=[
+		header_text_align_h = "*info/window_frames/header_text_align_h",
+		header_text_align_v = "*info/window_frames/header_text_align_v",
+		sensor_resize_pad = "*info/window_frames/frame_resize_pad",
+		sensor_resize_diagonal = "*info/window_frames/frame_resize_diagonal",
+		shadow_extrude = 8,
+		--]=]
+
+		-- Alignment of textures within control sensors
+		-- 0.0: left, 0.5: middle, 1.0: right
+		check.unitInterval(skin, "sensor_tex_align_h")
+
+		-- 0.0: top, 0.5: middle, 1.0: bottom
+		check.unitInterval(skin, "sensor_tex_align_v")
+
+		check.colorTuple(skin, "color_body")
+		check.colorTuple(skin, "color_shadow")
+
+		check.sashState(skin)
+
+		_checkResTopLevel(check.getRes(skin, "res_normal"))
+		_checkResTopLevel(check.getRes(skin, "res_small"))
+		_checkResTopLevel(check.getRes(skin, "res_large"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "header_text_align_h", scale)
+		change.integerScaled(skin, "header_text_align_v", scale)
+		change.integerScaled(skin, "in_view_pad_x", scale)
+		change.integerScaled(skin, "in_view_pad_y", scale)
+		change.integerScaled(skin, "sensor_resize_pad", scale)
+		change.integerScaled(skin, "shadow_extrude", scale)
+
+		_changeResTopLevel(check.getRes(skin, "res_normal"), scale)
+		_changeResTopLevel(check.getRes(skin, "res_small"), scale)
+		_changeResTopLevel(check.getRes(skin, "res_large"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

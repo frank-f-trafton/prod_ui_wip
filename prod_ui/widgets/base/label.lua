@@ -46,17 +46,51 @@ function def:uiCall_reshapePre()
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	-- Optional body slice and color
+	if res.sl_body ~= nil then
+		check.slice(res, "sl_body")
+	end
+	if res.color_body ~= nil then
+		check.colorTuple(res, "color_body")
+	end
+
+	check.colorTuple(res, "color_label")
+	check.integer(res, "label_ox")
+	check.integer(res, "label_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "label_ox", scale)
+	change.integerScaled(res, "label_oy", scale)
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			res_idle = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "base/label")
+		check.box(skin, "box")
+		check.labelStyle(skin, "label_style")
+		check.quad(skin, "tq_px")
+
+		-- Alignment of label text in Viewport #1.
+		check.enum(skin, "label_align_h")
+		check.enum(skin, "label_align_v")
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

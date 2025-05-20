@@ -1,6 +1,3 @@
--- Skin: Dropdown box (the pop-up menu).
-
-
 return {
 	skinner_id = "wimp/dropdown_pop",
 
@@ -9,13 +6,10 @@ return {
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm_hide",
 
-	text_align = "left", -- "left", "center", "right"
+	text_align = "left",
 
-	-- Height of items.
 	item_height = 22,
 
-	-- The drawer's maximum height, as measured by the number of visible items (plus margins).
-	-- Drawer height is limited by the size of the application window.
 	max_visible_items = 16,
 
 	slice = "*slices/atlas/list_box_body", -- XXX: replace with a dedicated resource.

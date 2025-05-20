@@ -231,11 +231,34 @@ function def:uiCall_update(dt)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		in_view_pad_x = "scaled-int",
-		in_view_pad_y = "scaled-int"
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "base/container")
+		check.box(skin, "box")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+
+		check.colorTuple(skin, "color_body")
+		check.slice(skin, "slc_body")
+
+		-- Padding when scrolling to put a widget into view.
+		check.number(skin, "in_view_pad_x")
+		check.number(skin, "in_view_pad_y")
+
+		check.sashState(skin)
+	end,
+
+
+	transform = function(skin, scale)
+		change.scaledInt(skin, "in_view_pad_x", scale)
+		change.scaledInt(skin, "in_view_pad_y", scale)
+
+		-- TODO
+	end,
 
 
 	install = function(self, skinner, skin)

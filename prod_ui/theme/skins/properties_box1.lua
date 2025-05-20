@@ -1,6 +1,3 @@
--- PropertiesBox.
-
-
 return {
 	skinner_id = "wimp/properties_box",
 
@@ -19,15 +16,11 @@ return {
 
 	sl_body = "*slices/atlas/list_box_body",
 
-	-- Alignment of property name text:
-	text_align_h = "left", -- "left", "center", "right"
-	-- Vertical text alignment is centered.
+	text_align_h = "left",
 
-	-- Property name icon column width and positioning, if active.
 	icon_spacing = 24,
-	icon_side = "left", -- "left", "right"
+	icon_side = "left",
 
-	-- Additional padding for left or right-aligned text. No effect with center alignment.
 	pad_text_x = 0,
 
 	color_item_text = {1.0, 1.0, 1.0, 1.0},

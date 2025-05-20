@@ -1,25 +1,16 @@
--- Skin: Dropdown box (the body).
-
-
 return {
 	skinner_id = "wimp/dropdown_box",
-
-	-- The SkinDef ID for pop-ups made by this widget.
 	skin_id_pop = "dropdown_pop1",
 
 	box = "*boxes/input_box",
 	font = "*fonts/p",
 
-	-- Horizontal size of the decorative button.
-	-- "auto": use Viewport #2's height.
 	button_spacing = 24,
-
-	-- Placement of the decorative button.
-	button_placement = "right", -- "left", "right"
+	button_placement = "right",
 
 	item_pad_v = 2,
 
-	text_align = "left", -- "left", "center", "right"
+	text_align = "left",
 
 	tq_deco_glyph = "*quads/atlas/arrow_down",
 

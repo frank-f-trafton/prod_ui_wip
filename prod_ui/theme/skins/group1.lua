@@ -1,6 +1,5 @@
--- WIMP group container.
-
 --[[
+QuadSlice layout:
 Slice B       Slice C
   3x1           3x1
 ┌─┬─┬─┐       ┌─┬─┬─┐
@@ -14,8 +13,8 @@ Slice B       Slice C
 └─┴───────────────┴─┘
        Slice A
          3x2
+(TODO: move this diagram somewhere more appropriate.)
 --]]
-
 return {
 	skinner_id = "wimp/group",
 

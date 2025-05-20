@@ -848,18 +848,47 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
 def.default_skinner = {
-	schema = {
-		underline_width = "scaled-int",
-		base_height = "scaled-int"
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/menu_bar")
+
+		-- NOTE: Very large box borders will interfere with clicking on menu items.
+		check.box(skin, "box")
+		check.quad(skin, "tq_px")
+		check.slice(skin, "sl_body")
+		check.font(skin, "font_item")
+		check.colorTuple(skin, "color_cat_enabled")
+		check.colorTuple(skin, "color_cat_selected")
+		check.colorTuple(skin, "color_cat_disabled")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_hover_glow")
+
+		check.integer(skin, "underline_width", 1)
+		check.number(skin, "height_mult", 1.0)
+		check.numberOrExact(skin, "base_height", 0, nil, "auto")
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "underline_width", scale)
+		change.integerScaled(skin, "base_height", scale)
+	end,
 
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
 		self.underline_width = skin.underline_width
-		self.base_height = skin.base_height
+
+		if skin.base_height == "auto" then
+			self.base_height = math.floor(skin.font_item:getHeight() * skin.height_mult) + skin.box.border.y1 + skin.box.border.y2
+		else
+			self.base_height = skin.base_height
+		end
 	end,
 
 

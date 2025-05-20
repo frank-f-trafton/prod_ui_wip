@@ -193,27 +193,95 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.quad(res, "tq_thumb")
+	check.quad(res, "sl_trough_active")
+	check.quad(res, "sl_trough_empty")
+	check.colorTuple(res, "color_label")
+	check.integer(res, "label_ox")
+	check.integer(res, "label_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "label_ox", scale)
+	change.integerScaled(res, "label_oy", scale)
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			label_spacing = "scaled-int",
-			trough_breadth = "scaled-int",
-			trough_breadth2 = "scaled-int",
-			thumb_w = "scaled-int",
-			thumb_h = "scaled-int",
-			thumb_ox = "scaled-int",
-			thumb_oy = "scaled-int",
-			trough_ext = "scaled-int",
-			res_idle = "&res",
-			res_hover = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			label_ox = "scaled-int",
-			label_oy = "scaled-int"
-		}
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "base/slider_bar")
+		check.box(skin, "box")
+		check.labelStyle(skin, "label_style")
+		check.quad(skin, "tq_px")
+
+		-- Label placement and spacing.
+		check.integer(skin, "label_spacing", 0)
+		check.exact(skin, "label_placement", "left", "right", "top", "bottom", "overlay")
+
+		-- For the empty part.
+		check.integer(skin, "trough_breadth", 0)
+
+		-- For the in-use part.
+		check.integer(skin, "trough_breadth2", 0)
+
+		-- When true, engage thumb-moving state even if the user clicked outside of the trough area.
+		check.type(skin, "trough_click_anywhere", "nil", "boolean")
+
+		-- Thumb visual dimensions. The size may be reduced if it does not fit into the trough.
+		check.integer(skin, "thumb_w", 0)
+		check.integer(skin, "thumb_h", 0)
+
+		-- Thumb visual offsets.
+		check.integer(skin, "thumb_ox", 0)
+		check.integer(skin, "thumb_oy", 0)
+
+		-- Adjusts the visual length of the trough line. Positive extends, negative reduces.
+		check.integer(skin, "trough_ext")
+
+		-- Cursor IDs for hover and press states (when over the trough area).
+		check.type(skin, "cursor_on", "nil", "string")
+		check.type(skin, "cursor_press", "nil", "string")
+
+		-- Label config.
+		check.enum(skin, "label_align_h")
+		check.enum(skin, "label_align_v")
+
+		--[[
+		TODO: an old WIP note:
+
+		quads:
+		slider_trough_tick_minor
+		slider_trough_tick_major
+		--]]
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_hover"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "label_spacing", scale)
+		change.integerScaled(skin, "trough_breadth", scale)
+		change.integerScaled(skin, "trough_breadth2", scale)
+		change.integerScaled(skin, "thumb_w", scale)
+		change.integerScaled(skin, "thumb_h", scale)
+		change.integerScaled(skin, "thumb_ox", scale)
+		change.integerScaled(skin, "thumb_oy", scale)
+		change.integerScaled(skin, "trough_ext", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_hover"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

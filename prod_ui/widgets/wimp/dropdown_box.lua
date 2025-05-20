@@ -481,20 +481,64 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
+local check = uiTheme.skinCheck
+local change = uiTheme.skinChange
+
+
+local function _checkRes(res)
+	check.slice(res, "slice")
+	check.slice(res, "slc_deco_button")
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_text")
+	check.colorTuple(res, "color_highlight")
+	check.integer(res, "deco_ox")
+	check.integer(res, "deco_oy")
+end
+
+
+local function _changeRes(res, scale)
+	change.integerScaled(res, "deco_ox", scale)
+	change.integerScaled(res, "deco_oy", scale)
+end
+
+
 def.default_skinner = {
-	schema = {
-		main = {
-			button_spacing = "scaled-int",
-			item_pad_v = "scaled-int",
-			res_idle = "&res",
-			res_pressed = "&res",
-			res_disabled = "&res"
-		},
-		res = {
-			deco_ox = "scaled-int",
-			deco_oy = "scaled-int"
-		},
-	},
+	validate = function(skin)
+		check.exact(skin, "skinner_id", "wimp/dropdown_box")
+
+		-- The SkinDef ID for pop-ups made by this widget.
+		check.type(skin, "skin_id_pop", "string")
+
+		check.box(skin, "box")
+		check.font(skin, "font")
+
+		-- Horizontal size of the decorative button.
+		-- "auto": use Viewport #2's height.
+		check.numberOrExact(skin, "button_spacing", nil, nil, "auto")
+
+		-- Placement of the decorative button.
+		check.exact(skin, "button_placement", "left", "right")
+
+		check.number(skin, "item_pad_v", 0)
+
+		check.exact(skin, "text_align", "left", "center", "right")
+
+		check.quad(skin, "tq_deco_glyph")
+
+		_checkRes(check.getRes(skin, "res_idle"))
+		_checkRes(check.getRes(skin, "res_pressed"))
+		_checkRes(check.getRes(skin, "res_disabled"))
+	end,
+
+
+	transform = function(skin, scale)
+		change.integerScaled(skin, "button_spacing", scale)
+		change.integerScaled(skin, "item_pad_v", scale)
+
+		_changeRes(check.getRes(skin, "res_idle"), scale)
+		_changeRes(check.getRes(skin, "res_pressed"), scale)
+		_changeRes(check.getRes(skin, "res_disabled"), scale)
+	end,
 
 
 	install = function(self, skinner, skin)

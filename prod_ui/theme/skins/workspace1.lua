@@ -1,5 +1,3 @@
--- WIMP workspace container.
-
 return {
 	skinner_id = "wimp/workspace",
 
@@ -7,7 +5,6 @@ return {
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 
-	-- Padding when scrolling to put a widget into view.
 	in_view_pad_x = 0,
 	in_view_pad_y = 0,
 
@@ -18,16 +15,9 @@ return {
 
 	sash_breadth = 8,
 
-	-- Reduces the intersection box when checking for the mouse *entering* a sash.
-	-- NOTE: overly large values will make the sash unclickable.
 	sash_contract_x = 0,
 	sash_contract_y = 0,
 
-	-- Increases the intersection box when checking for the mouse *leaving* a sash.
-	-- NOTES:
-	-- * Overly large values will prevent the user from clicking on widgets that
-	--   are descendants of the divider.
-	-- * The expansion does not go beyond the divider's body.
 	sash_expand_x = 2,
 	sash_expand_y = 2,
 
