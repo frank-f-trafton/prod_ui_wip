@@ -213,8 +213,8 @@ end
 
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local _makeLUTV = pTable.makeLUTV
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 local _enum_aux_placement = _makeLUTV("left", "right", "top", "bottom")

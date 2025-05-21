@@ -532,8 +532,8 @@ function def:uiCall_update(dt)
 end
 
 
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 def.default_skinner = {

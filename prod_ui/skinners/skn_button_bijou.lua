@@ -10,8 +10,8 @@ local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 local _lerp = commonMath.lerp
 local _makeLUTV = pTable.makeLUTV
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 local function _checkRes(res)

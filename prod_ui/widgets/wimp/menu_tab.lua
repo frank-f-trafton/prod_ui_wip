@@ -1071,8 +1071,8 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 end
 
 
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 local function _checkRes(res)

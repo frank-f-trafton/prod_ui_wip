@@ -401,8 +401,8 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 local function _checkRes(res)
