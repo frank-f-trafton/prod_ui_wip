@@ -305,8 +305,8 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 def.default_skinner = {

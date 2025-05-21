@@ -225,8 +225,8 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 def.default_skinner = {

@@ -643,8 +643,8 @@ end
 
 
 local _makeLUTV = pTable.makeLUTV
-local check = uiTheme.skinCheck
-local change = uiTheme.skinChange
+local check = uiTheme.check
+local change = uiTheme.change
 
 
 local function _checkRes(res)

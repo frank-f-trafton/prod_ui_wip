@@ -1,4 +1,4 @@
--- ProdUI: Theme support functions.
+-- ProdUI: Theme supportfunctions.
 
 
 local uiTheme = {}
@@ -76,132 +76,55 @@ function uiTheme.skinnerClearData(self)
 end
 
 
-uiTheme.skinCheck = {}
-local skinCheck = uiTheme.skinCheck
+uiTheme.check = {}
+local check = uiTheme.check
 
 
-function skinCheck.exact(skin, k, ...)
+local function _hdr(k)
+	return "(key: " .. tostring(k) .. "): "
+end
+
+
+local function _concatFromVarArgs(...)
+	local temp = {...}
+	for i, v in ipairs(temp) do
+		temp[i] = tostring(v)
+	end
+	return table.concat(temp, ", ")
+end
+
+
+local function _concatFromHash(t)
+	local temp = {}
+	for k in pairs(t) do
+		table.insert(temp, k)
+	end
+	return table.concat(temp, ", ")
+end
+
+
+function check.exact(skin, k, ...)
 	for i = 1, select("#", ...) do
 		if skin[k] == select(i, ...) then
 			return
 		end
 	end
-
-	error("exact test failed")
+	error(_hdr(k) .. "expected one of: " .. _concatFromVarArgs(...) .. ". Got: " .. tostring(skin[k]))
 end
 
 
-function skinCheck.box(skin, t, k)
-	if type(skin[k]) == "table" then
-		-- Check types of populated fields...
-
-		return
-	end
-
-	error("expected theme box")
-end
-
-
-function skinCheck.labelStyle(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected theme label style")
-end
-
-
-function skinCheck.scrollBarData(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected theme scroll bar data")
-end
-
-
-function skinCheck.scrollBarStyle(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected theme scroll bar style")
-end
-
-
-function skinCheck.font(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected font")
-end
-
-
-function skinCheck.iconData(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected IconData")
-end
-
-
-function skinCheck.thimbleInfo(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected thimbleInfo table")
-end
-
-
-function skinCheck.quad(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected resource quad")
-end
-
-
-function skinCheck.slice(skin, k)
-	if type(skin[k]) == "table" then
-		-- TODO
-
-		return
-	end
-
-	error("expected resource slice")
-end
-
-
-function skinCheck.type(skin, k, ...)
+function check.type(skin, k, ...)
 	local typ = type(skin[k])
 	for i = 1, select("#", ...) do
 		if typ == select(i, ...) then
 			return
 		end
 	end
-	error("bad type")
+	error(_hdr(k) .. "expected one of these types: " .. _concatFromVarArgs(...) .. ". Got: " .. typ)
 end
 
 
-function skinCheck.typeEval(skin, k, ...)
+function check.typeEval(skin, k, ...)
 	if not skin[k] then
 		return
 	end
@@ -211,181 +134,260 @@ function skinCheck.typeEval(skin, k, ...)
 			return
 		end
 	end
-	error("bad type")
+	error(_hdr(k) .. "expected false/nil or one of these types: " .. _concatFromVarArgs(...) .. ". Got: " .. typ)
 end
 
 
 -- @param [enum_t] A specific enum table. Leave nil to use uiTheme's table of common enums.
-function skinCheck.enum(skin, k, enum_t)
+function check.enum(skin, k, enum_t)
 	local enum = enum_t or enums[k]
 	if not enum then
 		error("invalid enum table")
 	end
-	if skin[k] ~= nil then
+	if enum[skin[k]] then
 		return enum[skin[k]]
 	end
-	error("missing enum: " .. tostring(k), 2)
+	error(_hdr(k) .. "expected enum value: " .. _concatFromHash(enum) .. ". Got: " .. tostring(skin[k]))
 end
 
 
-function skinCheck.numberOrEnum(skin, k, enum_t, min, max)
-	if skinCheck.numberEval(skin, k, min, max) then
-		return
-	end
-	skinCheck.enum(skin, k, enum_t)
-end
-
-
-function skinCheck.numberOrExact(skin, k, min, max, ...)
-	if skinCheck.numberEval(skin, k, min, max) then
-		return
-	end
-	skinCheck.exact(skin, k, ...)
-end
-
-
-function skinCheck.integerOrExact(skin, k, min, max, ...)
-	if skinCheck.integerEval(skin, k, min, max) then
-		return
-	end
-	skinCheck.exact(skin, k, ...)
-end
-
-
-
-function skinCheck.number(skin, k, min, max)
+function check.number(skin, k, min, max)
 	local n = skin[k]
 	if type(n) ~= "number" then
-		error("expected number")
-	end
-	if min and n < min then
-		error("number is below the minimum")
-	end
-	if max and n > max then
-		error("number is above the maximum")
+		error(_hdr(k) .. "expected number")
+
+	elseif min and n < min then
+		error(_hdr(k) .. "number is below the minimum")
+
+	elseif max and n > max then
+		error(_hdr(k) .. "number is above the maximum")
 	end
 end
 
 
-function skinCheck.numberEval(skin, k, min, max)
-	local n = skin[k]
-	if not n then
+function check.numberEval(skin, k, min, max)
+	if skin[k] then
+		check.number(skin, k, min, max)
+	end
+end
+
+
+function check.numberOrEnum(skin, k, enum_t, min, max)
+	if type(skin[k]) == "number" then
+		check.number(skin, k, min, max)
 		return
 	end
-	if type(n) ~= "number" then
-		error("expected number")
-	end
-	if min and n < min then
-		error("number is below the minimum")
-	end
-	if max and n > max then
-		error("number is above the maximum")
-	end
-	return true
+	check.enum(skin, k, enum_t)
 end
 
 
-function skinCheck.integer(skin, k, min, max)
-	local n = skin[k]
-	if type(n) ~= "number" or math.floor(n) ~= n then
-		error("expected integer")
-	end
-	if min and n < min then
-		error("integer is below the minimum")
-	end
-	if max and n > max then
-		error("integer is above the maximum")
-	end
-end
-
-
-function skinCheck.integerEval(skin, k, min, max)
-	local n = skin[k]
-	if not n then
+function check.numberOrExact(skin, k, min, max, ...)
+	if type(skin[k]) == "number" then
+		check.number(skin, k, min, max)
 		return
 	end
-	if type(n) ~= "number" or math.floor(n) ~= n then
-		error("expected integer")
-	end
-	if min and n < min then
-		error("integer is below the minimum")
-	end
-	if max and n > max then
-		error("integer is above the maximum")
-	end
-	return true
+	check.exact(skin, k, ...)
 end
 
 
-function skinCheck.unitInterval(skin, k)
+function check.integer(skin, k, min, max)
+	local n = skin[k]
+	if type(n) ~= "number" or math.floor(n) ~= n then
+		error(_hdr(k) .. "expected integer")
+
+	elseif min and n < min then
+		error(_hdr(k) .. "integer is below the minimum")
+
+	elseif max and n > max then
+		error(_hdr(k) .. "integer is above the maximum")
+	end
+end
+
+
+function check.integerEval(skin, k, min, max)
+	if skin[k] then
+		check.integer(skin, k, min, max)
+	end
+end
+
+
+function check.integerOrExact(skin, k, min, max, ...)
+	if type(skin[k]) == "number" then
+		check.integer(skin, k, min, max)
+		return
+	end
+	check.exact(skin, k, ...)
+end
+
+
+function check.unitInterval(skin, k)
 	local n = skin[k]
 	if type(n) ~= "number" or n < 0.0 or n > 1.0 then
-		error("expected number between 0.0 and 1.0")
+		error(_hdr(k) .. "expected number between 0.0 and 1.0")
 	end
 end
 
 
-function skinCheck.colorTuple(skin, k)
+function check.box(skin, k)
+	if type(skin[k]) == "table" then
+		-- Check types of populated fields...
+
+		return
+	end
+
+	error(_hdr(k) .. "expected theme box")
+end
+
+
+function check.labelStyle(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected theme label style")
+end
+
+
+function check.scrollBarData(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected theme scroll bar data")
+end
+
+
+function check.scrollBarStyle(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected theme scroll bar style")
+end
+
+
+function check.font(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected font")
+end
+
+
+function check.iconData(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected IconData")
+end
+
+
+function check.thimbleInfo(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected thimbleInfo table")
+end
+
+
+function check.quad(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected resource quad")
+end
+
+
+function check.slice(skin, k)
+	if type(skin[k]) == "table" then
+		-- TODO
+
+		return
+	end
+
+	error(_hdr(k) .. "expected resource slice")
+end
+
+
+function check.colorTuple(skin, k)
 	local c = skin[k]
 	if type(c) ~= "table" then
-		error("expected table")
-	end
-	if #c < 3 or #c > 4 then
-		error("expected 3-4 array items")
+		error(_hdr(k) .. "expected table (of colors)")
+
+	elseif #c < 3 or #c > 4 then
+		error(_hdr(k) .. "expected 3-4 array items (colors)")
 	end
 	for i, n in ipairs(c) do
 		if type(n) ~= "number" then
-			error("index #" .. i .. ": expected number")
+			error(_hdr(k) .. "index #" .. i .. ": expected number (for color)")
 		end
 	end
 end
 
 
-function skinCheck.getRes(skin, k)
-	local res = skin[k]
-	if type(res) ~= "table" then
-		error("missing resource table: " .. tostring(k))
-	end
-	return res
-end
+function check.sashState(skin)
+	check.slice(skin, "slc_sash_lr")
+	check.slice(skin, "slc_sash_tb")
 
-
-function skinCheck.sashState(skin)
-	skinCheck.slice(skin, "slc_sash_lr")
-	skinCheck.slice(skin, "slc_sash_tb")
-
-	skinCheck.integer(skin, "sash_breadth")
+	check.integer(skin, "sash_breadth")
 
 	-- Reduces the intersection box when checking for the mouse *entering* a sash.
 	-- NOTE: overly large values will make the sash unclickable.
-	skinCheck.integer(skin, "sash_contract_x")
-	skinCheck.integer(skin, "sash_contract_y")
+	check.integer(skin, "sash_contract_x")
+	check.integer(skin, "sash_contract_y")
 
 	-- Increases the intersection box when checking for the mouse *leaving* a sash.
 	-- NOTES:
 	-- * Overly large values will prevent the user from clicking on widgets that
 	--   are descendants of the divider.
 	-- * The expansion does not go beyond the divider's body.
-	skinCheck.integer(skin, "sash_expand_x")
-	skinCheck.integer(skin, "sash_expand_y")
+	check.integer(skin, "sash_expand_x")
+	check.integer(skin, "sash_expand_y")
 
-	skinCheck.type(skin, "cursor_sash_hover_h", "nil", "string")
-	skinCheck.type(skin, "cursor_sash_hover_v", "nil", "string")
-	skinCheck.type(skin, "cursor_sash_drag_h", "nil", "string")
-	skinCheck.type(skin, "cursor_sash_drag_v", "nil", "string")
+	check.type(skin, "cursor_sash_hover_h", "nil", "string")
+	check.type(skin, "cursor_sash_hover_v", "nil", "string")
+	check.type(skin, "cursor_sash_drag_h", "nil", "string")
+	check.type(skin, "cursor_sash_drag_v", "nil", "string")
 end
 
 
-uiTheme.skinChange = {}
-local skinChange = uiTheme.skinChange
+function check.getRes(skin, k)
+	local res = skin[k]
+	if type(res) ~= "table" then
+		error(_hdr(k) .. "expected resource table.")
+	end
+	return res
+end
 
 
-function skinChange.numberScaled(skin, k, scale)
+uiTheme.change = {}
+local change = uiTheme.change
+
+
+function change.numberScaled(skin, k, scale)
 	skin[k] = skin[k] * scale
 end
 
 
-function skinChange.integerScaled(skin, k, scale)
+function change.integerScaled(skin, k, scale)
 	skin[k] = math.floor(skin[k] * scale)
 end
 
