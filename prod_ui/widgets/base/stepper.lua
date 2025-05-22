@@ -405,7 +405,10 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.slice(res, "sl_body")
 	check.slice(res, "sl_button_up")
 	check.slice(res, "sl_button")
@@ -420,12 +423,19 @@ local function _checkRes(res)
 
 	check.integer(res, "button_ox")
 	check.integer(res, "button_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "button_ox", scale)
 	change.integerScaled(res, "button_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -460,10 +470,10 @@ def.default_skinner = {
 		-- Horizontal     left   right
 		-- Vertical       up     down
 
-		_checkRes(check.getRes(skin, "res_idle"))
-		_checkRes(check.getRes(skin, "res_hover"))
-		_checkRes(check.getRes(skin, "res_pressed"))
-		_checkRes(check.getRes(skin, "res_disabled"))
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_pressed")
+		_checkRes(skin, "res_disabled")
 	end,
 
 
@@ -471,10 +481,10 @@ def.default_skinner = {
 		change.integerScaled(skin, "prev_spacing", scale)
 		change.integerScaled(skin, "next_spacing", scale)
 
-		_changeRes(check.getRes(skin, "res_idle"), scale)
-		_changeRes(check.getRes(skin, "res_hover"), scale)
-		_changeRes(check.getRes(skin, "res_pressed"), scale)
-		_changeRes(check.getRes(skin, "res_disabled"), scale)
+		_changeRes(skin, "res_idle", scale)
+		_changeRes(skin, "res_hover", scale)
+		_changeRes(skin, "res_pressed", scale)
+		_changeRes(skin, "res_disabled", scale)
 	end,
 
 

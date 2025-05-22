@@ -217,22 +217,29 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local _enum_aux_placement = _makeLUTV("left", "right", "top", "bottom")
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
 
-
-local function _checkRes(res)
+	local res = check.getRes(skin, k)
 	check.slice(res, "slice")
 	check.colorTuple(res, "color_body")
 	check.colorTuple(res, "color_label")
 	check.colorTuple(res, "color_aux_icon")
 	check.integer(res, "label_ox")
 	check.integer(res, "label_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "label_ox", scale)
 	change.integerScaled(res, "label_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -255,8 +262,8 @@ def.default_skinner = {
 		-- graphic
 
 		-- Icon to show in the aux part of the button.
-		check.quad(skin, "resource-quad")
-		check.enum(skin, "aux_placement", _enum_aux_placement)
+		check.quad(skin, "tq_aux_glyph")
+		check.exact(skin, "aux_placement", "left", "right", "top", "bottom")
 
 		-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
 		-- "auto": size is based on Viewport #2
@@ -273,10 +280,10 @@ def.default_skinner = {
 		-- How much space to assign the graphic when not using "overlay" placement.
 		check.number(skin, "graphic_spacing", 0, nil, nil)
 
-		_checkRes(check.getRes(skin, "res_idle"))
-		_checkRes(check.getRes(skin, "res_hover"))
-		_checkRes(check.getRes(skin, "res_pressed"))
-		_checkRes(check.getRes(skin, "res_disabled"))
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_pressed")
+		_checkRes(skin, "res_disabled")
 	end,
 
 
@@ -284,10 +291,10 @@ def.default_skinner = {
 		change.integerScaled(skin, "aux_size", scale)
 		change.integerScaled(skin, "graphic_spacing", scale)
 
-		_changeRes(check.getRes(skin, "res_idle"), scale)
-		_changeRes(check.getRes(skin, "res_hover"), scale)
-		_changeRes(check.getRes(skin, "res_pressed"), scale)
-		_changeRes(check.getRes(skin, "res_disabled"), scale)
+		_changeRes(skin, "res_idle", scale)
+		_changeRes(skin, "res_hover", scale)
+		_changeRes(skin, "res_pressed", scale)
+		_changeRes(skin, "res_disabled", scale)
 	end,
 
 

@@ -2,7 +2,7 @@
 QuadSlice: a 9-slice library for LÖVE.
 See README.md for usage notes.
 
-Version: 1.3.0
+Version: 1.3.0 (Modified)
 
 License: MIT
 
@@ -61,6 +61,7 @@ local zero_quad -- assigned upon first use of quadSlice.newSlice().
 
 local _mt_slice = {}
 _mt_slice.__index = _mt_slice
+quadSlice._mt_slice = _mt_slice
 
 
 -- * Internal *

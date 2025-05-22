@@ -1263,7 +1263,7 @@ def.default_skinner = {
 
 		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
 
-		check.font(skin, "font_item")
+		check.loveType(skin, "font_item", "Font")
 		check.slice(skin, "slc_body")
 		check.quad(skin, "tq_px")
 		check.quad(skin, "tq_arrow")
@@ -1281,7 +1281,7 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
-		change.scaledInteger(skin, "separator_size", scale)
+		change.integerScaled(skin, "separator_size", scale)
 	end,
 
 

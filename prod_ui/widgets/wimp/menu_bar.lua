@@ -858,7 +858,7 @@ def.default_skinner = {
 		check.box(skin, "box")
 		check.quad(skin, "tq_px")
 		check.slice(skin, "sl_body")
-		check.font(skin, "font_item")
+		check.loveType(skin, "font_item", "Font")
 		check.colorTuple(skin, "color_cat_enabled")
 		check.colorTuple(skin, "color_cat_selected")
 		check.colorTuple(skin, "color_cat_disabled")
@@ -873,7 +873,9 @@ def.default_skinner = {
 
 	transform = function(skin, scale)
 		change.integerScaled(skin, "underline_width", scale)
-		change.integerScaled(skin, "base_height", scale)
+		if type(skin.base_height) == "number" then
+			change.integerScaled(skin, "base_height", scale)
+		end
 	end,
 
 

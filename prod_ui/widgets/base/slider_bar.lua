@@ -197,19 +197,29 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.quad(res, "tq_thumb")
-	check.quad(res, "sl_trough_active")
-	check.quad(res, "sl_trough_empty")
+	check.slice(res, "sl_trough_active")
+	check.slice(res, "sl_trough_empty")
 	check.colorTuple(res, "color_label")
 	check.integer(res, "label_ox")
 	check.integer(res, "label_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "label_ox", scale)
 	change.integerScaled(res, "label_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -259,10 +269,10 @@ def.default_skinner = {
 		slider_trough_tick_major
 		--]]
 
-		_checkRes(check.getRes(skin, "res_idle"))
-		_checkRes(check.getRes(skin, "res_hover"))
-		_checkRes(check.getRes(skin, "res_pressed"))
-		_checkRes(check.getRes(skin, "res_disabled"))
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_pressed")
+		_checkRes(skin, "res_disabled")
 	end,
 
 
@@ -276,10 +286,10 @@ def.default_skinner = {
 		change.integerScaled(skin, "thumb_oy", scale)
 		change.integerScaled(skin, "trough_ext", scale)
 
-		_changeRes(check.getRes(skin, "res_idle"), scale)
-		_changeRes(check.getRes(skin, "res_hover"), scale)
-		_changeRes(check.getRes(skin, "res_pressed"), scale)
-		_changeRes(check.getRes(skin, "res_disabled"), scale)
+		_changeRes(skin, "res_idle", scale)
+		_changeRes(skin, "res_hover", scale)
+		_changeRes(skin, "res_pressed", scale)
+		_changeRes(skin, "res_disabled", scale)
 	end,
 
 

@@ -632,7 +632,7 @@ def.default_skinner = {
 		-- Settings
 		check.exact(skin, "icon_side", nil, "left", "right")
 		check.type(skin, "show_icons", "nil", "boolean")
-		check.exact(skin, "text_align_h", "left", "center", "right")
+		check.exact(skin, "text_align_h", nil, "left", "center", "right")
 		-- / Settings
 
 		check.box(skin, "box")
@@ -640,7 +640,7 @@ def.default_skinner = {
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
 
-		check.font(skin, "font")
+		check.loveType(skin, "font", "Font")
 		check.iconData(skin, "data_icon")
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
@@ -667,9 +667,9 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
-		change.integerScaled(skin, "item_pad_v")
-		change.integerScaled(skin, "icon_spacing")
-		change.integerScaled(skin, "pad_text_x")
+		change.integerScaled(skin, "item_pad_v", scale)
+		change.integerScaled(skin, "icon_spacing", scale)
+		change.integerScaled(skin, "pad_text_x", scale)
 	end,
 
 

@@ -253,8 +253,8 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
-		change.scaledInt(skin, "in_view_pad_x", scale)
-		change.scaledInt(skin, "in_view_pad_y", scale)
+		change.integerScaled(skin, "in_view_pad_x", scale)
+		change.integerScaled(skin, "in_view_pad_y", scale)
 
 		-- TODO
 	end,

@@ -113,18 +113,28 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.colorTuple(res, "color_back")
 	check.colorTuple(res, "color_ichor")
 	check.colorTuple(res, "color_label")
 	check.integer(res, "label_ox")
 	check.integer(res, "label_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "label_ox", scale)
 	change.integerScaled(res, "label_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -147,16 +157,16 @@ def.default_skinner = {
 		check.slice(skin, "slc_back")
 		check.slice(skin, "slc_ichor")
 
-		_checkRes(check.getRes(skin, "res_active"))
-		_checkRes(check.getRes(skin, "res_inactive"))
+		_checkRes(skin, "res_active")
+		_checkRes(skin, "res_inactive")
 	end,
 
 
 	transform = function(skin, scale)
 		change.integerScaled(skin, "bar_spacing", scale)
 
-		_changeRes(check.getRes(skin, "res_active"), scale)
-		_changeRes(check.getRes(skin, "res_inactive"), scale)
+		_changeRes(skin, "res_active", scale)
+		_changeRes(skin, "res_inactive", scale)
 	end,
 
 

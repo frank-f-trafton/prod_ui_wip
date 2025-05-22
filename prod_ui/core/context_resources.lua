@@ -13,6 +13,7 @@ local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 
 
@@ -113,24 +114,19 @@ local function _initTexture(texture, metadata)
 				end
 
 				local tex_slice = {
-					x = v.x, y = v.y,
-					w1 = v.w1, h1 = v.h1,
-					w2 = v.w2, h2 = v.h2,
-					w3 = v.w3, h3 = v.h3,
-
 					tex_quad = base_tq,
 					texture = base_tq.texture,
 					blend_mode = tex_info.blend_mode,
 					alpha_mode = tex_info.alpha_mode,
-				}
 
-				tex_slice.slice = quadSlice.newSlice(
-					base_tq.x + v.x, base_tq.y + v.y,
-					v.w1, v.h1,
-					v.w2, v.h2,
-					v.w3, v.h3,
-					tex_slice.texture:getDimensions()
-				)
+					slice = quadSlice.newSlice(
+						base_tq.x + v.x, base_tq.y + v.y,
+						v.w1, v.h1,
+						v.w2, v.h2,
+						v.w3, v.h3,
+						base_tq.texture:getDimensions()
+					)
+				}
 
 				-- If specified, attach a starting draw function.
 				if v.draw_fn_id then
@@ -236,6 +232,11 @@ function methods:applyTheme(theme)
 	end
 
 	_deepCopyFields(theme.boxes, resources.boxes)
+	--[[
+	for k, box in pairs(resources.boxes) do
+		uiTheme.scaleBox(box, scale)
+	end
+	--]]
 
 	if theme.fonts then
 		for k, font_info in pairs(theme.fonts) do
@@ -288,8 +289,17 @@ function methods:applyTheme(theme)
 		if not skinner then
 			error("no skinner with ID: " .. tostring(v.skinner_id))
 		end
-		--skinner.validate(v)
-		--skinner.transform(v, scale)
+
+		uiTheme.setLabel("(" .. tostring(v.skinner_id) .. ", " .. tostring(k) .. ")")
+		if skinner.validate then
+			skinner.validate(v)
+		end
+		if skinner.transform then
+			skinner.transform(v, scale)
+		end
+		uiTheme.popLabel()
+		uiTheme.assertLabelEmpty()
+		uiTheme.setLabel()
 	end
 end
 

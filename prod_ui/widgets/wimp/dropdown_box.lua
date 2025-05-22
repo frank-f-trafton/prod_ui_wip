@@ -485,7 +485,10 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.slice(res, "slice")
 	check.slice(res, "slc_deco_button")
 	check.colorTuple(res, "color_body")
@@ -493,12 +496,18 @@ local function _checkRes(res)
 	check.colorTuple(res, "color_highlight")
 	check.integer(res, "deco_ox")
 	check.integer(res, "deco_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "deco_ox", scale)
 	change.integerScaled(res, "deco_oy", scale)
+	uiTheme.popLabel()
 end
 
 
@@ -508,7 +517,7 @@ def.default_skinner = {
 		check.type(skin, "skin_id_pop", "string")
 
 		check.box(skin, "box")
-		check.font(skin, "font")
+		check.loveType(skin, "font", "Font")
 
 		-- Horizontal size of the decorative button.
 		-- "auto": use Viewport #2's height.
@@ -523,9 +532,9 @@ def.default_skinner = {
 
 		check.quad(skin, "tq_deco_glyph")
 
-		_checkRes(check.getRes(skin, "res_idle"))
-		_checkRes(check.getRes(skin, "res_pressed"))
-		_checkRes(check.getRes(skin, "res_disabled"))
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_pressed")
+		_checkRes(skin, "res_disabled")
 	end,
 
 
@@ -533,9 +542,9 @@ def.default_skinner = {
 		change.integerScaled(skin, "button_spacing", scale)
 		change.integerScaled(skin, "item_pad_v", scale)
 
-		_changeRes(check.getRes(skin, "res_idle"), scale)
-		_changeRes(check.getRes(skin, "res_pressed"), scale)
-		_changeRes(check.getRes(skin, "res_disabled"), scale)
+		_changeRes(skin, "res_idle", scale)
+		_changeRes(skin, "res_pressed", scale)
+		_changeRes(skin, "res_disabled", scale)
 	end,
 
 
