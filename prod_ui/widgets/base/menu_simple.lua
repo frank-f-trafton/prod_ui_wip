@@ -311,7 +311,7 @@ local change = uiTheme.change
 
 def.default_skinner = {
 	validate = function(skin)
-		check.font(skin, "font")
+		check.loveType(skin, "font", "Font")
 
 		check.colorTuple(skin, "color_background")
 		check.colorTuple(skin, "color_outline")

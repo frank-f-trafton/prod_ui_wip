@@ -75,6 +75,18 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+	check.quad(res, "quad_checked")
+	check.quad(res, "quad_unchecked")
+	check.colorTuple(res, "color_bijou")
+
+	uiTheme.popLabel()
+end
+
+
 def.default_skinner = {
 	validate = function(skin)
 		check.box(skin, "box")
@@ -92,10 +104,10 @@ def.default_skinner = {
 		check.unitInterval(skin, "bijou_align_h")
 		check.unitInterval(skin, "bijou_align_v")
 
-		check.quad(skin, "quad_checked")
-		check.quad(skin, "quad_unchecked")
-
-		check.colorTuple(skin, "color_bijou")
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_pressed")
+		_checkRes(skin, "res_disabled")
 	end,
 
 

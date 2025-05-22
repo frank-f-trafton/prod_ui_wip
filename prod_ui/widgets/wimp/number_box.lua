@@ -668,7 +668,10 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.slice(res, "slice")
 	check.slice(res, "slc_button_inc")
 	check.slice(res, "slc_button_dec")
@@ -684,20 +687,27 @@ local function _checkRes(res)
 
 	check.integer(res, "deco_ox")
 	check.integer(res, "deco_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "deco_ox", scale)
 	change.integerScaled(res, "deco_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
 def.default_skinner = {
 	validate = function(skin)
 		check.box(skin, "box")
-		check.font(skin, "font")
-		check.font(skin, "font_ghost")
+		check.loveType(skin, "font", "Font")
+		check.loveType(skin, "font_ghost", "Font")
 
 		check.type(skin, "cursor_on", "nil", "string")
 		check.exact(skin, "text_align", "left", "center", "right")
@@ -710,20 +720,20 @@ def.default_skinner = {
 		check.exact(skin, "button_placement", "left", "right")
 		check.exact(skin, "button_alignment", "horizontal", "vertical")
 
-		_checkRes(check.getRes(skin, "res_idle"))
-		_checkRes(check.getRes(skin, "res_hover"))
-		_checkRes(check.getRes(skin, "res_pressed"))
-		_checkRes(check.getRes(skin, "res_disabled"))
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_pressed")
+		_checkRes(skin, "res_disabled")
 	end,
 
 
 	transform = function(skin, scale)
 		change.integerScaled(skin, "button_spacing", scale)
 
-		_changeRes(check.getRes(skin, "res_idle"), scale)
-		_changeRes(check.getRes(skin, "res_hover"), scale)
-		_changeRes(check.getRes(skin, "res_pressed"), scale)
-		_changeRes(check.getRes(skin, "res_disabled"), scale)
+		_changeRes(skin, "res_idle", scale)
+		_changeRes(skin, "res_hover", scale)
+		_changeRes(skin, "res_pressed", scale)
+		_changeRes(skin, "res_disabled", scale)
 	end,
 
 

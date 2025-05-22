@@ -6,5 +6,5 @@
 return {
 	font = "*fonts/p",
 	ul_color = false,
-	ul_h = 1, --math.max(1, math.floor(0.5 + 1 * scale)),
+	ul_h = 1
 }

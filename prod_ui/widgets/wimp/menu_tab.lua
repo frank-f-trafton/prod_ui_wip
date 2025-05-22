@@ -1075,18 +1075,28 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.slice(res, "sl_body")
 	check.colorTuple(res, "color_body")
 	check.colorTuple(res, "color_text")
 	check.integer(res, "offset_x")
 	check.integer(res, "offset_y")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "offset_ox", scale)
 	change.integerScaled(res, "offset_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -1096,7 +1106,7 @@ def.default_skinner = {
 		check.quad(skin, "tq_px")
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
-		check.font(skin, "font")
+		check.loveType(skin, "font", "Font")
 		check.iconData(skin, "data_icon")
 
 		check.colorTuple(skin, "color_background")
@@ -1112,7 +1122,7 @@ def.default_skinner = {
 		-- Some default data for cell implementations.
 		check.colorTuple(skin, "color_cell_bijou")
 		check.colorTuple(skin, "color_cell_text")
-		check.font(skin, "cell_font")
+		check.loveType(skin, "cell_font", "Font")
 
 		check.integer(skin, "bar_height", 0)
 		check.integer(skin, "col_sep_line_width", 0)
@@ -1135,9 +1145,9 @@ def.default_skinner = {
 		-- * Category panel right and sorting badge
 		check.integer(skin, "category_h_pad")
 
-		_checkRes(check.getRes(skin, "res_column_idle"))
-		_checkRes(check.getRes(skin, "res_column_hover"))
-		_checkRes(check.getRes(skin, "res_column_press"))
+		_checkRes(skin, "res_column_idle")
+		_checkRes(skin, "res_column_hover")
+		_checkRes(skin, "res_column_press")
 	end,
 
 
@@ -1149,9 +1159,9 @@ def.default_skinner = {
 		change.integerScaled(skin, "bijou_h", scale)
 		change.integerScaled(skin, "category_h_pad", scale)
 
-		_changeRes(check.getRes(skin, "res_column_idle"), scale)
-		_changeRes(check.getRes(skin, "res_column_hover"), scale)
-		_changeRes(check.getRes(skin, "res_column_press"), scale)
+		_changeRes(skin, "res_column_idle", scale)
+		_changeRes(skin, "res_column_hover", scale)
+		_changeRes(skin, "res_column_press", scale)
 	end,
 
 

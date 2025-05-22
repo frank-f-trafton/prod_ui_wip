@@ -948,34 +948,58 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkResSelection(res)
+local function _checkResSelection(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.colorTuple(res, "col_header_fill")
 	check.colorTuple(res, "col_header_text")
+
+	uiTheme.popLabel()
 end
 
 
-local function _checkResBtnClose(res)
+local function _checkResBtnClose(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.quad(res, "graphic")
+
+	uiTheme.popLabel()
 end
 
 
-local function _checkResBtnSize(res)
+local function _checkResBtnSize(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.quad(res, "graphic")
 	check.quad(res, "graphic_max")
 	check.quad(res, "graphic_unmax")
+
+	uiTheme.popLabel()
 end
 
 
-local function _checkResBtnState(res)
+local function _checkResBtnState(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	check.slice(res, "slice")
 	check.colorTuple(res, "color_body")
 	check.colorTuple(res, "color_quad")
 	check.integer(res, "label_ox")
 	check.integer(res, "label_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _checkResTopLevel(res)
+local function _checkResTopLevel(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+
 	-- Which rectangle to use for fitting the header.
 	-- false: 'self.w', 'self.h'
 	-- number: a corresponding viewport.
@@ -983,7 +1007,7 @@ local function _checkResTopLevel(res)
 
 	check.box(res, "header_box")
 	check.slice(res, "header_slc_body")
-	check.font(res, "header_font")
+	check.loveType(res, "header_font", "Font")
 	check.integer(res, "header_h", 0)
 	check.integer(res, "button_pad_w", 0)
 	check.integer(res, "button_w", 0)
@@ -992,35 +1016,47 @@ local function _checkResTopLevel(res)
 	-- From 0 (top) to 1 (bottom)
 	check.unitInterval(res, "button_align_v")
 
-	_checkResSelection(check.getRes(res, "res_selected"))
-	_checkResSelection(check.getRes(res, "res_unselected"))
+	_checkResSelection(res, "res_selected")
+	_checkResSelection(res, "res_unselected")
 
-	_checkResBtnClose(check.getRes(res, "btn_close"))
-	_checkResBtnSize(check.getRes(res, "btn_size"))
+	_checkResBtnClose(res, "btn_close")
+	_checkResBtnSize(res, "btn_size")
 
-	_checkResBtnState(check.getRes(res, "res_btn_idle"))
-	_checkResBtnState(check.getRes(res, "res_btn_hover"))
-	_checkResBtnState(check.getRes(res, "res_btn_pressed"))
-	_checkResBtnState(check.getRes(res, "res_btn_disabled"))
+	_checkResBtnState(res, "res_btn_idle")
+	_checkResBtnState(res, "res_btn_hover")
+	_checkResBtnState(res, "res_btn_pressed")
+	_checkResBtnState(res, "res_btn_disabled")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeResBtnState(res, scale)
-	check.integerScaled(res, "label_ox", scale)
-	check.integerScaled(res, "label_oy", scale)
+local function _changeResBtnState(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+	change.integerScaled(res, "label_ox", scale)
+	change.integerScaled(res, "label_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeResTopLevel(res, scale)
+local function _changeResTopLevel(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "header_h", scale)
 	change.integerScaled(res, "button_pad_w", scale)
 	change.integerScaled(res, "button_w", scale)
 	change.integerScaled(res, "button_h", scale)
 
-	_changeResBtnState(check.getRes(res, "res_btn_idle"))
-	_changeResBtnState(check.getRes(res, "res_btn_hover"))
-	_changeResBtnState(check.getRes(res, "res_btn_pressed"))
-	_changeResBtnState(check.getRes(res, "res_btn_disabled"))
+	_changeResBtnState(res, "res_btn_idle", scale)
+	_changeResBtnState(res, "res_btn_hover", scale)
+	_changeResBtnState(res, "res_btn_pressed", scale)
+	_changeResBtnState(res, "res_btn_disabled", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -1062,9 +1098,9 @@ def.default_skinner = {
 
 		check.sashState(skin)
 
-		_checkResTopLevel(check.getRes(skin, "res_normal"))
-		_checkResTopLevel(check.getRes(skin, "res_small"))
-		_checkResTopLevel(check.getRes(skin, "res_large"))
+		_checkResTopLevel(skin, "res_normal")
+		_checkResTopLevel(skin, "res_small")
+		_checkResTopLevel(skin, "res_large")
 	end,
 
 
@@ -1076,9 +1112,9 @@ def.default_skinner = {
 		change.integerScaled(skin, "sensor_resize_pad", scale)
 		change.integerScaled(skin, "shadow_extrude", scale)
 
-		_changeResTopLevel(check.getRes(skin, "res_normal"), scale)
-		_changeResTopLevel(check.getRes(skin, "res_small"), scale)
-		_changeResTopLevel(check.getRes(skin, "res_large"), scale)
+		_changeResTopLevel(skin, "res_normal", scale)
+		_changeResTopLevel(skin, "res_small", scale)
+		_changeResTopLevel(skin, "res_large", scale)
 	end,
 
 

@@ -669,12 +669,12 @@ def.default_skinner = {
 
 		check.scrollBarData(skin, "data_scroll")
 		check.integer(skin, "outline_width", 0)
-		check.font(skin, "font")
+		check.loveType(skin, "font_item", "Font")
 	end,
 
 
 	transform = function(skin, scale)
-		change.integerScaled(skin, "outline_width")
+		change.integerScaled(skin, "outline_width", scale)
 	end,
 
 

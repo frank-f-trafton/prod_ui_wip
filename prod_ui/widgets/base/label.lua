@@ -50,7 +50,11 @@ local check = uiTheme.check
 local change = uiTheme.change
 
 
-local function _checkRes(res)
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+
 	-- Optional body slice and color
 	if res.sl_body ~= nil then
 		check.slice(res, "sl_body")
@@ -62,12 +66,19 @@ local function _checkRes(res)
 	check.colorTuple(res, "color_label")
 	check.integer(res, "label_ox")
 	check.integer(res, "label_oy")
+
+	uiTheme.popLabel()
 end
 
 
-local function _changeRes(res, scale)
+local function _changeRes(skin, k, scale)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
 	change.integerScaled(res, "label_ox", scale)
 	change.integerScaled(res, "label_oy", scale)
+
+	uiTheme.popLabel()
 end
 
 
@@ -81,14 +92,14 @@ def.default_skinner = {
 		check.enum(skin, "label_align_h")
 		check.enum(skin, "label_align_v")
 
-		_checkRes(check.getRes(skin, "res_idle"))
-		_checkRes(check.getRes(skin, "res_disabled"))
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_disabled")
 	end,
 
 
 	transform = function(skin, scale)
-		_changeRes(check.getRes(skin, "res_idle"), scale)
-		_changeRes(check.getRes(skin, "res_disabled"), scale)
+		_changeRes(skin, "res_idle", scale)
+		_changeRes(skin, "res_disabled", scale)
 	end,
 
 

@@ -126,6 +126,13 @@ function M.clear(t)
 end
 
 
+function M.clearArray(t)
+	for i = #t, 1, -1 do
+		t[i] = nil
+	end
+end
+
+
 function M.assignIfNil(t, f, ...)
 	if t[f] == nil then
 		for i = 1, select("#", ...) do
@@ -151,6 +158,21 @@ function M.assignIfNilOrFalse(t, f, ...)
 	end
 end
 
+
+function M.toStringAll(t)
+	for k, v in pairs(t) do
+		t[k] = tostring(v)
+	end
+end
+
+
+function M.arrayOfHashKeys(t)
+	local a = {}
+	for k in pairs(t) do
+		a[#a + 1] = k
+	end
+	return a
+end
 
 
 return M
