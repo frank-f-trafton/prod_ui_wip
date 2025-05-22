@@ -38,9 +38,8 @@ local function _loadAndMakeFont(font_info)
 		local size = font_info.size
 		if not font_objects["default"][size] then
 			font_objects["default"][size] = love.graphics.newFont(size)
-
-			return font_objects["default"][size]
 		end
+		return font_objects["default"][size]
 	end
 
 	if not font_store[path] then

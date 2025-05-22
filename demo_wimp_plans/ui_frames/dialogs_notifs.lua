@@ -7,7 +7,6 @@ local commonWimp = require("prod_ui.common.common_wimp")
 
 -- WIMP Demo
 local demoShared = require("demo_shared")
-local wimpWorks = require("wimp_works")
 
 
 local function _makeFrameBlock2(self)
@@ -122,7 +121,7 @@ function plan.make(panel)
 		btn:initialize()
 		btn:setLabel("Modal Dialog Box")
 		btn.wid_buttonAction = function(self)
-			wimpWorks.makeDialogBox(panel.context, "It's a dialog box", [[
+			demoShared.makeDialogBox(panel.context, "It's a dialog box", [[
 This frame is modal; while present, it should block interaction with any other part of the interface.
 
 Click a button below (or the 'X' in the header bar) to dismiss it.]]
