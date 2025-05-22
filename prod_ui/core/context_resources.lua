@@ -226,19 +226,35 @@ function methods:applyTheme(theme)
 
 	self:resetResources()
 	fontCache.clear()
+	uiTheme.setLabel()
 
 	if not theme then
 		return
 	end
 
-	_deepCopyFields(theme.boxes, resources.boxes)
-	--[[
-	for k, box in pairs(resources.boxes) do
-		uiTheme.scaleBox(box, scale)
+	if theme.boxes then
+		uiTheme.pushLabel("boxes")
+
+		_deepCopyFields(theme.boxes, resources.boxes)
+		for k, box in pairs(resources.boxes) do
+			uiTheme.check.box(resources.boxes, k)
+			uiTheme.scaleBox(box, scale)
+		end
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
 	end
-	--]]
 
 	if theme.fonts then
+		uiTheme.pushLabel("fonts")
+
+		for k in pairs(theme.fonts) do
+			uiTheme.pushLabel(k)
+			uiTheme.checkFontInfo(theme.fonts, k)
+			uiTheme.scaleFontInfo(theme.fonts, k, scale)
+			uiTheme.popLabel()
+		end
+
 		for k, font_info in pairs(theme.fonts) do
 			fontCache.createFontObjects(font_info)
 		end
@@ -247,19 +263,85 @@ function methods:applyTheme(theme)
 			fontCache.setFallbacks(font_info)
 			resources.fonts[k] = fontCache.getFont(font_info)
 		end
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
 	end
 	fontCache.clear()
 
-	_deepCopyFields(theme.icons, resources.icons)
-	_deepCopyFields(theme.info, resources.info)
-	_deepCopyFields(theme.labels, resources.labels)
-	_deepCopyFields(theme.scroll_bar_data, resources.scroll_bar_data)
-	_deepCopyFields(theme.scroll_bar_styles, resources.scroll_bar_styles)
-	_deepCopyFields(theme.user, resources.user)
+	if theme.icons then
+		uiTheme.pushLabel("icons")
+
+		_deepCopyFields(theme.icons, resources.icons)
+		for k in pairs(resources.icons) do
+			uiTheme.check.iconData(resources.icons, k)
+		end
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
+
+	if theme.info then
+		uiTheme.pushLabel("info")
+
+		_deepCopyFields(theme.info, resources.info)
+
+		-- TODO
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
+
+
+	if theme.labels then
+		uiTheme.pushLabel("labels")
+
+		_deepCopyFields(theme.labels, resources.labels)
+
+		-- TODO
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
+
+	if theme.scroll_bar_data then
+		uiTheme.pushLabel("scroll_bar_data")
+
+		_deepCopyFields(theme.scroll_bar_data, resources.scroll_bar_data)
+
+		-- TODO
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
+
+	if theme.scroll_bar_styles then
+		uiTheme.pushLabel("scroll_bar_styles")
+
+		_deepCopyFields(theme.scroll_bar_styles, resources.scroll_bar_styles)
+
+		-- TODO
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
+
+	if theme.user then
+		uiTheme.pushLabel("user")
+
+		_deepCopyFields(theme.user, resources.user)
+
+		-- TODO
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
 
 	-- TODO: support loading a directory of images as one group (like an uncompiled atlas).
 
 	if theme.textures then
+		uiTheme.pushLabel("textures")
+
 		for k, tex_info in pairs(theme.textures) do
 			local tex, meta = _loadTextureFiles(tex_info.path)
 			local tex_tbl = _initTexture(tex, meta)
@@ -274,6 +356,8 @@ function methods:applyTheme(theme)
 				resources.slices[k] = tex_tbl.slices
 			end
 		end
+
+		uiTheme.popLabel()
 	end
 
 	if theme.skins then
@@ -298,9 +382,9 @@ function methods:applyTheme(theme)
 			skinner.transform(v, scale)
 		end
 		uiTheme.popLabel()
-		uiTheme.assertLabelEmpty()
-		uiTheme.setLabel()
+		uiTheme.assertLabelLevel(0)
 	end
+	uiTheme.assertLabelLevel(0)
 end
 
 

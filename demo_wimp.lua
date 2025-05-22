@@ -205,20 +205,7 @@ local function newWimpContext()
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
-	local theme = uiRes.loadDirectoryAsTable("prod_ui/theme")
-
-	-- Duplicate skins so that demo widgets can be tweaked without
-	-- affecting the rest of the program.
-	if theme.skins then
-		local dupes = {}
-		for k, v in pairs(theme.skins) do
-			dupes[k .. "_DEMO"] = pTable.deepCopy(v)
-		end
-		for k, v in pairs(dupes) do
-			theme.skins[k] = v
-		end
-	end
-
+	local theme = demoShared.loadTheme()
 	context:applyTheme(theme)
 
 	local wid_root = context:addRoot("wimp/root_wimp")

@@ -20,6 +20,19 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 local _makeLUTV = pTable.makeLUTV
 
 
+uiTheme.settings = {
+	max_font_size = 256
+}
+
+
+uiTheme.check = {}
+local check = uiTheme.check
+
+
+uiTheme.change = {}
+local change = uiTheme.change
+
+
 local err_label = {}
 
 
@@ -50,9 +63,14 @@ function uiTheme.concatLabel()
 end
 
 
-function uiTheme.assertLabelEmpty()
-	if #err_label > 0 then
-		error("the label stack is not empty: " .. table.concat(err_label, " > "))
+function uiTheme.getLabelLevel()
+	return #err_label
+end
+
+
+function uiTheme.assertLabelLevel(n)
+	if #err_label ~= n then
+		error("label stack mismatch: " .. table.concat(err_label, " > "))
 	end
 end
 
@@ -67,6 +85,16 @@ end
 
 
 uiTheme.enums = {
+	-- LÖVE enums
+	BlendAlphaMode = _makeLUTV("alphamultiply", "premultiplied"),
+	BlendMode = _makeLUTV("alpha", "replace", "screen", "add", "subtract", "multiply", "lighten", "darken"),
+	DrawMode = _makeLUTV("fill", "line"),
+	LineJoin = _makeLUTV("bevel", "miter", "none"),
+	LineStyle = _makeLUTV("rough", "smooth"),
+
+	-- ProdUI Theme enums
+	font_type = {[".ttf"]="vector", [".otf"]="vector", [".fnt"]="bmfont", [".png"]="imagefont"},
+
 	-- ProdUI skin enums
 	bijou_side_h = _makeLUTV("left", "right"),
 	graphic_placement = _makeLUTV("left", "right", "top", "bottom", "overlay"),
@@ -75,13 +103,6 @@ uiTheme.enums = {
 	quad_align_h = _makeLUTV("left", "center", "right"),
 	quad_align_v = _makeLUTV("top", "middle", "bottom"),
 	text_align_OLD = _makeLUTV("left", "center", "right"),
-
-	-- LÖVE enums
-	BlendAlphaMode = _makeLUTV("alphamultiply", "premultiplied"),
-	BlendMode = _makeLUTV("alpha", "replace", "screen", "add", "subtract", "multiply", "lighten", "darken"),
-	DrawMode = _makeLUTV("fill", "line"),
-	LineJoin = _makeLUTV("bevel", "miter", "none"),
-	LineStyle = _makeLUTV("rough", "smooth")
 }
 local enums = uiTheme.enums
 
@@ -137,8 +158,99 @@ function uiTheme.scaleBox(box, scale)
 end
 
 
-uiTheme.check = {}
-local check = uiTheme.check
+local function _getFontTypeFromPath(path)
+	if path == "default" then
+		return "vector"
+	end
+
+	local ext = enums.font_type[path:sub(-4)]
+	local font_type = ext
+	if not font_type then
+		uiTheme.pushLabel(ext)
+		uiTheme.error("invalid font extension")
+	end
+
+	return font_type
+end
+
+
+local function _getFontInfoTable(tbl, k)
+	local font_info = tbl[k]
+	if not font_info then
+		uiTheme.error("expected font-info table")
+	end
+	return font_info
+end
+
+
+function uiTheme.checkFontInfo(theme_fonts, k)
+	uiTheme.pushLabel(k)
+
+	local font_info = _getFontInfoTable(theme_fonts, k)
+	check.type(font_info, "path", "string")
+
+	local font_type = _getFontTypeFromPath(font_info.path)
+	if font_type == "vector" then
+		check.type(font_info, "size", "number")
+
+	elseif font_type == "bmfont" then
+		check.type(font_info, "image_path", "nil", "string")
+
+	elseif font_type == "imagefont" then
+		check.type(font_info, "glyphs", "string")
+		check.type(font_info, "extraspacing", "nil", "number")
+	end
+
+	check.type(font_info, "fallbacks", "nil", "table")
+	if font_info.fallbacks then
+		uiTheme.pushLabel("fallbacks")
+		for i, fb in ipairs(font_info.fallbacks) do
+			uiTheme.pushLabel(i)
+
+			check.type(fb, "path", "string")
+			if font_type == "vector" then
+				check.type(fb, "size", "number")
+			end
+
+			uiTheme.popLabel()
+		end
+		uiTheme.popLabel()
+	end
+
+	uiTheme.popLabel()
+end
+
+
+function uiTheme.scaleFontInfo(theme_fonts, k, scale)
+	uiTheme.pushLabel(k)
+
+	local font_info = _getFontInfoTable(theme_fonts, k)
+
+	local font_type = _getFontTypeFromPath(font_info.path)
+	if font_type == "vector" then
+		change.integerScaled(font_info, "size", scale, 0, uiTheme.settings.max_font_size)
+	end
+	-- Do not scale ImageFont extraspacing.
+
+	if font_info.fallbacks then
+		uiTheme.pushLabel("fallbacks")
+		for i, fb in ipairs(font_info.fallbacks) do
+			uiTheme.pushLabel(i)
+
+			if font_type == "vector" then
+				change.integerScaled(fb, "size", scale, 0, uiTheme.settings.max_font_size)
+			end
+
+			uiTheme.popLabel()
+		end
+		uiTheme.popLabel()
+	end
+
+	uiTheme.popLabel()
+end
+
+
+-- 'check' functions
 
 
 local function _concatVariadic(...)
@@ -610,25 +722,34 @@ function check.getRes(skin, k)
 end
 
 
-uiTheme.change = {}
-local change = uiTheme.change
+-- 'change' functions
 
 
-function change.numberScaled(skin, k, scale)
+function change.numberScaled(skin, k, scale, min, max)
 	uiShared.type1(1, skin, "table")
 	uiShared.notNilNotNaN(2, k)
 	uiShared.type1(3, scale, "number")
+	uiShared.typeEval1(4, min, "number")
+	uiShared.typeEval1(5, max, "number")
 
-	skin[k] = skin[k] * scale
+	min = min or -math.huge
+	max = max or math.huge
+
+	skin[k] = math.max(min, math.min(skin[k] * scale, max))
 end
 
 
-function change.integerScaled(skin, k, scale)
+function change.integerScaled(skin, k, scale, min, max)
 	uiShared.type1(1, skin, "table")
 	uiShared.notNilNotNaN(2, k)
 	uiShared.type1(3, scale, "number")
+	uiShared.typeEval1(4, min, "number")
+	uiShared.typeEval1(5, max, "number")
 
-	skin[k] = math.floor(skin[k] * scale)
+	min = min or -math.huge
+	max = max or math.huge
+
+	skin[k] = math.floor(math.max(min, math.min(skin[k] * scale, max)))
 end
 
 

@@ -1084,8 +1084,6 @@ function _mt_context:setScale(scale)
 	uiShared.numberNotNaN(1, scale)
 
 	self.scale = math.max(0.1, math.min(scale, 10.0))
-
-	-- TODO: updating the scale of existing widgets, skins, etc.
 end
 
 
@@ -1098,8 +1096,7 @@ function _mt_context:setDPI(dpi)
 	uiShared.numberNotNaN(1, dpi)
 
 	self.dpi = math.max(1, dpi)
-
-	-- TODO: updating the DPI of existing textures, slices, etc.
+	self.path_symbols.dpi = tostring(self.dpi)
 end
 
 
