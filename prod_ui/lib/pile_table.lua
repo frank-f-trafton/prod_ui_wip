@@ -92,6 +92,16 @@ function M.swapElements(t, i, j)
 end
 
 
+function M.reverseArray(t)
+	local n = #t
+	if n > 1 then
+		for i = 1, math.floor(n/2) do
+			t[i], t[n - i + 1] = t[n - i + 1], t[i]
+		end
+	end
+end
+
+
 function M.cloneArray(t)
 	local b = {}
 	for i, v in ipairs(t) do

@@ -4,6 +4,13 @@ local plan = {}
 local demoShared = require("demo_shared")
 
 
+local function _configureInputBox(self)
+	self.select_all_on_thimble1_take = true
+	self.deselect_all_on_thimble1_release = true
+	self.clear_history_on_deselect = true
+end
+
+
 local function _updateScale(self)
 	local context = self.context
 	local btn = self.parent:findTag("btn_crt")
@@ -23,10 +30,10 @@ local function _updateScale(self)
 	end
 
 	if not scale then
-		self:setLabel("Bad scale.")
+		btn:setLabel("Bad scale.")
 
 	elseif not dpi then
-		self:setLabel("Bad DPI.")
+		btn:setLabel("Bad DPI.")
 
 	else
 		-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
@@ -69,6 +76,7 @@ function plan.make(panel)
 	input = panel:addChild("input/text_box_single")
 	input.x, input.y, input.w, input.h = xx2, yy, ww, hh
 	input:initialize()
+	_configureInputBox(input)
 	input:setTag("in_scale")
 	input:setText(tostring(panel.context.scale))
 	input.wid_action = _updateScale
@@ -79,6 +87,7 @@ function plan.make(panel)
 	input = panel:addChild("input/text_box_single")
 	input.x, input.y, input.w, input.h = xx2, yy, ww, hh
 	input:initialize()
+	_configureInputBox(input)
 	input:setTag("in_dpi")
 	input:setText(tostring(panel.context.dpi))
 	input.wid_action = _updateScale

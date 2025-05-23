@@ -10,6 +10,7 @@ local _mcursors_supported = love.mouse.isCursorSupported()
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
+local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiLoad = require(REQ_PATH .. "ui_load")
 local uiShared = require(REQ_PATH .. "ui_shared")
 
@@ -18,7 +19,7 @@ local uiShared = require(REQ_PATH .. "ui_shared")
 local function cb_keyDown(self, kc, sc, rep, latest, hot_kc, hot_sc)
 	-- XXX not handling 'latest' for now.
 
-	print("hot_kc", hot_kc, "hot_sc", hot_sc)
+	--print("hot_kc", hot_kc, "hot_sc", hot_sc)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
@@ -57,13 +58,32 @@ local function cb_keyUp(self, kc, sc)
 end
 
 
+local _path_stack = {}
 local function _loader_lua(self, file_path)
+	uiShared.type1(2, file_path, "string")
+
+	for i, v in ipairs(_path_stack) do
+		if v == file_path then
+			local temp = pTable.cloneArray(_path_stack)
+			pTable.clearArray(_path_stack)
+			pTable.reverseArray(temp)
+			error("circular file dependency. This path: " .. tostring(file_path) .. "\n\nPath stack:\n\t" .. table.concat(temp, "\n\t"))
+		end
+	end
+
+	table.insert(_path_stack, file_path)
+
+	print("file_path", file_path)
 	local chunk, err = love.filesystem.load(self.conf.prod_ui_path .. file_path .. ".lua")
 	if not chunk then
 		return false, err
 	end
 
-	return chunk(self, file_path)
+	local rv = chunk(self, file_path)
+
+	table.remove(_path_stack)
+
+	return rv
 end
 
 

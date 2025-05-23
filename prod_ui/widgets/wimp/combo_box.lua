@@ -98,7 +98,6 @@ local function refreshLineEdText(self)
 		if self.allow_highlight then
 			self:highlightAll()
 		end
-		lgcInputS.updateCaretShape(self)
 	end
 end
 
@@ -259,8 +258,6 @@ function def:uiCall_initialize()
 	self.MN_page_jump_size = 4
 	self.MN_wrap_selection = false
 
-	lgcInputS.setupInstance(self)
-
 	-- State flags
 	self.enabled = true
 	self.hovered = false
@@ -276,9 +273,7 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 
-	local skin = self.skin
-
-	self.line_ed = lineEdS.new(skin.font)
+	lgcInputS.setupInstance(self, self.skin.font)
 
 	self:reshape()
 end
@@ -432,7 +427,6 @@ end
 
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
-		lgcInputS.resetCaretBlink(self)
 		lgcInputS.thimble1Take(self)
 	end
 end
