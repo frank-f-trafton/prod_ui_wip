@@ -2,7 +2,7 @@ local context=select(1, ...)
 
 
 -- Wrappable commands that are suitable to use with key bindings.
--- Such commands do not take additional arguments (besides 'self' and 'line_ed').
+-- Such commands do not take additional arguments (besides 'self').
 
 
 local editCommandS = context:getLua("shared/line_ed/s/edit_command_s")
