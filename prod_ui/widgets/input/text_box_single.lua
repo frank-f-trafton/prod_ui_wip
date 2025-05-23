@@ -68,8 +68,6 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcInputS.setupInstance(self)
-
 	-- State flags.
 	self.enabled = true
 	self.hovered = false
@@ -80,9 +78,7 @@ function def:uiCall_initialize()
 
 	self.cursor_hover = self.skin.cursor_on
 
-	self.line_ed = lineEdS.new(self.skin.font)
-
-	lgcInputS.updateCaretShape(self)
+	lgcInputS.setupInstance(self, self.skin.font)
 
 	self:reshape()
 end
@@ -172,7 +168,6 @@ end
 
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
-		lgcInputS.resetCaretBlink(self)
 		lgcInputS.thimble1Take(self)
 	end
 end

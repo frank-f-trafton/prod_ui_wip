@@ -255,10 +255,6 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 	end
 	line_ed:clearHighlight()
 
-	lgcInputS.updateCaretShape(self)
-	self:updateDocumentDimensions()
-	self:scrollGetCaretInBounds(true)
-
 	if write_history then
 		line_ed.hist:moveToEntry(2)
 		editHistS.writeEntry(line_ed, false)
@@ -362,8 +358,6 @@ function def:uiCall_initialize()
 	widShared.setupDoc(self)
 	widShared.setupViewports(self, 3)
 
-	lgcInputS.setupInstance(self)
-
 	-- The internal value.
 	self.value_default = 0
 	self.value = false
@@ -399,7 +393,7 @@ function def:uiCall_initialize()
 
 	local skin = self.skin
 
-	self.line_ed = lineEdS.new(skin.font)
+	lgcInputS.setupInstance(self, skin.font)
 
 	-- special history configuration
 	self.line_ed.hist:setLockedFirst(true)

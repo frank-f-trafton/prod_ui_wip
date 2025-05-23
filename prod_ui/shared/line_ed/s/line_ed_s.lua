@@ -1,7 +1,4 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
--- Single-line text editor core object.
+-- LineEditor (single) core object.
 
 
 --[[
@@ -10,6 +7,9 @@ WARNING: Functions tagged with the following comments require special attention:
 	[update]: Must run self:updateDisplayText() when done making changes.
 
 Note that self:updateDisplayText() also calls self:syncDisplayCaretHighlight() internally.
+
+Widgets may need to run additional update code after a method is executed (for example,
+to update the visual state of the caret).
 --]]
 
 

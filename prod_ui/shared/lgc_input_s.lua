@@ -1,6 +1,3 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
 --[[
 Shared widget logic for single-line text input.
 
@@ -35,11 +32,14 @@ local utf8 = require("utf8")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
+local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
+local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = context:getLua("core/wid_shared")
@@ -51,14 +51,13 @@ local love_major, love_minor = love.getVersion()
 
 -- Widget def configuration.
 function lgcInputS.setupDef(def)
-	-- Attach editing methods to def.
 	for k, v in pairs(editMethodsS) do
 		def[k] = v
 	end
 end
 
 
-function lgcInputS.setupInstance(self)
+function lgcInputS.setupInstance(self, font)
 	-- When true, typing overwrites the current position instead of inserting.
 	self.replace_mode = false
 
@@ -155,11 +154,8 @@ function lgcInputS.setupInstance(self)
 	--]]
 
 	-- Caller should create a single line editor object at `self.line_ed`.
-end
-
-
-function lgcInputS.resetCaretBlink(self)
-	self.caret_blink_time = self.caret_blink_reset
+	self.line_ed = lineEdS.new(self.skin.font)
+	editFuncS.updateCaretShape(self)
 end
 
 
@@ -173,85 +169,8 @@ function lgcInputS.updateCaretBlink(self, dt)
 end
 
 
-local function _partialHistForDeletions(self, line_ed, old_car, old_h, deleted, cat1, cat2)
-	local hist = line_ed.hist
-	local non_ws = string.find(deleted, "%S")
-	local entry = hist:getEntry()
-	local do_advance = true
-
-	if utf8.len(deleted) == 1
-	and (entry and entry.car_byte == old_car)
-	and ((self.input_category == cat1 and non_ws) or (self.input_category == cat2))
-	then
-		do_advance = false
-	end
-
-	if do_advance then
-		editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
-	end
-	editHistS.writeEntry(line_ed, do_advance)
-	self.input_category = non_ws and cat1 or cat2
-end
-
-
---- Helper that takes care of history changes following an action.
--- @param self The client widget
--- @param bound_func The wrapper function to call. It should take 'self' as its first argument and the LineEditor core as the second. It should return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also in EditAct.
--- @return true if the function reported success, and a boolean indicating if the action was undo/redo.
-function lgcInputS.executeBoundAction(self, bound_func)
-	local line_ed = self.line_ed
-
-	local old_car, old_h = line_ed.car_byte, line_ed.h_byte
-	local old_input_category = self.input_category
-
-	local ok, update_widget, caret_in_view, write_history, deleted, hist_change = bound_func(self, line_ed)
-
-	--[[
-	print("executeBoundAction()",
-		"ok", ok,
-		"update_widget", update_widget,
-		"caret_in_view", caret_in_view,
-		"write_history", write_history,
-		"deleted", deleted,
-		"hist_change", hist_change
-	)
-	--]]
-
-	if ok then
-		lgcInputS.updateCaretShape(self)
-		if update_widget then
-			self:updateDocumentDimensions(self)
-			self:scrollClampViewport()
-		end
-
-		if caret_in_view then
-			self:scrollGetCaretInBounds(true)
-		end
-
-		if line_ed.hist.enabled then
-			-- 'Delete' and 'backspace' can amend history entries.
-			if type(write_history) == "string" then -- "del", "bsp"
-				assert(type(deleted) == "string", "expected string for deleted text")
-				local cat1, cat2
-				if write_history == "bsp" then cat1, cat2 = "backspacing", "backspacing-ws"
-				elseif write_history == "del" then cat1, cat2 = "deleting", "deleting-ws" end
-				_partialHistForDeletions(self, line_ed, old_car, old_h, deleted, cat1, cat2)
-
-			-- Unconditional new history entry:
-			elseif write_history then
-				self.input_category = false
-
-				editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_car, old_h)
-				editHistS.writeEntry(line_ed, true)
-			end
-		end
-		return true, hist_change
-	end
-end
-
-
-function lgcInputS.cb_boundAction(self, item_t)
-	return lgcInputS.executeBoundAction(self, item_t.bound_func)
+function lgcInputS.cb_action(self, item_t)
+	return editWrapS.wrapAction(self, item_t.func)
 end
 
 
@@ -261,7 +180,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
-	lgcInputS.resetCaretBlink(self)
+	editFuncS.resetCaretBlink(self)
 
 	-- pop-up menu (undo, etc.)
 	if scancode == "application" or (shift_down and scancode == "f10") then
@@ -289,7 +208,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 	if bound_func then
 		-- XXX: cleanup (just do a return) once the old debug stuff is removed below.
-		local r1, r2 = lgcInputS.executeBoundAction(self, bound_func)
+		local r1, r2 = editWrapS.wrapAction(self, bound_func)
 		if r1 then
 			-- Stop event propagation
 			return r1, r2
@@ -322,14 +241,11 @@ function lgcInputS.textInputLogic(self, text)
 	local line_ed = self.line_ed
 
 	if self.allow_input then
+		editFuncS.resetCaretBlink(self)
+
 		local hist = line_ed.hist
-
-		lgcInputS.resetCaretBlink(self)
-
 		local old_car, old_h = line_ed.car_byte, line_ed.h_byte
-		local old_input_category = self.input_category
-
-		local written = self:writeText(text, false)
+		local written = editFuncS.writeText(self, text, false)
 
 		if written then
 			if self.replace_mode then
@@ -340,7 +256,7 @@ function lgcInputS.textInputLogic(self, text)
 			end
 
 			if hist.enabled then
-				local non_ws = string.find(written, "%S")
+				local non_ws = written:find("%S")
 				local entry = hist:getEntry()
 				local do_advance = true
 
@@ -357,7 +273,7 @@ function lgcInputS.textInputLogic(self, text)
 				self.input_category = non_ws and "typing" or "typing-ws"
 			end
 
-			lgcInputS.updateCaretShape(self)
+			editFuncS.updateCaretShape(self)
 			self:updateDocumentDimensions()
 			self:scrollGetCaretInBounds(true)
 
@@ -367,13 +283,26 @@ function lgcInputS.textInputLogic(self, text)
 end
 
 
+function lgcInputS.caretToX(self, clear_highlight, x, split_x)
+	local line_ed = self.line_ed
+	local byte = line_ed:getCharacterDetailsAtPosition(x, split_x)
+
+	line_ed:caretToByte(byte)
+
+	if clear_highlight then
+		line_ed:clearHighlight()
+	end
+	line_ed:syncDisplayCaretHighlight()
+end
+
+
 -- @param mouse_x, mouse_y Mouse position relative to widget top-left.
 -- @return true if event propagation should be halted.
 function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_before)
 	local line_ed = self.line_ed
 	local context = self.context
 
-	lgcInputS.resetCaretBlink(self)
+	editFuncS.resetCaretBlink(self)
 
 	if button == 1 then
 		-- WIP: this isn't quite right.
@@ -398,24 +327,24 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 			end
 
 			if context.cseq_presses == 1 then
-				self:caretToX(true, mouse_sx, true)
+				lgcInputS.caretToX(self, true, mouse_sx, true)
 
 				self.click_byte = line_ed.car_byte
-				lgcInputS.updateCaretShape(self)
+				editFuncS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 2 then
 				self.click_byte = line_ed.car_byte
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()
-				lgcInputS.updateCaretShape(self)
+				editFuncS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 3 then
 				self.click_byte = line_ed.car_byte
 
 				--- Highlight everything.
 				self:highlightAll()
-				lgcInputS.updateCaretShape(self)
+				editFuncS.updateCaretShape(self)
 			end
 		end
 
@@ -437,12 +366,33 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 end
 
 
+function lgcInputS.clickDragByWord(self, x, origin_byte)
+	local line_ed = self.line_ed
+
+	local drag_byte = line_ed:getCharacterDetailsAtPosition(x, true)
+
+	-- Expand ranges to cover full words
+	local db1, db2 = line_ed:getWordRange(drag_byte)
+	local cb1, cb2 = line_ed:getWordRange(origin_byte)
+
+	-- Merge the two ranges.
+	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
+	if origin_byte < drag_byte then
+		mb1, mb2 = mb2, mb1
+	end
+
+	line_ed:caretToByte(mb1)
+	line_ed:highlightToByte(mb2)
+	line_ed:syncDisplayCaretHighlight()
+end
+
+
 -- Used in uiCall_update(). Before calling, check that text-drag state is active.
 function lgcInputS.mouseDragLogic(self)
 	local context = self.context
 	local line_ed = self.line_ed
 
-	lgcInputS.resetCaretBlink(self)
+	editFuncS.resetCaretBlink(self)
 
 	-- Mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -456,12 +406,12 @@ function lgcInputS.mouseDragLogic(self)
 
 	-- Handle drag highlight actions.
 	if context.cseq_presses == 1 then
-		self:caretToX(false, s_mx, true)
-		lgcInputS.updateCaretShape(self)
+		lgcInputS.caretToX(self, false, s_mx, true)
+		editFuncS.updateCaretShape(self)
 
 	elseif context.cseq_presses == 2 then
-		self:clickDragByWord(s_mx, self.click_byte)
-		lgcInputS.updateCaretShape(self)
+		lgcInputS.clickDragByWord(self, s_mx, self.click_byte)
+		editFuncS.updateCaretShape(self)
 	end
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
 
@@ -471,9 +421,11 @@ end
 
 
 function lgcInputS.thimble1Take(self)
+	editFuncS.resetCaretBlink(self)
+
 	if self.select_all_on_thimble1_take then
 		self:highlightAll()
-		lgcInputS.updateCaretShape(self)
+		editFuncS.updateCaretShape(self)
 	end
 end
 
@@ -482,7 +434,7 @@ function lgcInputS.thimble1Release(self)
 	love.keyboard.setTextInput(false)
 	if self.deselect_all_on_thimble1_release then
 		self:caretFirst(true)
-		lgcInputS.updateCaretShape(self)
+		editFuncS.updateCaretShape(self)
 	end
 	if self.clear_history_on_deselect then
 		editHistS.wipeEntries(self)
@@ -528,24 +480,6 @@ function lgcInputS.method_updateDocumentDimensions(self)
 
 	else -- align == "right"
 		self.align_offset = math.max(0, self.vp_w - line_ed.disp_text_w)
-	end
-end
-
-
--- Update the widget's caret shape and appearance.
-function lgcInputS.updateCaretShape(self)
-	local line_ed = self.line_ed
-
-	self.caret_x = line_ed.caret_box_x
-	self.caret_y = line_ed.caret_box_y
-	self.caret_w = line_ed.caret_box_w
-	self.caret_h = line_ed.caret_box_h
-
-	if self.replace_mode then
-		self.caret_fill = "line"
-	else
-		self.caret_fill = "fill"
-		self.caret_w = line_ed.caret_line_width
 	end
 end
 
@@ -646,48 +580,48 @@ lgcInputS.pop_up_def = {
 	{
 		type = "command",
 		text = "Undo",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.undo,
+		callback = lgcInputS.cb_action,
+		func = editActS.undo,
 		config = lgcInputS.configItem_undo,
 	}, {
 		type = "command",
 		text = "Redo",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.redo,
+		callback = lgcInputS.cb_action,
+		func = editActS.redo,
 		config = lgcInputS.configItem_redo,
 	},
 	itemOps.def_separator,
 	{
 		type = "command",
 		text = "Cut",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.cut,
+		callback = lgcInputS.cb_action,
+		func = editActS.cut,
 		config = lgcInputS.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Copy",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.copy,
+		callback = lgcInputS.cb_action,
+		func = editActS.copy,
 		config = lgcInputS.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Paste",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.paste,
+		callback = lgcInputS.cb_action,
+		func = editActS.paste,
 		config = lgcInputS.configItem_paste,
 	}, {
 		type = "command",
 		text = "Delete",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.deleteHighlighted,
+		callback = lgcInputS.cb_action,
+		func = editActS.deleteHighlighted,
 		config = lgcInputS.configItem_cutCopyDelete,
 	},
 	itemOps.def_separator,
 	{
 		type = "command",
 		text = "Select All",
-		callback = lgcInputS.cb_boundAction,
-		bound_func = editActS.selectAll,
+		callback = lgcInputS.cb_action,
+		func = editActS.selectAll,
 		config = lgcInputS.configItem_selectAll,
 	},
 }
