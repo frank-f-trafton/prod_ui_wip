@@ -1105,8 +1105,8 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
-		change.integerScaled(skin, "header_text_align_h", scale)
-		change.integerScaled(skin, "header_text_align_v", scale)
+		change.numberScaled(skin, "header_text_align_h", scale, 0.0, 1.0)
+		change.numberScaled(skin, "header_text_align_v", scale, 0.0, 1.0)
 		change.integerScaled(skin, "in_view_pad_x", scale)
 		change.integerScaled(skin, "in_view_pad_y", scale)
 		change.integerScaled(skin, "sensor_resize_pad", scale)

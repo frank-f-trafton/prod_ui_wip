@@ -691,10 +691,6 @@ do
 		end
 	end
 
-	for i, window_id in ipairs(demo_window_launch) do
-		demoShared.launchWindowFrameFromPlan(wimp_root, window_id, true)
-	end
-
 	-- TODO: need to deal with initial sort state, so that Workspaces don't obscure Window Frames.
 	wimp_root:sortG2()
 
@@ -704,6 +700,10 @@ do
 	-- Refresh everything.
 	wimp_root:reshape()
 	--wimp_root:reshape()
+
+	for i, window_id in ipairs(demo_window_launch) do
+		demoShared.launchWindowFrameFromPlan(wimp_root, window_id, true)
+	end
 end
 
 
