@@ -551,7 +551,6 @@ def.default_skinner = {
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
 		check.loveType(skin, "font", "Font")
-		check.iconData(skin, "data_icon")
 
 		check.quad(skin, "tq_px")
 

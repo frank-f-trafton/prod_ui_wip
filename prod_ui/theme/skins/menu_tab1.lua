@@ -6,7 +6,6 @@ return {
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
-	data_icon = "*icons/p",
 
 	color_background = {0.2, 0.2, 0.2, 1.0},
 	color_item_text = {1.0, 1.0, 1.0, 1.0},

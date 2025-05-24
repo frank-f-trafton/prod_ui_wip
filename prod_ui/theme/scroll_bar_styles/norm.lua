@@ -3,12 +3,12 @@ return {
 	trough_enabled = true,
 	thumb_enabled = true,
 
-	bar_size = 16, --math.max(1, math.floor(16 * scale)),
-	button_size = 16, --math.max(1, math.floor(16 * scale)),
-	thumb_size_min = 16, --math.max(1, math.floor(16 * scale)),
-	thumb_size_max = 2^16, --math.max(1, math.floor(2^16 * scale)),
+	bar_size = 16,
+	button_size = 16,
+	thumb_size_min = 16,
+	thumb_size_max = 2^16,
 
-	v_near_side = false,
+	v_near_side = true,
 	v_auto_hide = false,
 
 	v_button1_enabled = true,
@@ -16,7 +16,7 @@ return {
 	v_button2_enabled = true,
 	v_button2_mode = "pend-cont",
 
-	h_near_side = false,
+	h_near_side = true,
 	h_auto_hide = false,
 
 	h_button1_enabled = true,

@@ -6,7 +6,6 @@ return {
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
-	data_icon = "*icons/p",
 
 	cursor_sash = "sizewe",
 	sash_w = 12,

@@ -641,7 +641,6 @@ def.default_skinner = {
 		check.scrollBarStyle(skin, "scr_style")
 
 		check.loveType(skin, "font", "Font")
-		check.iconData(skin, "data_icon")
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 		check.integer(skin, "item_pad_v")
@@ -689,7 +688,6 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		local data_icon = skin.data_icon
 
 		local tq_px = skin.tq_px
 		local sl_body = skin.sl_body

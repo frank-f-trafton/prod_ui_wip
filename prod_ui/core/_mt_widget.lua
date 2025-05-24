@@ -1066,7 +1066,7 @@ local _thimble_info = {
 
 --- The default renderer for when widgets have the thimble.
 function _mt_widget:renderThimble()
-	local thimble_t = self.thimble_info or _thimble_info
+	local thimble_t = self.thimble_info or context.resources.info.thimble_info or _thimble_info
 
 	love.graphics.setColor(thimble_t.color)
 
