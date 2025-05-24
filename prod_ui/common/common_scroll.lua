@@ -40,7 +40,7 @@ commonScroll.default_scr_style = {
 	thumb_size_min = 16,
 	thumb_size_max = 2^16,
 
-	v_near_side = false, -- false == left, true == right
+	v_near_side = true, -- true == left, false == right
 	v_auto_hide = false,
 
 	v_button1_enabled = true,
@@ -48,7 +48,7 @@ commonScroll.default_scr_style = {
 	v_button2_enabled = true,
 	v_button2_mode = "pend-cont",
 
-	h_near_side = false, -- false == top, true == bottom
+	h_near_side = true, -- true == bottom, false == top
 	h_auto_hide = false,
 
 	h_button1_enabled = true,
@@ -770,13 +770,13 @@ function commonScroll.arrangeScrollBars(self)
 		scr_v.w = scr_v.bar_size
 		scr_v.h = self.vp_h
 
-		scr_v.x = scr_v.near_side and self.vp_x or self.vp_x + self.vp_w - scr_v.w
+		scr_v.x = scr_v.near_side and self.vp_x + self.vp_w - scr_v.w or self.vp_x
 		scr_v.y = self.vp_y
 
 		-- If active, reduce viewport
 		if scr_v.active then
 			self.vp_w = self.vp_w - scr_v.w
-			if scr_v.near_side then
+			if not scr_v.near_side then
 				self.vp_x = self.vp_x + scr_v.w
 			end
 		end
@@ -796,12 +796,12 @@ function commonScroll.arrangeScrollBars(self)
 		scr_h.h = scr_h.bar_size
 
 		scr_h.x = self.vp_x
-		scr_h.y = scr_h.near_side and self.vp_y or self.vp_y + self.vp_h - scr_h.h
+		scr_h.y = scr_h.near_side and self.vp_y + self.vp_h - scr_h.h or self.vp_y
 
 		-- If active, reduce viewport
 		if scr_h.active then
 			self.vp_h = self.vp_h - scr_h.h
-			if scr_h.near_side then
+			if not scr_h.near_side then
 				self.vp_y = self.vp_y + scr_h.h
 			end
 		end
@@ -810,7 +810,7 @@ function commonScroll.arrangeScrollBars(self)
 	-- Make some adjustments when both scroll bars are active.
 	if scr_h and scr_h.active and scr_v and scr_v.active then
 		scr_v.h = scr_v.h - scr_h.h
-		if scr_h.near_side then
+		if not scr_h.near_side then
 			scr_v.y = scr_v.y + scr_h.h
 		end
 		-- (The horizontal bar should already be handled).

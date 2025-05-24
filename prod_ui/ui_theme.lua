@@ -560,24 +560,6 @@ function check.scrollBarStyle(skin, k)
 end
 
 
-function check.iconData(skin, k)
-	uiTheme.pushLabel(k)
-
-	local icon = skin[k]
-	if type(icon) ~= "table" then
-		uiTheme.error("expected IconData")
-	end
-	check.integer(icon, "w")
-	check.integer(icon, "h")
-	check.integer(icon, "pad_x1")
-	check.integer(icon, "pad_x2")
-	check.integer(icon, "pad_y")
-
-	uiTheme.popLabel()
-	return icon
-end
-
-
 function check.thimbleInfo(skin, k)
 	uiTheme.pushLabel(k)
 

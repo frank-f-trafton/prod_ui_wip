@@ -192,12 +192,10 @@ function methods:_initResourcesTable()
 	return {
 		boxes = {},
 		fonts = {},
-		icons = {},
 		info = {},
 		labels = {},
 		scroll_bar_data = {},
 		scroll_bar_styles = {},
-		user = {},
 
 		textures = {},
 		quads = {},
@@ -269,17 +267,6 @@ function methods:applyTheme(theme)
 	end
 	fontCache.clear()
 
-	if theme.icons then
-		uiTheme.pushLabel("icons")
-
-		_deepCopyFields(theme.icons, resources.icons)
-		for k in pairs(resources.icons) do
-			uiTheme.check.iconData(resources.icons, k)
-		end
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
-	end
 
 	if theme.info then
 		uiTheme.pushLabel("info")
@@ -319,17 +306,6 @@ function methods:applyTheme(theme)
 		uiTheme.pushLabel("scroll_bar_styles")
 
 		_deepCopyFields(theme.scroll_bar_styles, resources.scroll_bar_styles)
-
-		-- TODO
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
-	end
-
-	if theme.user then
-		uiTheme.pushLabel("user")
-
-		_deepCopyFields(theme.user, resources.user)
 
 		-- TODO
 

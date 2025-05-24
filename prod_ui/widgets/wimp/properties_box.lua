@@ -709,7 +709,6 @@ def.default_skinner = {
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
 		check.loveType(skin, "font", "Font")
-		check.iconData(skin, "data_icon")
 		check.type(skin, "cursor_sash", "nil", "string")
 		check.integer(skin, "sash_w", 0)
 		check.integer(skin, "item_h", 0)

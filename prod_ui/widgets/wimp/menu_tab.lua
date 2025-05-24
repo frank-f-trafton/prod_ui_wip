@@ -1107,7 +1107,6 @@ def.default_skinner = {
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
 		check.loveType(skin, "font", "Font")
-		check.iconData(skin, "data_icon")
 
 		check.colorTuple(skin, "color_background")
 		check.colorTuple(skin, "color_item_text")
