@@ -998,6 +998,8 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+		-- Update the scroll bar style
+		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
 
 

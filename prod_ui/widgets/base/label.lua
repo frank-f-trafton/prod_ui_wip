@@ -46,8 +46,7 @@ function def:uiCall_reshapePre()
 end
 
 
-local check = uiTheme.check
-local change = uiTheme.change
+local check, change = uiTheme.check, uiTheme.change
 
 
 local function _checkRes(skin, k)

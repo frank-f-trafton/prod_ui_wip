@@ -211,10 +211,7 @@ function def:uiCall_reshapePre()
 end
 
 
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
-local _makeLUTV = pTable.makeLUTV
-local check = uiTheme.check
-local change = uiTheme.change
+local check, change = uiTheme.check, uiTheme.change
 
 
 local function _checkRes(skin, k)

@@ -119,16 +119,18 @@ code_map_h["cont"]["b2"] = "h2-cont"
 --- Makes a scroll bar.
 -- @param horizontal When true, the scroll bar is aligned horizontally. When false, it's vertical.
 -- @param scr_style The scroll bar style table (options and measurements). If not provided, a default will be used.
+-- @param [bar] An existing scroll bar table to update.
 -- @return The scroll bar table.
-function commonScroll.newBar(horizontal, scr_style)
+function commonScroll.newBar(horizontal, scr_style, bar)
 	-- XXX Assertions
+	if bar and getmetatable(bar) ~= _mt_bar then
+		error("invalid or corrupt scroll bar")
+	end
 
 	horizontal = not not horizontal
 	scr_style = scr_style or commonScroll.default_scr_style
 
-	local self = setmetatable({}, _mt_bar)
-
-	self.style = scr_style
+	local self = bar or setmetatable({}, _mt_bar)
 
 	self.active = true
 	self.horizontal = horizontal
@@ -451,7 +453,7 @@ end
 -- * Widget plug-in methods *
 
 
---- Plug-in to make, remake or remove embedded scroll bars. The widget must have a scroll style field at 'self.skin.scr_style'.
+--- Plug-in to make, remake or remove embedded scroll bars.
 -- @param self The widget to modify.
 -- @param hori Horizontal bar (self.scr_h)
 -- @param vert Vertical bar (self.scr_v)
@@ -459,8 +461,8 @@ function commonScroll.setScrollBars(self, hori, vert)
 	-- Scroll style priority: 1) Style in self, 2) Style in skin, 3) The application default style.
 	local scr_style = self.scr_style or (self.skin and self.skin.scr_style) or nil
 
-	self.scr_h = (hori) and commonScroll.newBar(true, scr_style) or nil
-	self.scr_v = (vert) and commonScroll.newBar(false, scr_style) or nil
+	self.scr_h = (hori) and commonScroll.newBar(true, scr_style, self.scr_h) or nil
+	self.scr_v = (vert) and commonScroll.newBar(false, scr_style, self.scr_v) or nil
 
 	-- If there was a state change, reshape the widget after calling.
 end
