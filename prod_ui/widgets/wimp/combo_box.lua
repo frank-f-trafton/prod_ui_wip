@@ -45,12 +45,11 @@ local context = select(1, ...)
 
 
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
+local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
-local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -254,6 +253,8 @@ function def:uiCall_initialize()
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupDoc(self)
 
+	self.press_busy = false
+
 	lgcMenu.setup(self)
 	self.MN_page_jump_size = 4
 	self.MN_wrap_selection = false
@@ -270,10 +271,10 @@ function def:uiCall_initialize()
 	-- The item contents may be outdated from what is stored in the LineEditor object.
 	self.chosen_i = 0
 
+	lgcInputS.setupInstance(self)
+
 	self:skinSetRefs()
 	self:skinInstall()
-
-	lgcInputS.setupInstance(self, self.skin.font)
 
 	self:reshape()
 end
@@ -296,6 +297,8 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
+
+	lgcInputS.reshapeUpdate(self)
 
 	return true
 end
@@ -709,11 +712,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+		self.line_ed:setFont(self.skin.font)
 	end,
 
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
+		self.line_ed:setFont()
 	end,
 
 

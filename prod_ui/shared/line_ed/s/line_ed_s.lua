@@ -48,25 +48,21 @@ _mt_ed_s.__index = _mt_ed_s
 
 --- Creates a new Line Editor object.
 -- @return the line editor table.
-function lineEdS.new(font, text_color, text_h_color)
-	uiShared.loveType(1, font, "Font")
-	uiShared.typeEval(2, text_color, "table")
-	uiShared.typeEval(3, text_h_color, "table")
-
+function lineEdS.new()
 	local self = {}
 
-	self.font = font
+	self.font = false
 
 	-- dimensions of the display text and highlight box
 	self.disp_text_w = 0
-	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
+	self.disp_text_h = 0
 
 	self.disp_highlighted = false
 
 	self.highlight_x = 0
 	self.highlight_y = 0
 	self.highlight_w = 0
-	self.highlight_h = self.disp_text_h
+	self.highlight_h = 0
 
 	-- The internal text.
 	self.line = ""
@@ -104,8 +100,8 @@ function lineEdS.new(font, text_color, text_h_color)
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
-	self.text_color = text_color or default_text_color
-	self.text_h_color = text_h_color or default_text_h_color
+	self.text_color = default_text_color
+	self.text_h_color = default_text_h_color
 
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
@@ -141,10 +137,32 @@ function lineEdS.new(font, text_color, text_h_color)
 
 	setmetatable(self, _mt_ed_s)
 
-	self:updateFont(self.font)
-	self:updateDisplayText()
+	-- Assign a font with lineEd:setFont() ASAP.
 
 	return self
+end
+
+
+function _mt_ed_s:setFont(font) -- [update]
+	uiShared.loveTypeEval(1, font, "Font")
+
+	self.font = font or false
+	if self.font then
+		self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
+		self.caret_line_width = math.max(1, math.ceil(font:getWidth("M") / 16))
+		self.caret_box_w_empty = math.max(1, math.ceil(font:getWidth("_")))
+		--self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M") * 1.25))
+		self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M")))
+	end
+end
+
+
+function _mt_ed_s:setTextColors(text_color, text_h_color) -- [sync]
+	uiShared.typeEval(1, text_color, "table")
+	uiShared.typeEval(2, text_h_color, "table")
+
+	self.text_color = text_color or default_text_color
+	self.text_h_color = text_h_color or default_text_h_color
 end
 
 
@@ -169,16 +187,6 @@ end
 
 function _mt_ed_s:clearHighlight() -- [sync]
 	self.h_byte = self.car_byte
-end
-
-
-function _mt_ed_s:updateFont(font) -- [update]
-	self.font = font
-	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
-	self.caret_line_width = math.max(1, math.ceil(font:getWidth("M") / 16))
-	self.caret_box_w_empty = math.max(1, math.ceil(font:getWidth("_")))
-	--self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M") * 1.25))
-	self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M")))
 end
 
 

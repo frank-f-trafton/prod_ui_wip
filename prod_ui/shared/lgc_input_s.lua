@@ -57,7 +57,7 @@ function lgcInputS.setupDef(def)
 end
 
 
-function lgcInputS.setupInstance(self, font)
+function lgcInputS.setupInstance(self)
 	-- When true, typing overwrites the current position instead of inserting.
 	self.replace_mode = false
 
@@ -153,9 +153,7 @@ function lgcInputS.setupInstance(self, font)
 	* Returns: false/nil if the new text should be backed out, any other value otherwise.
 	--]]
 
-	-- Caller should create a single line editor object at `self.line_ed`.
-	self.line_ed = lineEdS.new(self.skin.font)
-	editFuncS.updateCaretShape(self)
+	self.line_ed = lineEdS.new()
 end
 
 
@@ -443,6 +441,16 @@ function lgcInputS.thimble1Release(self)
 		self:resetInputCategory()
 	end
 end
+
+
+function lgcInputS.reshapeUpdate(self)
+	self.line_ed:updateDisplayText()
+	self:updateDocumentDimensions()
+	editFuncS.updateCaretShape(self)
+	--self:scrollClampViewport()
+	--self:scrollGetCaretInBounds(true)
+end
+
 
 
 function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
