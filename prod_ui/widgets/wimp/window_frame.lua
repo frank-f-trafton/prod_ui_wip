@@ -1076,14 +1076,11 @@ def.default_skinner = {
 		check.slice(skin, "slc_body")
 		check.slice(skin, "slc_shadow")
 
-		-- TODO
-		--[=[
-		header_text_align_h = "*info/window_frames/header_text_align_h",
-		header_text_align_v = "*info/window_frames/header_text_align_v",
-		sensor_resize_pad = "*info/window_frames/frame_resize_pad",
-		sensor_resize_diagonal = "*info/window_frames/frame_resize_diagonal",
-		shadow_extrude = 8,
-		--]=]
+		check.unitInterval(skin, "header_text_align_h")
+		check.unitInterval(skin, "header_text_align_v")
+		check.integer(skin, "sensor_resize_pad", 0)
+		check.integer(skin, "sensor_resize_diagonal", 0)
+		check.integer(skin, "shadow_extrude", 0)
 
 		-- Alignment of textures within control sensors
 		-- 0.0: left, 0.5: middle, 1.0: right
@@ -1104,12 +1101,10 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
-		change.numberScaled(skin, "header_text_align_h", scale, 0.0, 1.0)
-		change.numberScaled(skin, "header_text_align_v", scale, 0.0, 1.0)
 		change.integerScaled(skin, "in_view_pad_x", scale)
 		change.integerScaled(skin, "in_view_pad_y", scale)
 		change.integerScaled(skin, "sensor_resize_pad", scale)
-		change.integerScaled(skin, "shadow_extrude", scale)
+		--change.integerScaled(skin, "shadow_extrude", scale)
 
 		_changeResTopLevel(skin, "res_normal", scale)
 		_changeResTopLevel(skin, "res_small", scale)
