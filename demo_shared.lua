@@ -25,6 +25,33 @@ function demoShared.loadTheme()
 end
 
 
+-- @return true on successful change, nil if the scale and dpi are not different from existing values, false if the
+--	change failed.
+function demoShared.executeThemeUpdate(context, scale, dpi)
+	-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
+	-- TODO: Probably need to declare valid DPI numbers somewhere.
+	local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(dpi), "directory")
+	if not tex_dir then
+		return false
+	else
+		local old_scale, old_dpi = context:getScale(), context:getDPI()
+		if not (scale == old_scale and dpi == old_dpi) then
+			context:setScale(scale)
+			context:setDPI(dpi)
+
+			local theme = demoShared.loadTheme()
+
+			context.root:forEach(function(self) if self.skinner then self:skinRemove() end end)
+			context:applyTheme(theme)
+			context.root:forEach(function(self) if self.skinner then self:skinSetRefs(); self:skinInstall() end end)
+			context.root:reshape()
+
+			return true
+		end
+	end
+end
+
+
 function demoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
 	-- If the frame already exists, just switch to it.
 	local frame = root:findTag("FRAME:" .. plan_id)

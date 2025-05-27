@@ -17,7 +17,7 @@ local function _updateScale(self)
 	if not btn then
 		return
 	end
-	local old_scale, old_dpi = context:getScale(), context:getDPI()
+
 	local scale, dpi
 
 	local in_scale = self.parent:findTag("in_scale")
@@ -36,23 +36,10 @@ local function _updateScale(self)
 		btn:setLabel("Bad DPI.")
 
 	else
-		-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
-		-- TODO: Probably need to declare valid DPI numbers somewhere.
-		local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(dpi), "directory")
-		if not tex_dir then
+		local result = demoShared.executeThemeUpdate(context, scale, dpi)
+		if result == false then
 			btn:setLabel("Unprovisioned DPI")
 		else
-			context:setScale(scale)
-			context:setDPI(dpi)
-
-			if not (scale == old_scale and dpi == old_dpi) then
-				local theme = demoShared.loadTheme()
-
-				context.root:forEach(function(self) if self.skinner then self:skinRemove() end end)
-				context:applyTheme(theme)
-				context.root:forEach(function(self) if self.skinner then self:skinSetRefs(); self:skinInstall() end end)
-				context.root:reshape()
-			end
 			btn:setLabel("Update")
 		end
 	end
