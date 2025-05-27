@@ -28,6 +28,7 @@ Ctrl + Shift + 1: Show context info
 Ctrl + Shift + 2: Show performance info
 Ctrl + Shift + 3: Show a crosshair at the mouse position
 Ctrl + Shift + 4: Toggle zoom mode
+Ctrl + `: Toggle scale (1.0; 1.5)
 
 When zoom mode is enabled:
 	'-': Zoom out

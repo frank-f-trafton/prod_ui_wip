@@ -304,6 +304,14 @@ end
 function love.keypressed(kc, sc, rep)
 	-- Debug stuff, specific to this demo.
 	-- [====[
+	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
+		if context:getScale() > 1 then
+			demoShared.executeThemeUpdate(context, 1.0, context:getDPI())
+		else
+			demoShared.executeThemeUpdate(context, 1.5, context:getDPI())
+		end
+	end
+
 	if love.keyboard.isDown("lshift", "rshift") and love.keyboard.isDown("lctrl", "rctrl") then
 		if kc == "1" or kc == "kp1" then
 			context.app.show_details = not context.app.show_details
