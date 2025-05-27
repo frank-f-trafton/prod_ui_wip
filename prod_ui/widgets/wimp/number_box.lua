@@ -25,12 +25,10 @@ local utf8 = require("utf8")
 
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
+local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
-local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
-local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
-local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -175,7 +173,6 @@ function def:fn_check()
 end
 
 
-local jit = jit
 local function _baseToString(n, base)
 	assert(base >= 2 and base <= 36, "unsupported base")
 
@@ -388,19 +385,17 @@ function def:uiCall_initialize()
 	self.enabled = true
 	self.hovered = false
 
+	lgcInputS.setupInstance(self)
+
 	self:skinSetRefs()
 	self:skinInstall()
-
-	local skin = self.skin
-
-	lgcInputS.setupInstance(self, skin.font)
 
 	-- special history configuration
 	self.line_ed.hist:setLockedFirst(true)
 	self.line_ed.hist:setMaxEntries(2)
 	editHistS.writeLockedFirst(self.line_ed)
 
-	self:setTextAlignment(skin.text_align)
+	self:setTextAlignment(self.skin.text_align)
 
 	self:setValueToDefault()
 	self:reshape()
@@ -431,6 +426,8 @@ function def:uiCall_reshapePre()
 
 	self:updateDocumentDimensions()
 	self:scrollClampViewport()
+
+	lgcInputS.reshapeUpdate(self)
 
 	return true
 end
@@ -732,11 +729,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+		self.line_ed:setFont(self.skin.font)
 	end,
 
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
+		self.line_ed:setFont()
 	end,
 
 

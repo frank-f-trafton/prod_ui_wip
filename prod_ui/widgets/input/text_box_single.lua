@@ -20,10 +20,8 @@ local context = select(1, ...)
 local utf8 = require("utf8") -- (Lua 5.3+)
 
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
-local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
+local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
-local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
-local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -71,14 +69,13 @@ function def:uiCall_initialize()
 	-- State flags.
 	self.enabled = true
 	self.hovered = false
-	self.pressed = false
+
+	lgcInputS.setupInstance(self)
 
 	self:skinSetRefs()
 	self:skinInstall()
 
 	self.cursor_hover = self.skin.cursor_on
-
-	lgcInputS.setupInstance(self, self.skin.font)
 
 	self:reshape()
 end
@@ -96,6 +93,8 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
+
+	lgcInputS.reshapeUpdate(self)
 
 	return true
 end
@@ -232,11 +231,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+		self.line_ed:setFont(self.skin.font)
 	end,
 
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
+		self.line_ed:setFont()
 	end,
 
 

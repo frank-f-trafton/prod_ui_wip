@@ -82,6 +82,14 @@ function uiShared.loveType(n, obj, typ)
 end
 
 
+function uiShared.loveTypeEval(n, obj, typ)
+	if obj and obj:type() ~= typ then
+		error("argument #" .. n .. ": bad LÖVE object type (expected " .. typ .. ", got " .. obj:type() .. ")", 2)
+	end
+end
+
+
+
 function uiShared.loveTypeOf(n, obj, typ)
 	if not obj:typeOf(typ) then
 		error("argument #" .. n .. ": expected LÖVE object type '" .. typ .. "' in class hierarchy", 2)
