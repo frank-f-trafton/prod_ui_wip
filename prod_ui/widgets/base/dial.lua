@@ -304,8 +304,7 @@ function def:uiCall_update(dt)
 end
 
 
-local check = uiTheme.check
-local change = uiTheme.change
+local check, change = uiTheme.check, uiTheme.change
 
 
 local function _checkRes(skin, k)

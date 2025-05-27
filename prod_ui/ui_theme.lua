@@ -158,6 +158,14 @@ function uiTheme.scaleBox(box, scale)
 end
 
 
+function uiTheme.scaleScrollBarStyle(sbs, scale)
+	change.integerScaled(sbs, "bar_size", scale, 0)
+	change.integerScaled(sbs, "button_size", scale, 0)
+	change.integerScaled(sbs, "thumb_size_min", scale, 0)
+	change.integerScaled(sbs, "thumb_size_max", scale, 0)
+end
+
+
 local function _getFontTypeFromPath(path)
 	if path == "default" then
 		return "vector"
@@ -250,9 +258,6 @@ function uiTheme.scaleFontInfo(theme_fonts, k, scale)
 end
 
 
--- 'check' functions
-
-
 local function _concatVariadic(...)
 	local t = {...}
 	pTable.toStringAll(t)
@@ -263,6 +268,9 @@ end
 local function _concatFromHash(t)
 	return table.concat(pTable.arrayOfHashKeys(t), ", ")
 end
+
+
+-- 'check' functions
 
 
 function check.eval(fn, skin, k, ...)

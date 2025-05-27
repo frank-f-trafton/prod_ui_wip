@@ -7,8 +7,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
-local check = uiTheme.check
-local change = uiTheme.change
+local check, change = uiTheme.check, uiTheme.change
 
 
 local function _checkRes(skin, k)

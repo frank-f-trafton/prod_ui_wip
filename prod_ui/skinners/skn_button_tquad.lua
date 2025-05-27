@@ -11,9 +11,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
-local _makeLUTV = pTable.makeLUTV
-local check = uiTheme.check
-local change = uiTheme.change
+local check, change = uiTheme.check, uiTheme.change
 
 
 local function _checkRes(skin, k)

@@ -225,8 +225,7 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check = uiTheme.check
-local change = uiTheme.change
+local check, change = uiTheme.check, uiTheme.change
 
 
 def.default_skinner = {
@@ -251,6 +250,8 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+		-- Update the scroll bar style
+		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
 
 

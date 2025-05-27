@@ -307,7 +307,9 @@ function methods:applyTheme(theme)
 
 		_deepCopyFields(theme.scroll_bar_styles, resources.scroll_bar_styles)
 
-		-- TODO
+		for k, v in pairs(resources.scroll_bar_styles) do
+			uiTheme.scaleScrollBarStyle(v, scale)
+		end
 
 		uiTheme.popLabel()
 		uiTheme.assertLabelLevel(0)
@@ -338,7 +340,7 @@ function methods:applyTheme(theme)
 
 	if theme.skins then
 		for k, v in pairs(theme.skins) do
-			resources.skins[k] = v
+			resources.skins[k] = pTable.deepCopy(v)
 		end
 	end
 
