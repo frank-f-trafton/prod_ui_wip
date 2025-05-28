@@ -572,8 +572,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if button == 1 and self.context.mouse_pressed_button == button then
 			-- Check for pressing on scroll bar components.
-			-- See notes around the call to 'commonScroll.widgetProcessHover'.
-			if mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h then
+			-- Since this widget can accept mouse events that are out of bounds, we must
+			-- perform an additional intersection check.
+			if mx >= 0 and my >= 0 and mx < self.w and my < self.h then
 				local fixed_step = 24 -- [XXX 2] style/config
 				handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
 			end
