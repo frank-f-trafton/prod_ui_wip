@@ -1,19 +1,6 @@
 return {
 	skinner_id = "wimp/window_frame",
 
-	-- settings
-	--allow_close
-	--allow_drag_move
-	--allow_maximize
-	--allow_resize
-	--header_visible = true,
-	header_button_side = "*info/window_frames/header_button_side",
-	header_show_close_button = "*info/window_frames/header_show_close_button",
-	header_show_max_button = "*info/window_frames/header_show_max_button",
-	header_text = "*info/window_frames/header_text",
-	header_size = "*info/window_frames/header_size",
-	-- /settings
-
 	box = "*boxes/wimp_frame",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
@@ -24,10 +11,13 @@ return {
 	slc_body = "*slices/atlas/win_body",
 	slc_shadow = "*slices/atlas/win_shadow",
 
-	header_text_align_h = "*info/window_frames/header_text_align_h",
-	header_text_align_v = "*info/window_frames/header_text_align_v",
-	sensor_resize_pad = "*info/window_frames/frame_resize_pad",
-	sensor_resize_diagonal = "*info/window_frames/frame_resize_diagonal",
+	header_text_align_h = 0.5,
+	header_text_align_v = 0.5,
+
+	sensor_resize_pad = 12,
+	sensor_resize_diagonal = 12,
+	frame_outbound_limit = 32,
+
 	shadow_extrude = 8,
 
 	sensor_tex_align_h = 0.5,
