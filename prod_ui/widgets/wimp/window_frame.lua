@@ -1078,8 +1078,17 @@ def.default_skinner = {
 
 		check.unitInterval(skin, "header_text_align_h")
 		check.unitInterval(skin, "header_text_align_v")
+
+		-- How many pixels to extend / pad resize sensors.
 		check.integer(skin, "sensor_resize_pad", 0)
+
+		-- How much to extend the diagonal parts of the resize area.
 		check.integer(skin, "sensor_resize_diagonal", 0)
+
+		-- How far to allow resizing a widget outside the bounds of its parent.
+		-- Used to prevent stretching frames too far outside the LÖVE application window.
+		check.integer(skin, "frame_outbound_limit", 1)
+
 		check.integer(skin, "shadow_extrude", 0)
 
 		-- Alignment of textures within control sensors

@@ -37,7 +37,7 @@ function lgcWindowFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, ist
 
 	-- Crop mouse position to a range slightly larger than the parent rectangle.
 	-- Prevents stretching frames far beyond the LÖVE window.
-	local outbound_limit = self.context.resources.info.window_frames.frame_outbound_limit
+	local outbound_limit = self.skin.frame_outbound_limit
 	mx = math.max(-outbound_limit, math.min(mx, self.parent.w + outbound_limit))
 	my = math.max(-outbound_limit, math.min(my, self.parent.h + outbound_limit))
 
