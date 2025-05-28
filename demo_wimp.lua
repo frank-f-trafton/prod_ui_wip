@@ -20,6 +20,7 @@ local demo_window_launch = {
 	--"window_frames.frame_unselectable",
 	--"window_frames.wimp_frame",
 	--"window_frames.wimp_menu_tab",
+	--"window_frames.window_frame_selector",
 }
 
 
