@@ -169,6 +169,15 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
+local function _shapeItem(self, item)
+	local skin = self.skin
+	local font = skin.font
+
+	item.w = font:getWidth(item.text)
+	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
+end
+
+
 function def:addItem(text, pos, bijou_id)
 	uiShared.type1(1, text, "string")
 	uiShared.intEval(2, pos, "number")
@@ -184,13 +193,12 @@ function def:addItem(text, pos, bijou_id)
 	item.selectable = true
 	item.marked = false -- multi-select
 
-	item.x, item.y = 0, 0
-	item.w = font:getWidth(text)
-	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-
 	item.text = text
 	item.bijou_id = bijou_id
 	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix
+
+	item.x, item.y = 0, 0
+	_shapeItem(self, item)
 
 	pos = pos or #items + 1
 
@@ -673,6 +681,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		-- Update shapes + positions of any existing items
+		for i, item in ipairs(self.items) do
+			_shapeItem(self, item)
+		end
+		self:arrangeItems(1)
+
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,

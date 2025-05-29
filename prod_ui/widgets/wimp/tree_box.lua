@@ -610,6 +610,10 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+		self:arrangeItems()
+
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
