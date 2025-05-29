@@ -15,6 +15,11 @@ return {
 		alpha_mode = "alphamultiply",
 	},
 
+	-- Textures which should not be scaled when rendering out.
+	no_scale = {
+		"pixel"
+	},
+
 	--[[
 	QuadSlice coordinates. Hash keys correspond to image filenames without extensions.
 	x,y: Offset to the upper-left.
