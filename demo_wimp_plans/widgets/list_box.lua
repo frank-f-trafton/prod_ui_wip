@@ -305,8 +305,7 @@ local function makeListBox1(panel, x, y)
 	sld.wid_actionSliderChanged = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			local skin_def = getmetatable(lb.skin)
-			skin_def.pad_text_x = self.slider_pos
+			lb.skin.pad_text_x = self.slider_pos
 			lb:reshape()
 		end
 	end

@@ -125,8 +125,7 @@ function plan.make(panel)
 	sld.wid_actionSliderChanged = function(self)
 		local tb = self:findSiblingTag("demo_treebox")
 		if tb then
-			local skin_def = getmetatable(tb.skin)
-			skin_def.item_pad_v = math.floor(self.slider_pos)
+			tb.skin.item_pad_v = math.floor(self.slider_pos)
 			_refreshTreeBox(tb)
 		end
 	end
@@ -147,8 +146,7 @@ function plan.make(panel)
 	sld.wid_actionSliderChanged = function(self)
 		local tb = self:findSiblingTag("demo_treebox")
 		if tb then
-			local skin_def = getmetatable(tb.skin)
-			skin_def.pipe_width = math.floor(self.slider_pos)
+			tb.skin.pipe_width = math.floor(self.slider_pos)
 			_refreshTreeBox(tb)
 		end
 	end
@@ -165,8 +163,7 @@ function plan.make(panel)
 	chk.wid_buttonAction = function(self)
 		local tb = self:findSiblingTag("demo_treebox")
 		if tb then
-			local skin_def = getmetatable(tb.skin)
-			skin_def.draw_pipes = not not self.checked
+			tb.skin.draw_pipes = not not self.checked
 			_refreshTreeBox(tb)
 		end
 	end
