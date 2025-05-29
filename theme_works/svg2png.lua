@@ -27,6 +27,7 @@ local src_info
 local src_i = 1
 
 local base_data
+local no_scale
 
 local out_path
 
@@ -128,29 +129,35 @@ local tasks_export = {
 		-- Grab and scale quadslice coordinates, if applicable.
 		if nativefs.getInfo(arg_src_path .. "/base_data.lua") then
 			base_data = shared.nfsLoadLuaFile(arg_src_path .. "/base_data.lua")
+			no_scale = {}
+			for i, v in ipairs(base_data.no_scale) do
+				no_scale[v] = true
+			end
 
 			print("Scaling quadslice coords -> base_data.lua -> tbl.slice_coords")
 			for k, v in pairs(base_data.slice_coords) do
-				v.x = scaleCoord(v.x, arg_dpi)
-				v.y = scaleCoord(v.y, arg_dpi)
-				v.w1 = scaleCoord(v.w1, arg_dpi)
-				v.h1 = scaleCoord(v.h1, arg_dpi)
-				v.w2 = scaleCoord(v.w2, arg_dpi)
-				v.h2 = scaleCoord(v.h2, arg_dpi)
-				v.w3 = scaleCoord(v.w3, arg_dpi)
-				v.h3 = scaleCoord(v.h3, arg_dpi)
+				if not no_scale[k] then
+					v.x = scaleCoord(v.x, arg_dpi)
+					v.y = scaleCoord(v.y, arg_dpi)
+					v.w1 = scaleCoord(v.w1, arg_dpi)
+					v.h1 = scaleCoord(v.h1, arg_dpi)
+					v.w2 = scaleCoord(v.w2, arg_dpi)
+					v.h2 = scaleCoord(v.h2, arg_dpi)
+					v.w3 = scaleCoord(v.w3, arg_dpi)
+					v.h3 = scaleCoord(v.h3, arg_dpi)
 
-				v.ox1 = tryScaleCoord(v.ox1, arg_dpi)
-				v.oy1 = tryScaleCoord(v.oy1, arg_dpi)
-				v.ox2 = tryScaleCoord(v.ox2, arg_dpi)
-				v.oy2 = tryScaleCoord(v.oy2, arg_dpi)
-				assertAllOrNone("draw offsets", v.ox1, v.oy1, v.ox2, v.oy2)
+					v.ox1 = tryScaleCoord(v.ox1, arg_dpi)
+					v.oy1 = tryScaleCoord(v.oy1, arg_dpi)
+					v.ox2 = tryScaleCoord(v.ox2, arg_dpi)
+					v.oy2 = tryScaleCoord(v.oy2, arg_dpi)
+					assertAllOrNone("draw offsets", v.ox1, v.oy1, v.ox2, v.oy2)
 
-				v.bx1 = tryScaleCoord(v.bx1, arg_dpi)
-				v.by1 = tryScaleCoord(v.by1, arg_dpi)
-				v.bx2 = tryScaleCoord(v.bx2, arg_dpi)
-				v.by2 = tryScaleCoord(v.by2, arg_dpi)
-				assertAllOrNone("border offsets", v.bx1, v.by1, v.bx2, v.by2)
+					v.bx1 = tryScaleCoord(v.bx1, arg_dpi)
+					v.by1 = tryScaleCoord(v.by1, arg_dpi)
+					v.bx2 = tryScaleCoord(v.bx2, arg_dpi)
+					v.by2 = tryScaleCoord(v.by2, arg_dpi)
+					assertAllOrNone("border offsets", v.bx1, v.by1, v.bx2, v.by2)
+				end
 			end
 			local out_str = t2s2.serialize(base_data)
 			shared.nfsWrite("output/" .. arg_dpi .. "/base_data.lua", out_str .. "\n")
@@ -168,11 +175,12 @@ local tasks_export = {
 				local file_no_ext = string.sub(item.name, 1, -5)
 				local ext = string.sub(item.name, -4)
 				if string.lower(ext) == ".svg" then
+					local dpi_out = no_scale[file_no_ext] and 96 or arg_dpi
 					local out_file_path = out_path .. "/" .. file_no_ext .. ".png"
 					print("export: " .. out_file_path)
 					local ok = os.execute(
 						"inkscape132 --export-filename=" .. out_path .. "/" .. file_no_ext .. ".png" ..
-						" --export-dpi=" .. arg_dpi ..
+						" --export-dpi=" .. dpi_out ..
 						" " .. arg_src_path .. "/" .. item.name
 					)
 				end

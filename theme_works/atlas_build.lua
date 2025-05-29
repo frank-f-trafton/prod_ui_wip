@@ -213,6 +213,7 @@ local tasks_build = {
 			quads = {},
 			slices = {},
 		}
+		-- (base_data.no_scale is dropped here.)
 
 		-- Produce quad tables.
 		print("#boxes: " .. #atl.boxes)
