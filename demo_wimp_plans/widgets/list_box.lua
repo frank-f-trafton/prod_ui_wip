@@ -42,7 +42,7 @@ end
 local function transferItem(item, from, to, i)
 	-- XXX: Need to work on a solution for transferring menu items between widgets.
 	-- As written, this won't preserve additional user data tied to the item.
-	local new_item = to:addItem(item.text, i, item.bijou_id)
+	local new_item = to:addItem(item.text, i, item.icon_id)
 
 	from:removeItem(item)
 	to:setSelection(new_item)

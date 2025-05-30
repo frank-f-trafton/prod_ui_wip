@@ -62,7 +62,7 @@ function plan.make(panel)
 	tree_box.MN_drag_select = true
 	--tree_box.MN_drag_drop_mode = true
 
-	-- (text, parent_node, tree_pos, bijou_id)
+	-- (text, parent_node, tree_pos, icon_id)
 	local node_top = tree_box:addNode("Top", nil, nil, "folder")
 	node_top.expanded = true
 
