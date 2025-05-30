@@ -3,13 +3,13 @@
 A WIMP TreeBox.
 
  ┌──────────────────────────┬─┐
- │   [B] Leaf               │^│ <──
- │ > [B] Node               ├─┤ <──
- │ v [B] Node               │ │ <── Items
- │       [B] Leaf           │ │ <──
- │    v  [B] Node           │ │ <──
- │          [B] Leaf        ├─┤ <──
- │   [B] Leaf               │v│ <──
+ │   [I] Leaf               │^│ <──
+ │ > [I] Node               ├─┤ <──
+ │ v [I] Node               │ │ <── Items
+ │       [I] Leaf           │ │ <──
+ │    v  [I] Node           │ │ <──
+ │          [I] Leaf        ├─┤ <──
+ │   [I] Leaf               │v│ <──
  ├─┬──────────────────────┬─┼─┤
  │<│                      │>│ │
  └─┴──────────────────────┴─┴─┘
@@ -17,7 +17,7 @@ A WIMP TreeBox.
                              │
                    Optional scroll bars
 
- [B]: Optional icons (bijoux)
+ [I]: Optional icons
  >/v: Optional expander sensors
 --]]
 
@@ -26,7 +26,7 @@ local context = select(1, ...)
 
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
-local commonTree = require(context.conf.prod_ui_req .. "common.common_tree")
+local lgcTree = context:getLua("shared/lgc_tree")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local structTree = require(context.conf.prod_ui_req .. "common.struct_tree")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -42,6 +42,7 @@ local def = {
 		TR_item_align_h = "left", -- start edge for the tree root. "left", "right"
 		TR_expanders_active = false,
 		TR_show_icons = false,
+		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
 	},
 }
 
@@ -52,7 +53,7 @@ def.setScrollBars = commonScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-def.arrangeItems = commonTree.arrangeItems
+def.arrangeItems = lgcTree.arrangeItems
 
 
 -- * Scroll helpers *
@@ -130,15 +131,15 @@ function def:wid_dropped(drop_state)
 end
 
 
-def.wid_defaultKeyNav = commonTree.wid_defaultKeyNav
+def.wid_defaultKeyNav = lgcTree.wid_defaultKeyNav
 
 
-def.setIconsEnabled = commonTree.setIconsEnabled
-def.setExpandersActive = commonTree.setExpandersActive
-def.setItemAlignment = commonTree.setItemAlignment
-def.addNode = commonTree.addNode
-def.orderItems = commonTree.orderItems
-def.removeNode = commonTree.removeNode
+def.setIconsEnabled = lgcTree.setIconsEnabled
+def.setExpandersActive = lgcTree.setExpandersActive
+def.setItemAlignment = lgcTree.setItemAlignment
+def.addNode = lgcTree.addNode
+def.orderItems = lgcTree.orderItems
+def.removeNode = lgcTree.removeNode
 
 
 function def:setSelection(item_t)
@@ -160,6 +161,10 @@ function def:setSelectionByIndex(item_i)
 end
 
 
+def.setIconSetID = lgcMenu.setIconSetID
+def.getIconSetID = lgcMenu.getIconSetID
+
+
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -174,7 +179,7 @@ function def:uiCall_initialize()
 	lgcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
 	self.MN_wrap_selection = false
 
-	commonTree.instanceSetup(self)
+	lgcTree.instanceSetup(self)
 	self.tree = structTree.new()
 
 	-- State flags.
@@ -220,7 +225,7 @@ function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
-		commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+		lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
 
 		-- Document height is based on the last item in the menu.
 		local last_item = self.items[#self.items]
@@ -368,7 +373,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						and (self.TR_item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
 						or (self.TR_item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
 						then
-							commonTree.setExpanded(self, item_t, not item_t.expanded)
+							lgcTree.setExpanded(self, item_t, not item_t.expanded)
 
 							clicked_expander = true
 						end
@@ -543,6 +548,7 @@ def.default_skinner = {
 		end
 		check.type(skin, "TR_expanders_active", "nil", "boolean")
 		check.type(skin, "TR_show_icons", "nil", "boolean")
+		check.type(skin, "icon_set_id", "nil", "string")
 		-- /settings
 
 		check.box(skin, "box")
@@ -611,7 +617,8 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
-		commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+		lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
+		lgcTree.updateAllIconReferences(self, self.skin, self.tree)
 		self:arrangeItems()
 
 		-- Update the scroll bar style
@@ -791,12 +798,12 @@ def.default_skinner = {
 		end
 
 
-		-- 3: Bijou icons, if enabled
+		-- 3: Icons
 		if self.TR_show_icons then
 			for i = first, last do
 				local item = items[i]
-				local tq_bijou = item.tq_bijou
-				if tq_bijou then
+				local tq_icon = item.tq_icon
+				if tq_icon then
 					local item_x
 					if self.TR_item_align_h == "left" then
 						item_x = item.x + self.TR_icon_x
@@ -804,7 +811,7 @@ def.default_skinner = {
 						item_x = item.x + item.w - self.TR_icon_x - self.TR_icon_w
 					end
 
-					uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, item_x, item.y, self.TR_icon_w, item.h)
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, item_x, item.y, self.TR_icon_w, item.h)
 				end
 			end
 		end

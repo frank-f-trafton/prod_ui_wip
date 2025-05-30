@@ -1,15 +1,19 @@
---[[
-	Logic for tree widgets.
---]]
+-- Logic for tree widgets.
 
 
-local commonTree = {}
+local context = select(1, ...)
+
+
+local lgcMenu = context:getLua("shared/lgc_menu")
+
+
+local lgcTree = {}
 
 
 local _enum_align = {left=true, center=true, right=true}
 
 
-function commonTree.instanceSetup(self)
+function lgcTree.instanceSetup(self)
 	-- X positions and widths of components within menu items.
 	-- The X positions are reversed when right alignment is used.
 	self.TR_expander_x = 0
@@ -22,7 +26,7 @@ function commonTree.instanceSetup(self)
 end
 
 
-function commonTree.setExpanded(self, item, exp)
+function lgcTree.setExpanded(self, item, exp)
 	item.expanded = exp
 	self:orderItems()
 	self:arrangeItems()
@@ -34,19 +38,20 @@ function commonTree.setExpanded(self, item, exp)
 	is lgcMenu.widgetAutoRangeV(), but it's not accessible (without debug shenanigans) from this source
 	file. Either it needs to be attached to widgets as a method, or this source file needs to be loaded
 	through the context.
+	TODO: this file is now loaded through the context.
 	--]]
 	self:cacheUpdate(true)
 end
 
 
-function commonTree.keyForward(self, dir)
+function lgcTree.keyForward(self, dir)
 	local item = self.items[self.index]
 	if item
 	and self.TR_expanders_active
 	and #item.nodes > 0
 	and not item.expanded
 	then
-		commonTree.setExpanded(self, item, true)
+		lgcTree.setExpanded(self, item, true)
 
 	elseif item and #item.nodes > 0 and item.expanded then
 		self:menuSetSelectedIndex(self:menuGetItemIndex(item.nodes[1]))
@@ -60,7 +65,7 @@ function commonTree.keyForward(self, dir)
 end
 
 
-function commonTree.keyBackward(self, dir)
+function lgcTree.keyBackward(self, dir)
 	local item = self.items[self.index]
 
 	if item
@@ -68,7 +73,7 @@ function commonTree.keyBackward(self, dir)
 	and #item.nodes > 0
 	and item.expanded
 	then
-		commonTree.setExpanded(self, item, false)
+		lgcTree.setExpanded(self, item, false)
 
 	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
 		self:menuSetSelectedIndex(self:menuGetItemIndex(item.parent))
@@ -87,7 +92,7 @@ end
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
-function commonTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
+function lgcTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -113,17 +118,17 @@ function commonTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		return self.TR_item_align_h == "left" and commonTree.keyBackward(self, -1)
-			or self.TR_item_align_h == "right" and commonTree.keyForward(self, -1)
+		return self.TR_item_align_h == "left" and lgcTree.keyBackward(self, -1)
+			or self.TR_item_align_h == "right" and lgcTree.keyForward(self, -1)
 
 	elseif scancode == "right" then
-		return self.TR_item_align_h == "left" and commonTree.keyForward(self, 1)
-			or self.TR_item_align_h == "right" and commonTree.keyBackward(self, 1)
+		return self.TR_item_align_h == "left" and lgcTree.keyForward(self, 1)
+			or self.TR_item_align_h == "right" and lgcTree.keyBackward(self, 1)
 	end
 end
 
 
-function commonTree.updateItemDimensions(self, skin, item)
+function lgcTree.updateItemDimensions(self, skin, item)
 	-- Do not try to update the root node.
 	if not item.parent then
 		return
@@ -136,42 +141,52 @@ function commonTree.updateItemDimensions(self, skin, item)
 end
 
 
-function commonTree.updateAllItemDimensions(self, skin, node)
+function lgcTree.updateAllItemDimensions(self, skin, node)
 	for i, item in ipairs(node.nodes) do
-		commonTree.updateItemDimensions(self, skin, item)
+		lgcTree.updateItemDimensions(self, skin, item)
 		if #item.nodes > 0 then
-			commonTree.updateAllItemDimensions(self, skin, item)
+			lgcTree.updateAllItemDimensions(self, skin, item)
 		end
 	end
 end
 
 
-function commonTree.setIconsEnabled(self, enabled)
+function lgcTree.updateAllIconReferences(self, skin, node)
+	for i, item in ipairs(node.nodes) do
+		lgcMenu.updateItemIcon(self, item)
+		if #item.nodes > 0 then
+			lgcTree.updateAllIconReferences(self, skin, item)
+		end
+	end
+end
+
+
+function lgcTree.setIconsEnabled(self, enabled)
 	self:writeSetting("TR_show_icons", not not enabled)
 	self:cacheUpdate(true)
-	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+	lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
 end
 
 
-function commonTree.setExpandersActive(self, active)
+function lgcTree.setExpandersActive(self, active)
 	self:writeSetting("TR_expanders_active", not not active)
 	self:cacheUpdate(true)
-	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+	lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
 end
 
 
-function commonTree.setItemAlignment(self, align)
+function lgcTree.setItemAlignment(self, align)
 	if not _enum_align[align] then
 		error("invalid alignment setting.")
 	end
 	self:writeSetting("TR_item_align_h", align)
 	self:cacheUpdate(true)
-	commonTree.updateAllItemDimensions(self, self.skin, self.tree)
+	lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
 end
 
 
-function commonTree.addNode(self, text, parent_node, tree_pos, bijou_id)
-	--print("add node", text, parent_node, tree_pos, bijou_id)
+function lgcTree.addNode(self, text, parent_node, tree_pos, icon_id)
+	--print("add node", text, parent_node, tree_pos, icon_id)
 	-- XXX: Assertions.
 
 	local skin = self.skin
@@ -193,11 +208,12 @@ function commonTree.addNode(self, text, parent_node, tree_pos, bijou_id)
 	item.marked = false -- multi-select
 
 	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix
+	item.icon_id = icon_id
+	item.tq_icon = false
+	lgcMenu.updateItemIcon(self, item)
 
 	item.x, item.y = 0, 0
-	commonTree.updateItemDimensions(self, skin, item)
+	lgcTree.updateItemDimensions(self, skin, item)
 
 	return item
 end
@@ -239,7 +255,7 @@ local function _selectionLoop(self, node)
 end
 
 
-function commonTree.orderItems(self)
+function lgcTree.orderItems(self)
 	local items = self.items
 
 	-- Note the current selected item, if any.
@@ -291,7 +307,7 @@ local function _removeNode(self, node, depth)
 end
 
 
-function commonTree.removeNode(self, node)
+function lgcTree.removeNode(self, node)
 	-- XXX: Assertions (?)
 
 	_removeNode(self, node, 1)
@@ -301,7 +317,7 @@ function commonTree.removeNode(self, node)
 end
 
 
-function commonTree.arrangeItems(self)
+function lgcTree.arrangeItems(self)
 	local skin, items = self.skin, self.items
 	local font = skin.font
 
@@ -321,4 +337,4 @@ function commonTree.arrangeItems(self)
 end
 
 
-return commonTree
+return lgcTree

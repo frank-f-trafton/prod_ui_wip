@@ -183,6 +183,11 @@ local function _loadTextureFiles(path)
 end
 
 
+--[[
+Important: the first-gen resource tables (boxes, fonts, etc.) must not be overwritten with new tables.
+By not overwriting them, far-flung source files may hold direct references without having to perform
+repeated lookups through context.resources.
+--]]
 function methods:_initResourcesTable()
 	if self.resources then
 		error("'self.resources' is already populated. This method should only be called once.")
@@ -192,6 +197,7 @@ function methods:_initResourcesTable()
 	return {
 		boxes = {},
 		fonts = {},
+		icons = {},
 		info = {},
 		labels = {},
 		scroll_bar_data = {},
@@ -267,6 +273,9 @@ function methods:applyTheme(theme)
 	end
 	fontCache.clear()
 
+	if theme.icons then
+		_deepCopyFields(theme.icons, resources.icons)
+	end
 
 	if theme.info then
 		uiTheme.pushLabel("info")
@@ -278,7 +287,6 @@ function methods:applyTheme(theme)
 		uiTheme.popLabel()
 		uiTheme.assertLabelLevel(0)
 	end
-
 
 	if theme.labels then
 		uiTheme.pushLabel("labels")
@@ -346,6 +354,9 @@ function methods:applyTheme(theme)
 
 	_applyReferences(resources, resources)
 
+	uiTheme.checkIconSets(resources.icons)
+	uiTheme.assertLabelLevel(0)
+
 	for k, v in pairs(resources.skins) do
 		local skinner = context.skinners[v.skinner_id]
 		if not skinner then
@@ -363,6 +374,9 @@ function methods:applyTheme(theme)
 		uiTheme.assertLabelLevel(0)
 	end
 	uiTheme.assertLabelLevel(0)
+
+	collectgarbage("collect")
+	collectgarbage("collect")
 end
 
 

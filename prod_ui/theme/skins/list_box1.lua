@@ -5,6 +5,7 @@ return {
 	icon_side = nil,
 	show_icons = nil,
 	text_align_h = nil,
+	icon_set_id = "bureau",
 	-- /settings
 
 	box = "*boxes/panel",

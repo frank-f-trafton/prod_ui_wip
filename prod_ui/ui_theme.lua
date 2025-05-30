@@ -258,6 +258,19 @@ function uiTheme.scaleFontInfo(theme_fonts, k, scale)
 end
 
 
+function uiTheme.checkIconSets(icon_set)
+	uiTheme.pushLabel("icons")
+	for k, v in pairs(icon_set) do
+		uiTheme.pushLabel(k)
+		for kk, vv in pairs(v) do
+			check.quad(v, kk)
+		end
+		uiTheme.popLabel()
+	end
+	uiTheme.popLabel()
+end
+
+
 local function _concatVariadic(...)
 	local t = {...}
 	pTable.toStringAll(t)

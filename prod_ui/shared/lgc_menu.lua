@@ -1366,4 +1366,40 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 end
 
 
+-- TODO: unsure where to put this.
+--- Updates a menu item's icon reference. If either the icon set ID or the icon ID is invalid,
+--	the reference is unset.
+function lgcMenu.updateItemIcon(self, item)
+	if item.icon_id then
+		local icon_set = self.context.resources.icons[self.icon_set_id]
+		if icon_set then
+			local quad = icon_set[item.icon_id]
+			print("", "quad", quad, item.icon_id)
+			if quad then
+				item.tq_icon = quad
+				return
+			end
+		end
+	end
+
+	item.tq_icon = false
+end
+
+
+function lgcMenu.setIconSetID(self, icon_set_id) -- TODO: untested
+	uiShared.type1(1, icon_set_id, "string")
+
+	self:writeSetting("icon_set_id", icon_set_id)
+
+	for i, item in ipairs(self.items) do
+		lgcMenu.updateItemIcon(self, item)
+	end
+end
+
+
+function lgcMenu.getIconSetID(self) -- TODO: untested
+	return self.icon_set_id
+end
+
+
 return lgcMenu

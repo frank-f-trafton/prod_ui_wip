@@ -310,6 +310,7 @@ function love.keypressed(kc, sc, rep)
 		if context:getScale() > 1 then
 			demoShared.executeThemeUpdate(context, 1.0, context:getDPI())
 		else
+			--demoShared.executeThemeUpdate(context, 1.5, 192)
 			demoShared.executeThemeUpdate(context, 1.5, context:getDPI())
 		end
 	end
