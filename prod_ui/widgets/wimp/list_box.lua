@@ -4,11 +4,11 @@
 A basic WIMP ListBox.
 
  ┌──────────────────────────┬─┐
- │[B] First item            │^│ ═╗
- │[B] Second item           ├─┤  ║
- │[B] Third                 │ │  ╠═ List items
- │[B] Fourth                │ │  ║
- │[B] And so on             ├─┤ ═╝
+ │[I] First item            │^│ ═╗
+ │[C] Second item           ├─┤  ║
+ │[O] Third                 │ │  ╠═ List items
+ │[N] Fourth                │ │  ║
+ │[S] And so on             ├─┤ ═╝
  │                          │v│
  ├─┬──────────────────────┬─┼─┤
  │<│                      │>│ │
@@ -18,7 +18,6 @@ A basic WIMP ListBox.
    |                         |
 Optional           Optional scroll bars
  icons
-(bijoux)
 
 --]]
 
@@ -40,7 +39,8 @@ local def = {
 	default_settings = {
 		icon_side = "left", -- "left", "right"
 		show_icons = false,
-		text_align_h = "left" -- "left", "center", "right"
+		text_align_h = "left", -- "left", "center", "right"
+		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
 	}
 }
 
@@ -178,10 +178,10 @@ local function _shapeItem(self, item)
 end
 
 
-function def:addItem(text, pos, bijou_id)
+function def:addItem(text, pos, icon_id)
 	uiShared.type1(1, text, "string")
 	uiShared.intEval(2, pos, "number")
-	uiShared.typeEval1(3, bijou_id, "string")
+	uiShared.typeEval1(3, icon_id, "string")
 
 	local skin = self.skin
 	local font = skin.font
@@ -194,8 +194,9 @@ function def:addItem(text, pos, bijou_id)
 	item.marked = false -- multi-select
 
 	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix
+	item.icon_id = icon_id
+	item.tq_icon = false
+	lgcMenu.updateItemIcon(self, item)
 
 	item.x, item.y = 0, 0
 	_shapeItem(self, item)
@@ -274,6 +275,10 @@ function def:setSelectionByIndex(item_i)
 		self:wid_select(self.items[self.index], self.index)
 	end
 end
+
+
+def.setIconSetID = lgcMenu.setIconSetID
+def.getIconSetID = lgcMenu.getIconSetID
 
 
 function def:uiCall_initialize()
@@ -640,6 +645,7 @@ def.default_skinner = {
 		check.exact(skin, "icon_side", nil, "left", "right")
 		check.type(skin, "show_icons", "nil", "boolean")
 		check.exact(skin, "text_align_h", nil, "left", "center", "right")
+		check.type(skin, "icon_set_id", "nil", "string")
 		-- / Settings
 
 		check.box(skin, "box")
@@ -657,7 +663,6 @@ def.default_skinner = {
 		-- Vertical text alignment is centered.
 
 		-- Icon column width and positioning, if active.
-
 		check.integer(skin, "icon_spacing")
 
 		-- Additional padding for left or right-aligned text. No effect with center alignment.
@@ -682,10 +687,12 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
-		-- Update shapes + positions of any existing items
+		-- Update shapes, positions, and icons of any existing items
 		for i, item in ipairs(self.items) do
+			lgcMenu.updateItemIcon(self, item)
 			_shapeItem(self, item)
 		end
+
 		self:arrangeItems(1)
 
 		-- Update the scroll bar style
@@ -760,14 +767,14 @@ def.default_skinner = {
 			end
 		end
 
-		-- 2: Bijou icons, if enabled
+		-- 2: Item icons, if enabled
 		love.graphics.setColor(rr, gg, bb, aa)
 		if self.show_icons then
 			for i = first, last do
 				local item = items[i]
-				local tq_bijou = item.tq_bijou
-				if tq_bijou then
-					uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, self.col_icon_x, item.y, self.col_icon_w, item.h)
+				local tq_icon = item.tq_icon
+				if tq_icon then
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.col_icon_x, item.y, self.col_icon_w, item.h)
 				end
 			end
 		end

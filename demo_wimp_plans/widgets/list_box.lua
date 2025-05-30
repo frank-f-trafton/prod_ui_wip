@@ -152,7 +152,7 @@ local function makeListBox1(panel, x, y)
 	local display1 = displays[1]
 	if display1 then
 		for i, mode in ipairs(display1.modes) do
-			local item = list_box:addItem(mode.width .. "x" .. mode.height, nil, "icon_file")
+			local item = list_box:addItem(mode.width .. "x" .. mode.height, nil, "file")
 			--[[
 			item.res_w = mode.width
 			item.res_h = mode.height

@@ -5,6 +5,7 @@ return {
 	--TR_item_align_h = "left",
 	--TR_expanders_active = false,
 	--TR_show_icons = false,
+	icon_set_id = "bureau",
 	-- /settings
 
 	box = "*boxes/panel",

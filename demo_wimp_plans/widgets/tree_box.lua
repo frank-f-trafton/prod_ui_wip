@@ -63,16 +63,16 @@ function plan.make(panel)
 	--tree_box.MN_drag_drop_mode = true
 
 	-- (text, parent_node, tree_pos, bijou_id)
-	local node_top = tree_box:addNode("Top", nil, nil, "icon_folder")
+	local node_top = tree_box:addNode("Top", nil, nil, "folder")
 	node_top.expanded = true
 
-	local node_mid = tree_box:addNode("Mid", node_top, nil, "icon_folder")
+	local node_mid = tree_box:addNode("Mid", node_top, nil, "folder")
 	node_mid.expanded = true
 
-	local node_bot = tree_box:addNode("Bottom", node_mid, nil, "icon_folder")
+	local node_bot = tree_box:addNode("Bottom", node_mid, nil, "folder")
 	node_bot.expanded = false
 
-	local back_to = tree_box:addNode("Back to top", nil, nil, "icon_folder")
+	local back_to = tree_box:addNode("Back to top", nil, nil, "folder")
 	back_to.expanded = false
 
 	tree_box:orderItems()
