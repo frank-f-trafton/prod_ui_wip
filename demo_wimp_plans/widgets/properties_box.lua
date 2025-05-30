@@ -22,7 +22,7 @@ function plan.make(panel)
 
 	properties_box:setTag("demo_properties_box")
 
-	-- (wid_id, text, pos, bijou_id)
+	-- (wid_id, text, pos, icon_id)
 	local c1 = properties_box:addControl("wimp/embed/checkbox", "Foobar")
 	local c2 = properties_box:addControl("wimp/embed/checkbox", "Cat")
 	local c3 = properties_box:addControl("input/text_box_single", "Dog")
