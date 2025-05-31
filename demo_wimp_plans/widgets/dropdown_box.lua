@@ -21,8 +21,10 @@ function plan.make(panel)
 	dropdown.h = 32
 	dropdown:initialize()
 
-	dropdown:addItem("foo")
-	dropdown:addItem("bar")
+	dropdown:writeSetting("show_icons", true)
+
+	dropdown:addItem("foo", nil, "file")
+	dropdown:addItem("bar", nil, "folder")
 	dropdown:addItem("baz")
 	dropdown:addItem("bop")
 

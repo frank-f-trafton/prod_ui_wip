@@ -1,14 +1,21 @@
 return {
 	skinner_id = "wimp/dropdown_pop",
 
-	box = "*boxes/panel",
+	-- settings
+	-- /settings
+
+	box = "*boxes/dropdown_pop",
 	font = "*fonts/p",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm_hide",
 
 	text_align = "left",
 
+	icon_side = "left",
+	icon_spacing = 24,
+
 	item_height = 22,
+	item_pad_v = 2,
 
 	max_visible_items = 16,
 
