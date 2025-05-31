@@ -249,7 +249,11 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 		line_ed:caretToByte(utf8.offset(line_ed.line, old_car_u + delta) or max_car_u)
 		line_ed:clearHighlight()
 		line_ed:syncDisplayCaretHighlight()
+
+		editFuncS.updateCaretShape(self)
+		self:scrollGetCaretInBounds(true)
 	end
+
 	line_ed:clearHighlight()
 
 	if write_history then
