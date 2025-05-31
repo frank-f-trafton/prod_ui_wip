@@ -4,23 +4,26 @@ The main body of a dropdown box.
 
 Closed:
 
-┌───────────┬─┐
-│ Foobar    │v│ --- To open, click anywhere or press space/enter.
-└───────────┴─┘     Press up/down or mouse-wheel to change the selection without opening.
-
+ ┌─────────────┬─┐
+ │ [I] Foobar  │v│ --- To open, click anywhere or press space/enter.
+ └─────────────┴─┘     Press up/down or mouse-wheel to change the selection without opening.
+   ^
+   |
+ Optional
+ item icon
 
 Opened:
 
-┌───────────┬─┐
-│ Foobar    │v│
-├───────────┼─┤
-│ Bazbop    │^│ ══╗
-│ Foobar    ├─┤   ║
-│:Jingle::::│ │   ║
-│ Bingo     │ │   ╠═══ Pop-up widget with list of selections.
-│ Pogo      ├─┤   ║
-│ Stove     │v│   ║
-└───────────┴─┘ ══╝
+┌─────────────┬─┐
+│ [I] Foobar  │v│
+├─────────────┼─┤
+│ [I] Bazbop  │^│ ══╗
+│ [I] Foobar  ├─┤   ║
+│:[I]:Jingle::│ │   ║
+│ [I] Bingo   │ │   ╠═══ Pop-up widget with list of selections.
+│ [I] Pogo    ├─┤   ║
+│ [I] Stove   │v│   ║
+└─────────────┴─┘ ══╝
 
 
 The dropdown menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance
@@ -53,6 +56,13 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "dropdown_box1",
+
+	default_settings = {
+		icon_side = "left", -- "left", "right"
+		show_icons = false,
+		text_align_h = "left", -- "left", "center", "right"
+		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
+	}
 }
 
 
@@ -85,32 +95,31 @@ function def:wid_chosenSelection(index, tbl)
 end
 
 
+local function _updateTextWidth(self)
+	local chosen = self.items[self.chosen_i]
 
-function def:addItem(text, pos, bijou_id)
+	self.chosen_text_w = chosen and self.skin.font:getWidth(chosen.text) or 0
+end
+
+
+function def:addItem(text, pos, icon_id)
 	local skin = self.skin
 	local font = skin.font
-
 	local items = self.items
 
 	uiShared.type1(1, text, "string")
 	uiShared.intRangeEval(2, pos, 1, #items + 1)
+	uiShared.typeEval1(3, icon_id, "string")
 
 	pos = pos or #items + 1
 
-	-- XXX: bijou_id
-	--]]
-
-	local item = {}
+	local item = {x=0, y=0, w=0, h=0}
 
 	item.selectable = true
-
-	item.x, item.y = 0, 0
-	item.w = font:getWidth(text)
-	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-
 	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix
+	item.icon_id = icon_id
+	item.tq_icon = false
+	lgcMenu.updateItemIcon(self, item)
 
 	table.insert(items, pos, item)
 
@@ -157,6 +166,7 @@ local function removeItemIndexCleanup(self, item_i, id)
 	if self[id] == item_i then
 		local landing_i = self:menuFindSelectableLanding(#self.items, -1) or self:menuFindSelectableLanding(#self.items, 1)
 		self[id] = landing_i or 0
+		_updateTextWidth(self)
 	end
 end
 
@@ -198,6 +208,8 @@ function def:setSelectionByIndex(item_i, id)
 
 	self:menuSetSelectedIndex(item_i, id)
 
+	_updateTextWidth(self)
+
 	if id == "chosen_i" and chosen_i_old ~= self.chosen_i then
 		self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
 	end
@@ -206,6 +218,10 @@ function def:setSelectionByIndex(item_i, id)
 		self.wid_drawer:menuChangeCleanup()
 	end
 end
+
+
+def.setIconSetID = lgcMenu.setIconSetID
+def.getIconSetID = lgcMenu.getIconSetID
 
 
 function def:uiCall_initialize()
@@ -219,13 +235,6 @@ function def:uiCall_initialize()
 	self.MN_page_jump_size = 4
 	self.MN_wrap_selection = false
 
-
-
-	-- XXX: dropdown button icon.
-
-	-- State flags
-	self.enabled = true
-
 	-- When opened, this holds a reference to the pop-up widget.
 	self.wid_drawer = false
 
@@ -233,25 +242,43 @@ function def:uiCall_initialize()
 	-- This is different from `self.index`, which denotes the current selection in the pop-up menu.
 	self.chosen_i = 0
 
+	self.chosen_text_w = 0
+
+	-- State flags
+	self.enabled = true
+
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self:reshape()
+	self:applyAllSettings()
 end
 
 
 function def:uiCall_reshapePre()
-	-- Viewport #1 is the chosen item text area.
-	-- Viewport #2 is the decorative button which indicates that this widget is clickable.
+	-- Viewport #1 is the main content area.
+	-- Viewport #2 is the item area.
+	-- Viewport #3 is for the item text.
+	-- Viewport #4 is for the item icon.
+	-- Viewport #5 is the decorative button which indicates that this widget is clickable.
 
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, skin.box.border)
+	widShared.copyViewport(self, 1, 2)
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
 
-	widShared.partitionViewport(self, 1, 2, button_spacing, skin.button_placement, true)
+	widShared.partitionViewport(self, 2, 5, button_spacing, skin.button_placement, true)
+
+	widShared.copyViewport(self, 2, 3)
+
+	local icon_spacing = self.show_icons and skin.icon_spacing or 0
+	widShared.partitionViewport(self, 3, 4, icon_spacing, skin.icon_side, true)
+
+	-- Additional text padding
+	widShared.carveViewport(self, 3, skin.box.margin)
+
+	_updateTextWidth(self)
 
 	return true
 end
@@ -274,6 +301,9 @@ function def:_openPopUpMenu()
 		self.chain_next = drawer
 		drawer.chain_prev = self
 		drawer:initialize()
+
+		drawer:writeSetting("show_icons", self.show_icons)
+		drawer:setIconSetID(self.icon_set_id)
 
 		commonWimp.assignPopUp(self, drawer)
 
@@ -512,6 +542,10 @@ end
 
 def.default_skinner = {
 	validate = function(skin)
+		-- settings
+		check.type(skin, "icon_set_id", "nil", "string")
+		-- /settings
+
 		-- The SkinDef ID for pop-ups made by this widget.
 		check.type(skin, "skin_id_pop", "string")
 
@@ -525,7 +559,8 @@ def.default_skinner = {
 		-- Placement of the decorative button.
 		check.exact(skin, "button_placement", "left", "right")
 
-		check.number(skin, "item_pad_v", 0)
+		check.exact(skin, "icon_side", "left", "right")
+		check.number(skin, "icon_spacing", 0)
 
 		check.exact(skin, "text_align", "left", "center", "right")
 
@@ -539,7 +574,7 @@ def.default_skinner = {
 
 	transform = function(skin, scale)
 		change.integerScaled(skin, "button_spacing", scale)
-		change.integerScaled(skin, "item_pad_v", scale)
+		change.integerScaled(skin, "icon_spacing", scale)
 
 		_changeRes(skin, "res_idle", scale)
 		_changeRes(skin, "res_pressed", scale)
@@ -549,6 +584,11 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		-- Update the icons of any existing items.
+		for i, item in ipairs(self.items) do
+			lgcMenu.updateItemIcon(self, item)
+		end
 	end,
 
 
@@ -578,40 +618,50 @@ def.default_skinner = {
 		love.graphics.setColor(res.color_body)
 		uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
-		-- XXX: Decorative button.
+		-- Decorative button.
 		love.graphics.setColor(1, 1, 1, 1)
-		uiGraphics.drawSlice(res.slc_deco_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-		uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp2_x + res.deco_ox, self.vp2_y + res.deco_oy, self.vp2_w, self.vp2_h)
+		uiGraphics.drawSlice(res.slc_deco_button, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
+		uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp5_x + res.deco_ox, self.vp5_y + res.deco_oy, self.vp5_w, self.vp5_h)
 
-		-- Crop item text.
+		-- Crop item text + icon.
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp_x,
-			oy + self.y + self.vp_y,
-			self.vp_w,
-			self.vp_h
+			ox + self.x + self.vp2_x,
+			oy + self.y + self.vp2_y,
+			self.vp2_w,
+			self.vp2_h
 		)
 
 		-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
 		if not self.wid_drawer and self.context.thimble1 == self then
 			love.graphics.setColor(res.color_highlight)
-			love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+			love.graphics.setScissor()
+			love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 		end
 
 		local chosen = self.items[self.chosen_i]
 		if chosen then
 			love.graphics.setColor(res.color_text)
 
-			-- XXX: Chosen item icon.
+			-- Chosen item icon.
+			if self.show_icons then
+				local tq_icon = chosen.tq_icon
+				if tq_icon then
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+				end
+			end
 
 			-- Chosen item text.
 			love.graphics.setFont(font)
-			local xx = self.vp_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp_w)
-			local yy = math.floor(0.5 + self.vp_y + (self.vp_h - font:getHeight()) / 2)
+			local xx = self.vp3_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp3_w)
+			local yy = math.floor(0.5 + self.vp3_y + (self.vp3_h - font:getHeight()) / 2)
 			love.graphics.print(chosen.text, xx, yy)
 		end
 
 		-- Debug
+		--[[
+		love.graphics.setScissor()
 		love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
+		--]]
 
 		love.graphics.pop()
 	end,

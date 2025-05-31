@@ -740,6 +740,16 @@ function widShared.resetViewport(self, v)
 end
 
 
+function widShared.setViewport(self, v, x, y, w, h)
+	v = vpk[v]
+
+	self[v.x] = x
+	self[v.y] = y
+	self[v.w] = math.max(0, w)
+	self[v.h] = math.max(0, h)
+end
+
+
 --[[
 Scroll wheel plug-in functions.
 (Positive Y == rolling wheel upward.)

@@ -23,7 +23,14 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "dropdown_pop1"
+	skin_id = "dropdown_pop1",
+
+	default_settings = {
+		icon_side = "left", -- "left", "right"
+		show_icons = false,
+		text_align_h = "left", -- "left", "center", "right"
+		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
+	}
 }
 
 
@@ -59,6 +66,17 @@ def.movePageUp = lgcMenu.widgetMovePageUp
 def.movePageDown = lgcMenu.widgetMovePageDown
 
 
+function def:_shapeItem(item)
+	local skin = self.skin
+	local font = skin.font
+
+	item.w = font:getWidth(item.text)
+	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
+
+	lgcMenu.updateItemIcon(self, item)
+end
+
+
 function def:_closeSelf(update_chosen)
 	if not self._dead then
 		local wid_ref = self.wid_ref
@@ -78,103 +96,24 @@ function def:_closeSelf(update_chosen)
 end
 
 
---[=[
---- Changes the widget dimensions based on its menu contents.
-function def:updateDimensions()
-
-	--[[
-	We need to:
-
-	* Handle vertical item layout
-	* Calculate item width by finding the widest single item
-	* Reshape the widget to correctly set viewport rectangles
-	* Set the width of all items to the width of viewport #1, and then reshape all items
-	--]]
-	-- XXX: We will just be using the maximum of (dropdown_box.w, widest item).
-
-	local skin = self.skin
-	local items = self.items
-
-	local font = skin.font_item
-
-	-- Update item heights.
-	for i, item in ipairs(items) do
-
-		local font = skin.font_item
-
-		local text_h, bijou_h = 1, 1
-		text_h = font:getHeight() + self.pad_text_y1 + self.pad_text_y2
-		if self.bijou then
-			bijou_h = self.pad_bijou_y1 + self.bijou_draw_h + self.pad_bijou_y2
-		end
-
-		item.h = math.max(text_h, bijou_h)
-	end
-
-	-- Arrange the items vertically.
-	self:arrangeItems()
-
-	-- The work-in-progress widget dimensions.
-	local w = 1
-	local h = items and (items[#items].y + items[#items].h) or 1
-
-	print("#items", #items, "h", h, "items[#items].y", items[#items].y, "items[#items].h", items[#items].h)
-
-	-- Find the widest item text.
-	local w_text = 0
-	for i, item in ipairs(items) do
-		if item.text_int then
-			w_text = math.max(w_text, font:getWidth(item.text_int))
-		end
-	end
-	w = (
-		self.pad_bijou_x1 +
-		self.bijou_draw_w +
-		self.pad_bijou_x2 +
-		self.pad_text_x1 +
-		w_text +
-		self.pad_text_x2
-	)
-
-	-- (We assume that the root widget's dimensions match the display area.)
-	local wid_top = self:getRootWidget()
-
-	self.w = math.min(w, wid_top.w)
-	self.h = math.min(h, wid_top.h)
-
-	self:reshape()
-
-	-- Update item widths and then reshape their internals.
-	for i, item in ipairs(self.items) do
-		item.w = self.vp_w
-		item:reshape()
-	end
-
-	-- Refresh document size.
-	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
-
-	print(
-		"self.w", self.w,
-		"self.h", self.h,
-		"self.vp_w", self.vp_w,
-		"self.vp_h", self.vp_h,
-		"self.doc_w", self.doc_w,
-		"self.doc_h", self.doc_h
-	)
-end
---]=]
-
-
 def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 function def:menuChangeCleanup()
+	for i, item in ipairs(self.items) do
+		self:_shapeItem(item)
+	end
+
 	self:menuSetSelectionStep(0, false)
 	self:arrangeItems()
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
 	self:selectionInView(true)
 end
+
+
+def.setIconSetID = lgcMenu.setIconSetID
+def.getIconSetID = lgcMenu.getIconSetID
 
 
 function def:uiCall_initialize()
@@ -193,7 +132,7 @@ function def:uiCall_initialize()
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
-	widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 4)
 
 	self.press_busy = false
 
@@ -201,41 +140,22 @@ function def:uiCall_initialize()
 
 	self.MN_wrap_selection = false
 
-	-- Padding values. -- XXX style/config, scale
-	--[[
-	self.pad_bijou_x1 = 2
-	self.pad_bijou_x2 = 2
-	self.pad_bijou_y1 = 2
-	self.pad_bijou_y2 = 2
-	--]]
-
-	-- Drawing offsets and size for bijou quads.
-	--[[
-	self.bijou_draw_w = 24
-	self.bijou_draw_h = 24
-	--]]
-
-	-- Padding above and below text and bijoux in items.
-	-- The tallest of the two components determines the item's height.
-	--[[
-	self.pad_text_x1 = 4
-	self.pad_text_x2 = 4
-	self.pad_text_y1 = 4
-	self.pad_text_y2 = 4
-	--]]
-
 	self:skinSetRefs()
 	self:skinInstall()
 
 	self:setScrollBars(false, true)
 
-	-- Set up the widget's position, then call reshape() and then menuChangeCleanup().
+	-- Set up the widget's position, then call reshape() and menuChangeCleanup().
 end
 
 
 function def:uiCall_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
+	-- Viewport #3 represents the size and horizontal position of one item.
+	-- Viewport #4 is the area for text.
+	-- Viewport #5 is the area for icons.
+
 	local skin = self.skin
 	local wid_ref = self.wid_ref
 	local root = self:getRootWidget()
@@ -268,6 +188,18 @@ function def:uiCall_reshapePre()
 	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
+	-- Dimensions and horizontal position for one menu item.
+	widShared.setViewport(self, 3, self.vp_x, 0, self.vp_w, skin.item_height)
+
+	-- Area for text
+	widShared.copyViewport(self, 3, 4)
+
+	-- Area for the icon
+	local icon_spacing = self.show_icons and skin.icon_spacing or 0
+	widShared.partitionViewport(self, 4, 5, icon_spacing, skin.icon_side, true)
+
+	-- Additional text padding
+	widShared.carveViewport(self, 4, skin.box.margin)
 
 	self:scrollClampViewport()
 	commonScroll.updateScrollState(self)
@@ -546,7 +478,11 @@ def.default_skinner = {
 
 		check.exact(skin, "text_align", "left", "center", "right")
 
+		check.exact(skin, "icon_side", "left", "right")
+		check.integer(skin, "icon_spacing", 0)
+
 		check.integer(skin, "item_height", 0)
+		check.integer(skin, "item_pad_v", 0)
 
 		-- The drawer's maximum height, as measured by the number of visible items (plus margins).
 		-- Drawer height is limited by the size of the application window.
@@ -560,7 +496,9 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
+		change.integerScaled(skin, "icon_spacing", scale)
 		change.integerScaled(skin, "item_height", scale)
+		change.integerScaled(skin, "item_pad_v", scale)
 	end,
 
 
@@ -568,6 +506,9 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
+
+		-- Fix item dimensions, icon references, etc.
+		self:menuChangeCleanup()
 	end,
 
 
@@ -587,6 +528,8 @@ def.default_skinner = {
 
 		love.graphics.push("all")
 
+		local old_r, old_g, old_b, old_a = love.graphics.getColor()
+
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
 		-- Back panel body.
@@ -596,7 +539,9 @@ def.default_skinner = {
 		commonScroll.drawScrollBarsV(self, self.skin.data_scroll)
 
 		-- Scroll offsets.
-		love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+		--love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+		love.graphics.translate(-self.scr_x, -self.scr_y)
+		uiGraphics.intersectScissor(ox + self.x + self.vp_x, oy + self.y + self.vp_y, self.vp_w, self.vp_h)
 
 		-- Dropdown drawers do not render hover-glow.
 
@@ -604,22 +549,44 @@ def.default_skinner = {
 		local selected_item = self.items[self.index]
 		if selected_item then
 			love.graphics.setColor(skin.color_selected)
-			love.graphics.rectangle("fill", 0, selected_item.y, self.vp_w - self.vp_x, selected_item.h)
+			love.graphics.rectangle("fill", 0, selected_item.y, self.vp3_w, selected_item.h)
 		end
 
-		-- XXX: icons.
+		local i_min, i_max = math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last)
+		local items = self.items
+
+		-- Item icons.
+		if self.vp5_w > 0 then
+			love.graphics.setColor(old_r, old_g, old_b, old_a)
+			for i = i_min, i_max do
+				local item = items[i]
+				local tq_icon = item.tq_icon
+				if tq_icon then
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.vp5_x, item.y + self.vp5_y, self.vp5_w, self.vp5_h)
+				end
+			end
+		end
 
 		-- Item text.
 		love.graphics.setColor(skin.color_text)
 		love.graphics.setFont(font)
 
-		for i = math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last) do
-			local item = self.items[i]
-			local xx = self.vp_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp_w)
+		for i = i_min, i_max do
+			local item = items[i]
+			local xx = self.vp4_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp4_w)
 			love.graphics.print(item.text, xx, item.y)
 		end
 
 		love.graphics.pop()
+
+		-- Debug: draw viewports
+		--[[
+		widShared.debug.debugDrawViewport(self, 1)
+		widShared.debug.debugDrawViewport(self, 2)
+		widShared.debug.debugDrawViewport(self, 3)
+		widShared.debug.debugDrawViewport(self, 4)
+		widShared.debug.debugDrawViewport(self, 5)
+		--]]
 	end,
 
 
