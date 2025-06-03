@@ -669,6 +669,7 @@ def.default_skinner = {
 
 		check.integer(skin, "pad_text_x")
 
+		check.colorTuple(skin, "color_body")
 		check.colorTuple(skin, "color_item_text")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
@@ -716,14 +717,17 @@ def.default_skinner = {
 		local sl_body = skin.sl_body
 
 		local items = self.items
+		local rr, gg, bb, aa
 
 		-- XXX: pick resources for enabled or disabled state, etc.
 		--local res = (self.active) and skin.res_active or skin.res_inactive
 
 		-- ListBox body.
-		love.graphics.setColor(1, 1, 1, 1)
+		rr, gg, bb, aa = love.graphics.getColor()
+		love.graphics.setColor(skin.color_body)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
+		love.graphics.setColor(rr, gg, bb, aa)
 		commonScroll.drawScrollBarsHV(self, skin.data_scroll)
 
 		love.graphics.push("all")
@@ -758,7 +762,7 @@ def.default_skinner = {
 		local last = math.min(self.MN_items_last, #items)
 
 		-- 1: Item markings
-		local rr, gg, bb, aa = love.graphics.getColor()
+		rr, gg, bb, aa = love.graphics.getColor()
 		love.graphics.setColor(skin.color_item_marked)
 		for i = first, last do
 			local item = items[i]
