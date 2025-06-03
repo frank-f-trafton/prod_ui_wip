@@ -22,6 +22,7 @@ return {
 
 	pad_text_x = 0,
 
+	color_body = {1.0, 1.0, 1.0, 1.0},
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
 	color_select_glow = {1.0, 1.0, 1.0, 0.33},
 	color_hover_glow = {1.0, 1.0, 1.0, 0.16},
