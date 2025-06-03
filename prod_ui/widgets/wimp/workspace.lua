@@ -264,6 +264,12 @@ def.default_skinner = {
 	--update = function(self, skinner, skin, dt)
 	--render = function(self, ox, oy)
 
+	render = function(self, ox, oy)
+		if self.userRender then
+			self:userRender(ox, oy)
+		end
+	end,
+
 
 	renderLast = function(self, ox, oy)
 		love.graphics.push("all")

@@ -117,7 +117,7 @@ Other Window Frames in this demo are "unassociated", and may appear in any Works
 		end
 	end
 
-	ws2.render = function(self, ox, oy)
+	ws2.userRender = function(self, ox, oy)
 		love.graphics.push("all")
 		love.graphics.reset()
 		love.graphics.setCanvas(canvas)
