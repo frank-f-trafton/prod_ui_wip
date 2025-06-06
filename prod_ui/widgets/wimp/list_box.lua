@@ -238,19 +238,7 @@ function def:removeItemByIndex(item_i)
 
 	table.remove(items, item_i)
 
-	-- Removed item was the last in the list, and was selected:
-	if self.index > #self.items then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1)
-		if landing_i then
-			self:setSelectionByIndex(landing_i)
-		else
-			self:setSelectionByIndex(0)
-		end
-
-	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self.index > item_i then
-		self.index = self.index - 1
-	end
+	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
 
 	self:arrangeItems(1, item_i, #items)
 

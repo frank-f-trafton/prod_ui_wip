@@ -72,6 +72,7 @@ local context = select(1, ...)
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -88,27 +89,7 @@ widShared.scrollSetMethods(def)
 def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
-local function _blocking_ui_evaluateHover(self, mx, my, os_x, os_y)
-	return true
-end
-
-local function _blocking_ui_evaluatePress(self, mx, my, os_x, os_y, button, istouch, presses)
-	return true
-end
-
-
--- XXX: test
-function def:setBlocking(enabled)
-	if enabled then
-		self.is_blocking_clicks = true
-		self.ui_evaluateHover = _blocking_ui_evaluateHover
-		self.ui_evaluatePress = _blocking_ui_evaluatePress
-	else
-		self.is_blocking_clicks = false
-		self.ui_evaluateHover = nil
-		self.ui_evaluatePress = nil
-	end
-end
+def.setBlocking = lgcPopUps.setBlocking
 
 
 -- * Internal: Sub-menu creation and teardown *
@@ -518,42 +499,18 @@ end
 def.keepInBounds = widShared.keepInBoundsOfParent
 
 
--- * Internal *
-
-
--- * / Internal *
-
-
--- * Scroll helpers *
-
-
 def.getInBounds = lgcMenu.getItemInBoundsRect
 def.selectionInView = lgcMenu.selectionInView
-
-
--- * / Scroll helpers *
-
-
--- * Spatial selection *
 
 
 def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
 def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
--- * / Spatial selection *
-
-
--- * Selection movement *
-
-
 def.movePrev = lgcMenu.widgetMovePrev
 def.moveNext = lgcMenu.widgetMoveNext
 def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
-
-
--- * / Selection movement *
 
 
 -- * Item management *
@@ -648,6 +605,8 @@ function def:uiCall_initialize()
 
 	self.sort_id = 7
 
+	lgcPopUps.setupInstance(self)
+
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
@@ -656,9 +615,6 @@ function def:uiCall_initialize()
 
 	lgcMenu.setup(self)
 	self.default_deselect = true
-
-	-- XXX: test
-	self.is_blocking_clicks = false
 
 	-- Padding values. -- XXX style/config, scale
 	self.pad_bijou_x1 = 2
@@ -757,7 +713,6 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 	end
 end
-
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)

@@ -21,9 +21,9 @@ Opened:
 │ Stove     │v│   ║
 └───────────┴─┘ ══╝
 
-
-The menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance and
-mouse actions. The body manages the menu's contents.
+The main widget and the drawer have separate menus, the latter being populated upon creation.
+Changing the ComboBox's menu while the drawer is open does not affect the drawer's menu, and
+vice versa.
 
 Unlike similar list widgets, ComboBoxes do not support menu-item icons. ComboBoxes and Dropdowns use the same
 drawer widget.
@@ -49,6 +49,7 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -58,6 +59,7 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "combo_box1",
+	--TODO: text_align_h = "left", -- "left", "center", "right"
 }
 
 
@@ -87,7 +89,7 @@ def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 local function refreshLineEdText(self)
-	local chosen_tbl = self.items[self.chosen_i]
+	local chosen_tbl = self.items[self.index]
 	local line_ed = self.line_ed
 
 	if chosen_tbl then
@@ -107,6 +109,12 @@ function def:wid_inputChanged(str)
 end
 
 
+--- Callback for when the drawer selection changes.
+function def:wid_drawerSelection(drawer, index, tbl)
+	-- ...
+end
+
+
 -- Callback for when the user types enter. Return true to halt the code that checks for typing
 -- literal newlines via enter.
 function def:wid_action(str)
@@ -120,6 +128,10 @@ function def:wid_thimble1Release(str)
 end
 
 
+local _mt_item = {selectable=true, x=0, y=0, w=0, h=0}
+_mt_item.__index = _mt_item
+
+
 function def:addItem(text, pos)
 	local skin = self.skin
 	local font = skin.font
@@ -130,24 +142,14 @@ function def:addItem(text, pos)
 
 	pos = pos or #items + 1
 
-	local item = {}
-
-	-- All ComboBox items should be selectable.
-	item.selectable = true
-
-	item.x, item.y = 0, 0
-	item.w = font:getWidth(text)
-	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
+	local item = setmetatable({}, _mt_item)
 
 	item.text = text
+	-- ComboBox items do not support icons.
 
 	table.insert(items, pos, item)
 
-	-- (Unlike Dropdown, we do not assign a default chosen index here if the list was previously empty.)
-
-	if self.wid_drawer then
-		self.wid_drawer:menuChangeCleanup()
-	end
+	-- Unlike Dropdown, we do not assign a default chosen index here if the list was previously empty.
 
 	return item
 end
@@ -157,29 +159,8 @@ function def:removeItem(item_t)
 	uiShared.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
-
 	local removed_item = self:removeItemByIndex(item_i)
-
 	return removed_item
-end
-
-
-local function removeItemIndexCleanup(self, item_i, id)
-	-- Removed item was the last in the list, and was selected:
-	if self[id] > #self.items then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1)
-		self:setSelectionByIndex(landing_i or 0, id)
-
-	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self[id] > item_i then
-		self[id] = self[id] - 1
-	end
-
-	-- Handle the current selection being removed.
-	if self[id] == item_i then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1) or self:menuFindSelectableLanding(#self.items, 1)
-		self[id] = landing_i or 0
-	end
 end
 
 
@@ -194,39 +175,30 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	removeItemIndexCleanup(self, item_i, "index")
-	removeItemIndexCleanup(self, item_i, "chosen_i")
-
-	if self.wid_drawer then
-		self.wid_drawer:menuChangeCleanup()
-	end
+	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
 
 	return removed_item
 end
 
 
-function def:setSelection(item_t, id)
+function def:setSelection(item_t)
 	uiShared.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
-	self:setSelectionByIndex(item_i, id)
+	self:setSelectionByIndex(item_i)
 end
 
 
-function def:setSelectionByIndex(item_i, id)
+function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local chosen_i_old = self.chosen_i
+	local index_old = self.index
 
-	self:menuSetSelectedIndex(item_i, id)
+	self:menuSetSelectedIndex(item_i)
 
-	if id == "chosen_i" and chosen_i_old ~= self.chosen_i then
+	if index_old ~= self.index then
 		refreshLineEdText(self)
 		self:wid_inputChanged(self.line_ed.line)
-	end
-
-	if self.wid_drawer then
-		self.wid_drawer:menuChangeCleanup()
 	end
 end
 
@@ -266,17 +238,11 @@ function def:uiCall_initialize()
 	-- When opened, this holds a reference to the pop-up widget.
 	self.wid_drawer = false
 
-	-- Index for the last chosen selection.
-	-- This is different from `self.index`, which denotes the current selection in the pop-up menu.
-	-- The item contents may be outdated from what is stored in the LineEditor object.
-	self.chosen_i = 0
-
 	lgcInputS.setupInstance(self)
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self:reshape()
+	self:applyAllSettings()
 end
 
 
@@ -329,7 +295,6 @@ function def:_openPopUpMenu()
 
 		local drawer = root:addChild("wimp/dropdown_pop")
 		drawer.skin_id = skin.skin_id_pop
-		drawer.items = self.items -- XXX maybe safer to make a whole copy of the menu.
 		drawer.x = ax
 		drawer.y = ay + self.h
 		drawer.wid_ref = self
@@ -338,12 +303,23 @@ function def:_openPopUpMenu()
 		drawer.chain_prev = self
 		drawer:initialize()
 
+		drawer:writeSetting("show_icons", false)
+
+		for i, item in ipairs(self.items) do
+			local new_item = drawer:addItem(item.text, nil, item.icon_id, true)
+			new_item.source_item = item
+		end
+
 		commonWimp.assignPopUp(self, drawer)
 
-		self:setSelectionByIndex(self.chosen_i)
+		drawer:setSelectionByIndex(self.index)
 
 		drawer:reshape()
-		drawer:menuChangeCleanup()
+		drawer:centerSelectedItem(true)
+
+		lgcPopUps.checkBlocking(drawer)
+
+		drawer:tryTakeThimble2()
 	end
 end
 
@@ -383,29 +359,29 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
-	local chosen_i_old = self.chosen_i
+	local index_old = self.index
 
 	if scancode == "up" then
-		self:movePrev(1, true, "chosen_i")
+		self:movePrev(1, true)
 		check_chosen = true
 
 	elseif scancode == "down" then
-		self:moveNext(1, true, "chosen_i")
+		self:moveNext(1, true)
 		check_chosen = true
 
 	elseif scancode == "pageup" then
-		--self:movePageUp(true, "chosen_i")
-		self:movePrev(self.MN_page_jump_size, true, "chosen_i")
+		--self:movePageUp(true)
+		self:movePrev(self.MN_page_jump_size, true)
 		check_chosen = true
 
 	elseif scancode == "pagedown" then
-		--self:movePageDown(true, "chosen_i")
-		self:moveNext(self.MN_page_jump_size, true, "chosen_i")
+		--self:movePageDown(true)
+		self:moveNext(self.MN_page_jump_size, true)
 		check_chosen = true
 	end
 
 	if check_chosen then
-		if chosen_i_old ~= self.chosen_i then
+		if index_old ~= self.index then
 			refreshLineEdText(self)
 			self:wid_inputChanged(self.line_ed.line)
 		end
@@ -462,9 +438,7 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		-- Forward keyboard events to the pop-up menu.
-		if self.wid_drawer then
-			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
-		else
+		if not self.wid_drawer then
 			local items = self.items
 			local old_index = self.index
 			local old_item = items[old_index]
@@ -614,21 +588,20 @@ function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
 		-- Cycle menu options if the drawer is closed.
 		if not self.wid_drawer then
-
 			local check_chosen = false
-			local chosen_i_old = self.chosen_i
+			local index_old = self.index
 
 			if y > 0 then
-				self:movePrev(y, true, "chosen_i")
+				self:movePrev(y, true)
 				check_chosen = true
 
 			elseif y < 0 then
-				self:moveNext(math.abs(y), true, "chosen_i")
+				self:moveNext(math.abs(y), true)
 				check_chosen = true
 			end
 
 			if check_chosen then
-				if chosen_i_old ~= self.chosen_i then
+				if index_old ~= self.index then
 					refreshLineEdText(self)
 					self:wid_inputChanged(self.line_ed.line)
 				end

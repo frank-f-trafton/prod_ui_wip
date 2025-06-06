@@ -1198,7 +1198,7 @@ function lgcMenu.selectionInView(self, immediate)
 		self:getInBounds(item, immediate)
 	end
 
-	if immediate then
+	if immediate and self.cacheUpdate then
 		self:cacheUpdate(false)
 	end
 end
@@ -1399,6 +1399,37 @@ end
 
 function lgcMenu.getIconSetID(self) -- TODO: untested
 	return self.icon_set_id
+end
+
+
+function lgcMenu.removeItemIndexCleanup(self, item_i, id)
+	-- Removed item was the last in the list, and was selected:
+	if self[id] > #self.items then
+		local landing_i = self:menuFindSelectableLanding(#self.items, -1)
+		self:setSelectionByIndex(landing_i or 0, id)
+
+	-- Removed item was not selected, and the selected item appears after the removed item in the list:
+	elseif self[id] > item_i then
+		self[id] = self[id] - 1
+	end
+
+	-- Handle the current selection being removed.
+	if self[id] == item_i then
+		local landing_i = self:menuFindSelectableLanding(#self.items, -1) or self:menuFindSelectableLanding(#self.items, 1)
+		self[id] = landing_i or 0
+	end
+end
+
+
+--- Picks the first selectable item, but only if there is currently no selection.
+-- The widget must have the method 'setSelectionByIndex'.
+function lgcMenu.trySelectIfNothingSelected(self)
+	if self.index == 0 then
+		local i, tbl = self:menuHasAnySelectableItems()
+		if i then
+			self:setSelectionByIndex(i)
+		end
+	end
 end
 
 
