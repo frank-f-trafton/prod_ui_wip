@@ -5,7 +5,7 @@
 
 	Notes:
 
-	* This doesn't handle the actual scrolling action of widgets. For that, please see 'logic/wid_shared.lua'
+	* This doesn't handle the actual scrolling action of widgets. For that, please see 'core/wid_shared.lua'
 	  for shared functions. The default scroll bar drawing function is in shared/impl_scroll_bar1.lua.
 
 	* The plug-in methods assume that the client widget has the following methods affixed:
@@ -763,7 +763,6 @@ function commonScroll.arrangeScrollBars(self)
 		if scr_v.auto_hide then
 			if asv1 or (ash1 and asv2) then
 				scr_v.active = true
-
 			else
 				scr_v.active = false
 			end
@@ -788,7 +787,6 @@ function commonScroll.arrangeScrollBars(self)
 		if scr_h.auto_hide then
 			if ash1 or (asv1 and ash2) then
 				scr_h.active = true
-
 			else
 				scr_h.active = false
 			end

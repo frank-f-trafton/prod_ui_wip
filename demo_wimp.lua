@@ -10,8 +10,8 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
-	"widgets.number_box",
 	"widgets.dropdown_box",
+	"widgets.number_box",
 	"widgets.list_box",
 	"widgets.text_box_single",
 	"demo_welcome",
@@ -156,6 +156,7 @@ reloadFont()
 
 
 local app_settings = require("prod_ui.default_settings")
+--app_settings.wimp.pop_up_menu.block_1st_click_out = true
 
 
 local function newWimpContext()

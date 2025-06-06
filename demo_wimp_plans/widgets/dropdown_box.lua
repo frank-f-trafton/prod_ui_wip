@@ -28,9 +28,11 @@ function plan.make(panel)
 	dropdown:addItem("baz")
 	dropdown:addItem("bop")
 
+	-- [[
 	for i = 1, 100 do
 		dropdown:addItem(tostring(i))
 	end
+	--]]
 
 	dropdown.wid_chosenSelection = function(self, index, tbl)
 		print("Dropdown: New chosen selection: #" .. index .. ", Text: " .. tostring(tbl.text))

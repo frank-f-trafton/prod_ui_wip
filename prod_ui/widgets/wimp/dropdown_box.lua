@@ -20,21 +20,18 @@ Opened:
 │ [I] Bazbop  │^│ ══╗
 │ [I] Foobar  ├─┤   ║
 │:[I]:Jingle::│ │   ║
-│ [I] Bingo   │ │   ╠═══ Pop-up widget with list of selections.
+│ [I] Bingo   │ │   ╠═══ "Drawer" with list of selections.
 │ [I] Pogo    ├─┤   ║
 │ [I] Stove   │v│   ║
 └─────────────┴─┘ ══╝
 
-
-The dropdown menu object is shared by the body and pop-up widget. The pop-up handles the menu's visual appearance
-and mouse actions. The body manages the menu's contents. Keyboard actions are split between the body and
-the pop-up, with the body holding onto the thimble and forwarding events to the pop-up when it exists.
+The main widget and the drawer have separate menus, the latter being populated upon creation.
+Changing the dropdown's menu while the drawer is open does not affect the drawer's menu, and
+vice versa.
 
 TODO: pressing keys to jump to the next item beginning with the key cap label.
 ^ Probably need a text-input field for additional code points... same for ListBoxes.
 Not sure about TreeBoxes.
-
-TODO: menu-item icons.
 
 TODO: right-click and thimble actions on the dropdown body. Note that context menus will not be supported from
 the dropdown drawer, since the drawer uses the same "pop-up menu slot" in the WIMP root as context menus. They
@@ -47,6 +44,7 @@ local context = select(1, ...)
 
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -94,12 +92,21 @@ function def:wid_chosenSelection(index, tbl)
 	-- ...
 end
 
+--- Callback for when the drawer selection changes.
+function def:wid_drawerSelection(drawer, index, tbl)
+	-- ...
+end
+
 
 local function _updateTextWidth(self)
-	local chosen = self.items[self.chosen_i]
+	local item = self.items[self.index]
 
-	self.chosen_text_w = chosen and self.skin.font:getWidth(chosen.text) or 0
+	self.chosen_text_w = item and self.skin.font:getWidth(item.text) or 0
 end
+
+
+local _mt_item = {selectable=true, x=0, y=0, w=0, h=0}
+_mt_item.__index = _mt_item
 
 
 function def:addItem(text, pos, icon_id)
@@ -113,9 +120,8 @@ function def:addItem(text, pos, icon_id)
 
 	pos = pos or #items + 1
 
-	local item = {x=0, y=0, w=0, h=0}
+	local item = setmetatable({}, _mt_item)
 
-	item.selectable = true
 	item.text = text
 	item.icon_id = icon_id
 	item.tq_icon = false
@@ -123,17 +129,9 @@ function def:addItem(text, pos, icon_id)
 
 	table.insert(items, pos, item)
 
-	-- If there is no chosen item, assign this one as chosen now.
-	if self.chosen_i == 0 then
-		local i, tbl = self:menuHasAnySelectableItems()
-		if i then
-			self:setSelectionByIndex(i, "chosen_i")
-		end
-	end
+	lgcMenu.trySelectIfNothingSelected(self)
 
-	if self.wid_drawer then
-		self.wid_drawer:menuChangeCleanup()
-	end
+	-- TODO: maybe destroy any open drawer, as a precaution, when this menu changes?
 
 	return item
 end
@@ -143,31 +141,8 @@ function def:removeItem(item_t)
 	uiShared.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
-
 	local removed_item = self:removeItemByIndex(item_i)
-
 	return removed_item
-end
-
-
-
-local function removeItemIndexCleanup(self, item_i, id)
-	-- Removed item was the last in the list, and was selected:
-	if self[id] > #self.items then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1)
-		self:setSelectionByIndex(landing_i or 0, id)
-
-	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self[id] > item_i then
-		self[id] = self[id] - 1
-	end
-
-	-- Handle the current selection being removed.
-	if self[id] == item_i then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1) or self:menuFindSelectableLanding(#self.items, 1)
-		self[id] = landing_i or 0
-		_updateTextWidth(self)
-	end
 end
 
 
@@ -182,40 +157,32 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	removeItemIndexCleanup(self, item_i, "index")
-	removeItemIndexCleanup(self, item_i, "chosen_i")
-
-	if self.wid_drawer then
-		self.wid_drawer:menuChangeCleanup()
-	end
+	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
+	_updateTextWidth(self)
 
 	return removed_item
 end
 
 
-function def:setSelection(item_t, id)
+function def:setSelection(item_t)
 	uiShared.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
-	self:setSelectionByIndex(item_i, id)
+	self:setSelectionByIndex(item_i)
 end
 
 
-function def:setSelectionByIndex(item_i, id)
+function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local chosen_i_old = self.chosen_i
+	local index_old = self.index
 
-	self:menuSetSelectedIndex(item_i, id)
+	self:menuSetSelectedIndex(item_i)
 
 	_updateTextWidth(self)
 
-	if id == "chosen_i" and chosen_i_old ~= self.chosen_i then
-		self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
-	end
-
-	if self.wid_drawer then
-		self.wid_drawer:menuChangeCleanup()
+	if index_old ~= self.index then
+		self:wid_chosenSelection(self.index, self.items[self.index])
 	end
 end
 
@@ -237,10 +204,6 @@ function def:uiCall_initialize()
 
 	-- When opened, this holds a reference to the pop-up widget.
 	self.wid_drawer = false
-
-	-- Index for the current selection displayed in the dropdown body.
-	-- This is different from `self.index`, which denotes the current selection in the pop-up menu.
-	self.chosen_i = 0
 
 	self.chosen_text_w = 0
 
@@ -293,7 +256,6 @@ function def:_openPopUpMenu()
 
 		local drawer = root:addChild("wimp/dropdown_pop")
 		drawer.skin_id = skin.skin_id_pop
-		drawer.items = self.items -- XXX maybe safer to make a whole copy of the menu.
 		drawer.x = ax
 		drawer.y = ay + self.h
 		drawer.wid_ref = self
@@ -305,12 +267,21 @@ function def:_openPopUpMenu()
 		drawer:writeSetting("show_icons", self.show_icons)
 		drawer:setIconSetID(self.icon_set_id)
 
+		for i, item in ipairs(self.items) do
+			local new_item = drawer:addItem(item.text, nil, item.icon_id, true)
+			new_item.source_item = item
+		end
+
 		commonWimp.assignPopUp(self, drawer)
 
-		self:setSelectionByIndex(self.chosen_i)
+		drawer:setSelectionByIndex(self.index)
 
 		drawer:reshape()
-		drawer:menuChangeCleanup()
+		drawer:centerSelectedItem(true)
+
+		lgcPopUps.checkBlocking(drawer)
+
+		drawer:tryTakeThimble2()
 	end
 end
 
@@ -338,6 +309,7 @@ function def:wid_popUpCleanup(reason_code)
 	if self.context.current_pressed == self then
 		self.context.current_pressed = false
 	end
+
 	self.wid_drawer = false
 end
 
@@ -349,38 +321,38 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
-	local chosen_i_old = self.chosen_i
+	local index_old = self.index
 
 	if scancode == "up" then
-		self:movePrev(1, true, "chosen_i")
+		self:movePrev(1, true)
 		check_chosen = true
 
 	elseif scancode == "down" then
-		self:moveNext(1, true, "chosen_i")
+		self:moveNext(1, true)
 		check_chosen = true
 
 	elseif scancode == "home" then
-		self:moveFirst(true, "chosen_i")
+		self:moveFirst(true)
 		check_chosen = true
 
 	elseif scancode == "end" then
-		self:moveLast(true, "chosen_i")
+		self:moveLast(true)
 		check_chosen = true
 
 	elseif scancode == "pageup" then
-		--self:movePageUp(true, "chosen_i")
-		self:movePrev(self.MN_page_jump_size, true, "chosen_i")
+		--self:movePageUp(true)
+		self:movePrev(self.MN_page_jump_size, true)
 		check_chosen = true
 
 	elseif scancode == "pagedown" then
-		--self:movePageDown(true, "chosen_i")
-		self:moveNext(self.MN_page_jump_size, true, "chosen_i")
+		--self:movePageDown(true)
+		self:moveNext(self.MN_page_jump_size, true)
 		check_chosen = true
 	end
 
 	if check_chosen then
-		if chosen_i_old ~= self.chosen_i then
-			self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
+		if index_old ~= self.index then
+			self:wid_chosenSelection(self.index, self.items[self.index])
 		end
 		return true
 	end
@@ -388,8 +360,6 @@ end
 
 
 function def:uiCall_thimble1Release(inst)
-	print("def:uiCall_thimble1Release", self, inst, self == inst)
-
 	if self == inst then
 		if self.wid_drawer then
 			-- The pop-up menu should not exist if the dropdown body does not have thimble1.
@@ -409,10 +379,7 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		-- Forward keyboard events to the pop-up menu.
-		if self.wid_drawer then
-			return self.wid_drawer:wid_forwardKeyPressed(key, scancode, isrepeat)
-		else
+		if not self.wid_drawer then
 			local items = self.items
 			local old_index = self.index
 			local old_item = items[old_index]
@@ -489,20 +456,20 @@ function def:uiCall_pointerWheel(inst, x, y)
 		if not self.wid_drawer then
 
 			local check_chosen = false
-			local chosen_i_old = self.chosen_i
+			local index_old = self.index
 
 			if y > 0 then
-				self:movePrev(y, true, "chosen_i")
+				self:movePrev(y, true)
 				check_chosen = true
 
 			elseif y < 0 then
-				self:moveNext(math.abs(y), true, "chosen_i")
+				self:moveNext(math.abs(y), true)
 				check_chosen = true
 			end
 
 			if check_chosen then
-				if chosen_i_old ~= self.chosen_i then
-					self:wid_chosenSelection(self.chosen_i, self.items[self.chosen_i])
+				if index_old ~= self.index then
+					self:wid_chosenSelection(self.index, self.items[self.index])
 				end
 				return true
 			end
@@ -638,7 +605,7 @@ def.default_skinner = {
 			love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 		end
 
-		local chosen = self.items[self.chosen_i]
+		local chosen = self.items[self.index]
 		if chosen then
 			love.graphics.setColor(res.color_text)
 

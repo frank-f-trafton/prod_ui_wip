@@ -1,6 +1,6 @@
 
 --[[
-wimp/dropdown_pop: The pop-up (or "drawer") component of a dropdown menu.
+wimp/dropdown_pop: The "drawer" component of a dropdown menu.
 
 'self.wid_ref' points to the invoking dropdown base widget.
 
@@ -16,8 +16,10 @@ local context = select(1, ...)
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -30,8 +32,13 @@ local def = {
 		show_icons = false,
 		text_align_h = "left", -- "left", "center", "right"
 		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	}
+	},
+
+	trickle = {}
 }
+
+
+def.setBlocking = lgcPopUps.setBlocking
 
 
 lgcMenu.attachMenuMethods(def)
@@ -66,7 +73,28 @@ def.movePageUp = lgcMenu.widgetMovePageUp
 def.movePageDown = lgcMenu.widgetMovePageDown
 
 
-function def:_shapeItem(item)
+local function _updateDocumentHeight(self)
+	local last_item = self.items[#self.items]
+
+	self.doc_h = last_item and last_item.y + last_item.h or 0
+end
+
+
+local function _updateDocumentWidth(self, w)
+	self.doc_w = math.max(self.doc_w, w)
+end
+
+
+local function _recalculateDocumentWidth(self)
+	local max_w = 0
+	for i, item in ipairs(self.items) do
+		max_w = math.max(max_w, item.w)
+	end
+	self.doc_w = max_w
+end
+
+
+local function _shapeItem(self, item)
 	local skin = self.skin
 	local font = skin.font
 
@@ -84,7 +112,14 @@ function def:_closeSelf(update_chosen)
 			wid_ref.wid_drawer = false
 
 			if update_chosen then
-				wid_ref:setSelectionByIndex(self.index, "chosen_i")
+				-- Confirm that the linked source item still exists in the main widget.
+				local chosen = self.items[self.index]
+				if chosen and type(chosen.source_item) == "table" then
+					local source_i = wid_ref:menuHasItem(chosen.source_item)
+					if source_i then
+						wid_ref:setSelectionByIndex(source_i)
+					end
+				end
 			end
 		end
 
@@ -96,19 +131,125 @@ function def:_closeSelf(update_chosen)
 end
 
 
+local _mt_item = {selectable=true}
+_mt_item.__index = _mt_item
+
+
+function def:addItem(text, pos, icon_id, suppress_select)
+	local skin = self.skin
+	local font = skin.font
+	local items = self.items
+
+	uiShared.type1(1, text, "string")
+	uiShared.intRangeEval(2, pos, 1, #items + 1)
+	uiShared.typeEval1(3, icon_id, "string")
+
+	pos = pos or #items + 1
+
+	local item = setmetatable({x=0, y=0, w=0, h=0}, _mt_item)
+
+	item.text = text
+	item.icon_id = icon_id
+	item.tq_icon = false
+
+	-- 'item.source_item' is set by the caller for later reference.
+
+	table.insert(items, pos, item)
+
+	_shapeItem(self, item)
+	self:arrangeItems(1, pos, #items)
+	_updateDocumentWidth(self, item.w)
+	_updateDocumentHeight(self)
+
+	if not suppress_select then
+		lgcMenu.trySelectIfNothingSelected(self)
+	end
+
+	return item
+end
+
+
+function def:removeItem(item_t)
+	uiShared.type1(1, item_t, "table")
+
+	local item_i = self:menuGetItemIndex(item_t)
+	local removed_item = self:removeItemByIndex(item_i)
+	return removed_item
+end
+
+
+function def:removeItemByIndex(item_i)
+	uiShared.intGE(1, item_i, 0)
+
+	local items = self.items
+	local removed_item = items[item_i]
+	if not removed_item then
+		error("no item to remove at index: " .. tostring(item_i))
+	end
+
+	local removed = table.remove(items, item_i)
+
+	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
+
+	_recalculateDocumentWidth(self)
+	_updateDocumentHeight(self)
+
+	return removed_item
+end
+
+
+function def:setSelection(item_t)
+	uiShared.type1(1, item_t, "table")
+
+	local item_i = self:menuGetItemIndex(item_t)
+	self:setSelectionByIndex(item_i)
+end
+
+
+function def:setSelectionByIndex(item_i)
+	uiShared.intGE(1, item_i, 0)
+
+	local index_old = self.index
+
+	self:menuSetSelectedIndex(item_i)
+
+	if index_old ~= self.index then
+		if self.wid_ref then
+			self.wid_ref:wid_drawerSelection(self, self.index, self.items[self.index])
+		end
+	end
+end
+
+
 def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 function def:menuChangeCleanup()
 	for i, item in ipairs(self.items) do
-		self:_shapeItem(item)
+		_shapeItem(self, item)
 	end
+	self:arrangeItems()
+	_recalculateDocumentWidth(self)
+	_updateDocumentHeight(self)
 
 	self:menuSetSelectionStep(0, false)
-	self:arrangeItems()
-	self:cacheUpdate(true)
-	self:scrollClampViewport()
 	self:selectionInView(true)
+	self:scrollClampViewport()
+	self:cacheUpdate()
+end
+
+
+function def:cacheUpdate()
+	lgcMenu.widgetAutoRangeV(self)
+end
+
+
+function def:centerSelectedItem(immediate)
+	local selected = self.items[self.index]
+	if selected then
+		self:scrollV(math.floor(0.5 + selected.y + selected.h / 2 - self.vp_h / 2), immediate)
+		self:cacheUpdate()
+	end
 end
 
 
@@ -119,33 +260,32 @@ def.getIconSetID = lgcMenu.getIconSetID
 function def:uiCall_initialize()
 	if not self.wid_ref then
 		error("no owner widget assigned to this menu.")
-
-	elseif not self.items then
-		error("owner widget did not provide a table of menu items.")
 	end
 
 	self.visible = true
 	self.allow_hover = true
+	self.can_have_thimble = true
 	self.clip_scissor = true
 
 	self.sort_id = 7
+
+	lgcPopUps.setupInstance(self)
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 4)
 
+	self.widest_width = 0
+
 	self.press_busy = false
 
-	lgcMenu.setup(self, self.items) -- 'items' was set by invoker
-
+	lgcMenu.setup(self)
 	self.MN_wrap_selection = false
-
-	self:skinSetRefs()
-	self:skinInstall()
 
 	self:setScrollBars(false, true)
 
-	-- Set up the widget's position, then call reshape() and menuChangeCleanup().
+	self:skinSetRefs()
+	self:skinInstall()
 end
 
 
@@ -165,13 +305,8 @@ function def:uiCall_reshapePre()
 	end
 
 	-- We assume that the root widget's dimensions match the display area.
-	-- Item dimensions must be up to date before calling.
-	local widest_item_width = 0
-	for i, item in ipairs(self.items) do
-		widest_item_width = math.max(widest_item_width, item.w)
-	end
 
-	self.w = math.min(root.w, math.max(wid_ref.w, widest_item_width))
+	self.w = math.min(root.w, math.max(wid_ref.w, self.doc_w))
 	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.items)))
 
 	self:keepInBounds()
@@ -210,23 +345,7 @@ function def:uiCall_reshapePre()
 end
 
 
---- Updates cached display state.
--- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
--- @return Nothing.
-function def:cacheUpdate(refresh_dimensions)
-	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
-	end
-
-	-- Set the draw ranges for items.
-	lgcMenu.widgetAutoRangeV(self)
-end
-
-
--- Used instead of 'uiCall_keypressed'. The dropdown body passes keyboard events through here.
-function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
-	local root = self:getRootWidget()
-
+function def:uiCall_keyPressed(key, scancode, isrepeat)
 	if scancode == "up" then
 		self:movePrev(1, true)
 		return true
@@ -261,9 +380,6 @@ function def:wid_forwardKeyPressed(key, scancode, isrepeat) -- XXX: WIP
 		return true
 	end
 end
-
-
---function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -336,9 +452,15 @@ end
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
-		local ax, ay = self:getAbsolutePosition()
-		local mouse_x = x - ax
-		local mouse_y = y - ay
+		local mx, my, ax, ay = self:getRelativePosition(x, y)
+
+		if self.is_blocking_clicks then
+			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
+				local root = self:getRootWidget()
+				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+				return
+			end
+		end
 
 		local handled_scroll_bars
 
@@ -352,7 +474,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if handled_scroll_bars then
 			self.context:clearClickSequence()
 		else
-			if widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
+			if widShared.pointInViewport(self, 2, mx, my) then
 
 				x = x - ax + self.scr_x - self.vp_x
 				y = y - ay + self.scr_y - self.vp_y
@@ -362,7 +484,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
 
 					self.press_busy = "menu-drag"
-					self:cacheUpdate(true)
+					self:cacheUpdate()
 				end
 			end
 		end
@@ -411,7 +533,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 		-- XXX support horizontal wheels
 
 		if widShared.checkScrollWheelScroll(self, x, y) then
-			self:cacheUpdate(false)
+			self:cacheUpdate()
 			return true
 		end
 	end
@@ -419,7 +541,7 @@ end
 
 
 function def:uiCall_update(dt)
-	-- This widget cannot operate if the owner which it extends is gone.
+	-- This widget cannot operate if the owner that it extends is gone.
 	local wid_ref = self.wid_ref
 	if not wid_ref then
 		self:remove()
@@ -454,7 +576,7 @@ function def:uiCall_update(dt)
 	commonScroll.updateScrollState(self)
 
 	if needs_update then
-		self:cacheUpdate(true)
+		self:cacheUpdate()
 	end
 end
 
@@ -591,7 +713,11 @@ def.default_skinner = {
 
 
 	--renderLast = function(self, ox, oy) end,
-	--renderThimble = function(self, ox, oy) -- (This widget can't take the thimble.)
+
+
+	renderThimble = function(self, ox, oy)
+		-- Don't render thimble focus.
+	end
 }
 
 
