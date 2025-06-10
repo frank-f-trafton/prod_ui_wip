@@ -354,9 +354,17 @@ end
 
 function def:refreshRows()
 	local column_bar_x2 = self.vp_w
-	local last_column = self.columns[#self.columns]
-	if last_column then
-		column_bar_x2 = last_column.x + last_column.w
+
+	local last_vis_column
+	for i = #self.columns, 1, -1 do
+		if self.columns[i].visible then
+			last_vis_column = self.columns[i]
+			break
+		end
+	end
+
+	if last_vis_column then
+		column_bar_x2 = last_vis_column.x + last_vis_column.w
 	end
 
 	local yy = 0
