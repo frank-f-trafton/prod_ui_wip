@@ -1,4 +1,3 @@
-
 --[[
 The main body of a dropdown box.
 

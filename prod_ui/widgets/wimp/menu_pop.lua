@@ -1,4 +1,3 @@
-
 --[[
 wimp/menu_pop: A pop-up menu implementation.
 
@@ -38,31 +37,30 @@ Horizontal item padding (not including widget margins):
 │   [B]   Text    Ctrl+t  > │
 └───────────────────────────┘
   │  │ │ │    │*1│      ││││ *2
-  │  │ │ │    │  │      │││self.pad_arrow_x2
+  │  │ │ │    │  │      │││skin.pad_arrow_x2
   │  │ │ │    │  │      │││
-  │  │ │ │    │  │      ││self.arrow_draw_w
+  │  │ │ │    │  │      ││skin.arrow_draw_w
   │  │ │ │    │  │      ││
-  │  │ │ │    │  │      │self.pad_arrow_x1
+  │  │ │ │    │  │      │skin.pad_arrow_x1
   │  │ │ │    │  │      │
   │  │ │ │    │  │      │
-  │  │ │ │    │  │      self.pad_shortcut_x2
+  │  │ │ │    │  │      skin.pad_shortcut_x2
   │  │ │ │    │  │
-  │  │ │ │    │  self.pad_shortcut_x1
+  │  │ │ │    │  skin.pad_shortcut_x1
   │  │ │ │    │
-  │  │ │ │    self.pad_text_x2
+  │  │ │ │    skin.pad_text_x2
   │  │ │ │
-  │  │ │ self.pad_text_x1
+  │  │ │ skin.pad_text_x1
   │  │ │
-  │  │ self.pad_bijou_x2
+  │  │ skin.pad_bijou_x2
   │  │
-  │  self.bijou_draw_w
+  │  skin.bijou_draw_w
   │
-  self.pad_bijou_x1
+  skin.pad_bijou_x1
 
 
 *1: The shortcut text is right-aligned.
 *2: Arrow measurements apply to groups only.
-
 
 --]]
 
@@ -81,6 +79,10 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "menu_pop1",
+
+	default_settings = {
+		show_icons = false, -- WIP
+	}
 }
 
 
@@ -90,6 +92,9 @@ def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
 
 
 def.setBlocking = lgcPopUps.setBlocking
+
+
+-- Removing items in pop-up menus is not supported.
 
 
 -- * Internal: Sub-menu creation and teardown *
@@ -211,7 +216,6 @@ local function keyMnemonicSearch(items, key)
 end
 
 
-
 local function selectItemColor(item, client, skin)
 	if item.actionable then
 		return skin.color_actionable
@@ -232,19 +236,20 @@ def._mt_command = {
 	type = "command",
 
 	reshape = function(item, client)
-		local font = client.skin.font_item
+		local skin = client.skin
+		local font = skin.font_item
 
 		item.text_x = (
-			client.pad_bijou_x1
-			+ client.bijou_draw_w
-			+ client.pad_bijou_x2
-			+ client.pad_text_x1
+			skin.pad_bijou_x1
+			+ skin.bijou_draw_w
+			+ skin.pad_bijou_x2
+			+ skin.pad_text_x1
 		)
 
-		item.text_y = client.pad_text_y1
+		item.text_y = skin.pad_text_y1
 
 		if item.text_shortcut then
-			item.text_s_x = item.w - font:getWidth(item.text_shortcut) - client.pad_shortcut_x2
+			item.text_s_x = item.w - font:getWidth(item.text_shortcut) - skin.pad_shortcut_x2
 			item.text_s_y = item.text_y
 		end
 
@@ -258,7 +263,7 @@ def._mt_command = {
 			item.text_int = temp_str
 			item.ul_x = item.text_x + x
 			item.ul_w = w
-			item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + client.underline_width / 2)
+			item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + skin.underline_width / 2)
 		end
 	end,
 }
@@ -269,15 +274,16 @@ def._mt_group = {
 	type = "group",
 
 	reshape = function(item, client)
-		local font = client.skin.font_item
+		local skin = client.skin
+		local font = skin.font_item
 
 		item.text_x = (
-			client.pad_bijou_x1
-			+ client.bijou_draw_w
-			+ client.pad_bijou_x2
-			+ client.pad_text_x1
+			skin.pad_bijou_x1
+			+ skin.bijou_draw_w
+			+ skin.pad_bijou_x2
+			+ skin.pad_text_x1
 		)
-		item.text_y = client.pad_text_y1
+		item.text_y = skin.pad_text_y1
 
 		-- Underline state
 		local temp_str, x, w = textUtil.processUnderline(item.text, font)
@@ -289,12 +295,12 @@ def._mt_group = {
 			item.text_int = temp_str
 			item.ul_x = item.text_x + x
 			item.ul_w = w
-			--item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + client.underline_width / 2)
-			item.ul_y = item.text_y + font:getBaseline() + math.floor(0.5 + client.underline_width / 2)
+			--item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + skin.underline_width / 2)
+			item.ul_y = item.text_y + font:getBaseline() + math.floor(0.5 + skin.underline_width / 2)
 		end
 
 		-- Arrow state
-		item.arrow_x = item.w - client.pad_arrow_x2 - client.arrow_draw_w - client.pad_arrow_x1
+		item.arrow_x = item.w - skin.pad_arrow_x2 - skin.arrow_draw_w - skin.pad_arrow_x1
 		item.arrow_y = item.text_y
 	end,
 }
@@ -318,12 +324,7 @@ def._mt_separator.__index = def._mt_separator
 -- @param item_info Table of default fields to assign to the fresh item.
 -- @return The new item table for additional tweaks.
 function def:appendItem(item_type, info)
-	local item = {
-		x = 0,
-		y = 0,
-		w = 1,
-		h = 1,
-	}
+	local item = {x=0, y=0, w=0, h=0}
 
 	if item_type == "command" then
 		item.text = info.text or ""
@@ -382,7 +383,9 @@ function def:appendItem(item_type, info)
 		item[k] = v
 	end
 
-	self:addItem(item)
+	table.insert(self.items, item)
+
+	item:reshape(self)
 
 	return item
 end
@@ -404,21 +407,19 @@ function def:updateDimensions()
 
 	local skin = self.skin
 	local items = self.items
-
 	local font = skin.font_item
 
 	-- Update item heights.
 	for i, item in ipairs(items) do
-
 		if item.type == "separator" then
-			item.h = self.pad_separator_y
+			item.h = skin.pad_separator_y
 		else
 			local font = skin.font_item
 
-			local text_h, bijou_h = 1, 1
-			text_h = font:getHeight() + self.pad_text_y1 + self.pad_text_y2
+			local bijou_h = 1
+			local text_h = font:getHeight() + skin.pad_text_y1 + skin.pad_text_y2
 			if self.bijou then
-				bijou_h = self.pad_bijou_y1 + self.bijou_draw_h + self.pad_bijou_y2
+				bijou_h = skin.pad_bijou_y1 + skin.bijou_draw_h + skin.pad_bijou_y2
 			end
 
 			item.h = math.max(text_h, bijou_h)
@@ -453,18 +454,18 @@ function def:updateDimensions()
 		end
 	end
 	w = (
-		self.pad_bijou_x1 +
-		self.bijou_draw_w +
-		self.pad_bijou_x2 +
-		self.pad_text_x1 +
+		skin.pad_bijou_x1 +
+		skin.bijou_draw_w +
+		skin.pad_bijou_x2 +
+		skin.pad_text_x1 +
 		w_text +
-		self.pad_text_x2
+		skin.pad_text_x2
 	)
 
 	-- If both groups and shortcuts are present, add the larger of the two padding values.
-	-- Otherwise add one or the other (or none).
-	local add_group_pad = self.pad_arrow_x1 + self.arrow_draw_w + self.pad_arrow_x2
-	local add_shortcut_pad = self.pad_shortcut_x1 + w_shortcut + self.pad_shortcut_x2
+	-- Otherwise, add one or the other (or none).
+	local add_group_pad = skin.pad_arrow_x1 + skin.arrow_draw_w + skin.pad_arrow_x2
+	local add_shortcut_pad = skin.pad_shortcut_x1 + w_shortcut + skin.pad_shortcut_x2
 	if has_shortcuts and has_groups then
 		w = w + math.max(add_group_pad, add_shortcut_pad)
 
@@ -513,77 +514,6 @@ def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
 
 
--- * Item management *
-
-
---[[
-	These 'add' and 'remove' methods are pretty basic. You may have to wrap them in functions that
-	are more aware of the kind of menu in use.
-
-	You also need to call self:menuChangeCleanup() when you are done adding or removing. (When handling
-	many items at once, it doesn't make sense to call it over and over.)
---]]
-
-
---- Adds an item instance to the menu.
--- @param item_instance The item instance (not the def!) to add.
--- @param index (default: #items + 1) Where to add the item in the list.
--- @return Nothing.
-function def:addItem(item_instance, index)
-	local items = self.items
-	index = index or #items + 1
-
-	table.insert(items, index, item_instance)
-
-	item_instance:reshape(self)
-
-	-- Call self:menuChangeCleanup() when you are done.
-end
-
-
---- Removes an item from the menu at the specified index.
--- @param index (default: #items) Index of the item to remove. Must point to a valid table.
--- @return The removed item instance.
-function def:removeItem(index)
-	local items = self.items
-	index = index or #items
-
-	-- Catch attempts to remove invalid item indexes (Lua's table.remove() is okay with empty indexes 0 and 1)
-	if not items[index] then
-		error("Menu has no item at index: " .. tostring(index))
-	end
-
-	local removed = table.remove(self.items, index)
-
-	return removed
-
-	-- Call self:menuChangeCleanup() when you are done.
-	-- No cleanup callback is run on the removed item, so any manual resource freeing needs to be handled by the caller.
-end
-
-
---- Removes an item from the menu, using the item table reference instead of the index.
--- @param item The item table in the menu.
--- @return The removed item. Raises an error if the item is not found in the menu.
-function def:removeItemTable(item) -- XXX untested
-	local index
-	for i, check in ipairs(self.items) do
-		if check == item then
-			index = i
-			break
-		end
-	end
-
-	if not index then
-		error("couldn't find item table in menu.")
-	else
-		return self:removeItem(index)
-	end
-
-	-- Call self:menuChangeCleanup() when you are done.
-end
-
-
 function def:menuChangeCleanup()
 	self:menuSetSelectionStep(0, false)
 	self:arrangeItems()
@@ -591,9 +521,6 @@ function def:menuChangeCleanup()
 	self:scrollClampViewport()
 	self:selectionInView()
 end
-
-
--- * / Item management *
 
 
 function def:uiCall_initialize()
@@ -609,44 +536,14 @@ function def:uiCall_initialize()
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
-	widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 7)
 
 	self.press_busy = false
 
 	lgcMenu.setup(self)
 	self.default_deselect = true
 
-	-- Padding values. -- XXX style/config, scale
-	self.pad_bijou_x1 = 2
-	self.pad_bijou_x2 = 2
-	self.pad_bijou_y1 = 2
-	self.pad_bijou_y2 = 2
-
-	self.pad_shortcut_x1 = 16
-	self.pad_shortcut_x2 = 8
-
-	-- Drawing offsets and size for bijou quads.
-	self.bijou_draw_w = 24
-	self.bijou_draw_h = 24
-
-	-- Padding above and below text and bijoux in items.
-	-- The tallest of the two components determines the item's height.
-	self.pad_text_x1 = 4
-	self.pad_text_x2 = 4
-	self.pad_text_y1 = 4
-	self.pad_text_y2 = 4
-
-	-- Padding for separators.
-	self.pad_separator_y = 4
-
-	-- Padding for group arrow indicators.
-	self.pad_arrow_x1 = 4
-	self.pad_arrow_x2 = 0
-	self.arrow_draw_w = 24
-	self.arrow_draw_h = 24
-
-	-- Used when underlining shortcut key letters in menu items.
-	self.underline_width = 1 -- XXX pull from skin.
+	self.widest_text = 0
 
 	-- References populated when this widget is part of a chain of menus.
 	self.chain_next = false
@@ -673,13 +570,37 @@ end
 
 
 function def:uiCall_reshapePre()
+	--[[
+	vp1 - viewport area
+	vp2 - reserved for separating scroll bars (etc.) from content
+	vp3 - full dimensions of one item
+
+	for each item:
+		vp4 - space for icon
+		vp5 - space for label text
+		vp6 - space for key shortcut text
+		vp7 - space for group arrow bijou
+	--]]
+
+	-- Calculate vp3 first.
+	local item_w = self.widest_text
+	if self.show_icons then
+		item_w = item_w + 0 -- WIP
+	end
+	widShared.setViewport(self, 3, 0, 0, 0, 0)
+	--self.widest_text
+
+
+
 	widShared.resetViewport(self, 1)
 
 	-- Apply edge padding.
 	widShared.carveViewport(self, 1, self.skin.box.margin)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2) -- TODO: maybe merge with viewport 1, since it's just a duplicate.
+	-- (Reserved in case any kind of scroll bar or other UI control is added around
+	-- the edges.)
+	widShared.copyViewport(self, 1, 2)
 
 	self:cacheUpdate()
 
@@ -1213,6 +1134,9 @@ def.default_skinner = {
 		check.box(skin, "box")
 		check.integer(skin, "separator_size", 0)
 
+		-- Used when underlining shortcut key letters in menu items.
+		check.integer(skin, "underline_width", 0)
+
 		-- (Pop up menus do not render hover-glow.)
 
 		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
@@ -1226,6 +1150,35 @@ def.default_skinner = {
 		check.quad(skin, "tq_radio_on")
 		check.quad(skin, "tq_radio_off")
 
+		-- Padding values.
+		check.integer(skin, "pad_bijou_x1", 0)
+		check.integer(skin, "pad_bijou_x2", 0)
+		check.integer(skin, "pad_bijou_y1", 0)
+		check.integer(skin, "pad_bijou_y2", 0)
+
+		-- Drawing offsets and size for bijou quads.
+		check.integer(skin, "bijou_draw_w", 0)
+		check.integer(skin, "bijou_draw_h", 0)
+
+		-- Padding above and below text and bijoux in items.
+		-- The tallest of the two components determines the item's height.
+		check.integer(skin, "pad_text_x1", 0)
+		check.integer(skin, "pad_text_x2", 0)
+		check.integer(skin, "pad_text_y1", 0)
+		check.integer(skin, "pad_text_y2", 0)
+
+		-- Padding for separators.
+		check.integer(skin, "pad_separator_y", 0)
+
+		-- Padding for group arrow indicators.
+		check.integer(skin, "pad_arrow_x1", 0)
+		check.integer(skin, "pad_arrow_x2", 0)
+		check.integer(skin, "arrow_draw_w", 0)
+		check.integer(skin, "arrow_draw_h", 0)
+
+		check.integer(skin, "pad_shortcut_x1", 0)
+		check.integer(skin, "pad_shortcut_x2", 0)
+
 		check.colorTuple(skin, "color_separator")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_actionable")
@@ -1236,6 +1189,27 @@ def.default_skinner = {
 
 	transform = function(skin, scale)
 		change.integerScaled(skin, "separator_size", scale)
+		change.integerScaled(skin, "underline_width", scale)
+
+		change.integerScaled(skin, "pad_bijou_x1", scale)
+		change.integerScaled(skin, "pad_bijou_x2", scale)
+		change.integerScaled(skin, "pad_bijou_y1", scale)
+		change.integerScaled(skin, "pad_bijou_y2", scale)
+
+		change.integerScaled(skin, "bijou_draw_w", scale)
+		change.integerScaled(skin, "bijou_draw_h", scale)
+
+		change.integerScaled(skin, "pad_text_x1", scale)
+		change.integerScaled(skin, "pad_text_x2", scale)
+		change.integerScaled(skin, "pad_text_y1", scale)
+		change.integerScaled(skin, "pad_text_y2", scale)
+
+		change.integerScaled(skin, "pad_separator_y", scale)
+
+		change.integerScaled(skin, "pad_arrow_x1", scale)
+		change.integerScaled(skin, "pad_arrow_x2", scale)
+		change.integerScaled(skin, "arrow_draw_w", scale)
+		change.integerScaled(skin, "arrow_draw_h", scale)
 	end,
 
 
@@ -1304,7 +1278,7 @@ def.default_skinner = {
 					item.x + item.ul_x,
 					item.y + item.ul_y,
 					item.ul_w,
-					self.underline_width
+					skin.underline_width
 				)
 			end
 		end
@@ -1320,10 +1294,10 @@ def.default_skinner = {
 					love.graphics.setColor(tbl_color)
 					uiGraphics.quadXYWH(
 						tq_bijou,
-						item.x + self.pad_bijou_x1,
-						item.y + self.pad_bijou_y1,
-						self.bijou_draw_w,
-						self.bijou_draw_h
+						item.x + skin.pad_bijou_x1,
+						item.y + skin.pad_bijou_y1,
+						skin.bijou_draw_w,
+						skin.bijou_draw_h
 					)
 				end
 			end
@@ -1371,8 +1345,10 @@ def.default_skinner = {
 		love.graphics.pop()
 
 		-- Debug: draw viewports
-		--widShared.debug.debugDrawViewport(self, 1)
-		--widShared.debug.debugDrawViewport(self, 2)
+		--[[
+		widShared.debug.debugDrawViewport(self, 1)
+		widShared.debug.debugDrawViewport(self, 2)
+		--]]
 	end,
 
 
