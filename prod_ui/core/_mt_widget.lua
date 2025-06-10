@@ -228,7 +228,8 @@ end
 --- Check if this widget currently has top thimble focus.
 -- @return True if it has the thimble, false if not.
 function _mt_widget:hasTopThimble()
-	return context.thimble2 and context.thimble2 == self or context.thimble1 == self
+	local thim = context.thimble2 or context.thimble1
+	return thim == self
 end
 
 

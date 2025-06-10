@@ -452,9 +452,8 @@ end
 
 function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
-		-- Cycle menu options if the drawer is closed.
-		if not self.wid_drawer then
-
+		-- Cycle menu options if the drawer is closed and this widget has top thimble focus.
+		if not self.wid_drawer and self:hasTopThimble() then
 			local check_chosen = false
 			local index_old = self.index
 
