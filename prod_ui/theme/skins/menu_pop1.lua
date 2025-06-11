@@ -43,9 +43,33 @@ return {
 	pad_shortcut_x2 = 0,
 
 	color_separator = {0.125, 0.125, 0.125, 1.0},
-	color_select_glow = {1.0, 1.0, 1.0, 0.33},
+	color_select_glow = {1.0, 1.0, 1.0, 0.5},
 
-	color_actionable = {1, 1, 1, 1.0},
-	color_selected = {0.1, 0.1, 0.1, 1.0},
-	color_inactive = {0.5, 0.5, 0.5, 1.0},
+	res_actionable_selected = {
+		col_icon = {1.0, 1.0, 1.0, 1.0},
+		col_label = {0.0, 0.0, 0.0, 1.0},
+		col_shortcut = {0.0, 0.0, 0.0, 1.0},
+		col_arrow = {0.0, 0.0, 0.0, 1.0},
+	},
+
+	res_actionable_unselected = {
+		col_icon = {1.0, 1.0, 1.0, 1.0},
+		col_label = {1.0, 1.0, 1.0, 1.0},
+		col_shortcut = {0.8, 0.8, 0.8, 1.0},
+		col_arrow = {1.0, 1.0, 1.0, 1.0},
+	},
+
+	res_inactionable_selected = {
+		col_icon = {0.35, 0.35, 0.35, 1.0},
+		col_label = {0.35, 0.35, 0.35, 1.0},
+		col_shortcut = {0.35, 0.35, 0.35, 1.0},
+		col_arrow = {0.35, 0.35, 0.35, 1.0},
+	},
+
+	res_inactionable_unselected = {
+		col_icon = {0.5, 0.5, 0.5, 1.0},
+		col_label = {0.5, 0.5, 0.5, 1.0},
+		col_shortcut = {0.5, 0.5, 0.5, 1.0},
+		col_arrow = {0.5, 0.5, 0.5, 1.0},
+	},
 }
