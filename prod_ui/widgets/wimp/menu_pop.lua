@@ -222,15 +222,12 @@ local function keyMnemonicSearch(items, key)
 end
 
 
-local function selectItemColor(item, client, skin)
+local function _getRes(item, client, skin)
+	local is_selected = client.items[client.index] == item
 	if item.actionable then
-		return skin.color_actionable
-
-	elseif client.items[client.index] == item then
-		return skin.color_selected
-
+		return is_selected and skin.res_actionable_selected or skin.res_actionable_unselected
 	else
-		return skin.color_inactive
+		return is_selected and skin.res_inactionable_selected or skin.res_inactionable_unselected
 	end
 end
 
@@ -242,11 +239,11 @@ def._mt_command = {type="command", selectable=true}
 def._mt_command.__index = def._mt_command
 
 
-def._mt_group = {type="group", selectable=true, actionable=false}
+def._mt_group = {type="group", selectable=true}
 def._mt_group.__index = def._mt_group
 
 
-def._mt_separator = {type="separator", selectable=false, actionable=false}
+def._mt_separator = {type="separator", selectable=false}
 def._mt_separator.__index = def._mt_separator
 
 
@@ -1019,6 +1016,20 @@ end
 local check, change = uiTheme.check, uiTheme.change
 
 
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+
+	check.colorTuple(res, "col_icon")
+	check.colorTuple(res, "col_label")
+	check.colorTuple(res, "col_shortcut")
+	check.colorTuple(res, "col_arrow")
+
+	uiTheme.popLabel()
+end
+
+
 def.default_skinner = {
 	validate = function(skin)
 		check.box(skin, "box")
@@ -1074,9 +1085,11 @@ def.default_skinner = {
 
 		check.colorTuple(skin, "color_separator")
 		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_actionable")
-		check.colorTuple(skin, "color_selected")
-		check.colorTuple(skin, "color_inactive")
+
+		_checkRes(skin, "res_actionable_selected")
+		_checkRes(skin, "res_actionable_unselected")
+		_checkRes(skin, "res_inactionable_selected")
+		_checkRes(skin, "res_inactionable_unselected")
 	end,
 
 
@@ -1166,8 +1179,8 @@ def.default_skinner = {
 		for i = items_first, items_last do
 			local item = items[i]
 			if item.ul_on then
-				local tbl_color = selectItemColor(item, self, skin)
-				love.graphics.setColor(tbl_color)
+				local res = _getRes(item, self, skin)
+				love.graphics.setColor(res.col_label)
 				uiGraphics.quad1x1(
 					tq_px,
 					text_x + item.ul_x,
@@ -1187,8 +1200,8 @@ def.default_skinner = {
 			if item.bijou then -- TODO: modernize
 				local tq_bijou = skin[item.bijou]
 				if tq_bijou then
-					local tbl_color = selectItemColor(item, self, skin)
-					love.graphics.setColor(tbl_color)
+					local res = _getRes(item, self, skin)
+					love.graphics.setColor(res.col_icon)
 					uiGraphics.quadXYWH(
 						tq_bijou,
 						icon_x,
@@ -1202,8 +1215,8 @@ def.default_skinner = {
 			local arrow_x = self.group_arrow_x
 
 			if item.type == "group" then
-				local tbl_color = selectItemColor(item, self, skin)
-				love.graphics.setColor(tbl_color)
+				local res = _getRes(item, self, skin)
+				love.graphics.setColor(res.col_arrow)
 				uiGraphics.quadXYWH(
 					tq_arrow,
 					arrow_x,
@@ -1220,15 +1233,15 @@ def.default_skinner = {
 		for i = items_first, items_last do
 			local item = items[i]
 
+			local res = _getRes(item, self, skin)
+
 			if item.text_int then
-				local tbl_color = selectItemColor(item, self, skin)
-				love.graphics.setColor(tbl_color)
+				love.graphics.setColor(res.col_label)
 				love.graphics.print(item.text_int, self.text_label_x, item.y + skin.pad_text_y1)
 			end
 
 			if item.text_shortcut then
-				local tbl_color = selectItemColor(item, self, skin)
-				love.graphics.setColor(tbl_color)
+				love.graphics.setColor(res.col_shortcut)
 				love.graphics.print(item.text_shortcut, self.text_shortcut_x, item.y + skin.pad_text_y1)
 			end
 		end
