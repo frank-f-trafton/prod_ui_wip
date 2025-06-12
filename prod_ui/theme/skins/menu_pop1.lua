@@ -2,18 +2,11 @@ return {
 	skinner_id = "wimp/menu_pop",
 
 	box = "*boxes/panel",
-
+	icon_set_id = "bureau",
 	font_item = "*fonts/p",
-
 	slc_body = "*slices/atlas/menu_pop_body",
 	tq_px = "*quads/atlas/pixel",
-
 	tq_arrow = "*quads/atlas/arrow_right",
-
-	tq_check_on = "*quads/atlas/menu_check_on",
-	tq_check_off = "*quads/atlas/menu_check_off",
-	tq_radio_on = "*quads/atlas/menu_radio_on",
-	tq_radio_off = "*quads/atlas/menu_radio_off",
 
 	separator_item_height = 4,
 	separator_graphic_height = 1,
@@ -23,13 +16,13 @@ return {
 	pad_x1 = 0,
 	pad_x2 = 18,
 
-	pad_bijou_x1 = 0,
-	pad_bijou_x2 = 0,
-	pad_bijou_y1 = 2,
-	pad_bijou_y2 = 2,
+	pad_icon_x1 = 0,
+	pad_icon_x2 = 0,
+	pad_icon_y1 = 2,
+	pad_icon_y2 = 2,
 
-	bijou_draw_w = 24,
-	bijou_draw_h = 24,
+	icon_draw_w = 24,
+	icon_draw_h = 24,
 
 	pad_text_x1 = 6,
 	pad_text_x2 = 0,

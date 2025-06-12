@@ -58,11 +58,11 @@ Horizontal item padding (not including widget margins):
   │ │ │ │
   │ │ │ skin.pad_text_x1
   │ │ │
-  │ │ skin.pad_bijou_x2 *3
+  │ │ skin.pad_icon_x2 *3
   │ │
-  │ skin.bijou_draw_w *3
+  │ skin.icon_draw_w *3
   │
-  skin.pad_bijou_x1 *3
+  skin.pad_icon_x1 *3
 
 
 *1: The shortcut text is right-aligned.
@@ -79,6 +79,7 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -88,6 +89,7 @@ local def = {
 
 	default_settings = {
 		show_icons = true, -- WIP
+		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
 	}
 }
 
@@ -140,7 +142,7 @@ local function assignSubMenu(item, client, set_selection)
 			-- Append items to fresh menu
 			if group_def then
 				for i, item_guide in ipairs(group_def) do
-					client_sub:appendItem(item_guide.type, item_guide)
+					client_sub:appendItem(item_guide)
 				end
 			end
 
@@ -235,52 +237,44 @@ end
 -- * MenuItem Defs *
 
 
-def._mt_command = {type="command", selectable=true}
-def._mt_command.__index = def._mt_command
-
-
-def._mt_group = {type="group", selectable=true}
-def._mt_group.__index = def._mt_group
-
-
-def._mt_separator = {type="separator", selectable=false}
-def._mt_separator.__index = def._mt_separator
-
-
 --- Append an item based on one of a few hardcoded types.
--- @param self The client widget.
 -- @param item_type Identifier (typically a string) for the kind of item to append.
--- @param item_info Table of default fields to assign to the fresh item.
+-- @param info Table of default fields to assign to the fresh item.
 -- @return The new item table for additional tweaks.
-function def:appendItem(item_type, info)
+function def:appendItem(info)
+	uiShared.type1(1, info, "table")
+
+	--[[
+	TODO: The interface for adding menu items needs an overhaul.
+	--]]
+
+	local item_type = info.type
 	local item = {x=0, y=0, w=0, h=0}
+
+	-- 'item.text_int' == internal version of 'item.text', with the underline notation stripped.
+	-- For items with icons, 'item.tq_icon' is set in 'self:updateDimensions()'.
 
 	if item_type == "command" then
 		item.text = info.text or ""
-
-		-- internal (underline notation stripped) version of item.text
 		item.text_int = ""
 		item.text_shortcut = info.text_shortcut or false
-		item.bijou = info.bijou or false
+		item.icon_id = info.bijou or false -- TODO: renaming from bijou to icon
 
+		item.selectable = true
 		item.callback = info.callback
 		item.actionable = not not item.callback
 
-		setmetatable(item, self._mt_command)
-
 	elseif item_type == "group" then
 		item.text = info.text or ""
-
-		-- internal (underline notation stripped) version of item.text
 		item.text_int = ""
+		item.icon_id = info.bijou or false -- TODO: renaming from bijou to icon
 
+		item.selectable = true
 		item.group_def = info.group_def
 		item.actionable = not not item.group_def
 
-		setmetatable(item, self._mt_group)
-
 	elseif item_type == "separator" then
-		setmetatable(item, self._mt_separator)
+		-- …
 
 	else
 		error("unknown item type: " .. tostring(item_type))
@@ -299,7 +293,7 @@ end
 -- * / MenuItem Defs *
 
 
---- Changes the widget dimensions based on its menu contents.
+--- Sets the correct widget dimensions for the menu, updating its internal contents along the way.
 function def:updateDimensions()
 	local skin = self.skin
 	local items = self.items
@@ -313,7 +307,7 @@ function def:updateDimensions()
 	local w_text, w_shortcut = 0, 0
 	local has_groups_or_shortcuts = false
 
-	local icon_h = self.show_icons and skin.pad_bijou_y1 + skin.bijou_draw_h + skin.pad_bijou_y2 or 0
+	local icon_h = self.show_icons and skin.pad_icon_y1 + skin.icon_draw_h + skin.pad_icon_y2 or 0
 	local text_h = skin.pad_text_y1 + font:getHeight() + skin.pad_text_y2
 	local item_height = math.max(text_h, icon_h)
 
@@ -325,8 +319,11 @@ function def:updateDimensions()
 			has_groups_or_shortcuts = true
 		end
 
-		-- Underline state
 		if item.type ~= "separator" then
+			lgcMenu.updateItemIcon(self, item)
+			print("item.type", item.type, "item.icon_id", item.icon_id, "item.tq_icon", item.tq_icon, "item.bijou", item.bijou)
+
+			-- Underline state
 			local temp_str, x, w = textUtil.processUnderline(item.text, font)
 			if not temp_str then
 				item.ul_on = false
@@ -358,9 +355,9 @@ function def:updateDimensions()
 	local ww = skin.pad_x1
 
 	if self.show_icons then
-		ww = ww + skin.pad_bijou_x1
+		ww = ww + skin.pad_icon_x1
 		self.icon_x = ww
-		ww = ww + skin.bijou_draw_w + skin.pad_bijou_x2
+		ww = ww + skin.icon_draw_w + skin.pad_icon_x2
 	end
 
 	if w_text > 0 then
@@ -1033,6 +1030,11 @@ end
 def.default_skinner = {
 	validate = function(skin)
 		check.box(skin, "box")
+		check.type(skin, "icon_set_id", "nil", "string")
+		check.loveType(skin, "font_item", "Font")
+		check.slice(skin, "slc_body")
+		check.quad(skin, "tq_px")
+		check.quad(skin, "tq_arrow")
 
 		-- Height of horizontal separator items.
 		check.integer(skin, "separator_item_height", 0)
@@ -1047,29 +1049,20 @@ def.default_skinner = {
 
 		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
 
-		check.loveType(skin, "font_item", "Font")
-		check.slice(skin, "slc_body")
-		check.quad(skin, "tq_px")
-		check.quad(skin, "tq_arrow")
-		check.quad(skin, "tq_check_on")
-		check.quad(skin, "tq_check_off")
-		check.quad(skin, "tq_radio_on")
-		check.quad(skin, "tq_radio_off")
-
 		-- Padding values.
 		check.integer(skin, "pad_x1", 0)
 		check.integer(skin, "pad_x2", 0)
 
-		check.integer(skin, "pad_bijou_x1", 0)
-		check.integer(skin, "pad_bijou_x2", 0)
-		check.integer(skin, "pad_bijou_y1", 0)
-		check.integer(skin, "pad_bijou_y2", 0)
+		check.integer(skin, "pad_icon_x1", 0)
+		check.integer(skin, "pad_icon_x2", 0)
+		check.integer(skin, "pad_icon_y1", 0)
+		check.integer(skin, "pad_icon_y2", 0)
 
-		-- Drawing offsets and size for bijou quads.
-		check.integer(skin, "bijou_draw_w", 0)
-		check.integer(skin, "bijou_draw_h", 0)
+		-- Drawing offsets and size for icon quads.
+		check.integer(skin, "icon_draw_w", 0)
+		check.integer(skin, "icon_draw_h", 0)
 
-		-- Padding above and below text and bijoux in items.
+		-- Padding above and below text and icons in items.
 		-- The tallest of the two components determines the item's height.
 		check.integer(skin, "pad_text_x1", 0)
 		check.integer(skin, "pad_text_x2", 0)
@@ -1100,13 +1093,13 @@ def.default_skinner = {
 
 		change.integerScaled(skin, "pad_x1", scale)
 		change.integerScaled(skin, "pad_x2", scale)
-		change.integerScaled(skin, "pad_bijou_x1", scale)
-		change.integerScaled(skin, "pad_bijou_x2", scale)
-		change.integerScaled(skin, "pad_bijou_y1", scale)
-		change.integerScaled(skin, "pad_bijou_y2", scale)
+		change.integerScaled(skin, "pad_icon_x1", scale)
+		change.integerScaled(skin, "pad_icon_x2", scale)
+		change.integerScaled(skin, "pad_icon_y1", scale)
+		change.integerScaled(skin, "pad_icon_y2", scale)
 
-		change.integerScaled(skin, "bijou_draw_w", scale)
-		change.integerScaled(skin, "bijou_draw_h", scale)
+		change.integerScaled(skin, "icon_draw_w", scale)
+		change.integerScaled(skin, "icon_draw_h", scale)
 
 		change.integerScaled(skin, "pad_text_x1", scale)
 		change.integerScaled(skin, "pad_text_x2", scale)
@@ -1193,27 +1186,23 @@ def.default_skinner = {
 
 		local icon_x = self.icon_x
 
-		-- Icons and arrow graphics
+		-- Icons and arrow bijoux
 		for i = items_first, items_last do
 			local item = items[i]
-			--print("item.bijou", item.bijou, "xywh", item.bijou_x, item.bijou_y, item.bijou_w, item.bijou_h)
-			if item.bijou then -- TODO: modernize
-				local tq_bijou = skin[item.bijou]
-				if tq_bijou then
-					local res = _getRes(item, self, skin)
-					love.graphics.setColor(res.col_icon)
-					uiGraphics.quadXYWH(
-						tq_bijou,
-						icon_x,
-						item.y + skin.pad_bijou_y1,
-						skin.bijou_draw_w,
-						skin.bijou_draw_h
-					)
-				end
+			local tq_icon = item.tq_icon
+			if tq_icon then
+				local res = _getRes(item, self, skin)
+				love.graphics.setColor(res.col_icon)
+				uiGraphics.quadXYWH(
+					tq_icon,
+					icon_x,
+					item.y + skin.pad_icon_y1,
+					skin.icon_draw_w,
+					skin.icon_draw_h
+				)
 			end
 
 			local arrow_x = self.group_arrow_x
-
 			if item.type == "group" then
 				local res = _getRes(item, self, skin)
 				love.graphics.setColor(res.col_arrow)
