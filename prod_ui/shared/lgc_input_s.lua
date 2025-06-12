@@ -36,7 +36,6 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
-local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
@@ -598,7 +597,7 @@ lgcInputS.pop_up_def = {
 		func = editActS.redo,
 		config = lgcInputS.configItem_redo,
 	},
-	itemOps.def_separator,
+	{type="separator"},
 	{
 		type = "command",
 		text = "Cut",
@@ -624,7 +623,7 @@ lgcInputS.pop_up_def = {
 		func = editActS.deleteHighlighted,
 		config = lgcInputS.configItem_cutCopyDelete,
 	},
-	itemOps.def_separator,
+	{type="separator"},
 	{
 		type = "command",
 		text = "Select All",

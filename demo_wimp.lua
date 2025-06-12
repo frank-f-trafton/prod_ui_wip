@@ -83,7 +83,6 @@ end
 -- Libs: ProdUI
 local commonMath = require("prod_ui.common.common_math")
 local commonWimp = require("prod_ui.common.common_wimp")
-local itemOps = require("prod_ui.common.item_ops")
 local keyMgr = require("prod_ui.lib.key_mgr")
 local pTable = require("prod_ui.lib.pile_table")
 local uiContext = require("prod_ui.ui_context")
@@ -411,7 +410,7 @@ do
 					end
 				end,
 			},
-			itemOps.def_separator,
+			{type="separator"},
 			{
 				type = "command",
 				text = "_Q_uit",
@@ -482,7 +481,7 @@ do
 				key_shortcut = "KC o",
 				callback = function(client, item) print("OPEN!") end,
 			},
-			itemOps.def_separator,
+			{type="separator"},
 			{
 				type = "group",
 				text = "_R_ecent",
@@ -511,7 +510,7 @@ do
 				--key_mnemonic = ,
 				--key_shortcut = ,
 			},
-			itemOps.def_separator,
+			{type="separator"},
 			{
 				type = "command",
 				text = "Baz",
@@ -537,7 +536,7 @@ do
 				key_mnemonic = "c",
 				key_shortcut = "K f1",
 			},
-			itemOps.def_separator,
+			{type="separator"},
 			{
 				type = "command",
 				text = "_A_bout...",

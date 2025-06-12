@@ -89,39 +89,7 @@ end
 
 
 local function fileSelectorKeyNav(self, key, scancode, isrepeat)
-	if scancode == "up" then
-		self:movePrev(1, true)
-		return true
-
-	elseif scancode == "down" then
-		self:moveNext(1, true)
-		return true
-
-	elseif scancode == "home" then
-		self:moveFirst(true)
-		return true
-
-	elseif scancode == "end" then
-		self:moveLast(true)
-		return true
-
-	elseif scancode == "pageup" then
-		self:movePageUp(true)
-		return true
-
-	elseif scancode == "pagedown" then
-		self:movePageDown(true)
-		return true
-
-	elseif scancode == "left" then
-		self:scrollDeltaH(-32) -- XXX config
-		return true
-
-	elseif scancode == "right" then
-		self:scrollDeltaH(32) -- XXX config
-		return true
-
-	elseif scancode == "return" then
+	if scancode == "return" then
 		-- Enter directory or symlink
 		local selected_item = self.items[self.index]
 		if selected_item then
@@ -341,7 +309,7 @@ function plan.makeWindowFrame(root)
 	menu_tab:sort()
 
 	menu_tab.getDirectoryItems = menu_getDirectoryItems
-	menu_tab.wid_defaultKeyNav = fileSelectorKeyNav
+	menu_tab.wid_keyPressed = fileSelectorKeyNav
 	menu_tab.trySetPath = menu_trySetPath
 
 	menu_tab:trySetPath("")
