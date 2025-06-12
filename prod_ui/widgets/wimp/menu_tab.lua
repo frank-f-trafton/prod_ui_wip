@@ -176,7 +176,7 @@ local function setupCategoryPopUp(self)
 		local tbl = {}
 
 		tbl.type = "command"
-		tbl.bijou = column.visible and "tq_check_on" or "tq_check_off"
+		tbl.bijou = column.visible and "check_on" or "check_off"
 		tbl.text = column.text ~= "" and column.text or "(Column #" .. i .. ")"
 
 		tbl.callback = callback_toggleCategoryVisibility
