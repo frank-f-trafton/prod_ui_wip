@@ -53,7 +53,6 @@ local context = select(1, ...)
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonTab = require(context.conf.prod_ui_req .. "common.common_tab")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
-local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -97,13 +96,7 @@ end
 
 
 function def:addRow()
-	local item = {}
-	item.selectable = true
-
-	item.x = 0
-	item.y = 0
-	item.w = 0
-	item.h = 0
+	local item = {x=0, y=0, w=0, h=0, selectable=true}
 
 	-- Every row in the menu should have as many cells as there are columns (including invisible ones).
 	item.cells = {}
@@ -114,28 +107,13 @@ function def:addRow()
 end
 
 
--- * Scroll helpers *
-
-
 --def.getInBounds = lgcMenu.getItemInBoundsRect
 def.getInBounds = lgcMenu.getItemInBoundsY
 def.selectionInView = lgcMenu.selectionInView
 
 
--- * / Scroll helpers *
-
-
--- * Spatial selection *
-
-
 def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
 def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
-
-
--- * / Spatial selection *
-
-
--- * Selection movement *
 
 
 def.movePrev = lgcMenu.widgetMovePrev
@@ -144,9 +122,6 @@ def.moveFirst = lgcMenu.widgetMoveFirst
 def.moveLast = lgcMenu.widgetMoveLast
 def.movePageUp = lgcMenu.widgetMovePageUp
 def.movePageDown = lgcMenu.widgetMovePageDown
-
-
--- * / Selection movement *
 
 
 -- * Pop-up menu setup (for columns) *
@@ -448,11 +423,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
-		local sel_item = self.items[self.index]
-		if sel_item and sel_item.menuCall_keyPressed and sel_item:menuCall_keyPressed(self, key, scancode, isrepeat) then
-			return true
-
-		elseif self.wid_keyPressed and self:wid_keyPressed(key, scancode, isrepeat) then
+		if self.wid_keyPressed and self:wid_keyPressed(key, scancode, isrepeat) then
 			return true
 
 		-- Run the default navigation checks.
@@ -508,7 +479,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			self:refreshColumnBar()
 			self:cacheUpdate(true)
 
-		-- Implement Drag-to-select and menuCall_pointerDrag.
+		-- Implement Drag-to-select
 		elseif self.press_busy == "menu-drag" then
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
@@ -520,10 +491,6 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				self.MN_item_hover = false
 
 				--self:selectionInView()
-
-				if item_t.menuCall_pointerDrag then
-					item_t:menuCall_pointerDrag(self, self.context.mouse_pressed_button)
-				end
 
 			elseif self.MN_drag_select == "auto-off" then
 				self:menuSetSelectedIndex(0)
@@ -614,22 +581,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			print("i", i, "item", item)
 
 			if item and item.selectable then
-				-- Un-hover any existing hovered item
-				if self.MN_item_hover ~= item then
-					if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
-						self.MN_item_hover:menuCall_hoverOff(self, mx, my)
-					end
-
-					self.MN_item_hover = item
-
-					if item.menuCall_hoverOn then
-						item:menuCall_hoverOn(self, mx, my)
-					end
-				end
-
-				if item.menuCall_hoverMove then
-					item:menuCall_hoverMove(self, mx, my, mouse_dx, mouse_dy)
-				end
+				self.MN_item_hover = item
 
 				-- Implement mouse hover-to-select.
 				if self.MN_hover_to_select and (mouse_dx ~= 0 or mouse_dy ~= 0) then
@@ -644,9 +596,6 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		end
 
 		if self.MN_item_hover and not hover_ok then
-			if self.MN_item_hover.menuCall_hoverOff then
-				self.MN_item_hover:menuCall_hoverOff(self, mx, my)
-			end
 			self.MN_item_hover = false
 
 			if self.MN_hover_to_select == "auto-off" then
@@ -663,12 +612,6 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		self.column_hovered = false
 		self.cursor_hover = nil
-
-		if self.MN_item_hover and self.MN_item_hover.menuCall_hoverOff then
-			local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-			local ax, ay = self:getAbsolutePosition()
-			self.MN_item_hover:menuCall_hoverOff(self, mx, my)
-		end
 
 		self.MN_item_hover = false
 
@@ -743,10 +686,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					end
 
 					self.MN_mouse_clicked_item = item_t
-
-					if item_t and item_t.menuCall_pointerPress then
-						item_t.menuCall_pointerPress(item_t, self, button, self.context.cseq_presses)
-					end
 				end
 			end
 		end
@@ -756,11 +695,7 @@ end
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
-		-- Repeat-press events for items
-		if self.MN_mouse_clicked_item and self.MN_mouse_clicked_item.menuCall_pointerPressRepeat then
-			local context = self.context
-			self.MN_mouse_clicked_item:menuCall_pointerPressRepeat(self, button, context.cseq_presses, context.mouse_pressed_rep_n)
-		else
+		if not self.MN_mouse_clicked_item then
 			-- Repeat-press events for scroll bar buttons
 			lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 		end
@@ -835,20 +770,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				end
 
 				self:selectionInView(true)
-			else
-				-- If mouse is over the selected item and it has a pointerRelease callback, run it.
-				local item_selected = self.items[self.index]
-				if item_selected and item_selected.selectable then
-
-					-- XXX safety precaution: ensure mouse position is within widget viewport #2?
-					if smx >= item_selected.x and smx < item_selected.x + item_selected.w
-					and smy >= item_selected.y and smy < item_selected.y + item_selected.h
-					then
-						if item_selected.menuCall_pointerRelease then
-							item_selected:menuCall_pointerRelease(self, button)
-						end
-					end
-				end
 			end
 
 			if old_press_busy == "column-press"
@@ -901,8 +822,6 @@ function def:uiCall_pointerWheel(inst, x, y)
 
 		-- XXX support mapping single-dimensional wheel to horizontal scroll motion
 		-- XXX support horizontal wheels
-
-		-- XXX menuCall_pointerWheel() callback for items.
 
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
@@ -961,10 +880,6 @@ function def:uiCall_update(dt)
 	-- Per-widget and per-selected-item update callbacks.
 	if self.wid_update then
 		self:wid_update(dt)
-	end
-	local selected = self.items[self.index]
-	if selected and selected.menuCall_selectedUpdate then
-		selected:menuCall_selectedUpdate(self, dt) -- XXX untested
 	end
 
 	if needs_update then
@@ -1258,7 +1173,6 @@ def.default_skinner = {
 	--renderLast = function(self, ox, oy) end,
 	--renderThimble = function(self, ox, oy) end,
 }
-
 
 
 return def

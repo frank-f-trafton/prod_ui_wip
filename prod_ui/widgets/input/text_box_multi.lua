@@ -41,7 +41,6 @@ local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
-local itemOps = require(context.conf.prod_ui_req .. "common.item_ops")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
@@ -132,7 +131,7 @@ do
 			bound_func = editActM.redo,
 			config = configItem_redo,
 		},
-		itemOps.def_separator,
+		{type="separator"},
 		{
 			type = "command",
 			text = "Cut",
@@ -158,7 +157,7 @@ do
 			bound_func = editActM.deleteHighlighted,
 			config = configItem_cutCopyDelete,
 		},
-		itemOps.def_separator,
+		{type="separator"},
 		{
 			type = "command",
 			text = "Select All",
