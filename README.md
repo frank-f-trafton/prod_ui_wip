@@ -15,7 +15,7 @@ Documentation (also a work in progress): https://github.com/rabbitboots/prod_ui_
 
 * Base directory: Example programs.
 * `prod_ui`: ProdUI.
-* `prod_ui/themes/build`: Theme builder scripts.
+* `theme_works`: Theme builder scripts.
 
 
 ## License
