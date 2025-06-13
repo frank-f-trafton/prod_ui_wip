@@ -1,13 +1,13 @@
 local context = select(1, ...)
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -15,7 +15,7 @@ local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
-local _lerp = commonMath.lerp
+local _lerp = pMath.lerp
 
 
 local _enum_header_sizes = uiShared.makeLUTV("small", "normal", "large")

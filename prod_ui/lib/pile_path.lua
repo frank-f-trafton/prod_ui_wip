@@ -1,39 +1,25 @@
--- PILE Path (beta)
+-- PILE Path v1.1.5
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
 
-local pPath = {}
+local M = {}
 
 
-function pPath.interpolate(s, sym)
-	return s:gsub("%%(.-)%%", sym)
+function M.getExtension(path)
+	return (path:match("/?([^/]-)$"):match("%.[^%.]-$")) or ""
 end
 
 
-function pPath.stripEdgeSlashes(s)
-	return s:match("^/*(.-)/*$")
+function M.join(a, b)
+	return (a:match("^/*(.*)$"):match("^(.-)/*$") .. (a ~= "" and "/" or "") .. b:match("^/*(.*)$")):match("^(.-)/*$")
 end
 
 
-function pPath.join(a, b)
-	return (a:match("^(.-)/?$") .. (a ~= "" and "/" or "") .. b):match("^(.-)/?$")
+function M.splitPathAndExtension(path)
+	local e = M.getExtension(path)
+	return path:sub(1, -(#e + 1)), e
 end
 
 
-function pPath.getExtension(path)
-	return path:match("%..-$")
-end
-
-
-function pPath.splitPathAndExtension(path)
-	local a, b = path:match("^(.*)(%..-)$")
-	if a then
-		return a, b
-	else
-		return path, ""
-	end
-end
-
-
-return pPath
+return M

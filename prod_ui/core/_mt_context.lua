@@ -12,7 +12,6 @@ _mt_context.__index = _mt_context
 local context = select(1, ...)
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local contextDraw = context:getLua("core/context_draw")
 local contextResources = context:getLua("core/context_resources")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
@@ -27,6 +26,11 @@ _mt_context.draw = contextDraw.draw
 -- Called first and last in context:love_update():
 _mt_context.updateFirst = uiShared.dummyFunc
 _mt_context.updateLast = uiShared.dummyFunc
+
+
+local function _pointInRect(px, py, x1, y1, x2, y2)
+	return px >= x1 and py >= y1 and px < x2 and py < y2
+end
 
 
 local function _updateLoop(wid, dt, locks)
@@ -426,7 +430,7 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 		old_current_pressed:cycleEvent("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
 
 		local old_x, old_y = old_current_pressed:getAbsolutePosition()
-		if commonMath.pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
+		if _pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
 			old_current_pressed:cycleEvent("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
 		end
 

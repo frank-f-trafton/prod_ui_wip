@@ -1,8 +1,8 @@
 local context = select(1, ...)
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local lgcButton = context:getLua("shared/lgc_button")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -10,7 +10,7 @@ local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
 
-local _lerp = commonMath.lerp
+local _lerp = pMath.lerp
 
 
 local _enum_align = uiShared.makeLUTV("left", "center", "right", "justify")

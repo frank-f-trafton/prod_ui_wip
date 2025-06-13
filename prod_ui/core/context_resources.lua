@@ -8,7 +8,7 @@ local context = select(1, ...)
 
 
 local fontCache = context:getLua("core/res/font_cache")
-local pPath = require(context.conf.prod_ui_req .. "lib.pile_path")
+local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
@@ -50,7 +50,7 @@ end
 function methods:interpolatePath(path)
 	uiShared.type1(1, path, "string")
 
-	return pPath.interpolate(path, self.path_symbols)
+	return (path:gsub(pString.ptn_percent, self.path_symbols))
 end
 
 

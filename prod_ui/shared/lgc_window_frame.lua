@@ -7,8 +7,11 @@ local context = select(1, ...)
 local lgcWindowFrame = {}
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local widShared = context:getLua("core/wid_shared")
+
+
+local _lerp = pMath.lerp
 
 
 -- @param dir 1 for right and bottom calculations, -1 for left and top calculations, 0 to return the old values.
@@ -85,8 +88,8 @@ function lgcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 			local mouse_rel_y = self.context.mouse_y - a_y
 
 			-- 0.0 == left or top, 1.0 == bottom or right
-			local lerp_x = commonMath.lerp(0, self.w, mouse_rel_x / self.w) / self.w
-			local lerp_y = commonMath.lerp(0, self.h, mouse_rel_y / self.h) / self.h
+			local lerp_x = _lerp(0, self.w, mouse_rel_x / self.w) / self.w
+			local lerp_y = _lerp(0, self.h, mouse_rel_y / self.h) / self.h
 
 			self:wid_unmaximize()
 			self:reshape()
