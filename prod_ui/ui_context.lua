@@ -64,7 +64,7 @@ local function _loader_lua(self, file_path)
 
 	for i, v in ipairs(_path_stack) do
 		if v == file_path then
-			local temp = pTable.cloneArray(_path_stack)
+			local temp = pTable.copyArray(_path_stack)
 			pTable.clearArray(_path_stack)
 			pTable.reverseArray(temp)
 			error("circular file dependency. This path: " .. tostring(file_path) .. "\n\nPath stack:\n\t" .. table.concat(temp, "\n\t"))

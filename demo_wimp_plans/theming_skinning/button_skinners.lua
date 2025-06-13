@@ -1,7 +1,6 @@
 
 -- ProdUI
 local demoShared = require("demo_shared")
-local pTable = require("prod_ui.lib.pile_table")
 
 
 local plan = {}

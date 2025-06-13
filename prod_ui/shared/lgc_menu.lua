@@ -12,17 +12,17 @@ local context = select(1, ...)
 local lgcMenu = {}
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
-local pileTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
 
 
-local _sign = commonMath.sign
-local _clamp = commonMath.clamp
+local _signP = pMath.signP
+local _clamp = pMath.clamp
 
 
 local menuMethods = {}
@@ -171,7 +171,7 @@ function menuMethods:menuGetSelectionStep(pos, delta, wrap)
 		pos = pos + delta
 		pos = _clamp(math.floor(pos), 1, #self.items)
 
-		local dir = _sign(delta)
+		local dir = _signP(delta)
 
 		-- If the new item is not selectable, then we need to hunt for the closest one nearby that is.
 		pos = self:menuFindSelectableLanding(pos, dir) or self:menuFindSelectableLanding(pos - dir, -dir) or 0
@@ -432,12 +432,12 @@ end
 
 
 function menuMethods:menuMoveItem(i, j)
-	pileTable.moveElement(self.items, i, j)
+	pTable.moveElement(self.items, i, j)
 end
 
 
 function menuMethods:menuSwapItems(i, j)
-	pileTable.swapElements(self.items, i, j)
+	pTable.swapElements(self.items, i, j)
 end
 
 

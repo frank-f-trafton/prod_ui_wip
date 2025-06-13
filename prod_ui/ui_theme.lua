@@ -8,9 +8,7 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 -- ProdUI
-local commonMath = require(REQ_PATH .. "common.common_math")
 local pTable = require(REQ_PATH .. "lib.pile_table")
-local pUTF8 = require(REQ_PATH .. "lib.pile_utf8")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
 local uiRes = require(REQ_PATH .. "ui_res")
@@ -273,7 +271,9 @@ end
 
 local function _concatVariadic(...)
 	local t = {...}
-	pTable.toStringAll(t)
+	for k, v in pairs(t) do
+		t[k] = tostring(v)
+	end
 	return table.concat(t, ", ")
 end
 

@@ -19,15 +19,15 @@ Click and drag up/down to adjust the dial position.
 local context = select(1, ...)
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local lgcButton = context:getLua("shared/lgc_button")
 local lgcLabel = context:getLua("shared/lgc_label")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
 
-local _lerp = commonMath.lerp
+local _lerp = pMath.lerp
 
 
 local def = {

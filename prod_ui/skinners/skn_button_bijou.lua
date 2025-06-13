@@ -1,14 +1,13 @@
 local context = select(1, ...)
 
 
-local commonMath = require(context.conf.prod_ui_req .. "common.common_math")
 local lgcLabel = context:getLua("shared/lgc_label")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
-local _lerp = commonMath.lerp
+local _lerp = pMath.lerp
 local check, change = uiTheme.check, uiTheme.change
 
 
