@@ -40,5 +40,12 @@ return {
 			-- "all" or "active"
 			render_shadow = "all",
 		},
+
+		menu_bar = {
+			-- Draw shortcut underlines: "never", "when-active", "always"
+			-- "when-active" == when a menu bar drawer is open, or the user is holding the 'alt' key.
+			draw_underlines = "always",
+		},
+
 	}
 }
