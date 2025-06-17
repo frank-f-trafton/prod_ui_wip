@@ -196,7 +196,7 @@ function def:addItem(text, pos, icon_id)
 	item.text = text
 	item.icon_id = icon_id
 	item.tq_icon = false
-	lgcMenu.updateItemIcon(self, item)
+	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 	item.x, item.y = 0, 0
 	_shapeItem(self, item)
@@ -678,7 +678,7 @@ def.default_skinner = {
 
 		-- Update shapes, positions, and icons of any existing items
 		for i, item in ipairs(self.items) do
-			lgcMenu.updateItemIcon(self, item)
+			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 			_shapeItem(self, item)
 		end
 

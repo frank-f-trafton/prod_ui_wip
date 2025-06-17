@@ -77,19 +77,6 @@ function commonTab.columnSortGeneric(wid, column)
 end
 
 
-function commonTab.setDefaultMeasurements(self)
-	local font = self.skin.cell_font
-	self.default_item_h = math.floor(font:getHeight() * 1.25)
-	self.default_item_text_x = math.floor(font:getWidth("M") / 4)
-	self.default_item_text_y = math.floor((self.default_item_h - font:getHeight()) / 2)
-
-	self.default_item_bijou_x = 0
-	self.default_item_bijou_y = 0
-	self.default_item_bijou_w = self.default_item_h
-	self.default_item_bijou_h = self.default_item_h
-end
-
-
 function commonTab.getWidestColumnText(self, column_id)
 	local font = self.skin.cell_font
 	local w = 0

@@ -153,7 +153,7 @@ end
 
 function lgcTree.updateAllIconReferences(self, skin, node)
 	for i, item in ipairs(node.nodes) do
-		lgcMenu.updateItemIcon(self, item)
+		item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 		if #item.nodes > 0 then
 			lgcTree.updateAllIconReferences(self, skin, item)
 		end
@@ -210,7 +210,7 @@ function lgcTree.addNode(self, text, parent_node, tree_pos, icon_id)
 	item.text = text
 	item.icon_id = icon_id
 	item.tq_icon = false
-	lgcMenu.updateItemIcon(self, item)
+	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 	item.x, item.y = 0, 0
 	lgcTree.updateItemDimensions(self, skin, item)

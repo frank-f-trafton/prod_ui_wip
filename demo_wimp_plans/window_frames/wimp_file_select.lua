@@ -186,14 +186,19 @@ local function setupMenuItem(self, source)
 	--item.cells[<?>] = {text = text_type} -- Reserved
 
 	if source.type == "file" then
-		item.cells[1].tq_bijou = self.context.resources.quads["atlas"]["icon_file"] -- TODO: fix
+		item.cells[1].icon_id = "file"
 
 	elseif source.type == "directory" or source.type == "symlink" then
-		item.cells[1].tq_bijou = self.context.resources.quads["atlas"]["icon_folder"] -- TODO: fix
+		item.cells[1].icon_id = "folder"
 	end
 
 	local implTabCell = self.context:getLua("shared/impl_tab_cell")
-	item.render = implTabCell.default_renderCell
+	for j, cell in ipairs(item.cells) do
+		cell.render = implTabCell.render
+		cell.reshape = implTabCell.reshape
+
+		cell:reshape(self)
+	end
 
 	return item
 end
@@ -276,7 +281,6 @@ function plan.makeWindowFrame(root)
 
 	frame:setLayoutNode(menu_tab, frame.layout_tree)
 
-	commonTab.setDefaultMeasurements(menu_tab)
 	menu_tab.renderThimble = function() end
 
 	menu_tab.MN_drag_select = true

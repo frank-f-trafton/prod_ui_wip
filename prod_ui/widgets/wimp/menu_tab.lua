@@ -50,6 +50,7 @@
 
 local context = select(1, ...)
 
+
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonTab = require(context.conf.prod_ui_req .. "common.common_tab")
 local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
@@ -60,7 +61,11 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "menu_tab1"
+	skin_id = "menu_tab1",
+
+	default_settings = {
+		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
+	}
 }
 
 
@@ -85,7 +90,7 @@ function def:addColumn(label, visible, cb_sort)
 	column.x = 0
 	column.y = 0
 	column.w = 128
-	column.h = 32
+	column.h = self.skin.bar_height
 
 	column.visible = (visible ~= nil) and not not visible or false
 	column.text = label or ""
@@ -95,8 +100,12 @@ function def:addColumn(label, visible, cb_sort)
 end
 
 
+local _mt_item = {selectable=true}
+_mt_item.__index = _mt_item
+
+
 function def:addRow()
-	local item = {x=0, y=0, w=0, h=0, selectable=true}
+	local item = setmetatable({x=0, y=0, w=0, h=0}, _mt_item)
 
 	-- Every row in the menu should have as many cells as there are columns (including invisible ones).
 	item.cells = {}
@@ -260,20 +269,9 @@ function def:uiCall_initialize()
 	-- The sorting direction for the primary column. True == ascending (arrow down).
 	self.column_sort_ascending = true
 
-	-- Item measurements. These should be set based on the font size used with
-	-- Menu-Item text.
-	-- The default item width is determined by the width of the column bar (or the
-	-- width of the widget if there are no categories).
-	self.default_item_h = 16
-	self.default_item_text_x = 0
-	self.default_item_text_y = 0
-	self.default_item_bijou_x = 0
-	self.default_item_bijou_y = 0
-	self.default_item_bijou_w = 0
-	self.default_item_bijou_h = 0
-
 	self:skinSetRefs()
 	self:skinInstall()
+	self:applyAllSettings()
 end
 
 
@@ -315,10 +313,12 @@ end
 -- Updates the positions of column header boxes
 function def:refreshColumnBar()
 	local cx = 0
+	local bar_height = self.skin.bar_height
 	for i, column in ipairs(self.columns) do
 		if column.visible then
 			column.x = cx
 			column.y = 0
+			column.h = bar_height
 			cx = cx + column.w
 		end
 	end
@@ -328,6 +328,8 @@ end
 
 
 function def:refreshRows()
+	local skin = self.skin
+
 	local column_bar_x2 = self.vp_w
 
 	local last_vis_column
@@ -347,10 +349,14 @@ function def:refreshRows()
 		item.x = 0
 		item.y = yy
 		item.w = column_bar_x2
-		item.h = self.default_item_h
+		item.h = skin.item_h
 
-		if item.reshape then
-			item:reshape()
+		for j, cell in ipairs(item.cells) do
+			if cell.reshape then
+				cell:reshape(self)
+			else
+				error("no reshape callback?")
+			end
 		end
 
 		yy = item.y + item.h
@@ -986,7 +992,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 		local item = items[j]
 		local cell = item.cells[column.id]
 		if cell then
-			item:render(self, column, cell, ox, oy)
+			cell:render(item, column, self, ox, oy)
 		end
 	end
 
@@ -1015,8 +1021,8 @@ local function _changeRes(skin, k, scale)
 	uiTheme.pushLabel(k)
 
 	local res = check.getRes(skin, k)
-	change.integerScaled(res, "offset_ox", scale)
-	change.integerScaled(res, "offset_oy", scale)
+	change.integerScaled(res, "offset_x", scale)
+	change.integerScaled(res, "offset_y", scale)
 
 	uiTheme.popLabel()
 end
@@ -1024,24 +1030,29 @@ end
 
 def.default_skinner = {
 	validate = function(skin)
+		-- settings
+		check.type(skin, "icon_set_id", "nil", "string")
+		-- /settings
+
 		check.box(skin, "box")
 		check.quad(skin, "tq_px")
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
 		check.loveType(skin, "font", "Font")
 
+		check.colorTuple(skin, "color_header_body")
 		check.colorTuple(skin, "color_background")
 		check.colorTuple(skin, "color_item_text")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
 		check.colorTuple(skin, "color_column_sep")
-
 		check.colorTuple(skin, "color_drag_col_bg")
 
-		check.integer(skin, "column_sep_width")
+		check.integer(skin, "item_h", 0)
+		check.integer(skin, "column_sep_width", 0)
 
 		-- Some default data for cell implementations.
-		check.colorTuple(skin, "color_cell_bijou")
+		check.colorTuple(skin, "color_cell_icon")
 		check.colorTuple(skin, "color_cell_text")
 		check.loveType(skin, "cell_font", "Font")
 
@@ -1049,14 +1060,6 @@ def.default_skinner = {
 		check.integer(skin, "col_sep_line_width", 0)
 		check.integer(skin, "bijou_w", 0)
 		check.integer(skin, "bijou_h", 0)
-
-		check.colorTuple(skin, "color_body")
-
-		-- vertical separator between columns
-		check.colorTuple(skin, "color_col_sep")
-
-		-- a line between the header body and rest of widget
-		check.colorTuple(skin, "color_body_sep")
 
 		check.quad(skin, "tq_arrow_up")
 		check.quad(skin, "tq_arrow_down")
@@ -1072,7 +1075,8 @@ def.default_skinner = {
 	end,
 
 
-	tranform = function(skin, scale)
+	transform = function(skin, scale)
+		change.integerScaled(skin, "item_h", scale)
 		change.integerScaled(skin, "column_sep_width", scale)
 		change.integerScaled(skin, "bar_height", scale)
 		change.integerScaled(skin, "col_sep_line_width", scale)
@@ -1090,6 +1094,10 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
+
+		self:refreshColumnBar()
+		self:cacheUpdate(true)
+		self:scrollClampViewport()
 	end,
 
 
@@ -1118,7 +1126,7 @@ def.default_skinner = {
 		uiGraphics.quadXYWH(tq_px, 0, 0, self.w, self.h)
 
 		-- Column bar body (spanning the top of the widget).
-		love.graphics.setColor(skin.color_body)
+		love.graphics.setColor(skin.color_header_body)
 		uiGraphics.quadXYWH(tq_px, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
 
 		uiGraphics.intersectScissor(
