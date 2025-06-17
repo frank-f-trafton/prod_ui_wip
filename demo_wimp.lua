@@ -358,20 +358,20 @@ end
 do
 	do
 		-- Construct the application menu bar.
-		local bar_menu = wimp_root:addChild("wimp/menu_bar")
-		bar_menu:initialize()
+		local menu_bar = wimp_root:addChild("wimp/menu_bar")
+		menu_bar:initialize()
 
 		-- [[
 		local node = wimp_root.layout_tree:newNode()
 		node:setMode("slice", "px", "top", 32)
-		wimp_root:setLayoutNode(bar_menu, node)
+		wimp_root:setLayoutNode(menu_bar, node)
 		--]]
 
-		bar_menu.tag = "root_menu_bar"
+		menu_bar.tag = "root_menu_bar"
 
 		-- Test the (normally commented out) debug render user event.
 		--[[
-		bar_menu.userDebugRender = function(self, os_x, os_y)
+		menu_bar.userDebugRender = function(self, os_x, os_y)
 			love.graphics.setScissor()
 			love.graphics.setColor(1,1,1,1)
 			love.graphics.print("Hello world!")
@@ -420,7 +420,7 @@ do
 				key_shortcut = "KC q",
 			},
 		}
-		bar_menu:appendItem("category", {
+		menu_bar:appendCategory({
 			text = "_D_emo",
 			key_mnemonic = "d",
 			pop_up_def = def_demo,
@@ -488,7 +488,7 @@ do
 				key_mnemonic = "r",
 			},
 		}
-		bar_menu:appendItem("category", {
+		menu_bar:appendCategory({
 			text = "_M_enu Example",
 			key_mnemonic = "m",
 			pop_up_def = def_file,
@@ -518,7 +518,7 @@ do
 				--key_shortcut = ,
 			},
 		}
-		bar_menu:appendItem("category", {
+		menu_bar:appendCategory({
 			text = "_E_dit",
 			key_mnemonic = "e",
 			pop_up_def = def_edit,
@@ -544,17 +544,17 @@ do
 				--key_shortcut = ,
 			},
 		}
-		bar_menu:appendItem("category", {
+		menu_bar:appendCategory({
 			text = "_H_elp",
 			key_mnemonic = "h",
 			pop_up_def = def_help,
 		})
 		--]==]
 
-		bar_menu:arrangeItems()
-		bar_menu:menuChangeCleanup()
+		menu_bar:arrangeItems()
+		menu_bar:menuChangeCleanup()
 
-		bar_menu.sort_id = 6
+		menu_bar.sort_id = 6
 
 		-- Hook application-level shortcuts to WIMP root
 		do
@@ -577,17 +577,17 @@ do
 
 		-- Hook menu bar key commands to WIMP root
 		do
-			table.insert(wimp_root.hooks_key_pressed, bar_menu.widHook_pressed)
-			table.insert(wimp_root.hooks_key_released, bar_menu.widHook_released)
+			table.insert(wimp_root.hooks_key_pressed, menu_bar.widHook_pressed)
+			table.insert(wimp_root.hooks_key_released, menu_bar.widHook_released)
 		end
 
 
 		-- Test sneaking a button into a menu bar.
 		--[[
-		local bar_button = bar_menu:addChild("base/button")
+		local bar_button = menu_bar:addChild("base/button")
 
-		bar_button.w = bar_menu.h - 4
-		bar_button.x = bar_menu.w - bar_button.w + 2
+		bar_button.w = menu_bar.h - 4
+		bar_button.x = menu_bar.w - bar_button.w + 2
 		bar_button.h = 2
 		bar_button.h = bar_button.w
 
