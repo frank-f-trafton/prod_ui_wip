@@ -811,15 +811,19 @@ function def:uiCall_update(dt)
 		self:cacheUpdate(true)
 	end
 
-	-- Selectively draw underlines?
-	--[[
+	-- Set underline render state
+	local uline_draw = context.settings.wimp.menu_bar.draw_underlines
 	local mod = self.context.key_mgr.mod
-	if self.chain_next or mod["alt"] then
+
+	if uline_draw == "always" then
 		self.show_underlines = true
-	else
+
+	elseif uline_draw == "when-active" then
+		self.show_underlines = (self.chain_next or mod["alt"]) and true or false
+
+	else -- "never"
 		self.show_underlines = false
 	end
-	--]]
 
 	-- Test async removal
 	--[[
