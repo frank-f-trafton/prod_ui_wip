@@ -20,6 +20,7 @@ local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -53,72 +54,51 @@ local function determineItemColor(item, client)
 end
 
 
-def._mt_category = {
-	type = "category",
-	reshape = function(item, client)
-		local font = client.skin.font_item
+local function _shapeItem(self, item)
+	local font = self.skin.font_item
 
-		--item.h = client.h
-		item.h = client.vp_h
-		item.text_x = client.text_pad_x
-		item.text_y = math.floor(0.5 + item.h/2 - font:getHeight()/2)
+	item.h = self.vp_h
+	item.text_x = self.text_pad_x
+	item.text_y = math.floor(0.5 + item.h/2 - font:getHeight()/2)
 
-		-- Underline state
-		local temp_str, x, w = textUtil.processUnderline(item.text, font)
-		if not temp_str then
-			item.ul_on = false
-			item.text_int = item.text
-		else
-			item.ul_on = true
-			item.text_int = temp_str
-			item.ul_x = item.text_x + x
-			item.ul_w = w
-			--item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + client.underline_width / 2)
-			item.ul_y = item.text_y + font:getBaseline() + math.floor(0.5 + client.underline_width / 2)
-		end
-
-		item.w = font:getWidth(item.text_int) + client.text_pad_x*2
-	end,
-	render = function(item, client, ox, oy)
-		love.graphics.setColor(determineItemColor(item, client))
-
-		-- Underlines are handled in a separate pass in the client.
-
-		-- Font is set by the client widget ahead of time.
-		love.graphics.print(item.text_int, item.x + item.text_x, item.y + item.text_y)
-	end,
-}
-def._mt_category.__index = def._mt_category
-
-
-function def:appendItem(item_type, info)
-	local item = {
-		x = 0,
-		y = 0,
-		w = 1,
-		h = 1,
-	}
-
-	if item_type == "category" then
-		item.text = info.text or ""
-		item.text_int = ""
-		item.text_x = 0
-		item.text_y = 0
-		item.text_w = 1
-
-		item.pop_up_def = info.pop_up_def
-
-		item.selectable = true
-
-		setmetatable(item, self._mt_category)
+	-- Underline state
+	local temp_str, x, w = textUtil.processUnderline(item.text, font)
+	if not temp_str then
+		item.ul_on = false
+		item.text_int = item.text
 	else
-		error("unknown item type: " .. tostring(item_type))
+		item.ul_on = true
+		item.text_int = temp_str
+		item.ul_x = item.text_x + x
+		item.ul_w = w
+		--item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + self.underline_width / 2)
+		item.ul_y = item.text_y + font:getBaseline() + math.floor(0.5 + self.underline_width / 2)
 	end
 
-	if info then
-		for k, v in pairs(info) do
-			item[k] = v
-		end
+	item.w = font:getWidth(item.text_int) + self.text_pad_x*2
+end
+
+
+local _mt_category = {type="category"}
+_mt_category.__index = _mt_category
+
+
+function def:appendCategory(info)
+	local item = {x=0, y=0, w=0, h=0}
+
+	item.text = info.text or ""
+	item.text_int = ""
+	item.text_x = 0
+	item.text_y = 0
+	item.text_w = 0
+
+	item.pop_up_def = info.pop_up_def
+	item.selectable = true
+
+	setmetatable(item, self._mt_category)
+
+	for k, v in pairs(info) do
+		item[k] = v
 	end
 
 	self.items[#self.items + 1] = item
@@ -330,9 +310,8 @@ function def:uiCall_reshapePost()
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
-	-- Reshape all items
 	for i, item in ipairs(self.items) do
-		item:reshape(self)
+		_shapeItem(self, item)
 	end
 
 	self:arrangeItems()
@@ -824,16 +803,6 @@ function def:uiCall_update(dt)
 	else -- "never"
 		self.show_underlines = false
 	end
-
-	-- Test async removal
-	--[[
-	if self.DBG_time then
-		self.DBG_time = self.DBG_time + dt
-		if self.DBG_time > 1.0 then
-			self.context:appendAsyncAction(self, async_remove)
-		end
-	end
-	--]]
 end
 
 
@@ -937,8 +906,6 @@ def.default_skinner = {
 			uiGraphics.quad1x1(skin.tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
 		end
 
-		love.graphics.setFont(font)
-
 		if self.show_underlines then
 			for i = 1, #items do
 				local item = items[i]
@@ -958,8 +925,12 @@ def.default_skinner = {
 
 		--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 
+		love.graphics.setFont(font)
 		for i = 1, #items do
-			items[i]:render(self, ox, oy)
+			local item = items[i]
+			love.graphics.setScissor()
+			love.graphics.setColor(determineItemColor(item, self))
+			love.graphics.print(item.text_int, item.x + item.text_x, item.y + item.text_y)
 		end
 
 		love.graphics.pop()
@@ -976,7 +947,7 @@ def.default_skinner = {
 		love.graphics.print("state: " .. self.state
 		.. "\npressed: " .. tostring(self == self.context.current_pressed)
 		.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
-		.. "\nself.index: " .. tostring(self.index))
+		.. "\nself.index: " .. tostring(self.index)
 		,
 		ww, oy + 32)
 		 --]]
