@@ -76,8 +76,6 @@ function plan.makeWindowFrame(root)
 
 	frame:setLayoutNode(menu_tab, frame.layout_tree)
 
-	commonTab.setDefaultMeasurements(menu_tab)
-
 	menu_tab.renderThimble = function() end
 
 	menu_tab.MN_drag_select = true
@@ -110,13 +108,11 @@ function plan.makeWindowFrame(root)
 		item.cells[4] = {text = item.label4}
 
 		local implTabCell = context:getLua("shared/impl_tab_cell")
-		item.render = implTabCell.default_renderCell
+		for j, cell in ipairs(item.cells) do
+			cell.render = implTabCell.render
+			cell.reshape = implTabCell.reshape
+		end
 	end
-
-	local font = menu_tab.skin.cell_font
-	menu_tab.default_item_h = math.floor(font:getHeight() * 1.25)
-	menu_tab.default_item_text_x = math.floor(font:getWidth("M") / 16)
-	menu_tab.default_item_text_y = math.floor((menu_tab.default_item_h - font:getHeight()) / 2)
 
 	menu_tab:refreshRows()
 

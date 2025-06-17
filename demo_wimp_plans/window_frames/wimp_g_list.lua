@@ -1,4 +1,5 @@
--- As seen in the Love Frames demo.
+-- A chart of Lua global variables, as seen in the Love Frames demo.
+
 
 -- ProdUI
 local commonTab = require("prod_ui.common.common_tab")
@@ -39,8 +40,6 @@ end
 function plan.makeWindowFrame(root)
 	local context = root.context
 
-	local implTabCell = context:getLua("shared/impl_tab_cell")
-
 	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
@@ -55,8 +54,6 @@ function plan.makeWindowFrame(root)
 	menu_tab:initialize()
 
 	frame:setLayoutNode(menu_tab, frame.layout_tree)
-
-	commonTab.setDefaultMeasurements(menu_tab)
 
 	menu_tab.renderThimble = function() end
 
@@ -81,13 +78,12 @@ function plan.makeWindowFrame(root)
 		item.cells[1] = {text = tostring(k)}
 		item.cells[2] = {text = tostring(v)}
 
-		item.render = implTabCell.default_renderCell
+		local implTabCell = context:getLua("shared/impl_tab_cell")
+		for j, cell in ipairs(item.cells) do
+			cell.render = implTabCell.render
+			cell.reshape = implTabCell.reshape
+		end
 	end
-
-	local font = menu_tab.skin.cell_font
-	menu_tab.default_item_h = math.floor(font:getHeight() * 1.25)
-	menu_tab.default_item_text_x = math.floor(font:getWidth("M") / 16)
-	menu_tab.default_item_text_y = math.floor((menu_tab.default_item_h - font:getHeight()) / 2)
 
 	menu_tab:refreshRows()
 

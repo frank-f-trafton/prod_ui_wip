@@ -320,8 +320,7 @@ function def:updateDimensions()
 		end
 
 		if item.type ~= "separator" then
-			lgcMenu.updateItemIcon(self, item)
-			print("item.type", item.type, "item.icon_id", item.icon_id, "item.tq_icon", item.tq_icon, "item.bijou", item.bijou)
+			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 			-- Underline state
 			local temp_str, x, w = textUtil.processUnderline(item.text, font)

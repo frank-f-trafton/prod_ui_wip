@@ -100,8 +100,7 @@ local function _shapeItem(self, item)
 
 	item.w = font:getWidth(item.text)
 	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-
-	lgcMenu.updateItemIcon(self, item)
+	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 end
 
 
