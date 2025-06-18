@@ -22,7 +22,6 @@ Optional icons (bijoux)  │
 
 --[[
 Stuff to fix:
-* When scaling up the UI, control widgets are not correctly sized horizontally.
 
 * The function attached to 'self:arrangeItems()' doesn't use the viewport argument.
   Might need to write a custom one for this widget.
@@ -180,7 +179,7 @@ end
 local function updateItemDimensions(self, v, item)
 	local skin = self.skin
 	local vx, vy, vw, vh = widShared.getViewportXYWH(self, v)
-	item.w = math.max(skin.control_min_w, vw)
+	item.w = vw
 	item.h = skin.item_h
 end
 
@@ -729,7 +728,6 @@ def.default_skinner = {
 		check.type(skin, "cursor_sash", "nil", "string")
 		check.integer(skin, "sash_w", 0)
 		check.integer(skin, "item_h", 0)
-		check.integer(skin, "control_min_w", 0)
 		check.slice(skin, "sl_body")
 
 		-- Alignment of property name text:
@@ -753,7 +751,6 @@ def.default_skinner = {
 	transform = function(skin, scale)
 		change.integerScaled(skin, "sash_w", scale)
 		change.integerScaled(skin, "item_h", scale)
-		change.integerScaled(skin, "control_min_w", scale)
 		change.integerScaled(skin, "icon_spacing", scale)
 		change.integerScaled(skin, "pad_text_x", scale)
 	end,
