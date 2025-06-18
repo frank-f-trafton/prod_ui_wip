@@ -70,9 +70,8 @@ local function _shapeItem(self, item)
 		item.ul_on = true
 		item.text_int = temp_str
 		item.ul_x = item.text_x + x
+		item.ul_y = item.text_y + textUtil.getUnderlineOffset(font, self.underline_width)
 		item.ul_w = w
-		--item.ul_y = item.text_y + font:getHeight() + math.floor(0.5 + self.underline_width / 2)
-		item.ul_y = item.text_y + font:getBaseline() + math.floor(0.5 + self.underline_width / 2)
 	end
 
 	item.w = font:getWidth(item.text_int) + self.text_pad_x*2
@@ -837,9 +836,9 @@ def.default_skinner = {
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
 
+		check.numberOrExact(skin, "base_height", 0, nil, "auto")
 		check.integer(skin, "underline_width", 1)
 		check.number(skin, "height_mult", 1.0)
-		check.numberOrExact(skin, "base_height", 0, nil, "auto")
 	end,
 
 
@@ -880,7 +879,6 @@ def.default_skinner = {
 		local selected_index = self.index
 
 		local font = skin.font_item
-		local font_h = font:getHeight()
 
 		love.graphics.push("all")
 

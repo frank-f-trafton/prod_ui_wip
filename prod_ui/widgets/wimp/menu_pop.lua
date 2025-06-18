@@ -331,8 +331,8 @@ function def:updateDimensions()
 				item.ul_on = true
 				item.text_int = temp_str
 				item.ul_x = x
+				item.ul_y = textUtil.getUnderlineOffset(font, skin.underline_width)
 				item.ul_w = w
-				item.ul_y = font:getHeight() + math.floor(0.5 + skin.underline_width / 2)
 			end
 		end
 
