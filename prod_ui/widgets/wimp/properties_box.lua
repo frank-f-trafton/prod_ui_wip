@@ -20,6 +20,20 @@ Optional icons (bijoux)  │
 --]]
 
 
+--[[
+Stuff to fix:
+* When scaling up the UI, control widgets are not correctly sized horizontally.
+
+* The function attached to 'self:arrangeItems()' doesn't use the viewport argument.
+  Might need to write a custom one for this widget.
+
+* 'items' should be its own array of tables with linked widgets. As it is, item
+  selection is mixed into the control widget tables.
+
+* Fix how icon resources are loaded.
+--]]
+
+
 local context = select(1, ...)
 
 
@@ -187,7 +201,7 @@ function def:addControl(wid_id, text, pos, bijou_id)
 	wid.bijou_id = bijou_id
 	wid.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix this up
 
-	self:arrangeItems(4, pos, #self.children)
+	self:arrangeItems(nil, pos, #self.children)
 
 	print("addControl text:", wid.text, "xywh: ", wid.x, wid.y, wid.w, wid.h)
 
@@ -225,7 +239,7 @@ function def:removeControlByIndex(wid_i)
 		self.index = self.index - 1
 	end
 
-	self:arrangeItems(4, wid_i, #children)
+	self:arrangeItems(nil, wid_i, #children)
 end
 
 
@@ -312,11 +326,15 @@ function def:uiCall_reshapePre()
 	self:scrollClampViewport()
 	commonScroll.updateScrollState(self)
 
-	-- Resize controls.
+	-- Resize and reposition controls.
+	local yy = self.vp_y
 	for i, wid in ipairs(self.items) do
 		wid.x = self.vp4_x - self.vp_x
+		wid.y = yy
 		updateItemDimensions(self, 4, wid)
+		yy = yy + wid.h
 	end
+	--self:arrangeItems()
 
 	self:cacheUpdate(true)
 end
