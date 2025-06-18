@@ -12,8 +12,8 @@ return {
 	color_select_glow = {0.33, 0.33, 0.33, 1.0},
 	color_hover_glow = {0.33, 0.33, 0.33, 1.0},
 
+	base_height = "auto",
+
 	underline_width = 1,
 	height_mult = 1.5,
-
-	base_height = "auto"
 }

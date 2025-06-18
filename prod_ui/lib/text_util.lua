@@ -529,4 +529,14 @@ function textUtil.getAlignmentOffset(str, font, align, width)
 end
 
 
+--- Gets the vertical underline offset for a font.
+-- @param font The Font.
+-- @param ul_thickness The vertical thickness of the underline.
+-- @return The vertical offset.
+function textUtil.getUnderlineOffset(font, ul_thickness)
+	local height = font:getHeight()
+	return height - math.floor(0.5 + (height - font:getBaseline() + ul_thickness) / 2.5)
+end
+
+
 return textUtil
