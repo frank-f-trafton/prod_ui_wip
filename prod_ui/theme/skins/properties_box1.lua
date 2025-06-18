@@ -9,7 +9,6 @@ return {
 
 	cursor_sash = "sizewe",
 	sash_w = 12,
-
 	item_h = 40,
 	control_min_w = 128,
 
