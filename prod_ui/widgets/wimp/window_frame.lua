@@ -22,7 +22,7 @@ local _enum_header_sizes = uiShared.makeLUTV("small", "normal", "large")
 
 
 local def = {
-	skin_id = "wimp_frame",
+	skin_id = "window_frame1",
 	trickle = {},
 
 	default_settings = {
