@@ -36,7 +36,6 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 -- ProdUI
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
@@ -607,7 +606,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
-				local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+				local lgcWimp = self.context:getLua("shared/lgc_wimp")
+				local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, x, y)
 				root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 				pop_up:tryTakeThimble2()
@@ -748,7 +748,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 			lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
 			local root = self:getRootWidget()
-			local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
+			local lgcWimp = self.context:getLua("shared/lgc_wimp")
+			local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
 			pop_up:tryTakeThimble2()
 
 			-- Halt propagation

@@ -53,7 +53,6 @@ local context = select(1, ...)
 
 local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local commonTab = require(context.conf.prod_ui_req .. "common.common_tab")
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -178,7 +177,8 @@ local function invokePopUpMenu(self, x, y)
 
 	local root = self:getRootWidget()
 
-	local pop_up = commonWimp.makePopUpMenu(self, cat_pop_up_def, x, y)
+	local lgcWimp = self.context:getLua("shared/lgc_wimp")
+	local pop_up = lgcWimp.makePopUpMenu(self, cat_pop_up_def, x, y)
 	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 	pop_up:tryTakeThimble2()

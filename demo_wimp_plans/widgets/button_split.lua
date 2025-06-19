@@ -1,6 +1,5 @@
 
 -- ProdUI
-local commonWimp = require("prod_ui.common.common_wimp")
 local demoShared = require("demo_shared")
 
 
@@ -57,7 +56,8 @@ local function _createPopUpMenu(self)
 			menu_x = ax + self.w - self.vp3_w
 		end
 
-		local pop_up = commonWimp.makePopUpMenu(self, _pop_up_def, menu_x, menu_y)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		local pop_up = lgcWimp.makePopUpMenu(self, _pop_up_def, menu_x, menu_y)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
