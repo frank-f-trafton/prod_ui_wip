@@ -152,6 +152,10 @@ function _mt_widget:uiCall_reshapePre()
 end
 
 
+--- Called when the layout system requests a slice length from a widget.
+-- @param x_axis True if the slice is horizontal, false if vertical.
+-- @param cross_length The length of available space on the other axis.
+-- @return 1) the length and 2) true/false/nil, indicating whether the value should be scaled or not, or nothing.
 function _mt_widget:uiCall_getSliceLength(x_axis, cross_length)
 
 end

@@ -50,13 +50,13 @@ local demo_plan_list = {
 		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
 		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
 		{plan_id = "scaling", label = "Scaling"},
+		{plan_id = "widgets.unfinished.layout", label = "Layout"},
 		--[[
 		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
 			{plan_id = "unfinished.drag_box", label = "Drag Box"},
 			{plan_id = "unfinished.dial", label = "Dials"},
-			{plan_id = "unfinished.menu_test", label = "Menu Test"},
 			{plan_id = "unfinished.container_work", label = "Container work"},
-			{plan_id = "unfinished.layout", label = "Layout"},
+
 			{plan_id = "unfinished.label_test", label = "Label test"},
 		}},
 		--]]

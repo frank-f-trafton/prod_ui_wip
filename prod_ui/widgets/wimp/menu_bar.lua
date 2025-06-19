@@ -297,7 +297,7 @@ end
 
 function def:uiCall_getSliceLength(x_axis, cross_length)
 	if not x_axis then
-		return self.base_height
+		return self.base_height, false
 	end
 end
 

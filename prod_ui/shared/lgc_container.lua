@@ -86,7 +86,7 @@ function _methods:configureSashNode(n1, n2)
 		error("argument #2: sashes are supposed to be leaf nodes.")
 	end
 
-	n2:setMode("slice", "px", n1.slice_edge, self.skin.sash_breadth, true)
+	n2:setMode("slice", "px", n1.slice_edge, self.skin.sash_breadth, true, true)
 end
 
 
@@ -109,7 +109,7 @@ end
 
 
 local function _checkMouseOverSash(self, node, mx, my, con_x, con_y)
-	if node.slice_sash then
+	if node.slice_is_sash then
 		if mx >= node.x + con_x
 		and mx < node.x + node.w - con_x
 		and my >= node.y + con_y
@@ -130,7 +130,7 @@ end
 
 
 function lgcContainer.renderSash(node, wid, ox, oy)
-	if node.slice_sash then
+	if node.slice_is_sash then
 		love.graphics.setColor(1, 0, 0, 1)
 		love.graphics.rectangle("fill", node.x - wid.scr_x, node.y - wid.scr_y, node.w, node.h)
 	end

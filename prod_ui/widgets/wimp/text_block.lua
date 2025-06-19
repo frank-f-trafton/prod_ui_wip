@@ -77,8 +77,13 @@ function def:setURL(url)
 
 	self.url = url or false
 
-	self.cursor_hover = self.url and self.skin.cursor_on
-	self.cursor_press = self.url and self.skin.cursor_press
+	if self.url then
+		self.cursor_hover = self.skin.cursor_on
+		self.cursor_press = self.skin.cursor_press
+	else
+		self.cursor_hover = nil
+		self.cursor_press = nil
+	end
 
 	self.allow_hover = not not self.url
 
@@ -213,7 +218,7 @@ function def:uiCall_getSliceLength(x_axis, cross_length)
 	if not x_axis and self.auto_size == "v" then
 		_determineTextDimensions(self, cross_length)
 		local border = self.skin.box.border
-		return self.text_h + border.y1 + border.y2
+		return self.text_h + border.y1 + border.y2, false
 	end
 end
 
