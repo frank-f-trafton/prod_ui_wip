@@ -1,7 +1,7 @@
 local context = select(1, ...)
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
@@ -39,7 +39,7 @@ local def = {
 }
 
 
-def.setScrollBars = commonScroll.setScrollBars
+def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -502,7 +502,7 @@ function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse
 		-- Because this widget accepts hover events outside of its boundaries (for resizing), we need to confirm
 		-- that the mouse cursor actually is within the Window Frame area before checking scroll bar hover.
 		if mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h then
-			commonScroll.widgetProcessHover(self, mx, my)
+			lgcScroll.widgetProcessHover(self, mx, my)
 		end
 
 		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
@@ -542,7 +542,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		commonScroll.widgetClearHover(self)
+		lgcScroll.widgetClearHover(self)
 
 		self.hover_zone = false
 		self.mouse_in_resize_zone = false
@@ -575,7 +575,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			-- perform an additional intersection check.
 			if mx >= 0 and my >= 0 and mx < self.w and my < self.h then
 				local fixed_step = 24 -- [XXX 2] style/config
-				handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+				handled = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
 			end
 
 			if not handled and self.header_visible then
@@ -717,7 +717,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				end
 			end
 
-			commonScroll.widgetClearPress(self)
+			lgcScroll.widgetClearPress(self)
 			self.press_busy = false
 		end
 	end
@@ -742,15 +742,15 @@ end
 function def:uiCall_update(dt)
 	dt = math.min(dt, 1.0)
 
-	if commonScroll.press_busy_codes[self.press_busy] then
+	if lgcScroll.press_busy_codes[self.press_busy] then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
-		commonScroll.widgetDragLogic(self, mx, my, button_step*dt)
+		lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
 	end
 
 	self:scrollUpdate(dt)
-	commonScroll.updateScrollState(self)
-	commonScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
+	lgcScroll.updateScrollBarShapes(self)
 
 	if self.needs_update then
 		local skin = self.skin
@@ -880,7 +880,7 @@ function def:uiCall_reshapePre()
 
 	widShared.carveViewport(self, 1, skin.box.border2)
 
-	commonScroll.arrangeScrollBars(self)
+	lgcScroll.arrangeScrollBars(self)
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 2, skin.box.margin2)
@@ -901,8 +901,8 @@ function def:uiCall_reshapePre()
 	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
-	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScrollState(self)
+	lgcScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
 
 	--return self.halt_reshape -- ?
 end
@@ -1252,7 +1252,7 @@ def.default_skinner = {
 	renderLast = function(self, ox, oy)
 		love.graphics.push("all")
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 		love.graphics.pop()
 	end,
 

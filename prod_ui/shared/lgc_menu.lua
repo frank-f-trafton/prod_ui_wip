@@ -12,13 +12,13 @@ local context = select(1, ...)
 local lgcMenu = {}
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
-local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
+local viewport_keys = context:getLua("core/viewport_keys")
 
 
 local _signP = pMath.signP
@@ -1263,7 +1263,7 @@ function lgcMenu.pointerPressScrollBars(self, x, y, button)
 	-- Check for pressing on scroll bar components.
 	if button == 1 then
 		local fixed_step = 24 -- XXX style/config
-		if commonScroll.widgetScrollPress(self, x, y, fixed_step) then
+		if lgcScroll.widgetScrollPress(self, x, y, fixed_step) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 			self.context:clearClickSequence()
 			return true
@@ -1274,12 +1274,12 @@ end
 
 function lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	-- Repeat-press events for scroll bar buttons
-	if commonScroll.press_busy_codes[self.press_busy]
+	if lgcScroll.press_busy_codes[self.press_busy]
 	and button == 1
 	and button == self.context.mouse_pressed_button
 	then
 		local fixed_step = 24 -- XXX style/config
-		commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+		lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
 	end
 end
 

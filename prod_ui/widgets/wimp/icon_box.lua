@@ -80,7 +80,7 @@ B2T_R2L: Bottom to top, right to left
 local context = select(1, ...)
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -93,7 +93,7 @@ local def = {
 
 
 widShared.scrollSetMethods(def)
-def.setScrollBars = commonScroll.setScrollBars
+def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 

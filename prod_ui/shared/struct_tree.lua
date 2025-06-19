@@ -1,6 +1,9 @@
 -- Provides the guts of a tree structure, suitable for use in a TreeBox widget.
 
 
+local context = select(1, ...)
+
+
 local structTree = {}
 
 

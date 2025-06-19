@@ -7,7 +7,7 @@ local context = select(1, ...)
 local widShared = {}
 
 
-local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys");
+local viewport_keys = context:getLua("core/viewport_keys")
 local vpk = viewport_keys
 
 

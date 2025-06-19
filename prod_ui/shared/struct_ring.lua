@@ -1,12 +1,14 @@
 -- XXX: Untested.
+
+
+local context = select(1, ...)
+
+
 -- A generic ring buffer container.
 -- Use case: rolling message logs.
 
 
 local structRing = {}
-
-
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local _mt_ring = {}

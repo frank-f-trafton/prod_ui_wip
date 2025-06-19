@@ -36,8 +36,8 @@ Stuff to fix:
 local context = select(1, ...)
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -51,7 +51,7 @@ local def = {
 
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.setScrollBars = commonScroll.setScrollBars
+def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
@@ -306,7 +306,7 @@ function def:uiCall_reshapePre()
 
 	-- Border and scroll bars.
 	widShared.carveViewport(self, 1, skin.box.border)
-	commonScroll.arrangeScrollBars(self)
+	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
@@ -323,7 +323,7 @@ function def:uiCall_reshapePre()
 	widShared.straddleViewport(self, 3, 5, "right", 0.5)
 
 	self:scrollClampViewport()
-	commonScroll.updateScrollState(self)
+	lgcScroll.updateScrollState(self)
 
 	-- Resize and reposition controls.
 	local yy = self.vp_y
@@ -474,7 +474,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		commonScroll.widgetProcessHover(self, mx, my)
+		lgcScroll.widgetProcessHover(self, mx, my)
 
 		local hover_ok = false
 
@@ -513,7 +513,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		commonScroll.widgetClearHover(self)
+		lgcScroll.widgetClearHover(self)
 		self.cursor_hover = nil
 		self.MN_item_hover = false
 	end
@@ -612,7 +612,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
-		commonScroll.widgetClearPress(self)
+		lgcScroll.widgetClearPress(self)
 		self.press_busy = false
 	end
 end
@@ -690,11 +690,11 @@ function def:uiCall_update(dt)
 	then
 		needs_update = true
 
-	elseif commonScroll.press_busy_codes[self.press_busy] then
+	elseif lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 			local button_step = 350 -- XXX style/config
-			commonScroll.widgetDragLogic(self, mx, my, button_step*dt)
+			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
 		end
 	end
 
@@ -706,8 +706,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- Update scroll bar registers and thumb position.
-	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScrollState(self)
+	lgcScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
 
 	if needs_update then
 		self:cacheUpdate(false)
@@ -788,7 +788,7 @@ def.default_skinner = {
 		love.graphics.setColor(1, 1, 1, 1)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
-		commonScroll.drawScrollBarsHV(self, skin.data_scroll) -- maybe do vertical bars only?
+		lgcScroll.drawScrollBarsHV(self, skin.data_scroll) -- maybe do vertical bars only?
 
 		love.graphics.push("all")
 
