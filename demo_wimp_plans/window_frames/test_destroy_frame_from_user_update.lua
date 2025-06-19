@@ -30,8 +30,8 @@ function plan.makeWindowFrame(root)
 			bb_lbl:setLabel(string.format("This frame will self-destruct, via userUpdate, in %.1f seconds.", self.usr_time_max - self.usr_time))
 		end
 		if self.usr_time >= self.usr_time_max then
-			local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
-			commonWimp.closeFrame(self)
+			local lgcWimp = self.context:getLua("shared/lgc_wimp")
+			lgcWimp.closeFrame(self)
 			return true
 		end
 	end

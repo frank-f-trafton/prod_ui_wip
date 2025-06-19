@@ -8,7 +8,6 @@
 
 
 -- ProdUI
-local commonWimp = require("prod_ui.common.common_wimp")
 local dbg = require("prod_ui.debug.dbg")
 
 
@@ -95,7 +94,7 @@ local function tree_userUpdate(self, dt)
 		if self.usr_timer <= 0 then
 			self.usr_timer = self.usr_timer_max
 			_buildTree(self, root)
-			local frame = commonWimp.getFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:reshape()
 			end

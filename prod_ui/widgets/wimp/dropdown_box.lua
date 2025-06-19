@@ -41,7 +41,6 @@ should still work when clicking on the body, however.
 local context = select(1, ...)
 
 
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
@@ -270,7 +269,8 @@ function def:_openPopUpMenu()
 			new_item.source_item = item
 		end
 
-		commonWimp.assignPopUp(self, drawer)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		lgcWimp.assignPopUp(self, drawer)
 
 		drawer:setSelectionByIndex(self.index)
 

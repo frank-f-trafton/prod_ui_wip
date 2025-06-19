@@ -16,7 +16,6 @@ The menu bar may act strangely if it is too narrow to display all categories.
 
 local context = select(1, ...)
 
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -119,7 +118,7 @@ end
 -- @param doctor_press When true, if user is pressing down a mouse button, transfer pressed state to the pop-up widget.
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
-local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to commonWimp.makePopUpMenu()
+local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to lgcWimp.makePopUpMenu()
 	lgcMenu.widgetConfigureMenuItems(item, item.pop_up_def)
 
 	-- Locate bottom of menu item in UI space.
@@ -134,7 +133,8 @@ local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selec
 		root:sendEvent("rootCall_destroyPopUp", client)
 	end
 
-	local pop_up = commonWimp.makePopUpMenu(client, item.pop_up_def, p_x, p_y)
+	local lgcWimp = client.context:getLua("shared/lgc_wimp")
+	local pop_up = lgcWimp.makePopUpMenu(client, item.pop_up_def, p_x, p_y)
 
 	if doctor_press then
 		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")

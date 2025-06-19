@@ -2,9 +2,6 @@
 local plan = {}
 
 
-local commonWimp = require("prod_ui.common.common_wimp")
-
-
 local demoShared = require("demo_shared")
 
 

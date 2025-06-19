@@ -17,7 +17,6 @@ _mt_widget.context = context
 
 local widLayout = context:getLua("core/wid_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys");
 local widShared = context:getLua("core/wid_shared")
 
@@ -1202,6 +1201,20 @@ function _mt_widget:getParent()
 	end
 
 	return parent
+end
+
+
+-- Looks up the hierarchy for a UI Frame, starting at this widget.
+-- @param self Any descendent of a UI Frame, or the UI Frame itself.
+-- @return The UI Frame, or nil if no UI Frame was found.
+function _mt_widget:getUIFrame()
+	local wid = self
+	while wid do
+		if wid.frame_type then
+			return wid
+		end
+		wid = wid.parent
+	end
 end
 
 

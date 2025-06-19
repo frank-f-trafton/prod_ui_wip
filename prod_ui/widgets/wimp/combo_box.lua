@@ -44,7 +44,6 @@ invoke another context menu on the selection in the drawer.
 local context = select(1, ...)
 
 
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
@@ -310,7 +309,8 @@ function def:_openPopUpMenu()
 			new_item.source_item = item
 		end
 
-		commonWimp.assignPopUp(self, drawer)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		lgcWimp.assignPopUp(self, drawer)
 
 		drawer:setSelectionByIndex(self.index)
 
@@ -428,7 +428,8 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		-- Destroy pop-up menu (either kind) if it exists in reference to this widget.
-		commonWimp.checkDestroyPopUp(self)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		lgcWimp.checkDestroyPopUp(self)
 		--self:_closePopUpMenu(false)
 		-- XXX: test the above change.
 	end

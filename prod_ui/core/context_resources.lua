@@ -14,10 +14,9 @@ local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local utilTable = require(context.conf.prod_ui_req .. "common.util_table")
 
 
-local _drill = utilTable.drill
+local _assertResolve = pTable.assertResolve
 
 
 local _lut_font_ext = pTable.makeLUTV(".ttf", ".otf", ".fnt", ".png")
@@ -218,7 +217,7 @@ local function _applyReferences(t, resources)
 			_applyReferences(v, resources)
 
 		elseif type(v) == "string" and v:sub(1, 1) == "*" then
-			t[k] = _drill(resources, "/", v:sub(2))
+			t[k] = _assertResolve(resources, "/", v:sub(2))
 		end
 	end
 end

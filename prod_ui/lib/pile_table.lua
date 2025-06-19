@@ -1,4 +1,4 @@
--- PILE Table v1.1.5
+-- PILE Table v1.1.5 (Modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -7,11 +7,17 @@
 local M = {}
 
 
+local PATH = ... and (...):match("(.-)[^%.]+$") or ""
+
+
 M.lang = {}
 local lang = M.lang
 
 
-local ipairs, pairs, type = ipairs, pairs, type
+local interp = require(PATH .. "pile_interp")
+
+
+local ipairs, pairs, rawget, select, type = ipairs, pairs, rawget, select, type
 
 
 function M.clear(t)
@@ -216,6 +222,52 @@ function M.assignIfNilOrFalse(t, k, ...)
 			end
 		end
 	end
+end
+
+
+lang.err_res_bad_t = "argument #$1: expected a table"
+lang.err_res_bad_s = "argument #$1: expected a non-empty string"
+function M.resolve(t, sep, str, raw)
+	if type(t) ~= "table" then
+		error(interp(lang.err_res_bad_t, 1))
+
+	elseif type(sep) ~= "string" or #sep == 0 then
+		error(interp(lang.err_res_bad_s, 2))
+
+	elseif type(str) ~= "string" or #str == 0 then
+		error(interp(lang.err_res_bad_s, 3))
+	end
+
+	local val = t
+	local i, j, count, len = 0, 0, 0, #str
+	while i <= len do
+		if type(val) ~= "table" then
+			return nil, count
+		end
+
+		j = str:find(sep, i + 1, true) or #str + 1
+		local fld = str:sub(i, j - 1)
+		if raw then
+			val = rawget(val, fld)
+		else
+			val = val[fld]
+		end
+
+		i = j + 1
+		count = count + 1
+	end
+
+	return val, count
+end
+
+
+lang.err_res_assert = "value resolution failed. String: $1, failed at token #$2."
+function M.assertResolve(t, sep, str, raw)
+	local ret, count = M.resolve(t, sep, str, raw)
+	if ret == nil then
+		error(interp(lang.err_res_assert, str, count))
+	end
+	return ret, count
 end
 
 

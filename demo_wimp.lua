@@ -82,7 +82,6 @@ end
 
 
 -- Libs: ProdUI
-local commonWimp = require("prod_ui.common.common_wimp")
 local keyMgr = require("prod_ui.lib.key_mgr")
 local pMath = require("prod_ui.lib.pile_math")
 local uiContext = require("prod_ui.ui_context")

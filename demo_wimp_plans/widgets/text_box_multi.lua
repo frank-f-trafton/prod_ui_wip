@@ -4,7 +4,6 @@
 --]]
 
 -- ProdUI
-local commonWimp = require("prod_ui.common.common_wimp")
 local keyMgr = require("prod_ui.lib.key_mgr")
 
 

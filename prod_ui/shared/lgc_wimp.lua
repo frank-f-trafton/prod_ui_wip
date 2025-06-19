@@ -1,45 +1,31 @@
--- Common shared functions for widgets operating under a WIMP tree root.
+-- Shared functions for widgets operating under a WIMP tree root.
 
 
-local commonWimp = {}
+local context = select(1, ...)
 
 
-local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
+local lgcWimp = {}
 
 
-local utilTable = require(REQ_PATH .. "util_table")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 
 
-function commonWimp.async_widget_remove(self)
+function lgcWimp.async_widget_remove(self)
 	self:remove()
-end
-
-
--- Gets the UI Frame that a widget belongs to.
--- @param self Any descendent of a UI Frame, or the UI Frame itself.
--- @return The UI Frame, or nil if no UI Frame was found.
-function commonWimp.getFrame(self)
-	local wid = self
-	while wid do
-		if wid.frame_type then
-			return wid
-		end
-		wid = wid.parent
-	end
 end
 
 
 --- Destroy the UI Frame that this widget belongs to. If called in update, the removal will be handled as an async action after the update loop is complete.
 -- @param self Any widget belonging to the current UI Frame, or the UI Frame itself.
 -- @return Nothing.
-function commonWimp.closeFrame(self)
+function lgcWimp.closeFrame(self)
 	local wid = self
 	while wid do
 		if wid.frame_type then
 			if not self.context:isLocked() then
 				wid:remove()
 			else
-				self.context:appendAsyncAction(wid, commonWimp.async_widget_remove, false)
+				self.context:appendAsyncAction(wid, lgcWimp.async_widget_remove, false)
 			end
 
 			return
@@ -51,7 +37,7 @@ end
 
 
 --- Makes a generic context menu and registers it with the WIMP root.
-function commonWimp.makePopUpMenu(self, menu_def, x, y)
+function lgcWimp.makePopUpMenu(self, menu_def, x, y)
 	local root = self:getRootWidget()
 
 	local pop_up = root:addChild("wimp/menu_pop")
@@ -80,7 +66,7 @@ function commonWimp.makePopUpMenu(self, menu_def, x, y)
 
 	local do_block
 	if root.context.settings then
-		do_block = utilTable.tryDrill(root.context.settings, "/", "wimp/pop_up_menu/block_1st_click_out")
+		do_block = pTable.resolve(root.context.settings, "/", "wimp/pop_up_menu/block_1st_click_out")
 	end
 
 	pop_up:setBlocking(do_block)
@@ -94,7 +80,7 @@ end
 
 --- Registers a widget as a pop-up in the WIMP root. The caller needs to create and initialize the widget
 -- before calling.
-function commonWimp.assignPopUp(self, pop_up)
+function lgcWimp.assignPopUp(self, pop_up)
 	local root = self:getRootWidget()
 
 	pop_up.wid_ref = self
@@ -104,7 +90,7 @@ end
 
 
 -- Destroy the pop-up menu if it exists in reference to this widget.
-function commonWimp.checkDestroyPopUp(self)
+function lgcWimp.checkDestroyPopUp(self)
 	local root = self:getRootWidget()
 
 	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
@@ -113,4 +99,4 @@ function commonWimp.checkDestroyPopUp(self)
 end
 
 
-return commonWimp
+return lgcWimp

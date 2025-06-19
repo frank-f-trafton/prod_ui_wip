@@ -1,7 +1,6 @@
 
 -- ProdUI
 local commonTab = require("prod_ui.common.common_tab")
-local commonWimp = require("prod_ui.common.common_wimp")
 
 
 local plan = {}

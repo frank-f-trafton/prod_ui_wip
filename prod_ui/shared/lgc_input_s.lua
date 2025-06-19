@@ -29,7 +29,6 @@ local lgcInputS = {}
 local utf8 = require("utf8")
 
 
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
@@ -188,7 +187,8 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
-		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
 		pop_up:tryTakeThimble2()
 
 		-- Halt propagation
@@ -352,7 +352,8 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
 		local ax, ay = self:getAbsolutePosition()
-		local pop_up = commonWimp.makePopUpMenu(self, self.pop_up_def, ax + mouse_x, ay + mouse_y)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, ax + mouse_x, ay + mouse_y)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()

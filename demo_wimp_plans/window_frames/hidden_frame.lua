@@ -2,9 +2,6 @@
 local plan = {}
 
 
-local commonWimp = require("prod_ui.common.common_wimp")
-
-
 function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 640

@@ -23,7 +23,6 @@ local context = select(1, ...)
 local utf8 = require("utf8")
 
 
-local commonWimp = require(context.conf.prod_ui_req .. "common.common_wimp")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
@@ -480,7 +479,8 @@ end
 
 function def:uiCall_destroy(inst)
 	if self == inst then
-		commonWimp.checkDestroyPopUp(self)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		lgcWimp.checkDestroyPopUp(self)
 	end
 end
 
