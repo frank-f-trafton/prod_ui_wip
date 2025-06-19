@@ -39,9 +39,6 @@ local _mt_node = {
 	w = 0,
 	h = 0,
 
-	-- For widgets that support dynamic sizing.
-	flow = false, -- "x", "y", false
-
 	w_min = 0,
 	w_max = math.huge,
 	h_min = 0,
@@ -62,16 +59,16 @@ local _mt_node = {
 
 	-- * Mode: slice
 
-	-- "px": unscaled pixels
+	-- "px": pixels
 	-- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any slices
 	-- were taken off at this level.
-	-- "ask": Query the client widget for a pixel value; fall back to 'slice_amount' as a pixel value otherwise.
-	slice_mode = "unit", -- "px", "unit", "ask"
+	slice_mode = "unit", -- "px", "unit"
+	slice_scale = false, -- scales "px" values when true.
 	slice_edge = "left", -- "left", "top", "right", "bottom"
 	slice_amount = 0.5,
 
 	-- Used by the divider container to mark nodes as draggable bars.
-	slice_sash = false,
+	slice_is_sash = false,
 
 	-- * Mode: grid
 	-- Number of tiles in the grid (for parents)
@@ -83,6 +80,8 @@ local _mt_node = {
 	grid_y = 0,
 
 	-- * Mode: static
+	static_scale = false,
+
 	-- Position and dimensions.
 	static_x = 0,
 	static_y = 0,
@@ -139,6 +138,16 @@ end
 
 
 function _mt_node:setMargin(x1, y1, x2, y2)
+	local scale = context.scale
+
+	self.margin_x1 = math.floor(x1 * scale)
+	self.margin_y1 = math.floor(y1 * scale)
+	self.margin_x2 = math.floor(x2 * scale)
+	self.margin_y2 = math.floor(y2 * scale)
+end
+
+
+function _mt_node:setMarginPrescaled(x1, y1, x2, y2)
 	self.margin_x1 = x1
 	self.margin_y1 = y1
 	self.margin_x2 = x2
@@ -146,11 +155,16 @@ function _mt_node:setMargin(x1, y1, x2, y2)
 end
 
 
--- "slice": slice_mode, slice_edge, slice_amount, [slice_sash]
+function _mt_node:getMargin()
+	return self.margin_x1, self.margin_y1, self.margin_x2, self.margin_y2
+end
+
+
+-- "slice": slice_mode, slice_edge, slice_amount, [slice_scale], [slice_is_sash]
 -- "grid": grid_x, grid_y
 -- "static": x, y, w, h
 -- "null": No arguments.
-function _mt_node:setMode(mode, a, b, c, d)
+function _mt_node:setMode(mode, a, b, c, d, e)
 	-- TODO: assertions
 
 	self.mode = mode
@@ -158,7 +172,8 @@ function _mt_node:setMode(mode, a, b, c, d)
 		self.slice_mode = a
 		self.slice_edge = b
 		self.slice_amount = c
-		self.slice_sash = d or false
+		self.slice_scale = not not d
+		self.slice_is_sash = not not e
 
 	elseif mode == "grid" then
 		self.grid_x = a
@@ -179,11 +194,6 @@ function _mt_node:setGridDimensions(rows, cols)
 
 	self.grid_rows = rows
 	self.grid_cols = cols
-end
-
-
-function _mt_node:getMargin()
-	return self.margin_x1, self.margin_y1, self.margin_x2, self.margin_y2
 end
 
 
@@ -244,13 +254,18 @@ function _mt_node:carveEdgeUnit(x_left, y_top, x_right, y_bottom)
 end
 
 
-function widLayout.applySlice(slice_mode, amount, length, original_length)
+function widLayout.applySlice(slice_mode, amount, length, original_length, do_scale)
+	--print("slice_mode", slice_mode, "amount", amount, "length", length, "original_length", original_length)
 	local cut
 	if slice_mode == "unit" then
 		cut = math.floor(original_length * math.max(0, math.min(amount, 1)))
 
 	elseif slice_mode == "px" then
-		cut = math.floor(math.max(0, math.min(amount, length)))
+		if do_scale then
+			cut = math.floor(math.max(0, math.min(amount * context.scale, length)))
+		else
+			cut = math.floor(math.max(0, math.min(amount, length)))
+		end
 
 	else
 		error("invalid 'slice_mode' enum.")
@@ -283,37 +298,48 @@ widLayout.handlers["grid"] = function(np, nc)
 end
 
 
+local function _querySliceLength(wid, nc, x_axis, cross_length)
+	if wid then
+		local a, b = wid:uiCall_getSliceLength(x_axis, cross_length)
+		if a then
+			return a, b
+		end
+	end
+	return nc.slice_amount, nc.slice_scale
+end
+
+
 widLayout.handlers["slice"] = function(np, nc)
 	local wid = nc.wid_ref
 
 	if nc.slice_edge == "left" then
 		nc.y = np.y
 		nc.h = np.h
-		local amount = wid and wid:uiCall_getSliceLength(true, nc.h) or nc.slice_amount
-		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w)
+		local amount, scaled = _querySliceLength(wid, nc, true, nc.h)
+		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w, scaled)
 		nc.x = np.x
 		np.x = np.x + nc.w
 
 	elseif nc.slice_edge == "right" then
 		nc.y = np.y
 		nc.h = np.h
-		local amount = wid and wid:uiCall_getSliceLength(true, nc.h) or nc.slice_amount
-		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w)
+		local amount, scaled = _querySliceLength(wid, nc, true, nc.h)
+		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w, scaled)
 		nc.x = np.x + np.w
 
 	elseif nc.slice_edge == "top" then
 		nc.x = np.x
 		nc.w = np.w
-		local amount = wid and wid:uiCall_getSliceLength(false, nc.w) or nc.slice_amount
-		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h)
+		local amount, scaled = _querySliceLength(wid, nc, false, nc.w)
+		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h, scaled)
 		nc.y = np.y
 		np.y = np.y + nc.h
 
 	elseif nc.slice_edge == "bottom" then
 		nc.x = np.x
 		nc.w = np.w
-		local amount = wid and wid:uiCall_getSliceLength(false, nc.w) or nc.slice_amount
-		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h)
+		local amount, scaled = _querySliceLength(wid, nc, false, nc.w)
+		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h, scaled)
 		nc.y = np.y + np.h
 
 	else
