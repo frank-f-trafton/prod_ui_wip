@@ -84,7 +84,7 @@ end
 local function _openURL(self)
 	assert(self.url, "no URL specified.")
 	love.system.openURL(self.url)
-	-- TODO: 'love.system.openURL' returns false when the URL couldn't be opened. Maybe this could be note in an error log?
+	-- TODO: 'love.system.openURL' returns false when the URL couldn't be opened. Maybe this could be noted in an error log?
 end
 
 

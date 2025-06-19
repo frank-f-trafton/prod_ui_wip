@@ -104,7 +104,7 @@ dpanel.y = 40
 local dpanel_left = true
 local dpanel_cool = 0
 local dpanel_cool_max = 0.33
-local dpanel_tabs = {0, 24, 150}
+local dpanel_tabs = {0, 24, 160}
 
 
 -- * Demo State *
@@ -814,19 +814,19 @@ local function _printPerf1(dpanel)
 	-- Uncomment to estimate the demo's current Lua memory usage.
 	-- NOTE: This will degrade performance. JIT compilation should also be disabled (in conf.lua).
 	--[[
-	qp:down()
-	collectgarbage("collect"); collectgarbage("collect")
-	qp:write("Mem (MB): ", collectgarbage("count") / 1024)
+	collectgarbage("collect")
+	collectgarbage("collect")
 	--]]
+	qp:print("Lua Memory (KB): ", "", math.floor(collectgarbage("count")))
+	qp:down()
 
 	qp:print("GPU Stats:")
 	if not demo_perf or not next(demo_perf) then
 		qp:print("", "(waiting for stats)")
 	else
-		qp:print("", "drawcallsbatched: ", demo_perf.drawcallsbatched)
-		qp:print("", "shaderswitches: ", demo_perf.shaderswitches)
-		qp:print("", "fonts: ", demo_perf.fonts)
-
+		qp:print("", "drawcalls: ", demo_perf.drawcalls)
+		qp:print("", "canvasswitches: ", demo_perf.canvasswitches)
+		qp:print("", "texturememory: ", demo_perf.texturememory)
 
 		if love_major < 12 then
 			qp:print("", "canvases: ", demo_perf.canvases)
@@ -834,7 +834,10 @@ local function _printPerf1(dpanel)
 		else
 			qp:print("", "textures: ", demo_perf.textures)
 		end
-		qp:print("", "drawcalls: ", demo_perf.drawcalls)
+
+		qp:print("", "fonts: ", demo_perf.fonts)
+		qp:print("", "shaderswitches: ", demo_perf.shaderswitches)
+		qp:print("", "drawcallsbatched: ", demo_perf.drawcallsbatched)
 	end
 
 	qp:down()
