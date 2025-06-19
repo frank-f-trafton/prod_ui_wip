@@ -1,8 +1,4 @@
 
--- ProdUI
-local commonTab = require("prod_ui.common.common_tab")
-
-
 local plan = {}
 
 
@@ -66,14 +62,16 @@ local function columnSortFiles(wid, column)
 		end
 	end
 
+	local lgcTab = wid.context:getLua("shared/lgc_tab")
+
 	table.sort(ord1, hof_sortName)
 	if not wid.column_sort_ascending then
-		commonTab.reverseSequence(ord1)
+		lgcTab.reverseSequence(ord1)
 	end
 
 	table.sort(ord2, sort_functions[column.id])
 	if not wid.column_sort_ascending then
-		commonTab.reverseSequence(ord2)
+		lgcTab.reverseSequence(ord2)
 	end
 
 	for i, item in ipairs(ord1) do

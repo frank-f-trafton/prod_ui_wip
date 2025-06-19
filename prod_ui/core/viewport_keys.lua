@@ -1,4 +1,5 @@
 -- Widget viewport key lookup.
+-- Load with context:getLua().
 return {
 	--[[1]] {x = "vp_x", y = "vp_y", w = "vp_w", h = "vp_h"},
 	--[[2]] {x = "vp2_x", y = "vp2_y", w = "vp2_w", h = "vp2_h"},

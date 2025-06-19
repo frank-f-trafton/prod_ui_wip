@@ -12,7 +12,6 @@ local context = select(1, ...)
 local lgcContainer = {}
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widLayout = context:getLua("core/wid_layout")
 

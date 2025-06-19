@@ -55,7 +55,7 @@ SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-common/step_handlers.lua:
+shared/hnd_step.lua:
 
 (Some tree traversal code is taken from LUIGI by airstruck.)
 

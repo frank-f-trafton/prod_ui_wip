@@ -35,13 +35,13 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 
 -- ProdUI
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -58,7 +58,7 @@ local def = {
 
 
 widShared.scrollSetMethods(def)
-def.setScrollBars = commonScroll.setScrollBars
+def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -401,7 +401,7 @@ function def:uiCall_reshapePre()
 	widShared.resetViewport(self, 1)
 
 	widShared.carveViewport(self, 1, skin.box.border)
-	commonScroll.arrangeScrollBars(self)
+	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
@@ -409,8 +409,8 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
-	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScrollState(self)
+	lgcScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
 
 	line_ed:displaySyncAll()
 
@@ -501,7 +501,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		mouse_x = mouse_x - ax
 		mouse_y = mouse_y - ay
 
-		commonScroll.widgetProcessHover(self, mouse_x, mouse_y)
+		lgcScroll.widgetProcessHover(self, mouse_x, mouse_y)
 
 		if mouse_x >= self.vp2_x and mouse_x < self.vp2_x + self.vp2_w
 		and mouse_y >= self.vp2_y and mouse_y < self.vp2_y + self.vp2_h
@@ -516,7 +516,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		commonScroll.widgetClearHover(self)
+		lgcScroll.widgetClearHover(self)
 
 		self.cursor_hover = nil
 	end
@@ -539,7 +539,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if button == 1 then
 			local fixed_step = 24 -- XXX style/config
 
-			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+			handled = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
 		end
 
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
@@ -627,7 +627,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- XXX style/config
 
-			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+			lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
 		end
 	end
 end
@@ -636,7 +636,7 @@ end
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
-			commonScroll.widgetClearPress(self)
+			lgcScroll.widgetClearPress(self)
 
 			self.press_busy = false
 		end
@@ -654,7 +654,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 	-- XXX add support for non-animated, immediate scroll-to
 
 	self:scrollClampViewport()
-	commonScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollBarShapes(self)
 
 	-- Stop bubbling
 	return true
@@ -939,12 +939,12 @@ function def:uiCall_update(dt)
 	disp:updateCaretBlink(dt)
 
 
-	if commonScroll.press_busy_codes[self.press_busy] then
+	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self.context.mouse_x, self.context.mouse_y
 			local ax, ay = self:getAbsolutePosition()
 			local button_step = 350 -- XXX style/config
-			commonScroll.widgetDragLogic(self, mx - ax, my - ay, button_step*dt)
+			lgcScroll.widgetDragLogic(self, mx - ax, my - ay, button_step*dt)
 		end
 	end
 
@@ -958,19 +958,19 @@ function def:uiCall_update(dt)
 	-- Update scroll bar registers and thumb position
 	local scr_h = self.scr_h
 	if scr_h then
-		commonScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
+		lgcScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
 
 		self.scr_h:updateThumb()
 	end
 
 	local scr_v = self.scr_v
 	if scr_v then
-		commonScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
+		lgcScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
 
 		self.scr_v:updateThumb()
 	end
 
-	commonScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollBarShapes(self)
 
 	-- Update cache if necessary.
 	if self.update_flag then
@@ -1145,7 +1145,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		commonScroll.drawScrollBarsHV(self, skin.data_scroll)
+		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
 
 		-- DEBUG: draw history state
 		--[[

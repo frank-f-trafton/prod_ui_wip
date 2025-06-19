@@ -2,12 +2,12 @@ local context = select(1, ...)
 
 
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
-local widLayout = context:getLua("core/wid_layout")
+local hndStep = context:getLua("shared/hnd_step")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
-local stepHandlers = require(context.conf.prod_ui_req .. "common.step_handlers")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -247,9 +247,9 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 				if scancode == "tab" then
 					local dest_cur
 					if mods["shift"] then
-						dest_cur = stepHandlers.intergenerationalPrevious(wid_cur)
+						dest_cur = hndStep.intergenerationalPrevious(wid_cur)
 					else
-						dest_cur = stepHandlers.intergenerationalNext(wid_cur)
+						dest_cur = hndStep.intergenerationalNext(wid_cur)
 					end
 
 					print("dest_cur", dest_cur)

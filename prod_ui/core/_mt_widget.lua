@@ -17,7 +17,7 @@ _mt_widget.context = context
 
 local widLayout = context:getLua("core/wid_layout")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys");
+local viewport_keys = context:getLua("core/viewport_keys")
 local widShared = context:getLua("core/wid_shared")
 
 

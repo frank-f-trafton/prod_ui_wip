@@ -1,3 +1,6 @@
+local context = select(1, ...)
+
+
 -- Common functions and data for tabular menus.
 
 --[[
@@ -18,14 +21,14 @@ Column fields:
 
 	cb_sort: A sorting function to use when the user clicks on the column box. When false/nil,
 		sorting will not be performed, though the "order" triangle bijou will still be adjusted.
-		The function 'commonTab.columnSortGeneric' can be used here.
+		The function 'lgcTab.columnSortGeneric' can be used here.
 --]]
 
 
-local commonTab = {}
+local lgcTab = {}
 
 
-function commonTab._sortTempItemsAscending(a, b)
+function lgcTab._sortTempItemsAscending(a, b)
 	for i = 2, math.max(#a, #b) do
 		if a[i] ~= b[i] then
 			return a[i] < b[i]
@@ -36,7 +39,7 @@ function commonTab._sortTempItemsAscending(a, b)
 end
 
 
-function commonTab._sortTempItemsDescending(a, b)
+function lgcTab._sortTempItemsDescending(a, b)
 	for i = 2, math.max(#a, #b) do
 		if a[i] ~= b[i] then
 			return a[i] > b[i]
@@ -47,7 +50,7 @@ function commonTab._sortTempItemsDescending(a, b)
 end
 
 
-function commonTab.columnSortGeneric(wid, column)
+function lgcTab.columnSortGeneric(wid, column)
 	local items = wid.items
 	local sort_order = column.sort_order
 
@@ -66,7 +69,7 @@ function commonTab.columnSortGeneric(wid, column)
 		temp[i] = entry
 	end
 
-	local sort_func = (wid.column_sort_ascending) and commonTab._sortTempItemsAscending or commonTab._sortTempItemsDescending
+	local sort_func = (wid.column_sort_ascending) and lgcTab._sortTempItemsAscending or lgcTab._sortTempItemsDescending
 	table.sort(temp, sort_func)
 
 	for i, tbl in ipairs(temp) do
@@ -77,7 +80,7 @@ function commonTab.columnSortGeneric(wid, column)
 end
 
 
-function commonTab.getWidestColumnText(self, column_id)
+function lgcTab.getWidestColumnText(self, column_id)
 	local font = self.skin.cell_font
 	local w = 0
 	local index
@@ -95,7 +98,7 @@ function commonTab.getWidestColumnText(self, column_id)
 end
 
 
-function commonTab.reverseSequence(seq)
+function lgcTab.reverseSequence(seq)
 	local last = #seq
 	local i, j = 1, last
 	while i <= math.floor(last/2) do
@@ -105,4 +108,4 @@ function commonTab.reverseSequence(seq)
 end
 
 
-return commonTab
+return lgcTab

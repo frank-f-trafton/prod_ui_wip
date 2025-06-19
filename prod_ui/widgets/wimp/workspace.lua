@@ -1,10 +1,10 @@
 local context = select(1, ...)
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local debug = context:getLua("core/wid/debug")
 local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -18,7 +18,7 @@ local def = {
 }
 
 
-def.setScrollBars = commonScroll.setScrollBars
+def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -79,7 +79,7 @@ function def:uiCall_reshapePre()
 	widShared.resetViewport(self, 1)
 	widShared.carveViewport(self, 1, skin.box.border)
 
-	commonScroll.arrangeScrollBars(self)
+	lgcScroll.arrangeScrollBars(self)
 
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, skin.box.margin)
@@ -99,8 +99,8 @@ function def:uiCall_reshapePost()
 	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
-	commonScroll.updateScrollBarShapes(self)
-	commonScroll.updateScrollState(self)
+	lgcScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
 end
 
 
@@ -116,7 +116,7 @@ end
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		commonScroll.widgetProcessHover(self, mx, my)
+		lgcScroll.widgetProcessHover(self, mx, my)
 	end
 end
 
@@ -128,7 +128,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		commonScroll.widgetClearHover(self)
+		lgcScroll.widgetClearHover(self)
 	end
 end
 
@@ -160,7 +160,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Check for pressing on scroll bar components.
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
-			handled = commonScroll.widgetScrollPress(self, x, y, fixed_step)
+			handled = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
 		end
 
 		-- Scroll bars were not activated: take thimble1
@@ -177,7 +177,7 @@ def.uiCall_pointerPressRepeat = lgcUIFrame.logic_pointerPressRepeat
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 then
-			commonScroll.widgetClearPress(self)
+			lgcScroll.widgetClearPress(self)
 
 			self.press_busy = false
 		end
@@ -198,15 +198,15 @@ def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
 
 function def:uiCall_update(dt)
 	dt = math.min(dt, 1.0)
-	if commonScroll.press_busy_codes[self.press_busy] then
+	if lgcScroll.press_busy_codes[self.press_busy] then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
-		commonScroll.widgetDragLogic(self, mx, my, button_step*dt)
+		lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
 	end
 
 	self:scrollUpdate(dt)
-	commonScroll.updateScrollState(self)
-	commonScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
+	lgcScroll.updateScrollBarShapes(self)
 end
 
 
@@ -275,7 +275,7 @@ def.default_skinner = {
 		love.graphics.push("all")
 
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-		commonScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 
 		love.graphics.pop()
 

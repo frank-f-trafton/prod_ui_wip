@@ -1,3 +1,6 @@
+local context = select(1, ...)
+
+
 -- A generic history container.
 
 

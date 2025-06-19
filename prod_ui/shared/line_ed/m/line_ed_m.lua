@@ -21,7 +21,7 @@ local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editDispM = context:getLua("shared/line_ed/m/edit_disp_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local seqString = context:getLua("shared/line_ed/seq_string")
-local structHistory = require(context.conf.prod_ui_req .. "common.struct_history")
+local structHistory = context:getLua("shared/struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 

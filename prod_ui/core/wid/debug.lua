@@ -9,7 +9,7 @@ local context = select(1, ...)
 local debug = {} -- widShared.debug
 
 
-local viewport_keys = require(context.conf.prod_ui_req .. "common.viewport_keys")
+local viewport_keys = context:getLua("core/viewport_keys")
 
 
 local vp_colors = {

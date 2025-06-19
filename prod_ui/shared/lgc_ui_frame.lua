@@ -12,8 +12,8 @@ local context = select(1, ...)
 local lgcUIFrame = {}
 
 
-local commonScroll = require(context.conf.prod_ui_req .. "common.common_scroll")
 local lgcContainer = context:getLua("shared/lgc_container")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = context:getLua("core/wid_shared")
 
@@ -162,7 +162,7 @@ function lgcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
 		if keep_in_view == "widget_in_view" then
 			local skin = self.skin
 			lgcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
-			commonScroll.updateScrollBarShapes(self)
+			lgcScroll.updateScrollBarShapes(self)
 		end
 	end
 end
@@ -267,7 +267,7 @@ function lgcUIFrame.logic_pointerPressRepeat(self, inst, x, y, button, istouch, 
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
 
-			commonScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+			lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
 		end
 	end
 end
@@ -287,7 +287,7 @@ function lgcUIFrame.logic_pointerWheel(self, inst, x, y)
 
 	-- Catch wheel events from descendants that did not block it.
 	local caught = widShared.checkScrollWheelScroll(self, x, y)
-	commonScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollBarShapes(self)
 
 	-- Stop bubbling if the view scrolled.
 	return caught
