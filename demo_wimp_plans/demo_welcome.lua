@@ -16,9 +16,9 @@ ProdUI is a user interface library for the LÖVE Framework.]])
 
 	demoShared.makeParagraph(panel, nil, "")
 
-	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI repository on GitHub", "https://www.github.com/rabbitboots/prod_ui_wip")
+	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI repository on GitHub", "https://www.github.com/frank-f-trafton/prod_ui_wip")
 
-	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI documentation (work in progress)", "https://github.com/rabbitboots/prod_ui_docs")
+	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI documentation (work in progress)", "https://github.com/frank-f-trafton/prod_ui_docs")
 
 	demoShared.makeParagraph(panel, nil, "\n\n")
 
