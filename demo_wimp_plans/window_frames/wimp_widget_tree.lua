@@ -7,11 +7,12 @@
 --]]
 
 
+local plan = {}
+
+
 -- ProdUI
 local dbg = require("prod_ui.debug.dbg")
-
-
-local plan = {}
+local demoShared = require("demo_shared")
 
 
 local function _deleteLoop(node, _collapsed)
@@ -94,7 +95,7 @@ local function tree_userUpdate(self, dt)
 		if self.usr_timer <= 0 then
 			self.usr_timer = self.usr_timer_max
 			_buildTree(self, root)
-			local frame = self:getUIFrame()
+			local frame = demoShared.getUIFrame(self)
 			if frame then
 				frame:reshape()
 			end

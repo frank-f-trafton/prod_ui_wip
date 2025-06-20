@@ -246,4 +246,18 @@ function demoShared.setStaticLayout(parent, child, x, y, w, h)
 end
 
 
+-- Looks up the hierarchy for a UI Frame, starting at this widget.
+-- @param self Any descendent of a UI Frame, or the UI Frame itself.
+-- @return The UI Frame, or nil if no UI Frame was found.
+function demoShared.getUIFrame(self)
+	local wid = self
+	while wid do
+		if wid.frame_type then
+			return wid
+		end
+		wid = wid.parent
+	end
+end
+
+
 return demoShared

@@ -1204,20 +1204,6 @@ function _mt_widget:getParent()
 end
 
 
--- Looks up the hierarchy for a UI Frame, starting at this widget.
--- @param self Any descendent of a UI Frame, or the UI Frame itself.
--- @return The UI Frame, or nil if no UI Frame was found.
-function _mt_widget:getUIFrame()
-	local wid = self
-	while wid do
-		if wid.frame_type then
-			return wid
-		end
-		wid = wid.parent
-	end
-end
-
-
 local function _applySetting(self, k, default_settings, skin, settings)
 	if settings[k] ~= nil then
 		self[k] = settings[k]

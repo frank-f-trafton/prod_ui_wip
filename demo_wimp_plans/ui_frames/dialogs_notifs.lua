@@ -8,7 +8,7 @@ local demoShared = require("demo_shared")
 local function _makeFrameBlock2(self)
 	local root = self:getRootWidget()
 	local frame, dialog
-	frame = self:getUIFrame()
+	frame = demoShared.getUIFrame(self)
 
 	if frame then
 		dialog = root:newWindowFrame()
@@ -57,7 +57,7 @@ end
 local function _makeFrameBlock1(self)
 	local root = self:getRootWidget()
 	local frame, dialog
-	frame = self:getUIFrame()
+	frame = demoShared.getUIFrame(self)
 
 	if frame then
 		dialog = root:newWindowFrame()
@@ -143,7 +143,7 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 		button_quote.str_tool_tip = "Click for an inspiring quote."
 
 		button_quote.wid_buttonAction = function(self)
-			local frame = self:getUIFrame()
+			local frame = demoShared.getUIFrame(self)
 			if not frame then
 				print("Demo Error: frame not found")
 			else
