@@ -2,6 +2,10 @@
 local plan = {}
 
 
+-- ProdUI
+local demoShared = require("demo_shared")
+
+
 function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 640
@@ -19,11 +23,8 @@ function plan.makeWindowFrame(root)
 	-- Button: Hide this frame
 	do
 		local btn = frame:addChild("base/button")
-		btn.x = xx
-		btn.y = yy
-		btn.w = 250
-		btn.h = hh
 		btn:initialize()
+		demoShared.setStaticLayout(frame, btn, xx, yy, 250, hh)
 		btn.usr_time = 0.0
 		btn.usr_time_max = 5.0
 		btn:setLabel("Hide for " .. btn.usr_time_max .. " seconds")

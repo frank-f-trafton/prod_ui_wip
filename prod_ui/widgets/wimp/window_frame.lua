@@ -898,13 +898,18 @@ function def:uiCall_reshapePre()
 
 	widLayout.resetLayout(self, self.layout_base)
 
+	--return self.halt_reshape -- ?
+end
+
+
+function def:uiCall_reshapePost()
+	print("window_frame: uiCall_reshapePost")
+
 	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
-
-	--return self.halt_reshape -- ?
 end
 
 

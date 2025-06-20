@@ -1,6 +1,9 @@
 local plan = {}
 
 
+local demoShared = require("demo_shared")
+
+
 function plan.makeWindowFrame(root)
 	local context = root.context
 	local frame = root:newWindowFrame()
@@ -18,6 +21,7 @@ function plan.makeWindowFrame(root)
 	bb_lbl.w = 256
 	bb_lbl.h = 192
 	bb_lbl:initialize()
+	demoShared.setStaticLayout(frame, bb_lbl, 0, 0, 256, 192)
 	bb_lbl:setTag("countdown_label")
 
 	frame.usr_time = 0.0
