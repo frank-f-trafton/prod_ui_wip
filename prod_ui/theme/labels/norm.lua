@@ -1,5 +1,5 @@
 return {
-	font = "*fonts/p",
+	font = "*/fonts/p",
 	ul_color = false,
 	ul_h = 1
 }

@@ -1,12 +1,12 @@
 return {
 	skinner_id = "wimp/menu_tab",
 
-	box = "*boxes/panel",
+	box = "*/boxes/panel",
 	icon_set_id = "bureau",
-	tq_px = "*quads/atlas/pixel",
-	data_scroll = "*scroll_bar_data/scroll_bar1",
-	scr_style = "*scroll_bar_styles/norm",
-	font = "*fonts/p",
+	tq_px = "*/quads/atlas/pixel",
+	data_scroll = "*/scroll_bar_data/scroll_bar1",
+	scr_style = "*/scroll_bar_styles/norm",
+	font = "*/fonts/p",
 
 	color_header_body = {0.25, 0.25, 0.25, 1.0},
 	color_background = {0.2, 0.2, 0.2, 1.0},
@@ -21,20 +21,20 @@ return {
 
 	color_cell_icon = {1.0, 1.0, 1.0, 1.0},
 	color_cell_text = {1.0, 1.0, 1.0, 1.0},
-	cell_font = "*fonts/p",
+	cell_font = "*/fonts/p",
 
 	bar_height = 32,
 	col_sep_line_width = 1,
 	bijou_w = 12,
 	bijou_h = 12,
 
-	tq_arrow_up = "*quads/atlas/arrow2_up",
-	tq_arrow_down = "*quads/atlas/arrow2_down",
+	tq_arrow_up = "*/quads/atlas/arrow2_up",
+	tq_arrow_down = "*/quads/atlas/arrow2_down",
 
 	category_h_pad = 4,
 
 	res_column_idle = {
-		sl_body = "*slices/atlas/tabular_category_body",
+		sl_body = "*/slices/atlas/tabular_category_body",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.8, 0.8, 0.8, 1.0},
 		offset_x = 0,
@@ -42,7 +42,7 @@ return {
 	},
 
 	res_column_hover = {
-		sl_body = "*slices/atlas/tabular_category_body_hover",
+		sl_body = "*/slices/atlas/tabular_category_body_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		offset_x = 0,
@@ -50,7 +50,7 @@ return {
 	},
 
 	res_column_press = {
-		sl_body = "*slices/atlas/tabular_category_body_press",
+		sl_body = "*/slices/atlas/tabular_category_body_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {1.0, 1.0, 1.0, 1.0},
 		offset_x = 0,
