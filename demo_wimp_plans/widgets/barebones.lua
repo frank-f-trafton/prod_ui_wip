@@ -128,7 +128,7 @@ function plan.make(panel)
 
 	local bb_sl2 = panel:addChild("barebones/slider_bar")
 	bb_sl2:initialize()
-	demoShared.setStaticLayout(panel, bb_sl2, xx, yy, ww, hh)
+	demoShared.setStaticLayout(panel, bb_sl2, xx, yy, hh, ww)
 
 	bb_sl2.trough_vertical = true
 	bb_sl2:setLabel("Vertical")
@@ -141,7 +141,7 @@ function plan.make(panel)
 
 	local bb_input = panel:addChild("barebones/input_box")
 	bb_input:initialize()
-	demoShared.setStaticLayout(panel, bb_sl2, xx, yy, ww, 32)
+	demoShared.setStaticLayout(panel, bb_input, xx, yy, ww, 32)
 
 	bb_input:setText("Barebones Input Box")
 	--bb_input:setMaxCodePoints(4)
