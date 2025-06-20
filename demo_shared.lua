@@ -6,6 +6,13 @@ local uiRes = require("prod_ui.ui_res")
 local uiShared = require("prod_ui.ui_shared")
 
 
+local function _openURL(self)
+	assert(self.url, "no URL specified.")
+	love.system.openURL(self.url)
+	-- TODO: 'love.system.openURL' returns false when the URL couldn't be opened. Maybe this could be noted in an error log?
+end
+
+
 function demoShared.loadTheme()
 	local theme = uiRes.loadDirectoryAsTable("prod_ui/theme")
 
@@ -66,25 +73,6 @@ function demoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
 	end
 
 	return frame
-end
-
-
-function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = parent:addChild("base/label")
-	label.x, label.y, label.w, label.h = x, y, w, h
-	label:initialize()
-	label:setLabel(text, label_mode)
-
-	return label
-end
-
-
-local function _openURL(self)
-	assert(self.url, "no URL specified.")
-	love.system.openURL(self.url)
-	-- TODO: 'love.system.openURL' returns false when the URL couldn't be opened. Maybe this could be noted in an error log?
 end
 
 
@@ -234,6 +222,27 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	print("node_button1 xywh:", nb1.x, nb1.y, nb1.w, nb1.h)
 
 	return dialog
+end
+
+
+function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
+	label_mode = label_mode or "single"
+
+	local label = parent:addChild("base/label")
+	label:initialize()
+	demoShared.setStaticLayout(parent, label, x, y, w, h)
+	label:setLabel(text, label_mode)
+
+	return label
+end
+
+
+function demoShared.setStaticLayout(parent, child, x, y, w, h)
+	local node = parent.layout_tree:newNode()
+	node:setMode("static", x, y, w, h)
+	parent:setLayoutNode(child, node)
+
+	return node
 end
 
 

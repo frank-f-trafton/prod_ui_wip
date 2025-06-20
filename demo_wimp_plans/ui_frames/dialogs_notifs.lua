@@ -110,11 +110,8 @@ function plan.make(panel)
 	-- (Modal) Dialog box test
 	do
 		local btn = panel:addChild("base/button")
-		btn.x = 64
-		btn.y = 64
-		btn.w = 160
-		btn.h = 24
 		btn:initialize()
+		demoShared.setStaticLayout(panel, btn, 64, 64, 160, 28)
 		btn:setLabel("Modal Dialog Box")
 		btn.wid_buttonAction = function(self)
 			demoShared.makeDialogBox(panel.context, "It's a dialog box", [[
@@ -128,11 +125,8 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 	-- Frame-blocking test
 	do
 		local btn = panel:addChild("base/button")
-		btn.x = 64
-		btn.y = 96
-		btn.w = 160
-		btn.h = 24
 		btn:initialize()
+		demoShared.setStaticLayout(panel, btn, 64, 96, 160, 28)
 		btn:setLabel("Frame-Blocking Test")
 		btn.wid_buttonAction = function(self)
 			_makeFrameBlock1(self)
@@ -143,11 +137,8 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 	-- Toast/Notification WIP
 	do
 		local button_quote = panel:addChild("base/button")
-		button_quote.x = 128
-		button_quote.y = 128
-		button_quote.w = 96
-		button_quote.h = 24
 		button_quote:initialize()
+		demoShared.setStaticLayout(panel, button_quote, 128, 128, 96, 28)
 		button_quote:setLabel("Inspiration")
 		button_quote.str_tool_tip = "Click for an inspiring quote."
 

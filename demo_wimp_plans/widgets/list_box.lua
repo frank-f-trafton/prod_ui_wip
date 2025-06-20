@@ -120,6 +120,7 @@ local function makeListBox1(panel, x, y)
 	local list_box = panel:addChild("wimp/list_box")
 	list_box.skin_id = list_box.skin_id .. "_DEMO"
 	list_box:initialize()
+	demoShared.setStaticLayout(panel, list_box, x, y, 224, 256)
 	list_box:setTag("demo_listbox")
 
 	list_box:writeSetting("show_icons", true)
@@ -136,11 +137,6 @@ local function makeListBox1(panel, x, y)
 	list_box.wid_select = function(self, item, index)
 		print("wid_select()", item, index)
 	end
-
-	list_box.x = x
-	list_box.y = y
-	list_box.w = 224
-	list_box.h = 256
 
 	list_box.MN_drag_scroll = true
 	list_box.MN_drag_select = true
@@ -203,8 +199,8 @@ local function makeListBox1(panel, x, y)
 
 	local rdo_btn
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_align = "left"
@@ -213,7 +209,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
+	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("center")
@@ -223,8 +219,8 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_align = "right"
@@ -236,8 +232,8 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	local chk = panel:addChild("barebones/checkbox")
-	chk.x, chk.y, chk.w, chk.h = wx, wy, ww, wh
 	chk:initialize()
+	demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
 	chk:setChecked(list_box.show_icons)
 	chk:setLabel("Icons")
 	chk.wid_buttonAction = function(self)
@@ -265,8 +261,8 @@ local function makeListBox1(panel, x, y)
 	end
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_icon_side = "left"
@@ -275,8 +271,8 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn.x, rdo_btn.y, rdo_btn.w, rdo_btn.h = wx, wy, ww, wh
 	rdo_btn:initialize()
+	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_icon_side = "right"
@@ -292,8 +288,8 @@ local function makeListBox1(panel, x, y)
 
 	wy = wy + wh
 
-	sld.x, sld.y, sld.w, sld.h = wx, wy, ww, wh
 	sld:initialize()
+	demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
 
 	sld.slider_pos = 0
 	sld.slider_max = 64
@@ -318,11 +314,8 @@ end
 
 local function makeListBox2(panel, x, y)
 	local list_box = panel:addChild("wimp/list_box")
-	list_box.x = x
-	list_box.y = y
-	list_box.w = 224
-	list_box.h = 256
 	list_box:initialize()
+	demoShared.setStaticLayout(panel, list_box, x, y, 224, 256)
 
 	list_box:setTag("demo_listbox2")
 
@@ -360,11 +353,8 @@ end
 
 local function makeListBox3(panel, x, y)
 	local lb1 = panel:addChild("wimp/list_box")
-	lb1.x = x
-	lb1.y = y
-	lb1.w = 224
-	lb1.h = 256
 	lb1:initialize()
+	demoShared.setStaticLayout(panel, lb1, x, y, 224, 256)
 	lb1:setTag("demo_listbox3a")
 
 	lb1.wid_action = function(self, item, index) print("[3a] wid_action()", item, index) end
@@ -392,11 +382,8 @@ local function makeListBox3(panel, x, y)
 
 
 	local lb2 = panel:addChild("wimp/list_box")
-	lb2.x = x + 320
-	lb2.y = y
-	lb2.w = 224
-	lb2.h = 256
 	lb2:initialize()
+	demoShared.setStaticLayout(panel, lb2, x + 320, y, 224, 256)
 	lb2:setTag("demo_listbox3b")
 
 	lb2.wid_action = function(self, item, index) print("[3b] wid_action()", item, index) end
@@ -426,11 +413,8 @@ end
 
 local function makeListBox4(panel, x, y)
 	local lb1 = panel:addChild("wimp/list_box")
-	lb1.x = x
-	lb1.y = y
-	lb1.w = 224
-	lb1.h = 256
 	lb1:initialize()
+	demoShared.setStaticLayout(panel, lb1, x, y, 224, 256)
 	lb1:setTag("demo_listbox4a")
 
 	lb1.wid_action = function(self, item, index) print("[4a] wid_action()", item, index) end
@@ -458,11 +442,8 @@ local function makeListBox4(panel, x, y)
 	lb1:reshape()
 
 	local b1 = panel:addChild("base/button")
-	b1.x = lb1.x + lb1.w + 32
-	b1.y = lb1.y
-	b1.w = 32
-	b1.h = 32
 	b1:initialize()
+	demoShared.setStaticLayout(panel, b1, x + 224 + 32, y, 32, 32)
 
 	b1:setLabel(">")
 
@@ -479,11 +460,8 @@ local function makeListBox4(panel, x, y)
 	end
 
 	local b2 = panel:addChild("base/button")
-	b2.x = lb1.x + lb1.w + 32
-	b2.y = lb1.y + lb1.h - 32
-	b2.w = 32
-	b2.h = 32
 	b2:initialize()
+	demoShared.setStaticLayout(panel, b2, x + 224 + 32, y + 256 - 32, 32, 32)
 
 	b2:setLabel("<")
 
@@ -500,15 +478,12 @@ local function makeListBox4(panel, x, y)
 	end
 
 	local lb2 = panel:addChild("wimp/list_box")
-	lb2.x = x + 320
-	lb2.y = y
-	lb2.w = 224
-	lb2.h = 256
 	lb2.wid_action = function(self, item, index) print("[4b] wid_action()", item, index) end
 	lb2.wid_action2 = function(self, item, index) print("[4b] wid_action2()", item, index) end
 	lb2.wid_action3 = function(self, item, index) print("[4b] wid_action3()", item, index) end
 	lb2.wid_select = function(self, item, index) print("[4b] wid_select()", item, index) end
 	lb2:initialize()
+	demoShared.setStaticLayout(panel, lb2, x + 320, y, 224, 256)
 	lb2:setTag("demo_listbox4b")
 
 	lb2:writeSetting("show_icons", true)

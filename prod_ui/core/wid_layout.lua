@@ -80,8 +80,6 @@ local _mt_node = {
 	grid_y = 0,
 
 	-- * Mode: static
-	static_scale = false,
-
 	-- Position and dimensions.
 	static_x = 0,
 	static_y = 0,
@@ -162,7 +160,7 @@ end
 
 -- "slice": slice_mode, slice_edge, slice_amount, [slice_scale], [slice_is_sash]
 -- "grid": grid_x, grid_y
--- "static": x, y, w, h
+-- "static": x, y, w, h, scaled
 -- "null": No arguments.
 function _mt_node:setMode(mode, a, b, c, d, e)
 	-- TODO: assertions
@@ -278,11 +276,12 @@ end
 widLayout.handlers = {}
 
 
-widLayout.handlers["static"] = function(np, nc) -- TODO: agh
-	nc.x = nc.static_x
-	nc.y = nc.static_y
-	nc.w = nc.static_w
-	nc.h = nc.static_h
+widLayout.handlers["static"] = function(np, nc)
+	local scale = context.scale
+	nc.x = math.floor(nc.static_x * scale)
+	nc.y = math.floor(nc.static_y * scale)
+	nc.w = math.floor(math.max(0, nc.static_w * scale))
+	nc.h = math.floor(math.max(0, nc.static_h * scale))
 end
 
 
