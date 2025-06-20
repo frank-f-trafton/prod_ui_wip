@@ -1,9 +1,9 @@
 return {
 	skinner_id = "base/dial",
 
-	box = "*boxes/button",
-	label_style = "*labels/norm",
-	tq_px = "*quads/atlas/pixel",
+	box = "*/boxes/button",
+	label_style = "*/labels/norm",
+	tq_px = "*/quads/atlas/pixel",
 
 	label_spacing = 0,
 	label_placement = "overlay",

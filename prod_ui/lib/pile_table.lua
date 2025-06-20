@@ -1,4 +1,4 @@
--- PILE Table v1.1.5 (Modified)
+-- PILE Table v1.1.6
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -240,35 +240,33 @@ function M.assignIfNilOrFalse(t, k, ...)
 	end
 end
 
-
 lang.err_res_bad_t = "argument #$1: expected a table"
 lang.err_res_bad_s = "argument #$1: expected a non-empty string"
-function M.resolve(t, sep, str, raw)
+lang.err_res_field_empty = "cannot resolve an empty field"
+function M.resolve(t, str, raw)
 	if type(t) ~= "table" then
 		error(interp(lang.err_res_bad_t, 1))
 
-	elseif type(sep) ~= "string" or #sep == 0 then
-		error(interp(lang.err_res_bad_s, 2))
-
 	elseif type(str) ~= "string" or #str == 0 then
-		error(interp(lang.err_res_bad_s, 3))
+		error(interp(lang.err_res_bad_s, 2))
 	end
 
 	local val = t
-	local i, j, count, len = 0, 0, 0, #str
+	local i, j, count, len = 1, 1, 0, #str
 	while i <= len do
 		if type(val) ~= "table" then
 			return nil, count
 		end
-
-		j = str:find(sep, i + 1, true) or #str + 1
-		local fld = str:sub(i, j - 1)
+		local fld
+		i, j, fld = str:find("^/([^/]+)", i)
+		if not fld then
+			error(lang.err_res_field_empty)
+		end
 		if raw then
 			val = rawget(val, fld)
 		else
 			val = val[fld]
 		end
-
 		i = j + 1
 		count = count + 1
 	end
@@ -278,8 +276,8 @@ end
 
 
 lang.err_res_assert = "value resolution failed. String: $1, failed at token #$2."
-function M.assertResolve(t, sep, str, raw)
-	local ret, count = M.resolve(t, sep, str, raw)
+function M.assertResolve(t, str, raw)
+	local ret, count = M.resolve(t, str, raw)
 	if ret == nil then
 		error(interp(lang.err_res_assert, str, count))
 	end

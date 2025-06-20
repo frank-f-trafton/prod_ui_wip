@@ -1,9 +1,9 @@
 return {
 	skinner_id = "status/progress_bar",
 
-	box = "*boxes/button",
-	label_style = "*labels/norm",
-	tq_px = "*quads/atlas/pixel",
+	box = "*/boxes/button",
+	label_style = "*/labels/norm",
+	tq_px = "*/quads/atlas/pixel",
 
 	label_align_h = "center",
 	label_align_v = "middle",
@@ -11,8 +11,8 @@ return {
 	bar_placement = "overlay",
 	bar_spacing = 50,
 
-	slc_back = "*slices/atlas/progress_back",
-	slc_ichor = "*slices/atlas/progress_ichor",
+	slc_back = "*/slices/atlas/progress_back",
+	slc_ichor = "*/slices/atlas/progress_ichor",
 
 	res_active = {
 		color_back = {1.0, 1.0, 1.0, 1.0},

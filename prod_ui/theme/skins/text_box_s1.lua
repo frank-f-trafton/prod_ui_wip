@@ -1,15 +1,15 @@
 return {
 	skinner_id = "input/text_box_single",
 
-	box = "*boxes/input_box",
-	font = "*fonts/p",
-	font_ghost = "*fonts/p",
+	box = "*/boxes/input_box",
+	font = "*/fonts/p",
+	font_ghost = "*/fonts/p",
 
 	cursor_on = "ibeam",
 	text_align = "left", -- "left", "center", "right"
 
 	res_idle = {
-		slice = "*slices/atlas/input_box",
+		slice = "*/slices/atlas/input_box",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -19,7 +19,7 @@ return {
 	},
 
 	res_hover = {
-		slice = "*slices/atlas/input_box_hover",
+		slice = "*/slices/atlas/input_box_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},
@@ -29,7 +29,7 @@ return {
 	},
 
 	res_disabled = {
-		slice = "*slices/atlas/input_box_disabled",
+		slice = "*/slices/atlas/input_box_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.5, 0.5, 0.5, 1.0},
 		color_highlight = {0.5, 0.5, 0.5, 1.0},

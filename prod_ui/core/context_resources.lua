@@ -217,7 +217,7 @@ local function _applyReferences(t, resources)
 			_applyReferences(v, resources)
 
 		elseif type(v) == "string" and v:sub(1, 1) == "*" then
-			t[k] = _assertResolve(resources, "/", v:sub(2))
+			t[k] = _assertResolve(resources, v:sub(2))
 		end
 	end
 end
