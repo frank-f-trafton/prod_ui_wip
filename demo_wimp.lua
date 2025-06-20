@@ -10,6 +10,7 @@ print("Start WIMP Demo.")
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"demo_welcome",
 	"widgets.progress_bar",
 	"widgets.slider_work",
 	"widgets.text_box_multi",
@@ -18,7 +19,6 @@ local demo_panel_launch = {
 	"widgets.dropdown_box",
 	"widgets.number_box",
 	"widgets.list_box",
-	"demo_welcome",
 }
 
 

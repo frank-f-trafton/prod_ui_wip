@@ -42,15 +42,12 @@ function plan.makeWindowFrame(root)
 	local ww, hh = 224, 64
 
 	local bb_button = frame:addChild("base/button")
-	bb_button.x = xx
-	bb_button.y = yy
-	bb_button.w = ww
-	bb_button.h = hh
+	bb_button:initialize()
+	demoShared.setStaticLayout(frame, bb_button, xx, yy, ww, hh)
 
 	bb_button.uiCall_thimble1Take = _assertNoThimble
 	bb_button.uiCall_thimble2Take = _assertNoThimble
 
-	bb_button:initialize()
 	bb_button.can_have_thimble = false
 
 	bb_button:setLabel("Example Button")
@@ -58,15 +55,12 @@ function plan.makeWindowFrame(root)
 	yy = yy + hh
 
 	local bb_cbox = frame:addChild("base/checkbox")
-	bb_cbox.x = xx
-	bb_cbox.y = yy
-	bb_cbox.w = ww
-	bb_cbox.h = hh
+	bb_cbox:initialize()
+	demoShared.setStaticLayout(frame, bb_cbox, xx, yy, ww, hh)
 
 	bb_cbox.uiCall_thimble1Take = _assertNoThimble
 	bb_cbox.uiCall_thimble2Take = _assertNoThimble
 
-	bb_cbox:initialize()
 	bb_cbox.can_have_thimble = false
 
 	bb_cbox:setLabel("Example Checkbox")
