@@ -14,11 +14,8 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	local properties_box = panel:addChild("wimp/properties_box")
-	properties_box.x = 0
-	properties_box.y = 64
-	properties_box.w = 400
-	properties_box.h = 300
 	properties_box:initialize()
+	demoShared.setStaticLayout(panel, properties_box, 0, 64, 400, 300)
 
 	properties_box:setTag("demo_properties_box")
 

@@ -747,21 +747,15 @@ def.default_skinner = {
 		love.graphics.pop()
 
 		-- Debug
+		--[[
 		love.graphics.push()
 
-		love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 288, 0)
-
-		--[[
-		-- Debug: working on text input enable/disable in events.
-		if love.keyboard.hasTextInput() then
-			love.graphics.setColor(1, 0, 0, 1)
-		else
-			love.graphics.setColor(0, 0, 1, 1)
-		end
-		love.graphics.circle("fill", 0, 0, 32)
-		--]]
+		love.graphics.setScissor()
+		local font = love.graphics.getFont()
+		love.graphics.print("self.wid_drawer: " .. tostring(self.wid_drawer), 0, -math.ceil(font:getHeight() * 1.2))
 
 		love.graphics.pop()
+		--]]
 	end,
 
 

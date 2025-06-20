@@ -1,6 +1,10 @@
 local plan = {}
 
 
+-- ProdUI
+local demoShared = require("demo_shared")
+
+
 local function timeFormatted()
 	return string.format("%.2f", tostring(love.timer.getTime()))
 end
@@ -14,11 +18,8 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	local stepper_h = panel:addChild("base/stepper")
-	stepper_h.x = 32
-	stepper_h.y = 32
-	stepper_h.w = 240
-	stepper_h.h = 32
 	stepper_h:initialize()
+	demoShared.setStaticLayout(panel, stepper_h, 32, 32, 240, 32)
 
 	stepper_h:insertOption("Foobar")
 	stepper_h:insertOption("Bazbop")
@@ -31,11 +32,8 @@ function plan.make(panel)
 
 
 	local stepper_v = panel:addChild("base/stepper")
-	stepper_v.x = 288
-	stepper_v.y = 32
-	stepper_v.w = 64
-	stepper_v.h = 128
 	stepper_v:initialize()
+	demoShared.setStaticLayout(panel, stepper_v, 288, 32, 64, 128)
 	stepper_v:insertOption("Foobar")
 	stepper_v:insertOption("Bazbop")
 	stepper_v:insertOption({text = "Dipdop"})

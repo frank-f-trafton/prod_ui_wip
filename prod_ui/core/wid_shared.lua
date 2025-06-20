@@ -521,7 +521,7 @@ end
 
 
 --[[
-	Keyhooks are a way to apply non-hardcoded keyboard shortcuts to branches of widgets or the tree root.
+	Keyhooks are a way to apply non-hardcoded keyboard shortcuts to widgets (typically UI Frames or the root widget).
 
 	Keyhook callbacks:
 

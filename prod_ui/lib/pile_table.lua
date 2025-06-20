@@ -17,7 +17,7 @@ local lang = M.lang
 local interp = require(PATH .. "pile_interp")
 
 
-local ipairs, pairs, rawget, select, type = ipairs, pairs, rawget, select, type
+local ipairs, pairs, rawget, select, table, type = ipairs, pairs, rawget, select, table, type
 
 
 function M.clear(t)
@@ -189,6 +189,22 @@ function M.reverseArray(t)
 			t[i], t[n - i + 1] = t[n - i + 1], t[i]
 		end
 	end
+end
+
+
+function M.removeElement(t, v, n)
+	n = n or math.huge
+	local c = 0
+	for i = #t, 1, -1 do
+		if c >= n then
+			break
+
+		elseif rawget(t, i) == v then
+			table.remove(t, i)
+			c = c + 1
+		end
+	end
+	return c
 end
 
 

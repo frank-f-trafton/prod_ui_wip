@@ -22,11 +22,8 @@ function plan.make(panel)
 
 	-- Repeat-Button
 	local b_rep = panel:addChild("base/button_repeat")
-	b_rep.x = 0
-	b_rep.y = 0
-	b_rep.w = 128
-	b_rep.h = 64
 	b_rep:initialize()
+	demoShared.setStaticLayout(panel, b_rep, 0, 0, 128, 64)
 
 	b_rep:setLabel("Button (Rep)")
 
@@ -40,11 +37,8 @@ function plan.make(panel)
 
 	-- Checkbox
 	local chk = panel:addChild("base/checkbox")
-	chk.x = 160
-	chk.y = 0
-	chk.w = 256
-	chk.h = 64
 	chk:initialize()
+	demoShared.setStaticLayout(panel, chk, 160, 0, 256, 64)
 
 	-- Test checkbox text label scissor-box.
 	local silly_string = "CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox"
@@ -56,11 +50,8 @@ function plan.make(panel)
 
 	-- Multi-state checkbox
 	local chk_m = panel:addChild("base/checkbox_multi")
-	chk_m.x = 160
-	chk_m.y = 96
-	chk_m.w = 256
-	chk_m.h = 64
 	chk_m:initialize()
+	demoShared.setStaticLayout(panel, chk_m, 160, 96, 256, 64)
 	chk_m:setLabel("Multi-State Checkbox", "single")
 	chk_m.wid_buttonAction = function(self)
 		print("Multi-Check state: " .. chk_m.value)
@@ -70,11 +61,8 @@ function plan.make(panel)
 	local btn_q = panel:addChild("base/button")
 	btn_q.skin_id = "button_tq1"
 	btn_q.graphic = context.resources.quads["atlas"]["checkbox_on"] -- TODO: fix
-	btn_q.x = 64
-	btn_q.y = 64
-	btn_q.w = 64
-	btn_q.h = 64
 	btn_q:initialize()
+	demoShared.setStaticLayout(panel, btn_q, 64, 64, 64, 64)
 
 	btn_q:setLabel("!?") -- XXX: was it intentional that this does not display?
 
@@ -88,33 +76,24 @@ function plan.make(panel)
 
 	py=py+py_plus
 	rdo = panel:addChild("base/radio_button")
-	rdo.x = px
-	rdo.y = py
-	rdo.w = 192
-	rdo.h = py_plus
 	rdo:initialize()
+	demoShared.setStaticLayout(panel, rdo, px, py, 192, py_plus)
 	rdo.radio_group = "rg_a"
 	rdo:setLabel("One (Group A)")
 	--rdo.wid_buttonAction
 
 	py=py+py_plus
 	rdo = panel:addChild("base/radio_button")
-	rdo.x = px
-	rdo.y = py
-	rdo.w = 192
-	rdo.h = py_plus
 	rdo:initialize()
+	demoShared.setStaticLayout(panel, rdo, px, py, 192, py_plus)
 	rdo.radio_group = "rg_a"
 	rdo:setLabel("Two (Group A)")
 	--rdo.wid_buttonAction
 
 	py=py+py_plus
 	rdo = panel:addChild("base/radio_button")
-	rdo.x = px
-	rdo.y = py
-	rdo.w = 192
-	rdo.h = py_plus
 	rdo:initialize()
+	demoShared.setStaticLayout(panel, rdo, px, py, 192, py_plus)
 	rdo.radio_group = "rg_b"
 	rdo:setLabel("Three (Group B)")
 	--radio.wid_buttonAction
@@ -126,6 +105,7 @@ function plan.make(panel)
 	rdo.w = 192
 	rdo.h = py_plus
 	rdo:initialize()
+	demoShared.setStaticLayout(panel, rdo, px, py, 191, py_plus)
 	rdo.radio_group = "rg_b"
 	rdo:setLabel("Four (Group B)")
 	--rdo.wid_buttonAction
@@ -133,11 +113,8 @@ function plan.make(panel)
 
 	-- Sticky Button.
 	local sticky = panel:addChild("base/button_sticky")
-	sticky.x = 256
-	sticky.y = 192
-	sticky.w = 240
-	sticky.h = 32
 	sticky:initialize()
+	demoShared.setStaticLayout(panel, sticky, 256, 192, 240, 32)
 	sticky:setTag("button_sticky")
 	sticky:setLabel("Sticky Button")
 
@@ -154,11 +131,8 @@ function plan.make(panel)
 	-- A normal button that unpresses the sticky button.
 	local b_unst = panel:addChild("base/button")
 	b_unst:setTag("button_unsticker")
-	b_unst.x = 256
-	b_unst.y = 192+48
-	b_unst.w = 240
-	b_unst.h = 32
 	b_unst:initialize()
+	demoShared.setStaticLayout(panel, b_unst, 256, 192+48, 240, 32)
 	b_unst:setLabel("Unpress Sticky Button")
 	b_unst:setEnabled(false)
 
@@ -174,11 +148,8 @@ function plan.make(panel)
 
 	-- An instant-action button. Fires on click-down, without continuous action (at least from holding the mouse button).
 	local b_instant = panel:addChild("base/button_instant")
-	b_instant.x = 256
-	b_instant.y = 192+48+48
-	b_instant.w = 240
-	b_instant.h = 32
 	b_instant:initialize()
+	demoShared.setStaticLayout(panel, b_instant, 256, 192+48+48, 240, 32)
 
 	b_instant:setLabel("Instant Action Button.")
 
@@ -190,11 +161,9 @@ function plan.make(panel)
 	-- A button with a secondary action.
 	demoShared.makeLabel(panel, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
 	local b_secondary = panel:addChild("base/button")
-	b_secondary.x = 256
-	b_secondary.y = 192+48+48+48+64
-	b_secondary.w = 240
-	b_secondary.h = 32
 	b_secondary:initialize()
+	demoShared.setStaticLayout(panel, b_secondary, 256, 192+48+48+48+64, 240, 32)
+
 
 	b_secondary:setLabel("Alt. Action Button.")
 
@@ -212,11 +181,8 @@ function plan.make(panel)
 
 
 	local btn_2c = panel:addChild("base/button_double_click")
-	btn_2c.x = 256
-	btn_2c.y = 192+48+48+48+64+64
-	btn_2c.w = 256
-	btn_2c.h = 32
 	btn_2c:initialize()
+	demoShared.setStaticLayout(panel, btn_2c, 256, 192+48+48+48+64+64, 256, 32)
 	btn_2c.radio_group = "bare1"
 	btn_2c:setLabel("Double-Click button")
 

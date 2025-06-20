@@ -20,11 +20,8 @@ function plan.make(panel)
 	local v_bar_width, v_bar_height = 100, 160
 
 	local p_bar = panel:addChild("status/progress_bar")
-	p_bar.x = 32
-	p_bar.y = 32
-	p_bar.w = h_bar_width
-	p_bar.h = h_bar_height
 	p_bar:initialize()
+	demoShared.setStaticLayout(panel, p_bar, 32, 32, h_bar_width, h_bar_height)
 	p_bar:setTag("demo_prog_bar")
 
 	p_bar.pos = starting_pos
@@ -41,11 +38,8 @@ function plan.make(panel)
 
 
 	local btn_active = panel:addChild("base/button")
-	btn_active.x = 256
-	btn_active.y = 32
-	btn_active.w = 128
-	btn_active.h = 40
 	btn_active:initialize()
+	demoShared.setStaticLayout(panel, btn_active, 256, 32, 128, 40)
 
 	btn_active:setLabel("setActive()")
 
@@ -58,11 +52,8 @@ function plan.make(panel)
 
 
 	local btn_vertical = panel:addChild("base/button")
-	btn_vertical.x = 256
-	btn_vertical.y = 32+40
-	btn_vertical.w = 128
-	btn_vertical.h = 40
 	btn_vertical:initialize()
+	demoShared.setStaticLayout(panel, btn_vertical, 256, 32+40, 128, 40)
 
 	btn_vertical:setLabel("Orientation")
 
@@ -70,23 +61,24 @@ function plan.make(panel)
 		local pb = self:findSiblingTag("demo_prog_bar")
 		if pb then
 			pb.vertical = not pb.vertical
-			if pb.vertical then
-				pb.w, pb.h = v_bar_width, v_bar_height
 
-			else
-				pb.w, pb.h = h_bar_width, h_bar_height
+			local node = pb.layout_ref
+			if node then
+				if pb.vertical then
+					node.static_w, node.static_h = v_bar_width, v_bar_height
+				else
+					node.static_w, node.static_h = h_bar_width, h_bar_height
+				end
+				pb.parent:reshape()
+				print(pb.vertical, node.static_w, node.static_h, pb.w, pb.h)
 			end
-			pb:reshape()
 		end
 	end
 
 
 	local btn_far_end = panel:addChild("base/button")
-	btn_far_end.x = 256
-	btn_far_end.y = 32+40+40
-	btn_far_end.w = 128
-	btn_far_end.h = 40
 	btn_far_end:initialize()
+	demoShared.setStaticLayout(panel, btn_far_end, 256, 32+40+40, 128, 40)
 
 	btn_far_end:setLabel("Near/Far Start")
 
@@ -130,11 +122,8 @@ function plan.make(panel)
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
-	sld_pos.x = 256
-	sld_pos.y = 160+32+8
-	sld_pos.w = 256
-	sld_pos.h = 32
 	sld_pos:initialize()
+	demoShared.setStaticLayout(panel, sld_pos, 256, 160+32+8, 256, 32)
 
 	sld_pos:setTag("position_slider")
 
@@ -152,11 +141,8 @@ function plan.make(panel)
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")
-	sld_max.x = 256
-	sld_max.y = 160+32+8+32+32+8
-	sld_max.w = 256
-	sld_max.h = 32
 	sld_max:initialize()
+	demoShared.setStaticLayout(panel, sld_max, 256, 160+32+8+32+32+8, 256, 32)
 	sld_max:setTag("maximum_slider")
 
 	sld_max.slider_pos = starting_max

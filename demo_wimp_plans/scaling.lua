@@ -61,8 +61,8 @@ function plan.make(panel)
 
 	demoShared.makeLabel(panel, xx1, yy, ww, hh, "Scale:", "single")
 	input = panel:addChild("input/text_box_single")
-	input.x, input.y, input.w, input.h = xx2, yy, ww, hh
 	input:initialize()
+	demoShared.setStaticLayout(panel, input, xx2, yy, ww, hh)
 	_configureInputBox(input)
 	input:setTag("in_scale")
 	input:setText(tostring(panel.context.scale))
@@ -72,8 +72,8 @@ function plan.make(panel)
 
 	demoShared.makeLabel(panel, 32, 128, 160, 32, "DPI:", "single")
 	input = panel:addChild("input/text_box_single")
-	input.x, input.y, input.w, input.h = xx2, yy, ww, hh
 	input:initialize()
+	demoShared.setStaticLayout(panel, input, xx2, yy, ww, hh)
 	_configureInputBox(input)
 	input:setTag("in_dpi")
 	input:setText(tostring(panel.context.dpi))
@@ -84,8 +84,8 @@ function plan.make(panel)
 	--input:setText("Single-Line Text Box")
 
 	local btn = panel:addChild("base/button")
-	btn.x, btn.y, btn.w, btn.h = xx2, yy, ww, hh
 	btn:initialize()
+	demoShared.setStaticLayout(panel, btn, xx2, yy, ww, hh)
 	btn.tag = "btn_crt"
 	btn:setLabel("Update")
 	btn.wid_buttonAction = _updateScale

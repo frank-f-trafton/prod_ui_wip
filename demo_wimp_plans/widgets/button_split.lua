@@ -89,11 +89,8 @@ function plan.make(panel)
 	-- Split Button
 	local btn_spl = panel:addChild("wimp/button_split")
 	btn_spl.skin_id = btn_spl.skin_id .. "_DEMO"
-	btn_spl.x = 0
-	btn_spl.y = 0
-	btn_spl.w = 224
-	btn_spl.h = 64
 	btn_spl:initialize()
+	demoShared.setStaticLayout(panel, btn_spl, 0, 0, 224, 64)
 	btn_spl:setTag("demo_split_btn")
 
 	btn_spl:setLabel("Split Button")
@@ -107,11 +104,8 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("base/checkbox")
-		chk.x = xx
-		chk.y = yy
-		chk.w = ww
-		chk.h = hh
 		chk:initialize()
+		demoShared.setStaticLayout(panel, chk, xx, yy, ww, hh)
 		chk:setLabel("Aux Enabled")
 		chk:setChecked(not not btn_spl.aux_enabled)
 		chk.wid_buttonAction = function(self)
@@ -128,11 +122,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo.x = xx
-		rdo.y = yy
-		rdo.w = ww
-		rdo.h = hh
 		rdo:initialize()
+		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "right"
 		rdo:setLabel("Right")
@@ -145,11 +136,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo.x = xx
-		rdo.y = yy
-		rdo.w = ww
-		rdo.h = hh
 		rdo:initialize()
+		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "left"
 		rdo:setLabel("Left")
@@ -162,11 +150,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo.x = xx
-		rdo.y = yy
-		rdo.w = ww
-		rdo.h = hh
 		rdo:initialize()
+		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "top"
 		rdo:setLabel("Top")
@@ -179,11 +164,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo.x = xx
-		rdo.y = yy
-		rdo.w = ww
-		rdo.h = hh
 		rdo:initialize()
+		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "bottom"
 		rdo:setLabel("Bottom")
@@ -201,11 +183,8 @@ function plan.make(panel)
 
 	do
 		local sld = panel:addChild("barebones/slider_bar")
-		sld.x = xx
-		sld.y = yy
-		sld.w = ww
-		sld.h = hh
 		sld:initialize()
+		demoShared.setStaticLayout(panel, sld, xx, yy, ww, hh)
 		sld.trough_vertical = false
 		sld:setLabel("Aux Size")
 		sld.slider_def = btn_spl.skin.aux_size
