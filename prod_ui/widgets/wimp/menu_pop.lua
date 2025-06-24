@@ -523,9 +523,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local root = self:getRootWidget()
 
 		if key == "escape" then
-
 			destroySubMenus(self)
-
 			--print("self.chain_prev", self.chain_prev)
 
 			-- Need some special handling depending on whether this is the base pop-up, or
@@ -550,6 +548,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false
+				temp_chain_prev:tryTakeThimble2()
 
 				return true
 			end
