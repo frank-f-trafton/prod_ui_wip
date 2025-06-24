@@ -1,6 +1,11 @@
--- Atlas texture data.
-
 return {
+	["!info"] = {
+		name = "Vacuum Dark",
+		author = "",
+		copyright = "",
+		license = "",
+	},
+
 	-- Run-time texture config hints.
 	config = {
 		filter_min = "linear",
