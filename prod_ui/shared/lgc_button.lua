@@ -43,6 +43,8 @@ function lgcButton.setEnabled(self, enabled)
 	if not self.enabled then
 		self.hovered = false
 		self.pressed = false
+		self.cursor_hover = nil
+		self.cursor_press = nil
 	end
 end
 

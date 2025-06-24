@@ -11,13 +11,13 @@ local function cb_refresh(self)
 	local ws2 = root:findTag("alt_workspace")
 
 	if self.tag == "btn_crt" then
-		self.enabled = not ws2
+		self:setEnabled(not ws2)
 
 	elseif self.tag == "btn_act" then
-		self.enabled = not not ws2
+		self:setEnabled(not not ws2)
 
 	elseif self.tag == "btn_dst" then
-		self.enabled = not not ws2
+		self:setEnabled(not not ws2)
 	end
 
 	print("cb_refresh: tag", self.tag, "enabled", self.enabled)
