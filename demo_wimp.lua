@@ -211,7 +211,7 @@ local function newWimpContext()
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
-	local theme = demoShared.loadTheme()
+	local theme = demoShared.loadTheme("vacuum_dark")
 	context:applyTheme(theme)
 
 	local wid_root = context:addRoot("wimp/root_wimp")
@@ -312,10 +312,10 @@ function love.keypressed(kc, sc, rep)
 	-- [====[
 	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
 		if context:getScale() > 1 then
-			demoShared.executeThemeUpdate(context, 1.0, context:getDPI())
+			demoShared.executeThemeUpdate(context, 1.0, context:getDPI(), "vacuum_dark")
 		else
 			--demoShared.executeThemeUpdate(context, 1.5, 192)
-			demoShared.executeThemeUpdate(context, 1.5, context:getDPI())
+			demoShared.executeThemeUpdate(context, 1.5, context:getDPI(), "vacuum_dark")
 		end
 	end
 

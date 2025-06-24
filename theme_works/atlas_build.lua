@@ -1,6 +1,8 @@
+require("lib.strict")
+
 --[[
 (Make the base PNGs with svg2png first.)
-clear && love12d atlas_build.lua --img-source output/96/vacuum_dark --dest output/96 --bleed 1
+clear && love12d atlas_build.lua --png-dir output/vacuum_dark/96/png --dest output/vacuum_dark/96 --bleed 1
 [--debug_alpha]
 
 NOTES:
@@ -8,7 +10,7 @@ NOTES:
 * Premultiplying (--premult) cancels out perimeter alpha-bleeding (--bleed <n>).
 --]]
 
-local example_usage = [[love . --img-source <input_path> --dest <output_path>]]
+local example_usage = [[love . --png-dir <input_path> --dest <output_path>]]
 
 local love_major, love_minor = love.getVersion()
 if love_major < 12 then
@@ -26,7 +28,7 @@ local nativefs = require("lib.nativefs")
 local t2s2 = require("lib.t2s2.t2s2")
 
 
-local arg_img_path
+local arg_png_path
 local arg_dest_path
 local arg_premult = "off"
 local arg_bleed = 0
@@ -43,8 +45,8 @@ local task_i = 1
 
 
 local function checkArgImagePath()
-	if not arg_img_path then
-		error("missing argument: source path")
+	if not arg_png_path then
+		error("missing argument: source (PNG) path")
 	end
 end
 
@@ -101,9 +103,9 @@ function love.load(arguments)
 	while i <= #arguments do
 		local argument = arguments[i]
 
-		if argument == "--img-source" then
+		if argument == "--png-dir" then
 			i = i + 1
-			arg_img_path = arguments[i]
+			arg_png_path = arguments[i]
 			checkArgImagePath()
 			i = i + 1
 
@@ -146,7 +148,7 @@ local tasks_build = {
 
 
 		-- Strip trailing slashes from paths
-		arg_img_path = shared.stripTrailingSlash(arg_img_path)
+		arg_png_path = shared.stripTrailingSlash(arg_png_path)
 		arg_dest_path = shared.stripTrailingSlash(arg_dest_path)
 
 		checkDestExists()
@@ -162,14 +164,14 @@ local tasks_build = {
 		local image_ids = {}
 
 		-- Use file paths+names as tie-breakers during the atlas layout procedure.
-		file_info = nativefs.getDirectoryItemsInfo(arg_img_path)
+		file_info = nativefs.getDirectoryItemsInfo(arg_png_path)
 
 		for i, file_t in ipairs(file_info) do
 			if file_t.type == "file" then
 				local file_no_ext = string.sub(file_t.name, 1, -5)
 				local ext = string.sub(file_t.name, -4)
 				if string.lower(ext) == ".png" then
-					local i_data = love.image.newImageData(arg_img_path .. "/" .. file_t.name)
+					local i_data = love.image.newImageData(arg_png_path .. "/" .. file_t.name)
 					i_data_set[#i_data_set + 1] = i_data
 					image_ids[i_data] = file_no_ext
 
@@ -208,7 +210,8 @@ local tasks_build = {
 		local base_data = shared.nfsLoadLuaFile(arg_dest_path .. "/base_data.lua")
 		local slice_coords = base_data.slice_coords
 
-		local out_coords = {
+		local out_base_data = {
+			["!info"] = base_data["!info"],
 			config = base_data.config,
 			quads = {},
 			slices = {},
@@ -218,19 +221,19 @@ local tasks_build = {
 		-- Produce quad tables.
 		print("#boxes: " .. #atl.boxes)
 		for i, box in ipairs(atl.boxes) do
-			out_coords.quads[box.id] = {x = box.x, y = box.y, w = box.iw, h = box.ih}
+			out_base_data.quads[box.id] = {x = box.x, y = box.y, w = box.iw, h = box.ih}
 		end
 
 		-- Copy the slice tables made by svg2png.
 		for k, v in pairs(slice_coords) do
-			local quad = out_coords.quads[k]
+			local quad = out_base_data.quads[k]
 			if not quad then
 				print("Warning: atlas_build: missing base quad for quadslice: " .. tostring(k))
 			end
-			out_coords.slices[k] = v
+			out_base_data.slices[k] = v
 		end
 
-		local atlas_box_str = t2s2.serialize(out_coords)
+		local atlas_box_str = t2s2.serialize(out_base_data)
 		shared.nfsWrite(arg_dest_path .. "/atlas.lua", atlas_box_str)
 
 		task_i = task_i + 1
@@ -240,11 +243,16 @@ local tasks_build = {
 
 
 function love.update(dt)
-	if not tasks_build[task_i] then
+	if love.keyboard.isDown("escape") then
+		print("*** Cancelled ***")
+		love.event.quit(1)
+
+	elseif not tasks_build[task_i] then
 		print("* Finished all tasks.")
 		print("task_i", task_i)
 		love.event.quit()
 		return
+
 	else
 		print("* Task #" .. task_i)
 		if not tasks_build[task_i]() then

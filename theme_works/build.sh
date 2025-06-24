@@ -10,6 +10,7 @@ set -e
 
 # Config
 dpi=96
+theme=vacuum_dark
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
@@ -18,18 +19,31 @@ while [[ $# -gt 0 ]]; do
 			shift
 			shift
 		;;
+
+		--theme)
+			theme="$2";
+			shift
+			shift
+		;;
+
+		*)
+		echo Unknown setting.
+		exit 1
+		;;
 	esac
 done
 
 echo DPI: $dpi
 echo Running svg2png...
 
-love12d svg2png.lua --source vacuum_dark --dpi $dpi
+love12d svg2png.lua --source $theme --dpi $dpi
 echo Running atlas_build...
-love12d atlas_build.lua --img-source output/$dpi/vacuum_dark --dest output/$dpi --bleed 1
+love12d atlas_build.lua --png-dir output/$theme/$dpi/png --dest output/$theme/$dpi --bleed 1
 
 echo Copying output to themes directory...
-rm -rf ../prod_ui/resources/textures/$dpi
 mkdir -p ../prod_ui/resources/textures/$dpi
-cp output/$dpi/atlas.lua ../prod_ui/resources/textures/$dpi/atlas.lua
-cp output/$dpi/atlas.png ../prod_ui/resources/textures/$dpi/atlas.png
+rm -rf ../prod_ui/resources/textures/$dpi/$theme.*
+cp output/$theme/$dpi/atlas.lua ../prod_ui/resources/textures/$dpi/$theme.lua
+cp output/$theme/$dpi/atlas.png ../prod_ui/resources/textures/$dpi/$theme.png
+
+echo Done.

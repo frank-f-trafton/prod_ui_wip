@@ -1,3 +1,5 @@
+require("lib.strict")
+
 --[[
 clear && love12d svg2png.lua --source vacuum_dark --dpi 96
 
@@ -19,12 +21,12 @@ local nativefs = require("lib.nativefs")
 local t2s2 = require("lib.t2s2.t2s2")
 
 
-local arg_src_path
+local arg_src_path -- theme name
 local arg_dpi
 
 
-local src_info
-local src_i = 1
+local svg_info
+local svg_i = 1
 
 local base_data
 local no_scale
@@ -120,11 +122,10 @@ local tasks_export = {
 
 	-- 2
 	function()
-		out_path = "output/" .. arg_dpi .. "/" .. arg_src_path
+		out_path = "output/" .. arg_src_path .. "/" .. arg_dpi
 		nativefs.createDirectory(out_path)
 		shared.recursiveDelete(out_path)
-
-		src_info = nativefs.getDirectoryItemsInfo(arg_src_path)
+		nativefs.createDirectory(out_path .. "/png")
 
 		-- Grab and scale quadslice coordinates, if applicable.
 		if nativefs.getInfo(arg_src_path .. "/base_data.lua") then
@@ -160,32 +161,34 @@ local tasks_export = {
 				end
 			end
 			local out_str = t2s2.serialize(base_data)
-			shared.nfsWrite("output/" .. arg_dpi .. "/base_data.lua", out_str .. "\n")
+			shared.nfsWrite("output/" .. arg_src_path .. "/" .. arg_dpi .. "/base_data.lua", out_str .. "\n")
 		end
 
+		svg_info = nativefs.getDirectoryItemsInfo(arg_src_path .. "/svg")
 		task_i = task_i + 1
 		return true
 	end,
 
 	-- 3
 	function()
-		if src_i <= #src_info then
-			local item = src_info[src_i]
+		if svg_i <= #svg_info then
+			local item = svg_info[svg_i]
 			if item.type == "file" then
 				local file_no_ext = string.sub(item.name, 1, -5)
 				local ext = string.sub(item.name, -4)
 				if string.lower(ext) == ".svg" then
 					local dpi_out = no_scale[file_no_ext] and 96 or arg_dpi
-					local out_file_path = out_path .. "/" .. file_no_ext .. ".png"
+					local out_file_path = out_path .. "/png/" .. file_no_ext .. ".png"
 					print("export: " .. out_file_path)
+					print("OUT_PATH", out_path)
 					local ok = os.execute(
-						"inkscape132 --export-filename=" .. out_path .. "/" .. file_no_ext .. ".png" ..
-						" --export-dpi=" .. dpi_out ..
-						" " .. arg_src_path .. "/" .. item.name
+						"inkscape132 --export-filename=" .. out_file_path
+						.. " --export-dpi=" .. dpi_out
+						.. " " .. arg_src_path .. "/svg/" .. item.name
 					)
 				end
 			end
-			src_i = src_i + 1
+			svg_i = svg_i + 1
 		else
 			task_i = task_i + 1
 		end
@@ -196,11 +199,16 @@ local tasks_export = {
 
 
 function love.update(dt)
-	if not tasks_export[task_i] then
+	if love.keyboard.isDown("escape") then
+		print("*** Cancelled ***")
+		love.event.quit(1)
+
+	elseif not tasks_export[task_i] then
 		print("* Finished all tasks.")
 		print("task_i", task_i)
 		love.event.quit()
 		return
+
 	else
 		print("* Task #" .. task_i)
 		if not tasks_export[task_i]() then

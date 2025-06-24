@@ -13,8 +13,8 @@ local function _openURL(self)
 end
 
 
-function demoShared.loadTheme()
-	local theme = uiRes.loadDirectoryAsTable("prod_ui/theme")
+function demoShared.loadTheme(id)
+	local theme = uiRes.loadDirectoryAsTable("prod_ui/themes/" .. id)
 
 	-- Duplicate skins so that demo widgets can be tweaked without
 	-- affecting the rest of the program.
@@ -34,7 +34,7 @@ end
 
 -- @return true on successful change, nil if the scale and dpi are not different from existing values, false if the
 --	change failed.
-function demoShared.executeThemeUpdate(context, scale, dpi)
+function demoShared.executeThemeUpdate(context, scale, dpi, id)
 	-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
 	-- TODO: Probably need to declare valid DPI numbers somewhere.
 	local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(dpi), "directory")
@@ -46,7 +46,7 @@ function demoShared.executeThemeUpdate(context, scale, dpi)
 			context:setScale(scale)
 			context:setDPI(dpi)
 
-			local theme = demoShared.loadTheme()
+			local theme = demoShared.loadTheme(id)
 
 			context.root:forEach(function(self) if self.skinner then self:skinRemove() end end)
 			context:applyTheme(theme)

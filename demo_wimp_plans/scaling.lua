@@ -36,7 +36,7 @@ local function _updateScale(self)
 		btn:setLabel("Bad DPI.")
 
 	else
-		local result = demoShared.executeThemeUpdate(context, scale, dpi)
+		local result = demoShared.executeThemeUpdate(context, scale, dpi, "vacuum_dark")
 		if result == false then
 			btn:setLabel("Unprovisioned DPI")
 		else
