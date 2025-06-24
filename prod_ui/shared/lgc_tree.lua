@@ -45,7 +45,7 @@ end
 
 
 function lgcTree.keyForward(self, dir)
-	local item = self.items[self.index]
+	local item = self.MN_items[self.MN_index]
 	if item
 	and self.TR_expanders_active
 	and #item.nodes > 0
@@ -66,7 +66,7 @@ end
 
 
 function lgcTree.keyBackward(self, dir)
-	local item = self.items[self.index]
+	local item = self.MN_items[self.MN_index]
 
 	if item
 	and self.TR_expanders_active
@@ -256,10 +256,10 @@ end
 
 
 function lgcTree.orderItems(self)
-	local items = self.items
+	local items = self.MN_items
 
 	-- Note the current selected item, if any.
-	local item_sel = items[self.index]
+	local item_sel = items[self.MN_index]
 
 	-- Clear the existing menu layout.
 	for i = #items, 1, -1 do
@@ -303,7 +303,7 @@ local function _removeNode(self, node, depth)
 	item.presented = nil
 	node.item = nil
 	local item_i = self:menuGetItemIndex(item)
-	table.remove(self.items, item_i)
+	table.remove(self.MN_items, item_i)
 end
 
 
@@ -318,7 +318,7 @@ end
 
 
 function lgcTree.arrangeItems(self)
-	local skin, items = self.skin, self.items
+	local skin, items = self.skin, self.MN_items
 	local font = skin.font
 
 	local yy = 0

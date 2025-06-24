@@ -698,7 +698,7 @@ do
 	local panel_id = demo_panel_launch[1]
 	local plan_list = wimp_root:findTag("plan_menu")
 	if panel_id and plan_list then
-		for i, item in ipairs(plan_list.items) do
+		for i, item in ipairs(plan_list.MN_items) do
 			if item.plan_id == panel_id then
 				plan_list:setSelection(item)
 				break

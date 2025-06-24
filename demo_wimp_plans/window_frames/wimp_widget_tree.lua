@@ -72,7 +72,7 @@ local function _buildTree(tree_box, root)
 	-- Restore the selection, if any.
 	local restored
 	if wid_selected then
-		for i, item in ipairs(tree_box.items) do
+		for i, item in ipairs(tree_box.MN_items) do
 			if item.usr_wid == wid_selected then
 				tree_box:menuSetSelectedIndex(i)
 				restored = true

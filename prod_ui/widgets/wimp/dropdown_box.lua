@@ -97,7 +97,7 @@ end
 
 
 local function _updateTextWidth(self)
-	local item = self.items[self.index]
+	local item = self.MN_items[self.MN_index]
 
 	self.chosen_text_w = item and self.skin.font:getWidth(item.text) or 0
 end
@@ -110,7 +110,7 @@ _mt_item.__index = _mt_item
 function def:addItem(text, pos, icon_id)
 	local skin = self.skin
 	local font = skin.font
-	local items = self.items
+	local items = self.MN_items
 
 	uiShared.type1(1, text, "string")
 	uiShared.intRangeEval(2, pos, 1, #items + 1)
@@ -146,7 +146,7 @@ end
 function def:removeItemByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local items = self.items
+	local items = self.MN_items
 	local removed_item = items[item_i]
 	if not removed_item then
 		error("no item to remove at index: " .. tostring(item_i))
@@ -154,7 +154,7 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
+	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 	_updateTextWidth(self)
 
 	return removed_item
@@ -172,14 +172,14 @@ end
 function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local index_old = self.index
+	local index_old = self.MN_index
 
 	self:menuSetSelectedIndex(item_i)
 
 	_updateTextWidth(self)
 
-	if index_old ~= self.index then
-		self:wid_chosenSelection(self.index, self.items[self.index])
+	if index_old ~= self.MN_index then
+		self:wid_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
 	end
 end
 
@@ -264,7 +264,7 @@ function def:_openPopUpMenu()
 		drawer:writeSetting("show_icons", self.show_icons)
 		drawer:setIconSetID(self.icon_set_id)
 
-		for i, item in ipairs(self.items) do
+		for i, item in ipairs(self.MN_items) do
 			local new_item = drawer:addItem(item.text, nil, item.icon_id, true)
 			new_item.source_item = item
 		end
@@ -272,7 +272,7 @@ function def:_openPopUpMenu()
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		lgcWimp.assignPopUp(self, drawer)
 
-		drawer:setSelectionByIndex(self.index)
+		drawer:setSelectionByIndex(self.MN_index)
 
 		drawer:reshape()
 		drawer:centerSelectedItem(true)
@@ -319,7 +319,7 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
-	local index_old = self.index
+	local index_old = self.MN_index
 
 	if scancode == "up" then
 		self:movePrev(1, true)
@@ -349,8 +349,8 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	end
 
 	if check_chosen then
-		if index_old ~= self.index then
-			self:wid_chosenSelection(self.index, self.items[self.index])
+		if index_old ~= self.MN_index then
+			self:wid_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
 		end
 		return true
 	end
@@ -378,8 +378,8 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		if not self.wid_drawer then
-			local items = self.items
-			local old_index = self.index
+			local items = self.MN_items
+			local old_index = self.MN_index
 			local old_item = items[old_index]
 
 			-- Space opens, but does not close the pop-up.
@@ -453,7 +453,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 		-- Cycle menu options if the drawer is closed and this widget has top thimble focus.
 		if not self.wid_drawer and self:hasTopThimble() then
 			local check_chosen = false
-			local index_old = self.index
+			local index_old = self.MN_index
 
 			if y > 0 then
 				self:movePrev(y, true)
@@ -465,8 +465,8 @@ function def:uiCall_pointerWheel(inst, x, y)
 			end
 
 			if check_chosen then
-				if index_old ~= self.index then
-					self:wid_chosenSelection(self.index, self.items[self.index])
+				if index_old ~= self.MN_index then
+					self:wid_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
 				end
 				return true
 			end
@@ -550,7 +550,7 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 
 		-- Update the icons of any existing items.
-		for i, item in ipairs(self.items) do
+		for i, item in ipairs(self.MN_items) do
 			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 		end
 	end,
@@ -602,7 +602,7 @@ def.default_skinner = {
 			love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 		end
 
-		local chosen = self.items[self.index]
+		local chosen = self.MN_items[self.MN_index]
 		if chosen then
 			love.graphics.setColor(res.color_text)
 

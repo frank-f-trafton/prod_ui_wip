@@ -44,7 +44,7 @@ local function determineItemColor(item, client)
 	if item.pop_up_def then
 		return client.skin.color_cat_enabled
 
-	elseif client.items[client.index] == item then
+	elseif client.MN_items[client.MN_index] == item then
 		return client.skin.color_cat_selected
 
 	else
@@ -99,7 +99,7 @@ function def:appendCategory(info)
 		item[k] = v
 	end
 
-	self.items[#self.items + 1] = item
+	self.MN_items[#self.MN_items + 1] = item
 
 	return item
 end
@@ -147,7 +147,7 @@ local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selec
 	pop_up.chain_prev = client
 
 	if set_selection then
-		pop_up.default_deselect = false
+		pop_up.MN_default_deselect = false
 	end
 	pop_up:menuSetDefaultSelection()
 
@@ -168,7 +168,7 @@ end
 
 
 function def:arrangeItems()
-	local items = self.items
+	local items = self.MN_items
 	local xx = 0
 
 	for i = 1, #items do
@@ -309,7 +309,7 @@ function def:uiCall_reshapePost()
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		_shapeItem(self, item)
 	end
 
@@ -324,7 +324,7 @@ end
 --- Updates cached display state.
 function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.MN_items)
 	end
 end
 
@@ -383,7 +383,7 @@ function def:widHook_pressed(key, scancode, isrepeat)
 			if (menu_bar.state == "idle" and alt_state) then
 				print("hook_pressed", key, alt_state, "menu_bar.state", menu_bar.state)
 
-				local item_i, item = keyMnemonicSearch(menu_bar.items, key)
+				local item_i, item = keyMnemonicSearch(menu_bar.MN_items, key)
 				if item then
 					--print("got it", key, item.text)
 					menu_bar:widCall_keyboardRunItem(item)
@@ -419,7 +419,7 @@ end
 function def:widCall_keyboardRunItem(item_t)
 	-- Confirm item belongs to this menu
 	local item_i
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		if item == item_t then
 			item_i = i
 			break
@@ -456,7 +456,7 @@ function def:widCall_keyboardActivate()
 		else
 			-- Find first selectable item
 			local item_i, item_t
-			for i, item in ipairs(self.items) do
+			for i, item in ipairs(self.MN_items) do
 				if item.selectable then
 					item_i = i
 					item_t = item
@@ -478,7 +478,7 @@ end
 
 --- Code to handle stepping left and right through the menu bar, which is called from a couple of places.
 local function handleLeftRightKeys(self, key, scancode, isrepeat)
-	local selection_old = self.index
+	local selection_old = self.MN_index
 	local mod = self.context.key_mgr.mod
 
 	if key == "left" or (key == "tab" and mod["shift"]) then
@@ -490,10 +490,10 @@ local function handleLeftRightKeys(self, key, scancode, isrepeat)
 
 	-- Unfortunately, with this design, the current selection is blanked out by
 	-- wid_popUpCleanup(), so we need to temporarily track it here.
-	local selection_new = self.index
+	local selection_new = self.MN_index
 
 	if selection_old ~= selection_new then
-		local item = self.items[self.index]
+		local item = self.MN_items[self.MN_index]
 		if item.selectable and item.pop_up_def then
 			makePopUpMenu(item, self, true, false, true)
 
@@ -571,7 +571,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		local ax, ay = self:getAbsolutePosition()
 
-		local item_i, item_t = self:getItemAtPoint(s_mx - ax, s_my - ay, 1, #self.items)
+		local item_i, item_t = self:getItemAtPoint(s_mx - ax, s_my - ay, 1, #self.MN_items)
 		if item_i and item_t.selectable then
 			self:menuSetSelectedIndex(item_i)
 			--self:selectionInView()
@@ -626,7 +626,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local hover_ok = false
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, 1, #self.items)
+			local i, item = self:getItemAtPoint(xx, yy, 1, #self.MN_items)
 
 			if item and item.selectable then
 				local old_hover = self.MN_item_hover
@@ -635,7 +635,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				if self.state == "opened" then
 					-- Hover-to-select
-					local selected_item = self.items[self.index]
+					local selected_item = self.MN_items[self.MN_index]
 					if item ~= selected_item then
 						self:menuSetSelectedIndex(i)
 					end
@@ -696,7 +696,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					-- Check for click-able items.
 					if not self.press_busy then
-						local item_i, item_t = self:trySelectItemAtPoint(x, y, 1, #self.items)
+						local item_i, item_t = self:trySelectItemAtPoint(x, y, 1, #self.MN_items)
 
 						self.press_busy = "menu-drag"
 
@@ -735,7 +735,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			self.press_busy = false
 
 			-- Mouse is over the selected item
-			local item_selected = self.items[self.index]
+			local item_selected = self.MN_items[self.MN_index]
 			if item_selected and item_selected.selectable  and item_selected.pop_up_def then
 
 				local ax, ay = self:getAbsolutePosition()
@@ -875,8 +875,8 @@ def.default_skinner = {
 	render = function(self, ox, oy)
 		local skin = self.skin
 
-		local items = self.items
-		local selected_index = self.index
+		local items = self.MN_items
+		local selected_index = self.MN_index
 
 		local font = skin.font_item
 
@@ -945,7 +945,7 @@ def.default_skinner = {
 		love.graphics.print("state: " .. self.state
 		.. "\npressed: " .. tostring(self == self.context.current_pressed)
 		.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
-		.. "\nself.index: " .. tostring(self.index)
+		.. "\nself.MN_index: " .. tostring(self.MN_index)
 		,
 		ww, oy + 32)
 		 --]]

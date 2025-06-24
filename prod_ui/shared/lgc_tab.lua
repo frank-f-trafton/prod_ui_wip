@@ -51,11 +51,11 @@ end
 
 
 function lgcTab.columnSortGeneric(wid, column)
-	local items = wid.items
+	local items = wid.MN_items
 	local sort_order = column.sort_order
 
 	local temp = {}
-	for i, item in ipairs(wid.items) do
+	for i, item in ipairs(wid.MN_items) do
 		local entry = {item}
 		if not sort_order then
 			entry[#entry + 1] = item.cells[column.id][column.sort_cell_field]
@@ -73,7 +73,7 @@ function lgcTab.columnSortGeneric(wid, column)
 	table.sort(temp, sort_func)
 
 	for i, tbl in ipairs(temp) do
-		wid.items[i] = tbl[1]
+		wid.MN_items[i] = tbl[1]
 	end
 
 	return true
@@ -85,7 +85,7 @@ function lgcTab.getWidestColumnText(self, column_id)
 	local w = 0
 	local index
 
-	for i, row in ipairs(self.items) do
+	for i, row in ipairs(self.MN_items) do
 		local cell = row.cells[column_id]
 		local new_w = font:getWidth(cell.text)
 		if new_w > w then

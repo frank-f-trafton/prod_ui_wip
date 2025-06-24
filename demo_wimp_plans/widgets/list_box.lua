@@ -25,10 +25,10 @@ local function keyPressed_swapItems(self, key, scancode, isrepeat)
 	local mods = self.context.key_mgr.mod
 
 	if mods["ctrl"] then
-		local dest_i = (key == "up") and self.index - 1 or (key == "down") and self.index + 1 or nil
-		if dest_i and dest_i >= 1 and dest_i <= #self.items then
-			if self:menuCanSelect(dest_i) and self:menuCanSelect(self.index) then
-				self:menuSwapItems(self.index, dest_i)
+		local dest_i = (key == "up") and self.MN_index - 1 or (key == "down") and self.MN_index + 1 or nil
+		if dest_i and dest_i >= 1 and dest_i <= #self.MN_items then
+			if self:menuCanSelect(dest_i) and self:menuCanSelect(self.MN_index) then
+				self:menuSwapItems(self.MN_index, dest_i)
 				self:menuSetSelectedIndex(dest_i)
 				self:arrangeItems()
 
@@ -54,7 +54,7 @@ end
 
 local function getDropPoint(self)
 	local mx, my = self:getRelativePositionScrolled(self.context.mouse_x, self.context.mouse_y)
-	local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.items)
+	local overlap_i, overlap_t, clamped = self:getItemAtPoint(mx, my, 1, #self.MN_items)
 	return overlap_i, overlap_t, clamped
 end
 
@@ -64,7 +64,7 @@ local function wid_droppedReorder(self, drop_state)
 		local from = drop_state.from
 		local item = drop_state.item
 
-		if self == from and #self.items > 1 and self:menuHasItem(item) then
+		if self == from and #self.MN_items > 1 and self:menuHasItem(item) then
 			local overlap_i, overlap_t, clamped = getDropPoint(self)
 			local old_i = self:menuGetItemIndex(item)
 
@@ -74,15 +74,15 @@ local function wid_droppedReorder(self, drop_state)
 
 			-- Dropped after the last item (if clamping), or on no item (if not clamping): move item to the end
 			elseif not overlap_i or clamped == 1 then
-				self:menuMoveItem(old_i, #self.items)
-				--self:menuSwapItems(old_i, #self.items)
+				self:menuMoveItem(old_i, #self.MN_items)
+				--self:menuSwapItems(old_i, #self.MN_items)
 
 			-- Dropped on an item
 			else
 				self:menuMoveItem(old_i, overlap_i)
 				--self:menuSwapItems(old_i, overlap_i)
 			end
-			self.index = overlap_i
+			self.MN_index = overlap_i
 			self:arrangeItems()
 			return true
 		end
@@ -452,7 +452,7 @@ local function makeListBox4(panel, x, y)
 		local l2 = self:findSiblingTag("demo_listbox4b")
 
 		if l1 and l2 then
-			local item = l1.items[l1.index]
+			local item = l1.MN_items[l1.MN_index]
 			if item then
 				transferItem(item, l1, l2, nil)
 			end
@@ -470,7 +470,7 @@ local function makeListBox4(panel, x, y)
 		local l2 = self:findSiblingTag("demo_listbox4b")
 
 		if l1 and l2 then
-			local item = l2.items[l2.index]
+			local item = l2.MN_items[l2.MN_index]
 			if item then
 				transferItem(item, l2, l1, nil)
 			end
