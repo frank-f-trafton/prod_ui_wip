@@ -482,10 +482,10 @@ local function handleLeftRightKeys(self, key, scancode, isrepeat)
 	local mod = self.context.key_mgr.mod
 
 	if key == "left" or (key == "tab" and mod["shift"]) then
-		self:movePrev()
+		self:movePrev(1, true, isrepeat)
 
 	elseif key == "right" or (key == "tab" and not mod["shift"]) then
-		self:moveNext()
+		self:moveNext(1, true, isrepeat)
 	end
 
 	-- Unfortunately, with this design, the current selection is blanked out by

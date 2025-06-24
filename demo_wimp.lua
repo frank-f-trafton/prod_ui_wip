@@ -617,6 +617,8 @@ do
 		local demo_list = ws1:addChild("wimp/tree_box")
 		demo_list:initialize()
 
+		demo_list.MN_wrap_selection = "no-rep"
+
 		-- [[
 		local node_list = ws1.layout_tree:newNode()
 		node_list:setMode("slice", "px", "left", 300)
