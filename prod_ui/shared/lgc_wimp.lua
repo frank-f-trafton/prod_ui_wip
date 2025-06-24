@@ -66,7 +66,7 @@ function lgcWimp.makePopUpMenu(self, menu_def, x, y)
 
 	local do_block
 	if root.context.settings then
-		do_block = pTable.resolve(root.context.settings, "/wimp/pop_up_menu/block_1st_click_out")
+		do_block = pTable.resolve(root.context.settings, "wimp/pop_up_menu/block_1st_click_out")
 	end
 
 	pop_up:setBlocking(do_block)

@@ -1,12 +1,12 @@
 return {
 	skinner_id = "wimp/menu_pop",
 
-	box = "*/boxes/panel",
+	box = "*boxes/panel",
 	icon_set_id = "bureau",
-	font_item = "*/fonts/p",
-	slc_body = "*/slices/atlas/menu_pop_body",
-	tq_px = "*/quads/atlas/pixel",
-	tq_arrow = "*/quads/atlas/arrow_right",
+	font_item = "*fonts/p",
+	slc_body = "*slices/atlas/menu_pop_body",
+	tq_px = "*quads/atlas/pixel",
+	tq_arrow = "*quads/atlas/arrow_right",
 
 	separator_item_height = 4,
 	separator_graphic_height = 1,
