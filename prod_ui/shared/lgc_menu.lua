@@ -462,7 +462,6 @@ function lgcMenu.setup(self, items, setup_mark, setup_drag_drop)
 	-- When true, the default selection is nothing (0).
 	self.MN_default_deselect = false
 
-
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
 	self.MN_selection_extend_x = 0
 	self.MN_selection_extend_y = 0
@@ -479,6 +478,9 @@ function lgcMenu.setup(self, items, setup_mark, setup_drag_drop)
 	self.MN_hover_to_select = false
 
 	-- How many items to jump when pressing pageup or pagedown, or equivalent gamepad buttons.
+	-- NOTE: this value is typically used with menus that only display one item at a time.
+	-- Menu widgets that show muliple items would, instead, probably use the menu viewport
+	-- size to determine how far to move.
 	self.MN_page_jump_size = 4
 
 	-- Range of items that are visible, and which should be checked for hover state.
@@ -486,6 +488,8 @@ function lgcMenu.setup(self, items, setup_mark, setup_drag_drop)
 	self.MN_items_last = 2^53 -- min(last, #items)
 
 	-- Wrap selection when pressing against the last selectable item.
+	-- true, false, "no-rep"
+	-- "no-rep": only wrap if the input is not a repeat event.
 	self.MN_wrap_selection = true
 
 	-- Scroll the view while dragging the mouse.
@@ -861,14 +865,27 @@ end
 --]]
 
 
+local function _checkAllowWrap(is_repeat, wrap_selection)
+	if wrap_selection == true then
+		return true
+
+	elseif wrap_selection == "no-rep" and not is_repeat then
+		return true
+	end
+
+	return false
+end
+
+
 --- Move the widget menu selection back by an arbitrary number of steps. If applicable: update scrolling such that the
 --  selection is in view, and update the widget's visual cache.
--- @param self The widget hosting the menu table.
+-- @param self The menu widget.
 -- @param n (1) How many steps to move.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
+-- @param is_repeat True if the source event is considered a repeating action (like holding down a keyboard key).
 -- @param id ("MN_index") Optional alternative index key to change.
-function lgcMenu.widgetMovePrev(self, n, immediate, id)
-	self:menuSetPrev(n, self.MN_wrap_selection, id)
+function lgcMenu.widgetMovePrev(self, n, immediate, is_repeat, id)
+	self:menuSetPrev(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection), id)
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -881,12 +898,13 @@ end
 
 --- Move the widget menu selection forward by an arbitrary number of steps. If applicable: update scrolling such that
 --  the selection is in view, and update the widget's visual cache.
--- @param self The widget hosting the menu table.
+-- @param self The menu widget.
 -- @param n (1) How many steps to move.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
+-- @param is_repeat True if the source event is considered a repeating action (like holding down a keyboard key).
 -- @param id ("MN_index") Optional alternative index key to change.
-function lgcMenu.widgetMoveNext(self, n, immediate, id)
-	self:menuSetNext(n, self.MN_wrap_selection, id)
+function lgcMenu.widgetMoveNext(self, n, immediate, is_repeat, id)
+	self:menuSetNext(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection), id)
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -1041,11 +1059,11 @@ end
 -- @param the isrepeat
 function lgcMenu.keyNavTB(self, key, scancode, isrepeat, id)
 	if scancode == "up" then
-		self:movePrev(1, nil, id)
+		self:movePrev(1, nil, isrepeat, id)
 		return true
 
 	elseif scancode == "down" then
-		self:moveNext(1, nil, id)
+		self:moveNext(1, nil, isrepeat, id)
 		return true
 
 	elseif scancode == "home" then
@@ -1070,11 +1088,11 @@ end
 --- Default key navigation for left-to-right menus.
 function lgcMenu.keyNavLR(self, key, scancode, isrepeat, id)
 	if scancode == "left" then
-		self:movePrev(1, nil, id)
+		self:movePrev(1, nil, isrepeat, id)
 		return true
 
 	elseif scancode == "right" then
-		self:moveNext(1, nil, id)
+		self:moveNext(1, nil, isrepeat, id)
 		return true
 
 	elseif scancode == "home" then

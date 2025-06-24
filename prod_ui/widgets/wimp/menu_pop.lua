@@ -508,11 +508,11 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local mod = self.context.key_mgr.mod
 
 	if key == "up" or (key == "tab" and mod["shift"]) then
-		self:movePrev(1, true)
+		self:movePrev(1, true, isrepeat)
 		return true
 
 	elseif key == "down" or (key == "tab" and not mod["shift"]) then
-		self:moveNext(1, true)
+		self:moveNext(1, true, isrepeat)
 		return true
 	end
 end

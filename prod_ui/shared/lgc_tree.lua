@@ -94,11 +94,11 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function lgcTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 	if scancode == "up" then
-		self:movePrev(1, true)
+		self:movePrev(1, true, isrepeat)
 		return true
 
 	elseif scancode == "down" then
-		self:moveNext(1, true)
+		self:moveNext(1, true, isrepeat)
 		return true
 
 	elseif scancode == "home" then

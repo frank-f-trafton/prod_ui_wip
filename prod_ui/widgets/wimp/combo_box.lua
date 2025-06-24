@@ -362,21 +362,19 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local index_old = self.MN_index
 
 	if scancode == "up" then
-		self:movePrev(1, true)
+		self:movePrev(1, true, isrepeat)
 		check_chosen = true
 
 	elseif scancode == "down" then
-		self:moveNext(1, true)
+		self:moveNext(1, true, isrepeat)
 		check_chosen = true
 
 	elseif scancode == "pageup" then
-		--self:movePageUp(true)
-		self:movePrev(self.MN_page_jump_size, true)
+		self:movePrev(self.MN_page_jump_size, true, false)
 		check_chosen = true
 
 	elseif scancode == "pagedown" then
-		--self:movePageDown(true)
-		self:moveNext(self.MN_page_jump_size, true)
+		self:moveNext(self.MN_page_jump_size, true, false)
 		check_chosen = true
 	end
 
