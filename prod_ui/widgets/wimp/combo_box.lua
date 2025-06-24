@@ -88,7 +88,7 @@ def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 local function refreshLineEdText(self)
-	local chosen_tbl = self.items[self.index]
+	local chosen_tbl = self.MN_items[self.MN_index]
 	local line_ed = self.line_ed
 
 	if chosen_tbl then
@@ -134,7 +134,7 @@ _mt_item.__index = _mt_item
 function def:addItem(text, pos)
 	local skin = self.skin
 	local font = skin.font
-	local items = self.items
+	local items = self.MN_items
 
 	uiShared.type1(1, text, "string")
 	uiShared.intRangeEval(2, pos, 1, #items + 1)
@@ -166,7 +166,7 @@ end
 function def:removeItemByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local items = self.items
+	local items = self.MN_items
 	local removed_item = items[item_i]
 	if not removed_item then
 		error("no item to remove at index: " .. tostring(item_i))
@@ -174,7 +174,7 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
+	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
 	return removed_item
 end
@@ -191,11 +191,11 @@ end
 function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local index_old = self.index
+	local index_old = self.MN_index
 
 	self:menuSetSelectedIndex(item_i)
 
-	if index_old ~= self.index then
+	if index_old ~= self.MN_index then
 		refreshLineEdText(self)
 		self:wid_inputChanged(self.line_ed.line)
 	end
@@ -304,7 +304,7 @@ function def:_openPopUpMenu()
 
 		drawer:writeSetting("show_icons", false)
 
-		for i, item in ipairs(self.items) do
+		for i, item in ipairs(self.MN_items) do
 			local new_item = drawer:addItem(item.text, nil, item.icon_id, true)
 			new_item.source_item = item
 		end
@@ -312,7 +312,7 @@ function def:_openPopUpMenu()
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		lgcWimp.assignPopUp(self, drawer)
 
-		drawer:setSelectionByIndex(self.index)
+		drawer:setSelectionByIndex(self.MN_index)
 
 		drawer:reshape()
 		drawer:centerSelectedItem(true)
@@ -359,7 +359,7 @@ end
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	local check_chosen = false
-	local index_old = self.index
+	local index_old = self.MN_index
 
 	if scancode == "up" then
 		self:movePrev(1, true)
@@ -381,7 +381,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	end
 
 	if check_chosen then
-		if index_old ~= self.index then
+		if index_old ~= self.MN_index then
 			refreshLineEdText(self)
 			self:wid_inputChanged(self.line_ed.line)
 		end
@@ -440,8 +440,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		-- Forward keyboard events to the pop-up menu.
 		if not self.wid_drawer then
-			local items = self.items
-			local old_index = self.index
+			local items = self.MN_items
+			local old_index = self.MN_index
 			local old_item = items[old_index]
 
 			-- Alt+Down opens the pop-up.
@@ -590,7 +590,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 		-- Cycle menu options if the drawer is closed and this widget has top thimble focus.
 		if not self.wid_drawer and self:hasTopThimble() then
 			local check_chosen = false
-			local index_old = self.index
+			local index_old = self.MN_index
 
 			if y > 0 then
 				self:movePrev(y, true)
@@ -602,7 +602,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			end
 
 			if check_chosen then
-				if index_old ~= self.index then
+				if index_old ~= self.MN_index then
 					refreshLineEdText(self)
 					self:wid_inputChanged(self.line_ed.line)
 				end

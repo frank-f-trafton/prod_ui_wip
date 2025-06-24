@@ -39,7 +39,7 @@ local sort_functions = {
 
 
 local function columnSortLabels(wid, column)
-	local items = wid.items
+	local items = wid.MN_items
 	print("column.id", column.id)
 	table.sort(items, sort_functions[column.id])
 

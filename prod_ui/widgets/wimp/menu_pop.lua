@@ -117,7 +117,7 @@ end
 
 local function assignSubMenu(item, client, set_selection)
 	-- Only create a sub-menu if the last-open doesn't match the current index (including if last-open is false).
-	local selected_item = client.items[client.index]
+	local selected_item = client.MN_items[client.MN_index]
 	if selected_item ~= client.last_open_group then
 
 		-- If this menu currently has a sub-menu, close it.
@@ -157,7 +157,7 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.origin_item = item
 
 			if set_selection then
-				client_sub.default_deselect = false
+				client_sub.MN_default_deselect = false
 			end
 			client_sub:menuSetDefaultSelection()
 
@@ -175,8 +175,8 @@ local function async_changeSubMenu(self, item_index, dt)
 	-- We assume that this async function is only called as a result of the mouse hovering over a group,
 	-- so the sub-menu defaults to no selection.
 
-	if item_index == self.index then
-		local item = self.items[item_index]
+	if item_index == self.MN_index then
+		local item = self.MN_items[item_index]
 
 		if item and item.type == "group" then
 			assignSubMenu(item, self, false)
@@ -224,7 +224,7 @@ end
 
 
 local function _getRes(item, client, skin)
-	local is_selected = client.items[client.index] == item
+	local is_selected = client.MN_items[client.MN_index] == item
 	if item.actionable then
 		return is_selected and skin.res_actionable_selected or skin.res_actionable_unselected
 	else
@@ -283,7 +283,7 @@ function def:appendItem(info)
 		item[k] = v
 	end
 
-	table.insert(self.items, item)
+	table.insert(self.MN_items, item)
 
 	return item
 end
@@ -295,7 +295,7 @@ end
 --- Sets the correct widget dimensions for the menu, updating its internal contents along the way.
 function def:updateDimensions()
 	local skin = self.skin
-	local items = self.items
+	local items = self.MN_items
 	local font = skin.font_item
 
 	self.icon_x = 0
@@ -385,12 +385,12 @@ function def:updateDimensions()
 	self:reshape()
 
 	-- Update item widths and then reshape their internals
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		item.w = self.vp_w
 	end
 
 	-- Refresh document size
-	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
+	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.MN_items)
 end
 
 
@@ -436,7 +436,7 @@ function def:uiCall_initialize()
 	self.press_busy = false
 
 	lgcMenu.setup(self)
-	self.default_deselect = true
+	self.MN_default_deselect = true
 
 	self.icon_x = 0
 	self.text_label_x = 0
@@ -495,7 +495,7 @@ end
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.items)
+		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.MN_items)
 	end
 
 	-- Set the draw ranges for items.
@@ -571,7 +571,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		end
 		-- 'left' needs to fall down here if not handled.
 
-		local sel_item = self.items[self.index]
+		local sel_item = self.MN_items[self.MN_index]
 
 		if sel_item and sel_item.selectable and sel_item.actionable then
 			if sel_item.type == "group" then
@@ -604,7 +604,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		local mod = self.context.key_mgr.mod
 		if not mod["ctrl"] then
 			-- Finally, check for key mnemonics.
-			local item_i, item = keyMnemonicSearch(self.items, key)
+			local item_i, item = keyMnemonicSearch(self.MN_items, key)
 			if item and item.selectable then
 				self:menuSetSelectedIndex(item_i)
 				if item.actionable then
@@ -632,7 +632,7 @@ end
 
 
 function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
-	local item_i, item = keyMnemonicSearch(self.items, key)
+	local item_i, item = keyMnemonicSearch(self.MN_items, key)
 	if item and item.selectable then
 		self:menuSetSelectedIndex(item_i)
 		if item.actionable then
@@ -706,15 +706,15 @@ local function restingOnOpenGroup(self)
 	print("restingOnOpenGroup",
 		self.chain_next,
 		self.chain_next and self.chain_next.origin_item,
-		self.items[self.index])
+		self.MN_items[self.MN_index])
 	--]]
-	return self.chain_next and self.chain_next.origin_item == self.items[self.index]
+	return self.chain_next and self.chain_next.origin_item == self.MN_items[self.MN_index]
 end
 
 
 local function findOriginItemIndex(c_prev, origin_item)
-	for i, c_item in ipairs(c_prev.items) do
-		--print(i, c_item, #c_prev.items)
+	for i, c_item in ipairs(c_prev.MN_items) do
+		--print(i, c_item, #c_prev.MN_items)
 		if c_item == origin_item then
 			return i
 		end
@@ -747,7 +747,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 	mx = mx - self.vp_x
 	my = my - self.vp_y
 
-	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.items)
+	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.MN_items)
 	if item_i and item_t.selectable then
 		self:menuSetSelectedIndex(item_i)
 		--self:selectionInView()
@@ -779,14 +779,14 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if widShared.pointInViewport(self, 2, mx, my) then
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
 			if item and item.selectable then
 				self.MN_item_hover = item
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.items[self.index]
+					local selected_item = self.MN_items[self.MN_index]
 					if item ~= selected_item then
 						self:menuSetSelectedIndex(i)
 					end
@@ -848,7 +848,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 			-- Check for click-able items.
 			if not self.press_busy then
-				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+				local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
 				self.press_busy = "menu-drag"
 
@@ -879,7 +879,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 			-- Handle mouse unpressing over the selected item.
 			if button == 1 then
-				local item_selected = self.items[self.index]
+				local item_selected = self.MN_items[self.MN_index]
 				if item_selected and item_selected.selectable and item_selected.actionable then
 
 					local ax, ay = self:getAbsolutePosition()
@@ -945,7 +945,7 @@ function def:uiCall_update(dt)
 
 	--print("wid_update", "open_time", self.open_time)
 
-	local selected = self.items[self.index]
+	local selected = self.MN_items[self.MN_index]
 
 	--[[
 	local cur_thimble2 = self.context.thimble2
@@ -960,14 +960,14 @@ function def:uiCall_update(dt)
 	end
 
 	--print("chain_next", self.chain_next, "in_chain", in_chain)
-	--print("self.index", self.index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
+	--print("self.MN_index", self.MN_index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
 	--]]
 
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
 	if self.context.mouse_focus then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
-		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.items)
+		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.MN_items)
 	end
 
 	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a", "last_open", self.last_open_group, "open_time", self.open_time)
@@ -982,7 +982,7 @@ function def:uiCall_update(dt)
 	end
 
 	if self.open_time >= 0.20 then -- XXX config/style
-		self.context:appendAsyncAction(self, async_changeSubMenu, self.index)
+		self.context:appendAsyncAction(self, async_changeSubMenu, self.MN_index)
 		self.open_time = 0
 	end
 
@@ -1131,7 +1131,7 @@ def.default_skinner = {
 		local tq_px = skin.tq_px
 		local tq_arrow = skin.tq_arrow
 
-		local items = self.items
+		local items = self.MN_items
 		local items_first, items_last = math.max(self.MN_items_first, 1), math.min(self.MN_items_last, #items)
 
 		love.graphics.push("all")
@@ -1148,7 +1148,7 @@ def.default_skinner = {
 		-- Pop up menus do not render hover-glow.
 
 		-- Selection glow
-		local sel_item = items[self.index]
+		local sel_item = items[self.MN_index]
 		if sel_item then
 			love.graphics.setColor(skin.color_select_glow)
 			uiGraphics.quad1x1(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)

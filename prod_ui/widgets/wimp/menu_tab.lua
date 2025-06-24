@@ -108,7 +108,7 @@ function def:addRow()
 	-- Every row in the menu should have as many cells as there are columns (including invisible ones).
 	item.cells = {}
 
-	table.insert(self.items, item)
+	table.insert(self.MN_items, item)
 
 	return item
 end
@@ -344,7 +344,7 @@ function def:refreshRows()
 	end
 
 	local yy = 0
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		item.x = 0
 		item.y = yy
 		item.w = column_bar_x2
@@ -371,7 +371,7 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w, self.doc_h = 0, 0
 
 		-- Document height is based on the last item in the menu.
-		local last_item = self.items[#self.items]
+		local last_item = self.MN_items[#self.MN_items]
 		if last_item then
 			self.doc_h = last_item.y + last_item.h
 		end
@@ -489,7 +489,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
 			local smx, smy = mx + self.scr_x, my + self.scr_y
-			local item_i, item_t = self:getItemAtPoint(smx, smy, 1, #self.items)
+			local item_i, item_t = self:getItemAtPoint(smx, smy, 1, #self.MN_items)
 			if item_i and item_t.selectable then
 				self:menuSetSelectedIndex(item_i)
 				-- Turn off item_hover so that other items don't glow.
@@ -582,7 +582,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if widShared.pointInViewport(self, 1, mx, my) then
 			-- Update item hover
 			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
-			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 			print("i", i, "item", item)
 
 			if item and item.selectable then
@@ -590,7 +590,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 				-- Implement mouse hover-to-select.
 				if self.MN_hover_to_select and (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.items[self.index]
+					local selected_item = self.MN_items[self.MN_index]
 					if item ~= selected_item then
 						self:menuSetSelectedIndex(i)
 					end
@@ -678,7 +678,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						smx,
 						smy,
 						math.max(1, self.MN_items_first),
-						math.min(#self.items, self.MN_items_last)
+						math.min(#self.MN_items, self.MN_items_last)
 					)
 
 					if self.MN_drag_select then
@@ -760,14 +760,14 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				self.column_primary = old_col_press
 
 				-- Try to maintain the old selection
-				local old_selected_item = self.items[self.index]
+				local old_selected_item = self.MN_items[self.MN_index]
 
 				self:sort()
 
 				if not old_selected_item then
 					self:menuSetSelectedIndex(0)
 				else
-					for i, item in ipairs(self.items) do
+					for i, item in ipairs(self.MN_items) do
 						if item == old_selected_item then
 							self:menuSetSelectedIndex(self:menuGetItemIndex(old_selected_item))
 						end
@@ -982,7 +982,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	-- Draw each menu item in range.
 	love.graphics.setColor(skin.color_item_text)
 
-	local items = self.items
+	local items = self.MN_items
 
 	local first = math.max(self.MN_items_first, 1)
 	local last = math.min(self.MN_items_last, #items)
@@ -1114,7 +1114,7 @@ def.default_skinner = {
 		local font = skin.font
 		local tq_px = skin.tq_px
 
-		local items = self.items
+		local items = self.MN_items
 
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
@@ -1165,7 +1165,7 @@ def.default_skinner = {
 		end
 
 		-- Draw selection glow, if applicable
-		local sel_item = items[self.index]
+		local sel_item = items[self.MN_index]
 		if sel_item then
 			love.graphics.setColor(skin.color_select_glow)
 			uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)

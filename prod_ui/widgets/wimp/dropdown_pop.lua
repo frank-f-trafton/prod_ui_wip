@@ -74,7 +74,7 @@ def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 local function _updateDocumentHeight(self)
-	local last_item = self.items[#self.items]
+	local last_item = self.MN_items[#self.MN_items]
 
 	self.doc_h = last_item and last_item.y + last_item.h or 0
 end
@@ -87,7 +87,7 @@ end
 
 local function _recalculateDocumentWidth(self)
 	local max_w = 0
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		max_w = math.max(max_w, item.w)
 	end
 	self.doc_w = max_w
@@ -112,7 +112,7 @@ function def:_closeSelf(update_chosen)
 
 			if update_chosen then
 				-- Confirm that the linked source item still exists in the main widget.
-				local chosen = self.items[self.index]
+				local chosen = self.MN_items[self.MN_index]
 				if chosen and type(chosen.source_item) == "table" then
 					local source_i = wid_ref:menuHasItem(chosen.source_item)
 					if source_i then
@@ -137,7 +137,7 @@ _mt_item.__index = _mt_item
 function def:addItem(text, pos, icon_id, suppress_select)
 	local skin = self.skin
 	local font = skin.font
-	local items = self.items
+	local items = self.MN_items
 
 	uiShared.type1(1, text, "string")
 	uiShared.intRangeEval(2, pos, 1, #items + 1)
@@ -180,7 +180,7 @@ end
 function def:removeItemByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local items = self.items
+	local items = self.MN_items
 	local removed_item = items[item_i]
 	if not removed_item then
 		error("no item to remove at index: " .. tostring(item_i))
@@ -188,7 +188,7 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
+	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
 	_recalculateDocumentWidth(self)
 	_updateDocumentHeight(self)
@@ -208,13 +208,13 @@ end
 function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local index_old = self.index
+	local index_old = self.MN_index
 
 	self:menuSetSelectedIndex(item_i)
 
-	if index_old ~= self.index then
+	if index_old ~= self.MN_index then
 		if self.wid_ref then
-			self.wid_ref:wid_drawerSelection(self, self.index, self.items[self.index])
+			self.wid_ref:wid_drawerSelection(self, self.MN_index, self.MN_items[self.MN_index])
 		end
 	end
 end
@@ -224,7 +224,7 @@ def.keepInBounds = widShared.keepInBoundsOfParent
 
 
 function def:menuChangeCleanup()
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		_shapeItem(self, item)
 	end
 	self:arrangeItems()
@@ -244,7 +244,7 @@ end
 
 
 function def:centerSelectedItem(immediate)
-	local selected = self.items[self.index]
+	local selected = self.MN_items[self.MN_index]
 	if selected then
 		self:scrollV(math.floor(0.5 + selected.y + selected.h / 2 - self.vp_h / 2), immediate)
 		self:cacheUpdate()
@@ -306,7 +306,7 @@ function def:uiCall_reshapePre()
 	-- We assume that the root widget's dimensions match the display area.
 
 	self.w = math.min(root.w, math.max(wid_ref.w, self.doc_w))
-	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.items)))
+	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.MN_items)))
 
 	self:keepInBounds()
 
@@ -398,7 +398,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 				mx = mx - self.vp_x
 				my = my - self.vp_y
 
-				local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.items)
+				local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.MN_items)
 				if item_i and item_t.selectable then
 					self:menuSetSelectedIndex(item_i)
 
@@ -422,16 +422,16 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		if widShared.pointInViewport(self, 2, mx, my) then
 			-- Update item hover
-			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
 			if item and item.selectable then
 				self.MN_item_hover = item
 
-				--print("item", item, "index", self.index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
+				--print("item", item, "MN_index", self.MN_index, "xx|yy", xx, yy, "item.xywh", item.x, item.y, item.w, item.h)
 
 				-- Implement mouse hover-to-select.
 				if (mouse_dx ~= 0 or mouse_dy ~= 0) then
-					local selected_item = self.items[self.index]
+					local selected_item = self.MN_items[self.MN_index]
 					if item ~= selected_item then
 						self:menuSetSelectedIndex(i)
 					end
@@ -480,7 +480,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				-- Check for click-able items.
 				if not self.press_busy then
-					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+					local item_i, item_t = self:trySelectItemAtPoint(x, y, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
 					self.press_busy = "menu-drag"
 					self:cacheUpdate()
@@ -510,7 +510,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 		if old_press_busy == "menu-drag" then
 			-- Handle mouse unpressing over the selected item.
 			if button == 1 then
-				local item_selected = self.items[self.index]
+				local item_selected = self.MN_items[self.MN_index]
 
 				if item_selected and item_selected.selectable then
 					self:_closeSelf(true)
@@ -644,8 +644,8 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-
 		local font = skin.font
+		local items = self.MN_items
 
 		love.graphics.push("all")
 
@@ -667,14 +667,14 @@ def.default_skinner = {
 		-- Dropdown drawers do not render hover-glow.
 
 		-- Selection glow.
-		local selected_item = self.items[self.index]
+		local selected_item = self.MN_items[self.MN_index]
 		if selected_item then
 			love.graphics.setColor(skin.color_selected)
 			love.graphics.rectangle("fill", 0, selected_item.y, self.vp3_w, selected_item.h)
 		end
 
-		local i_min, i_max = math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last)
-		local items = self.items
+
+		local i_min, i_max = math.max(1, self.MN_items_first), math.min(#items, self.MN_items_last)
 
 		-- Item icons.
 		if self.vp5_w > 0 then

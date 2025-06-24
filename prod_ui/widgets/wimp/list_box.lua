@@ -186,7 +186,7 @@ function def:addItem(text, pos, icon_id)
 	local skin = self.skin
 	local font = skin.font
 
-	local items = self.items
+	local items = self.MN_items
 
 	local item = {}
 
@@ -230,7 +230,7 @@ end
 function def:removeItemByIndex(item_i)
 	uiShared.numberNotNaN(1, item_i)
 
-	local items = self.items
+	local items = self.MN_items
 	local removed_item = items[item_i]
 	if not removed_item then
 		error("no item to remove at index: " .. tostring(item_i))
@@ -238,7 +238,7 @@ function def:removeItemByIndex(item_i)
 
 	table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "index")
+	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
 	self:arrangeItems(1, item_i, #items)
 
@@ -257,10 +257,10 @@ end
 function def:setSelectionByIndex(item_i)
 	uiShared.intGE(1, item_i, 0)
 
-	local old_index = self.index
+	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)
-	if old_index ~= self.index then
-		self:wid_select(self.items[self.index], self.index)
+	if old_index ~= self.MN_index then
+		self:wid_select(self.MN_items[self.MN_index], self.MN_index)
 	end
 end
 
@@ -335,7 +335,7 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w, self.doc_h = 0, 0
 
 		-- Document height is based on the last item in the menu.
-		local last_item = self.items[#self.items]
+		local last_item = self.MN_items[#self.MN_items]
 		if last_item then
 			self.doc_h = last_item.y + last_item.h
 		end
@@ -345,7 +345,7 @@ function def:cacheUpdate(refresh_dimensions)
 
 		self.col_text_w = 0
 		local font = skin.font
-		for i, item in ipairs(self.items) do
+		for i, item in ipairs(self.MN_items) do
 			self.col_text_w = math.max(self.col_text_w, item.x + item.w)
 		end
 
@@ -373,22 +373,22 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		local items = self.items
-		local old_index = self.index
+		local items = self.MN_items
+		local old_index = self.MN_index
 		local old_item = items[old_index]
 
 		-- wid_action() is handled in the 'thimbleAction()' callback.
 
 		if self.MN_mark_mode == "toggle" and key == "space" then
 			if old_index > 0 and self:menuCanSelect(old_index) then
-				self:menuToggleMarkedItem(self.items[old_index])
+				self:menuToggleMarkedItem(self.MN_items[old_index])
 				return true
 			end
 
 		elseif self:wid_keyPressed(key, scancode, isrepeat)
 		or self:wid_defaultKeyNav(key, scancode, isrepeat)
 		then
-			if old_item ~= items[self.index] then
+			if old_item ~= items[self.MN_index] then
 				if self.MN_mark_mode == "cursor" then
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
@@ -397,10 +397,10 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					else
 						self.MN_mark_index = false
 						self:menuClearAllMarkedItems()
-						self:menuSetMarkedItemByIndex(self.index, true)
+						self:menuSetMarkedItemByIndex(self.MN_index, true)
 					end
 				end
-				self:wid_select(items[self.index], self.index)
+				self:wid_select(items[self.MN_index], self.MN_index)
 			end
 			return true
 		end
@@ -420,7 +420,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			mx, my = mx + self.scr_x, my + self.scr_y
 
 			-- Update item hover
-			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
 			if item and item.selectable then
 				-- Un-hover any existing hovered item
@@ -464,8 +464,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
 
 				if item_t and item_t.selectable then
-					local old_index = self.index
-					local old_item = self.items[old_index]
+					local old_index = self.MN_index
+					local old_item = self.MN_items[old_index]
 
 					-- Buttons 1, 2 and 3 all select an item.
 					-- Only button 1 updates the item mark state.
@@ -557,8 +557,8 @@ function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
-		local index = self.index
-		local item = self.items[index]
+		local index = self.MN_index
+		local item = self.MN_items[index]
 
 		self:wid_action(item, index)
 
@@ -571,8 +571,8 @@ function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
-		local index = self.index
-		local item = self.items[index]
+		local index = self.MN_index
+		local item = self.MN_items[index]
 
 		self:wid_action2(item, index)
 
@@ -677,7 +677,7 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 
 		-- Update shapes, positions, and icons of any existing items
-		for i, item in ipairs(self.items) do
+		for i, item in ipairs(self.MN_items) do
 			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 			_shapeItem(self, item)
 		end
@@ -704,7 +704,7 @@ def.default_skinner = {
 		local tq_px = skin.tq_px
 		local sl_body = skin.sl_body
 
-		local items = self.items
+		local items = self.MN_items
 		local rr, gg, bb, aa
 
 		-- XXX: pick resources for enabled or disabled state, etc.
@@ -732,7 +732,7 @@ def.default_skinner = {
 		end
 
 		-- Selection glow.
-		local sel_item = items[self.index]
+		local sel_item = items[self.MN_index]
 		if sel_item then
 			local is_active = self == self.context.thimble1
 			local col = is_active and skin.color_active_glow or skin.color_select_glow

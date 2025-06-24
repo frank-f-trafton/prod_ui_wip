@@ -41,7 +41,7 @@ end
 --- Check if the menu has any items that can be selected.
 -- @return index and table of the first selectable item, or nil if there are no selectable items.
 function menuMethods:menuHasAnySelectableItems()
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		if item.selectable then
 			return i, item
 		end
@@ -60,11 +60,11 @@ function menuMethods:menuCanSelect(index)
 		return true
 
 	-- Out of bounds check
-	elseif index < 0 or index > #self.items then
+	elseif index < 0 or index > #self.MN_items then
 		return false, "list index is out of range."
 
 	-- Requested item is not selectable
-	elseif not self.items[index].selectable then
+	elseif not self.MN_items[index].selectable then
 		return false, "item is not selectable."
 	end
 
@@ -73,13 +73,13 @@ end
 
 
 --- Given an item index and a direction (previous or next), pick the closest item that is selectable (including the start index).
--- @param i The starting index (1..#self.items).
+-- @param i The starting index (1..#self.MN_items).
 -- @param dir The desired direction to move in, if the current index is not selectable. Can be 1 or -1.
 -- @return The most suitable selectable item index, or nil if there were no selectable item.
 function menuMethods:menuFindSelectableLanding(i, dir)
 	local item
 	repeat
-		item = self.items[i]
+		item = self.MN_items[i]
 		if item and item.selectable then
 			return i
 		end
@@ -91,12 +91,12 @@ end
 
 
 function menuMethods:menuGetDefaultSelection()
-	if not self.default_deselect then
+	if not self.MN_default_deselect then
 		local first_sel_i, first_sel = false, false
 
 		-- Prefer the first item with 'is_default_selection'.
 		-- If no default is set, fall back to the first selectable item.
-		for i, item in ipairs(self.items) do
+		for i, item in ipairs(self.MN_items) do
 			if item.selectable then
 				if item.is_default_selection then
 					return i, item
@@ -118,13 +118,13 @@ function menuMethods:menuGetDefaultSelection()
 end
 
 
---- Get the current selected item table. Equivalent to `local item_t = self.items[self.index]`.
--- @param id ("index") The index key.
+--- Get the current selected item table. Equivalent to `local item_t = self.MN_items[self.MN_index]`.
+-- @param id ("MN_index") The index key.
 -- @return The selected item, or nil if there is no current selection.
 function menuMethods:menuGetSelectedItem(id)
-	id = id or "index"
+	id = id or "MN_index"
 
-	return self.items[self[id]]
+	return self.MN_items[self[id]]
 end
 
 
@@ -139,7 +139,7 @@ function menuMethods:menuGetSelectionStep(pos, delta, wrap)
 		-- Zero delta is treated like a positive value (forward).
 		if wrap then
 			if delta < 0 then
-				pos = self:menuFindSelectableLanding(#self.items, -1) or 0
+				pos = self:menuFindSelectableLanding(#self.MN_items, -1) or 0
 			else
 				pos = self:menuFindSelectableLanding(1, 1) or 0
 			end
@@ -151,14 +151,14 @@ function menuMethods:menuGetSelectionStep(pos, delta, wrap)
 		end
 	-- Normal selection handling:
 	else
-		pos = _clamp(math.floor(pos), 1, #self.items)
+		pos = _clamp(math.floor(pos), 1, #self.MN_items)
 
 		-- Special handling for wrap-around. Wrapping only happens if the selection is at the edge
 		-- of the list, and it always puts the selector at the first selectable item on the opposite
 		-- side.
 		if wrap then
 			if delta < 0 and not self:menuFindSelectableLanding(pos - 1, -1) then
-				pos = self:menuFindSelectableLanding(#self.items, -1) or 0
+				pos = self:menuFindSelectableLanding(#self.MN_items, -1) or 0
 				return pos
 
 			elseif delta >= 0 and not self:menuFindSelectableLanding(pos + 1, 1) then
@@ -169,7 +169,7 @@ function menuMethods:menuGetSelectionStep(pos, delta, wrap)
 
 		-- Advance.
 		pos = pos + delta
-		pos = _clamp(math.floor(pos), 1, #self.items)
+		pos = _clamp(math.floor(pos), 1, #self.MN_items)
 
 		local dir = _signP(delta)
 
@@ -189,7 +189,7 @@ end
 
 --- The last selectable menu item.
 function menuMethods:menuGetLastSelectableIndex()
-	return self:menuFindSelectableLanding(#self.items, -1) or 0
+	return self:menuFindSelectableLanding(#self.MN_items, -1) or 0
 end
 
 
@@ -202,7 +202,7 @@ end
 -- @param wrap If true, when no matches are found, run the loop again starting from the edges that were blocked off.
 -- @return Closest item index and table, or nil if no match was found.
 function menuMethods:menuGetNearestItem2D(pos, x, y, dx, dy, wrap) -- XXX: Untested
-	local items = self.items
+	local items = self.MN_items
 	local item_current = items[pos]
 
 	if not item_current then
@@ -258,7 +258,7 @@ end
 -- @param item_t The item table. Must be populated in the menu, or else the function will raise a Lua error.
 -- @return The item index.
 function menuMethods:menuGetItemIndex(item_t)
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		if item == item_t then
 			return i
 		end
@@ -269,7 +269,7 @@ end
 
 
 function menuMethods:menuHasItem(item_t)
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		if item == item_t then
 			return i
 		end
@@ -281,7 +281,7 @@ end
 -- @param index The index of the menu item to select.
 -- @param id ("index") Specify an alternative table key, if applicable.
 function menuMethods:menuSetSelectedIndex(index, id)
-	id = id or "index"
+	id = id or "MN_index"
 
 	local ok, err = self:menuCanSelect(index)
 	if not ok then
@@ -313,21 +313,21 @@ end
 -- @param wrap (boolean) When true, wrap around the list when at the first or last selectable item.
 -- @param id ("index") Key ID for the index. Specify when using additional index variables.
 function menuMethods:menuSetSelectionStep(delta, wrap, id)
-	id = id or "index"
+	id = id or "MN_index"
 
 	self[id] = self:menuGetSelectionStep(self[id], delta, wrap)
 end
 
 
 function menuMethods:menuSetFirstSelectableIndex(id)
-	id = id or "index"
+	id = id or "MN_index"
 
 	self[id] = self:menuGetFirstSelectableIndex()
 end
 
 
 function menuMethods:menuSetLastSelectableIndex(id)
-	id = id or "index"
+	id = id or "MN_index"
 
 	self[id] = self:menuGetLastSelectableIndex()
 end
@@ -335,7 +335,7 @@ end
 
 --- Move to the previous selectable menu item.
 function menuMethods:menuSetPrev(n, wrap, id)
-	id = id or "index"
+	id = id or "MN_index"
 
 	n = n and math.max(math.floor(n), 1) or 1
 	self:menuSetSelectionStep(-n, wrap, id)
@@ -344,7 +344,7 @@ end
 
 --- Move to the next selectable menu item.
 function menuMethods:menuSetNext(n, wrap, id)
-	id = id or "index"
+	id = id or "MN_index"
 
 	n = n and math.max(math.floor(n), 1) or 1
 	self:menuSetSelectionStep(n, wrap, id)
@@ -368,7 +368,7 @@ end
 function menuMethods:menuSetMarkedItemByIndex(item_i, marked)
 	uiShared.type1(1, item_i, "number")
 
-	local item_t = self.items[item_i]
+	local item_t = self.MN_items[item_i]
 
 	self:menuSetMarkedItem(item_t, marked)
 end
@@ -378,7 +378,7 @@ end
 function menuMethods:menuGetAllMarkedItems()
 	local tbl = {}
 
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		if item.marked then
 			table.insert(tbl, item)
 		end
@@ -389,14 +389,14 @@ end
 
 
 function menuMethods:menuClearAllMarkedItems()
-	for i, item in ipairs(self.items) do
+	for i, item in ipairs(self.MN_items) do
 		item.marked = false
 	end
 end
 
 
 function menuMethods:menuSetMarkedItemRange(marked, first, last)
-	local items = self.items
+	local items = self.MN_items
 	uiShared.intRange(2, first, 1, #items)
 	uiShared.intRange(3, last, 1, #items)
 	marked = not not marked
@@ -408,7 +408,7 @@ end
 
 
 function menuMethods:menuHasMarkedItems()
-	for _, item in ipairs(self.items) do
+	for _, item in ipairs(self.MN_items) do
 		if item.marked then
 			return true
 		end
@@ -421,7 +421,7 @@ end
 function menuMethods:menuCountMarkedItems()
 	local c = 0
 
-	for _, item in ipairs(self.items) do
+	for _, item in ipairs(self.MN_items) do
 		if item.marked then
 			c = c + 1
 		end
@@ -432,12 +432,12 @@ end
 
 
 function menuMethods:menuMoveItem(i, j)
-	pTable.moveElement(self.items, i, j)
+	pTable.moveElement(self.MN_items, i, j)
 end
 
 
 function menuMethods:menuSwapItems(i, j)
-	pTable.swapElements(self.items, i, j)
+	pTable.swapElements(self.MN_items, i, j)
 end
 
 
@@ -454,13 +454,13 @@ function lgcMenu.setup(self, items, setup_mark, setup_drag_drop)
 	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
 	-- Run lgcMenu.attachMenuMethods() on the widget definition.
 
-	self.items = items or {}
+	self.MN_items = items or {}
 
 	-- The main selection index.
-	self.index = 0
+	self.MN_index = 0
 
 	-- When true, the default selection is nothing (0).
-	self.default_deselect = false
+	self.MN_default_deselect = false
 
 
 	-- Extends the selected item dimensions when scrolling to keep it within the bounds of the viewport.
@@ -537,7 +537,7 @@ end
 --- Automatically set a widget's items_first and items_last values by checking their vertical positions.
 -- @param self The widget.
 function lgcMenu.widgetAutoRangeV(self)
-	local items = self.items
+	local items = self.MN_items
 
 	local first, last
 	local r1 = self.vp2_y + self.scr_y
@@ -572,7 +572,7 @@ end
 --- Automatically set a widget's items_first and items_last values by checking their horizontal positions.
 -- @param self The widget.
 function lgcMenu.widgetAutoRangeH(self)
-	local items = self.items
+	local items = self.MN_items
 
 	local first, last
 	local r1 = self.vp2_x + self.scr_x
@@ -615,7 +615,7 @@ Some arguments may not be checked in certain variations, but they should be supp
 The functions do not check the item's 'selectable' state, and they assume that scroll bar intersection tests
 (if applicable) have already been checked.
 
--- @param items The 'client.items' table.
+-- @param items The 'client.MN_items' table.
 -- @param px X position (relative to widget, with scroll offset).
 -- @param py Y position (relative to widget, with scroll offset).
 -- @param first Index of the first item in the list to check.
@@ -624,7 +624,7 @@ The functions do not check the item's 'selectable' state, and they assume that s
 --	If not successful: nil.
 --]]
 function lgcMenu.widgetGetItemAtPoint(self, px, py, first, last)
-	local items = self.items
+	local items = self.MN_items
 	for i = first, last do
 		local item = items[i]
 		if px >= item.x and px < item.x + item.w and py >= item.y and py < item.y + item.h then
@@ -635,7 +635,7 @@ end
 
 
 function lgcMenu.widgetGetItemAtPointV(self, px, py, first, last)
-	local items = self.items
+	local items = self.MN_items
 	for i = first, last do
 		local item = items[i]
 		if py >= item.y and py < item.y + item.h then
@@ -646,7 +646,7 @@ end
 
 
 function lgcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
-	local items = self.items
+	local items = self.MN_items
 	local i1, i2 = items[1], items[#items]
 
 	if i1 and py < i1.y + i1.h then
@@ -666,7 +666,7 @@ end
 
 
 function lgcMenu.widgetGetItemAtPointH(self, px, py, first, last)
-	local items = self.items
+	local items = self.MN_items
 	for i = first, last do
 		local item = items[i]
 		if px >= item.x and px < item.x + item.w then
@@ -715,7 +715,7 @@ end
 
 -- Vertical list, top to bottom
 function lgcMenu.arrangeItemsVerticalTB(self, v, first, last) -- ('v' is unused)
-	local items = self.items
+	local items = self.MN_items
 
 	first = first or 1
 	last = last or #items
@@ -746,7 +746,7 @@ end
 
 -- Vertical list, left-to-right then top-to-bottom.
 function lgcMenu.arrangeItemsVerticalLRTB(self, v, first, last)
-	local items = self.items
+	local items = self.MN_items
 
 	v = v or 1
 	first = first or 1
@@ -784,7 +784,7 @@ end
 
 -- Horizontal list, left to right
 function lgcMenu.arrangeItemsHorizontalLR(self, v, first, last) -- ('v' is unused)
-	local items = self.items
+	local items = self.MN_items
 
 	first = first or 1
 	last = last or #items
@@ -815,7 +815,7 @@ end
 
 -- Horizontal list, top to bottom then left to right.
 function lgcMenu.arrangeItemsHorizontalTBLR(self, v, first, last)
-	local items = self.items
+	local items = self.MN_items
 
 	v = v or 1
 	first = first or 1
@@ -866,7 +866,7 @@ end
 -- @param self The widget hosting the menu table.
 -- @param n (1) How many steps to move.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
--- @param id ("index") Optional alternative index key to change.
+-- @param id ("MN_index") Optional alternative index key to change.
 function lgcMenu.widgetMovePrev(self, n, immediate, id)
 	self:menuSetPrev(n, self.MN_wrap_selection, id)
 
@@ -884,7 +884,7 @@ end
 -- @param self The widget hosting the menu table.
 -- @param n (1) How many steps to move.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
--- @param id ("index") Optional alternative index key to change.
+-- @param id ("MN_index") Optional alternative index key to change.
 function lgcMenu.widgetMoveNext(self, n, immediate, id)
 	self:menuSetNext(n, self.MN_wrap_selection, id)
 
@@ -901,7 +901,7 @@ end
 --  update scrolling such that the selection is in view, and update the widget's visual cache.
 -- @param self The widget hosting the menu table.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
--- @param id ("index") Optional alternative index key to change.
+-- @param id ("MN_index") Optional alternative index key to change.
 function lgcMenu.widgetMoveFirst(self, immediate, id)
 	self:menuSetFirstSelectableIndex(id)
 
@@ -918,7 +918,7 @@ end
 --  update scrolling such that the selection is in view, and update the widget's visual cache.
 -- @param self The widget hosting the menu table.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
--- @param id ("index") Optional alternative index key to change.
+-- @param id ("MN_index") Optional alternative index key to change.
 function lgcMenu.widgetMoveLast(self, immediate, id)
 	self:menuSetLastSelectableIndex(id)
 
@@ -932,12 +932,12 @@ end
 
 
 local function _pageStep(self, index, vert, dir, dist)
-	local items = self.items
+	local items = self.MN_items
 	local item = items[index]
 	if not item then
 		return
 	end
-	local candidate = self.items[index + dir]
+	local candidate = items[index + dir]
 
 	local pos, len
 	if vert then
@@ -982,7 +982,7 @@ end
 --- Move the widget menu selection up, preferring an item that is the distance of one "page" from the current
 --	selection. Viewport #1's height is used for the page size.
 function lgcMenu.widgetMovePageUp(self, immediate, id)
-	id = id or "index"
+	id = id or "MN_index"
 	if self[id] == 0 then
 		lgcMenu.widgetMoveFirst(self, immediate, id)
 		return
@@ -1006,7 +1006,7 @@ end
 --- Move the widget menu selection down, preferring an item that is the distance of one "page" from the current
 --	selection. Viewport #1's height is used for the page size.
 function lgcMenu.widgetMovePageDown(self, immediate, id)
-	id = id or "index"
+	id = id or "MN_index"
 	if self[id] == 0 then
 		lgcMenu.widgetMoveFirst(self, immediate, id)
 		return
@@ -1037,7 +1037,7 @@ end
 --- Default key navigation for top-to-bottom menus.
 -- @param self The widget.
 -- @param key, scancode, isrepeat Values from the LÖVE event.
--- @param id ("index") Optional alternative index key to change.
+-- @param id ("MN_index") Optional alternative index key to change.
 -- @param the isrepeat
 function lgcMenu.keyNavTB(self, key, scancode, isrepeat, id)
 	if scancode == "up" then
@@ -1186,8 +1186,8 @@ function lgcMenu.selectionInView(self, immediate)
 	Widget must have a 'getInBounds' method assigned. These methods usually require 'MN_selection_extend_[x|y]' to be set.
 	--]]
 
-	local items = self.items
-	local item = items[self.index]
+	local items = self.MN_items
+	local item = items[self.MN_index]
 
 	-- No selection or empty list: nothing to do.
 	if not item or #items == 0 then
@@ -1210,9 +1210,9 @@ function lgcMenu.markItemsCursorMode(self, old_index)
 		self.MN_mark_index = old_index
 	end
 
-	local items = self.items
+	local items = self.MN_items
 
-	local first, last = math.min(self.MN_mark_index, self.index), math.max(self.MN_mark_index, self.index)
+	local first, last = math.min(self.MN_mark_index, self.MN_index), math.max(self.MN_mark_index, self.MN_index)
 	first, last = math.max(1, math.min(first, #items)), math.max(1, math.min(last, #items))
 
 	self:menuSetMarkedItemRange(true, first, last)
@@ -1222,7 +1222,7 @@ end
 -- For uiCall_pointerPress().
 function lgcMenu.checkItemIntersect(self, mx, my, button)
 	-- Check for the cursor intersecting with a clickable item.
-	local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.items, self.MN_items_last))
+	local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
 	-- Reset click-sequence if clicking on a different item.
 	if self.MN_mouse_clicked_item ~= item_t then
@@ -1314,7 +1314,7 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 
 			drop_state.from = self
 			drop_state.id = "menu"
-			drop_state.item = self.items[self.index]
+			drop_state.item = self.MN_items[self.MN_index]
 			-- menu index could be outdated by the time the drag-and-drop action is completed.
 
 			if self:menuHasMarkedItems() then
@@ -1333,10 +1333,10 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 		mx = mx + self.scr_x
 		my = my + self.scr_y
 
-		local item_i, item_t = self:getItemAtPoint(mx, my, 1, #self.items)
+		local item_i, item_t = self:getItemAtPoint(mx, my, 1, #self.MN_items)
 		if item_i and item_t.selectable then
-			local items = self.items
-			local old_index = self.index
+			local items = self.MN_items
+			local old_index = self.MN_index
 			local old_item = items[old_index]
 
 			if old_item ~= item_t then
@@ -1389,8 +1389,8 @@ end
 
 function lgcMenu.removeItemIndexCleanup(self, item_i, id)
 	-- Removed item was the last in the list, and was selected:
-	if self[id] > #self.items then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1)
+	if self[id] > #self.MN_items then
+		local landing_i = self:menuFindSelectableLanding(#self.MN_items, -1)
 		self:setSelectionByIndex(landing_i or 0, id)
 
 	-- Removed item was not selected, and the selected item appears after the removed item in the list:
@@ -1400,7 +1400,7 @@ function lgcMenu.removeItemIndexCleanup(self, item_i, id)
 
 	-- Handle the current selection being removed.
 	if self[id] == item_i then
-		local landing_i = self:menuFindSelectableLanding(#self.items, -1) or self:menuFindSelectableLanding(#self.items, 1)
+		local landing_i = self:menuFindSelectableLanding(#self.MN_items, -1) or self:menuFindSelectableLanding(#self.MN_items, 1)
 		self[id] = landing_i or 0
 	end
 end
@@ -1409,7 +1409,7 @@ end
 --- Picks the first selectable item, but only if there is currently no selection.
 -- The widget must have the method 'setSelectionByIndex'.
 function lgcMenu.trySelectIfNothingSelected(self)
-	if self.index == 0 then
+	if self.MN_index == 0 then
 		local i, tbl = self:menuHasAnySelectableItems()
 		if i then
 			self:setSelectionByIndex(i)
