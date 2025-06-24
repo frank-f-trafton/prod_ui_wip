@@ -1,18 +1,18 @@
 return {
 	skinner_id = "wimp/properties_box",
 
-	box = "*/boxes/panel",
-	tq_px = "*/quads/atlas/pixel",
-	data_scroll = "*/scroll_bar_data/scroll_bar1",
-	scr_style = "*/scroll_bar_styles/norm",
-	font = "*/fonts/p",
+	box = "*boxes/panel",
+	tq_px = "*quads/atlas/pixel",
+	data_scroll = "*scroll_bar_data/scroll_bar1",
+	scr_style = "*scroll_bar_styles/norm",
+	font = "*fonts/p",
 
 	cursor_sash = "sizewe",
 	sash_w = 12,
 	item_h = 40,
 	-- TODO: minimum column widths
 
-	sl_body = "*/slices/atlas/list_box_body",
+	sl_body = "*slices/atlas/list_box_body",
 
 	text_align_h = "left",
 

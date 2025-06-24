@@ -1,4 +1,4 @@
--- PILE Table v1.1.6
+-- PILE Table v1.1.7
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -258,7 +258,7 @@ function M.resolve(t, str, raw)
 			return nil, count
 		end
 		local fld
-		i, j, fld = str:find("^/([^/]+)", i)
+		i, j, fld = str:find(count == 0 and "^([^/]+)" or "^/([^/]+)", i)
 		if not fld then
 			error(lang.err_res_field_empty)
 		end
