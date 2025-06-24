@@ -415,6 +415,22 @@ do
 			{type="separator"},
 			{
 				type = "command",
+				text = "Hide Menu",
+				text_shortcut = "F8",
+				callback = function(client, item)
+					local root = client:getRootWidget()
+					if root then
+						local menu_bar = root:findTag("root_menu_bar")
+						if menu_bar then
+							menu_bar:setHidden(not menu_bar:getHidden())
+							root:reshape()
+						end
+					end
+				end,
+			},
+			{type="separator"},
+			{
+				type = "command",
 				text = "_Q_uit",
 				text_shortcut = "Ctrl+Q",
 				--callback = function() print("QUIT!") end,
@@ -563,6 +579,16 @@ do
 		do
 			local shortcuts = {
 				["C+q"] = function(self, key, scancode, isrepeat) love.event.quit() end,
+				["+f8"] = function(self, key, scancode, isrepeat)
+					local root = self:getRootWidget()
+					if root then
+						local menu_bar = root:findTag("root_menu_bar")
+						if menu_bar then
+							menu_bar:setHidden(not menu_bar:getHidden())
+							root:reshape()
+						end
+					end
+				end,
 			}
 			local hook_pressed = function(self, tbl, key, scancode, isrepeat)
 				local key_mgr = self.context.key_mgr
@@ -714,9 +740,14 @@ do
 	-- Start with the top-most window selected, if any.
 	wimp_root:selectTopFrame()
 
+	-- If no Window Frames were created, hand the thimble to the main demo list.
+	local demo_list = wimp_root:findTag("plan_menu")
+	if demo_list then
+		demo_list:tryTakeThimble1()
+	end
+
 	-- Refresh everything.
 	wimp_root:reshape()
-	--wimp_root:reshape()
 
 	for i, window_id in ipairs(demo_window_launch) do
 		demoShared.launchWindowFrameFromPlan(wimp_root, window_id, true)

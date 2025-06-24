@@ -195,6 +195,18 @@ function def:wid_popUpCleanup(reason_code)
 end
 
 
+function def:setHidden(enabled)
+	self.hidden = not not enabled
+
+	-- Reshape the parent after calling.
+end
+
+
+function def:getHidden()
+	return self.hidden
+end
+
+
 -- * Scroll helpers *
 
 
@@ -281,6 +293,10 @@ function def:uiCall_initialize()
 	-- References populated when this widget is part of a chain of menus.
 	self.chain_next = false
 
+	-- When true, the height reported to the layout node is zero. The menu may still respond
+	-- through key shortcuts, though.
+	self.hidden = false
+
 	-- "idle": Not active.
 	-- "opened": A pop-up menu is active.
 	self.state = "idle"
@@ -297,7 +313,11 @@ end
 
 function def:uiCall_getSliceLength(x_axis, cross_length)
 	if not x_axis then
-		return self.base_height, false
+		if self.hidden then
+			return 0, false
+		else
+			return self.base_height, false
+		end
 	end
 end
 
@@ -873,6 +893,10 @@ def.default_skinner = {
 
 
 	render = function(self, ox, oy)
+		if self.hidden then
+			return
+		end
+
 		local skin = self.skin
 
 		local items = self.MN_items
@@ -926,7 +950,6 @@ def.default_skinner = {
 		love.graphics.setFont(font)
 		for i = 1, #items do
 			local item = items[i]
-			love.graphics.setScissor()
 			love.graphics.setColor(determineItemColor(item, self))
 			love.graphics.print(item.text_int, item.x + item.text_x, item.y + item.text_y)
 		end
