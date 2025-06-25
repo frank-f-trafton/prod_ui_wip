@@ -86,7 +86,7 @@ def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2 -- TODO: plug into w
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = true
+	self.thimble_mode = 1
 
 	widShared.setupViewports(self, 2)
 

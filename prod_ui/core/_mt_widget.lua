@@ -68,7 +68,7 @@ _mt_widget.scr_x = 0
 _mt_widget.scr_y = 0
 
 
-_mt_widget.can_have_thimble = false
+_mt_widget.thimble_mode = 0
 
 
 -- Affects ticking (uiCall_update, userUpdate), mouse events, and various kinds of selection (ie thimble handoff).
@@ -213,17 +213,17 @@ function _mt_widget:checkPressed()
 end
 
 
-function _mt_widget:canTakeThimble()
-	return self.can_have_thimble and self:isAwake()
+function _mt_widget:canTakeThimble(n)
+	return self.thimble_mode == n and self:isAwake()
 end
 
 
-local function _assertCanHaveThimble(self)
+local function _assertCanHaveThimble(self, n)
 	if not self:isAwake() then
-		error("this widget is not in an awake branch of the widget hierarchy.")
+		error("this widget is not in an awake branch of the widget hierarchy.", 2)
 
-	elseif not self.can_have_thimble then
-		error("this widget is not allowed to have cursor focus.", 2)
+	elseif self.thimble_mode ~= n then
+		error("this widget is not allowed to have cursor focus (thimble #" .. tostring(n) .. ").", 2)
 	end
 end
 
@@ -297,32 +297,33 @@ end
 
 
 --- Assigns thimble1 to this widget. The current thimble1 widget, if present, is replaced. This widget must have
---	'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget is
---	already thimble1, nothing happens.
+--	'thimble_mode' set to 1, and the context must not be captured by any other widget. If the widget already has
+--	thimble1, nothing happens.
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
 function _mt_widget:takeThimble1(a, b, c, d)
 	--print("takeThimble1", debug.traceback())
-	_assertCanHaveThimble(self)
+	_assertCanHaveThimble(self, 1)
 	_takeThimble1(self, a, b, c, d)
 end
 
 
 --- Assigns thimble2 to this widget. The current thimble2 widget, if present, is replaced. This widget must have
---	'can_have_thimble' set to true, and the context must not be captured by any other widget. If the widget is
---	already thimble2, nothing happens.
+--	'thimble_mode' set to 2, and the context must not be captured by any other widget. If the widget already has
+--	thimble2, nothing happens.
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
 function _mt_widget:takeThimble2(a, b, c, d)
 	--print("takeThimble2", debug.traceback())
-	_assertCanHaveThimble(self)
+	_assertCanHaveThimble(self, 2)
 	_takeThimble2(self, a, b, c, d)
 end
 
 
---- Like takeThimble1(), but doesn't error out if the widget is missing 'can_have_thimble'. It may still fail if the context is in captured mode.
+--- Like takeThimble1(), but doesn't error out if the widget's 'thimble_mode' doesn't match. It may still fail if the
+--	context is in captured mode.
 -- @param a, b, c, d Generic arguments (same as takeThimble()).
 -- @return True if takeThimble() was called, nil if not.
 function _mt_widget:tryTakeThimble1(a, b, c, d)
-	if self:canTakeThimble() then
+	if self:canTakeThimble(1) then
 		_takeThimble1(self, a, b, c, d)
 		return true
 	end
@@ -330,7 +331,7 @@ end
 
 
 function _mt_widget:tryTakeThimble2(a, b, c, d)
-	if self:canTakeThimble() then
+	if self:canTakeThimble(2) then
 		_takeThimble2(self, a, b, c, d)
 		return true
 	end
@@ -377,12 +378,12 @@ end
 
 --- Depth-first search for the first widget which can take the thimble.
 -- @return The found widget, or nil if the search was unsuccessful.
-function _mt_widget:getOpenThimbleDepthFirst()
-	if self:canTakeThimble() then
+function _mt_widget:getOpenThimble1DepthFirst()
+	if self:canTakeThimble(1) then
 		return self
 	else
 		for i, child in ipairs(self.children) do
-			if child:getOpenThimbleDepthFirst() then
+			if child:getOpenThimble1DepthFirst() then
 				return child
 			end
 		end

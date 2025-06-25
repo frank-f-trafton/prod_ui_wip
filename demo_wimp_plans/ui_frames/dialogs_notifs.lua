@@ -44,7 +44,7 @@ This Window Frame should block interaction with the UI Frame that invoked it, un
 		local root = dialog:getRootWidget()
 		root:setSelectedFrame(dialog)
 
-		local try_host = dialog:getOpenThimbleDepthFirst()
+		local try_host = dialog:getOpenThimble1DepthFirst()
 		if try_host then
 			try_host:takeThimble1()
 		end
@@ -88,7 +88,7 @@ Click the button to make a blocking UI Frame.
 		local root = dialog:getRootWidget()
 		root:setSelectedFrame(dialog)
 
-		local try_host = dialog:getOpenThimbleDepthFirst()
+		local try_host = dialog:getOpenThimble1DepthFirst()
 		if try_host then
 			try_host:takeThimble1()
 		end

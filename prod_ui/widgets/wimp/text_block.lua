@@ -92,7 +92,7 @@ function def:setURL(url)
 		self:releaseThimble1()
 	end
 
-	self.can_have_thimble = not not self.url
+	self.thimble_mode = self.url and 1 or 0
 end
 
 
@@ -150,7 +150,7 @@ end
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = false
-	self.can_have_thimble = false
+	self.thimble_mode = 0
 
 	widShared.setupViewports(self, 2)
 

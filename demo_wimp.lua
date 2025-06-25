@@ -620,7 +620,7 @@ do
 		bar_button.h = 2
 		bar_button.h = bar_button.w
 
-		bar_button.can_have_thimble = false
+		bar_button.thimble_mode = 0
 
 		bar_button:initialize()
 		--]]

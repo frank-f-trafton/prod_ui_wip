@@ -40,7 +40,7 @@ function _methods:setFrameSelectable(enabled)
 	end
 
 	self.frame_is_selectable = not not enabled
-	self.can_have_thimble = self.frame_is_selectable
+	self.thimble_mode = self.frame_is_selectable and 1 or 0
 end
 
 
@@ -80,7 +80,7 @@ function lgcUIFrame.instanceSetup(self, unselectable)
 	-- * The frame should never be made modal, or be part of a frame-blocking chain.
 	self.frame_is_selectable = not unselectable
 
-	self.can_have_thimble = self.frame_is_selectable
+	self.thimble_mode = self.frame_is_selectable and 1 or 0
 
 	-- Link to the last widget within this tree that held thimble1.
 	-- The link may become stale, so confirm the widget is still alive and within the tree before using.

@@ -211,7 +211,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 
 	root:setSelectedFrame(dialog)
 
-	local try_host = dialog:getOpenThimbleDepthFirst()
+	local try_host = dialog:getOpenThimble1DepthFirst()
 	if try_host then
 		try_host:takeThimble1()
 	end
