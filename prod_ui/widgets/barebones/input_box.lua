@@ -83,7 +83,7 @@ end
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = true
+	self.thimble_mode = 1
 
 	self.text = ""
 	self.text_w = 0

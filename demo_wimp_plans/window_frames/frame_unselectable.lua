@@ -48,7 +48,7 @@ function plan.makeWindowFrame(root)
 	bb_button.uiCall_thimble1Take = _assertNoThimble
 	bb_button.uiCall_thimble2Take = _assertNoThimble
 
-	bb_button.can_have_thimble = false
+	bb_button.thimble_mode = 0
 
 	bb_button:setLabel("Example Button")
 
@@ -61,7 +61,7 @@ function plan.makeWindowFrame(root)
 	bb_cbox.uiCall_thimble1Take = _assertNoThimble
 	bb_cbox.uiCall_thimble2Take = _assertNoThimble
 
-	bb_cbox.can_have_thimble = false
+	bb_cbox.thimble_mode = 0
 
 	bb_cbox:setLabel("Example Checkbox")
 

@@ -41,7 +41,7 @@ end
 
 function def:uiCall_initialize()
 	self.allow_hover = true
-	self.can_have_thimble = false
+	self.thimble_mode = 0
 	self.allow_focus_capture = false
 	self.visible = true
 	self.clip_hover = true

@@ -263,7 +263,7 @@ function def:uiCall_initialize()
 
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = true
+	self.thimble_mode = 2
 	self.clip_scissor = true
 
 	self.sort_id = 7

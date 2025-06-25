@@ -37,7 +37,7 @@ def.uiCall_pointerUnpress = lgcButtonBare.uiCall_pointerUnpress
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
-	self.can_have_thimble = true
+	self.thimble_mode = 1
 
 	lgcLabelBare.setup(self)
 	lgcSlider.setup(self)
