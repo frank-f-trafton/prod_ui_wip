@@ -12,7 +12,8 @@ local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiShared = require(REQ_PATH .. "ui_shared")
 
 
-local _info = {} -- For love.filesystem.getInfo().
+local _info = {} -- For love.filesystem.getInfo()
+local _blank_env = {} -- For setfenv()
 
 
 function uiRes.assertGetInfo(...)
@@ -35,26 +36,27 @@ function uiRes.infoCanTraverse(info)
 end
 
 
---- Loads and executes a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
--- @param path The path to the Lua file.
--- @param ... An arbitrary set of arguments to pass to the Lua chunk.
--- @return The result of executing the chunk.
-function uiRes.loadLuaFile(path, ...)
+function uiRes.assertLoad(path)
 	local chunk, err = love.filesystem.load(path)
-
 	if not chunk then
 		error(err)
 	end
-
-	local retval = chunk(...)
-
-	return retval
+	return chunk
 end
 
 
---- Like uiRes.loadLuaFile(), but includes the file path as the first argument.
-function uiRes.loadLuaFileWithPath(path, ...)
-	return uiRes.loadLuaFile(path, path, ...)
+--- Loads and executes a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
+-- @param path The path to the Lua file.
+-- @param [env] The environment table to use, if applicable.
+-- @param [...] An arbitrary set of arguments to pass to the Lua chunk.
+-- @return The result of executing the chunk.
+function uiRes.loadLuaFile(path, env, ...)
+	local chunk = uiRes.assertLoad(path)
+	if env then
+		setfenv(chunk, env)
+	end
+	local retval = chunk(...)
+	return retval
 end
 
 
@@ -202,10 +204,10 @@ end
 
 --- Loads a set of files as one Lua table.
 -- @param path The path.
--- @param handlers A table of extension handler functions. If not provided, a set of defaults will be substituted.
+-- @param [handlers] A table of extension handler functions. If not provided, a set of defaults will be substituted.
 --	(For more info, see the defaults and their comments below.)
--- @param depth (1000) How deep to enumerate before raising an error.
--- @param max_items (16384) How many items to check before raising an error.
+-- @param [depth] (1000) How deep to enumerate before raising an error.
+-- @param [max_items] (16384) How many items to check before raising an error.
 -- @return The table.
 function uiRes.loadDirectoryAsTable(path, handlers, depth, max_items)
 	uiShared.type1(1, path, "string")
@@ -215,7 +217,7 @@ function uiRes.loadDirectoryAsTable(path, handlers, depth, max_items)
 
 	handlers = handlers or uiRes.dir_handlers
 	depth = depth or 1000
-	max_items = max_items or 16384
+	max_items = max_items or 200000
 
 	local info = love.filesystem.getInfo(path, _info)
 	if uiRes.infoCanTraverse(love.filesystem.getInfo(path), info) then
@@ -255,11 +257,7 @@ uiRes.dir_handlers = {
 		end
 		--]]
 
-		local chunk, err = love.filesystem.load(full_path)
-		if not chunk then
-			error(err)
-		end
-
+		local chunk = uiRes.assertLoad(full_path)
 		chunk = chunk()
 		local id = name:sub(1, -(#ext + 1))
 
@@ -300,17 +298,34 @@ uiRes.dir_handlers = {
 }
 
 
-function uiRes.loadLuaFileOrDirectoryAsTable(path)
+uiRes.dir_handler_lua_blank_env = {
+	-- Load a Lua file with a blank environment:
+	[".lua"] = function(full_path, name, ext)
+		local chunk = uiRes.assertLoad(full_path)
+		setfenv(chunk, _blank_env)
+		chunk = chunk()
+		local id = name:sub(1, -(#ext + 1))
+
+		return id, chunk
+	end,
+}
+
+
+-- @param path The file path to the Lua file (without extension) or directory.
+-- @param [env] The environment table to use, if applicable.
+-- @param [handlers] A table of extension handler functions. If not provided, a set of defaults will be substituted.
+-- @return A table based on the file or directory of files.
+function uiRes.loadLuaFileOrDirectoryAsTable(path, env, handlers)
 	uiShared.type1(1, path, "string")
 
 	local lua_path = path .. ".lua"
 	local info = love.filesystem.getInfo(lua_path, _info)
 	if info and info.type == "file" then
-		return uiRes.loadLuaFile(lua_path)
+		return uiRes.loadLuaFile(lua_path, env)
 	else
 		info = love.filesystem.getInfo(path, _info)
 		if info and info.type == "directory" then
-			return uiRes.loadDirectoryAsTable(path)
+			return uiRes.loadDirectoryAsTable(path, handlers)
 		end
 	end
 	error("failed to load Lua file or directory: " .. path)

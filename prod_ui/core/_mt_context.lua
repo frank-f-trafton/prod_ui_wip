@@ -847,10 +847,7 @@ function _mt_context:loadWidgetDef(file_path, id, def_conf)
 	uiShared.type1(1, file_path, "string")
 	uiShared.notNilNotFalseNotNaN(2, id)
 
-	local chunk, err = love.filesystem.load(file_path)
-	if not chunk then
-		error("couldn't load widget def file. Path: '" .. file_path .. "'. Error: " .. err)
-	end
+	local chunk = uiRes.assertLoad(file_path)
 
 	return self:loadWidgetDefFromFunction(chunk, id, def_conf)
 end
@@ -998,7 +995,7 @@ function _mt_context:loadSkinner(file_path, id)
 
 	uiRes.assertNotRegistered("skinner", self.skinners, id)
 
-	local skinner = uiRes.loadLuaFile(file_path, self)
+	local skinner = uiRes.loadLuaFile(file_path, nil, self)
 	self.skinners[id] = skinner
 end
 

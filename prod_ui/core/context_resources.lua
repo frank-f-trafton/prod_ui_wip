@@ -8,7 +8,6 @@ local context = select(1, ...)
 
 
 local fontCache = context:getLua("core/res/font_cache")
-local json = require(context.conf.prod_ui_req .. "lib.json")
 local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
 local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
@@ -26,6 +25,7 @@ local _lut_font_ext_vec = pTable.makeLUTV(".ttf", ".otf")
 
 
 local _info = {} -- for love.filesystem.getInfo()
+local _blank_env = {} -- For setfenv()
 
 
 local methods = {}
@@ -172,10 +172,7 @@ local function _loadTextureFiles(path)
 
 	local info2 = love.filesystem.getInfo(path_lua, "file", _info)
 	if info2 then
-		local chunk, err = love.filesystem.load(path_lua)
-		if not chunk then
-			error(err)
-		end
+		local chunk = uiRes.assertLoad(path_lua)
 		metadata = chunk()
 	end
 	-- TODO: check config fields
@@ -236,7 +233,7 @@ function methods:enumerateThemes()
 		if info then
 			if info.type == "file" then
 				local main, ext = pPath.splitPathAndExtension(fs_name)
-				if ext == ".lua" then
+				if ext == ".lua" and not main:match("_INFO$") then
 					table.insert(theme_ids, main)
 				end
 
@@ -259,20 +256,12 @@ end
 
 
 function methods:getThemeInfo(id)
-	local path = context.conf.prod_ui_path .. "/themes/" .. id .. "_INFO.json"
+	local path = context.conf.prod_ui_path .. "/themes/" .. id .. "_INFO.lua"
 	if not love.filesystem.getInfo(path, _info) then
 		return nil, "no file at: " .. path
 	end
 
-	local str, err = love.filesystem.read(path)
-	if not str then
-		return nil, err
-	end
-
-	local ok, ret = pcall(json.decode, str)
-	if not ok then
-		return nil, ret
-	end
+	local ret = uiRes.loadLuaFile(path, _blank_env)
 
 	return {
 		name = _assignIfString(ret.name),
@@ -307,7 +296,8 @@ function methods:loadTheme(id)
 		theme_hash[id] = true
 		table.insert(theme_ids, id)
 
-		local theme2 = uiRes.loadLuaFileOrDirectoryAsTable(context.conf.prod_ui_path .. "themes/" .. id)
+		local path_theme2 = context.conf.prod_ui_path .. "themes/" .. id
+		local theme2 = uiRes.loadLuaFileOrDirectoryAsTable(path_theme2, _blank_env, uiRes.dir_handler_lua_blank_env)
 		local theme_info = pTable.assertResolve(theme2, "info/theme_info")
 		local next_id = theme_info.patches
 
