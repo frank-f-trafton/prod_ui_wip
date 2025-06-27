@@ -12,6 +12,7 @@ local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") 
 local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiLoad = require(REQ_PATH .. "ui_load")
+local uiRes = require(REQ_PATH .. "ui_res")
 local uiShared = require(REQ_PATH .. "ui_shared")
 
 
@@ -73,7 +74,6 @@ local function _loader_lua(self, file_path)
 
 	table.insert(_path_stack, file_path)
 
-	print("file_path", file_path)
 	local chunk, err = love.filesystem.load(self.conf.prod_ui_path .. file_path .. ".lua")
 	if not chunk then
 		return false, err
