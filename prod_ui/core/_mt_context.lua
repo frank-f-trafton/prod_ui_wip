@@ -1109,6 +1109,11 @@ function _mt_context:getDPI()
 end
 
 
+function _mt_context:getThemeID()
+	return self.theme_id
+end
+
+
 contextResources.attachMethods(_mt_context)
 
 

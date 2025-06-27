@@ -130,8 +130,15 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	local self = {}
 
+	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
+	self.scale = 1.0
+
 	-- DPI class. Determines which set of textures and associated metadata to load.
+	-- Should be an integer.
 	self.dpi = 96
+
+	-- When false, no theme is loaded.
+	self.theme_id = false
 
 	self.path_symbols = {
 		[""] = "%", -- escapes '%%' to '%'
@@ -148,9 +155,6 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	-- Usage of the settings table depends on the front-end.
 	self.settings = settings or {}
-
-	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
-	self.scale = 1.0
 
 	-- Passed as the settings argument when creating new layer canvases.
 	self.canvas_settings = {}
@@ -311,7 +315,7 @@ function uiContext.newContext(prod_ui_path, settings)
 	local _mt_context = self:getLua("core/_mt_context")
 	setmetatable(self, _mt_context)
 
-	-- Resources. See context_resources.lua for for info.
+	-- Resources. See context_resources.lua for more info.
 	self.resources = self:_initResourcesTable()
 
 	self._mt_widget = self:getLua("core/_mt_widget")

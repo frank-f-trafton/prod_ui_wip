@@ -26,7 +26,32 @@ SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-shared/line_ed/…:
+prod_ui/lib/json
+
+Copyright (c) 2020 rxi
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+-------------------------------------------------------------------------------
+prod_ui/shared/line_ed/…:
 
 (Some of ProdUI's text input code is based on, or very heavily inspired by
 ReFreezed's InputField library.)
@@ -55,7 +80,7 @@ SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-shared/hnd_step.lua:
+prod_ui/shared/hnd_step.lua:
 
 (Some tree traversal code is taken from LUIGI by airstruck.)
 
@@ -85,8 +110,8 @@ SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-prod_ui/lib/nativefs/:
-prod_ui/themes/build/lib/nativefs/:
+lib/nativefs/:
+theme_works/lib/nativefs/:
 
 Copyright 2020 megagrump@pm.me
 
@@ -98,8 +123,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 -------------------------------------------------------------------------------
-prod_ui/lib/nativefs/test/luaunit.lua:
-prod_ui/themes/build/lib/nativefs/test/luaunit.lua:
+lib/nativefs/test/luaunit.lua:
+theme_works/lib/nativefs/test/luaunit.lua:
 
 This software is distributed under the BSD License.
 
@@ -410,7 +435,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -------------------------------------------------------------------------------
-prod_ui/themes/build/lib/atlas_b.lua:
+theme_works/lib/atlas_b.lua:
 
 Copyright (c) 2023 RBTS
 

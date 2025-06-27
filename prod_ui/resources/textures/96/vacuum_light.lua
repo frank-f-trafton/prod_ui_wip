@@ -323,7 +323,7 @@ return {
     pixel = {
       h = 1,
       w = 1,
-      x = 146,
+      x = 140,
       y = 27
     },
     progress_back = {
@@ -463,18 +463,6 @@ return {
       w = 24,
       x = 105,
       y = 35
-    },
-    swatch_line = {
-      h = 1,
-      w = 1,
-      x = 143,
-      y = 27
-    },
-    swatch_panel = {
-      h = 1,
-      w = 1,
-      x = 140,
-      y = 27
     },
     tabular_category_body = {
       h = 12,

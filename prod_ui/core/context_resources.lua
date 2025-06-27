@@ -8,7 +8,9 @@ local context = select(1, ...)
 
 
 local fontCache = context:getLua("core/res/font_cache")
+local json = require(context.conf.prod_ui_req .. "lib.json")
 local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
+local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
@@ -223,16 +225,141 @@ local function _applyReferences(t, resources)
 end
 
 
+-- Gets a list of themes.
+function methods:enumerateThemes()
+	local path = context.conf.prod_ui_path .. "/themes"
+	local fs_items = love.filesystem.getDirectoryItems(path)
+	local theme_ids = {}
+
+	for i, fs_name in ipairs(fs_items) do
+		local info = love.filesystem.getInfo(path .. "/" .. fs_name, _info)
+		if info then
+			if info.type == "file" then
+				local main, ext = pPath.splitPathAndExtension(fs_name)
+				if ext == ".lua" then
+					table.insert(theme_ids, main)
+				end
+
+			elseif info.type == "directory" then
+				table.insert(theme_ids, fs_name)
+			end
+		end
+	end
+
+	table.sort(theme_ids)
+	return theme_ids
+end
+
+
+local function _assignIfString(v)
+	if type(v) == "string" then
+		return v
+	end
+end
+
+
+function methods:getThemeInfo(id)
+	local path = context.conf.prod_ui_path .. "/themes/" .. id .. "_INFO.json"
+	if not love.filesystem.getInfo(path, _info) then
+		return nil, "no file at: " .. path
+	end
+
+	local str, err = love.filesystem.read(path)
+	if not str then
+		return nil, err
+	end
+
+	local ok, ret = pcall(json.decode, str)
+	if not ok then
+		return nil, ret
+	end
+
+	return {
+		name = _assignIfString(ret.name),
+		authors = _assignIfString(ret.authors),
+		url = _assignIfString(ret.url),
+		license = _assignIfString(ret.license),
+		description = _assignIfString(ret.description)
+	}
+end
+
+
+local themes_max = 100
+
+
+local inspect = require("lib.test.inspect") -- TODO: DEBUG
+function methods:loadTheme(id)
+	uiShared.type1(1, id, "string")
+
+	local id_orig = id
+	local theme_hash, theme_ids = {}, {}
+	local theme
+
+	local i = 0
+	while true do
+		i = i + 1
+		if i > themes_max then
+			error("exceeded maximum allowed theme patches (" .. tostring(themes_max) .. ").")
+		end
+		if theme_hash[id] then
+			error("circular theme reference. ID: " .. tostring(id))
+		end
+		theme_hash[id] = true
+		table.insert(theme_ids, id)
+
+		local theme2 = uiRes.loadLuaFileOrDirectoryAsTable(context.conf.prod_ui_path .. "themes/" .. id)
+		local theme_info = pTable.assertResolve(theme2, "info/theme_info")
+		local next_id = theme_info.patches
+
+		print("LOADED THEME", id)
+		print("next_id", next_id)
+
+		--print(inspect(theme2))
+
+		if not theme then
+			print("SET INITIAL THEME", id)
+		else
+			print("PATCH THEME", id)
+			pTable.patch(theme2, theme)
+		end
+		theme = theme2
+
+		if not next_id then
+			print("BREAK")
+			break
+		end
+		id = next_id
+		print("BOTTOM OF LOOP")
+	end
+
+	if not theme then
+		error("failed to load theme: " .. tostring(id_orig))
+	end
+
+	theme.info.theme_ids = theme_ids
+
+	return theme
+end
+
+
 function methods:applyTheme(theme)
+	uiShared.type1(1, theme, "table")
+
 	local resources = self.resources
 	local scale = self.scale
 
 	self:resetResources()
+	self.theme_id = false
 	fontCache.clear()
 	uiTheme.setLabel()
 
 	if not theme then
 		return
+	end
+
+	self.theme_id = theme.info.theme_ids[1]
+	if type(self.theme_id) ~= "string" then
+		error("invalid Theme ID.")
 	end
 
 	if theme.boxes then

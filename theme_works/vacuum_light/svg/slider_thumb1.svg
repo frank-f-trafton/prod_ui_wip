@@ -8,7 +8,7 @@
    version="1.1"
    id="svg13547"
    sodipodi:docname="slider_thumb1.svg"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    inkscape:export-filename="checkmark_on.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
@@ -27,13 +27,13 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="16"
-     inkscape:cx="4.21875"
-     inkscape:cy="11"
-     inkscape:window-width="1440"
-     inkscape:window-height="777"
+     inkscape:zoom="22.627417"
+     inkscape:cx="7.9549513"
+     inkscape:cy="9.8773979"
+     inkscape:window-width="1920"
+     inkscape:window-height="1007"
      inkscape:window-x="0"
-     inkscape:window-y="32"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg13547"
      showguides="false">
@@ -42,14 +42,22 @@
        id="grid15567"
        empspacing="1"
        originx="0"
-       originy="0" />
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px"
+       visible="true" />
     <inkscape:grid
        type="xygrid"
        id="grid15569"
        empspacing="1"
        originx="0.5"
        originy="0.5"
-       dotted="true" />
+       dotted="true"
+       spacingy="1"
+       spacingx="1"
+       units="px"
+       visible="true" />
   </sodipodi:namedview>
   <defs
      id="defs13544" />
@@ -62,7 +70,7 @@
      y="0"
      inkscape:label="_hide_me" />
   <rect
-     style="display:inline;fill:#fdfdfd;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     style="display:inline;fill:#e5e5e5;fill-opacity:1;stroke:#1a1a1a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
      id="rect42196"
      width="22"
      height="22"

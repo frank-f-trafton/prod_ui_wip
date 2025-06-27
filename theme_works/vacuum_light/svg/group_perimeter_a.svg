@@ -28,12 +28,12 @@
      inkscape:document-units="px"
      showgrid="true"
      inkscape:zoom="22.627417"
-     inkscape:cx="9.1260969"
-     inkscape:cy="12.374369"
+     inkscape:cx="9.148194"
+     inkscape:cy="12.352272"
      inkscape:window-width="1920"
-     inkscape:window-height="957"
+     inkscape:window-height="1007"
      inkscape:window-x="0"
-     inkscape:window-y="32"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
      showguides="false">
@@ -80,7 +80,7 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="font-variation-settings:'wght' 700;fill:none;stroke:#ffffff;stroke-width:1.999;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       style="font-variation-settings:'wght' 700;fill:none;stroke:#808080;stroke-width:1.999;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
        d="M 3,4 V 21 H 21 V 4"
        id="path2"
        sodipodi:nodetypes="cccc" />
