@@ -594,12 +594,15 @@ def.default_skinner = {
 		-- Additional padding for text.
 		check.integer(skin, "pad_text_x", 0)
 
+		check.colorTuple(skin, "color_body")
 		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_item_icon")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
 		check.colorTuple(skin, "color_active_glow")
 		check.colorTuple(skin, "color_item_marked")
 		check.colorTuple(skin, "color_pipe")
+		check.colorTuple(skin, "color_expander")
 	end,
 
 
@@ -650,16 +653,17 @@ def.default_skinner = {
 		local first = math.max(self.MN_items_first, 1)
 		local last = math.min(self.MN_items_last, #items)
 
+		local rr, gg, bb, aa = love.graphics.getColor()
+		love.graphics.push("all")
+
 		-- XXX: pick resources for enabled or disabled state, etc.
 		--local res = (self.active) and skin.res_active or skin.res_inactive
 
 		-- TreeBox body
-		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.setColor(skin.color_body)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
-
-		love.graphics.push("all")
 
 		-- Scissor, scroll offsets for content.
 		uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
@@ -722,12 +726,6 @@ def.default_skinner = {
 					item_hover.h
 				)
 			end
-			--[[
-			love.graphics.push("all")
-			love.graphics.setColor(1,0,0,1)
-			love.graphics.rectangle("line", item_hover.x, item_hover.y, item_hover.w, item_hover.h)
-			love.graphics.pop()
-			--]]
 		end
 
 		-- Selection glow.
@@ -755,15 +753,11 @@ def.default_skinner = {
 			end
 		end
 
-
 		-- Menu items.
-		love.graphics.setColor(skin.color_item_text)
 		love.graphics.setFont(font)
 
 		-- 1: Item markings
-		local rr, gg, bb, aa = love.graphics.getColor()
 		love.graphics.setColor(skin.color_item_marked)
-
 		for i = first, last do
 			local item = items[i]
 			if item.marked then
@@ -771,10 +765,9 @@ def.default_skinner = {
 			end
 		end
 
-		love.graphics.setColor(rr, gg, bb, aa)
-
 		-- 2: Expander sensors, if enabled.
 		if self.TR_expanders_active then
+			love.graphics.setColor(skin.color_expander)
 			local tq_on = skin.tq_expander_down
 			local tq_off = (self.TR_item_align_h == "left") and skin.tq_expander_right or skin.tq_expander_left
 
@@ -797,9 +790,9 @@ def.default_skinner = {
 			end
 		end
 
-
 		-- 3: Icons
 		if self.TR_show_icons then
+			love.graphics.setColor(skin.color_item_icon)
 			for i = first, last do
 				local item = items[i]
 				local tq_icon = item.tq_icon
@@ -817,19 +810,9 @@ def.default_skinner = {
 		end
 
 		-- 4: Text labels
+		love.graphics.setColor(skin.color_item_text)
 		for i = first, last do
 			local item = items[i]
-			-- ugh
-			--[[
-			love.graphics.push("all")
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.setLineWidth(1)
-			love.graphics.setLineStyle("rough")
-			love.graphics.setLineJoin("miter")
-			love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
-			love.graphics.pop()
-			--]]
-
 			if item.text then
 				local item_x
 				if self.TR_item_align_h == "left" then

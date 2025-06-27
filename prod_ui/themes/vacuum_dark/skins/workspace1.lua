@@ -8,6 +8,8 @@ return {
 	in_view_pad_x = 0,
 	in_view_pad_y = 0,
 
+	background_color = {0.15, 0.1, 0.1, 1.0},
+
 	-- * Sash State *
 
 	slc_sash_lr = "*slices/atlas/sash_lr",

@@ -8,7 +8,9 @@ local inspect = require("lib.test.inspect")
 print("Start WIMP Demo.")
 
 
-local demo_default_theme = "vacuum_dark"
+local demo_default_theme
+--demo_default_theme = "vacuum_light"
+demo_default_theme = "vacuum_dark"
 
 
 -- The first panel to load.

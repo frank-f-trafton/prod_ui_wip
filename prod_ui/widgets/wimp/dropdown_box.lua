@@ -484,6 +484,7 @@ local function _checkRes(skin, k)
 	check.slice(res, "slc_deco_button")
 	check.colorTuple(res, "color_body")
 	check.colorTuple(res, "color_text")
+	check.colorTuple(res, "color_icon")
 	check.colorTuple(res, "color_highlight")
 	check.integer(res, "deco_ox")
 	check.integer(res, "deco_oy")
@@ -574,6 +575,7 @@ def.default_skinner = {
 			res = skin.res_disabled
 		end
 
+		local rr, gg, bb, aa = love.graphics.getColor()
 		love.graphics.push("all")
 
 		-- Back panel body.
@@ -581,7 +583,7 @@ def.default_skinner = {
 		uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
 		-- Decorative button.
-		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.setColor(rr, gg, bb, aa)
 		uiGraphics.drawSlice(res.slc_deco_button, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
 		uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp5_x + res.deco_ox, self.vp5_y + res.deco_oy, self.vp5_w, self.vp5_h)
 
@@ -602,18 +604,18 @@ def.default_skinner = {
 
 		local chosen = self.MN_items[self.MN_index]
 		if chosen then
-			love.graphics.setColor(res.color_text)
-
 			-- Chosen item icon.
 			if self.show_icons then
 				local tq_icon = chosen.tq_icon
 				if tq_icon then
+					love.graphics.setColor(res.color_icon)
 					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
 				end
 			end
 
 			-- Chosen item text.
 			love.graphics.setFont(font)
+			love.graphics.setColor(res.color_text)
 			local xx = self.vp3_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp3_w)
 			local yy = math.floor(0.5 + self.vp3_y + (self.vp3_h - font:getHeight()) / 2)
 			love.graphics.print(chosen.text, xx, yy)

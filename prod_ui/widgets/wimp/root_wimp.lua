@@ -729,8 +729,10 @@ function def:renderLast(os_x, os_y)
 	end
 
 	if self.drop_state then
-		love.graphics.setColor(1, 1, 1, 1)
+		local rr, gg, bb, aa = love.graphics.getColor()
+		love.graphics.setColor(self.context.resources.info.misc.dropping_text_color)
 		love.graphics.print("Dropping...", self.context.mouse_x - 20, self.context.mouse_y - 20)
+		love.graphics.setColor(rr, gg, bb, aa)
 	end
 
 	-- DEBUG
