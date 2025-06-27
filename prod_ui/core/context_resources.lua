@@ -310,7 +310,7 @@ function methods:loadTheme(id)
 			print("SET INITIAL THEME", id)
 		else
 			print("PATCH THEME", id)
-			pTable.patch(theme2, theme)
+			pTable.deepPatch(theme2, theme)
 		end
 		theme = theme2
 

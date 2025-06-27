@@ -1,4 +1,4 @@
--- PILE Table v1.1.7 (Modified)
+-- PILE Table v1.1.8
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -52,11 +52,11 @@ function M.copyArray(t)
 end
 
 
-local _deepCopy1, _deepCopy2
+local _deepCopy1
 
 
 lang.err_deep_key = "cannot copy tables as keys"
-_deepCopy2 = function(dst, k, v)
+local function _deepCopy2(dst, k, v)
 	if type(k) == "table" then
 		error(lang.err_deep_key)
 	end
@@ -80,6 +80,34 @@ end
 function M.deepCopy(t)
 	return _deepCopy1({}, t)
 end
+
+
+lang.err_patch_type = "argument #$1: bad type (expected $2, got $3)"
+lang.err_patch_key = "cannot patch tables as keys"
+local function deepPatch(a, b)
+	if type(a) ~= "table" then
+		error(interp(lang.err_patch_type, 1, "table", type(a)))
+
+	elseif type(b) ~= "table" then
+		error(interp(lang.err_patch_type, 2, "table", type(b)))
+	end
+
+	for k, v in pairs(b) do
+		if type(k) == "table" then
+			error(lang.err_patch_key)
+
+		elseif type(v) == "table" then
+			a[k] = type(a[k]) == "table" and a[k] or {}
+			deepPatch(a[k], v)
+
+		else
+			a[k] = v
+		end
+	end
+end
+
+
+M.deepPatch = deepPatch
 
 
 function M.isArray(t)
@@ -209,11 +237,9 @@ end
 
 
 function M.valueInArray(t, v, i)
-	i = i or 1
-	local len = #t
-	while i < len do
-		if v[i] == v then
-			return i
+	for p = i or 1, #t do
+		if t[p] == v then
+			return p
 		end
 	end
 end
@@ -294,25 +320,6 @@ function M.assertResolve(t, str, raw)
 	end
 	return ret, count
 end
-
-
-local function patch(a, b)
-	print("patch: start")
-	for k, v in pairs(b) do
-		print("k", k, "v", v, "a[k]", a[k])
-		if type(v) == "table" then
-			a[k] = type(a[k]) == "table" and a[k] or {}
-			patch(a[k], v)
-		else
-			a[k] = v
-			print("patched a[k] to: " .. tostring(v))
-		end
-	end
-	print("patch: end")
-end
-
-
-M.patch = patch
 
 
 return M
