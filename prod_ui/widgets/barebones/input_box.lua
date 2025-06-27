@@ -229,54 +229,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-def.render = function(self, ox, oy)
-	love.graphics.push("all")
-
-	local scale = self.context.scale
-	local font = self.context.resources.fonts.internal
-
-	local line_w = math.floor(1.0 * scale)
-	local caret_w = math.floor(2.0 * scale)
-	local margin_w = math.floor(8.0 * scale)
-
-	if not self.enabled then
-		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
-
-	elseif self.pressed then
-		love.graphics.setColor(0.25, 0.25, 0.25, 1.0)
-
-	elseif self.hover then
-		love.graphics.setColor(0.9, 0.9, 0.9, 1.0)
-
-	else -- enabled
-		love.graphics.setColor(0.8, 0.8, 0.8, 1.0)
-	end
-
-	-- Body.
-	love.graphics.setLineStyle("smooth")
-	love.graphics.setLineWidth(line_w)
-	love.graphics.rectangle("line", 0.5, 0.5, self.w - 1, self.h - 1)
-
-	uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
-
-	-- Horizontal scroll offset. The caret should always be in view.
-	local offset_x = -math.max(0, self.text_w + caret_w + margin_w*2 - self.w)
-
-	-- Center text vertically.
-	local font_h = math.floor(font:getHeight() * font:getLineHeight())
-	local offset_y = math.floor(0.5 + (self.h - font_h) / 2)
-
-	-- Text.
-	love.graphics.setFont(font)
-	love.graphics.print(self.text, margin_w + offset_x, offset_y) -- Alignment
-
-	-- Caret.
-	if self.context.thimble1 == self then
-		love.graphics.rectangle("fill", margin_w + offset_x + self.text_w, offset_y, caret_w, font_h)
-	end
-
-	love.graphics.pop()
-end
+def.render = context:getLua("shared/render_button_bare").inputBox
 
 
 return def

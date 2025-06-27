@@ -276,7 +276,6 @@ end
 local themes_max = 100
 
 
-local inspect = require("lib.test.inspect") -- TODO: DEBUG
 function methods:loadTheme(id)
 	uiShared.type1(1, id, "string")
 
@@ -289,8 +288,8 @@ function methods:loadTheme(id)
 		i = i + 1
 		if i > themes_max then
 			error("exceeded maximum allowed theme patches (" .. tostring(themes_max) .. ").")
-		end
-		if theme_hash[id] then
+
+		elseif theme_hash[id] then
 			error("circular theme reference. ID: " .. tostring(id))
 		end
 		theme_hash[id] = true
@@ -301,25 +300,15 @@ function methods:loadTheme(id)
 		local theme_info = pTable.assertResolve(theme2, "info/theme_info")
 		local next_id = theme_info.patches
 
-		print("LOADED THEME", id)
-		print("next_id", next_id)
-
-		--print(inspect(theme2))
-
-		if not theme then
-			print("SET INITIAL THEME", id)
-		else
-			print("PATCH THEME", id)
+		if theme then
 			pTable.deepPatch(theme2, theme)
 		end
 		theme = theme2
 
 		if not next_id then
-			print("BREAK")
 			break
 		end
 		id = next_id
-		print("BOTTOM OF LOOP")
 	end
 
 	if not theme then

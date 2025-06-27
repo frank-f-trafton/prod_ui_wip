@@ -73,8 +73,9 @@ function plan.make(panel)
 	demoShared.makeLabel(panel, 32, 96, 200, 32, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
 	list_box:initialize()
-	list_box:setTag("themes_list")
 	demoShared.setStaticLayout(panel, list_box, 32, 96+40, 200, 96)
+	list_box:setTag("themes_list")
+	list_box.wid_action = _updateScale
 
 	do
 		local theme_ids = context:enumerateThemes()

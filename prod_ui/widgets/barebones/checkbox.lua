@@ -49,7 +49,7 @@ function def:uiCall_initialize()
 end
 
 
-def.render = context:getLua("shared/render_button_bare")
+def.render = context:getLua("shared/render_button_bare").buttons
 
 
 return def

@@ -134,48 +134,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-def.render = function(self, ox, oy)
-	love.graphics.push("all")
-
-	-- Outline
-	if not self.enabled then
-		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
-
-	elseif self.pressed then
-		love.graphics.setColor(0.25, 0.25, 0.25, 1.0)
-
-	elseif self.hover then
-		love.graphics.setColor(0.9, 0.9, 0.9, 1.0)
-
-	else -- enabled
-		love.graphics.setColor(0.8, 0.8, 0.8, 1.0)
-	end
-
-	love.graphics.setLineStyle("smooth")
-	local line_width = math.max(1, math.floor(2 * self.context.scale))
-	love.graphics.setLineWidth(line_width)
-	love.graphics.setLineJoin("miter")
-	love.graphics.rectangle("line", line_width/2, line_width/2, self.w - line_width, self.h - line_width)
-
-	-- The trough is not rendered.
-
-	-- Thumb
-	love.graphics.setColor(1, 1, 1, 0.5)
-	--love.graphics.setScissor()
-	love.graphics.rectangle(
-		"fill",
-		self.thumb_x,
-		self.thumb_y,
-		self.thumb_w,
-		self.thumb_h
-	)
-	--print("!?", self.thumb_x, self.thumb_y, self.thumb_w, self.thumb_h)
-
-	-- Label text -- single-line only, no underlines.
-	lgcLabelBare.render(self, self.context.resources.fonts.internal, 1, 1, 1, 1)
-
-	love.graphics.pop()
-end
+def.render = context:getLua("shared/render_button_bare").slider
 
 
 return def

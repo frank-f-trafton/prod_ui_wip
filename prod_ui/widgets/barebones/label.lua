@@ -25,17 +25,7 @@ function def:uiCall_initialize()
 end
 
 
-def.render = function(self, ox, oy)
-	local r, g, b, a
-	if self.enabled then
-		r, g, b, a = 1, 1, 1, 1
-
-	else
-		r, g, b, a = 0.5, 0.5, 0.5, 1
-	end
-
-	lgcLabelBare.render(self, self.context.resources.fonts.internal, r, g, b, a)
-end
+def.render = context:getLua("shared/render_button_bare").label
 
 
 return def

@@ -121,21 +121,21 @@ function plan.make(panel)
 			end
 			_updateButtons(panel)
 		end,
-		["+f6"] = function(self, key, scancode, isrepeat)
+		["+f2"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
 				setAlign(tb, "left")
 			end
 			_updateButtons(panel)
 		end,
-		["+f7"] = function(self, key, scancode, isrepeat)
+		["+f3"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
 				setAlign(tb, "center")
 			end
 			_updateButtons(panel)
 		end,
-		["+f8"] = function(self, key, scancode, isrepeat)
+		["+f4"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
 				setAlign(tb, "right")
@@ -202,7 +202,7 @@ function plan.make(panel)
 	rdo_align:setTag("demo_align_l")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "left"
-	rdo_align:setLabel("Align Left (F6)", "single")
+	rdo_align:setLabel("Align Left (F2)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = xx + w2
@@ -213,7 +213,7 @@ function plan.make(panel)
 	rdo_align:setTag("demo_align_c")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "center"
-	rdo_align:setLabel("Align Center (F7)", "single")
+	rdo_align:setLabel("Align Center (F3)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = xx + w2
@@ -224,7 +224,7 @@ function plan.make(panel)
 	rdo_align:setTag("demo_align_r")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "right"
-	rdo_align:setLabel("Align Right (F8)", "single")
+	rdo_align:setLabel("Align Right (F4)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = x1

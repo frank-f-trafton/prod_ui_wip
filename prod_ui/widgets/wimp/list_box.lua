@@ -659,6 +659,7 @@ def.default_skinner = {
 
 		check.colorTuple(skin, "color_body")
 		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_item_icon")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
 		check.colorTuple(skin, "color_active_glow")
@@ -705,20 +706,19 @@ def.default_skinner = {
 		local sl_body = skin.sl_body
 
 		local items = self.MN_items
-		local rr, gg, bb, aa
+		local rr, gg, bb, aa = love.graphics.getColor()
+
+		love.graphics.push("all")
 
 		-- XXX: pick resources for enabled or disabled state, etc.
 		--local res = (self.active) and skin.res_active or skin.res_inactive
 
 		-- ListBox body.
-		rr, gg, bb, aa = love.graphics.getColor()
 		love.graphics.setColor(skin.color_body)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
 		love.graphics.setColor(rr, gg, bb, aa)
 		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
-
-		love.graphics.push("all")
 
 		-- Scissor, scroll offsets for content.
 		uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
@@ -741,7 +741,6 @@ def.default_skinner = {
 		end
 
 		-- Menu items.
-		love.graphics.setColor(skin.color_item_text)
 		local font = skin.font
 		love.graphics.setFont(font)
 		local font_h = font:getHeight()
@@ -750,7 +749,6 @@ def.default_skinner = {
 		local last = math.min(self.MN_items_last, #items)
 
 		-- 1: Item markings
-		rr, gg, bb, aa = love.graphics.getColor()
 		love.graphics.setColor(skin.color_item_marked)
 		for i = first, last do
 			local item = items[i]
@@ -760,8 +758,8 @@ def.default_skinner = {
 		end
 
 		-- 2: Item icons, if enabled
-		love.graphics.setColor(rr, gg, bb, aa)
 		if self.show_icons then
+			love.graphics.setColor(skin.color_item_icon)
 			for i = first, last do
 				local item = items[i]
 				local tq_icon = item.tq_icon
@@ -772,19 +770,9 @@ def.default_skinner = {
 		end
 
 		-- 3: Text labels
+		love.graphics.setColor(skin.color_item_text)
 		for i = first, last do
 			local item = items[i]
-			-- ugh
-			--[[
-			love.graphics.push("all")
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.setLineWidth(1)
-			love.graphics.setLineStyle("rough")
-			love.graphics.setLineJoin("miter")
-			love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
-			love.graphics.pop()
-			--]]
-
 			if item.text then
 				-- Need to align manually to prevent long lines from wrapping.
 				local text_x

@@ -234,6 +234,10 @@ def.default_skinner = {
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
 
+		if skin.background_color then
+			check.colorTuple(skin, "background_color")
+		end
+
 		-- Padding when scrolling to put a widget into view.
 		check.integer(skin, "in_view_pad_x", 0)
 		check.integer(skin, "in_view_pad_y", 0)
@@ -262,9 +266,19 @@ def.default_skinner = {
 
 	--refresh = function(self, skinner, skin)
 	--update = function(self, skinner, skin, dt)
-	--render = function(self, ox, oy)
+
 
 	render = function(self, ox, oy)
+		local skin = self.skin
+		if skin.background_color then
+			love.graphics.push("all")
+
+			love.graphics.setColor(skin.background_color)
+			love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+
+			love.graphics.pop()
+		end
+
 		if self.userRender then
 			self:userRender(ox, oy)
 		end
