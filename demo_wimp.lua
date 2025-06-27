@@ -8,8 +8,12 @@ local inspect = require("lib.test.inspect")
 print("Start WIMP Demo.")
 
 
+local demo_default_theme = "vacuum_dark"
+
+
 -- The first panel to load.
 local demo_panel_launch = {
+	"themes_and_scale",
 	"demo_welcome",
 	"widgets.progress_bar",
 	"widgets.slider_work",
@@ -52,7 +56,7 @@ local demo_plan_list = {
 		-- TODO: text blocks
 		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
 		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
-		{plan_id = "scaling", label = "Scaling"},
+		{plan_id = "themes_and_scale", label = "Themes and Scale"},
 		{plan_id = "widgets.unfinished.layout", label = "Layout"},
 		--[[
 		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
@@ -211,7 +215,7 @@ local function newWimpContext()
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
-	local theme = demoShared.loadTheme("vacuum_dark")
+	local theme = demoShared.loadThemeDuplicateSkins(context, demo_default_theme)
 	context:applyTheme(theme)
 
 	local wid_root = context:addRoot("wimp/root_wimp")
@@ -308,14 +312,15 @@ end
 
 
 function love.keypressed(kc, sc, rep)
+	print("context:getThemeID()", context:getThemeID())
 	-- Debug stuff, specific to this demo.
 	-- [====[
 	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
 		if context:getScale() > 1 then
-			demoShared.executeThemeUpdate(context, 1.0, context:getDPI(), "vacuum_dark")
+			demoShared.executeThemeUpdate(context, 1.0, context:getDPI(), context:getThemeID())
 		else
 			--demoShared.executeThemeUpdate(context, 1.5, 192)
-			demoShared.executeThemeUpdate(context, 1.5, context:getDPI(), "vacuum_dark")
+			demoShared.executeThemeUpdate(context, 1.5, context:getDPI(), context:getThemeID())
 		end
 	end
 

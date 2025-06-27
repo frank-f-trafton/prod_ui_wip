@@ -7,7 +7,7 @@
    viewBox="0 0 20 20"
    version="1.1"
    id="svg13547"
-   sodipodi:docname="window_graphic_large_close.svg"
+   sodipodi:docname="wingraphic_large_close.svg"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    inkscape:export-filename="checkmark_on.png"
    inkscape:export-xdpi="96"
@@ -29,7 +29,7 @@
      showgrid="true"
      inkscape:zoom="22.627417"
      inkscape:cx="1.5467961"
-     inkscape:cy="8.905126"
+     inkscape:cy="8.8609319"
      inkscape:window-width="1920"
      inkscape:window-height="1007"
      inkscape:window-x="0"
@@ -70,13 +70,13 @@
      y="0"
      inkscape:label="_hide_me" />
   <path
-     style="font-variation-settings:'wght' 700;display:inline;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:3.77952756;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     style="font-variation-settings:'wght' 700;display:inline;fill:none;fill-opacity:1;stroke:#1a1a1a;stroke-width:3.77952756;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
      d="m 3.5,3.5 13,13"
      id="path44389"
      inkscape:label="\"
      sodipodi:nodetypes="cc" />
   <path
-     style="font-variation-settings:'wght' 700;display:inline;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:3.77952756;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     style="font-variation-settings:'wght' 700;display:inline;fill:none;fill-opacity:1;stroke:#1a1a1a;stroke-width:3.77952756;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
      d="m 16.5,3.5 -13,13"
      id="path44391"
      inkscape:label="/"

@@ -13,15 +13,17 @@ local function _openURL(self)
 end
 
 
-function demoShared.loadTheme(id)
-	local theme = uiRes.loadDirectoryAsTable("prod_ui/themes/" .. id)
+function demoShared.loadThemeDuplicateSkins(context, id)
+	local theme = context:loadTheme(id)
 
 	-- Duplicate skins so that demo widgets can be tweaked without
 	-- affecting the rest of the program.
 	if theme.skins then
 		local dupes = {}
 		for k, v in pairs(theme.skins) do
-			dupes[k .. "_DEMO"] = pTable.deepCopy(v)
+			if not dupes[k .. "_DEMO"] then
+				dupes[k .. "_DEMO"] = pTable.deepCopy(v)
+			end
 		end
 		for k, v in pairs(dupes) do
 			theme.skins[k] = v
@@ -29,6 +31,21 @@ function demoShared.loadTheme(id)
 	end
 
 	return theme
+end
+
+
+local function _unskin(self)
+	if self.skinner then
+		self:skinRemove()
+	end
+end
+
+
+local function _reskin(self)
+	if self.skinner then
+		self:skinSetRefs()
+		self:skinInstall()
+	end
 end
 
 
@@ -41,16 +58,17 @@ function demoShared.executeThemeUpdate(context, scale, dpi, id)
 	if not tex_dir then
 		return false
 	else
-		local old_scale, old_dpi = context:getScale(), context:getDPI()
-		if not (scale == old_scale and dpi == old_dpi) then
+		local old_scale, old_dpi, old_id = context:getScale(), context:getDPI(), context:getThemeID()
+		print("id", id, "old_id", old_id)
+		if not (scale == old_scale and dpi == old_dpi and id == old_id) then
 			context:setScale(scale)
 			context:setDPI(dpi)
 
-			local theme = demoShared.loadTheme(id)
+			local theme = demoShared.loadThemeDuplicateSkins(context, id)
 
-			context.root:forEach(function(self) if self.skinner then self:skinRemove() end end)
+			context.root:forEach(_unskin)
 			context:applyTheme(theme)
-			context.root:forEach(function(self) if self.skinner then self:skinSetRefs(); self:skinInstall() end end)
+			context.root:forEach(_reskin)
 			context.root:reshape()
 
 			return true

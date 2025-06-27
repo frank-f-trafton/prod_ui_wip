@@ -17,8 +17,8 @@ return {
 	},
 
 	res_disabled = {
-		--[[optional]] --sl_body = "*slices/atlas/label_disabled",
-		--[[optional]] --color_body = {1.0, 1.0, 1.0, 1.0},
+		-- [[optional]] sl_body = "*slices/atlas/label_disabled",
+		-- [[optional]] color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		label_ox = 0,
 		label_oy = 0

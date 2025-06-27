@@ -1,4 +1,4 @@
--- PILE Table v1.1.7
+-- PILE Table v1.1.7 (Modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -208,6 +208,17 @@ function M.removeElement(t, v, n)
 end
 
 
+function M.valueInArray(t, v, i)
+	i = i or 1
+	local len = #t
+	while i < len do
+		if v[i] == v then
+			return i
+		end
+	end
+end
+
+
 lang.err_k_nil = "the key to assign is nil"
 function M.assignIfNil(t, k, ...)
 	if k == nil then
@@ -283,6 +294,25 @@ function M.assertResolve(t, str, raw)
 	end
 	return ret, count
 end
+
+
+local function patch(a, b)
+	print("patch: start")
+	for k, v in pairs(b) do
+		print("k", k, "v", v, "a[k]", a[k])
+		if type(v) == "table" then
+			a[k] = type(a[k]) == "table" and a[k] or {}
+			patch(a[k], v)
+		else
+			a[k] = v
+			print("patched a[k] to: " .. tostring(v))
+		end
+	end
+	print("patch: end")
+end
+
+
+M.patch = patch
 
 
 return M

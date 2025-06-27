@@ -8,6 +8,7 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local pPath = require(REQ_PATH .. "lib.pile_path")
+local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiShared = require(REQ_PATH .. "ui_shared")
 
 
@@ -19,6 +20,7 @@ function uiRes.assertGetInfo(...)
 	if not info then
 		error("unable to read file: " .. tostring(select(1, ...)))
 	end
+	return info
 end
 
 
@@ -33,7 +35,7 @@ function uiRes.infoCanTraverse(info)
 end
 
 
---- Loads and execute a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
+--- Loads and executes a Lua file, passing an arbitrary set of arguments to the chunk via the '...' operator.
 -- @param path The path to the Lua file.
 -- @param ... An arbitrary set of arguments to pass to the Lua chunk.
 -- @return The result of executing the chunk.
@@ -243,14 +245,15 @@ Directories are scanned by default, but a special handler named "directory" may 
 Note the lack of an extension argument.
 
 Return just the key to use for the new table at this level, or 'nil' to ignore the directory and its contents.
-
-In these default functions, all files and directories that begin with an underscore are ignored.
 --]]
 uiRes.dir_handlers = {
 	[".lua"] = function(full_path, name, ext)
+		--[[
+		-- To ignore .lua files whose names begin with an underscore:
 		if name:sub(1, 1) == "_" then
 			return
 		end
+		--]]
 
 		local chunk, err = love.filesystem.load(full_path)
 		if not chunk then
@@ -263,11 +266,14 @@ uiRes.dir_handlers = {
 		return id, chunk
 	end,
 
-	--[[
+	--[=[
 	[".txt"] = function(full_path, name, ext)
+		--[[
+		-- To ignore text files whose names begin with an underscore:
 		if name:sub(1, 1) == "_" then
 			return
 		end
+		--]]
 
 		local str, err = love.filesystem.read(full_path)
 		if not str then
@@ -278,15 +284,37 @@ uiRes.dir_handlers = {
 
 		return id, str
 	end,
-	--]]
+	--]=]
 
+	--[=[
 	["directory"] = function(full_path, name)
+		--[[
+		-- To ignore directory names that begin with an underscore:
 		if name:sub(1, 1) == "_" then
 			return
 		end
+		--]]
 		return name
 	end,
+	--]=]
 }
+
+
+function uiRes.loadLuaFileOrDirectoryAsTable(path)
+	uiShared.type1(1, path, "string")
+
+	local lua_path = path .. ".lua"
+	local info = love.filesystem.getInfo(lua_path, _info)
+	if info and info.type == "file" then
+		return uiRes.loadLuaFile(lua_path)
+	else
+		info = love.filesystem.getInfo(path, _info)
+		if info and info.type == "directory" then
+			return uiRes.loadDirectoryAsTable(path)
+		end
+	end
+	error("failed to load Lua file or directory: " .. path)
+end
 
 
 return uiRes
