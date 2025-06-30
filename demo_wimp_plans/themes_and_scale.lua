@@ -86,14 +86,16 @@ function plan.make(panel)
 				error(err)
 			end
 
-			local name = theme_details and theme_details.name or id
-			local lb_item = list_box:addItem(name)
+			if theme_details.present_to_user then
+				local name = theme_details and theme_details.name or id
+				local lb_item = list_box:addItem(name)
 
-			-- in case the display name gets fluffed up:
-			lb_item.usr_dir_id = id
+				-- in case the display name gets fluffed up:
+				lb_item.usr_dir_id = id
 
-			if id == context.theme_id then
-				list_box:setSelection(lb_item)
+				if id == context.theme_id then
+					list_box:setSelection(lb_item)
+				end
 			end
 		end
 	end

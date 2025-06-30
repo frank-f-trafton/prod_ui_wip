@@ -3,5 +3,7 @@ return {
 	authors = "Frank F. Trafton",
 	url = "https://www.github.com/frank-f-trafton/prod_ui_wip",
 	license = "See ProdUI license.",
-	description = "The oldest ProdUI theme."
+	present_to_user = true,
+	description = "The oldest ProdUI theme.",
+
 }
