@@ -47,23 +47,35 @@ function def:setAuxEnabled(enabled)
 end
 
 
-function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHover(inst, x, y, dx, dy)
 	if self == inst then
 		if self.enabled then
-			if not self.aux_pressed then
+			if self.aux_pressed then
+				self.hovered = false
+				self.cursor_hover = nil
+			else
 				self.hovered = true
+				if self.aux_enabled then
+					self.cursor_hover = self.skin.cursor_on
+				else
+					local mx, my = self:getRelativePosition(x, y)
+					if widShared.pointInViewport(self, 3, mx, my) then
+						self.cursor_hover = nil
+					else
+						self.cursor_hover = self.skin.cursor_on
+					end
+				end
 			end
 		end
 	end
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHoverOff(inst, x, y, dx, dy)
 	if self == inst then
 		if self.enabled then
-			if not self.aux_pressed then
-				self.hovered = false
-			end
+			self.hovered = false
+			self.cursor_hover = nil
 		end
 	end
 end
@@ -83,11 +95,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						-- main button part
 						if not widShared.pointInViewport(self, 3, mx, my) then
 							self.pressed = true
+							self.cursor_press = self.skin.cursor_press
 
 						-- aux button part (sticky)
 						elseif self.aux_enabled and not self.aux_pressed then
 							self.pressed = true
 							self.aux_pressed = true
+							self.cursor_press = nil
+							self.cursor_hover = nil
 
 							-- Press action
 							self:wid_buttonActionAux()
@@ -114,16 +129,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
+function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
-					local mx, my = self:getRelativePosition(x, y)
-					-- main button part
-					if not self.aux_pressed and not widShared.pointInViewport(self, 3, mx, my) then
+					if not self.aux_pressed then
 						self.pressed = false
-						self:wid_buttonAction()
+						self.cursor_press = nil
 					end
 				end
 			end
@@ -132,13 +145,15 @@ function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
-					if not self.aux_pressed then
-						self.pressed = false
+					local mx, my = self:getRelativePosition(x, y)
+					-- main button part
+					if not self.aux_pressed and not widShared.pointInViewport(self, 3, mx, my) then
+						self:wid_buttonAction()
 					end
 				end
 			end
@@ -163,7 +178,7 @@ function def:uiCall_initialize()
 	-- [XXX 8] (Optional) graphic associated with the button.
 	--self.graphic = <tq>
 
-	-- Aux button state
+	-- Aux button state.
 	self.aux_enabled = true
 	self.aux_pressed = false
 
@@ -174,9 +189,6 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self.cursor_hover = self.skin.cursor_on
-	self.cursor_press = self.skin.cursor_press
 
 	self:reshape()
 end
