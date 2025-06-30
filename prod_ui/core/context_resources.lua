@@ -268,6 +268,7 @@ function methods:getThemeInfo(id)
 		authors = _assignIfString(ret.authors),
 		url = _assignIfString(ret.url),
 		license = _assignIfString(ret.license),
+		present_to_user = not not ret.present_to_user,
 		description = _assignIfString(ret.description)
 	}
 end
