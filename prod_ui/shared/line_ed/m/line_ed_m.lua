@@ -1,7 +1,4 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
--- LineEditor (multi) core object. Provides the basic guts of a text input field.
+-- LineEditor (multi) core object.
 
 
 local context = select(1, ...)

@@ -1,4 +1,4 @@
--- PILE Table v1.1.8
+-- PILE Table v1.1.8 (Modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -15,9 +15,10 @@ local lang = M.lang
 
 
 local interp = require(PATH .. "pile_interp")
+local pArg = require(PATH .. "pile_arg_check")
 
 
-local ipairs, pairs, rawget, select, table, type = ipairs, pairs, rawget, select, table, type
+local ipairs, math, pairs, rawget, select, table, type = ipairs, math, pairs, rawget, select, table, type
 
 
 function M.clear(t)
@@ -53,21 +54,19 @@ end
 
 
 local _deepCopy1
-
-
-lang.err_deep_key = "cannot copy tables as keys"
+lang.err_deepcopy_key = "cannot copy tables as keys"
 local function _deepCopy2(dst, k, v)
 	if type(k) == "table" then
-		error(lang.err_deep_key)
-	end
-	if dst[k] == nil then
+		error(lang.err_deepcopy_key)
+
+	elseif dst[k] == nil then
 		dst[k] = type(v) == "table" and _deepCopy1({}, v) or v
 	end
 end
 
 
 _deepCopy1 = function(dst, src)
-	for i, v in ipairs(src) do
+	for i, v in ipairs(src) do -- do array keys first
 		_deepCopy2(dst, i, v)
 	end
 	for k, v in pairs(src) do
@@ -78,36 +77,132 @@ end
 
 
 function M.deepCopy(t)
+	pArg.type1(1, t, "table")
+
 	return _deepCopy1({}, t)
 end
 
 
-lang.err_patch_type = "argument #$1: bad type (expected $2, got $3)"
-lang.err_patch_key = "cannot patch tables as keys"
-local function deepPatch(a, b)
-	if type(a) ~= "table" then
-		error(interp(lang.err_patch_type, 1, "table", type(a)))
+local deepPatch1
+lang.err_deeppatch_key = "cannot patch tables as keys"
+local function deepPatch2(t, k, v, overwrite)
+	if type(k) == "table" then
+		error(lang.err_deeppatch_key)
 
-	elseif type(b) ~= "table" then
-		error(interp(lang.err_patch_type, 2, "table", type(b)))
+	elseif type(v) == "table" then
+		local tk = rawget(t, k)
+		if tk == nil or (overwrite and type(tk) ~= "table") then
+			rawset(t, k, {})
+		end
+		if type(rawget(t, k)) == "table" then
+			deepPatch1(rawget(t, k), v, overwrite)
+		end
+
+	elseif overwrite or t[k] == nil then
+		rawset(t, k, v)
 	end
+end
 
+
+deepPatch1 = function(a, b, overwrite)
+	for i, v in ipairs(b) do
+		deepPatch2(a, i, v, overwrite)
+	end
+	local n = #b
 	for k, v in pairs(b) do
-		if type(k) == "table" then
-			error(lang.err_patch_key)
-
-		elseif type(v) == "table" then
-			a[k] = type(a[k]) == "table" and a[k] or {}
-			deepPatch(a[k], v)
-
-		else
-			a[k] = v
+		if type(k) ~= "number" or math.floor(k) ~= k or k < 1 or k > n then
+			deepPatch2(a, k, v, overwrite)
 		end
 	end
 end
 
 
-M.deepPatch = deepPatch
+lang.err_dp_dupes = "duplicate table references in destination and patch"
+function M.deepPatch(a, b, overwrite)
+	pArg.type1(1, a, "table")
+	pArg.type1(2, b, "table")
+
+	if M.hasAnyDuplicateTables(a, b) then
+		error(lang.err_dp_dupes)
+	end
+
+	return deepPatch1(a, b, overwrite)
+end
+
+
+local _hash = {}
+local hasDupes1
+local function hasDupes2(v, _d)
+	if type(v) == "table" then
+		if _hash[v] then
+			return v
+		end
+		_hash[v] = true
+		local ret = hasDupes1(v, _d + 1)
+		if ret then
+			return ret
+		end
+	end
+end
+
+
+hasDupes1 = function(t, _d)
+	for k, v in pairs(t) do
+		local ret = hasDupes2(k, _d + 1) or hasDupes2(v, _d + 1)
+		if ret then
+			return ret
+		end
+	end
+end
+
+
+lang.err_dupes_zero_args = "no arguments provided."
+function M.hasAnyDuplicateTables(...)
+	local ret
+	M.clear(_hash)
+	local n = select("#", ...)
+	if n < 1 then
+		error(lang.err_dupes_zero_args)
+	end
+	for i = 1, select("#", ...) do
+		local t = select(i, ...)
+		pArg.type1(i, t, "table")
+		if _hash[t] then
+			M.clear(_hash)
+			return t
+		end
+		_hash[t] = true
+		ret = hasDupes1(t, 1)
+		if ret then
+			break
+		end
+	end
+	M.clear(_hash)
+	return ret
+end
+
+
+local function _patch2(t, k, v, overwrite)
+	if overwrite or rawget(t, k) == nil then
+		rawset(t, k, v)
+	end
+end
+
+
+function M.patch(a, b, overwrite)
+	pArg.type1(1, a, "table")
+	pArg.type1(2, b, "table")
+
+	for i, v in ipairs(b) do
+		_patch2(a, i, v, overwrite)
+	end
+	local n = #b
+	for k, v in pairs(b) do
+		if type(k) ~= "number" or math.floor(k) ~= k or k < 1 or k > n then
+			_patch2(a, k, v, overwrite)
+		end
+	end
+end
 
 
 function M.isArray(t)
@@ -277,14 +372,12 @@ function M.assignIfNilOrFalse(t, k, ...)
 	end
 end
 
-lang.err_res_bad_t = "argument #$1: expected a table"
+
 lang.err_res_bad_s = "argument #$1: expected a non-empty string"
 lang.err_res_field_empty = "cannot resolve an empty field"
 function M.resolve(t, str, raw)
-	if type(t) ~= "table" then
-		error(interp(lang.err_res_bad_t, 1))
-
-	elseif type(str) ~= "string" or #str == 0 then
+	pArg.type1(1, t, "table")
+	if type(str) ~= "string" or #str == 0 then
 		error(interp(lang.err_res_bad_s, 2))
 	end
 

@@ -15,7 +15,7 @@ local editDispM = {}
 
 --[[
 	(Logical) Line: An input string to be used as a source.
-	Wrap-Line: A single line of display text to be printed. May also include a coloredtext sequence version of the text.
+	Wrap-Line: A single line of display text to be printed. May also include a coloredtext version of the text.
 	Paragraph: Holds one or more Wrap-Lines that correspond to a single Logical Line. Without wrapping, each Paragraph
 		contains exactly one Wrap-Line.
 	Line Container: The main 'disp' object. Holds Paragraphs, plus metadata and an optional LÖVE Text object.
@@ -567,6 +567,7 @@ function _mt_lc:clearHighlightDirtyRange()
 	self.h_line_min = math.huge
 	self.h_line_max = 0
 end
+
 
 function _mt_lc:setHighlightDirtyRange(car_line, h_line)
 	self.h_line_min = math.min(car_line, h_line)

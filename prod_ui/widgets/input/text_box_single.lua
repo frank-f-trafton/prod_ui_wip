@@ -1,7 +1,6 @@
+-- A single-line text input box.
+
 --[[
-
-A single-line text input box.
-
          Viewport #1
   ╔═════════════════════════╗
   ║                         ║
@@ -19,6 +18,8 @@ local context = select(1, ...)
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
+
+-- ProdUI
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
@@ -49,7 +50,7 @@ lgcInputS.setupDef(def)
 
 def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
 def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
-def.updateAlignOffset = lgcInputS.method_updateAlignOffset
+def.updateAlignOffset = lgcInputS.method_updateAlignOffset -- XXX: method doesn't exist.
 def.pop_up_def = lgcInputS.pop_up_def
 
 
@@ -73,8 +74,6 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self.cursor_hover = self.skin.cursor_on
 
 	self:reshape()
 end
@@ -103,6 +102,7 @@ function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
+			self.cursor_hover = self.skin.cursor_on
 		end
 	end
 end
@@ -112,6 +112,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
+			self.cursor_hover = nil
 		end
 	end
 end
