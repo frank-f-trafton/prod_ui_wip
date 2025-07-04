@@ -15,12 +15,12 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.text_box_multi",
 	"widgets.button_split",
 	"themes_and_scale",
 	"demo_welcome",
 	"widgets.progress_bar",
 	"widgets.slider_work",
-	"widgets.text_box_multi",
 	"widgets.properties_box",
 	"widgets.text_box_single",
 	"widgets.dropdown_box",

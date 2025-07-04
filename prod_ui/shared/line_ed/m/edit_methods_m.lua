@@ -262,7 +262,7 @@ function client:highlightAll()
 	local line_ed = self.line_ed
 
 	line_ed.car_line = #line_ed.lines
-	line_ed.car_byte = #line_ed.lines[line_ed.h_line] + 1
+	line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
 
 	line_ed.h_line = 1
 	line_ed.h_byte = 1

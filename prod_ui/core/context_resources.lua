@@ -302,7 +302,7 @@ function methods:loadTheme(id)
 		local next_id = theme_info.patches
 
 		if theme then
-			pTable.deepPatch(theme2, theme)
+			pTable.deepPatch(theme2, theme, true)
 		end
 		theme = theme2
 

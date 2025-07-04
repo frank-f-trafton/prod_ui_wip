@@ -1,7 +1,6 @@
+-- A multi-line text input box.
+
 --[[
-
-input/text_box_multi: A multi-line text input box.
-
          Viewport #1
   ╔═══════════════════════╗
   ║                       ║
@@ -23,11 +22,11 @@ input/text_box_multi: A multi-line text input box.
 --]]
 
 
+local context = select(1, ...)
+
+
 -- LÖVE 12 compatibility
 local love_major, love_minor = love.getVersion()
-
-
-local context = select(1, ...)
 
 
 -- LÖVE Supplemental
@@ -35,202 +34,34 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 
 -- ProdUI
-local editActM = context:getLua("shared/line_ed/m/edit_act_m")
+
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
+local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
-local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
+local lgcInputM = context:getLua("shared/lgc_input_m")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
 
-local function dummy() end
-
-
 local def = {
 	skin_id = "text_box_m1",
-	renderThimble = dummy
+	renderThimble = uiShared.dummyFunc
 }
+
+
+lgcInputM.setupDef(def)
 
 
 widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
-
-
-local function executeRemoteAction(self, item_t)
-	local ok, update_viewport, caret_in_view, write_history = self:executeBoundAction(item_t.bound_func)
-	if ok then
-		self.update_flag = true
-	end
-
-	self:updateDocumentDimensions(self)
-	self:scrollGetCaretInBounds(true)
-end
-
-
--- Pop-up menu definition.
-do
-	local function configItem_undo(item, client)
-		item.selectable = true
-		item.actionable = (client.line_ed.hist.pos > 1)
-	end
-
-
-	local function configItem_redo(item, client)
-		item.selectable = true
-		item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
-	end
-
-
-	local function configItem_cutCopyDelete(item, client)
-		item.selectable = true
-		item.actionable = client.line_ed:isHighlighted()
-	end
-
-
-	local function configItem_paste(item, client)
-		item.selectable = true
-
-		-- XXX: There is an SDL function to check if the clipboard has text: https://wiki.libsdl.org/SDL_HasClipboardText
-		-- I tested it here: https://github.com/rabbitboots/love/tree/12.0-development-clipboard/src/modules/system
-		-- (Search 'hasclipboard' in src/modules/system.)
-		-- But the SDL function didn't seem to be 100% reliable when I looked at it (and I don't recall when that
-		-- was). Have to follow up on it.
-
-		-- Something like this:
-		-- item.actionable = love.system.hasClipboardText()
-
-		item.actionable = true
-	end
-
-
-	local function configItem_selectAll(item, client)
-		item.selectable = true
-		item.actionable = (not client.line_ed.lines:isEmpty())
-	end
-
-
-	-- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
-	def.pop_up_def = {
-		{
-			type = "command",
-			text = "Undo",
-			callback = executeRemoteAction,
-			bound_func = editActM.undo,
-			config = configItem_undo,
-		}, {
-			type = "command",
-			text = "Redo",
-			callback = executeRemoteAction,
-			bound_func = editActM.redo,
-			config = configItem_redo,
-		},
-		{type="separator"},
-		{
-			type = "command",
-			text = "Cut",
-			callback = executeRemoteAction,
-			bound_func = editActM.cut,
-			config = configItem_cutCopyDelete,
-		}, {
-			type = "command",
-			text = "Copy",
-			callback = executeRemoteAction,
-			bound_func = editActM.copy,
-			config = configItem_cutCopyDelete,
-		}, {
-			type = "command",
-			text = "Paste",
-			callback = executeRemoteAction,
-			bound_func = editActM.paste,
-			config = configItem_paste,
-		}, {
-			type = "command",
-			text = "Delete",
-			callback = executeRemoteAction,
-			bound_func = editActM.deleteHighlighted,
-			config = configItem_cutCopyDelete,
-		},
-		{type="separator"},
-		{
-			type = "command",
-			text = "Select All",
-			callback = executeRemoteAction,
-			bound_func = editActM.selectAll,
-			config = configItem_selectAll,
-		},
-	}
-end
-
-
--- Old history debug-print
---[=[
-	love.graphics.push("all")
-
-	local hist_x = 8
-	local hist_y = 400
-	qp:reset()
-	qp:setOrigin(hist_x, hist_y)
-	qp:print2("HISTORY STATE. i_cat:", wid_text_box.input_category)
-
-	hist_y = qp:getYOrigin() + qp:getYPosition()
-
-	for i, entry in ipairs(wid_text_box.line_ed.hist.ledger) do
-		qp:reset()
-		qp:setOrigin(hist_x, hist_y)
-
-		if i == wid_text_box.line_ed.hist.pos then
-			love.graphics.setColor(1, 1, 1, 1)
-		else
-			love.graphics.setColor(0.8, 0.8, 0.8, 1)
-		end
-
-		qp:print2("cl: ", entry.car_line)
-		qp:print2("cb: ", entry.car_byte)
-		qp:print2("hl: ", entry.h_line)
-		qp:print2("hb: ", entry.h_byte)
-		qp:down()
-
-		for j, line in ipairs(entry.lines) do
-			-- No point in printing hundreds (or thousands) of lines which can't be seen.
-			if j > 10 then
-				break
-			end
-
-			qp:print3(j, ": ", line)
-		end
-
-		hist_x = hist_x + 128
-	end
-
-	love.graphics.pop()
---]=]
-
-
--- Attach editing methods to def.
--- XXX: Do not use client:setFont().
-for k, v in pairs(editMethodsM) do
-	if def[k] then
-		error("meta field already populated: " .. tostring(k))
-	end
-
-	def[k] = v
-end
-
-
-local function updateCaretShape(self)
-	local disp = self.line_ed.disp
-
-	self.caret_x = disp.caret_box_x
-	self.caret_y = disp.caret_box_y
-	self.caret_w = disp.caret_box_w
-	self.caret_h = disp.caret_box_h
-end
+def.pop_up_def = lgcInputM.pop_up_def
 
 
 function def:uiCall_initialize()
@@ -243,19 +74,12 @@ function def:uiCall_initialize()
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupDoc(self)
 
-	-- Minimum widget size.
-	self.min_w = 8
-	self.min_h = 8
-
-	-- How far to offset sub-line X positions depending on the alignment.
-	-- Based on doc_w.
-	self.align_offset = 0
-
 	self.press_busy = false
 
-	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
-	self.caret_extend_x = 0
-	self.caret_extend_y = 0
+	-- State flags (WIP)
+	self.enabled = true
+
+	lgcInputM.setupInstance(self)
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -304,10 +128,7 @@ function def:uiCall_initialize()
 	self.click_line = 1
 	self.click_byte = 1
 
-	-- State flags (WIP)
-	self.enabled = true
-
-	updateCaretShape(self)
+	editFuncM.updateCaretShape(self)
 end
 
 
@@ -395,9 +216,6 @@ function def:uiCall_reshapePre()
 	local line_ed = self.line_ed
 	local disp = line_ed.disp
 
-	self.w = math.max(self.w, self.min_w)
-	self.h = math.max(self.h, self.min_h)
-
 	widShared.resetViewport(self, 1)
 
 	widShared.carveViewport(self, 1, skin.box.border)
@@ -435,7 +253,7 @@ function def:cacheUpdate()
 
 	self:updateDocumentDimensions()
 
-	updateCaretShape(self)
+	editFuncM.updateCaretShape(self)
 
 	if line_ed.replace_mode then
 		self.caret_fill = "line"
@@ -1083,6 +901,50 @@ def.default_skinner = {
 			"h_byte:" .. line_ed.h_byte,
 			200, 200
 		)
+		love.graphics.pop()
+		--]]
+
+
+		--[[
+		-- Old history debug-print
+		love.graphics.push("all")
+
+		local hist_x = 8
+		local hist_y = 400
+		qp:reset()
+		qp:setOrigin(hist_x, hist_y)
+		qp:print2("HISTORY STATE. i_cat:", wid_text_box.input_category)
+
+		hist_y = qp:getYOrigin() + qp:getYPosition()
+
+		for i, entry in ipairs(wid_text_box.line_ed.hist.ledger) do
+			qp:reset()
+			qp:setOrigin(hist_x, hist_y)
+
+			if i == wid_text_box.line_ed.hist.pos then
+				love.graphics.setColor(1, 1, 1, 1)
+			else
+				love.graphics.setColor(0.8, 0.8, 0.8, 1)
+			end
+
+			qp:print2("cl: ", entry.car_line)
+			qp:print2("cb: ", entry.car_byte)
+			qp:print2("hl: ", entry.h_line)
+			qp:print2("hb: ", entry.h_byte)
+			qp:down()
+
+			for j, line in ipairs(entry.lines) do
+				-- No point in printing hundreds (or thousands) of lines which can't be seen.
+				if j > 10 then
+					break
+				end
+
+				qp:print3(j, ": ", line)
+			end
+
+			hist_x = hist_x + 128
+		end
+
 		love.graphics.pop()
 		--]]
 	end,

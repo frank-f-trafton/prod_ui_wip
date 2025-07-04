@@ -38,6 +38,7 @@ local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = context:getLua("core/wid_shared")
@@ -49,9 +50,7 @@ local love_major, love_minor = love.getVersion()
 
 -- Widget def configuration.
 function lgcInputS.setupDef(def)
-	for k, v in pairs(editMethodsS) do
-		def[k] = v
-	end
+	pTable.patch(def, editMethodsS, true)
 end
 
 
