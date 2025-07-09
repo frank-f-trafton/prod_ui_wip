@@ -86,7 +86,7 @@ function def:uiCall_initialize()
 
 	local skin = self.skin
 
-	self.line_ed = lineEdM.new(skin.font)
+	self.line_ed = lineEdM.new()
 
 	-- Ghost text appears when the field is empty.
 	-- This is not part of the lineEditor core, and so it is not drawn through
@@ -255,7 +255,7 @@ function def:cacheUpdate()
 
 	editFuncM.updateCaretShape(self)
 
-	if line_ed.replace_mode then
+	if self.replace_mode then
 		self.caret_fill = "line"
 	else
 		self.caret_fill = "fill"
@@ -499,7 +499,7 @@ function def:uiCall_textInput(inst, text)
 		local line_ed = self.line_ed
 		local disp = line_ed.disp
 
-		if line_ed.allow_input then
+		if self.allow_input then
 
 			local hist = line_ed.hist
 
@@ -508,10 +508,10 @@ function def:uiCall_textInput(inst, text)
 			local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
 			local suppress_replace = false
-			if line_ed.replace_mode then
+			if self.replace_mode then
 				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
 				if line_ed.car_byte < #line_ed.lines[#line_ed.lines] + 1 then
-					line_ed.input_category = false
+					self.input_category = false
 				end
 
 				-- Replace mode should not overwrite line feeds.
@@ -529,7 +529,7 @@ function def:uiCall_textInput(inst, text)
 			local do_advance = true
 
 			if (entry and entry.car_line == old_line and entry.car_byte == old_byte)
-			and ((line_ed.input_category == "typing" and no_ws) or (line_ed.input_category == "typing-ws"))
+			and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
 			then
 				do_advance = false
 			end
@@ -538,7 +538,7 @@ function def:uiCall_textInput(inst, text)
 				editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
 			end
 			editHistM.writeEntry(line_ed, do_advance)
-			line_ed.input_category = no_ws and "typing" or "typing-ws"
+			self.input_category = no_ws and "typing" or "typing-ws"
 
 			self:updateDocumentDimensions()
 			self:scrollGetCaretInBounds(true)
@@ -730,6 +730,7 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+		self.line_ed:setFont(self.skin.font)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
@@ -737,6 +738,7 @@ def.default_skinner = {
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
+		self.line_ed:setFont()
 	end,
 
 
@@ -752,7 +754,7 @@ def.default_skinner = {
 		local disp = line_ed.disp
 		local font = disp.font
 
-		local res = line_ed.allow_input and skin.res_readwrite or skin.res_readonly
+		local res = self.allow_input and skin.res_readwrite or skin.res_readonly
 		local has_thimble = self == self.context.thimble1
 
 		-- XXX Debug renderer.

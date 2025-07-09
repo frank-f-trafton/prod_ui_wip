@@ -19,16 +19,20 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local commonEd = context:getLua("shared/line_ed/common_ed")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
-local editDispM = context:getLua("shared/line_ed/m/edit_disp_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-client.getReplaceMode = commonEd.client_getReplaceMode
-client.setReplaceMode = commonEd.client_setReplaceMode
+function client:getReplaceMode()
+	return self.replace_mode
+end
+
+
+function client:setReplaceMode(enabled)
+	self.replace_mode = not not enabled
+end
 
 
 -- * Font, Wrap, Align state, Width *
@@ -48,19 +52,6 @@ function client:setWrapMode(enabled)
 	self.line_ed:displaySyncAll()
 
 	-- XXX refresh: clamp scroll and get caret in bounds
-end
-
-
-function client:getFont()
-	return self.line_ed.disp.font
-end
-
-
-function client:setFont(font)
-	self.line_ed.disp:updateFont(font)
-	self.line_ed:displaySyncAll()
-
-	-- Force a cache update on the widget after calling this (self.update_flag = true).
 end
 
 
@@ -157,7 +148,7 @@ end
 function client:getHighlightEnabled(enabled)
 	-- No assertions.
 
-	return self.line_ed.allow_highlight
+	return self.allow_highlight
 end
 
 
@@ -168,10 +159,10 @@ function client:setHighlightEnabled(enabled)
 
 	local line_ed = self.line_ed
 
-	local old_state = line_ed.allow_highlight
-	line_ed.allow_highlight = not not enabled
+	local old_state = self.allow_highlight
+	self.allow_highlight = not not enabled
 
-	if old_state ~= line_ed.allow_highlight then
+	if old_state ~= self.allow_highlight then
 		line_ed:clearHighlight()
 		--self.update_flag = true
 
@@ -531,9 +522,9 @@ function client:writeText(text, suppress_replace)
 	local lines = line_ed.lines
 
 	-- Sanitize input
-	text = edComBase.cleanString(text, line_ed.bad_input_rule, line_ed.tabs_to_spaces, line_ed.allow_line_feed)
+	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
 
-	if not line_ed.allow_highlight then
+	if not self.allow_highlight then
 		line_ed:clearHighlight()
 	end
 
@@ -541,7 +532,7 @@ function client:writeText(text, suppress_replace)
 	if line_ed:isHighlighted() then
 		self:deleteHighlightedText()
 
-	elseif line_ed.replace_mode and not suppress_replace then
+	elseif self.replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
 		self:deleteUChar(utf8.len(text))
 	end
@@ -551,7 +542,7 @@ function client:writeText(text, suppress_replace)
 	-- XXX Planning to add and subtract to this as strings are written and deleted.
 	-- For now, just recalculate the length to ensure things are working.
 	line_ed.u_chars = lines:uLen()
-	text = textUtil.trimString(text, line_ed.u_chars_max - line_ed.u_chars)
+	text = textUtil.trimString(text, self.u_chars_max - line_ed.u_chars)
 
 	line_ed:insertText(text)
 
@@ -600,7 +591,7 @@ function client:copyHighlightedToClipboard()
 		copied = string.rep(disp.mask_glyph, utf8.len(copied))
 	end
 
-	copied = textUtil.sanitize(copied, line_ed.bad_input_rule)
+	copied = textUtil.sanitize(copied, self.bad_input_rule)
 
 	love.system.setClipboardText(copied)
 end
@@ -648,7 +639,7 @@ function client:pasteClipboardText()
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		line_ed.input_category = false
+		self.input_category = false
 		self:writeText(text, true)
 
 		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
@@ -1042,7 +1033,7 @@ function client:executeBoundAction(bound_func)
 		end
 
 		if write_history then
-			line_ed.input_category = false
+			self.input_category = false
 
 			editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
 			editHistM.writeEntry(line_ed, true)
