@@ -142,6 +142,11 @@ function lineEdS.new()
 end
 
 
+function _mt_ed_s:getFont()
+	return self.font
+end
+
+
 function _mt_ed_s:setFont(font) -- [update]
 	uiShared.loveTypeEval(1, font, "Font")
 

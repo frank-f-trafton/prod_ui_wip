@@ -11,6 +11,7 @@ local lgcInputM = {}
 
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
+local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 
 
@@ -27,6 +28,44 @@ function lgcInputM.setupInstance(self)
 
 	-- How far to offset the line X position depending on the alignment.
 	self.align_offset = 0
+
+	self.line_ed = lineEdM.new()
+
+	-- Enable/disable specific editing actions.
+	self.allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
+	self.allow_cut = true
+	self.allow_copy = true
+	self.allow_paste = true
+	self.allow_highlight = true -- XXX: Whoops, this is not checked in the mouse action code.
+
+	-- Affects presses of enter/return and the pasting of text that includes line feeds.
+	self.allow_line_feed = true
+
+	self.allow_tab = false -- affects single presses of the tab key
+	self.allow_untab = false -- affects shift+tab (unindenting)
+	self.tabs_to_spaces = true -- affects '\t' in writeText()
+
+	-- When inserting a new line, copies the leading whitespace from the previous line.
+	self.auto_indent = false
+
+	-- When true, typing overwrites the current position instead of inserting.
+	-- Exception: Replace Mode still inserts characters at the end of a line (so before a line feed character or
+	-- the end of the text string).
+	self.replace_mode = false
+
+	-- What to do when there's a UTF-8 encoding problem.
+	-- Applies to input text, and also to clipboard get/set.
+	-- See 'textUtil.sanitize()' for options.
+	self.bad_input_rule = false
+
+	-- Should be updated with core dimensions change.
+	self.page_jump_steps = 1
+
+	-- Helps with amending vs making new history entries
+	self.input_category = false
+
+	-- Max number of Unicode characters (not bytes) permitted in the field.
+	self.u_chars_max = 5000
 end
 
 
