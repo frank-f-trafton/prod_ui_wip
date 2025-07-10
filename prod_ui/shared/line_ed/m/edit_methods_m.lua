@@ -2,7 +2,7 @@
 
 
 --[[
-	LineEditor plug-in methods for client widgets. Some internal-facing methods remain attached to 'line_ed' and 'disp'.
+	LineEditor plug-in methods for client widgets. Some internal-facing methods remain attached to 'line_ed'.
 --]]
 
 
@@ -39,15 +39,15 @@ end
 
 
 function client:getWrapMode()
-	return self.line_ed.disp.wrap_mode
+	return self.line_ed.wrap_mode
 end
 
 
 -- @return true if the mode changed.
 function client:setWrapMode(enabled)
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
-	disp.wrap_mode = not not enabled
+	line_ed.wrap_mode = not not enabled
 
 	self.line_ed:displaySyncAll()
 
@@ -56,19 +56,19 @@ end
 
 
 function client:getAlign()
-	return self.line_ed.disp.align
+	return self.line_ed.align
 end
 
 
 function client:setAlign(align)
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
 	if align ~= "left" and align ~= "center" and align ~= "right" then
 		error("arg #2: invalid align setting.")
 	end
 
-	local old_align = disp.align
-	disp.align = align
+	local old_align = line_ed.align
+	line_ed.align = align
 	if old_align ~= align then
 		-- Update just the alignment of sub-lines.
 		self.line_ed:displaySyncAlign(1)
@@ -88,16 +88,16 @@ end
 
 
 function client:getMasking()
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
-	return disp.masked, (disp.masked) and disp.mask_glyph or nil
+	return line_ed.masked, (line_ed.masked) and line_ed.mask_glyph or nil
 end
 
 
 function client:setMasking(enabled, optional_glyph)
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
-	disp.masked = not not enabled
+	line_ed.masked = not not enabled
 
 	if optional_glyph then
 		self.line_ed:setMaskGlyph(optional_glyph)
@@ -108,13 +108,13 @@ end
 
 
 function client:setMaskGlyph(glyph)
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
 	if utf8.len(glyph) ~= 1 then
 		error("masking glyph must be exactly one code point.")
 	end
 
-	disp.mask_glyph = glyph
+	line_ed.mask_glyph = glyph
 	self.line_ed:displaySyncAll()
 end
 
@@ -126,13 +126,13 @@ end
 
 
 function client:getColorization()
-	return self.line_ed.disp.generate_colored_text
+	return self.line_ed.generate_colored_text
 end
 
 
 function client:setColorization(enabled)
-	local disp = self.line_ed.disp
-	disp.generate_colored_text = not not enabled
+	local line_ed = self.line_ed
+	line_ed.generate_colored_text = not not enabled
 
 	-- Refresh everything
 	self.line_ed:displaySyncAll()
@@ -226,7 +226,6 @@ end
 
 function client:getHighlightedText()
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	if line_ed:isHighlighted() then
 		local lines = line_ed.lines
@@ -310,7 +309,6 @@ end
 
 function client:highlightCurrentWord()
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
 
@@ -322,7 +320,6 @@ end
 function client:highlightCurrentWrappedLine()
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local disp = line_ed.disp
 
 	-- Temporarily move highlight point to caret, then pre-emptively update the display offsets
 	-- so that we have fresh data to work from.
@@ -344,14 +341,13 @@ end
 function client:caretStepUp(clear_highlight, n_steps)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local disp = line_ed.disp
-	local font = disp.font
-	local paragraphs = disp.paragraphs
+	local font = line_ed.font
+	local paragraphs = line_ed.paragraphs
 
 	n_steps = n_steps or 1
 
 	-- Already at top sub-line: move to start.
-	if disp.d_car_para <= 1 and disp.d_car_sub <= 1 then
+	if line_ed.d_car_para <= 1 and line_ed.d_car_sub <= 1 then
 		line_ed.car_line = 1
 		line_ed.car_byte = 1
 
@@ -364,7 +360,7 @@ function client:caretStepUp(clear_highlight, n_steps)
 		end
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
-		local d_para, d_sub = edComM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, -n_steps)
+		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.d_car_para, line_ed.d_car_sub, -n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
@@ -397,14 +393,13 @@ end
 function client:caretStepDown(clear_highlight, n_steps)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local disp = line_ed.disp
-	local font = disp.font
-	local paragraphs = disp.paragraphs
+	local font = line_ed.font
+	local paragraphs = line_ed.paragraphs
 
 	n_steps = n_steps or 1
 
 	-- Already at bottom sub-line: move to end.
-	if disp.d_car_para >= #paragraphs and disp.d_car_sub >= #paragraphs[#paragraphs] then
+	if line_ed.d_car_para >= #paragraphs and line_ed.d_car_sub >= #paragraphs[#paragraphs] then
 		line_ed.car_line = #line_ed.lines
 		line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
 
@@ -417,7 +412,7 @@ function client:caretStepDown(clear_highlight, n_steps)
 		end
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
-		local d_para, d_sub = edComM.stepSubLine(paragraphs, disp.d_car_para, disp.d_car_sub, n_steps)
+		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.d_car_para, line_ed.d_car_sub, n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
@@ -518,7 +513,6 @@ end
 -- @return The sanitized and trimmed text which was inserted into the field.
 function client:writeText(text, suppress_replace)
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 	local lines = line_ed.lines
 
 	-- Sanitize input
@@ -582,13 +576,12 @@ end
 
 function client:copyHighlightedToClipboard()
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	local copied = self:getHighlightedText()
 
 	-- Don't leak masked string info.
-	if disp.masked then
-		copied = string.rep(disp.mask_glyph, utf8.len(copied))
+	if line_ed.masked then
+		copied = string.rep(line_ed.mask_glyph, utf8.len(copied))
 	end
 
 	copied = textUtil.sanitize(copied, self.bad_input_rule)
@@ -599,7 +592,6 @@ end
 
 function client:cutHighlightedToClipboard()
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
@@ -609,9 +601,9 @@ function client:cutHighlightedToClipboard()
 		cut = textUtil.sanitize(cut, self.bad_input_rule)
 
 		-- Don't leak masked string info.
-		if disp.masked then
+		if line_ed.masked then
 			cut = table.concat(cut, "\n")
-			cut = string.rep(disp.mask_glyph, utf8.len(cut))
+			cut = string.rep(line_ed.mask_glyph, utf8.len(cut))
 		end
 
 		love.system.setClipboardText(cut)
@@ -931,10 +923,9 @@ end
 function client:caretLineFirst(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local disp = line_ed.disp
 
 	-- Find the first uChar offset for the current Paragraph + sub-line pair.
-	local u_count = disp:getSubLineUCharOffsetStart(disp.d_car_para, disp.d_car_sub)
+	local u_count = line_ed:dispGetSubLineUCharOffsetStart(line_ed.d_car_para, line_ed.d_car_sub)
 
 	-- Convert the display u_count to a byte offset in the line_ed/source string.
 	line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
@@ -952,10 +943,9 @@ end
 function client:caretLineLast(clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local disp = line_ed.disp
 
 	-- Find the last uChar offset for the current Paragraph + sub-line pair.
-	local u_count = disp:getSubLineUCharOffsetEnd(disp.d_car_para, disp.d_car_sub)
+	local u_count = line_ed:dispGetSubLineUCharOffsetEnd(line_ed.d_car_para, line_ed.d_car_sub)
 
 	-- Convert to internal line_ed byte offset
 	line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
@@ -1017,7 +1007,6 @@ end
 -- @return The results of bound_func(), in case they are helpful to the calling widget logic.
 function client:executeBoundAction(bound_func)
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)

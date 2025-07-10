@@ -73,7 +73,7 @@ end
 -- Jump left, right
 function editActM.caretJumpLeft(self, line_ed)
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretFirst(true)
 	else
 		self:caretJumpLeft(true)
@@ -85,7 +85,7 @@ end
 
 function editActM.caretJumpRight(self, line_ed)
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretLast(true)
 	else
 		self:caretJumpRight(true)
@@ -98,7 +98,7 @@ end
 -- Jump left, right with highlight
 function editActM.caretJumpLeftHighlight(self, line_ed)
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretFirst(not self.allow_highlight)
 	else
 		self:caretJumpLeft(not self.allow_highlight)
@@ -110,7 +110,7 @@ end
 
 function editActM.caretJumpRightHighlight(self, line_ed)
 	-- Don't leak details about the masked string.
-	if line_ed.disp.masked then
+	if line_ed.masked then
 		self:caretLast(not self.allow_highlight)
 	else
 		self:caretJumpRight(not self.allow_highlight)
@@ -438,7 +438,7 @@ function editActM.deleteGroup(self, line_ed)
 		local write_hist = false
 
 		-- Don't leak masked info.
-		if line_ed.disp.masked then
+		if line_ed.masked then
 			write_hist = not not self:deleteUChar(1)
 		else
 			self.input_category = false
@@ -468,7 +468,7 @@ function editActM.backspaceGroup(self, line_ed)
 		local write_hist = false
 
 		-- Don't leak masked info.
-		if line_ed.disp.masked then
+		if line_ed.masked then
 			write_hist = not not self:backspaceUChar(1)
 		else
 			write_hist = not not self:backspaceGroup()

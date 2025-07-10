@@ -134,7 +134,7 @@ end
 
 --- Call after changing alignment, then update the alignment of all sub-lines.
 function def:updateAlignOffset()
-	local align = self.line_ed.disp.align
+	local align = self.line_ed.align
 
 	if align == "left" then
 		self.align_offset = 0
@@ -149,15 +149,15 @@ end
 
 
 function def:scrollGetCaretInBounds(immediate)
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
 	--print("scrollGetCaretInBounds() BEFORE", self.scr_tx, self.scr_ty)
 
 	-- Get the extended caret rectangle.
-	local car_x1 = self.align_offset + disp.caret_box_x - self.caret_extend_x
-	local car_y1 = disp.caret_box_y - self.caret_extend_y
-	local car_x2 = self.align_offset + disp.caret_box_x + disp.caret_box_w + self.caret_extend_x
-	local car_y2 = disp.caret_box_y + disp.caret_box_h + self.caret_extend_y
+	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
+	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
+	local car_x2 = self.align_offset + line_ed.caret_box_x + line_ed.caret_box_w + self.caret_extend_x
+	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
 
 	-- Clamp the scroll target.
 	self.scr_tx = math.max(car_x2 - self.vp_w, math.min(self.scr_tx, car_x1))
@@ -194,13 +194,13 @@ end
 
 
 function def:updateDocumentDimensions()
-	local disp = self.line_ed.disp
+	local line_ed = self.line_ed
 
-	disp.view_w = self.vp_w
+	line_ed.view_w = self.vp_w
 
-	self.doc_h = disp:getDocumentHeight()
+	self.doc_h = self.line_ed:dispGetDocumentHeight()
 
-	local x1, x2 = disp:getDocumentXBoundaries()
+	local x1, x2 = self.line_ed:dispGetDocumentXBoundaries()
 	self.doc_w = (x2 - x1)
 
 	self:updateAlignOffset()
@@ -214,7 +214,6 @@ function def:uiCall_reshapePre()
 	local skin = self.skin
 
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	widShared.resetViewport(self, 1)
 
@@ -234,7 +233,7 @@ function def:uiCall_reshapePre()
 
 	self:updateDocumentDimensions()
 
-	local font = disp.font
+	local font = line_ed.font
 	self.line_ed.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
 
 	self.update_flag = true
@@ -247,7 +246,6 @@ end
 function def:cacheUpdate()
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
-	local disp = line_ed.disp
 
 	local skin = self.skin
 
@@ -259,7 +257,7 @@ function def:cacheUpdate()
 		self.caret_fill = "line"
 	else
 		self.caret_fill = "fill"
-		self.caret_w = disp.caret_line_width
+		self.caret_w = line_ed.caret_line_width
 	end
 
 	-- Find the first visible display paragraph (or rather, one before it) to cut down on rendering.
@@ -267,7 +265,7 @@ function def:cacheUpdate()
 
 	-- XXX default to 1?
 	--self.vis_para_top
-	for i, paragraph in ipairs(disp.paragraphs) do
+	for i, paragraph in ipairs(line_ed.paragraphs) do
 		local sub_one = paragraph[1]
 		if sub_one.y > y_pos then
 			self.vis_para_top = math.max(1, i - 1)
@@ -276,9 +274,9 @@ function def:cacheUpdate()
 	end
 
 	-- Find the last display paragraph (or one after it) as well.
-	self.vis_para_bot = #disp.paragraphs
-	for i = self.vis_para_top, #disp.paragraphs do
-		local paragraph = disp.paragraphs[i]
+	self.vis_para_bot = #line_ed.paragraphs
+	for i = self.vis_para_top, #line_ed.paragraphs do
+		local paragraph = line_ed.paragraphs[i]
 		local sub_last = paragraph[#paragraph]
 		if sub_last.y + sub_last.h > y_pos + self.vp2_h then
 			self.vis_para_bot = i
@@ -294,19 +292,14 @@ function def:cacheUpdate()
 
 		text_object:clear()
 
-		if disp.font ~= text_object:getFont() then
-			text_object:setFont(disp.font)
+		if line_ed.font ~= text_object:getFont() then
+			text_object:setFont(line_ed.font)
 		end
 
 		for i = self.vis_para_top, self.vis_para_bot do
-			local paragraph = disp.paragraphs[i]
+			local paragraph = line_ed.paragraphs[i]
 			for j, sub_line in ipairs(paragraph) do
-
-				-- [BUG] [UPGRADE] Adding empty or whitespace-only strings can crash LÖVE 11.4.
-				-- These workarounds shouldn't be necessary in LÖVE 12.
-				if #sub_line.str > 0 and string.find(sub_line.str, "%S") then
-					text_object:add(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
-				end
+				text_object:add(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
 			end
 		end
 	end
@@ -367,9 +360,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		elseif widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
 			local context = self.context
 			local line_ed = self.line_ed
-			local disp = line_ed.disp
 
-			disp:resetCaretBlink()
+			self.line_ed:dispResetCaretBlink()
 
 			if button == 1 then
 				self.press_busy = "text-drag"
@@ -482,7 +474,7 @@ end
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
-		self.line_ed.disp:resetCaretBlink()
+		self.line_ed:dispResetCaretBlink()
 	end
 end
 
@@ -497,13 +489,12 @@ end
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		local line_ed = self.line_ed
-		local disp = line_ed.disp
 
 		if self.allow_input then
 
 			local hist = line_ed.hist
 
-			disp:resetCaretBlink()
+			self.line_ed:dispResetCaretBlink()
 
 			local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
@@ -550,18 +541,17 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		local line_ed = self.line_ed
-		local disp = line_ed.disp
 		local hist = line_ed.hist
 
-		disp:resetCaretBlink()
+		self.line_ed:dispResetCaretBlink()
 
 		local input_intercepted = false
 
 		if scancode == "application" then
 			-- Locate caret in UI space
 			local ax, ay = self:getAbsolutePosition()
-			local caret_x = ax + self.vp_x - self.scr_x + disp.caret_box_x + self.align_offset
-			local caret_y = ay + self.vp_y - self.scr_y + disp.caret_box_y + disp.caret_box_h
+			local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x + self.align_offset
+			local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
 
 			lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
@@ -612,11 +602,10 @@ end
 local function mouseDragLogic(self)
 	local context = self.context
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	local widget_needs_update = false
 
-	disp:resetCaretBlink()
+	self.line_ed:dispResetCaretBlink()
 
 	-- Relative mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -652,7 +641,6 @@ end
 
 function def:uiCall_update(dt)
 	local line_ed = self.line_ed
-	local disp = line_ed.disp
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
@@ -668,8 +656,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	disp:updateCaretBlink(dt)
-
+	self.line_ed:dispUpdateCaretBlink(dt)
 
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
@@ -751,8 +738,7 @@ def.default_skinner = {
 
 		local line_ed = self.line_ed
 		local lines = line_ed.lines
-		local disp = line_ed.disp
-		local font = disp.font
+		local font = line_ed.font
 
 		local res = self.allow_input and skin.res_readwrite or skin.res_readonly
 		local has_thimble = self == self.context.thimble1
@@ -766,7 +752,7 @@ def.default_skinner = {
 		local yy = 0
 		for i, line in ipairs(self.line_ed.lines) do
 			love.graphics.print(i .. ": " .. line, 16, yy)
-			yy = yy + self.line_ed.disp.font:getHeight()
+			yy = yy + self.line_ed.font:getHeight()
 		end
 		--]]
 
@@ -792,12 +778,12 @@ def.default_skinner = {
 		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
 		-- ^ Variant with less overdraw?
-		--love.graphics.rectangle("fill", disp.vp2_x, disp.vp2_y, disp.vp2_w, disp.vp2_h)
+		--love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
 
 		-- Draw current paragraph illumination, if applicable.
 		if self.illuminate_current_line then
 			love.graphics.setColor(res.color_current_line_illuminate)
-			local paragraph = disp.paragraphs[disp.d_car_para]
+			local paragraph = line_ed.paragraphs[line_ed.d_car_para]
 			local para_y = paragraph[1].y
 
 			local last_sub = paragraph[#paragraph]
@@ -818,7 +804,7 @@ def.default_skinner = {
 			love.graphics.setColor(col_highlight)
 
 			for i = self.vis_para_top, self.vis_para_bot do
-				local paragraph = disp.paragraphs[i]
+				local paragraph = line_ed.paragraphs[i]
 				for j, sub_line in ipairs(paragraph) do
 					if sub_line.highlighted then
 						love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
@@ -830,7 +816,7 @@ def.default_skinner = {
 		-- Draw ghost text, if applicable.
 		-- XXX: center and right ghost text alignment modes aren't working correctly.
 		if self.ghost_text and lines:isEmpty() then
-			local align = self.ghost_text_align or disp.align
+			local align = self.ghost_text_align or line_ed.align
 
 			love.graphics.setFont(skin.font_ghost)
 
@@ -845,7 +831,7 @@ def.default_skinner = {
 				gx, gy = math.floor(-font:getWidth(self.ghost_text)), 0
 			end
 
-			if disp.wrap_mode then
+			if line_ed.wrap_mode then
 				love.graphics.printf(self.ghost_text, -self.align_offset, 0, self.vp_w, align)
 
 			else
@@ -862,7 +848,7 @@ def.default_skinner = {
 			love.graphics.setFont(skin.font)
 
 			for i = self.vis_para_top, self.vis_para_bot do
-				local paragraph = disp.paragraphs[i]
+				local paragraph = line_ed.paragraphs[i]
 				for j, sub_line in ipairs(paragraph) do
 					love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
 				end
@@ -870,7 +856,7 @@ def.default_skinner = {
 		end
 
 		-- Draw the caret.
-		if self.context.window_focus and has_thimble and disp.caret_is_showing then
+		if self.context.window_focus and has_thimble and line_ed.caret_is_showing then
 			love.graphics.setColor(res.color_insert) -- XXX: color_replace
 			love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
 		end
@@ -889,7 +875,7 @@ def.default_skinner = {
 		--]]
 
 		--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
-		--print("disp.caret_box_xywh", disp.caret_box_x, disp.caret_box_y, disp.caret_box_w, disp.caret_box_h)
+		--print("line_ed.caret_box_xywh", line_ed.caret_box_x, line_ed.caret_box_y, line_ed.caret_box_w, line_ed.caret_box_h)
 
 		-- DEBUG: show editor details.
 		--[[
