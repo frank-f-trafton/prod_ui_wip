@@ -1,6 +1,3 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
 -- LineEditor (multi) common utility functions.
 
 
@@ -14,44 +11,19 @@ local edComM = {}
 local utf8 = require("utf8")
 
 
--- ProdUI
-local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+function edComM.mergeRanges(al1, ab1, al2, ab2, bl1, bb1, bl2, bb2)
+	-- a, b: first, second ranges
+	-- l, b: line, byte
+	local l1, l2 = math.min(al1, bl1), math.max(al2, bl2)
+	local b1 = al1 == bl1 and math.min(ab1, bb1) or al1 < bl1 and ab1 or bb1
+	local b2 = al2 == bl2 and math.max(ab2, bb2) or al2 > bl2 and ab2 or bb2
 
-
--- * <Unsorted> *
-
-
-function edComM.mergeRanges(a_line_1, a_byte_1, a_line_2, a_byte_2, b_line_1, b_byte_1, b_line_2, b_byte_2)
-	local line_1 = math.min(a_line_1, b_line_1)
-	local line_2 = math.max(a_line_2, b_line_2)
-
-	local byte_1, byte_2
-
-	if a_line_1 == b_line_1 then
-		byte_1 = math.min(a_byte_1, b_byte_1)
-
-	elseif a_line_1 < b_line_1 then
-		byte_1 = a_byte_1
-
-	else
-		byte_1 = b_byte_1
-	end
-
-	if a_line_2 == b_line_2 then
-		byte_2 = math.max(a_byte_2, b_byte_2)
-
-	elseif a_line_2 > b_line_2 then
-		byte_2 = a_byte_2
-
-	else
-		byte_2 = b_byte_2
-	end
-
-	return line_1, byte_1, line_2, byte_2
+	return l1, b1, l2, b2
 end
 
 
---- Given a Paragraph, sub-line offset and byte within the sub-line, get a count of unicode code points from the start to the byte as if it were a single string.
+--- Given a Paragraph, sub-line offset and byte within the sub-line, get a count of unicode code points from the start
+--	to the byte as if it were a single string.
 function edComM.displaytoUCharCount(paragraph, sub_i, byte)
 	local string_one = paragraph[sub_i].str
 
@@ -189,7 +161,7 @@ end
 --  the top or bottom sub-line if reaching the start or end respectively.
 function edComM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 	while n_steps < 0 do
-		-- First line
+		-- first line
 		if d_car_para <= 1 and d_car_sub <= 1 then
 			d_car_para = 1
 			d_car_sub = 1
@@ -206,7 +178,7 @@ function edComM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 	end
 
 	while n_steps > 0 do
-		-- Last line
+		-- last line
 		if d_car_para >= #display_lines and d_car_sub >= #display_lines[#display_lines] then
 			d_car_para = #display_lines
 			d_car_sub = #display_lines[#display_lines]
