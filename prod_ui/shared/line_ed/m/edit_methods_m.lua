@@ -1,9 +1,4 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
---[[
-	LineEditor plug-in methods for client widgets. Some internal-facing methods remain attached to 'line_ed'.
---]]
+-- LineEditor (multi) plug-in methods for client widgets.
 
 
 local context = select(1, ...)
@@ -19,8 +14,8 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
+local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 

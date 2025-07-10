@@ -1,6 +1,3 @@
--- Skin: Multi-line text input box.
-
-
 return {
 	skinner_id = "input/text_box_multi",
 
