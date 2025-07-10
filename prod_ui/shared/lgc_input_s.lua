@@ -300,6 +300,8 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 
 	editFuncS.resetCaretBlink(self)
 
+	local ctrl_down, shift_down, alt_down, gui_down = context.key_mgr:getModState()
+
 	if button == 1 then
 		-- WIP: this isn't quite right.
 		-- [[
@@ -323,7 +325,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 			end
 
 			if context.cseq_presses == 1 then
-				lgcInputS.caretToX(self, true, mouse_sx, true)
+				lgcInputS.caretToX(self, not shift_down, mouse_sx, true)
 
 				self.click_byte = line_ed.car_byte
 				editFuncS.updateCaretShape(self)

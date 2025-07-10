@@ -21,6 +21,7 @@ function plan.make(panel)
 	input_single.w = 256
 	input_single.h = 32
 	input_single:initialize()
+
 	demoShared.setStaticLayout(panel, input_single, 32, 96, 256, 32)
 
 	--input_single:setText("Single-Line Text Box")
