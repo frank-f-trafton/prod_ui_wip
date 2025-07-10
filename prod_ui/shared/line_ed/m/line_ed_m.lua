@@ -42,7 +42,9 @@ function lineEdM.new()
 	_wip_dummy_font = _wip_dummy_font or love.graphics.newFont(13)
 	local font = _wip_dummy_font
 
-	local self = {}
+	local self = setmetatable({}, _mt_ed_m)
+
+	self.font = font
 
 	-- String sequence representing each line of internal text.
 	self.lines = seqString.new()
@@ -59,11 +61,106 @@ function lineEdM.new()
 	self.hist = structHistory.new()
 	editHistM.writeEntry(self, true)
 
-	-- Cached display details for rendering text, highlights, and the caret.
-	-- The LineEditor is responsible for keeping this in sync with the internal state.
-	self.disp = lineEdM.newLineContainer(font)
+	-- Display state.
+	self.paragraphs = {}
 
-	self.disp:setHighlightDirtyRange(self.car_line, self.h_line)
+	-- To change align and wrap mode, use the methods in the LineEditor object.
+	-- With center and right alignment, sub-lines will have negative X positions. The client
+	-- needs to keep track of the align mode and offset the positions based on the document
+	-- dimensions (which in turn are based on the number of lines and which lines are widest).
+	-- Center alignment: Zero X == center of
+	self.align = "left" -- "left", "center", "right"
+
+	self.wrap_mode = false
+
+	-- Copy of viewport #1 width. Used when wrapping text.
+	self.view_w = 0
+
+	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
+
+	-- Additional space between logical lines (in pixels).
+	-- TODO: theming/scaling
+	self.paragraph_pad = 0
+
+	-- Pixels to add to a highlight to represent a selected line feed.
+	-- Update this relative to the font size, maybe with a minimum size of 1 pixel.
+	self.width_line_feed = 4
+
+	-- Text colors, normal and highlighted.
+	-- References to these tables will be copied around.
+	self.text_color = {1, 1, 1, 1} -- TODO: skin
+	self.text_h_color = {0, 0, 0, 1} -- TODO: skin
+
+	-- XXX: skin or some other config system. Currently, 'caret_line_width' is based on the width of 'M' in the current font.
+	self.caret_line_width = 0
+	self.caret_is_showing = true
+
+	self.caret_blink_time = 0
+
+	-- XXX: skin or some other config system
+	self.caret_blink_reset = -0.5
+	self.caret_blink_on = 0.5
+	self.caret_blink_off = 0.5
+
+	-- Caret and highlight lines, sub-lines and bytes for the display text.
+	self.d_car_byte = 1
+	self.d_car_para = 1
+	self.d_car_sub = 1
+
+	self.d_h_byte = 1
+	self.d_h_para = 1
+	self.d_h_sub = 1
+
+	-- The position and dimensions of the currently selected character.
+	-- The client widget uses these values to determine the size and location of its caret.
+	self.caret_box_x = 0
+	self.caret_box_y = 0
+	self.caret_box_w = 0
+	self.caret_box_h = 0
+
+	-- Update range for highlights, tracked on a per-Paragraph basis.
+	self.h_line_min = math.huge
+	self.h_line_max = 0
+
+	-- Swaps out missing glyphs in the display string with a replacement glyph.
+	-- The internal contents (and results of clipboard actions) remain the same.
+	self.replace_missing = true
+
+	--[[
+	WARNING: masking cannot hide line feeds in the source string.
+	--]]
+
+	-- Glyph masking mode, as used in password fields.
+	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
+	-- It does nothing else in terms of security.
+	self.masked = false
+	self.mask_glyph = "*" -- Must be exactly one glyph.
+
+	-- Set true to create coloredtext tables for each sub-line string. Each coloredtext
+	-- table contains a color table and a code point string for every code point in the base
+	-- string. The initial color table is 'self.text_color_t'. For example, the string "foobar"
+	-- would become {col_t, "f", col_t, "o", col_t, "o", col_t, "b", col_t, "a", col_t, "r", }.
+	-- This uses considerably more memory than a single string, but allows recoloring on a
+	-- per-code point basis, which is convenient if you want to perform more than one pass of
+	-- coloring (such as in the case of mixing syntax highlighting and also inverting highlighted
+	-- text).
+	self.generate_colored_text = false
+
+	-- Assign a function taking 'self', 'str', 'syntax_t', and 'work_t' to colorize a Paragraph when updating
+	-- it. 'self' is the line container. 'syntax_t' is 'self.wip_syntax_colors', and it may contain existing
+	-- contents. You must return the number of entries written to the table so that the update logic can clip
+	-- the contents. 'work_t' is self.syntax_work, an arbitrary table you may use to help keep track of your
+	-- colorization state.
+	self.fn_colorize = false
+
+	-- Temporary workspace for constructing syntax highlighting sequences.
+	self.wip_syntax_colors = {}
+
+	-- Arbitrary table of state intended to help manage syntax highlighting.
+	self.syntax_work = {}
+
+
+	self:dispSetHighlightDirtyRange(self.car_line, self.h_line)
 
 	-- X position hint when stepping up or down.
 	self.vertical_x_hint = 0
@@ -71,9 +168,7 @@ function lineEdM.new()
 	-- Cached copy of 'lines' length in Unicode code points.
 	self.u_chars = self.lines:uLen()
 
-	setmetatable(self, _mt_ed_m)
-
-	self.disp:refreshFontParams()
+	self:dispRefreshFontParams()
 	self:displaySyncAll()
 
 	return self
@@ -105,13 +200,12 @@ end
 
 
 function _mt_ed_m:updateVertPosHint()
-	local disp = self.disp
-	local font = disp.font
+	local font = self.font
 
-	local d_sub = disp.paragraphs[disp.d_car_para][disp.d_car_sub]
+	local d_sub = self.paragraphs[self.d_car_para][self.d_car_sub]
 	local d_str = d_sub.str
 
-	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, disp.d_car_byte, font)
+	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, self.d_car_byte, font)
 end
 
 
@@ -120,17 +214,16 @@ end
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
 -- @return Line, byte and character string of the character at (or nearest to) the position.
 function _mt_ed_m:getCharacterDetailsAtPosition(x, y, split_x)
-	local disp = self.disp
-	local paragraphs = disp.paragraphs
-	local font = disp.font
+	local paragraphs = self.paragraphs
+	local font = self.font
 
-	local para_i, sub_i = disp:getOffsetsAtY(y)
+	local para_i, sub_i = self:dispGetOffsetsAtY(y)
 
 	local paragraph = paragraphs[para_i]
 	local sub_line = paragraph[sub_i]
 	--print("para_i", para_i, "sub_i", sub_i, "y1", sub_line.y, "y2", sub_line.y + sub_line.h)
 
-	local byte, x_pos, width = disp:getSubLineInfoAtX(para_i, sub_i, x, split_x)
+	local byte, x_pos, width = self:dispGetSubLineInfoAtX(para_i, sub_i, x, split_x)
 	--print("byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte
@@ -175,11 +268,9 @@ end
 
 
 function _mt_ed_m:updateDispHighlightRange()
-	local disp = self.disp
-
-	disp:updateHighlightDirtyRange(self.car_line, self.h_line)
-	disp:updateHighlights()
-	disp:setHighlightDirtyRange(self.car_line, self.h_line)
+	self:dispUpdateHighlightDirtyRange(self.car_line, self.h_line)
+	self:dispUpdateHighlights()
+	self:dispSetHighlightDirtyRange(self.car_line, self.h_line)
 end
 
 
@@ -215,7 +306,6 @@ end
 
 function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
 	local lines = self.lines
-	local disp = self.disp
 
 	if line_n < 1 or line_n > #lines then
 		error("'line_n' is out of range.")
@@ -228,12 +318,12 @@ function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
 
 	-- Convert input line+byte pair to display paragraph, sub, byte offsets.
 	local d_para = line_n
-	local d_byte, d_sub = edComM.coreToDisplayOffsets(line_str, byte_n, disp.paragraphs[d_para])
+	local d_byte, d_sub = edComM.coreToDisplayOffsets(line_str, byte_n, self.paragraphs[d_para])
 
 	-- Get first, last uChar offsets
-	local u_count_1, u_count_2 = disp:getSubLineUCharOffsetStartEnd(d_para, d_sub)
+	local u_count_1, u_count_2 = self:dispGetSubLineUCharOffsetStartEnd(d_para, d_sub)
 
-	-- Convert soft-wrap code point counts in disp to byte offsets in the core/source string
+	-- Convert soft-wrap code point counts in the display text to byte offsets in the core/source string
 	local byte_start = utf8.offset(lines[line_n], u_count_1)
 	local byte_end = utf8.offset(lines[line_n], u_count_2)
 
@@ -254,7 +344,6 @@ end
 function _mt_ed_m:insertText(text)
 	local lines = self.lines
 	local old_line = self.car_line
-	local disp = self.disp
 
 	self:highlightCleanup()
 
@@ -402,19 +491,20 @@ end
 
 function _mt_ed_m:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n)
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
+	local line
 
 	car_line_n = math.max(1, math.min(car_line_n, #self.lines))
-	local line = self.lines[car_line_n]
+	line = self.lines[car_line_n]
 	car_byte_n = math.max(1, math.min(car_byte_n, #line + 1))
-	local line = self.lines[car_line_n]
+	line = self.lines[car_line_n]
 
 	self.car_line = car_line_n
 	self.car_byte = car_byte_n
 
 	h_line_n = math.max(1, math.min(h_line_n, #self.lines))
-	local line = self.lines[h_line_n]
+	line = self.lines[h_line_n]
 	h_byte_n = math.max(1, math.min(h_byte_n, #line + 1))
-	local line = self.lines[h_line_n]
+	line = self.lines[h_line_n]
 
 	self.h_line = h_line_n
 	self.h_byte = h_byte_n
@@ -432,12 +522,11 @@ end
 -- * Core-to-display synchronization *
 
 
---- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'disp'. The display text must be current at time of call.
+--- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'line_ed'. The display text must be current at time of call.
 function _mt_ed_m:displaySyncCaretOffsets()
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
-	local disp = self.disp
-	local paragraphs = disp.paragraphs
+	local paragraphs = self.paragraphs
 
 	--[[
 	print(
@@ -448,100 +537,96 @@ function _mt_ed_m:displaySyncCaretOffsets()
 	)
 	--]]
 
-	disp.d_car_para = self.car_line
-	disp.d_car_byte, disp.d_car_sub = edComM.coreToDisplayOffsets(car_str, self.car_byte, paragraphs[disp.d_car_para])
+	self.d_car_para = self.car_line
+	self.d_car_byte, self.d_car_sub = edComM.coreToDisplayOffsets(car_str, self.car_byte, paragraphs[self.d_car_para])
 
-	disp.d_h_para = self.h_line
-	disp.d_h_byte, disp.d_h_sub = edComM.coreToDisplayOffsets(h_str, self.h_byte, paragraphs[disp.d_h_para])
+	self.d_h_para = self.h_line
+	self.d_h_byte, self.d_h_sub = edComM.coreToDisplayOffsets(h_str, self.h_byte, paragraphs[self.d_h_para])
 
-	disp:updateCaretRect()
+	self:dispUpdateCaretRect()
 end
 
 
 function _mt_ed_m:displaySyncInsertion(line_1, line_2) -- XXX integrate into insertText directly
 	local lines = self.lines
-	local disp = self.disp
 
 	if line_1 ~= line_2 then
-		disp:insertParagraphs(line_1, line_2 - line_1)
+		self:dispInsertParagraphs(line_1, line_2 - line_1)
 	end
 	for i = line_1, line_2 do
-		disp:updateParagraph(i, lines[i])
+		self:dispUpdateParagraph(i, lines[i])
 	end
 
-	disp:refreshYOffsets(line_1)
+	self:dispRefreshYOffsets(line_1)
 
-	disp:updateHighlightDirtyRange(line_1, line_2)
-	disp:updateHighlights()
-	disp:setHighlightDirtyRange(self.car_line, self.h_line)
+	self:dispUpdateHighlightDirtyRange(line_1, line_2)
+	self:dispUpdateHighlights()
+	self:dispSetHighlightDirtyRange(self.car_line, self.h_line)
 end
 
 
 function _mt_ed_m:displaySyncDeletion(line_1, line_2) -- XXX integrate into deleteText directly
 	local lines = self.lines
-	local disp = self.disp
 
 	if line_1 ~= line_2 then
-		disp:removeParagraphs(line_1, line_2 - line_1)
+		self:dispRemoveParagraphs(line_1, line_2 - line_1)
 	end
 
-	disp:updateParagraph(line_1, lines[line_1])
-	disp:refreshYOffsets(line_1)
+	self:dispUpdateParagraph(line_1, lines[line_1])
+	self:dispRefreshYOffsets(line_1)
 
-	disp:updateHighlightDirtyRange(line_1, line_2)
-	disp:updateHighlights()
-	disp:setHighlightDirtyRange(self.car_line, self.h_line)
+	self:dispUpdateHighlightDirtyRange(line_1, line_2)
+	self:dispUpdateHighlights()
+	self:dispSetHighlightDirtyRange(self.car_line, self.h_line)
 end
 
 
 function _mt_ed_m:displaySyncAll(line_i)
 	local lines = self.lines
-	local disp = self.disp
 
 	line_i = line_i or 1
 
 	-- Update all display paragraphs starting at the requested index.
 	-- We assume that all prior display paragraphs are up-to-date.
 	for i = line_i, #lines do
-		disp:updateParagraph(i, lines[i])
+		self:dispUpdateParagraph(i, lines[i])
 	end
 
 	-- Trim excess paragraphs
-	local paragraphs = disp.paragraphs
+	local paragraphs = self.paragraphs
 	for i = #paragraphs, #lines + 1, -1 do
 		paragraphs[i] = nil
 	end
 
 	-- Update Y positions of the remaining sub-lines
-	disp:refreshYOffsets(line_i)
+	self:dispRefreshYOffsets(line_i)
 
 	-- And the caret...
 	self:displaySyncCaretOffsets()
 	self:updateVertPosHint()
 
 	-- Finally, update all highlight ranges.
-	disp:updateHighlightDirtyRange(line_i, #paragraphs)
-	disp:updateHighlights()
+	self:dispUpdateHighlightDirtyRange(line_i, #paragraphs)
+	self:dispUpdateHighlights()
 end
 
 
 function _mt_ed_m:displaySyncAlign(line_i)
-	local disp = self.disp
 	line_i = line_i or 1
 
-	disp:updateParagraphAlign(line_i)
+	self:dispUpdateParagraphAlign(line_i)
 	self:updateVertPosHint()
 end
 
 
 function _mt_ed_m:getFont()
-	return self.disp.font
+	return self.font
 end
 
 
 function _mt_ed_m:setFont(font)
 	self.font = font or false
-	self.disp:updateFont(font)
+	self:dispUpdateFont(font)
 	self:displaySyncAll()
 
 	-- Force a cache update on the widget after calling this (client.update_flag = true).
@@ -566,13 +651,6 @@ end
 		contains exactly one Wrap-Line.
 	Line Container: The main 'disp' object. Holds Paragraphs, plus metadata and an optional LÖVE Text object.
 --]]
-
-
-
--- Object metatables
--- Display line container (of paragraphs)
-local _mt_lc = {}
-_mt_lc.__index = _mt_lc
 
 
 local function dispUpdateSubLineSyntaxColors(self, sub_line, byte_1, byte_2)
@@ -668,93 +746,10 @@ end
 -- * / Internal *
 
 
--- * Object creation *
-
-
-function lineEdM.newLineContainer(font, color_t, color_h_t)
-	local self = {} -- AKA "disp"
-
-	self.paragraphs = {}
-
-	-- To change align and wrap mode, use the methods in the LineEditor object.
-	-- With center and right alignment, sub-lines will have negative X positions. The client
-	-- needs to keep track of the align mode and offset the positions based on the document
-	-- dimensions (which in turn are based on the number of lines and which lines are widest).
-	-- Center alignment: Zero X == center of
-	self.align = "left" -- "left", "center", "right"
-
-	self.wrap_mode = false
-
-	-- Copy of viewport #1 width. Used when wrapping text.
-	self.view_w = 0
-
-	self.font = font
-	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
-
-	-- Additional space between logical lines (in pixels).
-	self.paragraph_pad = 0
-
-	-- Pixels to add to a highlight to represent a selected line feed.
-	-- Update this relative to the font size, maybe with a minimum size of 1 pixel.
-	self.width_line_feed = 4
-
-	-- Text colors, normal and highlighted.
-	-- References to these tables will be copied around.
-	self.text_color = color_t or {1, 1, 1, 1} -- XXX: skin
-	self.text_h_color = color_h_t or {0, 0, 0, 1} -- XXX: skin
-
-	editFuncM.setupCaretDisplayInfo(self, true, true)
-	editFuncM.setupCaretBox(self)
-
-	-- Update range for highlights, tracked on a per-Paragraph basis.
-	self.h_line_min = math.huge
-	self.h_line_max = 0
-
-	-- Swaps out missing glyphs in the display string with a replacement glyph.
-	-- The internal contents (and results of clipboard actions) remain the same.
-	self.replace_missing = true
-
-	--[[
-	WARNING: masking cannot hide line feeds in the source string.
-	--]]
-	editFuncM.setupMaskedState(self)
-
-	-- Set true to create coloredtext tables for each sub-line string. Each coloredtext
-	-- table contains a color table and a code point string for every code point in the base
-	-- string. The initial color table is 'self.text_color_t'. For example, the string "foobar"
-	-- would become {col_t, "f", col_t, "o", col_t, "o", col_t, "b", col_t, "a", col_t, "r", }.
-	-- This uses considerably more memory than a single string, but allows recoloring on a
-	-- per-code point basis, which is convenient if you want to perform more than one pass of
-	-- coloring (such as in the case of mixing syntax highlighting and also inverting highlighted
-	-- text).
-	self.generate_colored_text = false
-
-	-- Assign a function taking 'self', 'str', 'syntax_t', and 'work_t' to colorize a Paragraph when updating
-	-- it. 'self' is the line container. 'syntax_t' is 'self.wip_syntax_colors', and it may contain existing
-	-- contents. You must return the number of entries written to the table so that the update logic can clip
-	-- the contents. 'work_t' is self.syntax_work, an arbitrary table you may use to help keep track of your
-	-- colorization state.
-	self.fn_colorize = false
-
-	-- Temporary workspace for constructing syntax highlighting sequences.
-	self.wip_syntax_colors = {}
-
-	-- Arbitrary table of state intended to help manage syntax highlighting.
-	self.syntax_work = {}
-
-	setmetatable(self, _mt_lc)
-
-	return self
-end
-
-
--- * / Object creation *
-
-
 -- * Line container methods *
 
 
-function _mt_lc:getDocumentHeight()
+function _mt_ed_m:dispGetDocumentHeight()
 	-- Assumes the final sub-line is current.
 	local last_para = self.paragraphs[#self.paragraphs]
 	local last_sub = last_para[#last_para]
@@ -763,7 +758,7 @@ function _mt_lc:getDocumentHeight()
 end
 
 
-function _mt_lc:getDocumentXBoundaries()
+function _mt_ed_m:dispGetDocumentXBoundaries()
 	local x1, x2 = 0, 0
 
 	for i, paragraph in ipairs(self.paragraphs) do
@@ -778,7 +773,7 @@ end
 
 
 -- @param y Y position, relative to the line container start point.
-function _mt_lc:getOffsetsAtY(y)
+function _mt_ed_m:dispGetOffsetsAtY(y)
 	local paragraphs = self.paragraphs
 
 	-- Find Paragraph and sub-line that are closest to the Y position.
@@ -805,7 +800,7 @@ end
 
 
 -- @return Byte, X position and width of the glyph (if applicable).
-function _mt_lc:getSubLineInfoAtX(para_i, sub_i, x, split_x)
+function _mt_ed_m:dispGetSubLineInfoAtX(para_i, sub_i, x, split_x)
 	local paragraphs = self.paragraphs
 	local font = self.font
 
@@ -824,7 +819,7 @@ end
 
 
 --- Get the height of a Paragraph by comparing its first and last sub-lines. The positions must be up to date when calling. Includes lineHeight spacing, but not paragraph spacing.
-function _mt_lc:getParagraphHeight(para_i) -- XXX test
+function _mt_ed_m:dispGetParagraphHeight(para_i) -- XXX test
 	local paragraph = self.paragraphs[para_i]
 	local sub_first, sub_last = paragraph[1], paragraph[#paragraph]
 
@@ -832,7 +827,7 @@ function _mt_lc:getParagraphHeight(para_i) -- XXX test
 end
 
 
-function _mt_lc:getSubLineUCharOffsetStart(para_i, sub_i)
+function _mt_ed_m:dispGetSubLineUCharOffsetStart(para_i, sub_i)
 	local paragraph = self.paragraphs[para_i]
 	local u_count = 1
 
@@ -844,7 +839,7 @@ function _mt_lc:getSubLineUCharOffsetStart(para_i, sub_i)
 end
 
 
-function _mt_lc:getSubLineUCharOffsetEnd(para_i, sub_i)
+function _mt_ed_m:dispGetSubLineUCharOffsetEnd(para_i, sub_i)
 	local paragraph = self.paragraphs[para_i]
 	local u_count = 0
 
@@ -861,7 +856,7 @@ function _mt_lc:getSubLineUCharOffsetEnd(para_i, sub_i)
 end
 
 
-function _mt_lc:getSubLineUCharOffsetStartEnd(para_i, sub_i)
+function _mt_ed_m:dispGetSubLineUCharOffsetStartEnd(para_i, sub_i)
 	local paragraph = self.paragraphs[para_i]
 	local u_count_1 = 1
 	local u_count_2
@@ -882,7 +877,7 @@ end
 
 --- Update sub-line Y offsets, beginning at the specified Paragraph index and continuing to the end of the `paragraphs` array.
 -- @param para_i The first Paragraph to check. All previous sub-lines in the container must have up-to-date Y offsets.
-function _mt_lc:refreshYOffsets(para_i)
+function _mt_ed_m:dispRefreshYOffsets(para_i)
 	local paragraphs = self.paragraphs
 	local y = 0
 
@@ -909,7 +904,7 @@ end
 --- Within a line container, update a Paragraph's contents.
 -- @param i_para Index of the Paragraph. If not the first Paragraph, then all Paragraphs from 'index 1' to 'this index - 1' must be populated at time of call.
 -- @param str The source / input string.
-function _mt_lc:updateParagraph(i_para, str)
+function _mt_ed_m:dispUpdateParagraph(i_para, str)
 	local paragraphs = self.paragraphs
 	local font = self.font
 
@@ -938,7 +933,7 @@ function _mt_lc:updateParagraph(i_para, str)
 
 	local final_index = 1
 	if not self.wrap_mode then
-		self:updateSubLine(i_para, 1, work_str, self.wip_syntax_colors, 1)
+		self:dispUpdateSubLine(i_para, 1, work_str, self.wip_syntax_colors, 1)
 	else
 		local width, wrapped = font:getWrap(work_str, self.view_w)
 		local start_code_point = 1
@@ -960,7 +955,7 @@ function _mt_lc:updateParagraph(i_para, str)
 			if i < #wrapped and wrapped_line == "" then
 				wrapped_line = "~"
 			end
-			self:updateSubLine(i_para, i, wrapped_line, self.wip_syntax_colors, start_code_point)
+			self:dispUpdateSubLine(i_para, i, wrapped_line, self.wip_syntax_colors, start_code_point)
 
 			start_code_point = start_code_point + utf8.len(wrapped_line)
 		end
@@ -975,7 +970,7 @@ end
 
 
 -- Updates the alignment of sub-lines.
-function _mt_lc:updateParagraphAlign(line_1, line_2)
+function _mt_ed_m:dispUpdateParagraphAlign(line_1, line_2)
 	local paragraphs = self.paragraphs
 
 	line_1 = line_1 or 1
@@ -996,7 +991,7 @@ end
 -- @param i_para Paragraph index.
 -- @param i_sub Sub-line index.
 -- @param str The new string to use.
-function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
+function _mt_ed_m:dispUpdateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
 	local font = self.font
 
 	-- All sub-lines from index 1 to this index - 1 must be populated at time of call.
@@ -1010,7 +1005,7 @@ function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
 	sub_line.x = 0
 	sub_line.y = 0
 
-	-- Cached font:getWidth(self.str)
+	-- Cached font:getWidth(str)
 	sub_line.w = 0
 
 	-- Cached 'math.ceil(font:getHeight() * font:getLineHeight())'
@@ -1059,45 +1054,45 @@ function _mt_lc:updateSubLine(i_para, i_sub, str, syntax_colors, syntax_start)
 end
 
 
-function _mt_lc:insertParagraphs(i_para, qty)
+function _mt_ed_m:dispInsertParagraphs(i_para, qty)
 	for i = 1, qty do
 		table.insert(self.paragraphs, i_para + i, {})
 	end
 end
 
 
-function _mt_lc:removeParagraphs(i_para, qty)
+function _mt_ed_m:dispRemoveParagraphs(i_para, qty)
 	for i = 1, qty do
 		table.remove(self.paragraphs, i_para)
 	end
 end
 
 
-function _mt_lc:clearHighlightDirtyRange()
+function _mt_ed_m:dispClearHighlightDirtyRange()
 	self.h_line_min = math.huge
 	self.h_line_max = 0
 end
 
 
-function _mt_lc:setHighlightDirtyRange(car_line, h_line)
+function _mt_ed_m:dispSetHighlightDirtyRange(car_line, h_line)
 	self.h_line_min = math.min(car_line, h_line)
 	self.h_line_max = math.max(car_line, h_line)
 end
 
 
-function _mt_lc:updateHighlightDirtyRange(car_line, h_line)
+function _mt_ed_m:dispUpdateHighlightDirtyRange(car_line, h_line)
 	self.h_line_min = math.min(self.h_line_min, car_line, h_line)
 	self.h_line_max = math.max(self.h_line_max, car_line, h_line)
 end
 
 
-function _mt_lc:fullHighlightDirtyRange()
+function _mt_ed_m:dispFullHighlightDirtyRange()
 	self.h_line_min = 1
 	self.h_line_max = math.huge
 end
 
 
-function _mt_lc:updateHighlights()
+function _mt_ed_m:dispUpdateHighlights()
 	local paragraphs = self.paragraphs
 
 	local line_1 = math.max(self.h_line_min, 1)
@@ -1158,7 +1153,7 @@ function _mt_lc:updateHighlights()
 end
 
 
-function _mt_lc:clearHighlights()
+function _mt_ed_m:dispClearHighlights()
 	for i, paragraph in ipairs(self.paragraphs) do
 		for j, sub_line in ipairs(paragraph) do
 			sub_line.highlighted = false
@@ -1168,9 +1163,7 @@ function _mt_lc:clearHighlights()
 end
 
 
-function _mt_lc:updateCaretRect()
-	--print("disp:updateCaretRect()")
-
+function _mt_ed_m:dispUpdateCaretRect()
 	local font = self.font
 	local paragraphs = self.paragraphs
 
@@ -1191,7 +1184,7 @@ function _mt_lc:updateCaretRect()
 end
 
 
-function _mt_lc:updateFont(font)
+function _mt_ed_m:dispUpdateFont(font)
 	self.font = font
 	if font then
 		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
@@ -1199,7 +1192,7 @@ function _mt_lc:updateFont(font)
 		self.line_height = 0
 	end
 
-	self:refreshFontParams()
+	self:dispRefreshFontParams()
 	-- All display lines need to be updated after calling.
 end
 
@@ -1207,7 +1200,7 @@ end
 -- * / Line container methods *
 
 
-function _mt_lc:refreshFontParams()
+function _mt_ed_m:dispRefreshFontParams()
 	local font = self.font
 	local em_width
 	if font then
@@ -1223,8 +1216,8 @@ function _mt_lc:refreshFontParams()
 end
 
 
-_mt_lc.resetCaretBlink = editFuncM.dispResetCaretBlink
-_mt_lc.updateCaretBlink = editFuncM.dispUpdateCaretBlink
+_mt_ed_m.dispResetCaretBlink = editFuncM.dispResetCaretBlink
+_mt_ed_m.dispUpdateCaretBlink = editFuncM.dispUpdateCaretBlink
 
 
 return lineEdM
