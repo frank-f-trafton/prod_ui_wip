@@ -380,7 +380,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					end
 
 					if context.cseq_presses == 1 then
-						self:caretToXY(true, mouse_sx, mouse_sy, true)
+						local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+						self:caretToXY(not shift_down, mouse_sx, mouse_sy, true)
 						--self:scrollGetCaretInBounds() -- Helpful, or distracting?
 
 						self.click_line = line_ed.car_line
