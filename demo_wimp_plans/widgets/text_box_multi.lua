@@ -231,7 +231,6 @@ function plan.make(panel)
 	yy = yy + h2 + math.floor(h2/2)
 
 	local text_box = panel:addChild("input/text_box_multi")
-	text_box.font = context.resources.fonts.p
 	text_box:initialize()
 	demoShared.setStaticLayout(panel, text_box, xx, yy, 496, 350)
 	text_box:setTag("demo_text_box")
