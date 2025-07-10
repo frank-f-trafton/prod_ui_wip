@@ -20,6 +20,7 @@ local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local seqString = context:getLua("shared/line_ed/seq_string")
 local structHistory = context:getLua("shared/struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 lineEdM.code_groups = code_groups
@@ -32,19 +33,12 @@ _mt_ed_m.__index = _mt_ed_m
 -- * Public Functions *
 
 
-local _wip_dummy_font
-
-
 --- Creates a new Line Editor object.
 -- @return the LineEd table.
 function lineEdM.new()
-	-- WIP
-	_wip_dummy_font = _wip_dummy_font or love.graphics.newFont(13)
-	local font = _wip_dummy_font
-
 	local self = setmetatable({}, _mt_ed_m)
 
-	self.font = font
+	self.font = false
 
 	-- String sequence representing each line of internal text.
 	self.lines = seqString.new()
@@ -76,7 +70,7 @@ function lineEdM.new()
 	-- Copy of viewport #1 width. Used when wrapping text.
 	self.view_w = 0
 
-	self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
+	self.line_height = 0
 
 	-- Additional space between logical lines (in pixels).
 	-- TODO: theming/scaling
@@ -84,7 +78,7 @@ function lineEdM.new()
 
 	-- Pixels to add to a highlight to represent a selected line feed.
 	-- Update this relative to the font size, maybe with a minimum size of 1 pixel.
-	self.width_line_feed = 4
+	self.width_line_feed = 0
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
@@ -168,9 +162,7 @@ function lineEdM.new()
 	-- Cached copy of 'lines' length in Unicode code points.
 	self.u_chars = self.lines:uLen()
 
-	self:dispRefreshFontParams()
-	self:displaySyncAll()
-
+	-- Assign a font with line_ed:setFont() ASAP.
 	return self
 end
 
@@ -424,15 +416,12 @@ function _mt_ed_m:unindentLine(line_n)
 	local offset
 
 	if string.sub(old_line, 1, 1) == "\t" then
-		print("line_n", line_n, "tabs codepath")
 		offset = 1
 		self.lines:delete(line_n, 1, line_n, 1)
 	else
-		print("line_n", line_n, "spaces codepath")
 		local space1, space2 = string.find(old_line, "^[\x20]+") -- (0x20 == space)
 		if space1 then
 			offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
-			print("", "space1", space1, "space2", space2)
 			self.lines:delete(line_n, 1, line_n, offset)
 		end
 	end
@@ -624,18 +613,23 @@ function _mt_ed_m:getFont()
 end
 
 
-function _mt_ed_m:setFont(font)
+function _mt_ed_m:setFont(font) -- [update]
+	uiShared.loveTypeEval(1, font, "Font")
+
 	self.font = font or false
-	self:dispUpdateFont(font)
-	self:displaySyncAll()
+	if self.font then
+		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
+		local em_width = font:getWidth("M")
+		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
+		self.width_line_feed = math.max(1, math.ceil(em_width / 4))
+
+		-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
+		-- All display lines need to be updated after calling.
+		self:displaySyncAll()
+	end
 
 	-- Force a cache update on the widget after calling this (client.update_flag = true).
 end
-
-
--- WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
---   WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
--- WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
 
 
 --[[
@@ -1184,36 +1178,7 @@ function _mt_ed_m:dispUpdateCaretRect()
 end
 
 
-function _mt_ed_m:dispUpdateFont(font)
-	self.font = font
-	if font then
-		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
-	else
-		self.line_height = 0
-	end
-
-	self:dispRefreshFontParams()
-	-- All display lines need to be updated after calling.
-end
-
-
 -- * / Line container methods *
-
-
-function _mt_ed_m:dispRefreshFontParams()
-	local font = self.font
-	local em_width
-	if font then
-		em_width = font:getWidth("M")
-	else
-		em_width = 1
-	end
-
-	self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-	self.width_line_feed = math.max(1, math.ceil(em_width / 4))
-
-	-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
-end
 
 
 _mt_ed_m.dispResetCaretBlink = editFuncM.dispResetCaretBlink

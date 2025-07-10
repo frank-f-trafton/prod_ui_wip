@@ -81,12 +81,12 @@ function def:uiCall_initialize()
 
 	lgcInputM.setupInstance(self)
 
+	self.line_ed = lineEdM.new()
+
 	self:skinSetRefs()
 	self:skinInstall()
 
 	local skin = self.skin
-
-	self.line_ed = lineEdM.new()
 
 	-- Ghost text appears when the field is empty.
 	-- This is not part of the lineEditor core, and so it is not drawn through
