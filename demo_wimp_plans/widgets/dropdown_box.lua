@@ -15,7 +15,6 @@ function plan.make(panel)
 
 	--demoShared.makeLabel(panel, 32, 0, 512, 32, "...", "single")
 	local dropdown = panel:addChild("wimp/dropdown_box")
-	dropdown:initialize()
 	demoShared.setStaticLayout(panel, dropdown, 32, 96, 256, 32)
 
 	dropdown:writeSetting("show_icons", true)

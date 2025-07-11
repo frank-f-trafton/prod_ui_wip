@@ -13,9 +13,9 @@ function plan.make(panel)
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	local button_norm = panel:addChild("base/button")
-	button_norm.skin_id = button_norm.skin_id .. "_DEMO"
-	button_norm:initialize()
+	local wid_id = "base/button"
+	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
+	local button_norm = panel:addChild(wid_id, nil, skin_id)
 	demoShared.setStaticLayout(panel, button_norm, 256, 0, 224, 64)
 	button_norm:setLabel("Normal Skinned Button")
 
@@ -35,7 +35,6 @@ function plan.make(panel)
 
 	local bb_rdo
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "left"
@@ -45,7 +44,6 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "center"
@@ -55,7 +53,6 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "right"
@@ -66,7 +63,6 @@ function plan.make(panel)
 	yy = yy + hh2
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww2, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "justify"
@@ -85,7 +81,6 @@ function plan.make(panel)
 
 	local bb_rdo
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "top"
@@ -95,7 +90,6 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "middle"
@@ -105,7 +99,6 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:initialize()
 	demoShared.setStaticLayout(panel, bb_rdo, xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "bottom"

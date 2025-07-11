@@ -26,7 +26,6 @@ function plan.make(panel)
 	-- [===[
 	demoShared.makeLabel(panel, xx, 0, label_w, label_h, "Horizontal")
 	local sliderh1 = panel:addChild("base/slider_bar")
-	sliderh1:initialize()
 	demoShared.setStaticLayout(panel, sliderh1, xx, 32, h_wid_w, h_wid_h)
 
 	sliderh1.trough_vertical = false
@@ -54,7 +53,6 @@ function plan.make(panel)
 	-- [===[
 	demoShared.makeLabel(panel, xx, 0, label_w, label_h, "Read-Only")
 	local sliderh2 = panel:addChild("base/slider_bar")
-	sliderh2:initialize()
 	demoShared.setStaticLayout(panel, sliderh2, xx, 32, h_wid_w, h_wid_h)
 
 	sliderh2.trough_vertical = false
@@ -83,7 +81,6 @@ function plan.make(panel)
 	-- [===[
 	demoShared.makeLabel(panel, xx, 0, label_w, label_h, "Widget Disabled")
 	local sliderh3 = panel:addChild("base/slider_bar")
-	sliderh3:initialize()
 	demoShared.setStaticLayout(panel, sliderh3, xx, 32, h_wid_w, h_wid_h)
 
 	sliderh3.trough_vertical = false
@@ -112,7 +109,6 @@ function plan.make(panel)
 	-- [===[
 	demoShared.makeLabel(panel, xx, 128, label_w, label_h, "Vertical")
 	local sliderv1 = panel:addChild("base/slider_bar")
-	sliderv1:initialize()
 	demoShared.setStaticLayout(panel, sliderv1, math.floor(xx + (128 - v_wid_w) * 0.5), 160, v_wid_w, v_wid_h)
 
 	sliderv1.trough_vertical = true
@@ -136,7 +132,6 @@ function plan.make(panel)
 	-- [===[
 	demoShared.makeLabel(panel, xx, 128, label_w, label_h, "Read-Only")
 	local sliderv2 = panel:addChild("base/slider_bar")
-	sliderv2:initialize()
 	demoShared.setStaticLayout(panel, sliderv2, math.floor(xx + (128 - v_wid_w) * 0.5), 160, v_wid_w, v_wid_h)
 
 	sliderv2.trough_vertical = true
@@ -162,7 +157,6 @@ function plan.make(panel)
 	-- [===[
 	demoShared.makeLabel(panel, xx, 128, label_w, label_h, "Widget Disabled")
 	local sliderv3 = panel:addChild("base/slider_bar")
-	sliderv3:initialize()
 	demoShared.setStaticLayout(panel, sliderv3, math.floor(xx + (128 - v_wid_w) * 0.5), 160, v_wid_w, v_wid_h)
 
 	sliderv3.trough_vertical = true

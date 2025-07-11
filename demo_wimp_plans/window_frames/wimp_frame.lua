@@ -9,11 +9,11 @@ local demoShared = require("demo_shared")
 function plan.makeWindowFrame(root)
 	local context = root.context
 
-	local frame = root:newWindowFrame()
-	frame.skin_id = frame.skin_id .. "_DEMO"
+	local wid_id = "wimp/window_frame"
+	local skin_id = root.context.widget_defs[wid_id].skin_id .. "_DEMO"
+	local frame = root:newWindowFrame(skin_id)
 	frame.w = 640
 	frame.h = 480
-	frame:initialize()
 	frame:setFrameTitle("WIMP Window Frame")
 
 	frame:setLayoutBase("viewport-width")
@@ -25,7 +25,6 @@ function plan.makeWindowFrame(root)
 	-- Radio Buttons: Header size
 	do
 		local text1 = frame:addChild("wimp/text_block")
-		text1:initialize()
 		-- XXX work on syncing padding with embedded widget labels
 		demoShared.setStaticLayout(frame, text1, xx + 9, yy, ww, hh)
 		text1:setText("Header size")
@@ -41,7 +40,6 @@ function plan.makeWindowFrame(root)
 		-- Small
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Small")
@@ -58,7 +56,6 @@ function plan.makeWindowFrame(root)
 		-- Normal
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Normal")
@@ -75,7 +72,6 @@ function plan.makeWindowFrame(root)
 		-- Large
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Large")
@@ -94,7 +90,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Enable resizing
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getResizable()
 		checkbox:setLabel("Resizable frame", "single-ul")
@@ -113,7 +108,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Show resize sensors
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = false
 		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
@@ -133,7 +127,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle 'Close' button visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getCloseControlVisibility()
 		checkbox:setLabel("Show 'Close' control", "single-ul")
@@ -153,7 +146,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Enable closing the frame
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getCloseEnabled()
 		checkbox:setLabel("Enable 'Close'", "single-ul")
@@ -173,7 +165,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle 'Maximize' button visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getMaximizeControlVisibility()
 		checkbox:setLabel("Show 'Maximize' control", "single-ul")
@@ -193,7 +184,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Allow maximize
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getMaximizeEnabled()
 		checkbox:setLabel("Enable 'Maximize'", "single-ul")
@@ -213,7 +203,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle header visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getHeaderVisible()
 		checkbox:setLabel("Visible header", "single-ul")
@@ -233,7 +222,6 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle draggable frame
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, xx, yy, ww, hh)
 		checkbox.checked = frame:getDraggable()
 		checkbox:setLabel("Draggable header", "single-ul")
@@ -254,7 +242,6 @@ function plan.makeWindowFrame(root)
 	do
 		yy = yy + hh
 		local text1 = frame:addChild("wimp/text_block")
-		text1:initialize()
 		-- XXX work on syncing padding with embedded widget labels
 		demoShared.setStaticLayout(frame, text1, xx + 9, yy, ww, hh)
 		text1:setText("Control Placement")
@@ -271,7 +258,6 @@ function plan.makeWindowFrame(root)
 		-- Left side
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Left")
@@ -288,7 +274,6 @@ function plan.makeWindowFrame(root)
 		-- Right side
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Right")
@@ -309,7 +294,6 @@ function plan.makeWindowFrame(root)
 	do
 		local text1 = frame:addChild("wimp/text_block")
 		text1.font = context.resources.fonts.p
-		text1:initialize()
 		-- XXX work on syncing padding with embedded widget labels
 		demoShared.setStaticLayout(frame, text1, xx + 9, yy, ww, hh)
 		text1:setText("Header Text Alignment")
@@ -327,7 +311,6 @@ function plan.makeWindowFrame(root)
 		-- Left
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Left")
@@ -344,7 +327,6 @@ function plan.makeWindowFrame(root)
 		-- Center
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Center")
@@ -361,7 +343,6 @@ function plan.makeWindowFrame(root)
 		-- Right
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:initialize()
 			demoShared.setStaticLayout(frame, rad_btn, xx, yy, ww, hh)
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Right")
@@ -380,7 +361,6 @@ function plan.makeWindowFrame(root)
 	-- Button: Close
 	do
 		local btn = frame:addChild("base/button")
-		btn:initialize()
 		demoShared.setStaticLayout(frame, btn, xx, yy, ww, hh)
 		btn:setLabel("Close (forcefully)")
 		btn.wid_buttonAction = function(self)

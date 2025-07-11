@@ -277,6 +277,7 @@ function def:uiCall_initialize()
 	self.last_open = false
 
 	lgcMenu.setup(self) -- XXX clean up assignments below.
+
 	-- Ref to currently-hovered item, or false if not hovering over any items.
 	self.MN_item_hover = false
 

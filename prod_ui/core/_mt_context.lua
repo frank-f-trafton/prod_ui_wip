@@ -922,7 +922,7 @@ end
 
 
 --- Sets up a new widget instance table. Internal use.
-function _mt_context:_prepareWidgetInstance(id, parent)
+function _mt_context:_prepareWidgetInstance(id, parent, skin_id)
 	local def = self.widget_defs[id]
 
 	-- Unsupported type. (Corrupt widget defs collection?)
@@ -930,12 +930,11 @@ function _mt_context:_prepareWidgetInstance(id, parent)
 		error("unregistered ID or unsupported type for widget def (id: " .. tostring(id) .. ", type: " .. type(def) .. ")")
 	end
 
-	local inst = {}
-
-	inst.parent = parent
-	inst.settings = def.default_settings and {}
-
-	setmetatable(inst, def._inst_mt)
+	local inst = setmetatable({
+		parent = parent,
+		settings = def.default_settings and {},
+		skin_id = skin_id and skin_id
+	}, def._inst_mt)
 
 	if not inst._no_descendants then
 		inst.children = {}
@@ -945,24 +944,30 @@ function _mt_context:_prepareWidgetInstance(id, parent)
 end
 
 
---- Add a root widget to the context. There must not be an existing root.
+--- Adds a root widget to the context. There must not be an existing root.
 --  Locked during update: yes (context)
 -- @param id The widget def ID.
+-- @param [skin_id] The starting Skin ID, if applicable.
+-- @param [...] Additional arguments for the root's uiCall_initialize() callback.
 -- @return A reference to the new root instance.
-function _mt_context:addRoot(id)
+function _mt_context:addRoot(id, skin_id, ...)
 	uiShared.notNilNotFalseNotNaN(1, id)
+	uiShared.typeEval1(2, skin_id, "string")
 
 	if self.locked then
 		uiShared.errLockedContext("add root widget")
-	end
 
-	if self.root then
+	elseif self.root then
 		error("this context already has a root widget.")
 	end
 
-	local retval = self:_prepareWidgetInstance(id, nil)
-	self.root = retval
-	return retval
+	local root = self:_prepareWidgetInstance(id, nil, skin_id)
+	self.root = root
+
+	root:uiCall_initialize(...)
+	root:_runUserEvent("userInitialize")
+
+	return root
 end
 
 
@@ -1108,6 +1113,23 @@ end
 
 function _mt_context:getThemeID()
 	return self.theme_id
+end
+
+
+function _mt_context:checkWidget(wid)
+	if not wid._dead then
+		local wid_mt = getmetatable(wid)
+		local id = wid.id
+		if wid_mt and type(id) == "string" then
+			local def = self.widget_defs[id]
+			if type(def) == "table" then
+				if wid_mt == def._inst_mt then
+					return true
+				end
+			end
+		end
+	end
+	return false
 end
 
 

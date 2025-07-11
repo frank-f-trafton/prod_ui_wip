@@ -14,7 +14,6 @@ function plan.make(panel)
 	panel:setScrollBars(false, false)
 
 	local combo_box = panel:addChild("wimp/combo_box")
-	combo_box:initialize()
 	demoShared.setStaticLayout(panel, combo_box, 32, 96, 256, 32)
 
 	combo_box:addItem("foo")

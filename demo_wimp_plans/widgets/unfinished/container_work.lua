@@ -14,7 +14,6 @@ function plan.make(panel)
 	ctnr.y = 0
 	ctnr.w = 160
 	ctnr.h = 160
-	ctnr:initialize()
 
 	ctnr:setScrollRangeMode("auto")
 	ctnr:setScrollBars(true, true)
@@ -26,7 +25,6 @@ function plan.make(panel)
 	btn.y = 0
 	btn.w = 256
 	btn.h = 256
-	btn:initialize()
 	btn:setLabel("Button in container")
 
 
@@ -50,7 +48,6 @@ function plan.make(panel)
 
 		love.graphics.pop()
 	end
-	cntr_s:initialize()
 end
 
 

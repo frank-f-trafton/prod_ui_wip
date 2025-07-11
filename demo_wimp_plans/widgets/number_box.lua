@@ -19,7 +19,6 @@ function plan.make(panel)
 		-- WIP
 	end
 
-	num_box:initialize()
 	demoShared.setStaticLayout(panel, num_box, 32, 96, 256, 32)
 end
 

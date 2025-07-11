@@ -87,9 +87,9 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	-- Split Button
-	local btn_spl = panel:addChild("wimp/button_split")
-	btn_spl.skin_id = btn_spl.skin_id .. "_DEMO"
-	btn_spl:initialize()
+	local wid_id = "wimp/button_split"
+	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
+	local btn_spl = panel:addChild(wid_id, nil, skin_id)
 	demoShared.setStaticLayout(panel, btn_spl, 0, 0, 224, 64)
 	btn_spl:setTag("demo_split_btn")
 
@@ -104,7 +104,6 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("base/checkbox")
-		chk:initialize()
 		demoShared.setStaticLayout(panel, chk, xx, yy, ww, hh)
 		chk:setLabel("Aux Enabled")
 		chk:setChecked(not not btn_spl.aux_enabled)
@@ -122,7 +121,6 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo:initialize()
 		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "right"
@@ -136,7 +134,6 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo:initialize()
 		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "left"
@@ -150,7 +147,6 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo:initialize()
 		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "top"
@@ -164,7 +160,6 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		rdo:initialize()
 		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "bottom"
@@ -183,7 +178,6 @@ function plan.make(panel)
 
 	do
 		local sld = panel:addChild("barebones/slider_bar")
-		sld:initialize()
 		demoShared.setStaticLayout(panel, sld, xx, yy, ww, hh)
 		sld.trough_vertical = false
 		sld:setLabel("Aux Size")

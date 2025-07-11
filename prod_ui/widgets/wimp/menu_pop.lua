@@ -128,11 +128,8 @@ local function assignSubMenu(item, client, set_selection)
 		if group_def and parent then
 			-- Add as a sibling and attach to the menu chain.
 			local client_sub = parent:addChild("wimp/menu_pop")
-			client_sub:initialize()
-
 			client.chain_next = client_sub
 			client_sub.chain_prev = client
-
 			client_sub.wid_ref = client.wid_ref
 
 			-- Configure menu defs.

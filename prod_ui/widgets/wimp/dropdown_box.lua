@@ -251,16 +251,12 @@ function def:_openPopUpMenu()
 
 		local ax, ay = self:getAbsolutePosition()
 
-		local drawer = root:addChild("wimp/dropdown_pop")
-		drawer.skin_id = skin.skin_id_pop
+		local drawer = root:addChild("wimp/dropdown_pop", nil, skin.skin_id_pop, self)
 		drawer.x = ax
 		drawer.y = ay + self.h
-		drawer.wid_ref = self
 		self.wid_drawer = drawer
 		self.chain_next = drawer
 		drawer.chain_prev = self
-		drawer:initialize()
-
 		drawer:writeSetting("show_icons", self.show_icons)
 		drawer:setIconSetID(self.icon_set_id)
 

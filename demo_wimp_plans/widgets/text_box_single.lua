@@ -16,12 +16,6 @@ function plan.make(panel)
 	-- [=[
 	demoShared.makeLabel(panel, 32, 0, 512, 32, "Single-line text input widget", "single")
 	local input_single = panel:addChild("input/text_box_single")
-	input_single.x = 32
-	input_single.y = 96
-	input_single.w = 256
-	input_single.h = 32
-	input_single:initialize()
-
 	demoShared.setStaticLayout(panel, input_single, 32, 96, 256, 32)
 
 	--input_single:setText("Single-Line Text Box")

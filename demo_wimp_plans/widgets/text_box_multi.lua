@@ -171,7 +171,6 @@ function plan.make(panel)
 	local w2, h2 = 168, 40
 
 	local cbox_wrap = panel:addChild("barebones/checkbox")
-	cbox_wrap:initialize()
 	demoShared.setStaticLayout(panel, cbox_wrap, xx, yy, ww, hh)
 	cbox_wrap:setTag("demo_wrap")
 	cbox_wrap:setLabel("Wrap (F5)", "single")
@@ -197,7 +196,6 @@ function plan.make(panel)
 	local rdo_align
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:initialize()
 	demoShared.setStaticLayout(panel, rdo_align, xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_l")
 	rdo_align.radio_group = "align_h"
@@ -208,7 +206,6 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:initialize()
 	demoShared.setStaticLayout(panel, rdo_align, xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_c")
 	rdo_align.radio_group = "align_h"
@@ -219,7 +216,6 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:initialize()
 	demoShared.setStaticLayout(panel, rdo_align, xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_r")
 	rdo_align.radio_group = "align_h"
@@ -231,7 +227,6 @@ function plan.make(panel)
 	yy = yy + h2 + math.floor(h2/2)
 
 	local text_box = panel:addChild("input/text_box_multi")
-	text_box:initialize()
 	demoShared.setStaticLayout(panel, text_box, xx, yy, 496, 350)
 	text_box:setTag("demo_text_box")
 	text_box:setScrollBars(true, true)

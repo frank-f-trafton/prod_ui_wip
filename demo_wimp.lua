@@ -15,6 +15,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.button_work",
 	"widgets.text_box_multi",
 	"widgets.text_box_single",
 	"widgets.button_split",
@@ -223,7 +224,6 @@ local function newWimpContext()
 
 	local wid_root = context:addRoot("wimp/root_wimp")
 	wid_root.w, wid_root.h = love.graphics.getDimensions()
-	wid_root:initialize()
 
 	-- Test...
 	--[[
@@ -370,7 +370,6 @@ do
 	do
 		-- Construct the application menu bar.
 		local menu_bar = wimp_root:addChild("wimp/menu_bar")
-		menu_bar:initialize()
 
 		-- [[
 		local node = wimp_root.layout_tree:newNode()
@@ -629,15 +628,12 @@ do
 		bar_button.h = bar_button.w
 
 		bar_button.thimble_mode = 0
-
-		bar_button:initialize()
 		--]]
 	end
 
 
 	do
 		local ws1 = wimp_root:newWorkspace()
-		ws1:initialize()
 
 		ws1:setLayoutBase("viewport")
 		ws1:setScrollRangeMode("zero")
@@ -649,7 +645,6 @@ do
 		ws1.tag = "main_workspace"
 
 		local demo_list = ws1:addChild("wimp/tree_box")
-		demo_list:initialize()
 
 		demo_list.MN_wrap_selection = "no-rep"
 
@@ -708,7 +703,6 @@ do
 			until not wid
 
 			local plan_container = workspace:addChild("base/container")
-			plan_container:initialize()
 			workspace:setLayoutNode(plan_container, workspace.layout_tree)
 			plan_container.tag = "plan_container"
 

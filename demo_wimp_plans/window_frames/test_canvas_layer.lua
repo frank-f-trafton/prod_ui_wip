@@ -6,7 +6,6 @@ function plan.makeWindowFrame(root)
 	local frame = root.context.root:newWindowFrame()
 	frame.w = 300
 	frame.h = 300
-	frame:initialize()
 	frame:setFrameTitle("Canvas Layering Test")
 
 	frame:setLayoutBase("viewport-width")
