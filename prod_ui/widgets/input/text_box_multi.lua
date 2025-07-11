@@ -234,7 +234,7 @@ function def:uiCall_reshapePre()
 	self:updateDocumentDimensions()
 
 	local font = line_ed.font
-	self.line_ed.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
+	self.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
 
 	self.update_flag = true
 

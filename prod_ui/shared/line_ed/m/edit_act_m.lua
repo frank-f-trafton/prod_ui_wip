@@ -266,7 +266,6 @@ end
 
 
 function editActM.caretPageDown(self, line_ed)
-	--print("self.page_jump_steps", self.page_jump_steps)
 	if line_ed:isHighlighted() then
 		self:caretHighlightEdgeRight(not self.allow_highlight)
 	end

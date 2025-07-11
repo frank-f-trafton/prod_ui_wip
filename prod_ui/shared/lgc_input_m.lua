@@ -58,7 +58,7 @@ function lgcInputM.setupInstance(self)
 	-- See 'textUtil.sanitize()' for options.
 	self.bad_input_rule = false
 
-	-- Should be updated with core dimensions change.
+	-- Should be updated when the core dimensions change.
 	self.page_jump_steps = 1
 
 	-- Helps with amending vs making new history entries

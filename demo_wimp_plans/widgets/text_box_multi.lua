@@ -244,6 +244,14 @@ function plan.make(panel)
 	text_box.tabs_to_spaces = false
 	text_box.auto_indent = true
 
+	--[[
+	local str = ""
+	for i = 1, 100 do
+		str = str .. i .. "\n"
+	end
+	text_box:setText(str)
+	--]]
+
 	_updateButtons(panel)
 end
 
