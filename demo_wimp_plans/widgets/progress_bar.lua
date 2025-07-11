@@ -20,7 +20,6 @@ function plan.make(panel)
 	local v_bar_width, v_bar_height = 100, 160
 
 	local p_bar = panel:addChild("status/progress_bar")
-	p_bar:initialize()
 	demoShared.setStaticLayout(panel, p_bar, 32, 32, h_bar_width, h_bar_height)
 	p_bar:setTag("demo_prog_bar")
 
@@ -38,7 +37,6 @@ function plan.make(panel)
 
 
 	local btn_active = panel:addChild("base/button")
-	btn_active:initialize()
 	demoShared.setStaticLayout(panel, btn_active, 256, 32, 128, 40)
 
 	btn_active:setLabel("setActive()")
@@ -52,7 +50,6 @@ function plan.make(panel)
 
 
 	local btn_vertical = panel:addChild("base/button")
-	btn_vertical:initialize()
 	demoShared.setStaticLayout(panel, btn_vertical, 256, 32+40, 128, 40)
 
 	btn_vertical:setLabel("Orientation")
@@ -77,7 +74,6 @@ function plan.make(panel)
 
 
 	local btn_far_end = panel:addChild("base/button")
-	btn_far_end:initialize()
 	demoShared.setStaticLayout(panel, btn_far_end, 256, 32+40+40, 128, 40)
 
 	btn_far_end:setLabel("Near/Far Start")
@@ -122,7 +118,6 @@ function plan.make(panel)
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
-	sld_pos:initialize()
 	demoShared.setStaticLayout(panel, sld_pos, 256, 160+32+8, 256, 32)
 
 	sld_pos:setTag("position_slider")
@@ -141,7 +136,6 @@ function plan.make(panel)
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")
-	sld_max:initialize()
 	demoShared.setStaticLayout(panel, sld_max, 256, 160+32+8+32+32+8, 256, 32)
 	sld_max:setTag("maximum_slider")
 

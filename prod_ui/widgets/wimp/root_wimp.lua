@@ -636,12 +636,12 @@ end
 --[[
 Use this instead of root:addChild("wimp/window_frame").
 --]]
-function def:newWindowFrame(view_level)
+function def:newWindowFrame(skin_id, unselectable, view_level)
 	view_level = view_level or "normal"
 
 	local lane = lgcUIFrame.view_levels[view_level]
 	local pos = widShared.getSortLaneEdge(self.children, lane, "last")
-	local w_frame = self:addChild("wimp/window_frame", pos)
+	local w_frame = self:addChild("wimp/window_frame", pos, skin_id, unselectable, view_level)
 	return w_frame
 end
 

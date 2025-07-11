@@ -96,7 +96,6 @@ end
 
 function demoShared.makeTitle(self, tag, text)
 	local text_block = self:addChild("wimp/text_block")
-	text_block:initialize()
 	if tag then
 		text_block.tag = tag
 	end
@@ -115,7 +114,6 @@ end
 
 function demoShared.makeParagraph(self, tag, text)
 	local text_block = self:addChild("wimp/text_block")
-	text_block:initialize()
 	if tag then
 		text_block.tag = tag
 	end
@@ -135,7 +133,6 @@ end
 
 function demoShared.makeHyperlink(self, tag, text, url)
 	local text_block = self:addChild("wimp/text_block")
-	text_block:initialize()
 	if tag then
 		text_block.tag = tag
 	end
@@ -168,7 +165,6 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	local dialog = root:newWindowFrame()
 	dialog.w = 448
 	dialog.h = 256
-	dialog:initialize()
 
 	dialog:setResizable(false)
 	dialog:setMaximizeControlVisibility(false)
@@ -185,7 +181,6 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 
 
 	local text_block = dialog:addChild("wimp/text_block")
-	text_block:initialize()
 
 	local nt = dialog.layout_tree:newNode()
 	nt:setMode("slice", "px", "top", 32)
@@ -208,7 +203,6 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	local btn_w, btn_h = 96, 32
 
 	local button_y = dialog:addChild("base/button")
-	button_y:initialize()
 	dialog:setLayoutNode(button_y, node_button2)
 
 	button_y:setLabel("Yes")
@@ -217,7 +211,6 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	end
 
 	local button_n = dialog:addChild("base/button")
-	button_n:initialize()
 	dialog:setLayoutNode(button_n, node_button1)
 
 	button_n:setLabel("No")
@@ -247,7 +240,6 @@ function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
 	local label = parent:addChild("base/label")
-	label:initialize()
 	demoShared.setStaticLayout(parent, label, x, y, w, h)
 	label:setLabel(text, label_mode)
 

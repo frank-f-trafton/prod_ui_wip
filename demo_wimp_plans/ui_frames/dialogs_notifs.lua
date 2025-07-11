@@ -14,7 +14,6 @@ local function _makeFrameBlock2(self)
 		dialog = root:newWindowFrame()
 		dialog.w = 448
 		dialog.h = 256
-		dialog:initialize()
 		dialog:setScrollRangeMode("zero")
 		dialog:setScrollBars(false, false)
 		dialog:setFrameBlock(frame)
@@ -29,7 +28,6 @@ This Window Frame should block interaction with the UI Frame that invoked it, un
 		button_close.y = dialog.h - 72
 		button_close.w = 160
 		button_close.h = 32
-		button_close:initialize()
 		button_close:setLabel("All right, close it")
 		button_close.wid_buttonAction = function(self)
 			self:bubbleEvent("frameCall_close", true)
@@ -63,7 +61,6 @@ local function _makeFrameBlock1(self)
 		dialog = root:newWindowFrame()
 		dialog.w = 448
 		dialog.h = 256
-		dialog:initialize()
 		dialog:setScrollRangeMode("zero")
 		dialog:setScrollBars(false, false)
 		dialog:setFrameTitle("The Frame That Is Blocked")
@@ -78,7 +75,6 @@ Click the button to make a blocking UI Frame.
 		button_make.y = dialog.h - 72
 		button_make.w = 160
 		button_make.h = 32
-		button_make:initialize()
 		button_make:setLabel("Make blocking frame")
 		button_make.wid_buttonAction = function(self)
 			_makeFrameBlock2(self)
@@ -110,7 +106,6 @@ function plan.make(panel)
 	-- (Modal) Dialog box test
 	do
 		local btn = panel:addChild("base/button")
-		btn:initialize()
 		demoShared.setStaticLayout(panel, btn, 64, 64, 160, 28)
 		btn:setLabel("Modal Dialog Box")
 		btn.wid_buttonAction = function(self)
@@ -125,7 +120,6 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 	-- Frame-blocking test
 	do
 		local btn = panel:addChild("base/button")
-		btn:initialize()
 		demoShared.setStaticLayout(panel, btn, 64, 96, 160, 28)
 		btn:setLabel("Frame-Blocking Test")
 		btn.wid_buttonAction = function(self)
@@ -137,7 +131,6 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 	-- Toast/Notification WIP
 	do
 		local button_quote = panel:addChild("base/button")
-		button_quote:initialize()
 		demoShared.setStaticLayout(panel, button_quote, 128, 128, 96, 28)
 		button_quote:setLabel("Inspiration")
 		button_quote.str_tool_tip = "Click for an inspiring quote."

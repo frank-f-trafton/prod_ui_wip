@@ -72,7 +72,6 @@ function plan.make(panel)
 
 	demoShared.makeLabel(panel, 32, 96, 200, 32, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
-	list_box:initialize()
 	demoShared.setStaticLayout(panel, list_box, 32, 96+40, 200, 96)
 	list_box:setTag("themes_list")
 	list_box.wid_action = _updateScale
@@ -108,7 +107,6 @@ function plan.make(panel)
 	yy = yy + hh + h_pad
 
 	input = panel:addChild("input/text_box_single")
-	input:initialize()
 	demoShared.setStaticLayout(panel, input, xx, yy, ww, hh)
 	_configureInputBox(input)
 	input:setTag("in_scale")
@@ -122,7 +120,6 @@ function plan.make(panel)
 	yy = yy + hh + h_pad
 
 	input = panel:addChild("input/text_box_single")
-	input:initialize()
 	demoShared.setStaticLayout(panel, input, xx, yy, ww, hh)
 	_configureInputBox(input)
 	input:setTag("in_dpi")
@@ -132,7 +129,6 @@ function plan.make(panel)
 	yy = yy + hh + h_pad
 
 	local btn = panel:addChild("base/button")
-	btn:initialize()
 	demoShared.setStaticLayout(panel, btn, xx, yy, ww, hh)
 	btn.tag = "btn_crt"
 	btn:setLabel("Update")

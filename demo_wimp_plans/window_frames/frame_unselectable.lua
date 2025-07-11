@@ -18,10 +18,9 @@ end
 function plan.makeWindowFrame(root)
 	local unselectable = true
 	local view_level = "high"
-	local frame = root:newWindowFrame(view_level)
+	local frame = root:newWindowFrame(nil, unselectable, view_level)
 	frame.w = 320
 	frame.h = 380
-	frame:initialize(unselectable, view_level)
 	frame:setFrameTitle("Unselectable Frame")
 
 	frame:setLayoutBase("viewport-width")
@@ -42,7 +41,6 @@ function plan.makeWindowFrame(root)
 	local ww, hh = 224, 64
 
 	local bb_button = frame:addChild("base/button")
-	bb_button:initialize()
 	demoShared.setStaticLayout(frame, bb_button, xx, yy, ww, hh)
 
 	bb_button.uiCall_thimble1Take = _assertNoThimble
@@ -55,7 +53,6 @@ function plan.makeWindowFrame(root)
 	yy = yy + hh
 
 	local bb_cbox = frame:addChild("base/checkbox")
-	bb_cbox:initialize()
 	demoShared.setStaticLayout(frame, bb_cbox, xx, yy, ww, hh)
 
 	bb_cbox.uiCall_thimble1Take = _assertNoThimble

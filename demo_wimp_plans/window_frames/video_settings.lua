@@ -10,7 +10,6 @@ function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
-	frame:initialize()
 	frame:setFrameTitle("Video Settings")
 
 	frame:setLayoutBase("viewport-width")
@@ -25,7 +24,6 @@ function plan.makeWindowFrame(root)
 		local yy, hh = 32, 32
 
 		local text_vsync = frame:addChild("wimp/text_block")
-		text_vsync:initialize()
 		-- XXX work on syncing padding with embedded widget labels
 		demoShared.setStaticLayout(frame, text_vsync, 64 + 9, yy, 192, hh)
 		text_vsync:setText("VSync Mode")
@@ -40,7 +38,6 @@ function plan.makeWindowFrame(root)
 
 		yy=yy+hh
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:initialize()
 		demoShared.setStaticLayout(frame, rad_btn, 64, yy, 192, hh)
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -53,7 +50,6 @@ function plan.makeWindowFrame(root)
 
 		yy=yy+hh
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:initialize()
 		demoShared.setStaticLayout(frame, rad_btn, 64, yy, 192, hh)
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -67,7 +63,6 @@ function plan.makeWindowFrame(root)
 		-- A VSync number of 2 or larger will wait that many frames before syncing.
 		yy=yy+hh
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:initialize()
 		demoShared.setStaticLayout(frame, rad_btn, 64, yy, 192, hh)
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -80,7 +75,6 @@ function plan.makeWindowFrame(root)
 
 		yy=yy+hh
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:initialize()
 		demoShared.setStaticLayout(frame, rad_btn, 64, yy, 192, hh)
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -93,7 +87,6 @@ function plan.makeWindowFrame(root)
 
 		yy=yy+hh
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:initialize()
 		demoShared.setStaticLayout(frame, rad_btn, 64, yy, 192, hh)
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -110,7 +103,6 @@ function plan.makeWindowFrame(root)
 	--[====[
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, 64, 160, 192, 32)
 		checkbox.tag = "wimp-demo-show-state-details"
 		checkbox.checked = not not context.app.show_details
@@ -124,7 +116,6 @@ function plan.makeWindowFrame(root)
 
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, 64, 192, 192, 32)
 		checkbox.tag = "wimp-demo-show-perf"
 		checkbox.checked = not not context.app.show_perf
@@ -138,7 +129,6 @@ function plan.makeWindowFrame(root)
 
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:initialize()
 		demoShared.setStaticLayout(frame, checkbox, 64, 224, 192, 32)
 		checkbox.tag = "wimp-demo-mouse-cross"
 		checkbox.checked = not not context.app.show_mouse_cross

@@ -256,10 +256,13 @@ def.setIconSetID = lgcMenu.setIconSetID
 def.getIconSetID = lgcMenu.getIconSetID
 
 
-function def:uiCall_initialize()
-	if not self.wid_ref then
-		error("no owner widget assigned to this menu.")
+-- @param wid_ref The widget that owns this drawer.
+function def:uiCall_initialize(wid_ref)
+	if not self.context:checkWidget(wid_ref) then
+		error("argument #1: expected owner widget (check that the value is a table, that it is a proper widget, and that it isn't dead)")
 	end
+
+	self.wid_ref = wid_ref
 
 	self.visible = true
 	self.allow_hover = true

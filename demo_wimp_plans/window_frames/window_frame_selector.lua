@@ -19,7 +19,6 @@ local function _makeButton(frame, id, label, x, y, w, h)
 
 	local bb_btn = frame:addChild("base/button")
 	bb_btn.wid_buttonAction = _button_launchFrame
-	bb_btn:initialize()
 	demoShared.setStaticLayout(frame, bb_btn, x, y, w, h)
 	bb_btn:setLabel(label)
 	bb_btn.usr_plan = id
@@ -33,7 +32,6 @@ function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = ww + 18 -- TODO: account for scroll bar width...
 	frame.h = 480
-	frame:initialize()
 	frame:setFrameTitle("Window Frame Selector")
 
 	frame:setLayoutBase("viewport-width")
@@ -44,7 +42,6 @@ function plan.makeWindowFrame(root)
 	local bb_btn
 
 	bb_btn = frame:addChild("base/button")
-	bb_btn:initialize()
 	demoShared.setStaticLayout(frame, bb_btn, xx, yy, ww, hh)
 	bb_btn:setLabel("Open all")
 	bb_btn.wid_buttonAction = function(self)

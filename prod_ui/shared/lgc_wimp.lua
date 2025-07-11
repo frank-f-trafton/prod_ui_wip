@@ -43,7 +43,6 @@ function lgcWimp.makePopUpMenu(self, menu_def, x, y)
 	local pop_up = root:addChild("wimp/menu_pop")
 	pop_up.x = x
 	pop_up.y = y
-	pop_up:initialize()
 	pop_up.wid_ref = self
 
 	-- Append items to fresh menu.

@@ -24,7 +24,6 @@ function plan.make(panel)
 	dial1.y = 32
 	dial1.w = 64
 	dial1.h = 64
-	dial1:initialize()
 
 	--:setDialParameters(pos, min, max, home, rnd)
 	dial1:setDialParameters(0, 0, 100, 0, "none")

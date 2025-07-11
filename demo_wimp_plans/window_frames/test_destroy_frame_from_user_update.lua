@@ -8,7 +8,6 @@ function plan.makeWindowFrame(root)
 	local context = root.context
 	local frame = root:newWindowFrame()
 	frame.w, frame.h = 300, 300
-	frame:initialize()
 	frame:setFrameTitle("Frame Destroy Test")
 
 	frame:setLayoutBase("viewport-width")
@@ -20,7 +19,6 @@ function plan.makeWindowFrame(root)
 	bb_lbl.y = 0
 	bb_lbl.w = 256
 	bb_lbl.h = 192
-	bb_lbl:initialize()
 	demoShared.setStaticLayout(frame, bb_lbl, 0, 0, 256, 192)
 	bb_lbl:setTag("countdown_label")
 

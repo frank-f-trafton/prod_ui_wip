@@ -29,9 +29,9 @@ function plan.make(panel)
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	local tree_box = panel:addChild("wimp/tree_box")
-	tree_box.skin_id = tree_box.skin_id .. "_DEMO"
-	tree_box:initialize()
+	local wid_id = "wimp/tree_box"
+	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
+	local tree_box = panel:addChild(wid_id, nil, skin_id)
 	demoShared.setStaticLayout(panel, tree_box, 0, 0, 224, 256)
 	tree_box:setTag("demo_treebox")
 
@@ -84,108 +84,113 @@ function plan.make(panel)
 
 	wy = wy + wh
 
-	local rdo_btn
-	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:initialize()
-	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
-	rdo_btn.radio_group = "tb_item_h_align"
-	rdo_btn:setLabel("left")
-	rdo_btn.usr_item_align_h = "left"
-	rdo_btn.wid_buttonAction = rdo_item_align_h_action
-
-	wy = wy + wh
-
-	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:initialize()
-	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
-	rdo_btn.radio_group = "tb_item_h_align"
-	rdo_btn:setLabel("right")
-	rdo_btn.usr_item_align_h = "right"
-	rdo_btn.wid_buttonAction = rdo_item_align_h_action
-
-	rdo_btn:setCheckedConditional("usr_item_align_h", tree_box.TR_item_align_h)
-
-	wy = wy + wh
-	wy = wy + wh
-
-	local sld = panel:addChild("barebones/slider_bar")
-	sld:initialize()
-	demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
-	sld.trough_vertical = false
-	sld:setLabel("Item Vertical Pad")
-	sld.slider_pos = 0
-	sld.slider_def = tree_box.skin.item_pad_v
-	sld.slider_max = 64
-	sld.wid_actionSliderChanged = function(self)
-		local tb = self:findSiblingTag("demo_treebox")
-		if tb then
-			tb.skin.item_pad_v = math.floor(self.slider_pos)
-			_refreshTreeBox(tb)
-		end
+	do
+		local rdo_btn = panel:addChild("barebones/radio_button")
+		demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
+		rdo_btn.radio_group = "tb_item_h_align"
+		rdo_btn:setLabel("left")
+		rdo_btn.usr_item_align_h = "left"
+		rdo_btn.wid_buttonAction = rdo_item_align_h_action
 	end
 
 	wy = wy + wh
 
-	local sld = panel:addChild("barebones/slider_bar")
-	sld:initialize()
-	demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
-	sld.trough_vertical = false
-	sld:setLabel("Pipe width")
-	sld.slider_pos = 0
-	sld.slider_def = tree_box.skin.pipe_width
-	sld.slider_max = 64
-	sld.wid_actionSliderChanged = function(self)
-		local tb = self:findSiblingTag("demo_treebox")
-		if tb then
-			tb.skin.pipe_width = math.floor(self.slider_pos)
-			_refreshTreeBox(tb)
-		end
+	do
+		local rdo_btn = panel:addChild("barebones/radio_button")
+		demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
+		rdo_btn.radio_group = "tb_item_h_align"
+		rdo_btn:setLabel("right")
+		rdo_btn.usr_item_align_h = "right"
+		rdo_btn.wid_buttonAction = rdo_item_align_h_action
+
+		rdo_btn:setCheckedConditional("usr_item_align_h", tree_box.TR_item_align_h)
 	end
 
 	wy = wy + wh
 	wy = wy + wh
 
-
-	local chk = panel:addChild("barebones/checkbox")
-	chk:initialize()
-	demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
-	chk:setLabel("Draw pipes")
-	chk:setChecked(tree_box.skin.draw_pipes)
-	chk.wid_buttonAction = function(self)
-		local tb = self:findSiblingTag("demo_treebox")
-		if tb then
-			tb.skin.draw_pipes = not not self.checked
-			_refreshTreeBox(tb)
+	do
+		local sld = panel:addChild("barebones/slider_bar")
+		demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
+		sld.trough_vertical = false
+		sld:setLabel("Item Vertical Pad")
+		sld.slider_pos = 0
+		sld.slider_def = tree_box.skin.item_pad_v
+		sld.slider_max = 64
+		sld.wid_actionSliderChanged = function(self)
+			local tb = self:findSiblingTag("demo_treebox")
+			if tb then
+				tb.skin.item_pad_v = math.floor(self.slider_pos)
+				_refreshTreeBox(tb)
+			end
 		end
 	end
 
 	wy = wy + wh
 
-	local chk = panel:addChild("barebones/checkbox")
-	chk:initialize()
-	demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
-	chk:setLabel("Draw icons")
-	chk:setChecked(tree_box.TR_show_icons)
-	chk.wid_buttonAction = function(self)
-		local tb = self:findSiblingTag("demo_treebox")
-		if tb then
-			tb:setIconsEnabled(not not self.checked)
-			_refreshTreeBox(tb)
+	do
+		local sld = panel:addChild("barebones/slider_bar")
+		demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
+		sld.trough_vertical = false
+		sld:setLabel("Pipe width")
+		sld.slider_pos = 0
+		sld.slider_def = tree_box.skin.pipe_width
+		sld.slider_max = 64
+		sld.wid_actionSliderChanged = function(self)
+			local tb = self:findSiblingTag("demo_treebox")
+			if tb then
+				tb.skin.pipe_width = math.floor(self.slider_pos)
+				_refreshTreeBox(tb)
+			end
+		end
+	end
+
+	wy = wy + wh
+	wy = wy + wh
+
+	do
+		local chk = panel:addChild("barebones/checkbox")
+		demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
+		chk:setLabel("Draw pipes")
+		chk:setChecked(tree_box.skin.draw_pipes)
+		chk.wid_buttonAction = function(self)
+			local tb = self:findSiblingTag("demo_treebox")
+			if tb then
+				tb.skin.draw_pipes = not not self.checked
+				_refreshTreeBox(tb)
+			end
 		end
 	end
 
 	wy = wy + wh
 
-	local chk = panel:addChild("barebones/checkbox")
-	chk:initialize()
-	demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
-	chk:setLabel("Expanders enabled")
-	chk:setChecked(tree_box.TR_expanders_active)
-	chk.wid_buttonAction = function(self)
-		local tb = self:findSiblingTag("demo_treebox")
-		if tb then
-			tb:setExpandersActive(not not self.checked)
-			_refreshTreeBox(tb)
+	do
+		local chk = panel:addChild("barebones/checkbox")
+		demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
+		chk:setLabel("Draw icons")
+		chk:setChecked(tree_box.TR_show_icons)
+		chk.wid_buttonAction = function(self)
+			local tb = self:findSiblingTag("demo_treebox")
+			if tb then
+				tb:setIconsEnabled(not not self.checked)
+				_refreshTreeBox(tb)
+			end
+		end
+	end
+
+	wy = wy + wh
+
+	do
+		local chk = panel:addChild("barebones/checkbox")
+		demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
+		chk:setLabel("Expanders enabled")
+		chk:setChecked(tree_box.TR_expanders_active)
+		chk.wid_buttonAction = function(self)
+			local tb = self:findSiblingTag("demo_treebox")
+			if tb then
+				tb:setExpandersActive(not not self.checked)
+				_refreshTreeBox(tb)
+			end
 		end
 	end
 

@@ -10,7 +10,6 @@ function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
-	frame:initialize()
 	frame:setFrameTitle("Hiding Window Frames")
 
 	frame:setLayoutBase("viewport-width")
@@ -23,7 +22,6 @@ function plan.makeWindowFrame(root)
 	-- Button: Hide this frame
 	do
 		local btn = frame:addChild("base/button")
-		btn:initialize()
 		demoShared.setStaticLayout(frame, btn, xx, yy, 250, hh)
 		btn.usr_time = 0.0
 		btn.usr_time_max = 5.0

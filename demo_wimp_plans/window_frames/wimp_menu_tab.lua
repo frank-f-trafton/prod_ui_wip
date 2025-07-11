@@ -58,7 +58,6 @@ function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
-	frame:initialize()
 	frame:setFrameTitle("Tabular Menu Test")
 
 	frame:setLayoutBase("viewport")
@@ -68,7 +67,6 @@ function plan.makeWindowFrame(root)
 	local menu_tab = frame:addChild("wimp/menu_tab")
 	menu_tab.w = 640
 	menu_tab.h = 480
-	menu_tab:initialize()
 
 	frame:setLayoutNode(menu_tab, frame.layout_tree)
 

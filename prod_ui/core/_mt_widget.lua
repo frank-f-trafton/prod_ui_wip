@@ -478,37 +478,27 @@ function _mt_widget:getRelativePositionScrolled(x, y)
 end
 
 
-local debug_init_check
-function _mt_widget:initialize(...)
-	-- Uncomment to check for double initializations.
-	-- [[
-	debug_init_check = debug_init_check or setmetatable({}, {__mode = "k"})
-	if debug_init_check[self] then
-		error("double initialization of widget. ID: " .. tostring(self.id))
-	end
-	debug_init_check[self] = true
-	--]]
-
-	self:uiCall_initialize(...)
-	self:_runUserEvent("userInitialize")
-
-	return self
+function _mt_widget:initialize()
+	error("Delete this call!")
 end
 
 
 --- Adds a new child widget instance.
 --  Locked during update: yes (self)
 -- @param id The widget def ID.
--- @param pos (default: #self.children + 1) Where to place the new widget in the table of children.
+-- @param [pos] (default: #self.children + 1) Where to place the new widget in the table of children.
+-- @param [skin_id] The starting Skin ID, if applicable.
+-- @param [...] Additional arguments for the widget's uiCall_initialize() callback.
 -- @return New instance table. An error is raised if there is a problem.
-function _mt_widget:addChild(id, pos)
+function _mt_widget:addChild(id, pos, skin_id, ...)
 	uiShared.notNilNotFalseNotNaN(1, id)
 	uiShared.numberNotNaNEval(2, pos)
+	uiShared.typeEval1(3, skin_id, "string")
 
 	local children = self.children
 	pos = pos or #children + 1
 	if pos < 1 or pos > #children + 1 then
-		error("position is out of range.")
+		error("position is out of range")
 	end
 
 	if context.locks[self] then
@@ -518,9 +508,13 @@ function _mt_widget:addChild(id, pos)
 		errNoDescendants()
 	end
 
-	local retval = context:_prepareWidgetInstance(id, self)
-	table.insert(children, pos, retval)
-	return retval
+	local child = context:_prepareWidgetInstance(id, self, skin_id)
+	table.insert(children, pos, child)
+
+	child:uiCall_initialize(...)
+	child:_runUserEvent("userInitialize")
+
+	return child
 end
 
 

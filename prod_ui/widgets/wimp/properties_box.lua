@@ -190,7 +190,6 @@ function def:addControl(wid_id, text, pos, bijou_id)
 	uiShared.typeEval1(4, bijou_id, "string")
 
 	local wid = self:addChild(wid_id, pos)
-	wid:initialize()
 
 	wid.selectable = true
 	wid.marked = false -- multi-select

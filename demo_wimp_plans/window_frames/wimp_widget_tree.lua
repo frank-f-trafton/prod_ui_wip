@@ -140,7 +140,6 @@ function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 400
 	frame.h = 384
-	frame:initialize()
 	frame:setHeaderSize("small")
 	frame:setFrameTitle("Widget Tree")
 
@@ -149,19 +148,10 @@ function plan.makeWindowFrame(root)
 	frame:setScrollBars(false, false)
 
 	local tree_box = frame:addChild("wimp/tree_box")
-	tree_box:initialize()
-
 	local chk_vp = frame:addChild("base/checkbox")
-	chk_vp:initialize()
-
 	local chk_ly = frame:addChild("base/checkbox")
-	chk_ly:initialize()
-
 	local chk_highlight = frame:addChild("base/checkbox")
-	chk_highlight:initialize()
-
 	local chk_exclude = frame:addChild("base/checkbox")
-	chk_exclude:initialize()
 
 	chk_vp:setLabel("Show Viewports")
 	chk_vp:setChecked(context.app.dbg_vp.active)

@@ -3,7 +3,6 @@ local plan = {}
 
 local function _makeBox(self, fill, outline, text_color, text)
 	local wid = self:addChild("test/colorful_box")
-	wid:initialize()
 	wid:setColor(fill, outline, text_color)
 	wid:setText(text)
 

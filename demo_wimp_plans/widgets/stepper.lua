@@ -18,7 +18,6 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	local stepper_h = panel:addChild("base/stepper")
-	stepper_h:initialize()
 	demoShared.setStaticLayout(panel, stepper_h, 32, 32, 240, 32)
 
 	stepper_h:insertOption("Foobar")
@@ -32,7 +31,6 @@ function plan.make(panel)
 
 
 	local stepper_v = panel:addChild("base/stepper")
-	stepper_v:initialize()
 	demoShared.setStaticLayout(panel, stepper_v, 288, 32, 64, 128)
 	stepper_v:insertOption("Foobar")
 	stepper_v:insertOption("Bazbop")

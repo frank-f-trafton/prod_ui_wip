@@ -117,9 +117,11 @@ end
 
 
 local function makeListBox1(panel, x, y)
-	local list_box = panel:addChild("wimp/list_box")
-	list_box.skin_id = list_box.skin_id .. "_DEMO"
-	list_box:initialize()
+	--:addChild(id, pos, skin_id, ...)
+	local wid_id = "wimp/list_box"
+	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
+	local list_box = panel:addChild(wid_id, nil, skin_id)
+
 	demoShared.setStaticLayout(panel, list_box, x, y, 224, 256)
 	list_box:setTag("demo_listbox")
 
@@ -199,7 +201,6 @@ local function makeListBox1(panel, x, y)
 
 	local rdo_btn
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:initialize()
 	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("left")
@@ -210,7 +211,6 @@ local function makeListBox1(panel, x, y)
 
 	rdo_btn = panel:addChild("barebones/radio_button")
 	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
-	rdo_btn:initialize()
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("center")
 	rdo_btn.usr_align = "center"
@@ -219,7 +219,6 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:initialize()
 	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("right")
@@ -232,7 +231,6 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	local chk = panel:addChild("barebones/checkbox")
-	chk:initialize()
 	demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
 	chk:setChecked(list_box.show_icons)
 	chk:setLabel("Icons")
@@ -261,7 +259,6 @@ local function makeListBox1(panel, x, y)
 	end
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:initialize()
 	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("left")
@@ -271,7 +268,6 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:initialize()
 	demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("right")
@@ -288,7 +284,6 @@ local function makeListBox1(panel, x, y)
 
 	wy = wy + wh
 
-	sld:initialize()
 	demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
 
 	sld.slider_pos = 0
@@ -314,7 +309,6 @@ end
 
 local function makeListBox2(panel, x, y)
 	local list_box = panel:addChild("wimp/list_box")
-	list_box:initialize()
 	demoShared.setStaticLayout(panel, list_box, x, y, 224, 256)
 
 	list_box:setTag("demo_listbox2")
@@ -353,7 +347,6 @@ end
 
 local function makeListBox3(panel, x, y)
 	local lb1 = panel:addChild("wimp/list_box")
-	lb1:initialize()
 	demoShared.setStaticLayout(panel, lb1, x, y, 224, 256)
 	lb1:setTag("demo_listbox3a")
 
@@ -382,7 +375,6 @@ local function makeListBox3(panel, x, y)
 
 
 	local lb2 = panel:addChild("wimp/list_box")
-	lb2:initialize()
 	demoShared.setStaticLayout(panel, lb2, x + 320, y, 224, 256)
 	lb2:setTag("demo_listbox3b")
 
@@ -413,7 +405,6 @@ end
 
 local function makeListBox4(panel, x, y)
 	local lb1 = panel:addChild("wimp/list_box")
-	lb1:initialize()
 	demoShared.setStaticLayout(panel, lb1, x, y, 224, 256)
 	lb1:setTag("demo_listbox4a")
 
@@ -442,7 +433,6 @@ local function makeListBox4(panel, x, y)
 	lb1:reshape()
 
 	local b1 = panel:addChild("base/button")
-	b1:initialize()
 	demoShared.setStaticLayout(panel, b1, x + 224 + 32, y, 32, 32)
 
 	b1:setLabel(">")
@@ -460,7 +450,6 @@ local function makeListBox4(panel, x, y)
 	end
 
 	local b2 = panel:addChild("base/button")
-	b2:initialize()
 	demoShared.setStaticLayout(panel, b2, x + 224 + 32, y + 256 - 32, 32, 32)
 
 	b2:setLabel("<")
@@ -482,7 +471,6 @@ local function makeListBox4(panel, x, y)
 	lb2.wid_action2 = function(self, item, index) print("[4b] wid_action2()", item, index) end
 	lb2.wid_action3 = function(self, item, index) print("[4b] wid_action3()", item, index) end
 	lb2.wid_select = function(self, item, index) print("[4b] wid_select()", item, index) end
-	lb2:initialize()
 	demoShared.setStaticLayout(panel, lb2, x + 320, y, 224, 256)
 	lb2:setTag("demo_listbox4b")
 

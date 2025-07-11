@@ -40,7 +40,6 @@ function plan.makeWindowFrame(root)
 	local frame = root:newWindowFrame()
 	frame.w = 640
 	frame.h = 480
-	frame:initialize()
 	frame:setFrameTitle("Snapshot of '_G'")
 
 	frame:setLayoutBase("viewport")
@@ -48,7 +47,6 @@ function plan.makeWindowFrame(root)
 	frame:setScrollBars(false, false)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
-	menu_tab:initialize()
 
 	frame:setLayoutNode(menu_tab, frame.layout_tree)
 
