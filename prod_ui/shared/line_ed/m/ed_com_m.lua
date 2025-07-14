@@ -38,38 +38,22 @@ function edComM.displaytoUCharCount(paragraph, sub_i, byte)
 
 	local u_count = utf8.len(string_one, 1, byte)
 
-	--print("string_one", string_one)
-	--print("initial u_count", u_count)
-
 	for i = 1, sub_i - 1 do
 		u_count = u_count + utf8.len(paragraph[i].str)
-		--print("i", i, "u_count", u_count)
 	end
-
-	--print("final u_count", u_count + plus_one)
 
 	return u_count + plus_one
 end
 
 
+-- @param hit_non_ws When true, skips over initial whitespace.
 function edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
-	--print("huntWordBoundary", "dir", dir, "hit_non_ws", hit_non_ws, "first_group", first_group, "stop_on_line_feed", stop_on_line_feed)
-
-	-- If 'hit_non_ws' is true, this function skips over initial whitespace.
-
 	while true do
-		--print("LOOP: huntWordBoundary")
 		local line_p, byte_p, peeked = lines:offsetStep(dir, line_n, byte_n)
-		--print("line_p", line_p, "byte_p", byte_p, "peeked", peeked)
-		--print("^", not peeked and "nil" or peeked == 0x0a and "\\n" or utf8.char(peeked))
-
 		local group = code_groups[peeked]
-
-		--print("group", group)
 
 		-- Beginning or end of document
 		if peeked == nil then
-			--print("break: peeked == nil")
 			if dir == 1 then
 				line_n = #lines
 				byte_n = #lines[#lines] + 1
@@ -83,8 +67,6 @@ function edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, dir, hit_no
 		-- Hit line feed and instructed to stop, or we're past the initial whitespace and encountered
 		-- our first group mismatch
 		elseif (stop_on_line_feed and peeked == 0x0a) or (hit_non_ws and group ~= first_group) then
-			--print("break: hit_non_ws and group ~= first_group")
-			--print("hit_non_ws", hit_non_ws, "group", group, "first_group", first_group, "peeked: ", peeked)
 			-- Correct right-dir offsets
 			if dir == 1 then
 				line_n = line_p
@@ -100,8 +82,6 @@ function edComM.huntWordBoundary(code_groups, lines, line_n, byte_n, dir, hit_no
 
 		line_n, byte_n = line_p, byte_p
 	end
-
-	--print("return line_n", line_n, "byte_n", byte_n)
 
 	return line_n, byte_n
 end
@@ -142,18 +122,19 @@ end
 
 
 --- Sorts display caret and highlight offsets from first to last. (Paragraph, sub-line, and byte.)
-function edComM.getHighlightOffsetsParagraph(line_1, sub_1, byte_1, line_2, sub_2, byte_2)
-	if line_1 == line_2 and sub_1 == sub_2 then
-		byte_1, byte_2 = math.min(byte_1, byte_2), math.max(byte_1, byte_2)
+function edComM.getHighlightOffsetsParagraph(l1, s1, b1, l2, s2, b2)
+	-- l, s, b == line, sub-line, byte
+	if l1 == l2 and s1 == s2 then
+		b1, b2 = math.min(b1, b2), math.max(b1, b2)
 
-	elseif line_1 == line_2 and sub_1 > sub_2 then
-		sub_1, sub_2, byte_1, byte_2 = sub_2, sub_1, byte_2, byte_1
+	elseif l1 == l2 and s1 > s2 then
+		s1, s2, b1, b2 = s2, s1, b2, b1
 
-	elseif line_1 > line_2 then
-		line_1, line_2, sub_1, sub_2, byte_1, byte_2 = line_2, line_1, sub_2, sub_1, byte_2, byte_1
+	elseif l1 > l2 then
+		l1, l2, s1, s2, b1, b2 = l2, l1, s2, s1, b2, b1
 	end
 
-	return line_1, sub_1, byte_1, line_2, sub_2, byte_2
+	return l1, s1, b1, l2, s2, b2
 end
 
 
@@ -196,6 +177,21 @@ function edComM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 	end
 
 	return d_car_para, d_car_sub
+end
+
+
+function edComM.applyCaretAlignOffset(caret_x, line_str, align, font)
+	if align == "left" then
+		-- n/a
+
+	elseif align == "center" then
+		caret_x = caret_x + math.floor(0.5 - font:getWidth(line_str) / 2)
+
+	elseif align == "right" then
+		caret_x = caret_x - font:getWidth(line_str)
+	end
+
+	return caret_x
 end
 
 

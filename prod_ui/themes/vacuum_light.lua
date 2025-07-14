@@ -453,6 +453,34 @@ return {
 				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
 			},
 		},
+		text_code1 = {
+			res_readwrite = {
+				color_body = {0.9, 0.9, 0.9, 1.0},
+				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},
+				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
+				color_text = {0.1, 0.1, 0.1, 1.0},
+				color_readonly = {0.2, 0.2, 0.2, 1.0},
+				color_ghost_text = {0.5, 0.5, 0.5, 1.0},
+				color_insert = {0.1, 0.1, 0.1, 1.0},
+				color_replace = {0.25, 0.25, 0.25, 1.0},
+				color_margin = {0.8, 0.8, 0.8, 1.0},
+				color_margin_line_numbers = {0.5, 0.5, 0.5, 1.0}
+			},
+			res_readonly = {
+				color_body = {0.8, 0.8, 0.8, 1.0},
+				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},
+				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
+				color_text = {0.1, 0.1, 0.1, 1.0},
+				color_readonly = {0.2, 0.2, 0.2, 1.0},
+				color_ghost_text = {0.5, 0.5, 0.5, 1.0},
+				color_insert = {0.1, 0.1, 0.1, 1.0},
+				color_replace = {0.25, 0.25, 0.25, 1.0},
+				color_margin = {0.8, 0.8, 0.8, 1.0},
+				color_margin_line_numbers = {0.5, 0.5, 0.5, 1.0}
+			},
+		},
 		tree_box1 = {
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_item_text = {0.1, 0.1, 0.1, 1.0},

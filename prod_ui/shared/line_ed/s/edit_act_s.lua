@@ -9,7 +9,7 @@ local editCommandS = context:getLua("shared/line_ed/s/edit_command_s")
 
 
 return {
-	caretLeft = editCommandS.caretLeft or error("!?"),
+	caretLeft = editCommandS.caretLeft,
 	caretRight = editCommandS.caretRight,
 	caretLeftHighlight = editCommandS.caretLeftHighlight,
 	caretRightHighlight = editCommandS.caretRightHighlight,

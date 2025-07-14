@@ -23,7 +23,7 @@ Return value #1 being true updates the caret visual state, even if #2 is false.
 [*1]: Commands used as key bindings do not take these arguments.
 
 Recap:
--- 1) success, 2) update_wid, 3) caret_in_view, 4) write_hist, 5) del_text, 6) steppped_hist
+-- 1) success, 2) update_wid, 3) caret_in_view, 4) write_hist, 5) del_text, 6) stepped_hist
 --]]
 
 

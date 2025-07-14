@@ -35,7 +35,6 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 lineEdS.code_groups = code_groups
 
 
-
 -- stand-in text colors
 local default_text_color = {1, 1, 1, 1}
 local default_text_h_color = {0, 0, 0, 1}
@@ -155,7 +154,6 @@ function _mt_ed_s:setFont(font) -- [update]
 		self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 		self.caret_line_width = math.max(1, math.ceil(font:getWidth("M") / 16))
 		self.caret_box_w_empty = math.max(1, math.ceil(font:getWidth("_")))
-		--self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M") * 1.25))
 		self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M")))
 	end
 end

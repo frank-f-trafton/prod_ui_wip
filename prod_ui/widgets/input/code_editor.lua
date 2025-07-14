@@ -1,23 +1,23 @@
--- A multi-line text input box.
+-- WIP: copy of input/text_box_multi
+-- A code editor widget, with a column for line numbers and a faint highlight for the current line.
 
 --[[
-         Viewport #1
-  ╔═══════════════════════╗
-  ║                       ║
 
-┌───────────────────────────┬─┐
-│ ......................... │^│
-│ .The quick brown fox    . ├─┤
-│ .jumps over the lazy    . │ │
-│ .dog.|                  . │ │
-│ .                       . │ │
-│ .                       . │ │
-│ .                       . │ │
-│ .                       . ├─┤
-│ ......................... │v│  ═══╗
-├─┬───────────────────────┬─┼─┤     ╠═ Optional scroll bars
-│<│                       │>│ │  ═══╝
-└─┴───────────────────────┴─┴─┘
+Line #s    Viewport #1
+ ╔══╗╔═════════════════════╗
+ ┌──┬────────────────────────┬─┐
+ │ 1│ ...................... │^│
+ │ 2│ .The quick brown fox . ├─┤
+ │ 3│ .jumps over the lazy . │ │
+ │ 4│ .dog.|               . │ │
+ │ 5│ .                    . │ │
+ │ 6│ .                    . │ │
+ │ 7│ .                    . │ │
+ │ 8│ .                    . ├─┤
+ │ 9│ ...................... │v│  ═══╗
+ ├─┬┴──────────────────────┬─┼─┤     ╠═ Optional scroll bars
+ │<│                       │>│ │  ═══╝
+ └─┴───────────────────────┴─┴─┘
 
 --]]
 
@@ -50,7 +50,7 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "text_box_m1",
+	skin_id = "text_code1",
 	renderThimble = uiShared.dummyFunc
 }
 
@@ -83,6 +83,8 @@ function def:uiCall_initialize()
 	self.enabled = true
 
 	lgcInputM.setupInstance(self)
+
+	self.illuminate_current_line = true
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -558,7 +560,6 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 		self.line_ed:setFont(self.skin.font)
-		self.text_object:setFont(self.skin.font)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
@@ -605,13 +606,6 @@ def.default_skinner = {
 			self.vp2_h
 		)
 
-		--[[
-		print("ox, oy", ox, oy)
-		print("xy", self.x, self.y)
-		print("vp", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-		print("vp2", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-		--]]
-
 		--print("render", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
 
 		-- Draw background body
@@ -620,6 +614,18 @@ def.default_skinner = {
 
 		-- ^ Variant with less overdraw?
 		--love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+
+		-- Draw current paragraph illumination, if applicable.
+		if self.illuminate_current_line then
+			love.graphics.setColor(res.color_current_line_illuminate)
+			local paragraph = line_ed.paragraphs[line_ed.d_car_para]
+			local para_y = paragraph[1].y
+
+			local last_sub = paragraph[#paragraph]
+			local para_h = last_sub.y + last_sub.h - para_y
+
+			love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr_y + para_y, self.vp2_w, para_h)
+		end
 
 		love.graphics.push()
 
@@ -696,13 +702,6 @@ def.default_skinner = {
 
 		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
 
-		-- DEBUG: draw history state
-		--[[
-		love.graphics.push("all")
-
-		love.graphics.pop()
-		--]]
-
 		--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
 		--print("line_ed.caret_box_xywh", line_ed.caret_box_x, line_ed.caret_box_y, line_ed.caret_box_w, line_ed.caret_box_h)
 
@@ -718,50 +717,6 @@ def.default_skinner = {
 			"h_byte:" .. line_ed.h_byte,
 			200, 200
 		)
-		love.graphics.pop()
-		--]]
-
-
-		--[[
-		-- Old history debug-print
-		love.graphics.push("all")
-
-		local hist_x = 8
-		local hist_y = 400
-		qp:reset()
-		qp:setOrigin(hist_x, hist_y)
-		qp:print2("HISTORY STATE. i_cat:", wid_text_box.input_category)
-
-		hist_y = qp:getYOrigin() + qp:getYPosition()
-
-		for i, entry in ipairs(wid_text_box.line_ed.hist.ledger) do
-			qp:reset()
-			qp:setOrigin(hist_x, hist_y)
-
-			if i == wid_text_box.line_ed.hist.pos then
-				love.graphics.setColor(1, 1, 1, 1)
-			else
-				love.graphics.setColor(0.8, 0.8, 0.8, 1)
-			end
-
-			qp:print2("cl: ", entry.car_line)
-			qp:print2("cb: ", entry.car_byte)
-			qp:print2("hl: ", entry.h_line)
-			qp:print2("hb: ", entry.h_byte)
-			qp:down()
-
-			for j, line in ipairs(entry.lines) do
-				-- No point in printing hundreds (or thousands) of lines which can't be seen.
-				if j > 10 then
-					break
-				end
-
-				qp:print3(j, ": ", line)
-			end
-
-			hist_x = hist_x + 128
-		end
-
 		love.graphics.pop()
 		--]]
 	end,

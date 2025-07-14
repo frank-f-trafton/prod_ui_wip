@@ -31,19 +31,4 @@ function edComBase.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_
 end
 
 
-function edComBase.applyCaretAlignOffset(caret_x, line_str, align, font)
-	if align == "left" then
-		-- n/a
-
-	elseif align == "center" then
-		caret_x = caret_x + math.floor(0.5 - font:getWidth(line_str) / 2)
-
-	elseif align == "right" then
-		caret_x = caret_x - font:getWidth(line_str)
-	end
-
-	return caret_x
-end
-
-
 return edComBase
