@@ -153,7 +153,6 @@ function lineEdM.new()
 	-- Arbitrary table of state intended to help manage syntax highlighting.
 	self.syntax_work = {}
 
-
 	self:dispSetHighlightDirtyRange(self.car_line, self.h_line)
 
 	-- X position hint when stepping up or down.
@@ -167,7 +166,28 @@ function lineEdM.new()
 end
 
 
--- * Support Methods *
+function _mt_ed_m:getFont()
+	return self.font
+end
+
+
+function _mt_ed_m:setFont(font) -- [update]
+	uiShared.loveTypeEval(1, font, "Font")
+
+	self.font = font or false
+	if self.font then
+		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
+		local em_width = font:getWidth("M")
+		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
+		self.width_line_feed = math.max(1, math.ceil(em_width / 4))
+
+		-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
+		-- All display lines need to be updated after calling.
+		self:displaySyncAll()
+	end
+
+	-- Force a cache update on the widget after calling this (client.update_flag = true).
+end
 
 
 function _mt_ed_m:getCaretOffsets()
@@ -208,31 +228,22 @@ end
 function _mt_ed_m:getCharacterDetailsAtPosition(x, y, split_x)
 	local paragraphs = self.paragraphs
 	local font = self.font
-
 	local para_i, sub_i = self:dispGetOffsetsAtY(y)
-
 	local paragraph = paragraphs[para_i]
 	local sub_line = paragraph[sub_i]
-	--print("para_i", para_i, "sub_i", sub_i, "y1", sub_line.y, "y2", sub_line.y + sub_line.h)
 
 	local byte, x_pos, width = self:dispGetSubLineInfoAtX(para_i, sub_i, x, split_x)
-	--print("byte", byte, "x_pos", x_pos, "width", width)
 
 	-- Convert display offset to core byte
 	local u_count = edComM.displaytoUCharCount(paragraph, sub_i, byte)
 
-	--print("u_count", u_count)
-
 	local core_line = para_i
 	local core_str = self.lines[core_line]
 	local core_byte = utf8.offset(core_str, u_count)
-	--print("core_byte", core_byte, "#core_str", #core_str)
 	local core_char = false
 	if core_byte <= #core_str then
 		core_char = string.sub(core_str, core_byte, utf8.offset(core_str, 2, core_byte) - 1)
 	end
-
-	--print("core_line", core_line, "core_byte", core_byte, "core_char", core_char)
 
 	return core_line, core_byte, core_char
 end
@@ -511,7 +522,7 @@ end
 -- * Core-to-display synchronization *
 
 
---- Update the display container offsets to reflect the current core offsets. Also update the caret rectangle as stored in 'line_ed'. The display text must be current at time of call.
+--- Update the display offsets to reflect the current core offsets. Also update the caret rectangle. The display text must be current at time of call.
 function _mt_ed_m:displaySyncCaretOffsets()
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
@@ -605,30 +616,6 @@ function _mt_ed_m:displaySyncAlign(line_i)
 
 	self:dispUpdateParagraphAlign(line_i)
 	self:updateVertPosHint()
-end
-
-
-function _mt_ed_m:getFont()
-	return self.font
-end
-
-
-function _mt_ed_m:setFont(font) -- [update]
-	uiShared.loveTypeEval(1, font, "Font")
-
-	self.font = font or false
-	if self.font then
-		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
-		local em_width = font:getWidth("M")
-		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-		self.width_line_feed = math.max(1, math.ceil(em_width / 4))
-
-		-- Client should refresh/clamp scrolling and ensure the caret is visible after this function is called.
-		-- All display lines need to be updated after calling.
-		self:displaySyncAll()
-	end
-
-	-- Force a cache update on the widget after calling this (client.update_flag = true).
 end
 
 
@@ -1171,7 +1158,7 @@ function _mt_ed_m:dispUpdateCaretRect()
 	self.caret_box_w = textUtil.getCharacterW(sub_line_cur.str, self.d_car_byte, font) or font:getWidth("_")
 
 	-- Apply horizontal alignment offsetting to caret.
-	self.caret_box_x = edComBase.applyCaretAlignOffset(self.caret_box_x, sub_line_cur.str, self.align, font)
+	self.caret_box_x = edComM.applyCaretAlignOffset(self.caret_box_x, sub_line_cur.str, self.align, font)
 
 	self.caret_box_y = sub_line_cur.y
 	self.caret_box_h = font:getHeight()

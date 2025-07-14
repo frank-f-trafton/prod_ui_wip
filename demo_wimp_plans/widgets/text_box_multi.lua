@@ -63,7 +63,6 @@ function plan.make(panel)
 
 	local function setAlign(tb, align_mode)
 		tb:setAlign(align_mode)
-		tb:updateAlignOffset()
 		tb:cacheUpdate()
 		tb:scrollGetCaretInBounds(true)
 	end
@@ -226,8 +225,10 @@ function plan.make(panel)
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
 
+	local ED_W, ED_H = 496, 350
+
 	local text_box = panel:addChild("input/text_box_multi")
-	demoShared.setStaticLayout(panel, text_box, xx, yy, 496, 350)
+	demoShared.setStaticLayout(panel, text_box, xx, yy, ED_W, ED_H)
 	text_box:setTag("demo_text_box")
 	text_box:setScrollBars(true, true)
 
@@ -239,13 +240,40 @@ function plan.make(panel)
 	text_box.tabs_to_spaces = false
 	text_box.auto_indent = true
 
-	--[[
+	-- [[
 	local str = ""
 	for i = 1, 100 do
 		str = str .. i .. "\n"
 	end
 	text_box:setText(str)
 	--]]
+
+
+	xx = x1
+	yy = yy + h2 + ED_H
+
+
+	local code_ed = panel:addChild("input/code_editor")
+	demoShared.setStaticLayout(panel, code_ed, xx, yy, ED_W, ED_H)
+	code_ed:setTag("demo_code_ed")
+	code_ed:setScrollBars(true, true)
+
+	code_ed.ghost_text = "Ghost text"
+
+	--code_ed.allow_line_feed = false
+	code_ed.allow_tab = true
+	code_ed.allow_untab = true
+	code_ed.tabs_to_spaces = false
+	code_ed.auto_indent = true
+
+	--[[
+	local str = ""
+	for i = 1, 100 do
+		str = str .. i .. "\n"
+	end
+	code_ed:setText(str)
+	--]]
+
 
 	_updateButtons(panel)
 end

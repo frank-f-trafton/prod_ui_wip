@@ -463,9 +463,6 @@ function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
 	local car_x2 = self.align_offset + line_ed.caret_box_x + math.max(line_ed.caret_box_w, line_ed.caret_box_w_edge) + self.caret_extend_x
 	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
 
-	--print("self.scr_tx", self.scr_tx, "car_x1", car_x1, "car_x2", car_x2)
-	--print("self.scr_ty", self.scr_ty, "car_y1", car_y1, "car_y2", car_y2)
-
 	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
 end
 
