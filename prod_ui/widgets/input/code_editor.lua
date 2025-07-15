@@ -25,22 +25,15 @@ Line #s    Viewport #1
 local context = select(1, ...)
 
 
--- LÖVE 12 compatibility
-local love_major, love_minor = love.getVersion()
-
-
 -- LÖVE Supplemental
 local utf8 = require("utf8") -- (Lua 5.3+)
 
 
 -- ProdUI
-
-local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputM = context:getLua("shared/lgc_input_m")
-local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -134,71 +127,21 @@ function def:cacheUpdate()
 	self:updateDocumentDimensions()
 
 	editFuncM.updateCaretShape(self)
+	editFuncM.updateVisibleParagraphs(self)
 
-	if self.replace_mode then
-		self.caret_fill = "line"
-	else
-		self.caret_fill = "fill"
-		self.caret_w = line_ed.caret_line_width
-	end
-
-	-- Find the first visible display paragraph (or rather, one before it) to cut down on rendering.
-	local y_pos = self.scr_y - self.vp_y -- XXX should this be viewport #2? Or does the viewport offset matter at all?
-
-	-- XXX default to 1?
-	--self.vis_para_top
-	for i, paragraph in ipairs(line_ed.paragraphs) do
-		local sub_one = paragraph[1]
-		if sub_one.y > y_pos then
-			self.vis_para_top = math.max(1, i - 1)
-			break
-		end
-	end
-
-	-- Find the last display paragraph (or one after it) as well.
-	self.vis_para_bot = #line_ed.paragraphs
-	for i = self.vis_para_top, #line_ed.paragraphs do
-		local paragraph = line_ed.paragraphs[i]
-		local sub_last = paragraph[#paragraph]
-		if sub_last.y + sub_last.h > y_pos + self.vp2_h then
-			self.vis_para_bot = i
-			break
-		end
-	end
-
-	--print("cacheUpdate", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
-
-	-- Update the text object, if applicable
 	if self.text_object then
-		local text_object = self.text_object
-
-		text_object:clear()
-
-		if line_ed.font ~= text_object:getFont() then
-			text_object:setFont(line_ed.font)
-		end
-
-		for i = self.vis_para_top, self.vis_para_bot do
-			local paragraph = line_ed.paragraphs[i]
-			for j, sub_line in ipairs(paragraph) do
-				text_object:add(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
-			end
-		end
+		editFuncM.updateTextBatch(self)
 	end
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHover(inst, mx, my, dx, dy)
 	if self == inst then
-		local ax, ay = self:getAbsolutePosition()
-		mouse_x = mouse_x - ax
-		mouse_y = mouse_y - ay
+		mx, my = self:getRelativePosition(mx, my)
 
-		lgcScroll.widgetProcessHover(self, mouse_x, mouse_y)
+		lgcScroll.widgetProcessHover(self, mx, my)
 
-		if mouse_x >= self.vp2_x and mouse_x < self.vp2_x + self.vp2_w
-		and mouse_y >= self.vp2_y and mouse_y < self.vp2_y + self.vp2_h
-		then
+		if widShared.pointInViewport(self, 2, mx, my) then
 			self.cursor_hover = self.skin.cursor_on
 		else
 			self.cursor_hover = nil
@@ -207,7 +150,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:uiCall_pointerHoverOff(inst, mx, my, dx, dy)
 	if self == inst then
 		lgcScroll.widgetClearHover(self)
 
@@ -225,7 +168,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble1()
 		end
 
-		local mouse_x, mouse_y = self:getRelativePosition(x, y)
+		local mx, my = self:getRelativePosition(x, y)
 		local handled = false
 
 		-- Check for pressing on scroll bar components.
@@ -239,73 +182,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if handled then
 			self.context:forceClickSequence(false, button, 1)
 
-		elseif widShared.pointInViewport(self, 2, mouse_x, mouse_y) then
-			local context = self.context
-			local line_ed = self.line_ed
-
-			self.line_ed:dispResetCaretBlink()
-
-			if button == 1 then
-				self.press_busy = "text-drag"
-
-				-- Apply scroll + margin offsets
-				local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.align_offset
-				local mouse_sy = mouse_y + self.scr_y - self.vp_y
-
-				local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, mouse_sy, true)
-
-				if context.cseq_button == 1 then
-					-- Not the same line+byte position as last click: force single-click mode.
-					if context.cseq_presses > 1  and (core_line ~= self.click_line or core_byte ~= self.click_byte) then
-						context:forceClickSequence(self, button, 1)
-						-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
-					end
-
-					if context.cseq_presses == 1 then
-						local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
-						self:caretToXY(not shift_down, mouse_sx, mouse_sy, true)
-						--self:scrollGetCaretInBounds() -- Helpful, or distracting?
-
-						self.click_line = line_ed.car_line
-						self.click_byte = line_ed.car_byte
-
-						self.update_flag = true
-
-					elseif context.cseq_presses == 2 then
-						self.click_line = line_ed.car_line
-						self.click_byte = line_ed.car_byte
-
-						-- Highlight group from highlight position to mouse position
-						self:highlightCurrentWord()
-
-						self.update_flag = true
-
-					elseif context.cseq_presses == 3 then
-						self.click_line = line_ed.car_line
-						self.click_byte = line_ed.car_byte
-
-						--- Highlight sub-lines from highlight position to mouse position
-						--line_ed:highlightCurrentLine()
-						self:highlightCurrentWrappedLine()
-
-						self.update_flag = true
-					end
-				end
-
-			elseif button == 2 then
-				lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
-
-				local root = self:getRootWidget()
-
-				--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
-
-				local lgcWimp = self.context:getLua("shared/lgc_wimp")
-				local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, x, y)
-				root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
-
-				pop_up:tryTakeThimble2()
-
-				-- Halt propagation
+		elseif widShared.pointInViewport(self, 2, mx, my) then
+			if lgcInputM.mousePressLogic(self, x, y, button, istouch, presses) then
+				-- Propagation is halted when a context menu is created.
 				return true
 			end
 		end
@@ -340,16 +219,9 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 	-- Catch wheel events from descendants that did not block it.
 
-	local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
+	lgcInputM.mouseWheelLogic(self, x, y)
 
-	self.scr_tx = self.scr_tx - x * wheel_scale
-	self.scr_ty = self.scr_ty - y * wheel_scale
-	-- XXX add support for non-animated, immediate scroll-to
-
-	self:scrollClampViewport()
-	lgcScroll.updateScrollBarShapes(self)
-
-	-- Stop bubbling
+	-- stop bubbling
 	return true
 end
 
@@ -371,112 +243,14 @@ end
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		local line_ed = self.line_ed
-
-		if self.allow_input then
-
-			local hist = line_ed.hist
-
-			self.line_ed:dispResetCaretBlink()
-
-			local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
-
-			local suppress_replace = false
-			if self.replace_mode then
-				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-				if line_ed.car_byte < #line_ed.lines[#line_ed.lines] + 1 then
-					self.input_category = false
-				end
-
-				-- Replace mode should not overwrite line feeds.
-				local line = line_ed.lines[line_ed.car_line]
-				if line_ed.car_byte > #line then
-					suppress_replace = true
-				end
-			end
-
-			local written = self:writeText(text, suppress_replace)
-			self.update_flag = true
-
-			local no_ws = string.find(written, "%S")
-			local entry = hist:getEntry()
-			local do_advance = true
-
-			if (entry and entry.car_line == old_line and entry.car_byte == old_byte)
-			and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
-			then
-				do_advance = false
-			end
-
-			if do_advance then
-				editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-			end
-			editHistM.writeEntry(line_ed, do_advance)
-			self.input_category = no_ws and "typing" or "typing-ws"
-
-			self:updateDocumentDimensions()
-			self:scrollGetCaretInBounds(true)
-		end
+		lgcInputM.textInputLogic(self, text)
 	end
 end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
-		local line_ed = self.line_ed
-		local hist = line_ed.hist
-
-		self.line_ed:dispResetCaretBlink()
-
-		local input_intercepted = false
-
-		if scancode == "application" then
-			-- Locate caret in UI space
-			local ax, ay = self:getAbsolutePosition()
-			local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x + self.align_offset
-			local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
-
-			lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
-
-			local root = self:getRootWidget()
-			local lgcWimp = self.context:getLua("shared/lgc_wimp")
-			local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
-			pop_up:tryTakeThimble2()
-
-			-- Halt propagation
-			return true
-		end
-
-		if input_intercepted then
-			return true
-		end
-
-		local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
-
-		-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
-		if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
-			scancode = keyMgr.scan_numlock[scancode]
-			key = love.keyboard.getKeyFromScancode(scancode)
-		end
-
-		local bind_action = editBindM[hot_scan] or editBindM[hot_key]
-
-		if bind_action then
-			-- NOTE: most history ledger changes are handled in executeBoundAction().
-			local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
-
-			if ok then
-				if update_scroll then
-					self.update_flag = true
-				end
-
-				self:updateDocumentDimensions() -- XXX WIP
-				self:scrollGetCaretInBounds(true) -- XXX WIP
-
-				-- Stop event propagation
-				return true
-			end
-		end
+		return lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	end
 end
 
@@ -492,8 +266,7 @@ function def:uiCall_update(dt)
 		if lgcInputM.mouseDragLogic(self) then
 			self.update_flag = true
 		end
-		if self.mouse_drag_x ~= 0 or self.mouse_drag_y ~= 0 then
-			self:scrollDeltaHV(self.mouse_drag_x * dt * 4, self.mouse_drag_y * dt * 4) -- XXX style/config
+		if widShared.dragToScroll(self, dt) then
 			self.update_flag = true
 		end
 	end
@@ -502,10 +275,9 @@ function def:uiCall_update(dt)
 
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
-			local mx, my = self.context.mouse_x, self.context.mouse_y
-			local ax, ay = self:getAbsolutePosition()
+			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 			local button_step = 350 -- XXX style/config
-			lgcScroll.widgetDragLogic(self, mx - ax, my - ay, button_step*dt)
+			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
 		end
 	end
 
@@ -516,24 +288,10 @@ function def:uiCall_update(dt)
 		self.update_flag = true
 	end
 
-	-- Update scroll bar registers and thumb position
-	local scr_h = self.scr_h
-	if scr_h then
-		lgcScroll.updateRegisters(scr_h, math.floor(0.5 + self.scr_x), self.vp_w, self.doc_w)
-
-		self.scr_h:updateThumb()
-	end
-
-	local scr_v = self.scr_v
-	if scr_v then
-		lgcScroll.updateRegisters(scr_v, math.floor(0.5 + self.scr_y), self.vp_h, self.doc_h)
-
-		self.scr_v:updateThumb()
-	end
-
+	-- update scroll bar registers and thumb position
 	lgcScroll.updateScrollBarShapes(self)
+	lgcScroll.updateScrollState(self)
 
-	-- Update cache if necessary.
 	if self.update_flag then
 		self:cacheUpdate()
 		self.update_flag = false
@@ -584,19 +342,6 @@ def.default_skinner = {
 
 		local res = self.allow_input and skin.res_readwrite or skin.res_readonly
 		local has_thimble = self == self.context.thimble1
-
-		-- XXX Debug renderer.
-		--[[
-		love.graphics.setColor(0, 0, 0, 0.90)
-		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
-
-		love.graphics.setColor(1, 1, 1, 1)
-		local yy = 0
-		for i, line in ipairs(self.line_ed.lines) do
-			love.graphics.print(i .. ": " .. line, 16, yy)
-			yy = yy + self.line_ed.font:getHeight()
-		end
-		--]]
 
 		local scx, scy, scw, sch = love.graphics.getScissor()
 		uiGraphics.intersectScissor(
@@ -701,24 +446,6 @@ def.default_skinner = {
 		love.graphics.pop()
 
 		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
-
-		--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
-		--print("line_ed.caret_box_xywh", line_ed.caret_box_x, line_ed.caret_box_y, line_ed.caret_box_w, line_ed.caret_box_h)
-
-		-- DEBUG: show editor details.
-		--[[
-		love.graphics.push("all")
-		love.graphics.setScissor()
-		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.print(
-			"car_line:" .. line_ed.car_line .. "\n" ..
-			"car_byte:" .. line_ed.car_byte .. "\n" ..
-			"h_line:" .. line_ed.h_line .. "\n" ..
-			"h_byte:" .. line_ed.h_byte,
-			200, 200
-		)
-		love.graphics.pop()
-		--]]
 	end,
 }
 

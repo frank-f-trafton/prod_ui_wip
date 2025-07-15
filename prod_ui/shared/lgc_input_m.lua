@@ -10,11 +10,20 @@ local lgcInputM = {}
 
 
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
+local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
+local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
+local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
+local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local widShared = context:getLua("core/wid_shared")
+
+
+-- LÖVE 12 compatibility
+local love_major, love_minor = love.getVersion()
 
 
 local _dummy_font = love.graphics.newFont(12)
@@ -59,10 +68,6 @@ function lgcInputM.setupInstance(self)
 	-- Tick this whenever something related to the text box needs to be cached again.
 	-- lineEditor itself should immediately apply its own state changes.
 	self.update_flag = true
-
-	-- Used to update viewport scrolling as a result of dragging the mouse in update().
-	self.mouse_drag_x = 0
-	self.mouse_drag_y = 0
 
 	-- Position offsets when clicking the mouse.
 	-- These are only valid when a mouse action is in progress.
@@ -143,10 +148,14 @@ end
 function lgcInputM.method_updateDocumentDimensions(self)
 	local line_ed = self.line_ed
 
+	-- height (assumes the final sub-line is current)
+	local last_para = line_ed.paragraphs[#line_ed.paragraphs]
+	local last_sub = last_para[#last_para]
+
+	self.doc_h = last_sub.y + last_sub.h
+
+	-- width
 	line_ed.view_w = self.vp_w
-
-	self.doc_h = self.line_ed:dispGetDocumentHeight()
-
 	local x1, x2 = self.line_ed:dispGetDocumentXBoundaries()
 	self.doc_w = (x2 - x1)
 
@@ -156,6 +165,184 @@ end
 
 function lgcInputM.updatePageJumpSteps(self, font)
 	self.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
+end
+
+
+function lgcInputM.textInputLogic(self, text)
+	local line_ed = self.line_ed
+
+	if self.allow_input then
+		local hist = line_ed.hist
+
+		self.line_ed:dispResetCaretBlink()
+
+		local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
+
+		local suppress_replace = false
+		if self.replace_mode then
+			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
+			if line_ed.car_byte < #line_ed.lines[#line_ed.lines] + 1 then
+				self.input_category = false
+			end
+
+			-- Replace mode should not overwrite line feeds.
+			local line = line_ed.lines[line_ed.car_line]
+			if line_ed.car_byte > #line then
+				suppress_replace = true
+			end
+		end
+
+		local written = self:writeText(text, suppress_replace)
+		self.update_flag = true
+
+		local no_ws = string.find(written, "%S")
+		local entry = hist:getEntry()
+		local do_advance = true
+
+		if (entry and entry.car_line == old_line and entry.car_byte == old_byte)
+		and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
+		then
+			do_advance = false
+		end
+
+		if do_advance then
+			editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+		end
+		editHistM.writeEntry(line_ed, do_advance)
+		self.input_category = no_ws and "typing" or "typing-ws"
+
+		self:updateDocumentDimensions()
+		self:scrollGetCaretInBounds(true)
+	end
+end
+
+
+function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
+	local line_ed = self.line_ed
+	local hist = line_ed.hist
+
+	self.line_ed:dispResetCaretBlink()
+
+	local input_intercepted = false
+
+	if scancode == "application" then
+		-- Locate caret in UI space
+		local ax, ay = self:getAbsolutePosition()
+		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x + self.align_offset
+		local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
+
+		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+		local root = self:getRootWidget()
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
+		pop_up:tryTakeThimble2()
+
+		-- Halt propagation
+		return true
+	end
+
+	if input_intercepted then
+		return true
+	end
+
+	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+
+	-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
+	if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
+		scancode = keyMgr.scan_numlock[scancode]
+		key = love.keyboard.getKeyFromScancode(scancode)
+	end
+
+	local bind_action = editBindM[hot_scan] or editBindM[hot_key]
+
+	if bind_action then
+		-- NOTE: most history ledger changes are handled in executeBoundAction().
+		local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
+
+		if ok then
+			if update_scroll then
+				self.update_flag = true
+			end
+
+			self:updateDocumentDimensions() -- XXX WIP
+			self:scrollGetCaretInBounds(true) -- XXX WIP
+
+			-- Stop event propagation
+			return true
+		end
+	end
+end
+
+
+function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
+	local line_ed = self.line_ed
+
+	line_ed:dispResetCaretBlink()
+	local mx, my = self:getRelativePosition(x, y)
+
+	if button == 1 then
+		self.press_busy = "text-drag"
+
+		-- apply scroll + margin offsets
+		local msx = mx + self.scr_x - self.vp_x - self.align_offset
+		local msy = my + self.scr_y - self.vp_y
+
+		local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(msx, msy, true)
+
+		if context.cseq_button == 1 then
+			-- Not the same line+byte position as last click: force single-click mode.
+			if context.cseq_presses > 1  and (core_line ~= self.click_line or core_byte ~= self.click_byte) then
+				context:forceClickSequence(self, button, 1)
+				-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
+			end
+
+			if context.cseq_presses == 1 then
+				local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+				self:caretToXY(not shift_down, msx, msy, true)
+				--self:scrollGetCaretInBounds() -- Helpful, or distracting?
+
+				self.click_line = line_ed.car_line
+				self.click_byte = line_ed.car_byte
+
+				self.update_flag = true
+
+			elseif context.cseq_presses == 2 then
+				self.click_line = line_ed.car_line
+				self.click_byte = line_ed.car_byte
+
+				-- Highlight group from highlight position to mouse position
+				self:highlightCurrentWord()
+
+				self.update_flag = true
+
+			elseif context.cseq_presses == 3 then
+				self.click_line = line_ed.car_line
+				self.click_byte = line_ed.car_byte
+
+				--- Highlight sub-lines from highlight position to mouse position
+				--line_ed:highlightCurrentLine()
+				self:highlightCurrentWrappedLine()
+
+				self.update_flag = true
+			end
+		end
+
+	elseif button == 2 then
+		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+
+		local root = self:getRootWidget()
+
+		--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
+		local lgcWimp = self.context:getLua("shared/lgc_wimp")
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+
+		pop_up:tryTakeThimble2()
+
+		-- Halt propagation
+		return true
+	end
 end
 
 
@@ -192,11 +379,19 @@ function lgcInputM.mouseDragLogic(self)
 		widget_needs_update = true
 	end
 
-	-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
-	self.mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
-	self.mouse_drag_y = (my < 0) and my or (my >= self.vp_h) and my - self.vp_h or 0
-
 	return widget_needs_update
+end
+
+
+function lgcInputM.mouseWheelLogic(self, x, y)
+	local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
+
+	self.scr_tx = self.scr_tx - x * wheel_scale
+	self.scr_ty = self.scr_ty - y * wheel_scale
+	-- XXX add support for non-animated, immediate scroll-to
+
+	self:scrollClampViewport()
+	lgcScroll.updateScrollBarShapes(self)
 end
 
 

@@ -730,15 +730,6 @@ end
 -- * Line container methods *
 
 
-function _mt_ed_m:dispGetDocumentHeight()
-	-- Assumes the final sub-line is current.
-	local last_para = self.paragraphs[#self.paragraphs]
-	local last_sub = last_para[#last_para]
-
-	return last_sub.y + last_sub.h
-end
-
-
 function _mt_ed_m:dispGetDocumentXBoundaries()
 	local x1, x2 = 0, 0
 

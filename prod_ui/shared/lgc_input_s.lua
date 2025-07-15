@@ -116,9 +116,6 @@ function lgcInputS.setupInstance(self)
 	self.caret_extend_x = 0
 	self.caret_extend_y = 0
 
-	-- Used to update viewport scrolling as a result of dragging the mouse in update().
-	self.mouse_drag_x = 0
-
 	-- Position offset when clicking the mouse.
 	-- This is only valid when a mouse action is in progress.
 	self.click_byte = 1
