@@ -229,7 +229,7 @@ end
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
-		self.line_ed:dispResetCaretBlink()
+		lgcInputM.resetCaretBlink(self.line_ed)
 	end
 end
 
@@ -271,7 +271,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	self.line_ed:dispUpdateCaretBlink(dt)
+	lgcInputM.updateCaretBlink(line_ed, dt)
 
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then

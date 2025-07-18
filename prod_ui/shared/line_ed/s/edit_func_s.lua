@@ -17,10 +17,6 @@ local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-
-
-local _enum_align = uiShared.makeLUTV("left", "center", "right")
 
 
 -- Helper functions to save and restore the internal state of the Line Editor.
@@ -29,11 +25,6 @@ local _line, _disp_text, _car_byte, _h_byte
 
 local function _check(self)
 	return not self.fn_check and true or self:fn_check()
-end
-
-
-local function _checkAlign(align)
-	if not _enum_align[align] then error("invalid align mode for single-line text input") end
 end
 
 
@@ -74,7 +65,7 @@ local function _writeText(self, line_ed, text, suppress_replace)
 		line_ed:clearHighlight()
 	end
 
-	-- If there is a highlight selection, get rid of it and insert the new text. This overrides replace_mode.
+	-- If there is a highlighted selection, get rid of it and insert the new text. This overrides replace_mode.
 	if line_ed:isHighlighted() then
 		_deleteHighlighted(line_ed)
 
@@ -141,7 +132,6 @@ end
 
 
 function editFuncS.setTextAlignment(self, align)
-	_checkAlign(align)
 	local old_align = self.align
 	self.align = align
 	return old_align ~= self.align
@@ -150,10 +140,8 @@ end
 
 function editFuncS.cutHighlightedToClipboard(self)
 	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
 
 	local cut = _deleteHighlighted(line_ed)
-
 	if cut then
 		cut = textUtil.sanitize(cut, self.bad_input_rule)
 
@@ -168,8 +156,6 @@ function editFuncS.cutHighlightedToClipboard(self)
 			return cut
 		end
 	end
-
-	line_ed:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -191,18 +177,18 @@ end
 
 function editFuncS.pasteClipboard(self)
 	local line_ed = self.line_ed
+
 	local line, disp, car_byte, h_byte = line_ed:copyState()
-
-	if line_ed:isHighlighted() then
-		_deleteHighlighted(line_ed)
-	end
-
 	local text = love.system.getClipboardText()
 
 	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
+		if line_ed:isHighlighted() then
+			_deleteHighlighted(line_ed)
+		end
+
 		_writeText(self, line_ed, text, true)
 		if _check(self) then
 			line_ed:updateDisplayText()
@@ -300,13 +286,10 @@ function editFuncS.deleteGroup(self)
 		if first_group ~= "whitespace" then
 			hit_non_ws = true
 		end
-		--print("HIT_NON_WS", hit_non_ws, "FIRST_GROUP", first_group)
 
 		local byte_right = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
 		byte_right = byte_right - 1
-		--print("deleteGroup: byte_right", byte_right)
 
-		--print("ranges:", line_ed.car_byte, byte_right)
 		rv = line_ed:deleteText(true, line_ed.car_byte, byte_right)
 	end
 
@@ -509,8 +492,10 @@ end
 
 
 function editFuncS.stepHistory(self, dir)
-	-- -1 == undo, 1 == redo
 	local line_ed = self.line_ed
+
+	-- -1 == undo, 1 == redo
+
 	local hist = line_ed.hist
 	local line, disp, car_byte, h_byte = line_ed:copyState()
 	local old_pos = hist:getPosition()
@@ -538,7 +523,7 @@ end
 -- @param self The widget.
 -- @param text The input text. It will be sanitized, and possibly trimmed to fit into the uChar limit.
 -- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
--- entering line feeds, etc.
+--	entering line feeds, etc.
 -- @return The sanitized and trimmed text which was inserted into the field.
 function editFuncS.writeText(self, text, suppress_replace)
 	local line_ed = self.line_ed

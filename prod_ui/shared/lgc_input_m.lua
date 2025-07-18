@@ -14,6 +14,7 @@ local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
+local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
@@ -45,7 +46,7 @@ function lgcInputM.setupInstance(self)
 
 	-- Ghost text appears when the field is empty.
 	-- This is not part of the lineEditor core, and so it is not drawn through
-	-- the seqString or displayLine sub-objects, and is not affected by glyph masking.
+	-- the seqString or displayLine sub-objects.
 	self.ghost_text = false
 
 	-- false: use content text alignment.
@@ -174,7 +175,7 @@ function lgcInputM.textInputLogic(self, text)
 	if self.allow_input then
 		local hist = line_ed.hist
 
-		self.line_ed:dispResetCaretBlink()
+		lgcInputM.resetCaretBlink(line_ed)
 
 		local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
 
@@ -219,13 +220,13 @@ end
 
 function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	local line_ed = self.line_ed
-	local hist = line_ed.hist
 
-	self.line_ed:dispResetCaretBlink()
+	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
-	local input_intercepted = false
+	lgcInputM.resetCaretBlink(line_ed)
 
-	if scancode == "application" then
+	-- pop-up menu (undo, etc.)
+	if scancode == "application" or (shift_down and scancode == "f10") then
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
 		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x + self.align_offset
@@ -233,7 +234,6 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
-		local root = self:getRootWidget()
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
 		pop_up:tryTakeThimble2()
@@ -242,35 +242,16 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		return true
 	end
 
-	if input_intercepted then
-		return true
-	end
-
-	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
-
 	-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
 	if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
 		scancode = keyMgr.scan_numlock[scancode]
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local bind_action = editBindM[hot_scan] or editBindM[hot_key]
+	local bound_func = editBindM[hot_scan] or editBindM[hot_key]
 
-	if bind_action then
-		-- NOTE: most history ledger changes are handled in executeBoundAction().
-		local ok, update_scroll, caret_in_view, write_history = self:executeBoundAction(bind_action)
-
-		if ok then
-			if update_scroll then
-				self.update_flag = true
-			end
-
-			self:updateDocumentDimensions() -- XXX WIP
-			self:scrollGetCaretInBounds(true) -- XXX WIP
-
-			-- Stop event propagation
-			return true
-		end
+	if bound_func then
+		return editWrapM.wrapAction(self, bound_func)
 	end
 end
 
@@ -278,7 +259,7 @@ end
 function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 	local line_ed = self.line_ed
 
-	line_ed:dispResetCaretBlink()
+	lgcInputM.resetCaretBlink(line_ed)
 	local mx, my = self:getRelativePosition(x, y)
 
 	if button == 1 then
@@ -353,7 +334,7 @@ function lgcInputM.mouseDragLogic(self)
 
 	local widget_needs_update = false
 
-	line_ed:dispResetCaretBlink()
+	lgcInputM.resetCaretBlink(line_ed)
 
 	-- Relative mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -392,6 +373,21 @@ function lgcInputM.mouseWheelLogic(self, x, y)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollBarShapes(self)
+end
+
+
+function lgcInputM.resetCaretBlink(line_ed)
+	line_ed.caret_blink_time = line_ed.caret_blink_reset
+end
+
+
+function lgcInputM.updateCaretBlink(line_ed, dt)
+	line_ed.caret_blink_time = line_ed.caret_blink_time + dt
+	if line_ed.caret_blink_time > line_ed.caret_blink_on + line_ed.caret_blink_off then
+		line_ed.caret_blink_time = math.max(-(line_ed.caret_blink_on + line_ed.caret_blink_off), line_ed.caret_blink_time - (line_ed.caret_blink_on + line_ed.caret_blink_off))
+	end
+
+	line_ed.caret_is_showing = line_ed.caret_blink_time < line_ed.caret_blink_off
 end
 
 

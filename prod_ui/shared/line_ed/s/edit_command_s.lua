@@ -1,5 +1,5 @@
 --[[
-Wrappable commands for common LineEditor actions.
+Wrappable command functions for common LineEditor actions.
 
 Function arguments:
 1) self: The client widget
@@ -52,12 +52,6 @@ end
 
 function editCommandS.toggleReplaceMode(self)
 	local ok = editFuncS.setReplaceMode(self, not editFuncS.getReplaceMode(self))
-	return ok
-end
-
-
-function editCommandS.cutHighlightedToClipboard(self)
-	local ok = editFuncS.cutHighlightedToClipboard(self)
 	return ok
 end
 
@@ -178,22 +172,22 @@ function editCommandS.caretJumpLeft(self)
 end
 
 
-function editCommandS.caretRight(self)
+function editCommandS.caretLeft(self)
 	if self.line_ed:isHighlighted() then
-		editFuncS.caretHighlightEdgeRight(self)
+		editFuncS.caretHighlightEdgeLeft(self)
 	else
-		editFuncS.caretStepRight(self, true)
+		editFuncS.caretStepLeft(self, true)
 	end
 
 	return true, nil, true
 end
 
 
-function editCommandS.caretLeft(self)
+function editCommandS.caretRight(self)
 	if self.line_ed:isHighlighted() then
-		editFuncS.caretHighlightEdgeLeft(self)
+		editFuncS.caretHighlightEdgeRight(self)
 	else
-		editFuncS.caretStepLeft(self, true)
+		editFuncS.caretStepRight(self, true)
 	end
 
 	return true, nil, true
@@ -211,9 +205,9 @@ function editCommandS.highlightCurrentWord(self)
 end
 
 
-function editCommandS.caretHighlightEdgeRight(self)
+function editCommandS.caretHighlightEdgeLeft(self)
 	if self.allow_highlight then
-		editFuncS.caretHighlightEdgeRight(self)
+		editFuncS.caretHighlightEdgeLeft(self)
 	else
 		editFuncS.clearHighlight(self)
 	end
@@ -222,9 +216,9 @@ function editCommandS.caretHighlightEdgeRight(self)
 end
 
 
-function editCommandS.caretHighlightEdgeLeft(self)
+function editCommandS.caretHighlightEdgeRight(self)
 	if self.allow_highlight then
-		editFuncS.caretHighlightEdgeLeft(self)
+		editFuncS.caretHighlightEdgeRight(self)
 	else
 		editFuncS.clearHighlight(self)
 	end
@@ -299,15 +293,13 @@ end
 
 function editCommandS.backspace(self)
 	if self.allow_input then
-		local backspaced
-
 		if self.line_ed:isHighlighted() then
-			backspaced = editFuncS.deleteHighlighted(self)
+			local backspaced = editFuncS.deleteHighlighted(self)
 			if backspaced then
 				return true, true, true, true
 			end
 		else
-			backspaced = editFuncS.backspaceUChar(self, 1)
+			local backspaced = editFuncS.backspaceUChar(self, 1)
 			if backspaced then
 				return true, true, true, "bsp", backspaced
 			end
@@ -319,10 +311,10 @@ end
 function editCommandS.deleteHighlighted(self)
 	if self.allow_input then
 		if self.line_ed:isHighlighted() then
-			editFuncS.deleteHighlighted(self)
-
 			-- Always write history if anything was deleted.
-			return true, true, true, true
+			if editFuncS.deleteHighlighted(self) then
+				return true, true, true, true
+			end
 		end
 	end
 end
