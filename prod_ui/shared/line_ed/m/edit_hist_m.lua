@@ -1,11 +1,4 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
---[[
-	LineEditor history implementation.
-
-	IMPORTANT: For password fields, you should disable undo/redo history.
---]]
+-- LineEditor (multi-line) history implementation.
 
 
 local context = select(1, ...)

@@ -206,13 +206,14 @@ end
 -- @param copy_deleted If true, return the deleted text as a string.
 -- @param byte_1 The first byte offset to delete from.
 -- @param byte_2 The final byte offset to delete to.
--- @return The deleted text as a string, if 'copy_deleted' was true and any text was removed, or nil.
+-- @return The deleted text as a string, if 'copy_deleted' was true (and at least one character was deleted), or nil.
 function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2) -- [update]
 	if byte_1 <= byte_2 then
 		local deleted
 		if copy_deleted then
 			deleted = self.line:sub(byte_1, byte_2)
 		end
+
 		self.line = edComS.delete(self.line, byte_1, byte_2)
 		self.car_byte, self.h_byte = byte_1, byte_1
 

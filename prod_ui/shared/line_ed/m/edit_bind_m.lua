@@ -1,6 +1,3 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
 -- Default action bindings.
 
 
@@ -89,7 +86,7 @@ editBindM["S+kpenter"] = editActM.typeLineFeed
 editBindM["+tab"] = editActM.typeTab
 editBindM["S+tab"] = editActM.typeUntab
 
-editBindM["C+a"] = editActM.selectAll
+editBindM["C+a"] = editActM.highlightAll
 editBindM["C+c"] = editActM.copy
 editBindM["C+x"] = editActM.cut
 editBindM["S+delete"] = editActM.cut
@@ -104,8 +101,8 @@ editBindM["C+y"] = editActM.redo
 
 -- DEBUG: Test mouse-click commands from the keyboard
 --[[
-editBindM["CA+w"] = editActM.selectCurrentWord
-editBindM["CA+a"] = editActM.selectCurrentLine
+editBindM["CA+w"] = editActM.highlightCurrentWord
+editBindM["CA+a"] = editActM.highlightCurrentLine
 --]]
 
 

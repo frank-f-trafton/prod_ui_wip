@@ -200,32 +200,8 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 	local bound_func = editBindS[hot_scan] or editBindS[hot_key]
 
 	if bound_func then
-		-- XXX: cleanup (just do a return) once the old debug stuff is removed below.
-		local r1, r2 = editWrapS.wrapAction(self, bound_func)
-		if r1 then
-			-- Stop event propagation
-			return r1, r2
-		end
+		return editWrapS.wrapAction(self, bound_func)
 	end
-
-
-	-- XXX: This is old debug functionality that should be moved elsewhere.
-	--[[
-	elseif scancode == "f6" then
-		-- XXX: debug: left align
-
-	elseif scancode == "f7" then
-		-- XXX: debug: center align
-
-	elseif scancode == "f8" then
-		-- XXX: debug: right align
-
-	elseif scancode == "f9" then
-		-- XXX: masking (for passwords)
-
-	elseif scancode == "f10" then
-		-- XXX: debug: colorization test
-	--]]
 end
 
 

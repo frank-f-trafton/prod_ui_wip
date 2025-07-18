@@ -16,21 +16,34 @@ local utf8 = require("utf8")
 local code_groups = context:getLua("shared/line_ed/code_groups")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
+local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
+local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
-function client:getReplaceMode()
+local _enum_align = uiShared.makeLUTV("left", "center", "right")
+
+
+function client:deleteHighlighted()
+	editWrapM.wrapAction(self, editCommandM.deleteHighlighted)
+end
+
+
+function client:backspace()
+	editWrapM.wrapAction(self, editCommandM.backspace)
+end
+
+
+--[[!]] function client:getReplaceMode()
 	return self.replace_mode
 end
 
 
-function client:setReplaceMode(enabled)
+--[[!]] function client:setReplaceMode(enabled)
 	self.replace_mode = not not enabled
 end
-
-
--- * Font, Wrap, Align state, Width *
 
 
 function client:getWrapMode()
@@ -55,69 +68,13 @@ function client:getAlign()
 end
 
 
-function client:setAlign(align)
-	local line_ed = self.line_ed
-
-	if align ~= "left" and align ~= "center" and align ~= "right" then
-		error("arg #2: invalid align setting.")
+function client:setTextAlignment(align)
+	if not _enum_align[align] then
+		error("invalid align mode")
 	end
 
-	local old_align = line_ed.align
-	line_ed.align = align
-	if old_align ~= align then
-		-- Update just the alignment of sub-lines.
-		self.line_ed:displaySyncAlign(1)
-		self.line_ed:displaySyncCaretOffsets()
-
-		-- XXX refresh: update align_offset, clamp scroll, get caret in bounds
-
-		return true
-	end
+	editWrapM.wrapAction(self, editCommandM.setTextAlignment, align)
 end
-
-
--- * / Font, Wrap, Align state, Width *
-
-
--- * Masking state *
-
-
-function client:getMasking()
-	local line_ed = self.line_ed
-
-	return line_ed.masked, (line_ed.masked) and line_ed.mask_glyph or nil
-end
-
-
-function client:setMasking(enabled, optional_glyph)
-	local line_ed = self.line_ed
-
-	line_ed.masked = not not enabled
-
-	if optional_glyph then
-		self.line_ed:setMaskGlyph(optional_glyph)
-	else
-		self.line_ed:displaySyncAll()
-	end
-end
-
-
-function client:setMaskGlyph(glyph)
-	local line_ed = self.line_ed
-
-	if utf8.len(glyph) ~= 1 then
-		error("masking glyph must be exactly one code point.")
-	end
-
-	line_ed.mask_glyph = glyph
-	self.line_ed:displaySyncAll()
-end
-
-
--- * / Masking state *
-
-
--- * Colorization state *
 
 
 function client:getColorization()
@@ -132,12 +89,6 @@ function client:setColorization(enabled)
 	-- Refresh everything
 	self.line_ed:displaySyncAll()
 end
-
-
--- * / Colorization state *
-
-
--- * Highlight State *
 
 
 function client:getHighlightEnabled(enabled)
@@ -181,32 +132,11 @@ function client:setHighlightEnabled(enabled)
 end
 
 
--- * / Highlight State *
-
-
--- * History management *
-
-
 function client:stepHistory(dir)
-	-- -1 == undo
-	-- 1 == redo
+	uiShared.type1(1, dir, "number")
 
-	local line_ed = self.line_ed
-	local hist = line_ed.hist
-
-	local changed, entry = hist:moveToEntry(hist.pos + dir)
-
-	if changed then
-		editHistM.applyEntry(self, entry)
-		line_ed:displaySyncAll()
-	end
+	editWrapM.wrapAction(self, editCommandM.stepHistory, dir)
 end
-
-
--- * / History management *
-
-
--------------------- Unsorted --------------------
 
 
 function client:getText(line_1, line_2) -- XXX maybe replace with a call to lines:copyString().
@@ -239,70 +169,32 @@ end
 
 
 function client:clearHighlight()
-	self.line_ed:clearHighlight()
+	editWrapM.wrapAction(self, editCommandM.clearHighlight)
 end
 
 
 function client:highlightAll()
-	local line_ed = self.line_ed
-
-	line_ed.car_line = #line_ed.lines
-	line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
-
-	line_ed.h_line = 1
-	line_ed.h_byte = 1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	editWrapM.wrapAction(self, editCommandM.highlightAll)
 end
 
 
---- Moves caret to the left highlight edge
 function client:caretHighlightEdgeLeft()
-	local line_ed = self.line_ed
-
-	local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
-
-	line_ed.car_line = line_1
-	line_ed.car_byte = byte_1
-	line_ed.h_line = line_1
-	line_ed.h_byte = byte_1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	line_ed:updateDispHighlightRange()
+	editWrapM.wrapAction(self, editCommandM.caretHighlightEdgeLeft)
 end
 
 
---- Moves caret to the right highlight edge
 function client:caretHighlightEdgeRight()
-	local line_ed = self.line_ed
-
-	local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
-
-	line_ed.car_line = line_2
-	line_ed.car_byte = byte_2
-	line_ed.h_line = line_2
-	line_ed.h_byte = byte_2
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	line_ed:updateDispHighlightRange()
+	editWrapM.wrapAction(self, editCommandM.caretHighlightEdgeRight)
 end
 
 
 function client:highlightCurrentLine()
-	local line_ed = self.line_ed
-
-	line_ed.h_line = line_ed.car_line
-	line_ed.car_byte, line_ed.h_byte = 1, #line_ed.lines[line_ed.car_line] + 1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	editWrapM.wrapAction(self, editCommandM.highlightCurrentLine)
 end
 
 
 function client:highlightCurrentWord()
+	editWrapM.wrapAction(self, editCommandM.highlightCurrentWord)
 	local line_ed = self.line_ed
 
 	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
@@ -334,160 +226,22 @@ end
 
 
 function client:caretStepUp(clear_highlight, n_steps)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-	local font = line_ed.font
-	local paragraphs = line_ed.paragraphs
-
-	n_steps = n_steps or 1
-
-	-- Already at top sub-line: move to start.
-	if line_ed.d_car_para <= 1 and line_ed.d_car_sub <= 1 then
-		line_ed.car_line = 1
-		line_ed.car_byte = 1
-
-		line_ed:displaySyncCaretOffsets()
-		line_ed:updateVertPosHint()
-		if clear_highlight then
-			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
-		end
-	else
-		-- Get the offsets for the sub-line 'n_steps' above.
-		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.d_car_para, line_ed.d_car_sub, -n_steps)
-
-		-- Find the closest uChar / glyph to the current X hint.
-		local d_sub_t = paragraphs[d_para][d_sub]
-		local d_str = d_sub_t.str
-		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, line_ed.vertical_x_hint - d_sub_t.x)
-
-		-- Not the last sub-line in the Paragraph: correct leftmost position so that it doesn't
-		-- spill over to the next sub-line (and get stuck).
-		-- [[
-		if d_sub < #paragraphs[d_para] then
-			new_byte = math.min(#d_str, new_byte)
-		end
-		--]]
-
-		-- Convert display offsets to ones suitable for logical lines.
-		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		line_ed.car_line = d_para
-		line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
-
-		line_ed:displaySyncCaretOffsets()
-		if clear_highlight then
-			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
-		end
-	end
+	editWrapM.wrapAction(self, editCommandM.caretStepUp, clear_highlight, n_steps)
 end
 
 
 function client:caretStepDown(clear_highlight, n_steps)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-	local font = line_ed.font
-	local paragraphs = line_ed.paragraphs
-
-	n_steps = n_steps or 1
-
-	-- Already at bottom sub-line: move to end.
-	if line_ed.d_car_para >= #paragraphs and line_ed.d_car_sub >= #paragraphs[#paragraphs] then
-		line_ed.car_line = #line_ed.lines
-		line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
-
-		line_ed:displaySyncCaretOffsets()
-		line_ed:updateVertPosHint()
-		if clear_highlight then
-			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
-		end
-	else
-		-- Get the offsets for the sub-line 'n_steps' below.
-		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.d_car_para, line_ed.d_car_sub, n_steps)
-
-		-- Find the closest uChar / glyph to the current X hint.
-		local d_sub_t = paragraphs[d_para][d_sub]
-		local d_str = d_sub_t.str
-		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, line_ed.vertical_x_hint - d_sub_t.x)
-
-		-- Not the last sub-line in the Paragraph: correct rightmost position so that it doesn't
-		-- spill over to the next sub-line.
-		if d_sub < #paragraphs[d_para] then
-			new_byte = math.min(#d_str, new_byte)
-		end
-
-		-- Convert display offsets to ones suitable for logical lines.
-		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		line_ed.car_line = d_para
-		line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
-
-		line_ed:displaySyncCaretOffsets()
-		if clear_highlight then
-			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
-		end
-	end
+	editWrapM.wrapAction(self, editCommandM.caretStepDown, clear_highlight, n_steps)
 end
 
 
 function client:caretStepUpCoreLine(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	-- Already at top line: move to start.
-	if line_ed.car_line <= 1 then
-		line_ed.car_byte = 1
-
-	-- Already at position 1 on the current line: move up one line
-	elseif line_ed.car_byte == 1 then
-		line_ed.car_line = math.max(1, line_ed.car_line - 1)
-		line_ed.car_byte = 1
-
-	-- Otherwise, move to position 1 in the current line.
-	else
-		line_ed.car_byte = 1
-	end
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretStepUpCoreLine, clear_highlight)
 end
 
 
 function client:caretStepDownCoreLine(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	-- Already at bottom line: move to end.
-	if line_ed.car_line == #lines then
-		line_ed.car_byte = #lines[#lines] + 1
-
-	-- Already at last position in logical line: move to next line
-	elseif line_ed.car_byte == #lines[line_ed.car_line] + 1 then
-		line_ed.car_line = math.min(line_ed.car_line + 1, #lines)
-		line_ed.car_byte = #lines[line_ed.car_line] + 1
-
-	-- Otherwise, move to the last position in the current line.
-	else
-		line_ed.car_byte = #lines[line_ed.car_line] + 1
-	end
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretStepDownCoreLine, clear_highlight)
 end
 
 
@@ -500,42 +254,10 @@ function client:caretToXY(clear_highlight, x, y, split_x)
 end
 
 
-
---- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
--- @param text The input text. It will be sanitized and possibly trimmed to fit into the uChar limit.
--- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
--- entering line feeds, typing at the end of a line (so as not to overwrite line feeds), etc.
--- @return The sanitized and trimmed text which was inserted into the field.
 function client:writeText(text, suppress_replace)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	uiShared.type1(1, text, "string")
 
-	-- Sanitize input
-	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
-
-	if not self.allow_highlight then
-		line_ed:clearHighlight()
-	end
-
-	-- If there is a highlight selection, get rid of it and insert the new text. This overrides replace_mode.
-	if line_ed:isHighlighted() then
-		self:deleteHighlightedText()
-
-	elseif self.replace_mode and not suppress_replace then
-		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		self:deleteUChar(utf8.len(text))
-	end
-
-	-- Trim text to fit the allowed uChars limit.
-
-	-- XXX Planning to add and subtract to this as strings are written and deleted.
-	-- For now, just recalculate the length to ensure things are working.
-	line_ed.u_chars = lines:uLen()
-	text = textUtil.trimString(text, self.u_chars_max - line_ed.u_chars)
-
-	line_ed:insertText(text)
-
-	return text
+	editWrapM.wrapAction(self, editCommandM.writeText, text, suppress_replace)
 end
 
 
@@ -550,163 +272,33 @@ function client:setText(text)
 end
 
 
---- Delete characters by stepping backwards from the caret position.
--- @param n_u_chars The number of code points to delete.
--- @return The deleted characters in string form, or nil if nothing was deleted.
-function client:backspaceUChar(n_u_chars)
-	local line_ed = self.line_ed
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-	local line_1, byte_1, u_count = lines:countUChars(-1, line_ed.car_line, line_ed.car_byte, n_u_chars)
-
-	if u_count > 0 then
-		return line_ed:deleteText(true, line_1, byte_1, line_ed.car_line, line_ed.car_byte - 1)
-	end
+function client:cut()
+	editWrapM.wrapAction(self, editCommandM.cut)
 end
 
 
--- * Clipboard methods *
-
-
-function client:copyHighlightedToClipboard()
-	local line_ed = self.line_ed
-
-	local copied = self:getHighlightedText()
-
-	-- Don't leak masked string info.
-	if line_ed.masked then
-		copied = string.rep(line_ed.mask_glyph, utf8.len(copied))
-	end
-
-	copied = textUtil.sanitize(copied, self.bad_input_rule)
-
-	love.system.setClipboardText(copied)
+function client:copy()
+	editWrapM.wrapAction(self, editCommandM.copy)
 end
 
 
-function client:cutHighlightedToClipboard()
-	local line_ed = self.line_ed
-
-	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
-
-	local cut = self:deleteHighlightedText()
-
-	if cut then
-		cut = textUtil.sanitize(cut, self.bad_input_rule)
-
-		-- Don't leak masked string info.
-		if line_ed.masked then
-			cut = table.concat(cut, "\n")
-			cut = string.rep(line_ed.mask_glyph, utf8.len(cut))
-		end
-
-		love.system.setClipboardText(cut)
-
-		self.input_category = false
-
-		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-		editHistM.writeEntry(line_ed, true)
-	end
-end
-
-
-function client:pasteClipboardText()
-	local line_ed = self.line_ed
-
-	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
-
-	if line_ed:isHighlighted() then
-		self:deleteHighlightedText()
-	end
-
-	local text = love.system.getClipboardText()
-
-	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
-	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
-	-- Check both cases here to be sure.
-	if text and text ~= "" then
-		self.input_category = false
-		self:writeText(text, true)
-
-		editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-		editHistM.writeEntry(line_ed, true)
-	end
-end
-
-
---- Delete highlighted text from the field.
--- @return Substring of the deleted text.
-function client:deleteHighlightedText()
-	local line_ed = self.line_ed
-
-	if not self:isHighlighted() then
-		return
-	end
-
-	-- Clean up display highlight beforehand. Much harder to determine the offsets after deleting things.
-	local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
-	line_ed:highlightCleanup()
-
-	return line_ed:deleteText(true, line_1, byte_1, line_2, byte_2 - 1)
+function client:paste()
+	editWrapM.wrapAction(self, editCommandM.paste)
 end
 
 
 function client:deleteLine()
-	local line_ed = self.line_ed
-
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-
-	local retval
-	-- Multi-line, caret is not on the last line
-	if line_ed.car_line < #lines then
-		retval = line_ed:deleteText(true, line_ed.car_line, 1, line_ed.car_line + 1, 0)
-
-	-- Multi-line, on the last line
-	elseif line_ed.car_line > 1 then
-		retval = line_ed:deleteText(true, line_ed.car_line - 1, #lines[line_ed.car_line - 1] + 1, line_ed.car_line, #lines[line_ed.car_line])
-
-	-- Document is a single empty line
-	elseif #lines[1] == 0 then
-		retval = nil
-
-	-- Document is a single line, with contents that can be deleted
-	else
-		retval = line_ed:deleteText(true, line_ed.car_line, 1, line_ed.car_line, #lines[line_ed.car_line])
-	end
-
-	-- Force to position 1 of the current line and recache caret details
-	line_ed.car_byte = 1
-	line_ed.h_byte = 1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-
-	return retval
+	editWrapM.wrapAction(self, editCommandM.deleteLine)
 end
 
 
 function client:deleteCaretToLineEnd()
-	local line_ed = self.line_ed
-
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-
-	return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_ed.car_line, #lines[line_ed.car_line])
+	editWrapM.wrapAction(self, editCommandM.deleteCaretToLineEnd)
 end
 
 
 function client:deleteCaretToLineStart()
-	local line_ed = self.line_ed
-
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-
-	return line_ed:deleteText(true, line_ed.car_line, 1, line_ed.car_line, line_ed.car_byte - 1)
+	editWrapM.wrapAction(self, editCommandM.deleteCaretToLineStart)
 end
 
 
@@ -714,17 +306,9 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
-	local line_ed = self.line_ed
+	uiShared.type1(1, n_u_chars, "number")
 
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-	local line_2, byte_2, u_count = lines:countUChars(1, line_ed.car_line, line_ed.car_byte, n_u_chars)
-
-	if u_count > 0 then
-		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
-		return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_2, byte_2 - 1)
-	end
+	editWrapM.wrapAction(self, editCommandM.deleteUChar, n_u_chars)
 end
 
 
@@ -740,218 +324,52 @@ end
 
 
 function client:backspaceGroup()
-	local line_ed = self.line_ed
-
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-	local line_left, byte_left
-
-	if line_ed.car_byte == 1 and line_ed.car_line > 1 then
-		line_left = line_ed.car_line  - 1
-		byte_left = #lines[line_left] + 1
-	else
-		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, true)
-	end
-
-	if line_left then
-		if line_left ~= line_ed.car_line or byte_left ~= line_ed.car_byte then
-			return line_ed:deleteText(true, line_left, byte_left, line_ed.car_line, line_ed.car_byte - 1)
-		end
-	end
+	editWrapM.wrapAction(self, editCommandM.backspaceGroup)
 end
 
 
 function client:deleteGroup()
-	local line_ed = self.line_ed
-
-	line_ed:highlightCleanup()
-
-	local lines = line_ed.lines
-	local line_right, byte_right
-
-	if line_ed.car_byte == #lines[line_ed.car_line] + 1 and line_ed.car_line < #lines then
-		line_right = line_ed.car_line + 1
-		byte_right = 0
-	else
-		local hit_non_ws = false
-		local peeked = lines:peekCodePoint(line_ed.car_line, line_ed.car_byte)
-		local first_group = code_groups[peeked]
-		if first_group ~= "whitespace" then
-			hit_non_ws = true
-		end
-		--print("HIT_NON_WS", hit_non_ws, "PEEKED", peeked, "FIRST_GROUP", first_group)
-
-		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, true)
-		byte_right = byte_right - 1
-		--print("deleteGroup: line_right", line_right, "byte_right", byte_right)
-	end
-
-	--print("ranges:", line_ed.car_line, line_ed.car_byte, line_right, byte_right)
-	local del = line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_right, byte_right)
-	--print("DEL", "|"..(del or "<nil>").."|")
-	if del ~= "" then
-		return del
-	end
+	editWrapM.wrapAction(self, editCommandM.deleteGroup)
 end
 
 
--- * / Clipboard methods *
-
-
 function client:caretStepLeft(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	local new_line, new_byte = lines:offsetStepLeft(line_ed.car_line, line_ed.car_byte)
-	if new_line then
-		line_ed.car_line = new_line
-		line_ed.car_byte = new_byte
-	end
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretStepLeft, clear_highlight)
 end
 
 
 function client:caretStepRight(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	local new_line, new_byte = lines:offsetStepRight(line_ed.car_line, line_ed.car_byte)
-	if new_line then
-		line_ed.car_line = new_line
-		line_ed.car_byte = math.max(1, new_byte)
-	end
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretStepRight, clear_highlight)
 end
 
 
 function client:caretJumpLeft(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	line_ed.car_line, line_ed.car_byte = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, false)
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretJumpLeft, clear_highlight)
 end
 
 
 function client:caretJumpRight(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	local hit_non_ws = false
-	local first_group = code_groups[lines:peekCodePoint(line_ed.car_line, line_ed.car_byte)]
-	if first_group ~= "whitespace" then
-		hit_non_ws = true
-	end
-
-	--print("hit_non_ws", hit_non_ws, "first_group", first_group)
-
-	--(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
-	line_ed.car_line, line_ed.car_byte = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, false)
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
-
-	-- One more step to land on the right position. -- XXX okay to delete?
-	--self:caretStepRight(clear_highlight)
+	editWrapM.wrapAction(self, editCommandM.caretJumpRight, clear_highlight)
 end
 
 
 function client:caretFirst(clear_highlight)
-	local line_ed = self.line_ed
-
-	line_ed.car_line = 1
-	line_ed.car_byte = 1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretFirst, clear_highlight)
 end
 
 
 function client:caretLast(clear_highlight)
-	local line_ed = self.line_ed
-
-	line_ed.car_line = #line_ed.lines
-	line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretLast, clear_highlight)
 end
 
 
 function client:caretLineFirst(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	-- Find the first uChar offset for the current Paragraph + sub-line pair.
-	local u_count = line_ed:dispGetSubLineUCharOffsetStart(line_ed.d_car_para, line_ed.d_car_sub)
-
-	-- Convert the display u_count to a byte offset in the line_ed/source string.
-	line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretLineFirst, clear_highlight)
 end
 
 
 function client:caretLineLast(clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	-- Find the last uChar offset for the current Paragraph + sub-line pair.
-	local u_count = line_ed:dispGetSubLineUCharOffsetEnd(line_ed.d_car_para, line_ed.d_car_sub)
-
-	-- Convert to internal line_ed byte offset
-	line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
-
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	if clear_highlight then
-		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
-	end
+	editWrapM.wrapAction(self, editCommandM.caretLineLast, clear_highlight)
 end
 
 

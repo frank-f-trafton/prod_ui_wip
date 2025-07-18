@@ -67,12 +67,6 @@ function plan.make(panel)
 		tb:scrollGetCaretInBounds(true)
 	end
 
-	local function setMasking(tb, enabled)
-		tb:setMasking(not not enabled)
-		tb:cacheUpdate()
-		tb:scrollGetCaretInBounds(true)
-	end
-
 	local function setColorization(tb, enabled)
 		tb:setColorization(not not enabled)
 		tb:cacheUpdate()

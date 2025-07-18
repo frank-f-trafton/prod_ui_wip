@@ -1,8 +1,8 @@
-local context=select(1, ...)
+-- Wrappable command functions that are suitable to use with key bindings.
+-- Such functions do not take arguments (besides 'self').
 
 
--- Wrappable commands that are suitable to use with key bindings.
--- Such commands do not take additional arguments (besides 'self').
+local context = select(1, ...)
 
 
 local editCommandS = context:getLua("shared/line_ed/s/edit_command_s")
@@ -32,7 +32,7 @@ return {
 	typeTab = editCommandS.typeTab,
 	typeLineFeed = editCommandS.typeLineFeed,
 	selectAll = editCommandS.highlightAll,
-	selectCurrentWord = editCommandS.selectCurrentWord,
+	selectCurrentWord = editCommandS.highlightCurrentWord,
 	cut = editCommandS.cut,
 	copy = editCommandS.copy,
 	paste = editCommandS.paste,

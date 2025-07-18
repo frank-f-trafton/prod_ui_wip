@@ -24,6 +24,9 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
+local _enum_align = uiShared.makeLUTV("left", "center", "right")
+
+
 function client:deleteHighlighted()
 	editWrapS.wrapAction(self, editCommandS.deleteHighlighted)
 end
@@ -160,22 +163,17 @@ end
 
 
 function client:caretFirst(clear_highlight)
-	editFuncS.caretFirst(self, clear_highlight)
+	editWrapS.wrapAction(self, editFuncS.caretFirst, clear_highlight)
 end
 
 
 function client:caretLast(clear_highlight)
-	editFuncS.caretLast(self, clear_highlight)
+	editWrapS.wrapAction(self, editFuncS.caretLast, clear_highlight)
 end
 
 
-function client:cutHighlightedToClipboard()
-	editWrapS.wrapAction(self, editCommandS.cutHighlightedToClipboard)
-end
-
-
-function client:copyHighlightedToClipboard()
-	editFuncS.copyHighlightedToClipboard(self)
+function client:cut()
+	editWrapS.wrapAction(self, editCommandS.cut)
 end
 
 
@@ -210,7 +208,9 @@ end
 
 
 function client:setTextAlignment(align)
-	uiShared.type1(1, align, "string")
+	if not _enum_align[align] then
+		error("invalid align mode")
+	end
 
 	editWrapS.wrapAction(self, editCommandS.setTextAlignment, align)
 end

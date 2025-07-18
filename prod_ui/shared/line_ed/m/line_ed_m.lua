@@ -30,9 +30,6 @@ local _mt_ed_m = {}
 _mt_ed_m.__index = _mt_ed_m
 
 
--- * Public Functions *
-
-
 --- Creates a new Line Editor object.
 -- @return the LineEd table.
 function lineEdM.new()
@@ -119,16 +116,6 @@ function lineEdM.new()
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
 	self.replace_missing = true
-
-	--[[
-	WARNING: masking cannot hide line feeds in the source string.
-	--]]
-
-	-- Glyph masking mode, as used in password fields.
-	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
-	-- It does nothing else in terms of security.
-	self.masked = false
-	self.mask_glyph = "*" -- Must be exactly one glyph.
 
 	-- Set true to create coloredtext tables for each sub-line string. Each coloredtext
 	-- table contains a color table and a code point string for every code point in the base
@@ -366,7 +353,7 @@ end
 -- @param byte_1 The first byte offset to delete from.
 -- @param line_2 The final line to delete to.
 -- @param byte_2 The final byte offset to delete to.
--- @return The deleted text as a string, if 'copy_deleted' was true, or nil.
+-- @return The deleted text as a string, if 'copy_deleted' was true (and at least one character was deleted), or nil.
 function _mt_ed_m:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
 	-- XXX Maybe write a line and/or uChar offset version for the client method collection.
 	local lines = self.lines
@@ -376,6 +363,7 @@ function _mt_ed_m:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
 		deleted = lines:copy(line_1, byte_1, line_2, byte_2)
 		deleted = table.concat(deleted, "\n")
 	end
+
 	lines:delete(line_1, byte_1, line_2, byte_2)
 
 	self.car_line = line_1
@@ -388,67 +376,7 @@ function _mt_ed_m:deleteText(copy_deleted, line_1, byte_1, line_2, byte_2)
 
 	self:updateVertPosHint()
 
-	return deleted
-end
-
-
-local function fixCaretAfterIndent(self, line_n, offset)
-	if self.car_line == line_n then
-		self.car_byte = math.max(1, self.car_byte + offset)
-	end
-
-	if self.h_line == line_n then
-		self.h_byte = math.max(1, self.h_byte + offset)
-	end
-end
-
-
-function _mt_ed_m:indentLine(line_n)
-	local old_line = self.lines[line_n]
-
-	self.lines:add("\t", line_n, 1)
-
-	self.u_chars = self.u_chars + 1
-
-	fixCaretAfterIndent(self, line_n, 1)
-
-	self:displaySyncDeletion(line_n, line_n)
-	self:displaySyncCaretOffsets()
-
-	self:updateVertPosHint()
-
-	return old_line ~= self.lines[line_n]
-end
-
-
-function _mt_ed_m:unindentLine(line_n)
-	local old_line = self.lines[line_n]
-
-	local offset
-
-	if string.sub(old_line, 1, 1) == "\t" then
-		offset = 1
-		self.lines:delete(line_n, 1, line_n, 1)
-	else
-		local space1, space2 = string.find(old_line, "^[\x20]+") -- (0x20 == space)
-		if space1 then
-			offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
-			self.lines:delete(line_n, 1, line_n, offset)
-		end
-	end
-
-	if offset then
-		self.u_chars = self.u_chars - 1
-
-		fixCaretAfterIndent(self, line_n, -offset)
-
-		self:displaySyncDeletion(line_n, line_n)
-		self:displaySyncCaretOffsets()
-
-		self:updateVertPosHint()
-	end
-
-	return old_line ~= self.lines[line_n]
+	return deleted ~= "" and deleted
 end
 
 
@@ -517,9 +445,6 @@ function _mt_ed_m:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_
 
 	self:updateDispHighlightRange()
 end
-
-
--- * Core-to-display synchronization *
 
 
 --- Update the display offsets to reflect the current core offsets. Also update the caret rectangle. The display text must be current at time of call.
@@ -724,12 +649,6 @@ local function updateSubLineHorizontal(sub_line, align, font)
 end
 
 
--- * / Internal *
-
-
--- * Line container methods *
-
-
 function _mt_ed_m:dispGetDocumentXBoundaries()
 	local x1, x2 = 0, 0
 
@@ -891,11 +810,7 @@ function _mt_ed_m:dispUpdateParagraph(i_para, str)
 		work_str = textUtil.replaceMissingCodePointGlyphs(work_str, font, "□")
 	end
 
-	if self.masked then
-		work_str = textUtil.getMaskedString(work_str, self.mask_glyph)
-
-	-- Only syntax-colorize unmasked text.
-	elseif self.fn_colorize and self.generate_colored_text then
+	if self.fn_colorize and self.generate_colored_text then
 		local len = self:fn_colorize(work_str, self.wip_syntax_colors, self.syntax_work)
 		-- Trim color table
 		for i = #self.wip_syntax_colors, len + 1, -1 do
@@ -1154,13 +1069,6 @@ function _mt_ed_m:dispUpdateCaretRect()
 	self.caret_box_y = sub_line_cur.y
 	self.caret_box_h = font:getHeight()
 end
-
-
--- * / Line container methods *
-
-
-_mt_ed_m.dispResetCaretBlink = editFuncM.dispResetCaretBlink
-_mt_ed_m.dispUpdateCaretBlink = editFuncM.dispUpdateCaretBlink
 
 
 return lineEdM
