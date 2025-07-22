@@ -75,7 +75,7 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 
-	self:reshape()
+	self.line_ed:updateDisplayText()
 end
 
 

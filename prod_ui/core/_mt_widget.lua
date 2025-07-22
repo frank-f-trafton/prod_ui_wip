@@ -14,10 +14,10 @@ _mt_widget.context = context
 
 -- For loading widget defs, see the UI Context source.
 
-
-local widLayout = context:getLua("core/wid_layout")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local viewport_keys = context:getLua("core/viewport_keys")
+local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -981,7 +981,22 @@ function _mt_widget:hasDirectChild(wid)
 end
 
 
+function _mt_widget:_getHierarchy()
+	local t = {self.id}
+	local wid = self.parent
+	while wid do
+		table.insert(t, wid.id)
+		wid = wid.parent
+	end
+	pTable.reverseArray(t)
+	return table.concat(t, " > ")
+end
+
+
+
 function _mt_widget:reshape()
+	print("Reshape! " .. self:_getHierarchy())
+
 	if self:uiCall_reshapePre() then
 		return
 	end

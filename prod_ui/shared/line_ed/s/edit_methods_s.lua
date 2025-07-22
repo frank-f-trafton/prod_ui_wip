@@ -65,11 +65,6 @@ function client:stepHistory(dir)
 end
 
 
-function client:resetInputCategory()
-	editFuncS.resetInputCategory(self)
-end
-
-
 function client:getText()
 	return editFuncS.getText(self)
 end
@@ -213,6 +208,12 @@ function client:setTextAlignment(align)
 	end
 
 	editWrapS.wrapAction(self, editCommandS.setTextAlignment, align)
+end
+
+
+function client:resetInputCategory()
+	-- Used to force a new history entry.
+	self.input_category = false
 end
 
 

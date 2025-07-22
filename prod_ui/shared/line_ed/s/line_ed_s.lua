@@ -25,6 +25,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
+local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local structHistory = context:getLua("shared/struct_history")
@@ -35,17 +36,12 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 lineEdS.code_groups = code_groups
 
 
--- stand-in text colors
-local default_text_color = {1, 1, 1, 1}
-local default_text_h_color = {0, 0, 0, 1}
-
-
 local _mt_ed_s = {}
 _mt_ed_s.__index = _mt_ed_s
 
 
 --- Creates a new Line Editor object.
--- @return the line editor table.
+-- @return the LineEd table.
 function lineEdS.new()
 	local self = {}
 
@@ -98,8 +94,8 @@ function lineEdS.new()
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
-	self.text_color = default_text_color
-	self.text_h_color = default_text_h_color
+	self.text_color = edComBase.default_text_color
+	self.text_h_color = edComBase.default_text_h_color
 
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
@@ -135,7 +131,9 @@ function lineEdS.new()
 
 	setmetatable(self, _mt_ed_s)
 
-	-- Assign a font with lineEd:setFont() ASAP.
+	-- ASAP:
+	-- * Assign a font with line_ed:setFont()
+	-- * Update display text
 
 	return self
 end
@@ -151,10 +149,12 @@ function _mt_ed_s:setFont(font) -- [update]
 
 	self.font = font or false
 	if self.font then
+		local em_width = font:getWidth("M")
+		local uscore_width = font:getWidth("_")
 		self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
-		self.caret_line_width = math.max(1, math.ceil(font:getWidth("M") / 16))
-		self.caret_box_w_empty = math.max(1, math.ceil(font:getWidth("_")))
-		self.caret_box_w_edge = math.max(1, math.ceil(font:getWidth("M")))
+		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
+		self.caret_box_w_empty = math.max(1, math.ceil(uscore_width))
+		self.caret_box_w_edge = math.max(1, math.ceil(em_width))
 	end
 end
 
@@ -163,8 +163,13 @@ function _mt_ed_s:setTextColors(text_color, text_h_color) -- [sync]
 	uiShared.typeEval(1, text_color, "table")
 	uiShared.typeEval(2, text_h_color, "table")
 
-	self.text_color = text_color or default_text_color
-	self.text_h_color = text_h_color or default_text_h_color
+	self.text_color = text_color or edComBase.default_text_color
+	self.text_h_color = text_h_color or edComBase.default_text_h_color
+end
+
+
+function _mt_ed_s:getCaretOffsets()
+	return self.car_byte, self.h_byte
 end
 
 
@@ -175,9 +180,37 @@ function _mt_ed_s:getHighlightOffsets()
 end
 
 
---- Returns if the field currently has a highlighted section (not whether highlighting itself is currently active.)
+--- Returns if the LineEd currently has a highlighted section (not whether highlighting itself is currently active.)
 function _mt_ed_s:isHighlighted()
 	return self.h_byte ~= self.car_byte
+end
+
+
+function _mt_ed_s:clearHighlight() -- [sync]
+	self.h_byte = self.car_byte
+end
+
+
+-- @param x X position.
+-- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
+-- @return Byte and character string of the character at (or nearest to) the position.
+function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
+	local font = self.font
+	local line = self.line
+	local disp_text = self.disp_text
+
+	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
+
+	-- Convert display offset to core byte.
+	local u_count = edComS.utf8LenPlusOne(disp_text, byte)
+
+	local core_byte = utf8.offset(line, u_count)
+	local core_char = false
+	if core_byte <= #line then
+		core_char = line:sub(core_byte, utf8.offset(line, 2, core_byte) - 1)
+	end
+
+	return core_byte, core_char
 end
 
 
@@ -187,15 +220,9 @@ function _mt_ed_s:getLineInfoAtX(x, split_x)
 end
 
 
-function _mt_ed_s:clearHighlight() -- [sync]
-	self.h_byte = self.car_byte
-end
-
-
 --- Insert a string at the caret position.
 -- @param text The string to insert.
 function _mt_ed_s:insertText(text) -- [update]
-	self:clearHighlight()
 	self.line = edComS.add(self.line, text, self.car_byte)
 	self.car_byte = self.car_byte + #text
 	self.h_byte = self.car_byte
@@ -204,18 +231,17 @@ end
 
 --- Delete a section of text.
 -- @param copy_deleted If true, return the deleted text as a string.
--- @param byte_1 The first byte offset to delete from.
--- @param byte_2 The final byte offset to delete to.
+-- @param b1, b2 The first and last byte offsets to delete from and to.
 -- @return The deleted text as a string, if 'copy_deleted' was true (and at least one character was deleted), or nil.
-function _mt_ed_s:deleteText(copy_deleted, byte_1, byte_2) -- [update]
-	if byte_1 <= byte_2 then
+function _mt_ed_s:deleteText(copy_deleted, b1, b2) -- [update]
+	if b1 <= b2 then
 		local deleted
 		if copy_deleted then
-			deleted = self.line:sub(byte_1, byte_2)
+			deleted = self.line:sub(b1, b2)
 		end
 
-		self.line = edComS.delete(self.line, byte_1, byte_2)
-		self.car_byte, self.h_byte = byte_1, byte_1
+		self.line = edComS.delete(self.line, b1, b2)
+		self.car_byte, self.h_byte = b1, b1
 
 		return deleted ~= "" and deleted
 	end
@@ -224,6 +250,7 @@ end
 
 function _mt_ed_s:getWordRange(byte_n)
 	local line = self.line
+
 	if #line == 0 then
 		return 1, 1
 	end
@@ -276,7 +303,8 @@ function _mt_ed_s:updateDisplayText()
 end
 
 
---- Updates the display caret offsets, the caret rectangle, and the highlight rectangle. The display text must be current at time of call.
+--- Updates the display caret offsets, the caret rectangle, and the highlight rectangle. The display text must be
+--	current at time of call.
 function _mt_ed_s:syncDisplayCaretHighlight()
 	local line = self.line
 	local font = self.font
@@ -346,29 +374,6 @@ function _mt_ed_s:syncDisplayCaretHighlight()
 			j = j + 1
 		end
 	end
-end
-
-
--- @param x X position.
--- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
--- @return Line, byte and character string of the character at (or nearest to) the position.
-function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
-	local font = self.font
-	local line = self.line
-	local disp_text = self.disp_text
-
-	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
-
-	-- Convert display offset to core byte.
-	local u_count = edComS.utf8LenPlusOne(disp_text, byte)
-
-	local core_byte = utf8.offset(line, u_count)
-	local core_char = false
-	if core_byte <= #line then
-		core_char = line:sub(core_byte, utf8.offset(line, 2, core_byte) - 1)
-	end
-
-	return core_byte, core_char
 end
 
 

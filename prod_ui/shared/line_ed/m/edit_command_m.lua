@@ -20,9 +20,6 @@ local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
--- .setTextAlignment
-
-
 function editCommandM.setReplaceMode(self, enabled)
 	local ok = editFuncM.setReplaceMode(self, enabled)
 	return ok
@@ -543,6 +540,22 @@ function editCommandM.writeText(self, text)
 
 	return true, true, true, true
 end
+
+
+function editCommandM.replaceText(self, text)
+	editFuncM.replaceText(self, text)
+
+	return true, true, true, true
+end
+
+
+function editCommandM.setText(self, text)
+	editFuncM.setText(self, text)
+
+	return true, true, true, true
+end
+
+
 
 
 return editCommandM

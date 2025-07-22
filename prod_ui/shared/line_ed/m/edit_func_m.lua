@@ -31,7 +31,7 @@ end
 local function _deleteUChar(line_ed, n_u_chars)
 	local lines = line_ed.lines
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	local line_2, byte_2, u_count = lines:countUChars(1, line_ed.car_line, line_ed.car_byte, n_u_chars)
 
@@ -202,7 +202,7 @@ function editFuncM.deleteCaretToLineStart(self)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	return line_ed:deleteText(true, line_ed.car_line, 1, line_ed.car_line, line_ed.car_byte - 1)
 end
@@ -212,7 +212,7 @@ function editFuncM.deleteCaretToLineEnd(self)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	return line_ed:deleteText(true, line_ed.car_line, line_ed.car_byte, line_ed.car_line, #lines[line_ed.car_line])
 end
@@ -222,7 +222,7 @@ function editFuncM.backspaceGroup(self)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	local line_left, byte_left
 
@@ -247,9 +247,7 @@ function editFuncM.caretHighlightEdgeLeft(self)
 	local l1, b1, _, _ = line_ed:getHighlightOffsets()
 	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = l1, b1, l1, b1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -259,9 +257,7 @@ function editFuncM.caretHighlightEdgeRight(self)
 	local _, _, l2, b2 = line_ed:getHighlightOffsets()
 	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = l2, b2, l2, b2
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -274,12 +270,9 @@ function editFuncM.caretStepLeft(self, clear_highlight)
 		line_ed.car_line, line_ed.car_byte = new_line, new_byte
 	end
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -293,12 +286,9 @@ function editFuncM.caretStepRight(self, clear_highlight)
 		line_ed.car_line, line_ed.car_byte = new_line, math.max(1, new_byte)
 	end
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -309,12 +299,9 @@ function editFuncM.caretJumpLeft(self, clear_highlight)
 
 	line_ed.car_line, line_ed.car_byte = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, -1, false, -1, false)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -331,12 +318,9 @@ function editFuncM.caretJumpRight(self, clear_highlight)
 
 	line_ed.car_line, line_ed.car_byte = edComM.huntWordBoundary(code_groups, lines, line_ed.car_line, line_ed.car_byte, 1, hit_non_ws, first_group, false)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -346,17 +330,14 @@ function editFuncM.caretLineFirst(self, clear_highlight)
 	local lines = line_ed.lines
 
 	-- Find the first uChar offset for the current Paragraph + sub-line pair.
-	local u_count = line_ed:dispGetSubLineUCharOffsetStart(line_ed.d_car_para, line_ed.d_car_sub)
+	local u_count = edComM.getSubLineUCharOffsetStart(self.paragraphs[line_ed.d_car_para], line_ed.d_car_sub)
 
 	-- Convert the display u_count to a byte offset in the line_ed/source string.
 	line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -366,17 +347,14 @@ function editFuncM.caretLineLast(self, clear_highlight)
 	local lines = line_ed.lines
 
 	-- Find the last uChar offset for the current Paragraph + sub-line pair.
-	local u_count = line_ed:dispGetSubLineUCharOffsetEnd(line_ed.d_car_para, line_ed.d_car_sub)
+	local u_count = edComM.getSubLineUCharOffsetEnd(self.paragraphs[line_ed.d_car_para], line_ed.d_car_sub)
 
 	-- Convert to internal line_ed byte offset
 	line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -387,12 +365,9 @@ function editFuncM.caretFirst(self, clear_highlight)
 	line_ed.car_line = 1
 	line_ed.car_byte = 1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -403,12 +378,9 @@ function editFuncM.caretLast(self, clear_highlight)
 	line_ed.car_line = #line_ed.lines
 	line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -426,12 +398,9 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 		line_ed.car_line = 1
 		line_ed.car_byte = 1
 
-		line_ed:displaySyncCaretOffsets()
-		line_ed:updateVertPosHint()
+		-- ZXC update
 		if clear_highlight then
 			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
 		end
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
@@ -458,8 +427,6 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 		line_ed:displaySyncCaretOffsets()
 		if clear_highlight then
 			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
 		end
 	end
 end
@@ -478,12 +445,9 @@ function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 		line_ed.car_line = #line_ed.lines
 		line_ed.car_byte = #line_ed.lines[line_ed.car_line] + 1
 
-		line_ed:displaySyncCaretOffsets()
-		line_ed:updateVertPosHint()
+		-- ZXC update
 		if clear_highlight then
 			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
 		end
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
@@ -505,11 +469,9 @@ function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 		line_ed.car_line = d_para
 		line_ed.car_byte = utf8.offset(lines[line_ed.car_line], u_count)
 
-		line_ed:displaySyncCaretOffsets()
+		-- ZXC update
 		if clear_highlight then
 			line_ed:clearHighlight()
-		else
-			line_ed:updateDispHighlightRange()
 		end
 	end
 end
@@ -533,12 +495,9 @@ function editFuncM.caretStepUpCoreLine(self, clear_highlight)
 		line_ed.car_byte = 1
 	end
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -561,12 +520,9 @@ function editFuncM.caretStepDownCoreLine(self, clear_highlight)
 		line_ed.car_byte = #lines[line_ed.car_line] + 1
 	end
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 	if clear_highlight then
 		line_ed:clearHighlight()
-	else
-		line_ed:updateDispHighlightRange()
 	end
 end
 
@@ -589,7 +545,7 @@ function editFuncM.shiftLinesUp(self)
 		line_ed.car_byte = 1
 		line_ed.h_line = math.max(1, r2 - 1)
 		line_ed.h_byte = #line_ed.lines[line_ed.h_line] + 1
-		line_ed:displaySyncAll(r1 - 1)
+		-- ZXC update
 
 		return true
 	end
@@ -614,7 +570,7 @@ function editFuncM.shiftLinesDown(self)
 		line_ed.car_byte = 1
 		line_ed.h_line = math.min(#lines, r2 + 1)
 		line_ed.h_byte = #line_ed.lines[line_ed.h_line] + 1
-		line_ed:displaySyncAll(r1)
+		-- ZXC update
 
 		return true
 	end
@@ -634,7 +590,7 @@ end
 function editFuncM.backspaceUChar(self, n_u_chars)
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 	local lines = line_ed.lines
 	local line_1, byte_1, u_count = lines:countUChars(-1, line_ed.car_line, line_ed.car_byte, n_u_chars)
 
@@ -652,7 +608,7 @@ end
 function editFuncM.deleteGroup(self)
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	local lines = line_ed.lines
 	local line_right, byte_right
@@ -680,7 +636,7 @@ end
 function editFuncM.deleteLine(self)
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	local lines = line_ed.lines
 
@@ -706,8 +662,7 @@ function editFuncM.deleteLine(self)
 	line_ed.car_byte = 1
 	line_ed.h_byte = 1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
+	-- ZXC update
 
 	return retval
 end
@@ -758,10 +713,7 @@ function editFuncM.indentLine(self, line_n)
 
 	_fixCaretAfterIndent(line_ed, line_n, 1)
 
-	line_ed:displaySyncDeletion(line_n, line_n)
-	line_ed:displaySyncCaretOffsets()
-
-	line_ed:updateVertPosHint()
+	-- ZXC update
 
 	return old_line ~= line_ed.lines[line_n]
 end
@@ -792,7 +744,7 @@ function editFuncM.unindentLine(self, line_n)
 		line_ed:displaySyncDeletion(line_n, line_n)
 		line_ed:displaySyncCaretOffsets()
 
-		line_ed:updateVertPosHint()
+		-- ZXC update
 	end
 
 	return old_line ~= line_ed.lines[line_n]
@@ -829,7 +781,7 @@ function editFuncM.typeTab(self)
 			end
 		end
 	end
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 
 	return changed
 end
@@ -850,7 +802,7 @@ function editFuncM.typeUntab(self)
 		end
 	end
 
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 
 	return changed
 end
@@ -865,8 +817,7 @@ function editFuncM.highlightAll(self)
 	line_ed.h_line = 1
 	line_ed.h_byte = 1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -881,8 +832,7 @@ function editFuncM.highlightCurrentLine(self)
 	line_ed.h_line = line_ed.car_line
 	line_ed.car_byte, line_ed.h_byte = 1, #line_ed.lines[line_ed.car_line] + 1
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -891,8 +841,7 @@ function editFuncM.highlightCurrentWord(self)
 
 	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -906,7 +855,7 @@ function editFuncM.stepHistory(self, dir)
 
 	if changed then
 		editHistM.applyEntry(self, entry)
-		line_ed:displaySyncAll()
+		-- ZXC update
 		return true
 	end
 end
@@ -919,8 +868,9 @@ function editFuncM.setTextAlignment(self, align)
 	line_ed.align = align
 	if old_align ~= align then
 		-- Update just the alignment of sub-lines.
-		self.line_ed:displaySyncAlign(1)
+		self.line_ed:syncDisplayAlignment()
 		self.line_ed:displaySyncCaretOffsets()
+		-- ZXC update
 
 		return true
 	end
@@ -963,5 +913,34 @@ function editFuncM.writeText(self, text, suppress_replace)
 
 	return text
 end
+
+
+function editFuncM.replaceText(self, text)
+	local line_ed = self.line_ed
+
+	line_ed:deleteText(false, 1, 1, #line_ed.lines, #line_ed.lines[#line_ed.lines])
+	local rv = _writeText(self, line_ed, text, true)
+
+	line_ed:updateDisplayText(1, #line_ed.paragraphs)
+
+	-- WIP
+	-- [[
+	for i, para in ipairs(line_ed.paragraphs) do
+		for j, sub_line in ipairs(para) do
+			print(i, j, "|" .. sub_line.str .. "|")
+		end
+	end
+	--]]
+
+	return rv
+end
+
+
+function editFuncM.setText(self, text)
+	-- Like replaceText(), but also wipes history.
+	editFuncM.replaceText(self, text)
+	editHistM.wipeEntries(self)
+end
+
 
 return editFuncM

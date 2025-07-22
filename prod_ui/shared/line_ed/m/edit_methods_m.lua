@@ -57,7 +57,7 @@ function client:setWrapMode(enabled)
 
 	line_ed.wrap_mode = not not enabled
 
-	self.line_ed:displaySyncAll()
+	-- ZXC update
 
 	-- XXX refresh: clamp scroll and get caret in bounds
 end
@@ -87,7 +87,7 @@ function client:setColorization(enabled)
 	line_ed.generate_colored_text = not not enabled
 
 	-- Refresh everything
-	self.line_ed:displaySyncAll()
+	-- ZXC update
 end
 
 
@@ -199,8 +199,7 @@ function client:highlightCurrentWord()
 
 	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -219,9 +218,7 @@ function client:highlightCurrentWrappedLine()
 
 	--print("line_ed.car_byte", line_ed.car_byte, "line_ed.h_line", line_ed.h_byte)
 
-	line_ed:displaySyncCaretOffsets()
-	line_ed:updateVertPosHint()
-	line_ed:updateDispHighlightRange()
+	-- ZXC update
 end
 
 
@@ -261,14 +258,17 @@ function client:writeText(text, suppress_replace)
 end
 
 
---- Set the current internal text, wiping anything currently present.
+function client:replaceText(text)
+	uiShared.type1(1, text, "string")
+
+	editWrapM.wrapAction(self, editCommandM.replaceText, text)
+end
+
+
 function client:setText(text)
-	local line_ed = self.line_ed
+	uiShared.type1(1, text, "string")
 
-	local deleted = self:deleteAll()
-	line_ed:insertText(text)
-
-	return deleted
+	editWrapM.wrapAction(self, editCommandM.setText, text)
 end
 
 
@@ -315,7 +315,7 @@ end
 function client:deleteAll()
 	local line_ed = self.line_ed
 
-	line_ed:highlightCleanup()
+	line_ed:clearHighlight()
 
 	local lines = line_ed.lines
 
@@ -443,6 +443,12 @@ function client:executeBoundAction(bound_func)
 
 		return true, update_viewport, caret_in_view, write_history
 	end
+end
+
+
+function client:resetInputCategory()
+	-- Used to force a new history entry.
+	self.input_category = false
 end
 
 
