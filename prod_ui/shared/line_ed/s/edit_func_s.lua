@@ -485,12 +485,6 @@ function editFuncS.getDisplayText(self)
 end
 
 
-function editFuncS.resetInputCategory(self)
-	-- Used to force a new history entry.
-	self.input_category = false
-end
-
-
 function editFuncS.stepHistory(self, dir)
 	local line_ed = self.line_ed
 

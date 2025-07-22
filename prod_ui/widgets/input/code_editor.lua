@@ -81,6 +81,8 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
+
+	self.line_ed:updateDisplayText()
 end
 
 
@@ -105,7 +107,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
-	line_ed:displaySyncAll()
+	-- ZXC update (?)
 
 	self:updateDocumentDimensions()
 

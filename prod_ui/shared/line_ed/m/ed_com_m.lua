@@ -195,4 +195,51 @@ function edComM.applyCaretAlignOffset(caret_x, line_str, align, font)
 end
 
 
+--- Gets the starting code point index for a sub-line.
+function edComM.getSubLineUCharOffsetStart(para, sub_i)
+	local u_count = 1
+
+	for i = 1, sub_i - 1 do
+		u_count = u_count + utf8.len(para[i].str)
+	end
+
+	return u_count
+end
+
+
+--- Gets the ending code point index for a sub-line.
+function edComM.getSubLineUCharOffsetEnd(para, sub_i)
+	local u_count = 0
+
+	for i = 1, sub_i do
+		u_count = u_count + utf8.len(para[i].str)
+	end
+
+	-- End of the Paragraph: add one more byte past the end.
+	if sub_i >= #para then
+		u_count = u_count + 1
+	end
+
+	return u_count
+end
+
+
+--- Gets both the starting and ending code point indices for a sub-line.
+function edComM.getSubLineUCharOffsetStartEnd(para, sub_i)
+	local u_count_1, u_count_2 = 1, nil
+
+	for i = 1, sub_i - 1 do
+		u_count_1 = u_count_1 + utf8.len(para[i].str)
+	end
+	u_count_2 = u_count_1 + utf8.len(para[sub_i].str) - 1
+
+	-- End of the Paragraph: add one more byte past the end.
+	if sub_i >= #para then
+		u_count_2 = u_count_2 + 1
+	end
+
+	return u_count_1, u_count_2
+end
+
+
 return edComM

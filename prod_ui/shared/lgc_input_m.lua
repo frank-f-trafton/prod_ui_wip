@@ -151,13 +151,25 @@ function lgcInputM.method_updateDocumentDimensions(self)
 
 	-- height (assumes the final sub-line is current)
 	local last_para = line_ed.paragraphs[#line_ed.paragraphs]
+	print("#line_ed.paragraphs", #line_ed.paragraphs)
+	print("#last_para", #last_para)
 	local last_sub = last_para[#last_para]
+
+	-- WIP
+	-- [[
+	print("#paragraphs", #line_ed.paragraphs)
+	for i, para in ipairs(line_ed.paragraphs) do
+		for j, sub_line in ipairs(para) do
+			print(i, j, "|" .. sub_line.str .. "|")
+		end
+	end
+	--]]
 
 	self.doc_h = last_sub.y + last_sub.h
 
 	-- width
 	line_ed.view_w = self.vp_w
-	local x1, x2 = self.line_ed:dispGetDocumentXBoundaries()
+	local x1, x2 = self.line_ed:getDisplayXBoundaries()
 	self.doc_w = (x2 - x1)
 
 	lgcInputM.updateAlignOffset(self)
@@ -193,7 +205,7 @@ function lgcInputM.textInputLogic(self, text)
 			end
 		end
 
-		local written = self:writeText(text, suppress_replace)
+		local written = editFuncM.writeText(self, text, suppress_replace)
 		self.update_flag = true
 
 		local no_ws = string.find(written, "%S")

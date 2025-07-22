@@ -12,6 +12,11 @@ local utf8 = require("utf8")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
+-- stand-in text colors
+edComBase.default_text_color = {1, 1, 1, 1}
+edComBase.default_text_h_color = {0, 0, 0, 1}
+
+
 function edComBase.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed)
 	str = textUtil.sanitize(str, bad_byte_policy)
 

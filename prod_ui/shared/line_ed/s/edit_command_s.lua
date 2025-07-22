@@ -270,8 +270,15 @@ function editCommandS.stepHistory(self, dir)
 end
 
 
+function editCommandS.writeText(self, text)
+	editFuncS.writeText(self, text)
+
+	return true, true, true, true
+end
+
+
 function editCommandS.replaceText(self, text)
-	editFuncS.setText(self, text)
+	editFuncS.replaceText(self, text)
 
 	return true, true, true, true
 end
@@ -279,13 +286,6 @@ end
 
 function editCommandS.setText(self, text)
 	editFuncS.setText(self, text)
-
-	return true, true, true, true
-end
-
-
-function editCommandS.writeText(self, text)
-	editFuncS.writeText(self, text)
 
 	return true, true, true, true
 end
