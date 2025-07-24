@@ -91,7 +91,7 @@ local function _checkClearHighlight(line_ed, clear_highlight)
 end
 
 
--- Update the widget's caret shape and appearance.
+-- Updates the widget's caret shape and appearance.
 function editFuncS.updateCaretShape(self)
 	local line_ed = self.line_ed
 
@@ -111,30 +111,6 @@ end
 
 function editFuncS.resetCaretBlink(self)
 	self.caret_blink_time = self.caret_blink_reset
-end
-
-
-function editFuncS.getReplaceMode(self)
-	return self.replace_mode
-end
-
-
-function editFuncS.setReplaceMode(self, enabled)
-	local old_replace_mode = self.replace_mode
-	self.replace_mode = not not enabled
-	return old_replace_mode ~= self.replace_mode
-end
-
-
-function editFuncS.getTextAlignment(self)
-	return self.align
-end
-
-
-function editFuncS.setTextAlignment(self, align)
-	local old_align = self.align
-	self.align = align
-	return old_align ~= self.align
 end
 
 
@@ -417,7 +393,7 @@ function editFuncS.caretStepRight(self, clear_highlight)
 end
 
 
-function editFuncS.caretHighlightEdgeLeft(self)
+function editFuncS.caretToHighlightEdgeLeft(self)
 	local line_ed = self.line_ed
 
 	local byte_1, byte_2 = line_ed:getHighlightOffsets()
@@ -427,7 +403,7 @@ function editFuncS.caretHighlightEdgeLeft(self)
 end
 
 
-function editFuncS.caretHighlightEdgeRight(self)
+function editFuncS.caretToHighlightEdgeRight(self)
 	local line_ed = self.line_ed
 
 	local byte_1, byte_2 = line_ed:getHighlightOffsets()

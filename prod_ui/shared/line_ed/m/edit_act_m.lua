@@ -8,11 +8,6 @@ local context = select(1, ...)
 local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 
 
--- TODO: fill in the missing stuff (up, down, pageup, pagedown, and so on).
-
--- YOU WERE HERE
-
-
 return {
 	caretLeft = editCommandM.caretLeft,
 	caretRight = editCommandM.caretRight,
@@ -26,6 +21,18 @@ return {
 	caretLast = editCommandM.caretLast,
 	caretFirstHighlight = editCommandM.caretFirstHighlight,
 	caretLastHighlight = editCommandM.caretLastHighlight,
+	caretStepUp = editCommandM.caretStepUp,
+	caretStepDown = editCommandM.caretStepDown,
+	caretPageUp = editCommandM.caretPageUp,
+	caretPageDown = editCommandM.caretPageDown,
+	caretStepUpHighlight = editCommandM.caretStepUpHighlight,
+	caretStepDownHighlight = editCommandM.caretStepDownHighlight,
+	shiftLinesUp = editCommandM.shiftLinesUp,
+	shiftLinesDown = editCommandM.shiftLinesDown,
+	caretLineFirst = editCommandM.caretLineFirst,
+	caretLineLast = editCommandM.caretLineLast,
+	-- caret: first of wrapped line
+	-- caret: last of wrapped line
 	backspace = editCommandM.backspace,
 	delete = editCommandM.delete,
 	deleteHighlighted = editCommandM.deleteHighlighted,

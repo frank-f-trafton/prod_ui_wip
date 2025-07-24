@@ -113,8 +113,6 @@ function def:uiCall_reshapePre()
 
 	lgcInputM.updatePageJumpSteps(self, line_ed.font)
 
-	self.update_flag = true
-
 	return true
 end
 
@@ -262,14 +260,16 @@ function def:uiCall_update(dt)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
+	local do_update
+
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
 		-- Need to continuously update the selection.
 		if lgcInputM.mouseDragLogic(self) then
-			self.update_flag = true
+			do_update = true
 		end
 		if widShared.dragToScroll(self, dt) then
-			self.update_flag = true
+			do_update = true
 		end
 	end
 
@@ -287,16 +287,15 @@ function def:uiCall_update(dt)
 
 	-- Force a cache update if the external scroll position is different.
 	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
-		self.update_flag = true
+		do_update  = true
 	end
 
 	-- update scroll bar registers and thumb position
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
-	if self.update_flag then
+	if do_update then
 		self:cacheUpdate()
-		self.update_flag = false
 	end
 end
 

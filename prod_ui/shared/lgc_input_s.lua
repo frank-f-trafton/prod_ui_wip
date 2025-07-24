@@ -254,6 +254,7 @@ end
 
 function lgcInputS.caretToX(self, clear_highlight, x, split_x)
 	local line_ed = self.line_ed
+
 	local byte = line_ed:getCharacterDetailsAtPosition(x, split_x)
 
 	line_ed:caretToByte(byte)

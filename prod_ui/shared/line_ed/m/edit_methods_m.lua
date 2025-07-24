@@ -36,13 +36,13 @@ function client:backspace()
 end
 
 
---[[!]] function client:getReplaceMode()
+function client:getReplaceMode()
 	return self.replace_mode
 end
 
 
---[[!]] function client:setReplaceMode(enabled)
-	self.replace_mode = not not enabled
+function client:setReplaceMode(enabled)
+	editWrapM.wrapAction(self, editCommandM.setReplaceMode, enabled)
 end
 
 
@@ -51,15 +51,8 @@ function client:getWrapMode()
 end
 
 
--- @return true if the mode changed.
 function client:setWrapMode(enabled)
-	local line_ed = self.line_ed
-
-	line_ed.wrap_mode = not not enabled
-
-	-- ZXC update
-
-	-- XXX refresh: clamp scroll and get caret in bounds
+	editWrapM.wrapAction(self, editCommandM.setWrapMode, enabled)
 end
 
 
@@ -69,9 +62,7 @@ end
 
 
 function client:setTextAlignment(align)
-	if not _enum_align[align] then
-		error("invalid align mode")
-	end
+	uiShared.enum(1, align, "alignMode", _enum_align)
 
 	editWrapM.wrapAction(self, editCommandM.setTextAlignment, align)
 end
@@ -83,52 +74,17 @@ end
 
 
 function client:setColorization(enabled)
-	local line_ed = self.line_ed
-	line_ed.generate_colored_text = not not enabled
-
-	-- Refresh everything
-	-- ZXC update
+	editWrapM.wrapAction(self, editCommandM.setColorization, enabled)
 end
 
 
 function client:getHighlightEnabled(enabled)
-	-- No assertions.
-
 	return self.allow_highlight
 end
 
 
---- Enables or disables highlight selection mode. When disabling, any current selection is removed. (Should only be used immediately after widget is initialized. See source comments for more info.)
--- @param enabled true or false/nil.
 function client:setHighlightEnabled(enabled)
-	-- No assertions.
-
-	local line_ed = self.line_ed
-
-	local old_state = self.allow_highlight
-	self.allow_highlight = not not enabled
-
-	if old_state ~= self.allow_highlight then
-		line_ed:clearHighlight()
-		--self.update_flag = true
-
-		--[[
-		NOTE: if the field has already accumulated history entries with highlighting, selections may
-		still be loaded when undoing/redoing entries.
-
-		The following block removes all selections in the history ledger. This is a destructive change:
-		they won't be restored if you re-enable highlighting. It might be batter to just clear all
-		history when calling this. Ideally, you wouldn't be changing allow/disallow highlight after
-		initialization of the widget.
-		--]]
-		--[[
-		local hist = self.line_ed.hist
-		for i, entry in ipairs(hist.ledger) do -- XXX untested
-			entry.h_line = entry.car_line
-			entry.h_byte = entry.car_byte
-		end
-		--]]
-	end
+	editWrapM.wrapAction(self, editCommandM.setHighlightEnabled, enabled)
 end
 
 
@@ -139,13 +95,8 @@ function client:stepHistory(dir)
 end
 
 
-function client:getText(line_1, line_2) -- XXX maybe replace with a call to lines:copyString().
-	local lines = self.line_ed.lines
-
-	line_1 = line_1 or 1
-	line_2 = line_2 or #lines
-
-	return lines:copyString(line_1, 1, line_end, #lines[line_end])
+function client:getText()
+	return self.line_ed.lines:copyString()
 end
 
 
@@ -155,9 +106,8 @@ function client:getHighlightedText()
 	if line_ed:isHighlighted() then
 		local lines = line_ed.lines
 
-		local line_1, byte_1, line_2, byte_2 = line_ed:getHighlightOffsets()
-		local text = lines:copy(line_1, byte_1, line_2, byte_2 - 1)
-
+		local l1, b1, l2, b2 = line_ed:getHighlightOffsets()
+		local text = lines:copy(l1, b1, l2, b2 - 1)
 		return table.concat(text, "\n")
 	end
 end
@@ -169,7 +119,7 @@ end
 
 
 function client:clearHighlight()
-	editWrapM.wrapAction(self, editCommandM.clearHighlight)
+	editWrapM.wrapAction(self, editCommandM.clearHighlight) -- TODO: wrapped function doesn't exist
 end
 
 
@@ -178,13 +128,13 @@ function client:highlightAll()
 end
 
 
-function client:caretHighlightEdgeLeft()
-	editWrapM.wrapAction(self, editCommandM.caretHighlightEdgeLeft)
+function client:caretToHighlightEdgeLeft()
+	editWrapM.wrapAction(self, editCommandM.caretToHighlightEdgeLeft)
 end
 
 
-function client:caretHighlightEdgeRight()
-	editWrapM.wrapAction(self, editCommandM.caretHighlightEdgeRight)
+function client:caretToHighlightEdgeRight()
+	editWrapM.wrapAction(self, editCommandM.caretToHighlightEdgeRight)
 end
 
 
@@ -193,32 +143,13 @@ function client:highlightCurrentLine()
 end
 
 
-function client:highlightCurrentWord()
-	editWrapM.wrapAction(self, editCommandM.highlightCurrentWord)
-	local line_ed = self.line_ed
-
-	line_ed.car_line, line_ed.car_byte, line_ed.h_line, line_ed.h_byte = line_ed:getWordRange(line_ed.car_line, line_ed.car_byte)
-
-	-- ZXC update
+function client:highlightCurrentWrappedLine()
+	editWrapM.wrapAction(self, editCommandM.highlightCurrentWrappedLine)
 end
 
 
-function client:highlightCurrentWrappedLine()
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	-- Temporarily move highlight point to caret, then pre-emptively update the display offsets
-	-- so that we have fresh data to work from.
-	line_ed.h_line = line_ed.car_line
-	line_ed.h_byte = line_ed.car_byte
-
-	line_ed:displaySyncCaretOffsets()
-
-	line_ed.car_byte, line_ed.h_byte = line_ed:getWrappedLineRange(line_ed.car_line, line_ed.car_byte)
-
-	--print("line_ed.car_byte", line_ed.car_byte, "line_ed.h_line", line_ed.h_byte)
-
-	-- ZXC update
+function client:highlightCurrentWord()
+	editWrapM.wrapAction(self, editCommandM.highlightCurrentWord)
 end
 
 
@@ -239,15 +170,6 @@ end
 
 function client:caretStepDownCoreLine(clear_highlight)
 	editWrapM.wrapAction(self, editCommandM.caretStepDownCoreLine, clear_highlight)
-end
-
-
-function client:caretToXY(clear_highlight, x, y, split_x)
-	local line_ed = self.line_ed
-
-	local line_ed_line, line_ed_byte = line_ed:getCharacterDetailsAtPosition(x, y, split_x)
-
-	line_ed:caretToLineAndByte(clear_highlight, line_ed_line, line_ed_byte)
 end
 
 
@@ -313,13 +235,7 @@ end
 
 
 function client:deleteAll()
-	local line_ed = self.line_ed
-
-	line_ed:clearHighlight()
-
-	local lines = line_ed.lines
-
-	return line_ed:deleteText(true, 1, 1, #lines, #lines[#lines])
+	editWrapM.wrapAction(self, editCommandM.deleteAll)
 end
 
 
@@ -370,79 +286,6 @@ end
 
 function client:caretLineLast(clear_highlight)
 	editWrapM.wrapAction(self, editCommandM.caretLineLast, clear_highlight)
-end
-
-
-function client:clickDragByWord(x, y, origin_line, origin_byte)
-	local line_ed = self.line_ed
-	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
-
-	-- Expand ranges to cover full words
-	local dl1, db1, dl2, db2 = line_ed:getWordRange(drag_line, drag_byte)
-	local cl1, cb1, cl2, cb2 = line_ed:getWordRange(origin_line, origin_byte)
-
-	-- Merge the two ranges
-	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(dl1, db1, dl2, db2, cl1, cb1, cl2, cb2)
-
-	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
-		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
-	else
-		line_ed:caretAndHighlightToLineAndByte(ml2, mb2, ml1, mb1)
-	end
-end
-
-
-function client:clickDragByLine(x, y, origin_line, origin_byte)
-	local line_ed = self.line_ed
-
-	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
-
-	-- Expand ranges to cover full (wrapped) lines
-	local drag_first, drag_last = line_ed:getWrappedLineRange(drag_line, drag_byte)
-	local click_first, click_last = line_ed:getWrappedLineRange(origin_line, origin_byte)
-
-	-- Merge the two ranges
-	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(
-		drag_line, drag_first, drag_line, drag_last,
-		origin_line, click_first, origin_line, click_last
-	)
-	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
-		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
-	else
-		line_ed:caretAndHighlightToLineAndByte(ml2, mb2, ml1, mb1)
-	end
-end
-
-
---- Helper that takes care of history changes following an action.
--- @param self The client widget
--- @param bound_func The wrapper function to call. It should take 'self' as its first argument, the LineEditor core as the second, and return values that control if and how the lineEditor object is updated. For more info, see the bound_func(self) call here, and also EditAct.
--- @return The results of bound_func(), in case they are helpful to the calling widget logic.
-function client:executeBoundAction(bound_func)
-	local line_ed = self.line_ed
-
-	local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
-	local ok, update_viewport, caret_in_view, write_history = bound_func(self, line_ed)
-
-	--print("executeBoundAction()", "ok", ok, "update_viewport", update_viewport, "caret_in_view", caret_in_view, "write_history", write_history)
-	if ok then
-		if update_viewport then
-			-- XXX refresh: update scroll bounds
-		end
-
-		if caret_in_view then
-			-- XXX refresh: tell client widget to get the caret in view
-		end
-
-		if write_history then
-			self.input_category = false
-
-			editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
-			editHistM.writeEntry(line_ed, true)
-		end
-
-		return true, update_viewport, caret_in_view, write_history
-	end
 end
 
 

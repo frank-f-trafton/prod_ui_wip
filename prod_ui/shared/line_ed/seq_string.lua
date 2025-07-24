@@ -146,8 +146,8 @@ function _mt_seq:copy(line_start, byte_start, line_end, byte_end)
 end
 
 
-function _mt_seq:copyString(line_start, byte_start, line_end, byte_end)
-	return table.concat(self:copy(line_start, byte_start, line_end, byte_end), "\n")
+function _mt_seq:copyString()
+	return table.concat(self, "\n")
 end
 
 
