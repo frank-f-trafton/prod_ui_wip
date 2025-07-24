@@ -39,20 +39,25 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 function editCommandS.setTextAlignment(self, align)
-	local ok = editFuncS.setTextAlignment(self, align)
-	return ok, ok, ok
+	if align ~= self.align then
+		self.align = align
+		return true, true, true
+	end
 end
 
 
 function editCommandS.setReplaceMode(self, enabled)
-	local ok = editFuncS.setReplaceMode(self, enabled)
-	return ok
+	enabled = not not enabled
+	if enabled ~= self.replace_mode then
+		self.replace_mode = enabled
+		return true
+	end
 end
 
 
 function editCommandS.toggleReplaceMode(self)
-	local ok = editFuncS.setReplaceMode(self, not editFuncS.getReplaceMode(self))
-	return ok
+	self.replace_mode = not self.replace_mode
+	return true
 end
 
 
@@ -174,7 +179,7 @@ end
 
 function editCommandS.caretLeft(self)
 	if self.line_ed:isHighlighted() then
-		editFuncS.caretHighlightEdgeLeft(self)
+		editFuncS.caretToHighlightEdgeLeft(self)
 	else
 		editFuncS.caretStepLeft(self, true)
 	end
@@ -185,7 +190,7 @@ end
 
 function editCommandS.caretRight(self)
 	if self.line_ed:isHighlighted() then
-		editFuncS.caretHighlightEdgeRight(self)
+		editFuncS.caretToHighlightEdgeRight(self)
 	else
 		editFuncS.caretStepRight(self, true)
 	end
@@ -205,9 +210,9 @@ function editCommandS.highlightCurrentWord(self)
 end
 
 
-function editCommandS.caretHighlightEdgeLeft(self)
+function editCommandS.caretToHighlightEdgeLeft(self)
 	if self.allow_highlight then
-		editFuncS.caretHighlightEdgeLeft(self)
+		editFuncS.caretToHighlightEdgeLeft(self)
 	else
 		editFuncS.clearHighlight(self)
 	end
@@ -216,9 +221,9 @@ function editCommandS.caretHighlightEdgeLeft(self)
 end
 
 
-function editCommandS.caretHighlightEdgeRight(self)
+function editCommandS.caretToHighlightEdgeRight(self)
 	if self.allow_highlight then
-		editFuncS.caretHighlightEdgeRight(self)
+		editFuncS.caretToHighlightEdgeRight(self)
 	else
 		editFuncS.clearHighlight(self)
 	end

@@ -95,13 +95,13 @@ function client:highlightAll()
 end
 
 
-function client:caretHighlightEdgeLeft()
-	editWrapS.wrapAction(self, editCommandS.caretHighlightEdgeLeft)
+function client:caretToHighlightEdgeLeft()
+	editWrapS.wrapAction(self, editCommandS.caretToHighlightEdgeLeft)
 end
 
 
-function client:caretHighlightEdgeRight()
-	editWrapS.wrapAction(self, editCommandS.caretHighlightEdgeRight)
+function client:caretToHighlightEdgeRight()
+	editWrapS.wrapAction(self, editCommandS.caretToHighlightEdgeRight)
 end
 
 
@@ -183,7 +183,7 @@ end
 
 
 function client:getReplaceMode()
-	return editFuncS.getReplaceMode(self)
+	return self.replace_mode
 end
 
 
@@ -198,7 +198,7 @@ end
 
 
 function client:getTextAlignment()
-	return editFuncS.getTextAlignment(self)
+	return self.align
 end
 
 

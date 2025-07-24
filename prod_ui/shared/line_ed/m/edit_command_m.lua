@@ -2,6 +2,9 @@
 Wrappable command functions for common LineEditor actions.
 
 For more info, see the comments at the top of 'shared/line_ed/s/edit_command_s.lua'.
+
+Recap of return values:
+-- 1) success, 2) update_wid, 3) caret_in_view, 4) write_hist, 5) del_text, 6) stepped_hist
 --]]
 
 
@@ -21,14 +24,16 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 function editCommandM.setReplaceMode(self, enabled)
-	local ok = editFuncM.setReplaceMode(self, enabled)
-	return ok
+	local old = self.replace_mode
+	self.replace_mode = not not enabled
+	return old ~= self.replace_mode
 end
 
 
 function editCommandM.toggleReplaceMode(self)
-	local ok = editFuncM.setReplaceMode(self, not editFuncM.getReplaceMode(self))
-	return ok
+	local old = self.replace_mode
+	self.replace_mode = not self.replace_mode
+	return old ~= self.replace_mode
 end
 
 
@@ -93,7 +98,7 @@ end
 
 function editCommandM.caretLeft(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeLeft(self)
+		editFuncM.caretToHighlightEdgeLeft(self)
 	else
 		editFuncM.caretStepLeft(self, true)
 	end
@@ -104,7 +109,7 @@ end
 
 function editCommandM.caretRight(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeRight(self)
+		editFuncM.caretToHighlightEdgeRight(self)
 	else
 		editFuncM.caretStepRight(self, true)
 	end
@@ -113,9 +118,9 @@ function editCommandM.caretRight(self)
 end
 
 
-function editCommandM.caretHighlightEdgeLeft(self)
+function editCommandM.caretToHighlightEdgeLeft(self)
 	if self.allow_highlight then
-		editFuncM.caretHighlightEdgeLeft(self)
+		editFuncM.caretToHighlightEdgeLeft(self)
 	else
 		editFuncM.clearHighlight(self)
 	end
@@ -124,9 +129,9 @@ function editCommandM.caretHighlightEdgeLeft(self)
 end
 
 
-function editCommandM.caretHighlightEdgeRight(self)
+function editCommandM.caretToHighlightEdgeRight(self)
 	if self.allow_highlight then
-		editFuncM.caretHighlightEdgeRight(self)
+		editFuncM.caretToHighlightEdgeRight(self)
 	else
 		editFuncM.clearHighlight(self)
 	end
@@ -236,7 +241,7 @@ end
 
 function editCommandM.caretStepUp(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeLeft(self, not self.allow_highlight)
+		editFuncM.caretToHighlightEdgeLeft(self, not self.allow_highlight)
 	end
 	editFuncM.caretStepUp(self, true, 1)
 
@@ -246,7 +251,7 @@ end
 
 function editCommandM.caretStepDown(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeRight(self)
+		editFuncM.caretToHighlightEdgeRight(self)
 	end
 	editFuncM.caretStepDown(self, true, 1)
 
@@ -270,7 +275,7 @@ end
 
 function editCommandM.caretStepUpCoreLine(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeLeft(self, not self.allow_highlight)
+		editFuncM.caretToHighlightEdgeLeft(self, not self.allow_highlight)
 	end
 	editFuncM.caretStepUpCoreLine(self, true)
 
@@ -280,7 +285,7 @@ end
 
 function editCommandM.caretStepDownCoreLine(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeRight(self)
+		editFuncM.caretToHighlightEdgeRight(self)
 	end
 	editFuncM.caretStepDownCoreLine(self, true)
 
@@ -304,7 +309,7 @@ end
 
 function editCommandM.caretPageUp(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeLeft(self, not self.allow_highlight)
+		editFuncM.caretToHighlightEdgeLeft(self, not self.allow_highlight)
 	end
 	editFuncM.caretStepUp(self, true, self.page_jump_steps)
 
@@ -314,7 +319,7 @@ end
 
 function editCommandM.caretPageDown(self)
 	if self.line_ed:isHighlighted() then
-		editFuncM.caretHighlightEdgeRight(self)
+		editFuncM.caretToHighlightEdgeRight(self)
 	end
 	editFuncM.caretStepDown(self, true, self.page_jump_steps)
 
@@ -337,14 +342,21 @@ end
 
 
 function editCommandM.shiftLinesUp(self)
-	if editFuncM.shiftLinesUp(self) then
+	if self.allow_input and editFuncM.shiftLinesUp(self) then
 		return true, true, true, true
 	end
 end
 
 
 function editCommandM.shiftLinesDown(self)
-	if editFuncM.shiftLinesDown(self) then
+	if self.allow_input and editFuncM.shiftLinesDown(self) then
+		return true, true, true, true
+	end
+end
+
+
+function editCommandM.deleteAll(self)
+	if self.allow_input and editFuncM.deleteAll(self) then
 		return true, true, true, true
 	end
 end
@@ -492,8 +504,18 @@ end
 
 function editCommandM.highlightCurrentLine(self)
 	if self.allow_highlight then
-		self:highlightCurrentWrappedLine()
 		editFuncM.highlightCurrentLine(self)
+	else
+		editFuncM.clearHighlight(self)
+	end
+
+	return true, true
+end
+
+
+function editCommandM.highlightCurrentWrappedLine(self)
+	if self.allow_highlight then
+		editFuncM.highlightCurrentWrappedLine(self)
 	else
 		editFuncM.clearHighlight(self)
 	end
@@ -556,6 +578,32 @@ function editCommandM.setText(self, text)
 end
 
 
+function editCommandM.setWrapMode(self, enabled)
+	if editFuncM.setWrapMode(self, enabled) then
+		return true, true, true
+	end
+end
+
+
+function editCommandM.setColorization(self, enabled)
+	if editFuncM.setColorization(self, enabled) then
+		return true, true, true
+	end
+end
+
+
+function editCommandM.setHighlightEnabled(self, enabled)
+	if editFuncM.setHighlightEnabled(self, enabled) then
+		return true, true, true
+	end
+end
+
+
+function editCommandM.caretToLineAndByte(self, clear_highlight, line_n, byte_n)
+	if editFuncM.caretToLineAndByte(self, clear_highlight, line_n, byte_n) then
+		return true, true, true
+	end
+end
 
 
 return editCommandM

@@ -993,7 +993,6 @@ function _mt_widget:_getHierarchy()
 end
 
 
-
 function _mt_widget:reshape()
 	print("Reshape! " .. self:_getHierarchy())
 

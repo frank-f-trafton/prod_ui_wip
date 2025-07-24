@@ -326,32 +326,6 @@ local function _updateHighlight(self, i_para, i_sub, byte_1, byte_2)
 end
 
 
---- Update sub-line Y offsets, beginning at the specified Paragraph index and continuing to the end of the `paragraphs` array.
--- @param para_i The first Paragraph to check. All previous sub-lines in the container must have up-to-date Y offsets.
-local function _refreshSubLineYOffsets(self, para_i)
-	local paragraphs = self.paragraphs
-	local y = 0
-
-	-- If starting after Paragraph #1, assume that the previous sub-line has known-good coordinates.
-	if para_i > 1 then
-		local para_prev = paragraphs[para_i - 1]
-		local sub_prev = para_prev[#para_prev]
-		y = sub_prev.y + sub_prev.h + self.paragraph_pad
-	end
-
-	for i = para_i, #paragraphs do
-		local paragraph = paragraphs[i]
-
-		for j, sub_line in ipairs(paragraph) do
-			sub_line.y = y
-			y = y + sub_line.h
-		end
-
-		y = y + self.paragraph_pad
-	end
-end
-
-
 function _mt_ed_m:getFont()
 	return self.font
 end
@@ -482,7 +456,7 @@ function _mt_ed_m:insertText(text) -- [update]
 	if old_line ~= self.car_line then
 		for i = old_line + 1, self.car_line do
 			table.insert(self.paragraphs, i, {})
-			print("inserted at index " .. i, #self.paragraphs)
+			--print("inserted at index " .. i, #self.paragraphs)
 		end
 	end
 end
@@ -508,7 +482,7 @@ function _mt_ed_m:deleteText(copy_deleted, l1, b1, l2, b2) -- [update]
 
 	if l1 ~= l2 then
 		for i = l2, l1 + 1, -1 do
-			table.delete(self.paragraphs, i)
+			table.remove(self.paragraphs, i)
 		end
 	end
 
@@ -546,12 +520,12 @@ end
 function _mt_ed_m:updateDisplayText(para_1, para_2)
 	local lines = self.lines
 	local paragraphs = self.paragraphs
+	local font = self.font
 
 	para_1 = para_1 or 1
 	para_2 = para_2 or #lines
 
 	for i = para_1, para_2 do
-		local font = self.font
 		local str = lines[i]
 
 		-- Make sure the paragraph table exists.
@@ -610,7 +584,26 @@ function _mt_ed_m:updateDisplayText(para_1, para_2)
 		end
 	end
 
-	_refreshSubLineYOffsets(self, para_1)
+	-- Update sub-line Y offsets.
+	local y = 0
+
+	-- If starting after Paragraph #1, assume that the previous sub-line's coords are good.
+	if para_1 > 1 then
+		local para_prev = paragraphs[para_1 - 1]
+		local sub_prev = para_prev[#para_prev]
+		y = sub_prev.y + sub_prev.h + self.paragraph_pad
+	end
+
+	for i = para_1, #paragraphs do
+		local paragraph = paragraphs[i]
+
+		for j, sub_line in ipairs(paragraph) do
+			sub_line.y = y
+			y = y + sub_line.h
+		end
+
+		y = y + self.paragraph_pad
+	end
 
 	self:syncDisplayCaretHighlight(para_1, para_2)
 end
@@ -622,6 +615,9 @@ function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
 	local car_str = self.lines[self.car_line]
 	local h_str = self.lines[self.h_line]
 	local paragraphs = self.paragraphs
+
+	para_1 = para_1 or 1
+	para_2 = para_2 or #self.lines
 
 	--[[
 	print(
@@ -660,7 +656,7 @@ function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
 	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, self.d_car_byte, font)
 
 	-- Get line offsets relative to the display sequence.
-	local para_1, sub_1, byte_1, para_2, sub_2, byte_2 = edComM.getHighlightOffsetsParagraph(
+	local dp1, ds1, db1, dp2, ds2, db2 = edComM.getHighlightOffsetsParagraph(
 		self.d_car_para,
 		self.d_car_sub,
 		self.d_car_byte,
@@ -675,25 +671,26 @@ function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
 	-- 2: Handling in-between lines and bottom of multiple lines
 	-- 3: Done / fall through to 'not highlighted'
 	local paint_mode = 1
-	if para_1 == para_2 and sub_1 == sub_2 then
+	if dp1 == dp2 and ds1 == ds2 then
 		paint_mode = 0
 	end
 
+	print("?", para_1, para_2, #self.lines, #self.paragraphs)
 	for i = para_1, para_2 do
 		local paragraph = paragraphs[i]
 		for j, sub_line in ipairs(paragraph) do
 			-- Single highlighted line
-			if paint_mode == 0 and i == para_1 and j == sub_1 then
-				_updateHighlight(self, i, j, byte_1, byte_2)
+			if paint_mode == 0 and i == dp1 and j == ds1 then
+				_updateHighlight(self, i, j, db1, db2)
 
 			-- Top of multiple lines
-			elseif paint_mode == 1 and i == para_1 and j == sub_1 then
-				_updateHighlight(self, i, j, byte_1, #sub_line.str + 2)
+			elseif paint_mode == 1 and i == dp1 and j == ds1 then
+				_updateHighlight(self, i, j, db1, #sub_line.str + 2)
 				paint_mode = 2
 
 			-- Bottom of multiple lines
-			elseif paint_mode == 2 and i == para_2 and j == sub_2 then
-				_updateHighlight(self, i, j, 1, byte_2)
+			elseif paint_mode == 2 and i == dp2 and j == ds2 then
+				_updateHighlight(self, i, j, 1, db2)
 				paint_mode = 3
 
 			-- In-betweens
@@ -730,21 +727,14 @@ end
 --- Gets the top and bottom selected line indices and the selection bytes that go with them, in order.
 -- @param omit_empty_last_selection When true, exclude the bottom line if the selection is at the start.
 function _mt_ed_m:getSelectedLinesRange(omit_empty_last_selection)
-	local r1, r2, b1, b2 = self.car_line, self.h_line, self.car_byte, self.h_byte
-	if r1 > r2 then
-		r1, r2, b1, b2 = r2, r1, b2, b1
+	local l1, b1, l2, b2 = self:getHighlightOffsets()
+
+	if omit_empty_last_selection and l2 > l1 and b2 <= 1 then
+		l2 = math.max(l1, l2 - 1)
+		b2 = #self.lines[l2] + 1
 	end
 
-	if r1 == r2 then
-		b1, b2 = math.min(b1, b2), math.max(b1, b2)
-	end
-
-	if omit_empty_last_selection and r2 > r1 and b2 <= 1 then
-		r2 = math.max(r1, r2 - 1)
-		b2 = #self.lines[r2] + 1
-	end
-
-	return r1, r2, b1, b2
+	return l1, l2, b1, b2
 end
 
 
@@ -775,24 +765,6 @@ function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
 end
 
 
-function _mt_ed_m:caretToLineAndByte(clear_highlight, line_n, byte_n) -- [sync]
-	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
-
-	line_n = math.max(1, math.min(line_n, #self.lines))
-	local line = self.lines[line_n]
-	byte_n = math.max(1, math.min(byte_n, #line + 1))
-
-	self.car_line = line_n
-	self.car_byte = byte_n
-
-	--print("self.car_line", self.car_line, "self.car_byte", self.car_byte)
-
-	if clear_highlight then
-		self:clearHighlight()
-	end
-end
-
-
 function _mt_ed_m:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n) -- [sync]
 	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
 	local line
@@ -815,8 +787,6 @@ function _mt_ed_m:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_
 
 	--print("self.car_line", self.car_line, "self.car_byte", self.car_byte)
 	--print("self.h_line", self.h_line, "self.h_byte", self.h_byte)
-
-	-- ZXC update
 end
 
 
@@ -841,6 +811,28 @@ function _mt_ed_m:getDisplayParagraphHeight(para_i) -- XXX test
 	local sub_first, sub_last = paragraph[1], paragraph[#paragraph]
 
 	return sub_last.y + sub_last.h - sub_first.y
+end
+
+
+function _mt_ed_m:_printInternalText(first, last)
+	first = first or 1
+	last = last or #self.lines
+	for i = first, last do
+		local line = self.lines[i]
+		print(i, "|" .. line .. "|")
+	end
+end
+
+
+function _mt_ed_m:_printDisplayText(first, last)
+	first = first or 1
+	last = last or #self.paragraphs
+	for i = first, last do
+		local para = self.paragraphs[i]
+		for j, sub_line in ipairs(para) do
+			print(i, j, "|" .. sub_line.str .. "|")
+		end
+	end
 end
 
 
