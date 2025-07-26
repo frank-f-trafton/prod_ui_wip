@@ -13,15 +13,16 @@ local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
-local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
+local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local widShared = context:getLua("core/wid_shared")
+--local widShared = context:getLua("core/wid_shared")
 
 
 -- LÖVE 12 compatibility
@@ -38,10 +39,6 @@ end
 
 
 function lgcInputM.setupInstance(self)
-	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
-	self.caret_extend_x = 0
-	self.caret_extend_y = 0
-
 	-- How far to offset the line X position depending on the alignment.
 	self.align_offset = 0
 
@@ -59,6 +56,7 @@ function lgcInputM.setupInstance(self)
 	self.vis_para_top = 1
 	self.vis_para_bot = 1
 
+	-- Caret state
 	self.caret_fill = "fill"
 
 	-- The caret rect dimensions for drawing.
@@ -66,6 +64,18 @@ function lgcInputM.setupInstance(self)
 	self.caret_y = 0
 	self.caret_w = 0
 	self.caret_h = 0
+
+	self.caret_is_showing = true
+	self.caret_blink_time = 0
+
+	-- XXX: skin or some other config system
+	self.caret_blink_reset = -0.5
+	self.caret_blink_on = 0.5
+	self.caret_blink_off = 0.5
+
+	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
+	self.caret_extend_x = 0
+	self.caret_extend_y = 0
 
 	-- Position offsets when clicking the mouse.
 	-- These are only valid when a mouse action is in progress.
@@ -75,6 +85,10 @@ function lgcInputM.setupInstance(self)
 	self.text_object = uiGraphics.newTextBatch(_dummy_font)
 
 	self.line_ed = lineEdM.new()
+
+	-- History state.
+	self.hist = structHistory.new()
+	editFuncM.writeHistoryEntry(self, true)
 
 	-- Enable/disable specific editing actions.
 	self.allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
@@ -114,90 +128,26 @@ function lgcInputM.setupInstance(self)
 end
 
 
---- Call after changing alignment, then update the alignment of all sub-lines.
-function lgcInputM.updateAlignOffset(self)
-	local align = self.line_ed.align
-
-	if align == "left" then
-		self.align_offset = 0
-
-	elseif align == "center" then
-		self.align_offset = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
-
-	else -- align == "right"
-		self.align_offset = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
-	end
-end
-
-
-function lgcInputM.method_scrollGetCaretInBounds(self, immediate)
-	local line_ed = self.line_ed
-
-	-- get the extended caret rectangle
-	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
-	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
-	local car_x2 = self.align_offset + line_ed.caret_box_x + line_ed.caret_box_w + self.caret_extend_x
-	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
-
-	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
-end
-
-
-function lgcInputM.method_updateDocumentDimensions(self)
-	local line_ed = self.line_ed
-
-	-- height (assumes the final sub-line is current)
-	local last_para = line_ed.paragraphs[#line_ed.paragraphs]
-	print("#line_ed.paragraphs", #line_ed.paragraphs)
-	print("#last_para", #last_para)
-	local last_sub = last_para[#last_para]
-
-	-- WIP
-	-- [[
-	print("#paragraphs", #line_ed.paragraphs)
-	for i, para in ipairs(line_ed.paragraphs) do
-		for j, sub_line in ipairs(para) do
-			print(i, j, "|" .. sub_line.str .. "|")
-		end
-	end
-	--]]
-
-	self.doc_h = last_sub.y + last_sub.h
-
-	-- width
-	line_ed.view_w = self.vp_w
-	local x1, x2 = self.line_ed:getDisplayXBoundaries()
-	self.doc_w = (x2 - x1)
-
-	lgcInputM.updateAlignOffset(self)
-end
-
-
-function lgcInputM.updatePageJumpSteps(self, font)
-	self.page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
-end
-
-
 function lgcInputM.textInputLogic(self, text)
 	local line_ed = self.line_ed
 
 	if self.allow_input then
-		local hist = line_ed.hist
+		local hist = self.hist
 
-		lgcInputM.resetCaretBlink(line_ed)
+		editWidM.resetCaretBlink(self)
 
-		local old_line, old_byte, old_h_line, old_h_byte = line_ed:getCaretOffsets()
+		local xcl, xcb, xhl, xhb = line_ed:getCaretOffsets() -- old offsets
 
 		local suppress_replace = false
 		if self.replace_mode then
 			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-			if line_ed.car_byte < #line_ed.lines[#line_ed.lines] + 1 then
+			if line_ed.cb < #line_ed.lines[#line_ed.lines] + 1 then
 				self.input_category = false
 			end
 
 			-- Replace mode should not overwrite line feeds.
-			local line = line_ed.lines[line_ed.car_line]
-			if line_ed.car_byte > #line then
+			local line = line_ed.lines[line_ed.cl]
+			if line_ed.cb > #line then
 				suppress_replace = true
 			end
 		end
@@ -208,19 +158,19 @@ function lgcInputM.textInputLogic(self, text)
 		local entry = hist:getEntry()
 		local do_advance = true
 
-		if (entry and entry.car_line == old_line and entry.car_byte == old_byte)
+		if (entry and entry.cl == xcl and entry.cb == xcb)
 		and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
 		then
 			do_advance = false
 		end
 
 		if do_advance then
-			editHistM.doctorCurrentCaretOffsets(line_ed.hist, old_line, old_byte, old_h_line, old_h_byte)
+			editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
 		end
-		editHistM.writeEntry(line_ed, do_advance)
+		editFuncM.writeHistoryEntry(self, do_advance)
 		self.input_category = no_ws and "typing" or "typing-ws"
 
-		self:updateDocumentDimensions()
+		editWidM.updateDocumentDimensions(self)
 		self:scrollGetCaretInBounds(true)
 	end
 end
@@ -231,7 +181,7 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
-	lgcInputM.resetCaretBlink(line_ed)
+	editWidM.resetCaretBlink(self)
 
 	-- pop-up menu (undo, etc.)
 	if scancode == "application" or (shift_down and scancode == "f10") then
@@ -264,10 +214,60 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 end
 
 
+local function _caretToXY(self, clear_highlight, x, y, split_x)
+	local line_ed = self.line_ed
+
+	local cl, cb = line_ed:getCharacterDetailsAtPosition(x, y, split_x)
+	line_ed:moveCaret(cl, cb, clear_highlight)
+end
+
+
+local function _clickDragByWord(self, x, y, origin_line, origin_byte)
+	local line_ed = self.line_ed
+
+	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
+
+	-- Expand ranges to cover full words
+	local dl1, db1, dl2, db2 = line_ed:getWordRange(drag_line, drag_byte)
+	local cl1, cb1, cl2, cb2 = line_ed:getWordRange(origin_line, origin_byte)
+
+	-- Merge the two ranges
+	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(dl1, db1, dl2, db2, cl1, cb1, cl2, cb2)
+
+	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
+		line_ed:moveCaretAndHighlight(ml1, mb1, ml2, mb2)
+	else
+		line_ed:moveCaretAndHighlight(ml2, mb2, ml1, mb1)
+	end
+end
+
+
+local function _clickDragByLine(self, x, y, origin_line, origin_byte)
+	local line_ed = self.line_ed
+
+	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
+
+	-- Expand ranges to cover full (wrapped) lines
+	local drag_first, drag_last = line_ed:getWrappedLineRange(drag_line, drag_byte)
+	local click_first, click_last = line_ed:getWrappedLineRange(origin_line, origin_byte)
+
+	-- Merge the two ranges
+	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(
+		drag_line, drag_first, drag_line, drag_last,
+		origin_line, click_first, origin_line, click_last
+	)
+	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
+		line_ed:moveCaretAndHighlight(ml1, mb1, ml2, mb2)
+	else
+		line_ed:moveCaretAndHighlight(ml2, mb2, ml1, mb1)
+	end
+end
+
+
 function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 	local line_ed = self.line_ed
 
-	lgcInputM.resetCaretBlink(line_ed)
+	editWidM.resetCaretBlink(self)
 	local mx, my = self:getRelativePosition(x, y)
 
 	if button == 1 then
@@ -288,22 +288,22 @@ function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 
 			if context.cseq_presses == 1 then
 				local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
-				lgcInputM.caretToXY(self, not shift_down, msx, msy, true)
+				_caretToXY(self, not shift_down, msx, msy, true)
 				--self:scrollGetCaretInBounds() -- Helpful, or distracting?
 
-				self.click_line = line_ed.car_line
-				self.click_byte = line_ed.car_byte
+				self.click_line = line_ed.cl
+				self.click_byte = line_ed.cb
 
 			elseif context.cseq_presses == 2 then
-				self.click_line = line_ed.car_line
-				self.click_byte = line_ed.car_byte
+				self.click_line = line_ed.cl
+				self.click_byte = line_ed.cb
 
 				-- Highlight group from highlight position to mouse position
 				self:highlightCurrentWord()
 
 			elseif context.cseq_presses == 3 then
-				self.click_line = line_ed.car_line
-				self.click_byte = line_ed.car_byte
+				self.click_line = line_ed.cl
+				self.click_byte = line_ed.cb
 
 				--- Highlight sub-lines from highlight position to mouse position
 				--line_ed:highlightCurrentLine()
@@ -336,7 +336,7 @@ function lgcInputM.mouseDragLogic(self)
 
 	local widget_needs_update = false
 
-	lgcInputM.resetCaretBlink(line_ed)
+	editWidM.resetCaretBlink(self)
 
 	-- Relative mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -350,15 +350,15 @@ function lgcInputM.mouseDragLogic(self)
 
 	-- Handle drag highlight actions
 	if context.cseq_presses == 1 then
-		lgcInputM.caretToXY(self, false, s_mx, s_my, true)
+		_caretToXY(self, false, s_mx, s_my, true)
 		widget_needs_update = true
 
 	elseif context.cseq_presses == 2 then
-		lgcInputM.clickDragByWord(self, s_mx, s_my, self.click_line, self.click_byte)
+		_clickDragByWord(self, s_mx, s_my, self.click_line, self.click_byte)
 		widget_needs_update = true
 
 	elseif context.cseq_presses == 3 then
-		lgcInputM.clickDragByLine(self, s_mx, s_my, self.click_line, self.click_byte)
+		_clickDragByLine(self, s_mx, s_my, self.click_line, self.click_byte)
 		widget_needs_update = true
 	end
 
@@ -378,79 +378,6 @@ function lgcInputM.mouseWheelLogic(self, x, y)
 end
 
 
-function lgcInputM.resetCaretBlink(line_ed)
-	line_ed.caret_blink_time = line_ed.caret_blink_reset
-end
-
-
-function lgcInputM.updateCaretBlink(line_ed, dt)
-	line_ed.caret_blink_time = line_ed.caret_blink_time + dt
-	if line_ed.caret_blink_time > line_ed.caret_blink_on + line_ed.caret_blink_off then
-		line_ed.caret_blink_time = math.max(-(line_ed.caret_blink_on + line_ed.caret_blink_off), line_ed.caret_blink_time - (line_ed.caret_blink_on + line_ed.caret_blink_off))
-	end
-
-	line_ed.caret_is_showing = line_ed.caret_blink_time < line_ed.caret_blink_off
-end
-
-
-function lgcInputM.caretToXY(self, clear_highlight, x, y, split_x)
-	local line_ed = self.line_ed
-
-	local line_ed_line, line_ed_byte = line_ed:getCharacterDetailsAtPosition(x, y, split_x)
-	editFuncM.caretToLineAndByte(self, clear_highlight, line_ed_line, line_ed_byte)
-end
-
-
-function lgcInputM.clickDragByWord(self, x, y, origin_line, origin_byte)
-	local line_ed = self.line_ed
-
-	local l1, _, l2, _ = line_ed:getHighlightOffsets()
-
-	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
-
-	-- Expand ranges to cover full words
-	local dl1, db1, dl2, db2 = line_ed:getWordRange(drag_line, drag_byte)
-	local cl1, cb1, cl2, cb2 = line_ed:getWordRange(origin_line, origin_byte)
-
-	-- Merge the two ranges
-	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(dl1, db1, dl2, db2, cl1, cb1, cl2, cb2)
-
-	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
-		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
-	else
-		line_ed:caretAndHighlightToLineAndByte(ml2, mb2, ml1, mb1)
-	end
-
-	line_ed:syncDisplayCaretHighlight(math.min(l1, drag_line), math.max(l2, drag_line))
-end
-
-
-function lgcInputM.clickDragByLine(self, x, y, origin_line, origin_byte)
-	local line_ed = self.line_ed
-
-	local l1, _, l2, _ = line_ed:getHighlightOffsets()
-
-	local drag_line, drag_byte = line_ed:getCharacterDetailsAtPosition(x, y, true)
-
-	-- Expand ranges to cover full (wrapped) lines
-	local drag_first, drag_last = line_ed:getWrappedLineRange(drag_line, drag_byte)
-	local click_first, click_last = line_ed:getWrappedLineRange(origin_line, origin_byte)
-
-	-- Merge the two ranges
-	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(
-		drag_line, drag_first, drag_line, drag_last,
-		origin_line, click_first, origin_line, click_last
-	)
-	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
-		line_ed:caretAndHighlightToLineAndByte(ml1, mb1, ml2, mb2)
-	else
-		line_ed:caretAndHighlightToLineAndByte(ml2, mb2, ml1, mb1)
-	end
-
-	line_ed:syncDisplayCaretHighlight(math.min(l1, drag_line), math.max(l2, drag_line))
-end
-
-
 function lgcInputM.cb_action(self, item_t)
 	return editWrapM.wrapAction(self, item_t.func)
 end
@@ -461,13 +388,13 @@ end
 
 function lgcInputM.configItem_undo(item, client)
 	item.selectable = true
-	item.actionable = (client.line_ed.hist.pos > 1)
+	item.actionable = (client.hist.pos > 1)
 end
 
 
 function lgcInputM.configItem_redo(item, client)
 	item.selectable = true
-	item.actionable = (client.line_ed.hist.pos < #client.line_ed.hist.ledger)
+	item.actionable = (client.hist.pos < #client.hist.ledger)
 end
 
 

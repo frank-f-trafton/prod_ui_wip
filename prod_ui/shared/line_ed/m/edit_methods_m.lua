@@ -14,13 +14,11 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local edComBase = context:getLua("shared/line_ed/ed_com_base")
-local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
-local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
+local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
-local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local _enum_align = uiShared.makeLUTV("left", "center", "right")
@@ -88,10 +86,13 @@ function client:setHighlightEnabled(enabled)
 end
 
 
-function client:stepHistory(dir)
-	uiShared.type1(1, dir, "number")
+function client:undo()
+	editWrapM.wrapAction(self, editCommandM.undo)
+end
 
-	editWrapM.wrapAction(self, editCommandM.stepHistory, dir)
+
+function client:redo()
+	editWrapM.wrapAction(self, editCommandM.redo)
 end
 
 
@@ -106,7 +107,7 @@ function client:getHighlightedText()
 	if line_ed:isHighlighted() then
 		local lines = line_ed.lines
 
-		local l1, b1, l2, b2 = line_ed:getHighlightOffsets()
+		local l1, b1, l2, b2 = line_ed:getCaretOffsetsInOrder()
 		local text = lines:copy(l1, b1, l2, b2 - 1)
 		return table.concat(text, "\n")
 	end
@@ -292,6 +293,11 @@ end
 function client:resetInputCategory()
 	-- Used to force a new history entry.
 	self.input_category = false
+end
+
+
+function client:scrollGetCaretInBounds(immediate)
+	editWidM.scrollGetCaretInBounds(self, immediate)
 end
 
 

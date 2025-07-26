@@ -58,10 +58,13 @@ function client:setText(text)
 end
 
 
-function client:stepHistory(dir)
-	uiShared.type1(1, dir, "number")
+function client:undo()
+	editWrapS.wrapAction(self, editCommandS.undo)
+end
 
-	editWrapS.wrapAction(self, editCommandS.stepHistory, dir)
+
+function client:redo()
+	editWrapS.wrapAction(self, editCommandS.redo)
 end
 
 

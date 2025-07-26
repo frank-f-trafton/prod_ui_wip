@@ -123,7 +123,7 @@ end
 
 
 --- Sorts display caret and highlight offsets from first to last. (Paragraph, sub-line, and byte.)
-function edComM.getHighlightOffsetsParagraph(l1, s1, b1, l2, s2, b2)
+function edComM.getDisplayOffsetsInOrder(l1, s1, b1, l2, s2, b2)
 	-- l, s, b == line, sub-line, byte
 	if l1 == l2 and s1 == s2 then
 		b1, b2 = math.min(b1, b2), math.max(b1, b2)
@@ -141,18 +141,18 @@ end
 
 --- Given a display-lines object, a Paragraph index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
 --  the top or bottom sub-line if reaching the start or end respectively.
-function edComM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
+function edComM.stepSubLine(display_lines, dcp, dcs, n_steps)
 	while n_steps < 0 do
 		-- first line
-		if d_car_para <= 1 and d_car_sub <= 1 then
-			d_car_para = 1
-			d_car_sub = 1
+		if dcp <= 1 and dcs <= 1 then
+			dcp = 1
+			dcs = 1
 			break
 		else
-			d_car_sub = d_car_sub - 1
-			if d_car_sub == 0 then
-				d_car_para = d_car_para - 1
-				d_car_sub = #display_lines[d_car_para]
+			dcs = dcs - 1
+			if dcs == 0 then
+				dcp = dcp - 1
+				dcs = #display_lines[dcp]
 			end
 
 			n_steps = n_steps + 1
@@ -161,23 +161,23 @@ function edComM.stepSubLine(display_lines, d_car_para, d_car_sub, n_steps)
 
 	while n_steps > 0 do
 		-- last line
-		if d_car_para >= #display_lines and d_car_sub >= #display_lines[#display_lines] then
-			d_car_para = #display_lines
-			d_car_sub = #display_lines[#display_lines]
+		if dcp >= #display_lines and dcs >= #display_lines[#display_lines] then
+			dcp = #display_lines
+			dcs = #display_lines[#display_lines]
 			break
 		else
-			d_car_sub = d_car_sub + 1
+			dcs = dcs + 1
 
-			if d_car_sub > #display_lines[d_car_para] then
-				d_car_para = d_car_para + 1
-				d_car_sub = 1
+			if dcs > #display_lines[dcp] then
+				dcp = dcp + 1
+				dcs = 1
 			end
 
 			n_steps = n_steps - 1
 		end
 	end
 
-	return d_car_para, d_car_sub
+	return dcp, dcs
 end
 
 

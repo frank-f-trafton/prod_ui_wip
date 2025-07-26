@@ -57,20 +57,14 @@ function plan.make(panel)
 
 	local function setWrapMode(tb, enabled)
 		tb:setWrapMode(not not enabled)
-		tb:cacheUpdate()
-		tb:scrollGetCaretInBounds(true)
 	end
 
 	local function setAlign(tb, align_mode)
 		tb:setAlign(align_mode)
-		tb:cacheUpdate()
-		tb:scrollGetCaretInBounds(true)
 	end
 
 	local function setColorization(tb, enabled)
 		tb:setColorization(not not enabled)
-		tb:cacheUpdate()
-		tb:scrollGetCaretInBounds(true)
 		--[[
 		local DEMO_PURPLE = {1, 0, 1, 1}
 
@@ -228,7 +222,6 @@ function plan.make(panel)
 
 	text_box.ghost_text = "Ghost text"
 
-	--text_box.allow_line_feed = false
 	text_box.allow_tab = true
 	text_box.allow_untab = true
 	text_box.tabs_to_spaces = false
@@ -254,7 +247,6 @@ function plan.make(panel)
 
 	code_ed.ghost_text = "Ghost text"
 
-	--code_ed.allow_line_feed = false
 	code_ed.allow_tab = true
 	code_ed.allow_untab = true
 	code_ed.tabs_to_spaces = false
