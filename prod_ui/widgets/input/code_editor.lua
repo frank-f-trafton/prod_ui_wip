@@ -31,7 +31,7 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 -- ProdUI
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
-local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
+local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputM = context:getLua("shared/lgc_input_m")
 local lgcScroll = context:getLua("shared/lgc_scroll")
@@ -57,10 +57,6 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 def.pop_up_def = lgcInputM.pop_up_def
 
 
-def.scrollGetCaretInBounds = lgcInputM.method_scrollGetCaretInBounds
-def.updateDocumentDimensions = lgcInputM.method_updateDocumentDimensions
-
-
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -81,8 +77,6 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self.line_ed:updateDisplayText()
 end
 
 
@@ -109,29 +103,11 @@ function def:uiCall_reshapePre()
 
 	-- ZXC update (?)
 
-	self:updateDocumentDimensions()
+	editWidM.updateDocumentDimensions(self)
 
-	lgcInputM.updatePageJumpSteps(self, line_ed.font)
+	editWidM.updatePageJumpSteps(self, line_ed.font)
 
 	return true
-end
-
-
---- Updates cached display state.
-function def:cacheUpdate()
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-
-	local skin = self.skin
-
-	self:updateDocumentDimensions()
-
-	editFuncM.updateCaretShape(self)
-	editFuncM.updateVisibleParagraphs(self)
-
-	if self.text_object then
-		editFuncM.updateTextBatch(self)
-	end
 end
 
 
@@ -229,7 +205,7 @@ end
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
-		lgcInputM.resetCaretBlink(self.line_ed)
+		editWidM.resetCaretBlink(self)
 	end
 end
 
@@ -273,7 +249,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	lgcInputM.updateCaretBlink(line_ed, dt)
+	editWidM.updateCaretBlink(self, dt)
 
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
@@ -295,7 +271,7 @@ function def:uiCall_update(dt)
 	lgcScroll.updateScrollState(self)
 
 	if do_update then
-		self:cacheUpdate()
+		editWidM.generalUpdate(self, true, false, false, true, true)
 	end
 end
 
@@ -319,6 +295,8 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 		self.line_ed:setFont(self.skin.font)
+		self.text_object:setFont(self.skin.font)
+		self.line_ed:updateDisplayText()
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
@@ -364,7 +342,7 @@ def.default_skinner = {
 		-- Draw current paragraph illumination, if applicable.
 		if self.illuminate_current_line then
 			love.graphics.setColor(res.color_current_line_illuminate)
-			local paragraph = line_ed.paragraphs[line_ed.d_car_para]
+			local paragraph = line_ed.paragraphs[line_ed.dcp]
 			local para_y = paragraph[1].y
 
 			local last_sub = paragraph[#paragraph]
@@ -437,7 +415,7 @@ def.default_skinner = {
 		end
 
 		-- Draw the caret.
-		if self.context.window_focus and has_thimble and line_ed.caret_is_showing then
+		if self.context.window_focus and has_thimble and self.caret_is_showing then
 			love.graphics.setColor(res.color_insert) -- XXX: color_replace
 			love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
 		end

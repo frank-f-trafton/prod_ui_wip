@@ -1,23 +1,14 @@
 -- LineEditor (multi) core object.
 
-
 --[[
-WARNING: Functions tagged with the following comments require special attention:
-	[sync]: Must run self:syncDisplayCaretHighlight() when done making changes.
-	[update]: Must run self:updateDisplayText() when done making changes.
-
-Note that self:updateDisplayText() also calls self:syncDisplayCaretHighlight() internally.
-
 Widgets may need to run additional update code after a method is executed (for example,
 to update the visual state of the caret).
---]]
 
+Data structures:
 
---[[
-	(Logical) Line: An internal string.
-	Wrap-Line: A single line of display text to be printed. May also include a coloredtext version of the text.
-	Paragraph: Holds one or more Wrap-Lines that correspond to a single Logical Line. Without wrapping, each Paragraph
-		contains exactly one Wrap-Line.
+* line_ed.lines {strings}: The internal text, split by line feeds.
+* line_ed.paragraphs {tables}: Display data for each line of text. Each paragraph is an array of sub-lines.
+* Sub-line: A single line of display text to be printed. May also include a coloredtext version of the text.
 --]]
 
 
@@ -35,10 +26,7 @@ local utf8 = require("utf8")
 local code_groups = context:getLua("shared/line_ed/code_groups")
 local edComBase = context:getLua("shared/line_ed/ed_com_base")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
-local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
-local editHistM = context:getLua("shared/line_ed/m/edit_hist_m")
 local seqString = context:getLua("shared/line_ed/seq_string")
-local structHistory = context:getLua("shared/struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
@@ -61,16 +49,12 @@ function lineEdM.new()
 	self.lines = seqString.new()
 
 	-- Current line and position (in bytes) of the text caret and the highlight selection.
-	-- The highlight can be greater or less than self.car_byte.
-	-- If (h_line == car_line and h_byte == car_byte), then highlighting is not active.
-	self.car_byte = 1
-	self.car_line = 1
-	self.h_byte = 1
-	self.h_line = 1
-
-	-- History state.
-	self.hist = structHistory.new()
-	editHistM.writeEntry(self, true)
+	-- The caret can appear before or after the highlight position. If they have the same
+	-- position, then highlighting is not active.
+	self.cl = 1 -- caret line
+	self.cb = 1 -- caret byte
+	self.hl = 1 -- highlight line
+	self.hb = 1 -- highlight byte
 
 	-- Display state.
 	self.paragraphs = {}
@@ -104,23 +88,15 @@ function lineEdM.new()
 
 	-- XXX: skin or some other config system. Currently, 'caret_line_width' is based on the width of 'M' in the current font.
 	self.caret_line_width = 0
-	self.caret_is_showing = true
-
-	self.caret_blink_time = 0
-
-	-- XXX: skin or some other config system
-	self.caret_blink_reset = -0.5
-	self.caret_blink_on = 0.5
-	self.caret_blink_off = 0.5
 
 	-- Caret and highlight lines, sub-lines and bytes for the display text.
-	self.d_car_byte = 1
-	self.d_car_para = 1
-	self.d_car_sub = 1
-
-	self.d_h_byte = 1
-	self.d_h_para = 1
-	self.d_h_sub = 1
+	-- These are based on the internal caret and highlight positions.
+	self.dcp = 1 -- Caret paragraph
+	self.dcs = 1 -- Caret sub-line
+	self.dcb = 1 -- Caret byte
+	self.dhp = 1 -- Highlight paragraph
+	self.dhs = 1 -- Highlight sub-line
+	self.dhb = 1 -- Highlight byte
 
 	-- The position and dimensions of the currently selected character.
 	-- The client widget uses these values to determine the size and location of its caret.
@@ -169,7 +145,7 @@ function lineEdM.new()
 end
 
 
-local function _updateDisplaySubLineHorizontal(sub_line, align, font)
+local function _updateDisplaySubHorizontal(sub_line, align, font)
 	sub_line.w = font:getWidth(sub_line.str)
 
 	if align == "left" then
@@ -247,7 +223,7 @@ local function _updateDisplaySubLine(self, i_para, i_sub, str, syntax_colors, sy
 	paragraph[i_sub] = sub_line
 
 	sub_line.h = math.ceil(font:getHeight() * font:getLineHeight())
-	_updateDisplaySubLineHorizontal(sub_line, self.align, font)
+	_updateDisplaySubHorizontal(sub_line, self.align, font)
 end
 
 
@@ -331,8 +307,12 @@ function _mt_ed_m:getFont()
 end
 
 
-function _mt_ed_m:setFont(font) -- [update]
+function _mt_ed_m:setFont(font)
 	uiShared.loveTypeEval(1, font, "Font")
+
+	if font and self.font == font then
+		return
+	end
 
 	self.font = font or false
 	if self.font then
@@ -340,28 +320,33 @@ function _mt_ed_m:setFont(font) -- [update]
 		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
 		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
 		self.width_line_feed = math.max(1, math.ceil(em_width / 4))
+
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
 	end
 end
 
 
-function _mt_ed_m:setTextColors(text_color, text_h_color) -- [sync]
+function _mt_ed_m:setTextColors(text_color, text_h_color)
 	uiShared.typeEval(1, text_color, "table")
 	uiShared.typeEval(2, text_h_color, "table")
 
 	self.text_color = text_color or edComBase.default_text_color
 	self.text_h_color = text_h_color or edComBase.default_text_h_color
+
+	self:syncDisplayCaretHighlight()
 end
 
 
 function _mt_ed_m:getCaretOffsets()
-	return self.car_line, self.car_byte, self.h_line, self.h_byte
+	return self.cl, self.cb, self.hl, self.hb
 end
 
 
---- Gets caret and highlight lines and offsets in the correct order.
-function _mt_ed_m:getHighlightOffsets()
+--- Gets caret and highlight lines and offsets (in order from top to bottom).
+function _mt_ed_m:getCaretOffsetsInOrder()
 	-- You may need to subtract 1 from byte_2 to get the correct range.
-	local l1, b1, l2, b2 = self.car_line, self.car_byte, self.h_line, self.h_byte
+	local l1, b1, l2, b2 = self.cl, self.cb, self.hl, self.hb
 
 	if l1 == l2 then
 		b1, b2 = math.min(b1, b2), math.max(b1, b2)
@@ -376,12 +361,17 @@ end
 
 --- Returns if the LineEd currently has a highlighted section (not whether highlighting itself is currently active.)
 function _mt_ed_m:isHighlighted()
-	return not (self.h_line == self.car_line and self.h_byte == self.car_byte)
+	return not (self.hl == self.cl and self.hb == self.cb)
 end
 
 
-function _mt_ed_m:clearHighlight() -- [sync]
-	self.h_line, self.h_byte = self.car_line, self.car_byte
+function _mt_ed_m:clearHighlight()
+	local l1, _, l2, _ = self:getCaretOffsetsInOrder()
+	local old_h_line, old_h_byte = self.hl, self.hb
+	self.hl, self.hb = self.cl, self.cb
+	if not (self.hl == old_h_line and self.hb == old_h_byte) then
+		self:syncDisplayCaretHighlight(l1, l2)
+	end
 end
 
 
@@ -445,20 +435,70 @@ function _mt_ed_m:dispGetSubLineInfoAtX(para_i, sub_i, x, split_x)
 end
 
 
+-- @param cl, cb The new caret line and byte offsets.
+-- @param clear_highlight When true, sets the highlight to the caret.
+-- @return true if the caret position (including highlight) changed.
+function _mt_ed_m:moveCaret(cl, cb, clear_highlight)
+	local temp
+
+	cl = math.max(1, math.min(cl, #self.lines))
+	temp = self.lines[cl]
+	cb = math.max(1, math.min(cb, #temp + 1))
+
+	local old_cl, old_cb, old_hl, old_hb = self.cl, self.cb, self.hl, self.hb
+	self.cl, self.cb = cl, cb
+	if clear_highlight then
+		self.hl, self.hb = cl, cb
+	end
+	self:syncDisplayCaretHighlight(math.min(old_cl, old_hl), math.max(old_cl, old_hl))
+	self:syncDisplayCaretHighlight(math.min(self.cl, self.hl), math.max(self.cl, self.hl))
+
+	return not (old_cl == self.cl and old_cb == self.cb and old_hl == self.hl and old_hb == self.hb)
+end
+
+
+-- @param cl, cb The new caret line and byte offsets.
+-- @param hl, hb The new highlight line and byte offsets.
+-- @return true if the caret position (including highlight) changed.
+function _mt_ed_m:moveCaretAndHighlight(cl, cb, hl, hb)
+	local temp
+
+	cl = math.max(1, math.min(cl, #self.lines))
+	temp = self.lines[cl]
+	cb = math.max(1, math.min(cb, #temp + 1))
+
+	hl = math.max(1, math.min(hl, #self.lines))
+	temp = self.lines[hl]
+	hb = math.max(1, math.min(hb, #temp + 1))
+
+	local old_cl, old_cb, old_hl, old_hb = self.cl, self.cb, self.hl, self.hb
+	self.cl, self.cb, self.hl, self.hb = cl, cb, hl, hb
+	self:syncDisplayCaretHighlight(math.min(old_cl, old_hl), math.max(old_cl, old_hl))
+	self:syncDisplayCaretHighlight(math.min(cl, hl), math.max(cl, hl))
+
+	return not (old_cl == self.cl and old_cb == self.cb and old_hl == self.hl and old_hb == self.hb)
+end
+
+
 --- Insert a string at the caret position.
 -- @param text The string to insert.
-function _mt_ed_m:insertText(text) -- [update]
-	local old_line = self.car_line
+function _mt_ed_m:insertText(text)
+	local old_line = self.cl
 
-	self.car_line, self.car_byte = self.lines:add(text, self.car_line, self.car_byte)
-	self.h_line, self.h_byte = self.car_line, self.car_byte
+	self:clearHighlight()
 
-	if old_line ~= self.car_line then
-		for i = old_line + 1, self.car_line do
+	self.cl, self.cb = self.lines:add(text, self.cl, self.cb)
+	self.hl, self.hb = self.cl, self.cb
+
+	if old_line ~= self.cl then
+		for i = old_line + 1, self.cl do
 			table.insert(self.paragraphs, i, {})
 			--print("inserted at index " .. i, #self.paragraphs)
 		end
 	end
+
+	self:updateDisplayText(old_line, self.cl)
+	self:syncDisplayCaretHighlight(self.cl, self.cl)
 end
 
 
@@ -467,24 +507,28 @@ end
 -- @param l1, b1 The first line and byte to delete from.
 -- @param l2, b2 The final line and byte to delete to.
 -- @return The deleted text as a string, if 'copy_deleted' was true (and at least one character was deleted), or nil.
-function _mt_ed_m:deleteText(copy_deleted, l1, b1, l2, b2) -- [update]
+function _mt_ed_m:deleteText(copy_deleted, l1, b1, l2, b2)
 	local lines = self.lines
+
+	self:clearHighlight()
 
 	local deleted
 	if copy_deleted then
-		deleted = lines:copy(l1, b1, l2, b2)
-		deleted = table.concat(deleted, "\n")
+		deleted = table.concat(lines:copy(l1, b1, l2, b2), "\n")
 	end
 
 	lines:delete(l1, b1, l2, b2)
 
-	self.car_line, self.car_byte, self.h_line, self.h_byte = l1, b1, l1, b1
+	self.cl, self.cb, self.hl, self.hb = l1, b1, l1, b1
 
 	if l1 ~= l2 then
 		for i = l2, l1 + 1, -1 do
 			table.remove(self.paragraphs, i)
 		end
 	end
+
+	self:updateDisplayText(self.cl, self.cl)
+	self:syncDisplayCaretHighlight(self.cl, self.cl)
 
 	return deleted ~= "" and deleted
 end
@@ -604,45 +648,39 @@ function _mt_ed_m:updateDisplayText(para_1, para_2)
 
 		y = y + self.paragraph_pad
 	end
-
-	self:syncDisplayCaretHighlight(para_1, para_2)
 end
 
 
---- Updates the display caret offsets, the caret rectangle, and the highlight rectangle. The display text must be
---	current at time of call.
-function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
-	local car_str = self.lines[self.car_line]
-	local h_str = self.lines[self.h_line]
+--- Updates caret shape, display offsets, and the vertical X position hint.
+function _mt_ed_m:updateCaret()
+	local car_str = self.lines[self.cl]
+	local h_str = self.lines[self.hl]
 	local paragraphs = self.paragraphs
-
-	para_1 = para_1 or 1
-	para_2 = para_2 or #self.lines
 
 	--[[
 	print(
-		"car_line", self.car_line,
-		"h_line", self.h_line,
+		"cl", self.cl,
+		"hl", self.hl,
 		"#car_str", car_str and #car_str or "nil",
-		"self.car_byte", self.car_byte
+		"self.cb", self.cb
 	)
 	--]]
 
-	self.d_car_para = self.car_line
-	self.d_car_byte, self.d_car_sub = edComM.coreToDisplayOffsets(car_str, self.car_byte, paragraphs[self.d_car_para])
+	self.dcp = self.cl
+	self.dcb, self.dcs = edComM.coreToDisplayOffsets(car_str, self.cb, paragraphs[self.dcp])
 
-	self.d_h_para = self.h_line
-	self.d_h_byte, self.d_h_sub = edComM.coreToDisplayOffsets(h_str, self.h_byte, paragraphs[self.d_h_para])
+	self.dhp = self.hl
+	self.dhb, self.dhs = edComM.coreToDisplayOffsets(h_str, self.hb, paragraphs[self.dhp])
 
 	local font = self.font
-	local para_cur = paragraphs[self.d_car_para]
-	local sub_line_cur = para_cur[self.d_car_sub]
+	local para_cur = paragraphs[self.dcp]
+	local sub_line_cur = para_cur[self.dcs]
 
 	-- Update cached caret info.
-	self.caret_box_x = textUtil.getCharacterX(sub_line_cur.str, self.d_car_byte, font)
+	self.caret_box_x = textUtil.getCharacterX(sub_line_cur.str, self.dcb, font)
 
 	-- If we are at the end of the string + 1: use the width of the underscore character.
-	self.caret_box_w = textUtil.getCharacterW(sub_line_cur.str, self.d_car_byte, font) or font:getWidth("_")
+	self.caret_box_w = textUtil.getCharacterW(sub_line_cur.str, self.dcb, font) or font:getWidth("_")
 
 	-- Apply horizontal alignment offsetting to caret.
 	self.caret_box_x = edComM.applyCaretAlignOffset(self.caret_box_x, sub_line_cur.str, self.align, font)
@@ -651,18 +689,30 @@ function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
 	self.caret_box_h = font:getHeight()
 
 	-- Vertical position hint
-	local d_sub = self.paragraphs[self.d_car_para][self.d_car_sub]
+	local d_sub = self.paragraphs[self.dcp][self.dcs]
 	local d_str = d_sub.str
-	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, self.d_car_byte, font)
+	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, self.dcb, font)
+end
+
+
+--- Updates the display caret offsets, the caret rectangle, and the highlight rectangle. The display text must be
+--	current at time of call.
+function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
+	local paragraphs = self.paragraphs
+
+	para_1 = para_1 or 1
+	para_2 = para_2 or #self.lines
+
+	self:updateCaret()
 
 	-- Get line offsets relative to the display sequence.
-	local dp1, ds1, db1, dp2, ds2, db2 = edComM.getHighlightOffsetsParagraph(
-		self.d_car_para,
-		self.d_car_sub,
-		self.d_car_byte,
-		self.d_h_para,
-		self.d_h_sub,
-		self.d_h_byte
+	local dp1, ds1, db1, dp2, ds2, db2 = edComM.getDisplayOffsetsInOrder(
+		self.dcp,
+		self.dcs,
+		self.dcb,
+		self.dhp,
+		self.dhs,
+		self.dhb
 	)
 
 	-- paint_mode:
@@ -718,7 +768,7 @@ function _mt_ed_m:syncDisplayAlignment(line_1, line_2)
 	for i = line_1, line_2 do
 		local paragraph = paragraphs[i]
 		for j, sub_line in ipairs(paragraph) do
-			_updateDisplaySubLineHorizontal(sub_line, align, font)
+			_updateDisplaySubHorizontal(sub_line, align, font)
 		end
 	end
 end
@@ -727,7 +777,7 @@ end
 --- Gets the top and bottom selected line indices and the selection bytes that go with them, in order.
 -- @param omit_empty_last_selection When true, exclude the bottom line if the selection is at the start.
 function _mt_ed_m:getSelectedLinesRange(omit_empty_last_selection)
-	local l1, b1, l2, b2 = self:getHighlightOffsets()
+	local l1, b1, l2, b2 = self:getCaretOffsetsInOrder()
 
 	if omit_empty_last_selection and l2 > l1 and b2 <= 1 then
 		l2 = math.max(l1, l2 - 1)
@@ -765,31 +815,6 @@ function _mt_ed_m:getWrappedLineRange(line_n, byte_n)
 end
 
 
-function _mt_ed_m:caretAndHighlightToLineAndByte(car_line_n, car_byte_n, h_line_n, h_byte_n) -- [sync]
-	-- XXX Maybe write an equivalent client method for jumping to a line and/or uChar offset.
-	local line
-
-	car_line_n = math.max(1, math.min(car_line_n, #self.lines))
-	line = self.lines[car_line_n]
-	car_byte_n = math.max(1, math.min(car_byte_n, #line + 1))
-	line = self.lines[car_line_n]
-
-	self.car_line = car_line_n
-	self.car_byte = car_byte_n
-
-	h_line_n = math.max(1, math.min(h_line_n, #self.lines))
-	line = self.lines[h_line_n]
-	h_byte_n = math.max(1, math.min(h_byte_n, #line + 1))
-	line = self.lines[h_line_n]
-
-	self.h_line = h_line_n
-	self.h_byte = h_byte_n
-
-	--print("self.car_line", self.car_line, "self.car_byte", self.car_byte)
-	--print("self.h_line", self.h_line, "self.h_byte", self.h_byte)
-end
-
-
 function _mt_ed_m:getDisplayXBoundaries()
 	local x1, x2 = 0, 0
 
@@ -814,6 +839,40 @@ function _mt_ed_m:getDisplayParagraphHeight(para_i) -- XXX test
 end
 
 
+function _mt_ed_m:setWrapMode(enabled)
+	enabled = not not enabled
+	if self.wrap_mode ~= enabled then
+		self.wrap_mode = enabled
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
+		return true
+	end
+end
+
+
+function _mt_ed_m:setColorization(enabled)
+	enabled = not not enabled
+	if self.generate_colored_text ~= enabled then
+		self.generate_colored_text = enabled
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
+		return true
+	end
+end
+
+
+function _mt_ed_m:setTextAlignment(align)
+	if self.align ~= align then
+		self.align = align
+		self:syncDisplayAlignment()
+		self:syncDisplayCaretHighlight()
+		return true
+	end
+end
+
+
+-- Debug methods.
+-- [====[
 function _mt_ed_m:_printInternalText(first, last)
 	first = first or 1
 	last = last or #self.lines
@@ -834,6 +893,7 @@ function _mt_ed_m:_printDisplayText(first, last)
 		end
 	end
 end
+--]====]
 
 
 return lineEdM

@@ -264,17 +264,6 @@ function editCommandS.clearHighlight(self)
 end
 
 
-function editCommandS.stepHistory(self, dir)
-	if self.line_ed.hist.enabled then
-		if editFuncS.stepHistory(self, dir) then
-			self.input_category = false
-
-			return true, true, true, nil, nil, true
-		end
-	end
-end
-
-
 function editCommandS.writeText(self, text)
 	editFuncS.writeText(self, text)
 
@@ -355,6 +344,17 @@ function editCommandS.caretRightHighlight(self)
 	editFuncS.caretStepRight(self, not self.allow_highlight)
 
 	return true, nil, true
+end
+
+
+function editCommandS.stepHistory(self, dir)
+	if self.line_ed.hist.enabled then
+		if editFuncS.stepHistory(self, dir) then
+			self.input_category = false
+
+			return true, true, true, nil, nil, true
+		end
+	end
 end
 
 

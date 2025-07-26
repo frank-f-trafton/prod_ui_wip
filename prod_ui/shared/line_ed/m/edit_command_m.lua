@@ -103,7 +103,7 @@ function editCommandM.caretLeft(self)
 		editFuncM.caretStepLeft(self, true)
 	end
 
-	return true, true, true, false
+	return true, true, true
 end
 
 
@@ -114,7 +114,7 @@ function editCommandM.caretRight(self)
 		editFuncM.caretStepRight(self, true)
 	end
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -125,7 +125,7 @@ function editCommandM.caretToHighlightEdgeLeft(self)
 		editFuncM.clearHighlight(self)
 	end
 
-	return true
+	return true, true, true
 end
 
 
@@ -136,7 +136,7 @@ function editCommandM.caretToHighlightEdgeRight(self)
 		editFuncM.clearHighlight(self)
 	end
 
-	return true
+	return true, true, true
 end
 
 
@@ -144,98 +144,98 @@ end
 function editCommandM.caretLeftHighlight(self)
 	editFuncM.caretStepLeft(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretRightHighlight(self)
 	editFuncM.caretStepRight(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretJumpLeft(self)
 	editFuncM.caretJumpLeft(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretJumpRight(self)
 	editFuncM.caretJumpRight(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretJumpLeftHighlight(self)
 	editFuncM.caretJumpLeft(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretJumpRightHighlight(self)
 	editFuncM.caretJumpRight(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretLineFirst(self)
 	editFuncM.caretLineFirst(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretLineLast(self)
 	editFuncM.caretLineLast(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretFirst(self)
 	editFuncM.caretFirst(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretLast(self)
 	editFuncM.caretLast(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretFirstHighlight(self)
 	editFuncM.caretFirst(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretLastHighlight(self)
 	editFuncM.caretLast(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretLineFirstHighlight(self)
 	editFuncM.caretLineFirst(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretLineLastHighlight(self)
 	editFuncM.caretLineLast(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -245,7 +245,7 @@ function editCommandM.caretStepUp(self)
 	end
 	editFuncM.caretStepUp(self, true, 1)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -255,21 +255,21 @@ function editCommandM.caretStepDown(self)
 	end
 	editFuncM.caretStepDown(self, true, 1)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretStepUpHighlight(self)
 	editFuncM.caretStepUp(self, not self.allow_highlight, 1)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretStepDownHighlight(self)
 	editFuncM.caretStepDown(self, not self.allow_highlight, 1)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -279,7 +279,7 @@ function editCommandM.caretStepUpCoreLine(self)
 	end
 	editFuncM.caretStepUpCoreLine(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -289,21 +289,21 @@ function editCommandM.caretStepDownCoreLine(self)
 	end
 	editFuncM.caretStepDownCoreLine(self, true)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretStepUpCoreLineHighlight(self)
 	editFuncM.caretStepUpCoreLine(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretStepDownCoreLineHighlight(self)
 	editFuncM.caretStepDownCoreLine(self, not self.allow_highlight)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -313,7 +313,7 @@ function editCommandM.caretPageUp(self)
 	end
 	editFuncM.caretStepUp(self, true, self.page_jump_steps)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -323,21 +323,21 @@ function editCommandM.caretPageDown(self)
 	end
 	editFuncM.caretStepDown(self, true, self.page_jump_steps)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretPageUpHighlight(self)
 	editFuncM.caretStepUp(self, not self.allow_highlight, self.page_jump_steps)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
 function editCommandM.caretPageDownHighlight(self)
 	editFuncM.caretStepDown(self, not self.allow_highlight, self.page_jump_steps)
 
-	return true, nil, true
+	return true, true, true
 end
 
 
@@ -525,7 +525,7 @@ end
 
 
 function editCommandM.stepHistory(self, dir)
-	if self.line_ed.hist.enabled then
+	if self.hist.enabled then
 		if editFuncM.stepHistory(self, dir) then
 			self.input_category = false
 
@@ -552,7 +552,7 @@ end
 
 
 function editCommandM.setTextAlignment(self, align)
-	local ok = editFuncM.setTextAlignment(self, align)
+	local ok = self.line_ed:setTextAlignment(align)
 	return ok, ok, ok
 end
 
@@ -579,14 +579,14 @@ end
 
 
 function editCommandM.setWrapMode(self, enabled)
-	if editFuncM.setWrapMode(self, enabled) then
+	if self.line_ed:setWrapMode(enabled) then
 		return true, true, true
 	end
 end
 
 
 function editCommandM.setColorization(self, enabled)
-	if editFuncM.setColorization(self, enabled) then
+	if self.line_ed:setColorization(enabled) then
 		return true, true, true
 	end
 end
@@ -600,9 +600,10 @@ end
 
 
 function editCommandM.caretToLineAndByte(self, clear_highlight, line_n, byte_n)
-	if editFuncM.caretToLineAndByte(self, clear_highlight, line_n, byte_n) then
-		return true, true, true
-	end
+	local line_ed = self.line_ed
+
+	local ok = line_ed:moveCaret(line_n, byte_n, clear_highlight)
+	return ok, ok, ok
 end
 
 
