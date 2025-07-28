@@ -145,6 +145,14 @@ function lineEdM.new()
 end
 
 
+-- Updates the X position hint for when stepping the caret up and down. The display text must be up to date.
+local function _updateVerticalCaretHint(self)
+	local d_sub = self.paragraphs[self.dcp][self.dcs]
+	local d_str = d_sub.str
+	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, self.dcb, self.font)
+end
+
+
 local function _updateDisplaySubHorizontal(sub_line, align, font)
 	sub_line.w = font:getWidth(sub_line.str)
 
@@ -323,6 +331,7 @@ function _mt_ed_m:setFont(font)
 
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()
+		_updateVerticalCaretHint(self)
 	end
 end
 
@@ -437,8 +446,9 @@ end
 
 -- @param cl, cb The new caret line and byte offsets.
 -- @param clear_highlight When true, sets the highlight to the caret.
+-- @param update_x_hint True to update the vertical X hint.
 -- @return true if the caret position (including highlight) changed.
-function _mt_ed_m:moveCaret(cl, cb, clear_highlight)
+function _mt_ed_m:moveCaret(cl, cb, clear_highlight, update_x_hint)
 	local temp
 
 	cl = math.max(1, math.min(cl, #self.lines))
@@ -453,14 +463,19 @@ function _mt_ed_m:moveCaret(cl, cb, clear_highlight)
 	self:syncDisplayCaretHighlight(math.min(old_cl, old_hl), math.max(old_cl, old_hl))
 	self:syncDisplayCaretHighlight(math.min(self.cl, self.hl), math.max(self.cl, self.hl))
 
+	if update_x_hint then
+		_updateVerticalCaretHint(self)
+	end
+
 	return not (old_cl == self.cl and old_cb == self.cb and old_hl == self.hl and old_hb == self.hb)
 end
 
 
 -- @param cl, cb The new caret line and byte offsets.
 -- @param hl, hb The new highlight line and byte offsets.
+-- @param update_x_hint True to update the vertical X hint.
 -- @return true if the caret position (including highlight) changed.
-function _mt_ed_m:moveCaretAndHighlight(cl, cb, hl, hb)
+function _mt_ed_m:moveCaretAndHighlight(cl, cb, hl, hb, update_x_hint)
 	local temp
 
 	cl = math.max(1, math.min(cl, #self.lines))
@@ -475,6 +490,10 @@ function _mt_ed_m:moveCaretAndHighlight(cl, cb, hl, hb)
 	self.cl, self.cb, self.hl, self.hb = cl, cb, hl, hb
 	self:syncDisplayCaretHighlight(math.min(old_cl, old_hl), math.max(old_cl, old_hl))
 	self:syncDisplayCaretHighlight(math.min(cl, hl), math.max(cl, hl))
+
+	if update_x_hint then
+		_updateVerticalCaretHint(self)
+	end
 
 	return not (old_cl == self.cl and old_cb == self.cb and old_hl == self.hl and old_hb == self.hb)
 end
@@ -499,6 +518,7 @@ function _mt_ed_m:insertText(text)
 
 	self:updateDisplayText(old_line, self.cl)
 	self:syncDisplayCaretHighlight(self.cl, self.cl)
+	_updateVerticalCaretHint(self)
 end
 
 
@@ -529,6 +549,7 @@ function _mt_ed_m:deleteText(copy_deleted, l1, b1, l2, b2)
 
 	self:updateDisplayText(self.cl, self.cl)
 	self:syncDisplayCaretHighlight(self.cl, self.cl)
+	_updateVerticalCaretHint(self)
 
 	return deleted ~= "" and deleted
 end
@@ -651,20 +672,13 @@ function _mt_ed_m:updateDisplayText(para_1, para_2)
 end
 
 
---- Updates caret shape, display offsets, and the vertical X position hint.
+--- Updates caret shape and display offsets.
 function _mt_ed_m:updateCaret()
 	local car_str = self.lines[self.cl]
 	local h_str = self.lines[self.hl]
 	local paragraphs = self.paragraphs
 
-	--[[
-	print(
-		"cl", self.cl,
-		"hl", self.hl,
-		"#car_str", car_str and #car_str or "nil",
-		"self.cb", self.cb
-	)
-	--]]
+	--print("cl", self.cl, "hl", self.hl, "#car_str", car_str and #car_str or "nil", "self.cb", self.cb)
 
 	self.dcp = self.cl
 	self.dcb, self.dcs = edComM.coreToDisplayOffsets(car_str, self.cb, paragraphs[self.dcp])
@@ -687,11 +701,6 @@ function _mt_ed_m:updateCaret()
 
 	self.caret_box_y = sub_line_cur.y
 	self.caret_box_h = font:getHeight()
-
-	-- Vertical position hint
-	local d_sub = self.paragraphs[self.dcp][self.dcs]
-	local d_str = d_sub.str
-	self.vertical_x_hint = d_sub.x + textUtil.getCharacterX(d_str, self.dcb, font)
 end
 
 
@@ -707,12 +716,7 @@ function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
 
 	-- Get line offsets relative to the display sequence.
 	local dp1, ds1, db1, dp2, ds2, db2 = edComM.getDisplayOffsetsInOrder(
-		self.dcp,
-		self.dcs,
-		self.dcb,
-		self.dhp,
-		self.dhs,
-		self.dhb
+		self.dcp, self.dcs, self.dcb, self.dhp, self.dhs, self.dhb
 	)
 
 	-- paint_mode:
@@ -725,7 +729,6 @@ function _mt_ed_m:syncDisplayCaretHighlight(para_1, para_2)
 		paint_mode = 0
 	end
 
-	print("?", para_1, para_2, #self.lines, #self.paragraphs)
 	for i = para_1, para_2 do
 		local paragraph = paragraphs[i]
 		for j, sub_line in ipairs(paragraph) do
@@ -845,6 +848,7 @@ function _mt_ed_m:setWrapMode(enabled)
 		self.wrap_mode = enabled
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()
+		_updateVerticalCaretHint(self)
 		return true
 	end
 end
@@ -856,6 +860,7 @@ function _mt_ed_m:setColorization(enabled)
 		self.generate_colored_text = enabled
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()
+		_updateVerticalCaretHint(self)
 		return true
 	end
 end
@@ -866,6 +871,7 @@ function _mt_ed_m:setTextAlignment(align)
 		self.align = align
 		self:syncDisplayAlignment()
 		self:syncDisplayCaretHighlight()
+		_updateVerticalCaretHint(self)
 		return true
 	end
 end

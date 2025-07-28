@@ -56,7 +56,7 @@ function editWrapS.wrapAction(self, func, ...)
 
 				-- Partial / conditional history updates
 				local hist = line_ed.hist
-				local non_ws = string.find(deleted, "%S")
+				local non_ws = deleted:find("%S")
 				local entry = hist:getEntry()
 				local do_advance = true
 
