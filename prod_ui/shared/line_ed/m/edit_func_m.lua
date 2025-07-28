@@ -116,7 +116,7 @@ function editFuncM.caretToHighlightEdgeLeft(self)
 	local line_ed = self.line_ed
 
 	local l1, b1 = line_ed:getCaretOffsetsInOrder()
-	line_ed:moveCaret(l1, b1, true)
+	line_ed:moveCaret(l1, b1, true, true)
 end
 
 
@@ -124,7 +124,7 @@ function editFuncM.caretToHighlightEdgeRight(self)
 	local line_ed = self.line_ed
 
 	local _, _, l2, b2 = line_ed:getCaretOffsetsInOrder()
-	line_ed:moveCaret(l2, b2, true)
+	line_ed:moveCaret(l2, b2, true, true)
 end
 
 
@@ -134,7 +134,7 @@ function editFuncM.caretStepLeft(self, clear_highlight)
 
 	local cl, cb = lines:offsetStepLeft(line_ed.cl, line_ed.cb)
 	if cl then
-		line_ed:moveCaret(cl, cb, clear_highlight)
+		line_ed:moveCaret(cl, cb, clear_highlight, true)
 	end
 end
 
@@ -145,7 +145,7 @@ function editFuncM.caretStepRight(self, clear_highlight)
 
 	local cl, cb = lines:offsetStepRight(line_ed.cl, line_ed.cb)
 	if cl then
-		line_ed:moveCaret(cl, math.max(1, cb), clear_highlight)
+		line_ed:moveCaret(cl, math.max(1, cb), clear_highlight, true)
 	end
 end
 
@@ -155,7 +155,7 @@ function editFuncM.caretJumpLeft(self, clear_highlight)
 	local lines = line_ed.lines
 
 	local cl, cb = edComM.huntWordBoundary(code_groups, lines, line_ed.cl, line_ed.cb, -1, false, -1, false)
-	line_ed:moveCaret(cl, cb, clear_highlight)
+	line_ed:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
@@ -170,7 +170,7 @@ function editFuncM.caretJumpRight(self, clear_highlight)
 	end
 
 	local cl, cb = edComM.huntWordBoundary(code_groups, lines, line_ed.cl, line_ed.cb, 1, hit_non_ws, first_group, false)
-	line_ed:moveCaret(cl, cb, clear_highlight)
+	line_ed:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
@@ -183,7 +183,7 @@ function editFuncM.caretLineFirst(self, clear_highlight)
 
 	-- Convert the display u_count to a byte offset in the line_ed/source string.
 	local cl, cb = line_ed.cl, utf8.offset(lines[line_ed.cl], u_count)
-	line_ed:moveCaret(cl, cb, clear_highlight)
+	line_ed:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
@@ -196,21 +196,21 @@ function editFuncM.caretLineLast(self, clear_highlight)
 
 	-- Convert to internal line_ed byte offset
 	local cl, cb = line_ed.cl, utf8.offset(lines[line_ed.cl], u_count)
-	line_ed:moveCaret(cl, cb, clear_highlight)
+	line_ed:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretFirst(self, clear_highlight)
 	local line_ed = self.line_ed
 
-	line_ed:moveCaret(1, 1, clear_highlight)
+	line_ed:moveCaret(1, 1, clear_highlight, true)
 end
 
 
 function editFuncM.caretLast(self, clear_highlight)
 	local line_ed = self.line_ed
 
-	line_ed:moveCaret(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, clear_highlight)
+	line_ed:moveCaret(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, clear_highlight, true)
 end
 
 
@@ -224,7 +224,7 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 
 	-- Already at top sub-line: move to start.
 	if line_ed.dcp <= 1 and line_ed.dcs <= 1 then
-		line_ed:moveCaret(1, 1, clear_highlight)
+		line_ed:moveCaret(1, 1, clear_highlight, true)
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
 		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.dcp, line_ed.dcs, -n_steps)
@@ -236,15 +236,13 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 
 		-- Not the last sub-line in the Paragraph: correct leftmost position so that it doesn't
 		-- spill over to the next sub-line (and get stuck).
-		-- [[
 		if d_sub < #paragraphs[d_para] then
 			new_byte = math.min(#d_str, new_byte)
 		end
-		--]]
 
 		-- Convert display offsets to ones suitable for logical lines.
 		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		line_ed:moveCaret(d_para, utf8.offset(lines[line_ed.cl], u_count), clear_highlight)
+		line_ed:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
 	end
 end
 
@@ -259,7 +257,7 @@ function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 
 	-- Already at bottom sub-line: move to end.
 	if line_ed.dcp >= #paragraphs and line_ed.dcs >= #paragraphs[#paragraphs] then
-		line_ed:moveCaret(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, clear_highlight)
+		line_ed:moveCaret(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, clear_highlight, true)
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
 		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.dcp, line_ed.dcs, n_steps)
@@ -277,7 +275,7 @@ function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 
 		-- Convert display offsets to ones suitable for logical lines.
 		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		line_ed:moveCaret(d_para, utf8.offset(lines[line_ed.cl], u_count), clear_highlight)
+		line_ed:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
 	end
 end
 
@@ -288,15 +286,15 @@ function editFuncM.caretStepUpCoreLine(self, clear_highlight)
 
 	-- Already at top line: move to start.
 	if line_ed.cl <= 1 then
-		line_ed:moveCaret(line_ed.cl, 1, clear_highlight)
+		line_ed:moveCaret(line_ed.cl, 1, clear_highlight, true)
 
 	-- Already at position 1 on the current line: move up one line
 	elseif line_ed.cb == 1 then
-		line_ed:moveCaret(math.max(1, line_ed.cl - 1), 1, clear_highlight)
+		line_ed:moveCaret(math.max(1, line_ed.cl - 1), 1, clear_highlight, true)
 
 	-- Otherwise, move to position 1 in the current line.
 	else
-		line_ed:moveCaret(line_ed.cl, 1, clear_highlight)
+		line_ed:moveCaret(line_ed.cl, 1, clear_highlight, true)
 	end
 end
 
@@ -307,15 +305,15 @@ function editFuncM.caretStepDownCoreLine(self, clear_highlight)
 
 	-- Already at bottom line: move to end.
 	if line_ed.cl == #lines then
-		line_ed:moveCaret(line_ed.cl, #lines[#lines] + 1, clear_highlight)
+		line_ed:moveCaret(line_ed.cl, #lines[#lines] + 1, clear_highlight, true)
 
 	-- Already at last position in logical line: move to next line
 	elseif line_ed.cb == #lines[line_ed.cl] + 1 then
-		line_ed:moveCaret(math.min(line_ed.cl + 1, #lines), #lines[line_ed.cl] + 1, clear_highlight)
+		line_ed:moveCaret(math.min(line_ed.cl + 1, #lines), #lines[line_ed.cl] + 1, clear_highlight, true)
 
 	-- Otherwise, move to the last position in the current line.
 	else
-		line_ed:moveCaret(line_ed.cl, #lines[line_ed.cl] + 1, clear_highlight)
+		line_ed:moveCaret(line_ed.cl, #lines[line_ed.cl] + 1, clear_highlight, true)
 	end
 end
 
@@ -333,7 +331,7 @@ function editFuncM.shiftLinesUp(self)
 		end
 
 		lines[r2] = displaced_line
-		line_ed:moveCaretAndHighlight(math.max(1, r1 - 1), 1, math.max(1, r2 - 1), #line_ed.lines[line_ed.hl] + 1)
+		line_ed:moveCaretAndHighlight(math.max(1, r1 - 1), 1, math.max(1, r2 - 1), #line_ed.lines[line_ed.hl] + 1, true)
 
 		return true
 	end
@@ -353,7 +351,7 @@ function editFuncM.shiftLinesDown(self)
 		end
 
 		lines[r1] = displaced_line
-		line_ed:moveCaretAndHighlight(math.min(#lines, r1 + 1), 1, math.min(#lines, r2 + 1), #line_ed.lines[line_ed.hl] + 1)
+		line_ed:moveCaretAndHighlight(math.min(#lines, r1 + 1), 1, math.min(#lines, r2 + 1), #line_ed.lines[line_ed.hl] + 1, true)
 
 		return true
 	end
@@ -487,9 +485,9 @@ local function _indentLine(self, line_n)
 	local old_line = line_ed.lines[line_n]
 	local l1, b1, l2, b2 = line_ed:getCaretOffsetsInOrder()
 
-	line_ed:moveCaretAndHighlight(line_n, 1, line_n, 1)
+	line_ed:moveCaretAndHighlight(line_n, 1, line_n, 1, false)
 	line_ed:insertText("\t")
-	line_ed:moveCaretAndHighlight(l1, b1 + 1, l2, b2 + 1)
+	line_ed:moveCaretAndHighlight(l1, b1 + 1, l2, b2 + 1, true)
 
 	return old_line ~= line_ed.lines[line_n]
 end
@@ -503,13 +501,13 @@ local function _unindentLine(self, line_n)
 
 	if old_line:sub(1, 1) == "\t" then
 		line_ed:deleteText(false, line_n, 1, line_n, 1)
-		line_ed:moveCaretAndHighlight(l1, math.max(1, b1 - 1), l2, math.max(1, b2 - 1))
+		line_ed:moveCaretAndHighlight(l1, math.max(1, b1 - 1), l2, math.max(1, b2 - 1), true)
 	else
 		local space1, space2 = old_line:find("^[\x20]+") -- (0x20 == space)
 		if space1 then
 			local offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
 			line_ed:deleteText(false, line_n, 1, line_n, offset)
-			line_ed:moveCaretAndHighlight(l1, math.max(1, b1 - offset), l2, math.max(1, b2 - offset))
+			line_ed:moveCaretAndHighlight(l1, math.max(1, b1 - offset), l2, math.max(1, b2 - offset), true)
 		end
 	end
 
@@ -573,7 +571,7 @@ end
 function editFuncM.highlightAll(self)
 	local line_ed = self.line_ed
 
-	line_ed:moveCaretAndHighlight(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, 1, 1)
+	line_ed:moveCaretAndHighlight(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, 1, 1, true)
 end
 
 
@@ -587,7 +585,7 @@ end
 function editFuncM.highlightCurrentLine(self)
 	local line_ed = self.line_ed
 
-	line_ed:moveCaretAndHighlight(line_ed.cl, 1, line_ed.hl, #line_ed.lines[line_ed.cl] + 1)
+	line_ed:moveCaretAndHighlight(line_ed.cl, 1, line_ed.hl, #line_ed.lines[line_ed.cl] + 1, true)
 end
 
 
@@ -595,7 +593,7 @@ function editFuncM.highlightCurrentWord(self)
 	local line_ed = self.line_ed
 
 	local cl, cb, hl, hb = line_ed:getWordRange(line_ed.cl, line_ed.cb)
-	line_ed:moveCaretAndHighlight(cl, cb, hl, hb)
+	line_ed:moveCaretAndHighlight(cl, cb, hl, hb, true)
 end
 
 
@@ -605,7 +603,7 @@ function editFuncM.highlightCurrentWrappedLine(self)
 
 	local cl, hl = line_ed.cl, line_ed.cl
 	local cb, hb = line_ed:getWrappedLineRange(line_ed.cl, line_ed.cb)
-	line_ed:moveCaretAndHighlight(cl, cb, hl, hb)
+	line_ed:moveCaretAndHighlight(cl, cb, hl, hb, true)
 
 	--print("line_ed.cb", line_ed.cb, "line_ed.hl", line_ed.hb)
 end

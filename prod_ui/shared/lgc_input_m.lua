@@ -12,6 +12,7 @@ local lgcInputM = {}
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
+local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
@@ -154,24 +155,25 @@ function lgcInputM.textInputLogic(self, text)
 
 		local written = editFuncM.writeText(self, text, suppress_replace)
 
-		local no_ws = string.find(written, "%S")
-		local entry = hist:getEntry()
-		local do_advance = true
+		editWidM.generalUpdate(self, true, true, true, true, true)
 
-		if (entry and entry.cl == xcl and entry.cb == xcb)
-		and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
-		then
-			do_advance = false
+		if written ~= "" then
+			local no_ws = written:find("%S")
+			local entry = hist:getEntry()
+			local do_advance = true
+
+			if (entry and entry.cl == xcl and entry.cb == xcb)
+			and ((self.input_category == "typing" and no_ws) or (self.input_category == "typing-ws"))
+			then
+				do_advance = false
+			end
+
+			if do_advance then
+				editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
+			end
+			editFuncM.writeHistoryEntry(self, do_advance)
+			self.input_category = no_ws and "typing" or "typing-ws"
 		end
-
-		if do_advance then
-			editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
-		end
-		editFuncM.writeHistoryEntry(self, do_advance)
-		self.input_category = no_ws and "typing" or "typing-ws"
-
-		editWidM.updateDocumentDimensions(self)
-		self:scrollGetCaretInBounds(true)
 	end
 end
 
@@ -218,7 +220,7 @@ local function _caretToXY(self, clear_highlight, x, y, split_x)
 	local line_ed = self.line_ed
 
 	local cl, cb = line_ed:getCharacterDetailsAtPosition(x, y, split_x)
-	line_ed:moveCaret(cl, cb, clear_highlight)
+	line_ed:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
@@ -235,9 +237,9 @@ local function _clickDragByWord(self, x, y, origin_line, origin_byte)
 	local ml1, mb1, ml2, mb2 = edComM.mergeRanges(dl1, db1, dl2, db2, cl1, cb1, cl2, cb2)
 
 	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
-		line_ed:moveCaretAndHighlight(ml1, mb1, ml2, mb2)
+		line_ed:moveCaretAndHighlight(ml1, mb1, ml2, mb2, true)
 	else
-		line_ed:moveCaretAndHighlight(ml2, mb2, ml1, mb1)
+		line_ed:moveCaretAndHighlight(ml2, mb2, ml1, mb1, true)
 	end
 end
 
@@ -257,9 +259,9 @@ local function _clickDragByLine(self, x, y, origin_line, origin_byte)
 		origin_line, click_first, origin_line, click_last
 	)
 	if drag_line < origin_line or (drag_line == origin_line and drag_byte < origin_byte) then
-		line_ed:moveCaretAndHighlight(ml1, mb1, ml2, mb2)
+		line_ed:moveCaretAndHighlight(ml1, mb1, ml2, mb2, true)
 	else
-		line_ed:moveCaretAndHighlight(ml2, mb2, ml1, mb1)
+		line_ed:moveCaretAndHighlight(ml2, mb2, ml1, mb1, true)
 	end
 end
 

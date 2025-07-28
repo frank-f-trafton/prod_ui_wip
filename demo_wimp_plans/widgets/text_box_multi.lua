@@ -227,7 +227,7 @@ function plan.make(panel)
 	text_box.tabs_to_spaces = false
 	text_box.auto_indent = true
 
-	-- [[
+	--[[
 	local str = ""
 	for i = 1, 100 do
 		str = str .. i .. "\n"
@@ -235,6 +235,12 @@ function plan.make(panel)
 	text_box:setText(str)
 	--]]
 
+	local demo_text = [=[
+The quick brown fox jumps over the lazy dog.
+Jackdaws love my black sphinx of quartz.
+The five boxing wizards jump quickly.]=]
+
+	text_box:setText(demo_text)
 
 	xx = x1
 	yy = yy + h2 + ED_H

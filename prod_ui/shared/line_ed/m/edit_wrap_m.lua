@@ -28,17 +28,6 @@ function editWrapM.wrapAction(self, func, ...)
 	)
 	--]]
 
-	--[[
-	function editWidM.generalUpdate(self)
-		editWidM.updateDocumentDimensions(self)
-		editWidM.updateVisibleParagraphs(self)
-
-		if self.text_object then
-			editWidM.updateTextBatch(self)
-		end
-	end
-	--]]
-
 	if ok then
 		editWidM.generalUpdate(self, true, update_widget, caret_in_view, update_widget, update_widget)
 
@@ -52,8 +41,7 @@ function editWrapM.wrapAction(self, func, ...)
 				elseif write_history == "del" then cat1, cat2 = "deleting", "deleting-ws" end
 
 				-- Partial / conditional history updates
-
-				local non_ws = string.find(deleted, "%S")
+				local non_ws = deleted:find("%S")
 				local entry = hist:getEntry()
 				local do_advance = true
 

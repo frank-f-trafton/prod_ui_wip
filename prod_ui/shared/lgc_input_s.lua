@@ -217,6 +217,7 @@ function lgcInputS.textInputLogic(self, text)
 		local written = editFuncS.writeText(self, text, false)
 
 		if written then
+			-- TODO: editWidS.generalUpdate()
 			if self.replace_mode then
 				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
 				if line_ed.car_byte < #line_ed.line + 1 then

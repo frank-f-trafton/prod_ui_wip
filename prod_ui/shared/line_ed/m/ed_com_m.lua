@@ -139,41 +139,42 @@ function edComM.getDisplayOffsetsInOrder(l1, s1, b1, l2, s2, b2)
 end
 
 
---- Given a display-lines object, a Paragraph index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
+--- Given an array of paragraphs, a paragraph index, a sub-line index, and a number of steps, get the sub-line 'n_steps' away, or
 --  the top or bottom sub-line if reaching the start or end respectively.
-function edComM.stepSubLine(display_lines, dcp, dcs, n_steps)
-	while n_steps < 0 do
-		-- first line
-		if dcp <= 1 and dcs <= 1 then
-			dcp = 1
-			dcs = 1
-			break
-		else
-			dcs = dcs - 1
-			if dcs == 0 then
-				dcp = dcp - 1
-				dcs = #display_lines[dcp]
-			end
+function edComM.stepSubLine(paragraphs, dcp, dcs, n_steps)
+	if n_steps < 0 then
+		while n_steps < 0 do
+			-- first line
+			if dcp <= 1 and dcs <= 1 then
+				dcp, dcs = 1, 1
+				break
+			else
+				dcs = dcs - 1
+				if dcs == 0 then
+					dcp = dcp - 1
+					dcs = #paragraphs[dcp]
+				end
 
-			n_steps = n_steps + 1
+				n_steps = n_steps + 1
+			end
 		end
-	end
 
-	while n_steps > 0 do
-		-- last line
-		if dcp >= #display_lines and dcs >= #display_lines[#display_lines] then
-			dcp = #display_lines
-			dcs = #display_lines[#display_lines]
-			break
-		else
-			dcs = dcs + 1
+	elseif n_steps > 0 then
+		while n_steps > 0 do
+			-- last line
+			if dcp >= #paragraphs and dcs >= #paragraphs[#paragraphs] then
+				dcp, dcs = #paragraphs, #paragraphs[#paragraphs]
+				break
+			else
+				dcs = dcs + 1
 
-			if dcs > #display_lines[dcp] then
-				dcp = dcp + 1
-				dcs = 1
+				if dcs > #paragraphs[dcp] then
+					dcp = dcp + 1
+					dcs = 1
+				end
+
+				n_steps = n_steps - 1
 			end
-
-			n_steps = n_steps - 1
 		end
 	end
 

@@ -599,10 +599,10 @@ function editCommandM.setHighlightEnabled(self, enabled)
 end
 
 
-function editCommandM.caretToLineAndByte(self, clear_highlight, line_n, byte_n)
+function editCommandM.caretToLineAndByte(self, clear_highlight, l1, b1)
 	local line_ed = self.line_ed
 
-	local ok = line_ed:moveCaret(line_n, byte_n, clear_highlight)
+	local ok = line_ed:moveCaret(l1, b1, clear_highlight, true)
 	return ok, ok, ok
 end
 
