@@ -464,18 +464,16 @@ end
 
 function editCommandM.typeTab(self)
 	if self.allow_input and self.allow_tab then
-		if editFuncM.typeTab(self) then
-			return true, true, true, true
-		end
+		local ok = editFuncM.typeTab(self)
+		return true, ok, false, ok, false
 	end
 end
 
 
 function editCommandM.typeUntab(self)
 	if self.allow_input and self.allow_untab then
-		if editFuncM.untypeTab(self) then
-			return true, true, true, true
-		end
+		local ok = editFuncM.typeUntab(self)
+		return true, ok, false, ok, false
 	end
 end
 
@@ -574,7 +572,8 @@ end
 function editCommandM.setText(self, text)
 	editFuncM.setText(self, text)
 
-	return true, true, true, true
+	-- Don't write a history entry from here. One has already been set up in editFuncM.setText().
+	return true, true, true
 end
 
 

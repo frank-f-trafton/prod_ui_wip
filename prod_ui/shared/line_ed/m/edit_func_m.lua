@@ -469,13 +469,13 @@ function editFuncM.typeLineFeedWithAutoIndent(self)
 		end
 	end
 
-	self:writeText(new_str, true)
+	editFuncM.writeText(self, new_str, true)
 end
 
 
 function editFuncM.typeLineFeed(self)
 	self.input_category = false
-	self:writeText("\n", true)
+	editFuncM.writeText(self, "\n", true)
 end
 
 
@@ -483,11 +483,9 @@ local function _indentLine(self, line_n)
 	local line_ed = self.line_ed
 
 	local old_line = line_ed.lines[line_n]
-	local l1, b1, l2, b2 = line_ed:getCaretOffsetsInOrder()
 
 	line_ed:moveCaretAndHighlight(line_n, 1, line_n, 1, false)
 	line_ed:insertText("\t")
-	line_ed:moveCaretAndHighlight(l1, b1 + 1, l2, b2 + 1, true)
 
 	return old_line ~= line_ed.lines[line_n]
 end
@@ -497,17 +495,14 @@ local function _unindentLine(self, line_n)
 	local line_ed = self.line_ed
 
 	local old_line = line_ed.lines[line_n]
-	local l1, b1, l2, b2 = line_ed:getCaretOffsetsInOrder()
 
 	if old_line:sub(1, 1) == "\t" then
 		line_ed:deleteText(false, line_n, 1, line_n, 1)
-		line_ed:moveCaretAndHighlight(l1, math.max(1, b1 - 1), l2, math.max(1, b2 - 1), true)
 	else
 		local space1, space2 = old_line:find("^[\x20]+") -- (0x20 == space)
 		if space1 then
 			local offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
 			line_ed:deleteText(false, line_n, 1, line_n, offset)
-			line_ed:moveCaretAndHighlight(l1, math.max(1, b1 - offset), l2, math.max(1, b2 - offset), true)
 		end
 	end
 
@@ -523,9 +518,9 @@ function editFuncM.typeTab(self)
 	-- Caret and highlight are on the same line: write a literal tab.
 	-- (Unhighlights first)
 	if line_ed.cl == line_ed.hl then
-		local written = self:writeText("\t", true)
+		local written = editFuncM.writeText(self, "\t", true)
 
-		if #written > 0 then
+		if written and #written > 0 then
 			changed = true
 		end
 	-- Caret and highlight are on different lines: indent the range of lines.
@@ -542,6 +537,7 @@ function editFuncM.typeTab(self)
 					changed = true
 				end
 			end
+			line_ed:moveCaretAndHighlight(r2, #line_ed.lines[r2] + 1, r1, 1)
 		end
 	end
 
@@ -562,6 +558,9 @@ function editFuncM.typeUntab(self)
 		if line_changed then
 			changed = true
 		end
+	end
+	if changed then
+		line_ed:moveCaretAndHighlight(r2, #line_ed.lines[r2] + 1, r1, 1)
 	end
 
 	return changed
@@ -724,6 +723,7 @@ end
 function editFuncM.applyHistoryEntry(self, entry)
 	local line_ed = self.line_ed
 	local src_lines = line_ed.lines
+	local paragraphs = line_ed.paragraphs
 	local entry_lines = entry.lines
 
 	for i = 1, #entry_lines do
@@ -731,6 +731,7 @@ function editFuncM.applyHistoryEntry(self, entry)
 	end
 	for i = #src_lines, #entry_lines + 1, -1 do
 		src_lines[i] = nil
+		paragraphs[i] = nil
 	end
 
 	line_ed.cl, line_ed.cb, line_ed.hl, line_ed.hb = entry.cl, entry.cb, entry.hl, entry.hb
@@ -752,7 +753,7 @@ end
 function editFuncM.wipeHistoryEntries(self)
 	self.hist:clearAll()
 	self:resetInputCategory()
-	editFuncM.writeHistoryEntry(self, true)
+	editFuncM.writeHistoryEntry(self, false)
 end
 
 

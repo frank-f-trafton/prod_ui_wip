@@ -458,47 +458,51 @@ def.default_skinner = {
 		--]]
 
 
-		--[[
+		-- [[
 		-- Old history debug-print
-		love.graphics.push("all")
+		local qp = self.DEBUG_qp
+		if qp then
+			love.graphics.push("all")
+			love.graphics.setScissor()
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.setFont(self.line_ed.font)
 
-		local hist_x = 8
-		local hist_y = 400
-		qp:reset()
-		qp:setOrigin(hist_x, hist_y)
-		qp:print2("HISTORY STATE. i_cat:", wid_text_box.input_category)
+			local hist = self.hist
 
-		hist_y = qp:getYOrigin() + qp:getYPosition()
-
-		for i, entry in ipairs(wid_text_box.hist.ledger) do
+			local hist_x = 8
+			local hist_y = 400
 			qp:reset()
 			qp:setOrigin(hist_x, hist_y)
+			qp:print("History Ledger. pos: ", hist.pos, " i_cat: ", self.input_category)
 
-			if i == wid_text_box.hist.pos then
-				love.graphics.setColor(1, 1, 1, 1)
-			else
-				love.graphics.setColor(0.8, 0.8, 0.8, 1)
-			end
+			hist_y = qp:getYOrigin() + qp:getYPosition()
 
-			qp:print2("cl: ", entry.cl)
-			qp:print2("cb: ", entry.cb)
-			qp:print2("hl: ", entry.hl)
-			qp:print2("hb: ", entry.hb)
-			qp:down()
+			for i, entry in ipairs(self.hist.ledger) do
+				qp:reset()
+				qp:setOrigin(hist_x, hist_y)
 
-			for j, line in ipairs(entry.lines) do
-				-- No point in printing hundreds (or thousands) of lines which can't be seen.
-				if j > 10 then
-					break
+				if i == self.hist.pos then
+					love.graphics.setColor(1, 1, 1, 1)
+				else
+					love.graphics.setColor(0.8, 0.8, 0.8, 1)
 				end
 
-				qp:print3(j, ": ", line)
+				qp:write("pos ", i, " CL ", entry.cl, " CB ", entry.cb, " HL ", entry.hl, " HB ", entry.hb)
+				qp:down()
+
+				for j, line in ipairs(entry.lines) do
+					-- No point in printing hundreds (or thousands) of lines which can't be seen.
+					if j > 3 then
+						break
+					end
+
+					qp:print(j, ": ", line)
+				end
+
+				hist_y = hist_y + self.line_ed.font:getHeight() * 5
 			end
-
-			hist_x = hist_x + 128
+			love.graphics.pop()
 		end
-
-		love.graphics.pop()
 		--]]
 	end,
 }

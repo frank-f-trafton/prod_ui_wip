@@ -18,13 +18,8 @@ function editWrapM.wrapAction(self, func, ...)
 	local ok, update_widget, caret_in_view, write_history, deleted, hist_change = func(self, ...)
 
 	--[[
-	print("wrapAction()",
-		"ok", ok,
-		"update_widget", update_widget,
-		"caret_in_view", caret_in_view,
-		"write_history", write_history,
-		"deleted", deleted,
-		"hist_change", hist_change
+	print("wrapAction()", "ok", ok, "update_widget", update_widget, "caret_in_view", caret_in_view,
+		"write_history", write_history, "deleted", deleted, "hist_change", hist_change
 	)
 	--]]
 

@@ -97,8 +97,10 @@ end
 
 
 --- Writes a history entry to the ledger.
--- @param do_advance True, advance to the next ledger entry. False: overwrite the current entry, if one exists, or create entry #1.
--- @return The current ledger entry (new or previously written, with old data), or nothing if the History object is disabled.
+-- @param do_advance True, advance to the next ledger entry. False: overwrite the current entry, if one exists, or
+--	create entry #1.
+-- @return The current ledger entry (new or previously written, with old data), or nothing if the History object is
+--	disabled.
 function _mt_hist:writeEntry(do_advance)
 	if self.pos < 0 or self.pos > #self.ledger then
 		error("history position is out of bounds")

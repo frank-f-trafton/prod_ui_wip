@@ -86,7 +86,7 @@ editBindM["S+kpenter"] = editActM.typeLineFeed
 editBindM["+tab"] = editActM.typeTab
 editBindM["S+tab"] = editActM.typeUntab
 
-editBindM["C+a"] = editActM.highlightAll
+editBindM["C+a"] = editActM.selectAll
 editBindM["C+c"] = editActM.copy
 editBindM["C+x"] = editActM.cut
 editBindM["S+delete"] = editActM.cut

@@ -222,10 +222,14 @@ function plan.make(panel)
 
 	text_box.ghost_text = "Ghost text"
 
-	text_box.allow_tab = true
-	text_box.allow_untab = true
+	text_box.allow_tab = false
+	text_box.allow_untab = false
 	text_box.tabs_to_spaces = false
-	text_box.auto_indent = true
+	text_box.auto_indent = false
+
+	-- Debug...
+	local quickPrint = require("lib.quick_print")
+	text_box.DEBUG_qp = quickPrint.new()
 
 	--[[
 	local str = ""
@@ -245,7 +249,7 @@ The five boxing wizards jump quickly.]=]
 	xx = x1
 	yy = yy + h2 + ED_H
 
-
+	--[====[
 	local code_ed = panel:addChild("input/code_editor")
 	demoShared.setStaticLayout(panel, code_ed, xx, yy, ED_W, ED_H)
 	code_ed:setTag("demo_code_ed")
@@ -265,7 +269,7 @@ The five boxing wizards jump quickly.]=]
 	end
 	code_ed:setText(str)
 	--]]
-
+	--]====]
 
 	_updateButtons(panel)
 end
