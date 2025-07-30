@@ -33,21 +33,21 @@ function plan.make(panel)
 			-- TODO: This is unergonomic, to say the least.
 			local b_align_l = panel:findTag("demo_align_l")
 			if b_align_l then
-				if b_align_l.usr_align == tb:getAlign() then
+				if b_align_l.usr_align == tb:getTextAlignment() then
 					b_align_l:setChecked(true)
 				end
 			end
 
 			local b_align_c = panel:findTag("demo_align_c")
 			if b_align_c then
-				if b_align_c.usr_align == tb:getAlign() then
+				if b_align_c.usr_align == tb:getTextAlignment() then
 					b_align_c:setChecked(true)
 				end
 			end
 
 			local b_align_r = panel:findTag("demo_align_r")
 			if b_align_r then
-				if b_align_r.usr_align == tb:getAlign() then
+				if b_align_r.usr_align == tb:getTextAlignment() then
 					b_align_r:setChecked(true)
 				end
 			end
@@ -60,7 +60,7 @@ function plan.make(panel)
 	end
 
 	local function setAlign(tb, align_mode)
-		tb:setAlign(align_mode)
+		tb:setTextAlignment(align_mode)
 	end
 
 	local function setColorization(tb, enabled)

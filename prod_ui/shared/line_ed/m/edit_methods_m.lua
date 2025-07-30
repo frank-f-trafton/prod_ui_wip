@@ -54,7 +54,7 @@ function client:setWrapMode(enabled)
 end
 
 
-function client:getAlign()
+function client:getTextAlignment()
 	return self.line_ed.align
 end
 
@@ -277,6 +277,26 @@ end
 
 function client:caretLast(clear_highlight)
 	editWrapM.wrapAction(self, editCommandM.caretLast, clear_highlight)
+end
+
+
+function client:caretFullLineFirst(clear_highlight)
+	editWrapM.wrapAction(self, editCommandM.caretFullLineFirst, clear_highlight)
+end
+
+
+function client:caretFullLineLast(clear_highlight)
+	editWrapM.wrapAction(self, editCommandM.caretFullLineLast, clear_highlight)
+end
+
+
+function client:caretSubLineFirst(clear_highlight)
+	editWrapM.wrapAction(self, editCommandM.caretSubLineFirst, clear_highlight)
+end
+
+
+function client:caretSubLineLast(clear_highlight)
+	editWrapM.wrapAction(self, editCommandM.caretSubLineLast, clear_highlight)
 end
 
 

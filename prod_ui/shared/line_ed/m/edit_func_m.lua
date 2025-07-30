@@ -53,8 +53,7 @@ function editFuncM.pasteClipboard(self)
 			editFuncM.deleteHighlighted(self)
 		end
 
-		editFuncM.writeText(self, text, true)
-		return true
+		return not not editFuncM.writeText(self, text, true)
 	end
 end
 
@@ -174,7 +173,22 @@ function editFuncM.caretJumpRight(self, clear_highlight)
 end
 
 
-function editFuncM.caretLineFirst(self, clear_highlight)
+function editFuncM.caretFullLineFirst(self, clear_highlight)
+	local line_ed = self.line_ed
+
+	line_ed:moveCaret(line_ed.cl, 1, clear_highlight, true)
+end
+
+
+function editFuncM.caretFullLineLast(self, clear_highlight)
+	local line_ed = self.line_ed
+	local lines = line_ed.lines
+
+	line_ed:moveCaret(line_ed.cl, #lines[line_ed.cl] + 1, clear_highlight, true)
+end
+
+
+function editFuncM.caretSubLineFirst(self, clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -187,7 +201,7 @@ function editFuncM.caretLineFirst(self, clear_highlight)
 end
 
 
-function editFuncM.caretLineLast(self, clear_highlight)
+function editFuncM.caretSubLineLast(self, clear_highlight)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
@@ -197,6 +211,30 @@ function editFuncM.caretLineLast(self, clear_highlight)
 	-- Convert to internal line_ed byte offset
 	local cl, cb = line_ed.cl, utf8.offset(lines[line_ed.cl], u_count)
 	line_ed:moveCaret(cl, cb, clear_highlight, true)
+end
+
+
+function editFuncM.caretLineFirst(self, clear_highlight)
+	local line_ed = self.line_ed
+	local lines = line_ed.lines
+
+	local cl, cb, hl, hb = line_ed:getCaretOffsets()
+	editFuncM.caretSubLineFirst(self, clear_highlight)
+	if line_ed:compareCaretOffsets(cl, cb, hl, hb) then
+		editFuncM.caretFullLineFirst(self, clear_highlight)
+	end
+end
+
+
+function editFuncM.caretLineLast(self, clear_highlight)
+	local line_ed = self.line_ed
+	local lines = line_ed.lines
+
+	local cl, cb, hl, hb = line_ed:getCaretOffsets()
+	editFuncM.caretSubLineLast(self, clear_highlight)
+	if line_ed:compareCaretOffsets(cl, cb, hl, hb) then
+		editFuncM.caretFullLineLast(self, clear_highlight)
+	end
 end
 
 
@@ -210,7 +248,7 @@ end
 function editFuncM.caretLast(self, clear_highlight)
 	local line_ed = self.line_ed
 
-	line_ed:moveCaret(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, clear_highlight, true)
+	line_ed:moveCaret(#line_ed.lines, #line_ed.lines[#line_ed.lines] + 1, clear_highlight, true)
 end
 
 
@@ -320,18 +358,22 @@ end
 
 function editFuncM.shiftLinesUp(self)
 	local line_ed = self.line_ed
+	local lines = line_ed.lines
 
 	local r1, r2 = line_ed:getSelectedLinesRange(true)
-	local lines = line_ed.lines
 	local displaced_line = lines[r1 - 1]
 
 	if displaced_line then
+		line_ed:clearHighlight()
+
 		for i = r1 - 1, r2 - 1 do
 			lines[i] = lines[i + 1]
 		end
 
 		lines[r2] = displaced_line
-		line_ed:moveCaretAndHighlight(math.max(1, r1 - 1), 1, math.max(1, r2 - 1), #line_ed.lines[line_ed.hl] + 1, true)
+		line_ed:updateDisplayText(r1 - 1, r2)
+		line_ed:moveCaretAndHighlight(r1 - 1, 1, r2 - 1, #lines[r2 - 1] + 1, true)
+		line_ed:syncDisplayCaretHighlight(r1 - 1, r2)
 
 		return true
 	end
@@ -342,16 +384,20 @@ function editFuncM.shiftLinesDown(self)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
 
-	local r1, r2, b1, b2 = line_ed:getSelectedLinesRange(true)
+	local r1, r2 = line_ed:getSelectedLinesRange(true)
 	local displaced_line = lines[r2 + 1]
 
 	if displaced_line then
+		line_ed:clearHighlight()
+
 		for i = r2 + 1, r1 + 1, -1 do
 			lines[i] = lines[i - 1]
 		end
 
 		lines[r1] = displaced_line
-		line_ed:moveCaretAndHighlight(math.min(#lines, r1 + 1), 1, math.min(#lines, r2 + 1), #line_ed.lines[line_ed.hl] + 1, true)
+		line_ed:updateDisplayText(r1, r2 + 1)
+		line_ed:moveCaretAndHighlight(r1 + 1, 1, r2 + 1, #lines[r2 + 1] + 1, true)
+		line_ed:syncDisplayCaretHighlight(r1, r2 + 1)
 
 		return true
 	end
@@ -626,10 +672,10 @@ end
 
 
 --- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
--- @param text The input text. It will be sanitized and possibly trimmed to fit into the uChar limit.
+-- @param text The input text. It will be sanitized, and possibly trimmed to fit into the uChar limit.
 -- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
 --	entering line feeds, typing at the end of a line (so as not to overwrite line feeds), etc.
--- @return The sanitized and trimmed text which was inserted into the field.
+-- @return The sanitized and trimmed text which was inserted into the field, or nil if no text was added.
 function editFuncM.writeText(self, text, suppress_replace)
 	local line_ed = self.line_ed
 	local lines = line_ed.lines
@@ -657,9 +703,11 @@ function editFuncM.writeText(self, text, suppress_replace)
 	line_ed.u_chars = lines:uLen()
 	text = textUtil.trimString(text, self.u_chars_max - line_ed.u_chars)
 
-	line_ed:insertText(text)
+	if #text > 0 then
+		line_ed:insertText(text)
 
-	return text
+		return text
+	end
 end
 
 

@@ -35,8 +35,6 @@ return {
 	caretLineLast = editCommandM.caretLineLast,
 	caretLineFirstHighlight = editCommandM.caretLineFirstHighlight,
 	caretLineLastHighlight = editCommandM.caretLineLastHighlight,
-	-- caret: first of wrapped line
-	-- caret: last of wrapped line
 	backspace = editCommandM.backspace,
 	delete = editCommandM.delete,
 	deleteHighlighted = editCommandM.deleteHighlighted,
