@@ -183,43 +183,64 @@ function editCommandM.caretJumpRightHighlight(self)
 end
 
 
+function editCommandM.caretFullLineFirst(self)
+	editFuncM.caretFullLineFirst(self, true)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretFullLineFirstHighlight(self)
+	editFuncM.caretFullLineFirst(self, not self.allow_highlight)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretFullLineLast(self)
+	editFuncM.caretFullLineLast(self, true)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretFullLineLastHighlight(self)
+	editFuncM.caretFullLineLast(self, not self.allow_highlight)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretSubLineFirst(self)
+	editFuncM.caretSubLineFirst(self, true)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretSubLineFirstHighlight(self)
+	editFuncM.caretSubLineFirst(self, not self.allow_highlight)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretSubLineLast(self)
+	editFuncM.caretSubLineLast(self, true)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretSubLineLastHighlight(self)
+	editFuncM.caretSubLineLast(self, not self.allow_highlight)
+
+	return true, true, true
+end
+
+
 function editCommandM.caretLineFirst(self)
 	editFuncM.caretLineFirst(self, true)
-
-	return true, true, true
-end
-
-
-function editCommandM.caretLineLast(self)
-	editFuncM.caretLineLast(self, true)
-
-	return true, true, true
-end
-
-
-function editCommandM.caretFirst(self)
-	editFuncM.caretFirst(self, true)
-
-	return true, true, true
-end
-
-
-function editCommandM.caretLast(self)
-	editFuncM.caretLast(self, true)
-
-	return true, true, true
-end
-
-
-function editCommandM.caretFirstHighlight(self)
-	editFuncM.caretFirst(self, not self.allow_highlight)
-
-	return true, true, true
-end
-
-
-function editCommandM.caretLastHighlight(self)
-	editFuncM.caretLast(self, not self.allow_highlight)
 
 	return true, true, true
 end
@@ -232,8 +253,43 @@ function editCommandM.caretLineFirstHighlight(self)
 end
 
 
+function editCommandM.caretLineLast(self)
+	editFuncM.caretLineLast(self, true)
+
+	return true, true, true
+end
+
+
 function editCommandM.caretLineLastHighlight(self)
 	editFuncM.caretLineLast(self, not self.allow_highlight)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretFirst(self)
+	editFuncM.caretFirst(self, true)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretFirstHighlight(self)
+	editFuncM.caretFirst(self, not self.allow_highlight)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretLast(self)
+	editFuncM.caretLast(self, true)
+
+	return true, true, true
+end
+
+
+function editCommandM.caretLastHighlight(self)
+	editFuncM.caretLast(self, not self.allow_highlight)
 
 	return true, true, true
 end

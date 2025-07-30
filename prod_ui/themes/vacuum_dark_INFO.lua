@@ -5,5 +5,4 @@ return {
 	license = "See ProdUI license.",
 	present_to_user = true,
 	description = "The oldest ProdUI theme.",
-
 }

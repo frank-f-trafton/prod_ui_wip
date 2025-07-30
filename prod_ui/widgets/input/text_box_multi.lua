@@ -99,10 +99,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
-	-- ZXC update (?)
-
-	editWidM.updateDocumentDimensions(self)
-
+	editWidM.generalUpdate(self, true, true, false, true, true)
 	editWidM.updatePageJumpSteps(self, line_ed.font)
 
 	return true
@@ -341,15 +338,6 @@ def.default_skinner = {
 			self.vp2_h
 		)
 
-		--[[
-		print("ox, oy", ox, oy)
-		print("xy", self.x, self.y)
-		print("vp", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
-		print("vp2", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-		--]]
-
-		--print("render", "self.vis_para_top", self.vis_para_top, "self.vis_para_bot", self.vis_para_bot)
-
 		-- Draw background body
 		love.graphics.setColor(res.color_body)
 		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
@@ -360,7 +348,7 @@ def.default_skinner = {
 		love.graphics.push()
 
 		-- Translate into core region, with scrolling offsets applied.
-		love.graphics.translate(self.vp_x + self.align_offset - self.scr_x, self.vp_y - self.scr_y)
+		love.graphics.translate(self.align_offset - self.scr_x, -self.scr_y)
 
 		-- Draw highlight rectangles.
 		if line_ed:isHighlighted() then
@@ -432,34 +420,18 @@ def.default_skinner = {
 
 		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
 
-		-- DEBUG: draw history state
+
+		-- Debug: document dimensions
 		--[[
 		love.graphics.push("all")
-
+		love.graphics.setColor(0, 1, 0, 1)
+		love.graphics.setLineWidth(0.5)
+		love.graphics.rectangle("line", -self.scr_x, -self.scr_y, self.doc_w, self.doc_h)
 		love.graphics.pop()
 		--]]
-
-		--print("text box scr xy", self.scr_x, self.scr_y, "fx fy", self.scr_fx, self.scr_fy, "tx ty", self.scr_tx, self.scr_ty)
-		--print("line_ed.caret_box_xywh", line_ed.caret_box_x, line_ed.caret_box_y, line_ed.caret_box_w, line_ed.caret_box_h)
-
-		-- DEBUG: show editor details.
-		--[[
-		love.graphics.push("all")
-		love.graphics.setScissor()
-		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.print(
-			"cl:" .. line_ed.cl .. "\n" ..
-			"cb:" .. line_ed.cb .. "\n" ..
-			"hl:" .. line_ed.hl .. "\n" ..
-			"hb:" .. line_ed.hb,
-			200, 200
-		)
-		love.graphics.pop()
-		--]]
-
 
 		-- [[
-		-- Old history debug-print
+		-- Debug: history state
 		local qp = self.DEBUG_qp
 		if qp then
 			love.graphics.push("all")

@@ -446,9 +446,11 @@ function lgcInputS.method_updateDocumentDimensions(self)
 	local line_ed = self.line_ed
 	local font = line_ed.font
 
-	-- The document width is the larger of: 1) viewport width, 2) text width (plus an empty caret slot).
-	-- When alignment is center or right and the text is smaller than the viewport, the text, caret,
-	-- etc. are transposed.
+	--[[
+	The document width is the larger of: 1) viewport width, 2) text width (plus an empty caret slot).
+	When alignment is center or right and the text is smaller than the viewport, the text, caret,
+	etc. are transposed.
+	--]]
 	self.doc_w = math.max(self.vp_w, line_ed.disp_text_w)
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
 

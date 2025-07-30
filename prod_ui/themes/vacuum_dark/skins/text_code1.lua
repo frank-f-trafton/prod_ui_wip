@@ -1,7 +1,7 @@
 return {
 	skinner_id = "input/code_editor",
 
-	box = "*boxes/input_box",
+	box = "*boxes/input_box_m",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	font = "*fonts/p",
 	font_ghost = "*fonts/p",

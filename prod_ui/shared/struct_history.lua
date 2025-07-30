@@ -12,19 +12,15 @@ _mt_hist.__index = _mt_hist
 
 
 function structHistory.new()
-	local self = setmetatable({}, _mt_hist)
+	return setmetatable({
+		enabled = true,
+		pos = 0,
+		max = 500,
+		ledger = {},
 
-	self.enabled = true
-
-	-- Prevents the first entry from being deleted (even if max is 0).
-	self.locked_first = false
-
-	self.pos = 0
-	self.max = 500
-
-	self.ledger = {}
-
-	return self
+		-- Prevents the first entry from being deleted (even if max is 0).
+		locked_first = false
+	}, _mt_hist)
 end
 
 

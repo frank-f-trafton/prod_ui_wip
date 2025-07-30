@@ -71,23 +71,21 @@ function lineEdM.new()
 	-- Copy of viewport #1 width. Used when wrapping text.
 	self.view_w = 0
 
-	self.line_height = 0
-
 	-- Additional space between logical lines (in pixels).
 	-- TODO: theming/scaling
 	self.paragraph_pad = 0
 
 	-- Pixels to add to a highlight to represent a selected line feed.
 	-- Update this relative to the font size, maybe with a minimum size of 1 pixel.
-	self.width_line_feed = 0
+	self.line_feed_width = 0
+
+	self.caret_line_width = 1
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
 	self.text_color = {1, 1, 1, 1} -- TODO: skin
 	self.text_h_color = {0, 0, 0, 1} -- TODO: skin
 
-	-- XXX: skin or some other config system. Currently, 'caret_line_width' is based on the width of 'M' in the current font.
-	self.caret_line_width = 0
 
 	-- Caret and highlight lines, sub-lines and bytes for the display text.
 	-- These are based on the internal caret and highlight positions.
@@ -189,9 +187,6 @@ local function _updateDisplaySubLine(self, i_para, i_sub, str, syntax_colors, sy
 	-- Cached font:getWidth(str)
 	sub_line.w = 0
 
-	-- Cached 'math.ceil(font:getHeight() * font:getLineHeight())'
-	sub_line.line_height = 0
-
 	-- Normal string display text.
 	if not str then
 		error("DEBUG TODO: check why 'str' might be false/nil here.")
@@ -286,15 +281,12 @@ local function _updateHighlight(self, i_para, i_sub, byte_1, byte_2)
 		local sub_str = sub_line.str
 
 		-- NOTE: byte_1 and byte_2 can be OOB because string.sub() clamps the ranges.
-		-- I guess there is a limit that is related to the maximum size of strings?
-		-- math.huge for the second byte will lead to an empty string.
+		local pixels_before = font:getWidth(sub_str:sub(1, byte_1 - 1))
+		local pixels_highlight = font:getWidth(sub_str:sub(byte_1, byte_2 - 1))
 
-		local pixels_before = font:getWidth(string.sub(sub_str, 1, byte_1 - 1))
-		local pixels_highlight = font:getWidth(string.sub(sub_str, byte_1, byte_2 - 1))
-
-		-- Make byte_2 longer than #string + 1 to signify that the line feed is also highlighted.
+		-- When byte_2 > #string + 1, it's a signal that the invisible line feed is highlighted.
 		if byte_2 > #sub_str + 1 then
-			pixels_highlight = pixels_highlight + self.width_line_feed
+			pixels_highlight = pixels_highlight + self.line_feed_width
 		end
 
 		sub_line.highlighted = true
@@ -325,9 +317,8 @@ function _mt_ed_m:setFont(font)
 	self.font = font or false
 	if self.font then
 		local em_width = font:getWidth("M")
-		self.line_height = math.ceil(font:getHeight() * font:getLineHeight())
 		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-		self.width_line_feed = math.max(1, math.ceil(em_width / 4))
+		self.line_feed_width = math.max(1, math.ceil(em_width / 4))
 
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()
@@ -365,6 +356,11 @@ function _mt_ed_m:getCaretOffsetsInOrder()
 	end
 
 	return l1, b1, l2, b2
+end
+
+
+function _mt_ed_m:compareCaretOffsets(cl, cb, hl, hb)
+	return cl == self.cl and cb == self.cb and hl == self.hl and hb == self.hb
 end
 
 

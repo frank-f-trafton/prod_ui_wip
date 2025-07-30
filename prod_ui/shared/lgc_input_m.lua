@@ -157,7 +157,7 @@ function lgcInputM.textInputLogic(self, text)
 
 		editWidM.generalUpdate(self, true, true, true, true, true)
 
-		if written ~= "" then
+		if written then
 			local no_ws = written:find("%S")
 			local entry = hist:getEntry()
 			local do_advance = true
@@ -275,9 +275,9 @@ function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 	if button == 1 then
 		self.press_busy = "text-drag"
 
-		-- apply scroll + margin offsets
-		local msx = mx + self.scr_x - self.vp_x - self.align_offset
-		local msy = my + self.scr_y - self.vp_y
+		-- apply offsets
+		local msx = mx + self.scr_x - self.align_offset
+		local msy = my + self.scr_y
 
 		local core_line, core_byte = line_ed:getCharacterDetailsAtPosition(msx, msy, true)
 
@@ -340,11 +340,10 @@ function lgcInputM.mouseDragLogic(self)
 
 	editWidM.resetCaretBlink(self)
 
-	-- Relative mouse position relative to viewport #1.
-	local ax, ay = self:getAbsolutePosition()
-	local mx, my = context.mouse_x - ax - self.vp_x, context.mouse_y - ay - self.vp_y
+	-- relative mouse position
+	local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 
-	-- ...And with scroll offsets applied.
+	-- ...and with offsets applied
 	local s_mx = mx + self.scr_x - self.align_offset
 	local s_my = my + self.scr_y
 

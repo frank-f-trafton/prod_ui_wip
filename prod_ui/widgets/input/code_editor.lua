@@ -101,10 +101,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
-	-- ZXC update (?)
-
-	editWidM.updateDocumentDimensions(self)
-
+	editWidM.generalUpdate(self, true, true, false, true, true)
 	editWidM.updatePageJumpSteps(self, line_ed.font)
 
 	return true
