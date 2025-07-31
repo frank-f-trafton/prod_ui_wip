@@ -46,12 +46,12 @@ end
 
 
 function client:getHighlightedText()
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	if line_ed:isHighlighted() then
-		local lines = line_ed.lines
+	if LE:isHighlighted() then
+		local lines = LE.lines
 
-		local l1, b1, l2, b2 = line_ed:getCaretOffsetsInOrder()
+		local l1, b1, l2, b2 = LE:getCaretOffsetsInOrder()
 		local text = lines:copy(l1, b1, l2, b2 - 1)
 		return table.concat(text, "\n")
 	end
@@ -59,7 +59,7 @@ end
 
 
 function client:isHighlighted()
-	return self.line_ed:isHighlighted()
+	return self.LE:isHighlighted()
 end
 
 
@@ -140,7 +140,7 @@ end
 
 
 function client:getText()
-	return self.line_ed.lines:copyString()
+	return self.LE.lines:copyString()
 end
 
 
@@ -262,7 +262,7 @@ end
 
 function client:resetInputCategory()
 	-- Used to force a new history entry.
-	self.input_category = false
+	self.LE_input_category = false
 end
 
 
@@ -277,7 +277,7 @@ end
 
 
 function client:getReplaceMode()
-	return self.replace_mode
+	return self.LE_replace_mode
 end
 
 
@@ -287,7 +287,7 @@ end
 
 
 function client:getWrapMode()
-	return self.line_ed.wrap_mode
+	return self.LE.wrap_mode
 end
 
 
@@ -299,7 +299,7 @@ end
 
 
 function client:getTextAlignment()
-	return self.line_ed.align
+	return self.LE.align
 end
 
 
@@ -309,7 +309,7 @@ end
 
 
 function client:getColorization()
-	return self.line_ed.generate_colored_text
+	return self.LE.generate_colored_text
 end
 
 
@@ -319,97 +319,97 @@ end
 
 
 function client:getAllowHighlight(enabled)
-	return self.allow_highlight
+	return self.LE_allow_highlight
 end
 
 
 function client:setAllowTab(enabled)
-	self.allow_tab = not not enabled
+	self.LE_allow_tab = not not enabled
 end
 
 
 function client:getAllowTab()
-	return self.allow_tab
+	return self.LE_allow_tab
 end
 
 
 function client:setAllowUntab(enabled)
-	self.allow_untab = not not enabled
+	self.LE_allow_untab = not not enabled
 end
 
 
 function client:getAllowUntab()
-	return self.allow_untab
+	return self.LE_allow_untab
 end
 
 
 function client:setTabsToSpaces(enabled)
-	self.tabs_to_spaces = not not enabled
+	self.LE_tabs_to_spaces = not not enabled
 end
 
 
 function client:getTabsToSpaces()
-	return self.tabs_to_spaces
+	return self.LE_tabs_to_spaces
 end
 
 
 function client:setAutoIndent(enabled)
-	self.auto_indent = not not enabled
+	self.LE_auto_indent = not not enabled
 end
 
 
 function client:getAutoIndent()
-	return self.auto_indent
+	return self.LE_auto_indent
 end
 
 
 function client:setAllowInput(enabled)
-	self.allow_input = not not enabled
+	self.LE_allow_input = not not enabled
 end
 
 
 function client:getAllowInput()
-	return self.allow_input
+	return self.LE_allow_input
 end
 
 
 function client:setAllowCut(enabled)
-	self.allow_cut = not not enabled
+	self.LE_allow_cut = not not enabled
 end
 
 
 function client:getAllowCut()
-	return self.allow_cut
+	return self.LE_allow_cut
 end
 
 
 function client:setAllowCopy(enabled)
-	self.allow_copy = not not enabled
+	self.LE_allow_copy = not not enabled
 end
 
 
 function client:getAllowCopy()
-	return self.allow_copy
+	return self.LE_allow_copy
 end
 
 
 function client:setAllowPaste(enabled)
-	self.allow_paste = not not enabled
+	self.LE_allow_paste = not not enabled
 end
 
 
 function client:getAllowPaste()
-	return self.allow_paste
+	return self.LE_allow_paste
 end
 
 
 function client:setAllowLineFeed(enabled)
-	self.allow_line_feed = not not enabled
+	self.LE_allow_line_feed = not not enabled
 end
 
 
 function client:getAllowLineFeed()
-	return self.allow_line_feed
+	return self.LE_allow_line_feed
 end
 
 
@@ -420,12 +420,12 @@ end
 function client:setBadInputRule(rule)
 	uiShared.enumEval(1, rule, "badInputRule", _enum_bad_input)
 
-	self.bad_input_rule = rule or false
+	self.LE_bad_input_rule = rule or false
 end
 
 
 function client:getBadInputRule()
-	return self.bad_input_rule
+	return self.LE_bad_input_rule
 end
 
 

@@ -12,8 +12,8 @@ local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 
 
 function editWrapM.wrapAction(self, func, ...)
-	local line_ed = self.line_ed
-	local xcl, xcb, xhl, xhb = line_ed:getCaretOffsets() -- old offsets
+	local LE = self.LE
+	local xcl, xcb, xhl, xhb = LE:getCaretOffsets() -- old offsets
 
 	local ok, update_widget, caret_in_view, write_history, deleted, hist_change = func(self, ...)
 
@@ -26,7 +26,7 @@ function editWrapM.wrapAction(self, func, ...)
 	if ok then
 		editWidM.generalUpdate(self, true, update_widget, caret_in_view, update_widget, update_widget)
 
-		local hist = self.hist
+		local hist = self.LE_hist
 		if hist.enabled then
 			-- 'Delete' and 'backspace' can amend history entries.
 			if type(write_history) == "string" then -- "del", "bsp"
@@ -42,7 +42,7 @@ function editWrapM.wrapAction(self, func, ...)
 
 				if utf8.len(deleted) == 1
 				and (entry and entry.cl == xcl and entry.cb == xcb)
-				and ((self.input_category == cat1 and non_ws) or (self.input_category == cat2))
+				and ((self.LE_input_category == cat1 and non_ws) or (self.LE_input_category == cat2))
 				then
 					do_advance = false
 				end
@@ -51,11 +51,11 @@ function editWrapM.wrapAction(self, func, ...)
 					editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
 				end
 				editFuncM.writeHistoryEntry(self, do_advance)
-				self.input_category = non_ws and cat1 or cat2
+				self.LE_input_category = non_ws and cat1 or cat2
 
 			-- Unconditional new history entry:
 			elseif write_history then
-				self.input_category = false
+				self.LE_input_category = false
 
 				editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
 				editFuncM.writeHistoryEntry(self, true)

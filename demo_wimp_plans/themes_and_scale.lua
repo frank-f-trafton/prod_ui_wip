@@ -6,9 +6,9 @@ local pPath = require("prod_ui.lib.pile_path")
 
 
 local function _configureInputBox(self)
-	self.select_all_on_thimble1_take = true
-	self.deselect_all_on_thimble1_release = true
-	self.clear_history_on_deselect = true
+	self.LE_select_all_on_thimble1_take = true
+	self.LE_deselect_all_on_thimble1_release = true
+	self.LE_clear_history_on_deselect = true
 	self:setTextAlignment("center")
 end
 

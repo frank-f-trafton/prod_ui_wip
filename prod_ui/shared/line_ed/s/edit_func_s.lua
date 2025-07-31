@@ -28,107 +28,107 @@ local function _check(self)
 end
 
 
-local function _deleteHighlighted(line_ed)
-	if line_ed:isHighlighted() then
-		local byte_1, byte_2 = line_ed:getHighlightOffsets()
-		line_ed:clearHighlight()
-		return line_ed:deleteText(true, byte_1, byte_2 - 1)
+local function _deleteHighlighted(LE)
+	if LE:isHighlighted() then
+		local byte_1, byte_2 = LE:getHighlightOffsets()
+		LE:clearHighlight()
+		return LE:deleteText(true, byte_1, byte_2 - 1)
 	end
 end
 
 
-local function _deleteUChar(line_ed, n_u_chars)
-	local line = line_ed.line
+local function _deleteUChar(LE, n_u_chars)
+	local line = LE.line
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
 	-- Nothing to delete at the last caret position.
-	if line_ed.car_byte > #line then
+	if LE.car_byte > #line then
 		return
 	end
 
-	local byte_2, u_count = edComS.countUChars(line, 1, line_ed.car_byte, n_u_chars)
+	local byte_2, u_count = edComS.countUChars(line, 1, LE.car_byte, n_u_chars)
 	if u_count == 0 then
 		byte_2 = #line + 1
 	end
 
 	-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
-	return line_ed:deleteText(true, line_ed.car_byte, byte_2 - 1)
+	return LE:deleteText(true, LE.car_byte, byte_2 - 1)
 end
 
 
-local function _writeText(self, line_ed, text, suppress_replace)
+local function _writeText(self, LE, text, suppress_replace)
 	-- Sanitize input
-	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
+	text = edComBase.cleanString(text, self.LE_bad_input_rule, self.LE_tabs_to_spaces, self.LE_allow_line_feed)
 
-	if not self.allow_highlight then
-		line_ed:clearHighlight()
+	if not self.LE_allow_highlight then
+		LE:clearHighlight()
 	end
 
-	-- If there is a highlighted selection, get rid of it and insert the new text. This overrides replace_mode.
-	if line_ed:isHighlighted() then
-		_deleteHighlighted(line_ed)
+	-- If there is a highlighted selection, get rid of it and insert the new text. This overrides Replace Mode.
+	if LE:isHighlighted() then
+		_deleteHighlighted(LE)
 
-	elseif self.replace_mode and not suppress_replace then
+	elseif self.LE_replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
-		_deleteUChar(line_ed, utf8.len(text))
+		_deleteUChar(LE, utf8.len(text))
 	end
 
 	-- Trim text to fit the allowed uChars limit.
-	text = textUtil.trimString(text, self.u_chars_max - utf8.len(line_ed.line))
+	text = textUtil.trimString(text, self.LE_u_chars_max - utf8.len(LE.line))
 
-	line_ed:insertText(text)
+	LE:insertText(text)
 
 	return text
 end
 
 
 -- Do not use with methods that change the internal text.
-local function _checkClearHighlight(line_ed, clear_highlight)
+local function _checkClearHighlight(LE, clear_highlight)
 	if clear_highlight then
-		line_ed:clearHighlight()
+		LE:clearHighlight()
 	end
 end
 
 
 -- Updates the widget's caret shape and appearance.
 function editFuncS.updateCaretShape(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	self.caret_x = line_ed.caret_box_x
-	self.caret_y = line_ed.caret_box_y
-	self.caret_w = line_ed.caret_box_w
-	self.caret_h = line_ed.caret_box_h
+	self.LE_caret_x = LE.caret_box_x
+	self.LE_caret_y = LE.caret_box_y
+	self.LE_caret_w = LE.caret_box_w
+	self.LE_caret_h = LE.caret_box_h
 
-	if self.replace_mode then
-		self.caret_fill = "line"
+	if self.LE_replace_mode then
+		self.LE_caret_fill = "line"
 	else
-		self.caret_fill = "fill"
-		self.caret_w = line_ed.caret_line_width
+		self.LE_caret_fill = "fill"
+		self.LE_caret_w = LE.caret_line_width
 	end
 end
 
 
 function editFuncS.resetCaretBlink(self)
-	self.caret_blink_time = self.caret_blink_reset
+	self.LE_caret_blink_time = self.LE_caret_blink_reset
 end
 
 
 function editFuncS.cutHighlightedToClipboard(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local cut = _deleteHighlighted(line_ed)
+	local cut = _deleteHighlighted(LE)
 	if cut then
-		cut = textUtil.sanitize(cut, self.bad_input_rule)
+		cut = textUtil.sanitize(cut, self.LE_bad_input_rule)
 
 		-- Don't leak masked string info.
-		if line_ed.masked then
-			cut = line_ed.mask_glyph:rep(utf8.len(cut))
+		if LE.masked then
+			cut = LE.mask_glyph:rep(utf8.len(cut))
 		end
 
 		if _check(self) then
 			love.system.setClipboardText(cut)
-			line_ed:updateDisplayText()
+			LE:updateDisplayText()
 			return cut
 		end
 	end
@@ -136,145 +136,145 @@ end
 
 
 function editFuncS.copyHighlightedToClipboard(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local copied = editFuncS.getHighlightedText(self)
 
 	-- Don't leak masked string info.
-	if line_ed.masked then
-		copied = string.rep(line_ed.mask_glyph, utf8.len(copied))
+	if LE.masked then
+		copied = string.rep(LE.mask_glyph, utf8.len(copied))
 	end
 
-	copied = textUtil.sanitize(copied, self.bad_input_rule)
+	copied = textUtil.sanitize(copied, self.LE_bad_input_rule)
 
 	love.system.setClipboardText(copied)
 end
 
 
 function editFuncS.pasteClipboard(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local line, disp, car_byte, h_byte = LE:copyState()
 	local text = love.system.getClipboardText()
 
 	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		if line_ed:isHighlighted() then
-			_deleteHighlighted(line_ed)
+		if LE:isHighlighted() then
+			_deleteHighlighted(LE)
 		end
 
-		_writeText(self, line_ed, text, true)
+		_writeText(self, LE, text, true)
 		if _check(self) then
-			line_ed:updateDisplayText()
+			LE:updateDisplayText()
 			return true
 		end
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 function editFuncS.caretFirst(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.car_byte = 1
+	LE.car_byte = 1
 
-	_checkClearHighlight(line_ed, clear_highlight)
-	line_ed:syncDisplayCaretHighlight()
+	_checkClearHighlight(LE, clear_highlight)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.caretLast(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.car_byte = #line_ed.line + 1
+	LE.car_byte = #LE.line + 1
 
-	_checkClearHighlight(line_ed, clear_highlight)
-	line_ed:syncDisplayCaretHighlight()
+	_checkClearHighlight(LE, clear_highlight)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.deleteCaretToStart(self)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	line_ed:clearHighlight()
-	local rv = line_ed:deleteText(true, 1, line_ed.car_byte - 1)
+	LE:clearHighlight()
+	local rv = LE:deleteText(true, 1, LE.car_byte - 1)
 
 	if rv and _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 function editFuncS.deleteCaretToEnd(self)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	line_ed:clearHighlight()
-	local rv = line_ed:deleteText(true, line_ed.car_byte, #line_ed.line)
+	LE:clearHighlight()
+	local rv = LE:deleteText(true, LE.car_byte, #LE.line)
 
 	if rv and _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 function editFuncS.backspaceGroup(self)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 	local rv
 
-	if line_ed.car_byte > 1 then
-		local byte_left = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
-		rv = line_ed:deleteText(true, byte_left, line_ed.car_byte - 1)
+	if LE.car_byte > 1 then
+		local byte_left = edComS.huntWordBoundary(code_groups, LE.line, LE.car_byte, -1, false, -1)
+		rv = LE:deleteText(true, byte_left, LE.car_byte - 1)
 	end
 
 	if rv and _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 function editFuncS.deleteGroup(self)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 	local rv
 
-	if line_ed.car_byte < #line_ed.line + 1 then
+	if LE.car_byte < #LE.line + 1 then
 		local hit_non_ws = false
-		local first_group = code_groups[utf8.codepoint(line_ed.line, line_ed.car_byte)]
+		local first_group = code_groups[utf8.codepoint(LE.line, LE.car_byte)]
 		if first_group ~= "whitespace" then
 			hit_non_ws = true
 		end
 
-		local byte_right = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
+		local byte_right = edComS.huntWordBoundary(code_groups, LE.line, LE.car_byte, 1, hit_non_ws, first_group)
 		byte_right = byte_right - 1
 
-		rv = line_ed:deleteText(true, line_ed.car_byte, byte_right)
+		rv = LE:deleteText(true, LE.car_byte, byte_right)
 	end
 
 	if rv and _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -283,23 +283,23 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function editFuncS.backspaceUChar(self, n_u_chars)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
-	local byte_1, u_count = edComS.countUChars(line, -1, line_ed.car_byte, n_u_chars)
+	local byte_1, u_count = edComS.countUChars(line, -1, LE.car_byte, n_u_chars)
 	local rv
 	if u_count > 0 then
-		rv = line_ed:deleteText(true, byte_1, line_ed.car_byte - 1)
+		rv = LE:deleteText(true, byte_1, LE.car_byte - 1)
 
 		if rv and _check(self) then
-			line_ed:updateDisplayText()
+			LE:updateDisplayText()
 			return rv
 		end
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -308,54 +308,54 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function editFuncS.deleteUChar(self, n_u_chars)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	local rv = _deleteUChar(line_ed, n_u_chars)
+	local rv = _deleteUChar(LE, n_u_chars)
 
 	if rv and _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 --- Delete highlighted text from the field.
 -- @return Substring of the deleted text.
 function editFuncS.deleteHighlighted(self)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	local rv = _deleteHighlighted(line_ed)
+	local rv = _deleteHighlighted(LE)
 	if rv and _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 function editFuncS.caretJumpLeft(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.car_byte = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, -1, false, -1)
+	LE.car_byte = edComS.huntWordBoundary(code_groups, LE.line, LE.car_byte, -1, false, -1)
 
-	_checkClearHighlight(line_ed, clear_highlight)
-	line_ed:syncDisplayCaretHighlight()
+	_checkClearHighlight(LE, clear_highlight)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.caretJumpRight(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local hit_non_ws = false
 
 	local first_group
-	if line_ed.car_byte <= #line_ed.line then
-		first_group = code_groups[utf8.codepoint(line_ed.line, line_ed.car_byte)]
+	if LE.car_byte <= #LE.line then
+		first_group = code_groups[utf8.codepoint(LE.line, LE.car_byte)]
 	end
 
 	if first_group ~= "whitespace" then
@@ -365,109 +365,109 @@ function editFuncS.caretJumpRight(self, clear_highlight)
 	--print("hit_non_ws", hit_non_ws, "first_group", first_group)
 
 	--(lines, line_n, byte_n, dir, hit_non_ws, first_group, stop_on_line_feed)
-	line_ed.car_byte = edComS.huntWordBoundary(code_groups, line_ed.line, line_ed.car_byte, 1, hit_non_ws, first_group)
+	LE.car_byte = edComS.huntWordBoundary(code_groups, LE.line, LE.car_byte, 1, hit_non_ws, first_group)
 
-	_checkClearHighlight(line_ed, clear_highlight)
-	line_ed:syncDisplayCaretHighlight()
+	_checkClearHighlight(LE, clear_highlight)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.caretStepLeft(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.car_byte = edComS.offsetStepLeft(line_ed.line, line_ed.car_byte) or 1
+	LE.car_byte = edComS.offsetStepLeft(LE.line, LE.car_byte) or 1
 
-	_checkClearHighlight(line_ed, clear_highlight)
-	line_ed:syncDisplayCaretHighlight()
+	_checkClearHighlight(LE, clear_highlight)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.caretStepRight(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local new_byte = edComS.offsetStepRight(line_ed.line, line_ed.car_byte)
-	line_ed.car_byte = new_byte or #line_ed.line + 1
+	local new_byte = edComS.offsetStepRight(LE.line, LE.car_byte)
+	LE.car_byte = new_byte or #LE.line + 1
 
-	_checkClearHighlight(line_ed, clear_highlight)
-	line_ed:syncDisplayCaretHighlight()
+	_checkClearHighlight(LE, clear_highlight)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.caretToHighlightEdgeLeft(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local byte_1, byte_2 = line_ed:getHighlightOffsets()
-	line_ed.car_byte, line_ed.h_byte = byte_1, byte_1
+	local byte_1, byte_2 = LE:getHighlightOffsets()
+	LE.car_byte, LE.h_byte = byte_1, byte_1
 
-	line_ed:syncDisplayCaretHighlight()
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.caretToHighlightEdgeRight(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local byte_1, byte_2 = line_ed:getHighlightOffsets()
-	line_ed.car_byte, line_ed.h_byte = byte_2, byte_2
+	local byte_1, byte_2 = LE:getHighlightOffsets()
+	LE.car_byte, LE.h_byte = byte_2, byte_2
 
-	line_ed:syncDisplayCaretHighlight()
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.highlightCurrentWord(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.car_byte, line_ed.h_byte = line_ed:getWordRange(line_ed.car_byte)
+	LE.car_byte, LE.h_byte = LE:getWordRange(LE.car_byte)
 
-	line_ed:syncDisplayCaretHighlight()
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.highlightAll(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.car_byte = #line_ed.line + 1
-	line_ed.h_byte = 1
+	LE.car_byte = #LE.line + 1
+	LE.h_byte = 1
 
-	line_ed:syncDisplayCaretHighlight()
+	LE:syncDisplayCaretHighlight()
 end
 
 
 function editFuncS.clearHighlight(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	if line_ed:clearHighlight() then
-		line_ed:syncDisplayCaretHighlight()
+	if LE:clearHighlight() then
+		LE:syncDisplayCaretHighlight()
 	end
 end
 
 
 function editFuncS.getText(self)
-	return self.line_ed.line
+	return self.LE.line
 end
 
 
 function editFuncS.getHighlightedText(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	if line_ed:isHighlighted() then
-		local b1, b2 = self.line_ed:getHighlightOffsets()
-		return line_ed.line:sub(b1, b2 - 1)
+	if LE:isHighlighted() then
+		local b1, b2 = self.LE:getHighlightOffsets()
+		return LE.line:sub(b1, b2 - 1)
 	end
 end
 
 
 function editFuncS.getDisplayText(self)
-	return self.line_ed.disp_text
+	return self.LE.disp_text
 end
 
 
 function editFuncS.stepHistory(self, dir)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	-- -1 == undo, 1 == redo
 
-	local hist = line_ed.hist
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local hist = LE.hist
+	local line, disp, car_byte, h_byte = LE:copyState()
 	local old_pos = hist:getPosition()
 
 	if hist.enabled then
@@ -479,13 +479,13 @@ function editFuncS.stepHistory(self, dir)
 			if not _check(self) then
 				hist.pos = old_pos
 			else
-				line_ed:updateDisplayText()
+				LE:updateDisplayText()
 				return true
 			end
 		end
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
@@ -496,32 +496,32 @@ end
 --	entering line feeds, etc.
 -- @return The sanitized and trimmed text which was inserted into the field.
 function editFuncS.writeText(self, text, suppress_replace)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	local rv = _writeText(self, line_ed, text, suppress_replace)
+	local rv = _writeText(self, LE, text, suppress_replace)
 	if _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 
 function editFuncS.replaceText(self, text)
-	local line_ed = self.line_ed
-	local line, disp, car_byte, h_byte = line_ed:copyState()
+	local LE = self.LE
+	local line, disp, car_byte, h_byte = LE:copyState()
 
-	line_ed:deleteText(false, 1, #line_ed.line)
-	local rv = _writeText(self, line_ed, text, true)
+	LE:deleteText(false, 1, #LE.line)
+	local rv = _writeText(self, LE, text, true)
 
 	if _check(self) then
-		line_ed:updateDisplayText()
+		LE:updateDisplayText()
 		return rv
 	end
 
-	line_ed:setState(line, disp, car_byte, h_byte)
+	LE:setState(line, disp, car_byte, h_byte)
 end
 
 

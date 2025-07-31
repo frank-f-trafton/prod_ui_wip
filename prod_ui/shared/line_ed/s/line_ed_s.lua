@@ -86,7 +86,7 @@ function lineEdS.new()
 	self.caret_box_w_edge = 0
 
 	-- History state.
-	self.hist = structHistory.new()
+	self.hist = structHistory.new() -- TODO: migrate to client widget; rename to 'LE_hist'
 	editHistS.writeEntry(self, true)
 
 	-- External display text.
@@ -132,7 +132,7 @@ function lineEdS.new()
 	setmetatable(self, _mt_ed_s)
 
 	-- ASAP:
-	-- * Assign a font with line_ed:setFont()
+	-- * Assign a font with LE:setFont()
 	-- * Update display text
 
 	return self

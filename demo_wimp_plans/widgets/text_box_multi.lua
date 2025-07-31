@@ -69,7 +69,7 @@ function plan.make(panel)
 		local DEMO_PURPLE = {1, 0, 1, 1}
 
 		wid_text_box:resizeWidget(512, 256)
-		wid_text_box.line_ed.fn_colorize = function(self, str, syntax_colors, syntax_work)
+		wid_text_box.LE_obj.fn_colorize = function(self, str, syntax_colors, syntax_work)
 
 			-- i: byte offset in string
 			-- j: the next byte offset
@@ -220,7 +220,7 @@ function plan.make(panel)
 	text_box:setTag("demo_text_box")
 	text_box:setScrollBars(true, true)
 
-	text_box.ghost_text = "Ghost text"
+	text_box.LE_ghost_text = "Ghost text"
 
 	text_box:setAllowTab(false)
 	text_box:setAllowUntab(false)
@@ -255,7 +255,7 @@ The five boxing wizards jump quickly.]=]
 	code_ed:setTag("demo_code_ed")
 	code_ed:setScrollBars(true, true)
 
-	code_ed.ghost_text = "Ghost text"
+	code_ed.LE_ghost_text = "Ghost text"
 
 	code_ed:setAllowTab(true)
 	code_ed:setAllowUntab(true)

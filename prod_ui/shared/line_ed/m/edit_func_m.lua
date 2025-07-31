@@ -19,11 +19,11 @@ local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 
 
 function editFuncM.cutHighlightedToClipboard(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local cut = editFuncM.deleteHighlighted(self)
 	if cut then
-		cut = textUtil.sanitize(cut, self.bad_input_rule)
+		cut = textUtil.sanitize(cut, self.LE_bad_input_rule)
 		love.system.setClipboardText(cut)
 		return cut
 	end
@@ -31,17 +31,17 @@ end
 
 
 function editFuncM.copyHighlightedToClipboard(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local copied = self:getHighlightedText()
-	copied = textUtil.sanitize(copied, self.bad_input_rule)
+	copied = textUtil.sanitize(copied, self.LE_bad_input_rule)
 
 	love.system.setClipboardText(copied)
 end
 
 
 function editFuncM.pasteClipboard(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local text = love.system.getClipboardText()
 
@@ -49,7 +49,7 @@ function editFuncM.pasteClipboard(self)
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		if line_ed:isHighlighted() then
+		if LE:isHighlighted() then
 			editFuncM.deleteHighlighted(self)
 		end
 
@@ -59,218 +59,218 @@ end
 
 
 function editFuncM.deleteAll(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
-	return line_ed:deleteText(true, 1, 1, #lines, #lines[#lines])
+	return LE:deleteText(true, 1, 1, #lines, #lines[#lines])
 end
 
 
 function editFuncM.deleteCaretToLineStart(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
-	return line_ed:deleteText(true, line_ed.cl, 1, line_ed.cl, line_ed.cb - 1)
+	return LE:deleteText(true, LE.cl, 1, LE.cl, LE.cb - 1)
 end
 
 
 function editFuncM.deleteCaretToLineEnd(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
-	return line_ed:deleteText(true, line_ed.cl, line_ed.cb, line_ed.cl, #lines[line_ed.cl])
+	return LE:deleteText(true, LE.cl, LE.cb, LE.cl, #lines[LE.cl])
 end
 
 
 function editFuncM.backspaceGroup(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
 	local line_left, byte_left
 
-	if line_ed.cb == 1 and line_ed.cl > 1 then
-		line_left = line_ed.cl  - 1
+	if LE.cb == 1 and LE.cl > 1 then
+		line_left = LE.cl  - 1
 		byte_left = #lines[line_left] + 1
 	else
-		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, line_ed.cl, line_ed.cb, -1, false, -1, true)
+		line_left, byte_left = edComM.huntWordBoundary(code_groups, lines, LE.cl, LE.cb, -1, false, -1, true)
 	end
 
 	if line_left then
-		if line_left ~= line_ed.cl or byte_left ~= line_ed.cb then
-			return line_ed:deleteText(true, line_left, byte_left, line_ed.cl, line_ed.cb - 1)
+		if line_left ~= LE.cl or byte_left ~= LE.cb then
+			return LE:deleteText(true, line_left, byte_left, LE.cl, LE.cb - 1)
 		end
 	end
 end
 
 
 function editFuncM.caretToHighlightEdgeLeft(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local l1, b1 = line_ed:getCaretOffsetsInOrder()
-	line_ed:moveCaret(l1, b1, true, true)
+	local l1, b1 = LE:getCaretOffsetsInOrder()
+	LE:moveCaret(l1, b1, true, true)
 end
 
 
 function editFuncM.caretToHighlightEdgeRight(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local _, _, l2, b2 = line_ed:getCaretOffsetsInOrder()
-	line_ed:moveCaret(l2, b2, true, true)
+	local _, _, l2, b2 = LE:getCaretOffsetsInOrder()
+	LE:moveCaret(l2, b2, true, true)
 end
 
 
 function editFuncM.caretStepLeft(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local cl, cb = lines:offsetStepLeft(line_ed.cl, line_ed.cb)
+	local cl, cb = lines:offsetStepLeft(LE.cl, LE.cb)
 	if cl then
-		line_ed:moveCaret(cl, cb, clear_highlight, true)
+		LE:moveCaret(cl, cb, clear_highlight, true)
 	end
 end
 
 
 function editFuncM.caretStepRight(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local cl, cb = lines:offsetStepRight(line_ed.cl, line_ed.cb)
+	local cl, cb = lines:offsetStepRight(LE.cl, LE.cb)
 	if cl then
-		line_ed:moveCaret(cl, math.max(1, cb), clear_highlight, true)
+		LE:moveCaret(cl, math.max(1, cb), clear_highlight, true)
 	end
 end
 
 
 function editFuncM.caretJumpLeft(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local cl, cb = edComM.huntWordBoundary(code_groups, lines, line_ed.cl, line_ed.cb, -1, false, -1, false)
-	line_ed:moveCaret(cl, cb, clear_highlight, true)
+	local cl, cb = edComM.huntWordBoundary(code_groups, lines, LE.cl, LE.cb, -1, false, -1, false)
+	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretJumpRight(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
 	local hit_non_ws = false
-	local first_group = code_groups[lines:peekCodePoint(line_ed.cl, line_ed.cb)]
+	local first_group = code_groups[lines:peekCodePoint(LE.cl, LE.cb)]
 	if first_group ~= "whitespace" then
 		hit_non_ws = true
 	end
 
-	local cl, cb = edComM.huntWordBoundary(code_groups, lines, line_ed.cl, line_ed.cb, 1, hit_non_ws, first_group, false)
-	line_ed:moveCaret(cl, cb, clear_highlight, true)
+	local cl, cb = edComM.huntWordBoundary(code_groups, lines, LE.cl, LE.cb, 1, hit_non_ws, first_group, false)
+	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretFullLineFirst(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed:moveCaret(line_ed.cl, 1, clear_highlight, true)
+	LE:moveCaret(LE.cl, 1, clear_highlight, true)
 end
 
 
 function editFuncM.caretFullLineLast(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:moveCaret(line_ed.cl, #lines[line_ed.cl] + 1, clear_highlight, true)
+	LE:moveCaret(LE.cl, #lines[LE.cl] + 1, clear_highlight, true)
 end
 
 
 function editFuncM.caretSubLineFirst(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
 	-- Find the first uChar offset for the current Paragraph + sub-line pair.
-	local u_count = edComM.getSubLineUCharOffsetStart(line_ed.paragraphs[line_ed.dcp], line_ed.dcs)
+	local u_count = edComM.getSubLineUCharOffsetStart(LE.paragraphs[LE.dcp], LE.dcs)
 
-	-- Convert the display u_count to a byte offset in the line_ed/source string.
-	local cl, cb = line_ed.cl, utf8.offset(lines[line_ed.cl], u_count)
-	line_ed:moveCaret(cl, cb, clear_highlight, true)
+	-- Convert the display u_count to a byte offset in the LineEd/source string.
+	local cl, cb = LE.cl, utf8.offset(lines[LE.cl], u_count)
+	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretSubLineLast(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
 	-- Find the last uChar offset for the current Paragraph + sub-line pair.
-	local u_count = edComM.getSubLineUCharOffsetEnd(line_ed.paragraphs[line_ed.dcp], line_ed.dcs)
+	local u_count = edComM.getSubLineUCharOffsetEnd(LE.paragraphs[LE.dcp], LE.dcs)
 
-	-- Convert to internal line_ed byte offset
-	local cl, cb = line_ed.cl, utf8.offset(lines[line_ed.cl], u_count)
-	line_ed:moveCaret(cl, cb, clear_highlight, true)
+	-- Convert to internal LineEd byte offset
+	local cl, cb = LE.cl, utf8.offset(lines[LE.cl], u_count)
+	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretLineFirst(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local cl, cb, hl, hb = line_ed:getCaretOffsets()
+	local cl, cb, hl, hb = LE:getCaretOffsets()
 	editFuncM.caretSubLineFirst(self, clear_highlight)
-	if line_ed:compareCaretOffsets(cl, cb, hl, hb) then
+	if LE:compareCaretOffsets(cl, cb, hl, hb) then
 		editFuncM.caretFullLineFirst(self, clear_highlight)
 	end
 end
 
 
 function editFuncM.caretLineLast(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local cl, cb, hl, hb = line_ed:getCaretOffsets()
+	local cl, cb, hl, hb = LE:getCaretOffsets()
 	editFuncM.caretSubLineLast(self, clear_highlight)
-	if line_ed:compareCaretOffsets(cl, cb, hl, hb) then
+	if LE:compareCaretOffsets(cl, cb, hl, hb) then
 		editFuncM.caretFullLineLast(self, clear_highlight)
 	end
 end
 
 
 function editFuncM.caretFirst(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed:moveCaret(1, 1, clear_highlight, true)
+	LE:moveCaret(1, 1, clear_highlight, true)
 end
 
 
 function editFuncM.caretLast(self, clear_highlight)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed:moveCaret(#line_ed.lines, #line_ed.lines[#line_ed.lines] + 1, clear_highlight, true)
+	LE:moveCaret(#LE.lines, #LE.lines[#LE.lines] + 1, clear_highlight, true)
 end
 
 
 function editFuncM.caretStepUp(self, clear_highlight, n_steps)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-	local font = line_ed.font
-	local paragraphs = line_ed.paragraphs
+	local LE = self.LE
+	local lines = LE.lines
+	local font = LE.font
+	local paragraphs = LE.paragraphs
 
 	n_steps = n_steps or 1
 
 	-- Already at top sub-line: move to start.
-	if line_ed.dcp <= 1 and line_ed.dcs <= 1 then
-		line_ed:moveCaret(1, 1, clear_highlight, true)
+	if LE.dcp <= 1 and LE.dcs <= 1 then
+		LE:moveCaret(1, 1, clear_highlight, true)
 	else
 		-- Get the offsets for the sub-line 'n_steps' above.
-		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.dcp, line_ed.dcs, -n_steps)
+		local d_para, d_sub = edComM.stepSubLine(paragraphs, LE.dcp, LE.dcs, -n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
 		local d_str = d_sub_t.str
-		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, line_ed.vertical_x_hint - d_sub_t.x)
+		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, LE.vertical_x_hint - d_sub_t.x)
 
 		-- Not the last sub-line in the Paragraph: correct leftmost position so that it doesn't
 		-- spill over to the next sub-line (and get stuck).
@@ -280,30 +280,30 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 
 		-- Convert display offsets to ones suitable for logical lines.
 		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		line_ed:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
+		LE:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
 	end
 end
 
 
 function editFuncM.caretStepDown(self, clear_highlight, n_steps)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
-	local font = line_ed.font
-	local paragraphs = line_ed.paragraphs
+	local LE = self.LE
+	local lines = LE.lines
+	local font = LE.font
+	local paragraphs = LE.paragraphs
 
 	n_steps = n_steps or 1
 
 	-- Already at bottom sub-line: move to end.
-	if line_ed.dcp >= #paragraphs and line_ed.dcs >= #paragraphs[#paragraphs] then
-		line_ed:moveCaret(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, clear_highlight, true)
+	if LE.dcp >= #paragraphs and LE.dcs >= #paragraphs[#paragraphs] then
+		LE:moveCaret(#LE.lines, #LE.lines[LE.cl] + 1, clear_highlight, true)
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
-		local d_para, d_sub = edComM.stepSubLine(paragraphs, line_ed.dcp, line_ed.dcs, n_steps)
+		local d_para, d_sub = edComM.stepSubLine(paragraphs, LE.dcp, LE.dcs, n_steps)
 
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
 		local d_str = d_sub_t.str
-		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, line_ed.vertical_x_hint - d_sub_t.x)
+		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, LE.vertical_x_hint - d_sub_t.x)
 
 		-- Not the last sub-line in the Paragraph: correct rightmost position so that it doesn't
 		-- spill over to the next sub-line.
@@ -313,67 +313,67 @@ function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 
 		-- Convert display offsets to ones suitable for logical lines.
 		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		line_ed:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
+		LE:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
 	end
 end
 
 
 function editFuncM.caretStepUpCoreLine(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
 	-- Already at top line: move to start.
-	if line_ed.cl <= 1 then
-		line_ed:moveCaret(line_ed.cl, 1, clear_highlight, true)
+	if LE.cl <= 1 then
+		LE:moveCaret(LE.cl, 1, clear_highlight, true)
 
 	-- Already at position 1 on the current line: move up one line
-	elseif line_ed.cb == 1 then
-		line_ed:moveCaret(math.max(1, line_ed.cl - 1), 1, clear_highlight, true)
+	elseif LE.cb == 1 then
+		LE:moveCaret(math.max(1, LE.cl - 1), 1, clear_highlight, true)
 
 	-- Otherwise, move to position 1 in the current line.
 	else
-		line_ed:moveCaret(line_ed.cl, 1, clear_highlight, true)
+		LE:moveCaret(LE.cl, 1, clear_highlight, true)
 	end
 end
 
 
 function editFuncM.caretStepDownCoreLine(self, clear_highlight)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
 	-- Already at bottom line: move to end.
-	if line_ed.cl == #lines then
-		line_ed:moveCaret(line_ed.cl, #lines[#lines] + 1, clear_highlight, true)
+	if LE.cl == #lines then
+		LE:moveCaret(LE.cl, #lines[#lines] + 1, clear_highlight, true)
 
 	-- Already at last position in logical line: move to next line
-	elseif line_ed.cb == #lines[line_ed.cl] + 1 then
-		line_ed:moveCaret(math.min(line_ed.cl + 1, #lines), #lines[line_ed.cl] + 1, clear_highlight, true)
+	elseif LE.cb == #lines[LE.cl] + 1 then
+		LE:moveCaret(math.min(LE.cl + 1, #lines), #lines[LE.cl] + 1, clear_highlight, true)
 
 	-- Otherwise, move to the last position in the current line.
 	else
-		line_ed:moveCaret(line_ed.cl, #lines[line_ed.cl] + 1, clear_highlight, true)
+		LE:moveCaret(LE.cl, #lines[LE.cl] + 1, clear_highlight, true)
 	end
 end
 
 
 function editFuncM.shiftLinesUp(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local r1, r2 = line_ed:getSelectedLinesRange(true)
+	local r1, r2 = LE:getSelectedLinesRange(true)
 	local displaced_line = lines[r1 - 1]
 
 	if displaced_line then
-		line_ed:clearHighlight()
+		LE:clearHighlight()
 
 		for i = r1 - 1, r2 - 1 do
 			lines[i] = lines[i + 1]
 		end
 
 		lines[r2] = displaced_line
-		line_ed:updateDisplayText(r1 - 1, r2)
-		line_ed:moveCaretAndHighlight(r1 - 1, 1, r2 - 1, #lines[r2 - 1] + 1, true)
-		line_ed:syncDisplayCaretHighlight(r1 - 1, r2)
+		LE:updateDisplayText(r1 - 1, r2)
+		LE:moveCaretAndHighlight(r1 - 1, 1, r2 - 1, #lines[r2 - 1] + 1, true)
+		LE:syncDisplayCaretHighlight(r1 - 1, r2)
 
 		return true
 	end
@@ -381,23 +381,23 @@ end
 
 
 function editFuncM.shiftLinesDown(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local r1, r2 = line_ed:getSelectedLinesRange(true)
+	local r1, r2 = LE:getSelectedLinesRange(true)
 	local displaced_line = lines[r2 + 1]
 
 	if displaced_line then
-		line_ed:clearHighlight()
+		LE:clearHighlight()
 
 		for i = r2 + 1, r1 + 1, -1 do
 			lines[i] = lines[i - 1]
 		end
 
 		lines[r1] = displaced_line
-		line_ed:updateDisplayText(r1, r2 + 1)
-		line_ed:moveCaretAndHighlight(r1 + 1, 1, r2 + 1, #lines[r2 + 1] + 1, true)
-		line_ed:syncDisplayCaretHighlight(r1, r2 + 1)
+		LE:updateDisplayText(r1, r2 + 1)
+		LE:moveCaretAndHighlight(r1 + 1, 1, r2 + 1, #lines[r2 + 1] + 1, true)
+		LE:syncDisplayCaretHighlight(r1, r2 + 1)
 
 		return true
 	end
@@ -405,85 +405,85 @@ end
 
 
 function editFuncM.deleteHighlighted(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	if self:isHighlighted() then
-		local l1, b1, l2, b2 = line_ed:getCaretOffsetsInOrder()
-		line_ed:clearHighlight()
-		return line_ed:deleteText(true, l1, b1, l2, b2 - 1)
+		local l1, b1, l2, b2 = LE:getCaretOffsetsInOrder()
+		LE:clearHighlight()
+		return LE:deleteText(true, l1, b1, l2, b2 - 1)
 	end
 end
 
 
 function editFuncM.backspaceUChar(self, n_u_chars)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
-	local line_1, byte_1, u_count = lines:countUChars(-1, line_ed.cl, line_ed.cb, n_u_chars)
+	local line_1, byte_1, u_count = lines:countUChars(-1, LE.cl, LE.cb, n_u_chars)
 
 	if u_count > 0 then
-		return line_ed:deleteText(true, line_1, byte_1, line_ed.cl, line_ed.cb - 1)
+		return LE:deleteText(true, line_1, byte_1, LE.cl, LE.cb - 1)
 	end
 end
 
 
 function editFuncM.deleteUChar(self, n_u_chars)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
-	local line_2, byte_2, u_count = lines:countUChars(1, line_ed.cl, line_ed.cb, n_u_chars)
+	local line_2, byte_2, u_count = lines:countUChars(1, LE.cl, LE.cb, n_u_chars)
 
 	if u_count > 0 then
 		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
-		return line_ed:deleteText(true, line_ed.cl, line_ed.cb, line_2, byte_2 - 1)
+		return LE:deleteText(true, LE.cl, LE.cb, line_2, byte_2 - 1)
 	end
 end
 
 
 function editFuncM.deleteGroup(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
 	local line_right, byte_right
-	if line_ed.cb == #lines[line_ed.cl] + 1 and line_ed.cl < #lines then
-		line_right = line_ed.cl + 1
+	if LE.cb == #lines[LE.cl] + 1 and LE.cl < #lines then
+		line_right = LE.cl + 1
 		byte_right = 0
 	else
 		local hit_non_ws = false
-		local peeked = lines:peekCodePoint(line_ed.cl, line_ed.cb)
+		local peeked = lines:peekCodePoint(LE.cl, LE.cb)
 		local first_group = code_groups[peeked]
 		if first_group ~= "whitespace" then
 			hit_non_ws = true
 		end
 
-		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, line_ed.cl, line_ed.cb, 1, hit_non_ws, first_group, true)
+		line_right, byte_right = edComM.huntWordBoundary(code_groups, lines, LE.cl, LE.cb, 1, hit_non_ws, first_group, true)
 		byte_right = byte_right - 1
 	end
 
-	return line_ed:deleteText(true, line_ed.cl, line_ed.cb, line_right, byte_right)
+	return LE:deleteText(true, LE.cl, LE.cb, line_right, byte_right)
 end
 
 
 function editFuncM.deleteLine(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
 	local retval
 	-- Multi-line, caret is not on the last line
-	if line_ed.cl < #lines then
-		retval = line_ed:deleteText(true, line_ed.cl, 1, line_ed.cl + 1, 0)
+	if LE.cl < #lines then
+		retval = LE:deleteText(true, LE.cl, 1, LE.cl + 1, 0)
 
 	-- Multi-line, on the last line
-	elseif line_ed.cl > 1 then
-		retval = line_ed:deleteText(true, line_ed.cl - 1, #lines[line_ed.cl - 1] + 1, line_ed.cl, #lines[line_ed.cl])
+	elseif LE.cl > 1 then
+		retval = LE:deleteText(true, LE.cl - 1, #lines[LE.cl - 1] + 1, LE.cl, #lines[LE.cl])
 
 	-- Document is a single empty line
 	elseif #lines[1] == 0 then
@@ -491,25 +491,25 @@ function editFuncM.deleteLine(self)
 
 	-- Document is a single line, with contents that can be deleted
 	else
-		retval = line_ed:deleteText(true, line_ed.cl, 1, line_ed.cl, #lines[line_ed.cl])
+		retval = LE:deleteText(true, LE.cl, 1, LE.cl, #lines[LE.cl])
 	end
 
-	line_ed:moveCaretAndHighlight(self.cl, 1, self.hl, 1)
+	LE:moveCaretAndHighlight(self.cl, 1, self.hl, 1)
 
 	return retval
 end
 
 
 function editFuncM.typeLineFeedWithAutoIndent(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	self.input_category = false
+	self.LE_input_category = false
 
 	local new_str = "\n"
 
-	if self.auto_indent then
-		local top_selected_line = math.min(line_ed.cl, line_ed.hl)
-		local leading_white_space = string.match(line_ed.lines[top_selected_line], "^%s+")
+	if self.LE_auto_indent then
+		local top_selected_line = math.min(LE.cl, LE.hl)
+		local leading_white_space = string.match(LE.lines[top_selected_line], "^%s+")
 		if leading_white_space then
 			new_str = new_str .. leading_white_space
 		end
@@ -520,50 +520,50 @@ end
 
 
 function editFuncM.typeLineFeed(self)
-	self.input_category = false
+	self.LE_input_category = false
 	editFuncM.writeText(self, "\n", true)
 end
 
 
 local function _indentLine(self, line_n)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local old_line = line_ed.lines[line_n]
+	local old_line = LE.lines[line_n]
 
-	line_ed:moveCaretAndHighlight(line_n, 1, line_n, 1, false)
-	line_ed:insertText("\t")
+	LE:moveCaretAndHighlight(line_n, 1, line_n, 1, false)
+	LE:insertText("\t")
 
-	return old_line ~= line_ed.lines[line_n]
+	return old_line ~= LE.lines[line_n]
 end
 
 
 local function _unindentLine(self, line_n)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local old_line = line_ed.lines[line_n]
+	local old_line = LE.lines[line_n]
 
 	if old_line:sub(1, 1) == "\t" then
-		line_ed:deleteText(false, line_n, 1, line_n, 1)
+		LE:deleteText(false, line_n, 1, line_n, 1)
 	else
 		local space1, space2 = old_line:find("^[\x20]+") -- (0x20 == space)
 		if space1 then
 			local offset = ((space2 - 1) % 4) -- XXX space tab width should be a config setting somewhere.
-			line_ed:deleteText(false, line_n, 1, line_n, offset)
+			LE:deleteText(false, line_n, 1, line_n, offset)
 		end
 	end
 
-	return old_line ~= line_ed.lines[line_n]
+	return old_line ~= LE.lines[line_n]
 end
 
 
 function editFuncM.typeTab(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local changed = false
 
 	-- Caret and highlight are on the same line: write a literal tab.
 	-- (Unhighlights first)
-	if line_ed.cl == line_ed.hl then
+	if LE.cl == LE.hl then
 		local written = editFuncM.writeText(self, "\t", true)
 
 		if written and #written > 0 then
@@ -571,19 +571,19 @@ function editFuncM.typeTab(self)
 		end
 	-- Caret and highlight are on different lines: indent the range of lines.
 	else
-		local r1, r2 = line_ed:getSelectedLinesRange(true)
+		local r1, r2 = LE:getSelectedLinesRange(true)
 
 		-- Only perform the indent if the total number of added tabs will not take us beyond
 		-- the max code points setting.
 		local tab_count = 1 + (r2 - r1)
-		if line_ed.u_chars + tab_count <= self.u_chars_max then
+		if LE.u_chars + tab_count <= self.LE_u_chars_max then
 			for i = r1, r2 do
 				local line_changed = _indentLine(self, i) -- TODO: slow implementation.
 				if line_changed then
 					changed = true
 				end
 			end
-			line_ed:moveCaretAndHighlight(r2, #line_ed.lines[r2] + 1, r1, 1)
+			LE:moveCaretAndHighlight(r2, #LE.lines[r2] + 1, r1, 1)
 		end
 	end
 
@@ -592,10 +592,10 @@ end
 
 
 function editFuncM.typeUntab(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local changed = false
-	local r1, r2 = line_ed:getSelectedLinesRange(true)
+	local r1, r2 = LE:getSelectedLinesRange(true)
 	local tab_count = 1 + (r2 - r1)
 
 	for i = r1, r2 do
@@ -606,7 +606,7 @@ function editFuncM.typeUntab(self)
 		end
 	end
 	if changed then
-		line_ed:moveCaretAndHighlight(r2, #line_ed.lines[r2] + 1, r1, 1)
+		LE:moveCaretAndHighlight(r2, #LE.lines[r2] + 1, r1, 1)
 	end
 
 	return changed
@@ -614,58 +614,58 @@ end
 
 
 function editFuncM.highlightAll(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed:moveCaretAndHighlight(#line_ed.lines, #line_ed.lines[line_ed.cl] + 1, 1, 1, true)
+	LE:moveCaretAndHighlight(#LE.lines, #LE.lines[LE.cl] + 1, 1, 1, true)
 end
 
 
 function editFuncM.clearHighlight(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	self.line_ed:clearHighlight()
+	self.LE:clearHighlight()
 end
 
 
 function editFuncM.highlightCurrentLine(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed:moveCaretAndHighlight(line_ed.cl, 1, line_ed.hl, #line_ed.lines[line_ed.cl] + 1, true)
+	LE:moveCaretAndHighlight(LE.cl, 1, LE.hl, #LE.lines[LE.cl] + 1, true)
 end
 
 
 function editFuncM.highlightCurrentWord(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local cl, cb, hl, hb = line_ed:getWordRange(line_ed.cl, line_ed.cb)
-	line_ed:moveCaretAndHighlight(cl, cb, hl, hb, true)
+	local cl, cb, hl, hb = LE:getWordRange(LE.cl, LE.cb)
+	LE:moveCaretAndHighlight(cl, cb, hl, hb, true)
 end
 
 
 function editFuncM.highlightCurrentWrappedLine(self)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
-	local cl, hl = line_ed.cl, line_ed.cl
-	local cb, hb = line_ed:getWrappedLineRange(line_ed.cl, line_ed.cb)
-	line_ed:moveCaretAndHighlight(cl, cb, hl, hb, true)
+	local cl, hl = LE.cl, LE.cl
+	local cb, hb = LE:getWrappedLineRange(LE.cl, LE.cb)
+	LE:moveCaretAndHighlight(cl, cb, hl, hb, true)
 
-	--print("line_ed.cb", line_ed.cb, "line_ed.hl", line_ed.hb)
+	--print("LE.cb", LE.cb, "LE.hl", LE.hb)
 end
 
 
 function editFuncM.stepHistory(self, dir)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	-- -1 == undo, 1 == redo
 
-	local hist = self.hist
+	local hist = self.LE_hist
 	local changed, entry = hist:moveToEntry(hist.pos + dir)
 
 	if changed then
 		editFuncM.applyHistoryEntry(self, entry)
-		line_ed:updateDisplayText()
-		line_ed:syncDisplayCaretHighlight()
+		LE:updateDisplayText()
+		LE:syncDisplayCaretHighlight()
 		return true
 	end
 end
@@ -677,21 +677,21 @@ end
 --	entering line feeds, typing at the end of a line (so as not to overwrite line feeds), etc.
 -- @return The sanitized and trimmed text which was inserted into the field, or nil if no text was added.
 function editFuncM.writeText(self, text, suppress_replace)
-	local line_ed = self.line_ed
-	local lines = line_ed.lines
+	local LE = self.LE
+	local lines = LE.lines
 
 	-- Sanitize input
-	text = edComBase.cleanString(text, self.bad_input_rule, self.tabs_to_spaces, self.allow_line_feed)
+	text = edComBase.cleanString(text, self.LE_bad_input_rule, self.LE_tabs_to_spaces, self.LE_allow_line_feed)
 
-	if not self.allow_highlight then
-		line_ed:clearHighlight()
+	if not self.LE_allow_highlight then
+		LE:clearHighlight()
 	end
 
-	-- If there is a highlighted selection, get rid of it and insert the new text. This overrides replace_mode.
-	if line_ed:isHighlighted() then
+	-- If there is a highlighted selection, get rid of it and insert the new text. This overrides Replace Mode.
+	if LE:isHighlighted() then
 		editFuncM.deleteHighlighted(self)
 
-	elseif self.replace_mode and not suppress_replace then
+	elseif self.LE_replace_mode and not suppress_replace then
 		-- Delete up to the number of uChars in 'text', then insert text in the same spot.
 		editFuncM.deleteUChar(self, utf8.len(text))
 	end
@@ -700,11 +700,11 @@ function editFuncM.writeText(self, text, suppress_replace)
 
 	-- XXX Planning to add and subtract to this as strings are written and deleted.
 	-- For now, just recalculate the length to ensure things are working.
-	line_ed.u_chars = lines:uLen()
-	text = textUtil.trimString(text, self.u_chars_max - line_ed.u_chars)
+	LE.u_chars = lines:uLen()
+	text = textUtil.trimString(text, self.LE_u_chars_max - LE.u_chars)
 
 	if #text > 0 then
-		line_ed:insertText(text)
+		LE:insertText(text)
 
 		return text
 	end
@@ -712,9 +712,9 @@ end
 
 
 function editFuncM.replaceText(self, text)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed:deleteText(false, 1, 1, #line_ed.lines, #line_ed.lines[#line_ed.lines])
+	LE:deleteText(false, 1, 1, #LE.lines, #LE.lines[#LE.lines])
 	return editFuncM.writeText(self, text, true)
 end
 
@@ -730,13 +730,13 @@ end
 --	used right after the widget is initialized, because a populated history ledger may contain entries with highlights.)
 -- @param enabled true or false/nil.
 function editFuncM.setAllowHighlight(self, enabled)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	enabled = not not enabled
-	if self.allow_highlight ~= enabled then
-		self.allow_highlight = enabled
+	if self.LE_allow_highlight ~= enabled then
+		self.LE_allow_highlight = enabled
 		if not enabled then
-			line_ed:clearHighlight()
+			LE:clearHighlight()
 		end
 		return true
 	end
@@ -744,11 +744,11 @@ end
 
 
 function editFuncM.initHistoryEntry(self, entry)
-	local line_ed = self.line_ed
-	local src_lines = line_ed.lines
+	local LE = self.LE
+	local src_lines = LE.lines
 
 	entry.lines = entry.lines or {}
-	local cl, cb, hl, hb = line_ed:getCaretOffsets()
+	local cl, cb, hl, hb = LE:getCaretOffsets()
 
 	for i = #entry.lines, #src_lines + 1, -1 do
 		entry.lines[i] = nil
@@ -762,16 +762,16 @@ end
 
 
 function editFuncM.writeHistoryEntry(self, do_advance)
-	local entry = self.hist:writeEntry(do_advance)
+	local entry = self.LE_hist:writeEntry(do_advance)
 	editFuncM.initHistoryEntry(self, entry)
 	return entry
 end
 
 
 function editFuncM.applyHistoryEntry(self, entry)
-	local line_ed = self.line_ed
-	local src_lines = line_ed.lines
-	local paragraphs = line_ed.paragraphs
+	local LE = self.LE
+	local src_lines = LE.lines
+	local paragraphs = LE.paragraphs
 	local entry_lines = entry.lines
 
 	for i = 1, #entry_lines do
@@ -782,12 +782,12 @@ function editFuncM.applyHistoryEntry(self, entry)
 		paragraphs[i] = nil
 	end
 
-	line_ed.cl, line_ed.cb, line_ed.hl, line_ed.hb = entry.cl, entry.cb, entry.hl, entry.hb
+	LE.cl, LE.cb, LE.hl, LE.hb = entry.cl, entry.cb, entry.hl, entry.hb
 end
 
 
 function editFuncM.doctorHistoryCaretOffsets(self, cl, cb, hl, hb)
-	local hist = self.hist
+	local hist = self.LE_hist
 	local entry = hist.ledger[hist.pos]
 
 	if entry then
@@ -796,10 +796,10 @@ function editFuncM.doctorHistoryCaretOffsets(self, cl, cb, hl, hb)
 end
 
 
--- Deletes all history entries, then writes a new entry based on the current line_ed state.
+-- Deletes all history entries, then writes a new entry based on the current LineEd state.
 -- Also clears the widget's input category.
 function editFuncM.wipeHistoryEntries(self)
-	self.hist:clearAll()
+	self.LE_hist:clearAll()
 	self:resetInputCategory()
 	editFuncM.writeHistoryEntry(self, false)
 end

@@ -84,7 +84,7 @@ end
 
 
 function client:isHighlighted()
-	return self.line_ed:isHighlighted()
+	return self.LE:isHighlighted()
 end
 
 
@@ -186,7 +186,7 @@ end
 
 
 function client:getReplaceMode()
-	return self.replace_mode
+	return self.LE_replace_mode
 end
 
 
@@ -201,7 +201,7 @@ end
 
 
 function client:getTextAlignment()
-	return self.align
+	return self.LE_align
 end
 
 
@@ -216,7 +216,7 @@ end
 
 function client:resetInputCategory()
 	-- Used to force a new history entry.
-	self.input_category = false
+	self.LE_input_category = false
 end
 
 

@@ -24,23 +24,23 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 function editCommandM.setReplaceMode(self, enabled)
-	local old = self.replace_mode
-	self.replace_mode = not not enabled
-	return old ~= self.replace_mode
+	local old = self.LE_replace_mode
+	self.LE_replace_mode = not not enabled
+	return old ~= self.LE_replace_mode
 end
 
 
 function editCommandM.toggleReplaceMode(self)
-	local old = self.replace_mode
-	self.replace_mode = not self.replace_mode
-	return old ~= self.replace_mode
+	local old = self.LE_replace_mode
+	self.LE_replace_mode = not self.LE_replace_mode
+	return old ~= self.LE_replace_mode
 end
 
 
 function editCommandM.cut(self)
-	if self.allow_input and self.allow_cut and self.allow_highlight and self.line_ed:isHighlighted() then
+	if self.LE_allow_input and self.LE_allow_cut and self.LE_allow_highlight and self.LE:isHighlighted() then
 		if editFuncM.cutHighlightedToClipboard(self) then
-			self.input_category = false
+			self.LE_input_category = false
 
 			return true, true, true, true
 		end
@@ -49,7 +49,7 @@ end
 
 
 function editCommandM.copy(self)
-	if self.allow_copy and self.allow_highlight and self.line_ed:isHighlighted() then
+	if self.LE_allow_copy and self.LE_allow_highlight and self.LE:isHighlighted() then
 		editFuncM.copyHighlightedToClipboard(self)
 
 		return true
@@ -58,8 +58,8 @@ end
 
 
 function editCommandM.paste(self)
-	if self.allow_input and self.allow_paste and editFuncM.pasteClipboard(self) then
-		self.input_category = false
+	if self.LE_allow_input and self.LE_allow_paste and editFuncM.pasteClipboard(self) then
+		self.LE_input_category = false
 
 		return true, true, true, true
 	end
@@ -67,9 +67,9 @@ end
 
 
 function editCommandM.deleteCaretToLineStart(self)
-	if self.allow_input then
+	if self.LE_allow_input then
 		editFuncM.deleteCaretToLineStart(self)
-		self.input_category = false
+		self.LE_input_category = false
 
 		return true, true, true, true
 	end
@@ -77,9 +77,9 @@ end
 
 
 function editCommandM.deleteCaretToLineEnd(self)
-	if self.allow_input then
+	if self.LE_allow_input then
 		editFuncM.deleteCaretToLineEnd(self)
-		self.input_category = false
+		self.LE_input_category = false
 
 		return true, true, true, true
 	end
@@ -87,9 +87,9 @@ end
 
 
 function editCommandM.backspaceGroup(self)
-	if self.allow_input then
+	if self.LE_allow_input then
 		local write_hist = not not editFuncM.backspaceGroup(self)
-		self.input_category = false
+		self.LE_input_category = false
 
 		return true, true, true, write_hist
 	end
@@ -97,7 +97,7 @@ end
 
 
 function editCommandM.caretLeft(self)
-	if self.line_ed:isHighlighted() then
+	if self.LE:isHighlighted() then
 		editFuncM.caretToHighlightEdgeLeft(self)
 	else
 		editFuncM.caretStepLeft(self, true)
@@ -108,7 +108,7 @@ end
 
 
 function editCommandM.caretRight(self)
-	if self.line_ed:isHighlighted() then
+	if self.LE:isHighlighted() then
 		editFuncM.caretToHighlightEdgeRight(self)
 	else
 		editFuncM.caretStepRight(self, true)
@@ -119,7 +119,7 @@ end
 
 
 function editCommandM.caretToHighlightEdgeLeft(self)
-	if self.allow_highlight then
+	if self.LE_allow_highlight then
 		editFuncM.caretToHighlightEdgeLeft(self)
 	else
 		editFuncM.clearHighlight(self)
@@ -130,7 +130,7 @@ end
 
 
 function editCommandM.caretToHighlightEdgeRight(self)
-	if self.allow_highlight then
+	if self.LE_allow_highlight then
 		editFuncM.caretToHighlightEdgeRight(self)
 	else
 		editFuncM.clearHighlight(self)
@@ -142,14 +142,14 @@ end
 
 -- Step left, right while highlighting
 function editCommandM.caretLeftHighlight(self)
-	editFuncM.caretStepLeft(self, not self.allow_highlight)
+	editFuncM.caretStepLeft(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretRightHighlight(self)
-	editFuncM.caretStepRight(self, not self.allow_highlight)
+	editFuncM.caretStepRight(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -170,14 +170,14 @@ end
 
 
 function editCommandM.caretJumpLeftHighlight(self)
-	editFuncM.caretJumpLeft(self, not self.allow_highlight)
+	editFuncM.caretJumpLeft(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretJumpRightHighlight(self)
-	editFuncM.caretJumpRight(self, not self.allow_highlight)
+	editFuncM.caretJumpRight(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -191,7 +191,7 @@ end
 
 
 function editCommandM.caretFullLineFirstHighlight(self)
-	editFuncM.caretFullLineFirst(self, not self.allow_highlight)
+	editFuncM.caretFullLineFirst(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -205,7 +205,7 @@ end
 
 
 function editCommandM.caretFullLineLastHighlight(self)
-	editFuncM.caretFullLineLast(self, not self.allow_highlight)
+	editFuncM.caretFullLineLast(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -219,7 +219,7 @@ end
 
 
 function editCommandM.caretSubLineFirstHighlight(self)
-	editFuncM.caretSubLineFirst(self, not self.allow_highlight)
+	editFuncM.caretSubLineFirst(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -233,7 +233,7 @@ end
 
 
 function editCommandM.caretSubLineLastHighlight(self)
-	editFuncM.caretSubLineLast(self, not self.allow_highlight)
+	editFuncM.caretSubLineLast(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -247,7 +247,7 @@ end
 
 
 function editCommandM.caretLineFirstHighlight(self)
-	editFuncM.caretLineFirst(self, not self.allow_highlight)
+	editFuncM.caretLineFirst(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -261,7 +261,7 @@ end
 
 
 function editCommandM.caretLineLastHighlight(self)
-	editFuncM.caretLineLast(self, not self.allow_highlight)
+	editFuncM.caretLineLast(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -275,7 +275,7 @@ end
 
 
 function editCommandM.caretFirstHighlight(self)
-	editFuncM.caretFirst(self, not self.allow_highlight)
+	editFuncM.caretFirst(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
@@ -289,15 +289,15 @@ end
 
 
 function editCommandM.caretLastHighlight(self)
-	editFuncM.caretLast(self, not self.allow_highlight)
+	editFuncM.caretLast(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretStepUp(self)
-	if self.line_ed:isHighlighted() then
-		editFuncM.caretToHighlightEdgeLeft(self, not self.allow_highlight)
+	if self.LE:isHighlighted() then
+		editFuncM.caretToHighlightEdgeLeft(self, not self.LE_allow_highlight)
 	end
 	editFuncM.caretStepUp(self, true, 1)
 
@@ -306,7 +306,7 @@ end
 
 
 function editCommandM.caretStepDown(self)
-	if self.line_ed:isHighlighted() then
+	if self.LE:isHighlighted() then
 		editFuncM.caretToHighlightEdgeRight(self)
 	end
 	editFuncM.caretStepDown(self, true, 1)
@@ -316,22 +316,22 @@ end
 
 
 function editCommandM.caretStepUpHighlight(self)
-	editFuncM.caretStepUp(self, not self.allow_highlight, 1)
+	editFuncM.caretStepUp(self, not self.LE_allow_highlight, 1)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretStepDownHighlight(self)
-	editFuncM.caretStepDown(self, not self.allow_highlight, 1)
+	editFuncM.caretStepDown(self, not self.LE_allow_highlight, 1)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretStepUpCoreLine(self)
-	if self.line_ed:isHighlighted() then
-		editFuncM.caretToHighlightEdgeLeft(self, not self.allow_highlight)
+	if self.LE:isHighlighted() then
+		editFuncM.caretToHighlightEdgeLeft(self, not self.LE_allow_highlight)
 	end
 	editFuncM.caretStepUpCoreLine(self, true)
 
@@ -340,7 +340,7 @@ end
 
 
 function editCommandM.caretStepDownCoreLine(self)
-	if self.line_ed:isHighlighted() then
+	if self.LE:isHighlighted() then
 		editFuncM.caretToHighlightEdgeRight(self)
 	end
 	editFuncM.caretStepDownCoreLine(self, true)
@@ -350,76 +350,76 @@ end
 
 
 function editCommandM.caretStepUpCoreLineHighlight(self)
-	editFuncM.caretStepUpCoreLine(self, not self.allow_highlight)
+	editFuncM.caretStepUpCoreLine(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretStepDownCoreLineHighlight(self)
-	editFuncM.caretStepDownCoreLine(self, not self.allow_highlight)
+	editFuncM.caretStepDownCoreLine(self, not self.LE_allow_highlight)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretPageUp(self)
-	if self.line_ed:isHighlighted() then
-		editFuncM.caretToHighlightEdgeLeft(self, not self.allow_highlight)
+	if self.LE:isHighlighted() then
+		editFuncM.caretToHighlightEdgeLeft(self, not self.LE_allow_highlight)
 	end
-	editFuncM.caretStepUp(self, true, self.page_jump_steps)
+	editFuncM.caretStepUp(self, true, self.LE_page_jump_steps)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretPageDown(self)
-	if self.line_ed:isHighlighted() then
+	if self.LE:isHighlighted() then
 		editFuncM.caretToHighlightEdgeRight(self)
 	end
-	editFuncM.caretStepDown(self, true, self.page_jump_steps)
+	editFuncM.caretStepDown(self, true, self.LE_page_jump_steps)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretPageUpHighlight(self)
-	editFuncM.caretStepUp(self, not self.allow_highlight, self.page_jump_steps)
+	editFuncM.caretStepUp(self, not self.LE_allow_highlight, self.LE_page_jump_steps)
 
 	return true, true, true
 end
 
 
 function editCommandM.caretPageDownHighlight(self)
-	editFuncM.caretStepDown(self, not self.allow_highlight, self.page_jump_steps)
+	editFuncM.caretStepDown(self, not self.LE_allow_highlight, self.LE_page_jump_steps)
 
 	return true, true, true
 end
 
 
 function editCommandM.shiftLinesUp(self)
-	if self.allow_input and editFuncM.shiftLinesUp(self) then
+	if self.LE_allow_input and editFuncM.shiftLinesUp(self) then
 		return true, true, true, true
 	end
 end
 
 
 function editCommandM.shiftLinesDown(self)
-	if self.allow_input and editFuncM.shiftLinesDown(self) then
+	if self.LE_allow_input and editFuncM.shiftLinesDown(self) then
 		return true, true, true, true
 	end
 end
 
 
 function editCommandM.deleteAll(self)
-	if self.allow_input and editFuncM.deleteAll(self) then
+	if self.LE_allow_input and editFuncM.deleteAll(self) then
 		return true, true, true, true
 	end
 end
 
 
 function editCommandM.deleteHighlighted(self)
-	if self.allow_input and self.line_ed:isHighlighted() then
+	if self.LE_allow_input and self.LE:isHighlighted() then
 		-- Always write history if anything was deleted.
 		if editFuncM.deleteHighlighted() then
 			return true, true, true, true
@@ -429,8 +429,8 @@ end
 
 
 function editCommandM.backspace(self)
-	if self.allow_input then
-		if self.line_ed:isHighlighted() then
+	if self.LE_allow_input then
+		if self.LE:isHighlighted() then
 			local backspaced = editFuncM.deleteHighlighted(self)
 			if backspaced then
 				return true, true, true, true
@@ -446,8 +446,8 @@ end
 
 
 function editCommandM.delete(self)
-	if self.allow_input then
-		if self.line_ed:isHighlighted() then
+	if self.LE_allow_input then
+		if self.LE:isHighlighted() then
 			local deleted = editFuncM.deleteHighlighted(self)
 			if deleted then
 				return true, true, true, true
@@ -463,7 +463,7 @@ end
 
 
 function editCommandM.deleteUChar(self, n_u_chars)
-	if self.allow_input then
+	if self.LE_allow_input then
 		local write_hist = not not editFuncM.deleteUChar(self, n_u_chars)
 
 		return true, true, true, write_hist
@@ -472,8 +472,8 @@ end
 
 
 function editCommandM.deleteGroup(self)
-	if self.allow_input then
-		self.input_category = false
+	if self.LE_allow_input then
+		self.LE_input_category = false
 		local write_hist = not not editFuncM.deleteGroup(self)
 
 		return true, true, true, write_hist
@@ -482,8 +482,8 @@ end
 
 
 function editCommandM.deleteLine(self)
-	if self.allow_input then
-		self.input_category = false
+	if self.LE_allow_input then
+		self.LE_input_category = false
 		local write_hist = not not editFuncM.deleteLine(self)
 
 		return true, true, true, write_hist
@@ -492,9 +492,9 @@ end
 
 
 function editCommandM.backspaceCaretToLineStart(self)
-	if self.allow_input then
+	if self.LE_allow_input then
 		self:deleteCaretToLineStart()
-		self.input_category = false
+		self.LE_input_category = false
 
 		return true, true, true, true
 	end
@@ -503,7 +503,7 @@ end
 
 -- Add line feed (unhighlights first)
 function editCommandM.typeLineFeedWithAutoIndent(self)
-	if self.allow_input and self.allow_line_feed then
+	if self.LE_allow_input and self.LE_allow_line_feed then
 		editFuncM.typeLineFeedWithAutoIndent(self)
 		return true, true, true, true
 	end
@@ -511,7 +511,7 @@ end
 
 
 function editCommandM.typeLineFeed(self)
-	if self.allow_input and self.allow_line_feed then
+	if self.LE_allow_input and self.LE_allow_line_feed then
 		editFuncM.typeLineFeed(self)
 		return true, true, true, true
 	end
@@ -519,7 +519,7 @@ end
 
 
 function editCommandM.typeTab(self)
-	if self.allow_input and self.allow_tab then
+	if self.LE_allow_input and self.LE_allow_tab then
 		local ok = editFuncM.typeTab(self)
 		return true, ok, false, ok, false
 	end
@@ -527,7 +527,7 @@ end
 
 
 function editCommandM.typeUntab(self)
-	if self.allow_input and self.allow_untab then
+	if self.LE_allow_input and self.LE_allow_untab then
 		local ok = editFuncM.typeUntab(self)
 		return true, ok, false, ok, false
 	end
@@ -535,7 +535,7 @@ end
 
 
 function editCommandM.highlightAll(self)
-	if self.allow_highlight then
+	if self.LE_allow_highlight then
 		editFuncM.highlightAll(self)
 	else
 		editFuncM.clearHighlight(self)
@@ -546,7 +546,7 @@ end
 
 
 function editCommandM.highlightCurrentWord(self)
-	if self.allow_highlight then
+	if self.LE_allow_highlight then
 		editFuncM.highlightCurrentWord(self)
 	else
 		editFuncM.clearHighlight(self)
@@ -557,7 +557,7 @@ end
 
 
 function editCommandM.highlightCurrentLine(self)
-	if self.allow_highlight then
+	if self.LE_allow_highlight then
 		editFuncM.highlightCurrentLine(self)
 	else
 		editFuncM.clearHighlight(self)
@@ -568,7 +568,7 @@ end
 
 
 function editCommandM.highlightCurrentWrappedLine(self)
-	if self.allow_highlight then
+	if self.LE_allow_highlight then
 		editFuncM.highlightCurrentWrappedLine(self)
 	else
 		editFuncM.clearHighlight(self)
@@ -579,9 +579,9 @@ end
 
 
 function editCommandM.stepHistory(self, dir)
-	if self.hist.enabled then
+	if self.LE_hist.enabled then
 		if editFuncM.stepHistory(self, dir) then
-			self.input_category = false
+			self.LE_input_category = false
 
 			return true, true, true, nil, nil, true
 		end
@@ -591,7 +591,7 @@ end
 
 function editCommandM.undo(self)
 	if editFuncM.stepHistory(self, -1) then
-		self.input_category = false
+		self.LE_input_category = false
 		return true, true, true, nil, nil, true
 	end
 end
@@ -599,14 +599,14 @@ end
 
 function editCommandM.redo(self)
 	if editFuncM.stepHistory(self, 1) then
-		self.input_category = false
+		self.LE_input_category = false
 		return true, true, true, nil, nil, true
 	end
 end
 
 
 function editCommandM.setTextAlignment(self, align)
-	local ok = self.line_ed:setTextAlignment(align)
+	local ok = self.LE:setTextAlignment(align)
 	return ok, ok, ok
 end
 
@@ -634,14 +634,14 @@ end
 
 
 function editCommandM.setWrapMode(self, enabled)
-	if self.line_ed:setWrapMode(enabled) then
+	if self.LE:setWrapMode(enabled) then
 		return true, true, true
 	end
 end
 
 
 function editCommandM.setColorization(self, enabled)
-	if self.line_ed:setColorization(enabled) then
+	if self.LE:setColorization(enabled) then
 		return true, true, true
 	end
 end
@@ -655,9 +655,9 @@ end
 
 
 function editCommandM.caretToLineAndByte(self, clear_highlight, l1, b1)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local ok = line_ed:moveCaret(l1, b1, clear_highlight, true)
+	local ok = LE:moveCaret(l1, b1, clear_highlight, true)
 	return ok, ok, ok
 end
 

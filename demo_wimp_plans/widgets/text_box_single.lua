@@ -20,11 +20,11 @@ function plan.make(panel)
 
 	--input_single:setText("Single-Line Text Box")
 
-	--input_single.allow_line_feed = true
-	--input_single.allow_enter_line_feed = true
+	--input_single.LE_allow_line_feed = true
+	--input_single.LE_allow_enter_line_feed = true
 
 	input_single.wid_action = function(self)
-		print("input_single: Pressed 'enter': " .. input_single.line_ed.line)
+		print("input_single: Pressed 'enter': " .. input_single.LE_obj.line)
 	end
 	--]=]
 end

@@ -19,8 +19,8 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 -- @param [...] Extra arguments for func.
 -- @return true if the function reported success, and a boolean indicating if the action was undo/redo.
 function editWrapS.wrapAction(self, func, ...)
-	local line_ed = self.line_ed
-	local old_car, old_h = line_ed.car_byte, line_ed.h_byte
+	local LE = self.LE
+	local old_car, old_h = LE.car_byte, LE.h_byte
 
 	local ok, update_widget, caret_in_view, write_history, deleted, hist_change = func(self, ...)
 
@@ -46,7 +46,7 @@ function editWrapS.wrapAction(self, func, ...)
 			self:scrollGetCaretInBounds(true)
 		end
 
-		if line_ed.hist.enabled then
+		if LE.hist.enabled then
 			-- 'Delete' and 'backspace' can amend history entries.
 			if type(write_history) == "string" then -- "del", "bsp"
 				assert(type(deleted) == "string", "expected string for deleted text")
@@ -55,14 +55,14 @@ function editWrapS.wrapAction(self, func, ...)
 				elseif write_history == "del" then cat1, cat2 = "deleting", "deleting-ws" end
 
 				-- Partial / conditional history updates
-				local hist = line_ed.hist
+				local hist = LE.hist
 				local non_ws = deleted:find("%S")
 				local entry = hist:getEntry()
 				local do_advance = true
 
 				if utf8.len(deleted) == 1
 				and (entry and entry.car_byte == old_car)
-				and ((self.input_category == cat1 and non_ws) or (self.input_category == cat2))
+				and ((self.LE_input_category == cat1 and non_ws) or (self.LE_input_category == cat2))
 				then
 					do_advance = false
 				end
@@ -70,15 +70,15 @@ function editWrapS.wrapAction(self, func, ...)
 				if do_advance then
 					editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
 				end
-				editHistS.writeEntry(line_ed, do_advance)
-				self.input_category = non_ws and cat1 or cat2
+				editHistS.writeEntry(LE, do_advance)
+				self.LE_input_category = non_ws and cat1 or cat2
 
 			-- Unconditional new history entry:
 			elseif write_history then
-				self.input_category = false
+				self.LE_input_category = false
 
-				editHistS.doctorCurrentCaretOffsets(line_ed.hist, old_car, old_h)
-				editHistS.writeEntry(line_ed, true)
+				editHistS.doctorCurrentCaretOffsets(LE.hist, old_car, old_h)
+				editHistS.writeEntry(LE, true)
 			end
 		end
 

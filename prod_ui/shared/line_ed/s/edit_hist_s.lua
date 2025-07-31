@@ -25,8 +25,8 @@ function editHistS.initEntry(entry, source_line, car_byte, h_byte)
 end
 
 
-function editHistS.writeEntry(line_ed, do_advance)
-	local hist = line_ed.hist
+function editHistS.writeEntry(LE, do_advance)
+	local hist = LE.hist
 	if hist.enabled then
 		local entry
 		if hist.locked_first then
@@ -34,22 +34,22 @@ function editHistS.writeEntry(line_ed, do_advance)
 			hist.ledger[2] = hist.ledger[2] or {}
 			entry = hist.ledger[2]
 		else
-			entry = line_ed.hist:writeEntry(do_advance)
+			entry = LE.hist:writeEntry(do_advance)
 		end
 
-		editHistS.initEntry(entry, line_ed.line, line_ed.car_byte, line_ed.h_byte)
+		editHistS.initEntry(entry, LE.line, LE.car_byte, LE.h_byte)
 		return entry
 	end
 end
 
 
-function editHistS.writeLockedFirst(line_ed)
-	local hist = line_ed.hist
+function editHistS.writeLockedFirst(LE)
+	local hist = LE.hist
 	assert(hist.locked_first, "called on a history struct without a locked first entry")
 	if hist.enabled then
 		hist.ledger[1] = hist.ledger[1] or {}
 		local entry = hist.ledger[1]
-		editHistS.initEntry(entry, line_ed.line, line_ed.car_byte, line_ed.h_byte)
+		editHistS.initEntry(entry, LE.line, LE.car_byte, LE.h_byte)
 		return entry
 	end
 end
@@ -58,11 +58,11 @@ end
 function editHistS.applyEntry(self, entry)
 	print("editHistS.applyEntry", "|"..entry.line.."|", entry.car_byte, entry.h_byte)
 
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.line = entry.line
-	line_ed.car_byte = entry.car_byte
-	line_ed.h_byte = entry.h_byte
+	LE.line = entry.line
+	LE.car_byte = entry.car_byte
+	LE.h_byte = entry.h_byte
 end
 
 
@@ -80,14 +80,14 @@ function editHistS.doctorCurrentCaretOffsets(hist, car_byte, h_byte)
 end
 
 
--- Deletes all history entries, then writes a new entry based on the current line_ed state.
+-- Deletes all history entries, then writes a new entry based on the current LE state.
 -- Also clears the widget's input category.
 function editHistS.wipeEntries(self)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	line_ed.hist:clearAll()
+	LE.hist:clearAll()
 	self:resetInputCategory()
-	editHistS.writeEntry(line_ed, true)
+	editHistS.writeEntry(LE, true)
 end
 
 
