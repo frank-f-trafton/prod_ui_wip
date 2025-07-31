@@ -22,6 +22,7 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local _enum_align = uiShared.makeLUTV("left", "center", "right")
+local _enum_bad_input = uiShared.makeLUTV("trim", "replacement_char")
 
 
 function client:deleteHighlighted()
@@ -34,58 +35,6 @@ function client:backspace()
 end
 
 
-function client:getReplaceMode()
-	return self.replace_mode
-end
-
-
-function client:setReplaceMode(enabled)
-	editWrapM.wrapAction(self, editCommandM.setReplaceMode, enabled)
-end
-
-
-function client:getWrapMode()
-	return self.line_ed.wrap_mode
-end
-
-
-function client:setWrapMode(enabled)
-	editWrapM.wrapAction(self, editCommandM.setWrapMode, enabled)
-end
-
-
-function client:getTextAlignment()
-	return self.line_ed.align
-end
-
-
-function client:setTextAlignment(align)
-	uiShared.enum(1, align, "alignMode", _enum_align)
-
-	editWrapM.wrapAction(self, editCommandM.setTextAlignment, align)
-end
-
-
-function client:getColorization()
-	return self.line_ed.generate_colored_text
-end
-
-
-function client:setColorization(enabled)
-	editWrapM.wrapAction(self, editCommandM.setColorization, enabled)
-end
-
-
-function client:getHighlightEnabled(enabled)
-	return self.allow_highlight
-end
-
-
-function client:setHighlightEnabled(enabled)
-	editWrapM.wrapAction(self, editCommandM.setHighlightEnabled, enabled)
-end
-
-
 function client:undo()
 	editWrapM.wrapAction(self, editCommandM.undo)
 end
@@ -93,11 +42,6 @@ end
 
 function client:redo()
 	editWrapM.wrapAction(self, editCommandM.redo)
-end
-
-
-function client:getText()
-	return self.line_ed.lines:copyString()
 end
 
 
@@ -193,6 +137,12 @@ function client:setText(text)
 
 	editWrapM.wrapAction(self, editCommandM.setText, text)
 end
+
+
+function client:getText()
+	return self.line_ed.lines:copyString()
+end
+
 
 
 function client:cut()
@@ -318,6 +268,164 @@ end
 
 function client:scrollGetCaretInBounds(immediate)
 	editWidM.scrollGetCaretInBounds(self, immediate)
+end
+
+
+function client:setReplaceMode(enabled)
+	editWrapM.wrapAction(self, editCommandM.setReplaceMode, enabled)
+end
+
+
+function client:getReplaceMode()
+	return self.replace_mode
+end
+
+
+function client:setWrapMode(enabled)
+	editWrapM.wrapAction(self, editCommandM.setWrapMode, enabled)
+end
+
+
+function client:getWrapMode()
+	return self.line_ed.wrap_mode
+end
+
+
+function client:setTextAlignment(align)
+	uiShared.enum(1, align, "alignMode", _enum_align)
+
+	editWrapM.wrapAction(self, editCommandM.setTextAlignment, align)
+end
+
+
+function client:getTextAlignment()
+	return self.line_ed.align
+end
+
+
+function client:setColorization(enabled)
+	editWrapM.wrapAction(self, editCommandM.setColorization, enabled)
+end
+
+
+function client:getColorization()
+	return self.line_ed.generate_colored_text
+end
+
+
+function client:setAllowHighlight(enabled)
+	editWrapM.wrapAction(self, editCommandM.setAllowHighlight, enabled)
+end
+
+
+function client:getAllowHighlight(enabled)
+	return self.allow_highlight
+end
+
+
+function client:setAllowTab(enabled)
+	self.allow_tab = not not enabled
+end
+
+
+function client:getAllowTab()
+	return self.allow_tab
+end
+
+
+function client:setAllowUntab(enabled)
+	self.allow_untab = not not enabled
+end
+
+
+function client:getAllowUntab()
+	return self.allow_untab
+end
+
+
+function client:setTabsToSpaces(enabled)
+	self.tabs_to_spaces = not not enabled
+end
+
+
+function client:getTabsToSpaces()
+	return self.tabs_to_spaces
+end
+
+
+function client:setAutoIndent(enabled)
+	self.auto_indent = not not enabled
+end
+
+
+function client:getAutoIndent()
+	return self.auto_indent
+end
+
+
+function client:setAllowInput(enabled)
+	self.allow_input = not not enabled
+end
+
+
+function client:getAllowInput()
+	return self.allow_input
+end
+
+
+function client:setAllowCut(enabled)
+	self.allow_cut = not not enabled
+end
+
+
+function client:getAllowCut()
+	return self.allow_cut
+end
+
+
+function client:setAllowCopy(enabled)
+	self.allow_copy = not not enabled
+end
+
+
+function client:getAllowCopy()
+	return self.allow_copy
+end
+
+
+function client:setAllowPaste(enabled)
+	self.allow_paste = not not enabled
+end
+
+
+function client:getAllowPaste()
+	return self.allow_paste
+end
+
+
+function client:setAllowLineFeed(enabled)
+	self.allow_line_feed = not not enabled
+end
+
+
+function client:getAllowLineFeed()
+	return self.allow_line_feed
+end
+
+
+-- @param rule The rule to use.
+-- * "trim": Cut the string at the first bad byte.
+-- * "replacement_char": Replace every unrecognized byte with the Unicode replacement code point.
+-- * false/nile: return an empty string on bad unput.
+function client:setBadInputRule(rule)
+	uiShared.enumEval(1, rule, "badInputRule", _enum_bad_input)
+
+	self.bad_input_rule = rule or false
+end
+
+
+function client:getBadInputRule()
+	return self.bad_input_rule
 end
 
 
