@@ -6,8 +6,8 @@ to update the visual state of the caret).
 
 Data structures:
 
-* line_ed.lines {strings}: The internal text, split by line feeds.
-* line_ed.paragraphs {tables}: Display data for each line of text. Each paragraph is an array of sub-lines.
+* LE.lines {strings}: The internal text, split by line feeds.
+* LE.paragraphs {tables}: Display data for each line of text. Each paragraph is an array of sub-lines.
 * Sub-line: A single line of display text to be printed. May also include a coloredtext version of the text.
 --]]
 
@@ -137,7 +137,7 @@ function lineEdM.new()
 	self.u_chars = self.lines:uLen()
 
 	-- ASAP:
-	-- * Assign a font with line_ed:setFont()
+	-- * Assign a font with LE:setFont()
 	-- * Update display text
 	return self
 end

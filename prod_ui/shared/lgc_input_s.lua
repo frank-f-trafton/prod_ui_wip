@@ -56,90 +56,90 @@ end
 
 function lgcInputS.setupInstance(self)
 	-- When true, typing overwrites the current position instead of inserting.
-	self.replace_mode = false
+	self.LE_replace_mode = false
 
 	-- What to do when there's a UTF-8 encoding problem.
 	-- Applies to input text, and also to clipboard get/set.
 	-- See 'textUtil.sanitize()' for options.
-	self.bad_input_rule = false
+	self.LE_bad_input_rule = false
 
 	-- Enable/disable specific editing actions.
-	self.allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
-	self.allow_cut = true
-	self.allow_copy = true
-	self.allow_paste = true
-	self.allow_highlight = true
+	self.LE_allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
+	self.LE_allow_cut = true
+	self.LE_allow_copy = true
+	self.LE_allow_paste = true
+	self.LE_allow_highlight = true
 
 	-- Allows '\n' as text input (including pasting from the clipboard).
 	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
 	-- stop at line feeds.
 	-- In the external display string, line feed code points (0xa) are replaced with U+23CE (⏎).
-	self.allow_line_feed = false
+	self.LE_allow_line_feed = false
 
-	-- Allows typing a line feed by pressing enter/return. `self.allow_line_feed` must be true.
+	-- Allows typing a line feed by pressing enter/return. `self.LE_allow_line_feed` must be true.
 	-- Note that this may override other uses of enter/return in the owning widget.
-	self.allow_enter_line_feed = false
+	self.LE_allow_enter_line_feed = false
 
-	self.allow_tab = false -- affects single presses of the tab key
-	self.allow_untab = false -- affects shift+tab (unindenting)
-	self.tabs_to_spaces = false -- affects '\t' in writeText()
+	self.LE_allow_tab = false -- affects single presses of the tab key
+	self.LE_allow_untab = false -- affects shift+tab (unindenting)
+	self.LE_tabs_to_spaces = false -- affects '\t' in writeText()
 
 	-- Max number of Unicode characters (not bytes) permitted in the field.
-	self.u_chars_max = math.huge
+	self.LE_u_chars_max = math.huge
 
 	-- Helps with amending vs making new history entries.
-	self.input_category = false
+	self.LE_input_category = false
 
 	-- When these fields are true, the widget should…
 	-- * Select all text upon receiving the thimble
-	self.select_all_on_thimble1_take = false
+	self.LE_select_all_on_thimble1_take = false -- TODO: add to multi-line code
 
 	-- * Deselect all text upon releasing the thimble (the caret is moved to the first position).
-	self.deselect_all_on_thimble1_release = false
+	self.LE_deselect_all_on_thimble1_release = false -- TODO: add to multi-line code
 
 	-- * Clear history when deselected
-	self.clear_history_on_deselect = false
+	self.LE_clear_history_on_deselect = false -- TODO: add to multi-line code
 
 	-- * Clear the input category when deselected (forcing a new history entry to be made upon the
-	-- next user text input event). ('clear_history_on_deselect' also does this.)
-	self.clear_input_category_on_deselect = true
+	-- next user text input event). ('LE_clear_history_on_deselect' also does this.)
+	self.LE_clear_input_category_on_deselect = true
 
-	-- Caret position and dimensions. Based on 'line_ed.caret_box_*'.
-	self.caret_x = 0
-	self.caret_y = 0
-	self.caret_w = 0
-	self.caret_h = 0
+	-- Caret position and dimensions. Based on 'LE.caret_box_*'.
+	self.LE_caret_x = 0
+	self.LE_caret_y = 0
+	self.LE_caret_w = 0
+	self.LE_caret_h = 0
 
-	self.caret_fill = "line"
+	self.LE_caret_fill = "line"
 
 	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
-	self.caret_extend_x = 0
-	self.caret_extend_y = 0
+	self.LE_caret_extend_x = 0
+	self.LE_caret_extend_y = 0 -- TODO: unnecessary for single-line text, no?
 
 	-- Position offset when clicking the mouse.
 	-- This is only valid when a mouse action is in progress.
-	self.click_byte = 1
+	self.LE_click_byte = 1
 
-	self.align = "left" -- "left", "center", "right"
+	self.LE_align = "left" -- "left", "center", "right"
 
 	-- How far to offset the line X position depending on the alignment.
-	self.align_offset = 0
+	self.LE_align_ox = 0
 
 	-- string: display this text when the input box is empty.
 	-- false: disabled.
-	self.ghost_text = false
+	self.LE_ghost_text = false
 
 	-- false: use content text alignment.
 	-- "left", "center", "right", "justify"
-	self.ghost_text_align = false
+	self.LE_ghost_text_align = false
 
-	self.caret_is_showing = true
-	self.caret_blink_time = 0
+	self.LE_caret_showing = true
+	self.LE_caret_blink_time = 0
 
 	-- XXX: skin or some other config system
-	self.caret_blink_reset = -0.5
-	self.caret_blink_on = 0.5
-	self.caret_blink_off = 0.5
+	self.LE_caret_blink_reset = -0.5
+	self.LE_caret_blink_on = 0.5
+	self.LE_caret_blink_off = 0.5
 
 	--[[
 	'self.fn_check': a function that can reject changes made to the text.
@@ -147,17 +147,17 @@ function lgcInputS.setupInstance(self)
 	* Returns: false/nil if the new text should be backed out, any other value otherwise.
 	--]]
 
-	self.line_ed = lineEdS.new()
+	self.LE = lineEdS.new()
 end
 
 
 function lgcInputS.updateCaretBlink(self, dt)
-	self.caret_blink_time = self.caret_blink_time + dt
-	if self.caret_blink_time > self.caret_blink_on + self.caret_blink_off then
-		self.caret_blink_time = math.max(-(self.caret_blink_on + self.caret_blink_off), self.caret_blink_time - (self.caret_blink_on + self.caret_blink_off))
+	self.LE_caret_blink_time = self.LE_caret_blink_time + dt
+	if self.LE_caret_blink_time > self.LE_caret_blink_on + self.LE_caret_blink_off then
+		self.LE_caret_blink_time = math.max(-(self.LE_caret_blink_on + self.LE_caret_blink_off), self.LE_caret_blink_time - (self.LE_caret_blink_on + self.LE_caret_blink_off))
 	end
 
-	self.caret_is_showing = self.caret_blink_time < self.caret_blink_off
+	self.LE_caret_showing = self.LE_caret_blink_time < self.LE_caret_blink_off
 end
 
 
@@ -168,7 +168,7 @@ end
 
 -- @return true if event propagation should halt.
 function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
@@ -178,8 +178,8 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 	if scancode == "application" or (shift_down and scancode == "f10") then
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
-		local caret_x = ax + self.vp_x - self.scr_x + line_ed.caret_box_x + self.align_offset
-		local caret_y = ay + self.vp_y - self.scr_y + line_ed.caret_box_y + line_ed.caret_box_h
+		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
+		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h
 
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
@@ -207,21 +207,21 @@ end
 
 -- @return true if the input was accepted, false if it was rejected or input is not allowed
 function lgcInputS.textInputLogic(self, text)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	if self.allow_input then
+	if self.LE_allow_input then
 		editFuncS.resetCaretBlink(self)
 
-		local hist = line_ed.hist
-		local old_car, old_h = line_ed.car_byte, line_ed.h_byte
+		local hist = LE.hist
+		local old_car, old_h = LE.car_byte, LE.h_byte
 		local written = editFuncS.writeText(self, text, false)
 
 		if written then
 			-- TODO: editWidS.generalUpdate()
-			if self.replace_mode then
+			if self.LE_replace_mode then
 				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-				if line_ed.car_byte < #line_ed.line + 1 then
-					self.input_category = false
+				if LE.car_byte < #LE.line + 1 then
+					self.LE_input_category = false
 				end
 			end
 
@@ -231,7 +231,7 @@ function lgcInputS.textInputLogic(self, text)
 				local do_advance = true
 
 				if (entry and entry.car_byte == old_car)
-				and ((self.input_category == "typing" and non_ws) or (self.input_category == "typing-ws"))
+				and ((self.LE_input_category == "typing" and non_ws) or (self.LE_input_category == "typing-ws"))
 				then
 					do_advance = false
 				end
@@ -239,8 +239,8 @@ function lgcInputS.textInputLogic(self, text)
 				if do_advance then
 					editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
 				end
-				editHistS.writeEntry(line_ed, do_advance)
-				self.input_category = non_ws and "typing" or "typing-ws"
+				editHistS.writeEntry(LE, do_advance)
+				self.LE_input_category = non_ws and "typing" or "typing-ws"
 			end
 
 			editFuncS.updateCaretShape(self)
@@ -254,23 +254,23 @@ end
 
 
 function lgcInputS.caretToX(self, clear_highlight, x, split_x)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local byte = line_ed:getCharacterDetailsAtPosition(x, split_x)
+	local byte = LE:getCharacterDetailsAtPosition(x, split_x)
 
-	line_ed:caretToByte(byte)
+	LE:caretToByte(byte)
 
 	if clear_highlight then
-		line_ed:clearHighlight()
+		LE:clearHighlight()
 	end
-	line_ed:syncDisplayCaretHighlight()
+	LE:syncDisplayCaretHighlight()
 end
 
 
 -- @param mouse_x, mouse_y Mouse position relative to widget top-left.
 -- @return true if event propagation should be halted.
 function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_before)
-	local line_ed = self.line_ed
+	local LE = self.LE
 	local context = self.context
 
 	editFuncS.resetCaretBlink(self)
@@ -280,7 +280,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 	if button == 1 then
 		-- WIP: this isn't quite right.
 		-- [[
-		if not had_thimble1_before and self.select_all_on_thimble1_take then
+		if not had_thimble1_before and self.LE_select_all_on_thimble1_take then
 			return
 		end
 		--]]
@@ -288,13 +288,13 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 		self.press_busy = "text-drag"
 
 		-- Apply scroll + margin offsets
-		local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.align_offset
+		local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.LE_align_ox
 
-		local core_byte = line_ed:getCharacterDetailsAtPosition(mouse_sx, true)
+		local core_byte = LE:getCharacterDetailsAtPosition(mouse_sx, true)
 
 		if context.cseq_button == 1 then
 			-- Not the same byte position as last click: force single-click mode.
-			if context.cseq_presses > 1  and core_byte ~= self.click_byte then
+			if context.cseq_presses > 1  and core_byte ~= self.LE_click_byte then
 				context:forceClickSequence(self, button, 1)
 				-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
 			end
@@ -302,18 +302,18 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 			if context.cseq_presses == 1 then
 				lgcInputS.caretToX(self, not shift_down, mouse_sx, true)
 
-				self.click_byte = line_ed.car_byte
+				self.LE_click_byte = LE.car_byte
 				editFuncS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 2 then
-				self.click_byte = line_ed.car_byte
+				self.LE_click_byte = LE.car_byte
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()
 				editFuncS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 3 then
-				self.click_byte = line_ed.car_byte
+				self.LE_click_byte = LE.car_byte
 
 				--- Highlight everything.
 				self:highlightAll()
@@ -341,13 +341,13 @@ end
 
 
 function lgcInputS.clickDragByWord(self, x, origin_byte)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
-	local drag_byte = line_ed:getCharacterDetailsAtPosition(x, true)
+	local drag_byte = LE:getCharacterDetailsAtPosition(x, true)
 
 	-- Expand ranges to cover full words
-	local db1, db2 = line_ed:getWordRange(drag_byte)
-	local cb1, cb2 = line_ed:getWordRange(origin_byte)
+	local db1, db2 = LE:getWordRange(drag_byte)
+	local cb1, cb2 = LE:getWordRange(origin_byte)
 
 	-- Merge the two ranges.
 	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
@@ -355,16 +355,16 @@ function lgcInputS.clickDragByWord(self, x, origin_byte)
 		mb1, mb2 = mb2, mb1
 	end
 
-	line_ed:caretToByte(mb1)
-	line_ed:highlightToByte(mb2)
-	line_ed:syncDisplayCaretHighlight()
+	LE:caretToByte(mb1)
+	LE:highlightToByte(mb2)
+	LE:syncDisplayCaretHighlight()
 end
 
 
 -- Used in uiCall_update(). Before calling, check that text-drag state is active.
 function lgcInputS.mouseDragLogic(self)
 	local context = self.context
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	editFuncS.resetCaretBlink(self)
 
@@ -373,7 +373,7 @@ function lgcInputS.mouseDragLogic(self)
 	local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
 
 	-- ...And with scroll offsets applied.
-	local s_mx = mx + self.scr_x - self.align_offset
+	local s_mx = mx + self.scr_x - self.LE_align_ox
 	local s_my = my + self.scr_y
 
 	--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
@@ -384,7 +384,7 @@ function lgcInputS.mouseDragLogic(self)
 		editFuncS.updateCaretShape(self)
 
 	elseif context.cseq_presses == 2 then
-		lgcInputS.clickDragByWord(self, s_mx, self.click_byte)
+		lgcInputS.clickDragByWord(self, s_mx, self.LE_click_byte)
 		editFuncS.updateCaretShape(self)
 	end
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
@@ -397,7 +397,7 @@ end
 function lgcInputS.thimble1Take(self)
 	editFuncS.resetCaretBlink(self)
 
-	if self.select_all_on_thimble1_take then
+	if self.LE_select_all_on_thimble1_take then
 		self:highlightAll()
 		editFuncS.updateCaretShape(self)
 	end
@@ -406,21 +406,21 @@ end
 
 function lgcInputS.thimble1Release(self)
 	love.keyboard.setTextInput(false)
-	if self.deselect_all_on_thimble1_release then
+	if self.LE_deselect_all_on_thimble1_release then
 		self:caretFirst(true)
 		editFuncS.updateCaretShape(self)
 	end
-	if self.clear_history_on_deselect then
+	if self.LE_clear_history_on_deselect then
 		editHistS.wipeEntries(self)
 	end
-	if self.clear_input_category_on_deselect then
+	if self.LE_clear_input_category_on_deselect then
 		self:resetInputCategory()
 	end
 end
 
 
 function lgcInputS.reshapeUpdate(self)
-	self.line_ed:updateDisplayText()
+	self.LE:updateDisplayText()
 	self:updateDocumentDimensions()
 	editFuncS.updateCaretShape(self)
 	--self:scrollClampViewport()
@@ -430,39 +430,39 @@ end
 
 
 function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	-- get the extended caret rectangle
-	local car_x1 = self.align_offset + line_ed.caret_box_x - self.caret_extend_x
-	local car_y1 = line_ed.caret_box_y - self.caret_extend_y
-	local car_x2 = self.align_offset + line_ed.caret_box_x + math.max(line_ed.caret_box_w, line_ed.caret_box_w_edge) + self.caret_extend_x
-	local car_y2 = line_ed.caret_box_y + line_ed.caret_box_h + self.caret_extend_y
+	local car_x1 = self.LE_align_ox + LE.caret_box_x - self.LE_caret_extend_x
+	local car_y1 = LE.caret_box_y - self.LE_caret_extend_y
+	local car_x2 = self.LE_align_ox + LE.caret_box_x + math.max(LE.caret_box_w, LE.caret_box_w_edge) + self.LE_caret_extend_x
+	local car_y2 = LE.caret_box_y + LE.caret_box_h + self.LE_caret_extend_y
 
 	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
 end
 
 
 function lgcInputS.method_updateDocumentDimensions(self)
-	local line_ed = self.line_ed
-	local font = line_ed.font
+	local LE = self.LE
+	local font = LE.font
 
 	--[[
 	The document width is the larger of: 1) viewport width, 2) text width (plus an empty caret slot).
 	When alignment is center or right and the text is smaller than the viewport, the text, caret,
 	etc. are transposed.
 	--]]
-	self.doc_w = math.max(self.vp_w, line_ed.disp_text_w)
+	self.doc_w = math.max(self.vp_w, LE.disp_text_w)
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
 
-	local align = self.align
+	local align = self.LE_align
 	if align == "left" then
-		self.align_offset = 0
+		self.LE_align_ox = 0
 
 	elseif align == "center" then
-		self.align_offset = math.max(0, (self.vp_w - line_ed.disp_text_w) * .5)
+		self.LE_align_ox = math.max(0, (self.vp_w - LE.disp_text_w) * .5)
 
 	else -- align == "right"
-		self.align_offset = math.max(0, self.vp_w - line_ed.disp_text_w)
+		self.LE_align_ox = math.max(0, self.vp_w - LE.disp_text_w)
 	end
 end
 
@@ -476,47 +476,47 @@ end
 function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
 	-- Call after setting up the text area scissor box, within `love.graphics.push("all")` and `pop()`.
 
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	love.graphics.translate(
-		self.vp_x + self.align_offset - self.scr_x,
+		self.vp_x + self.LE_align_ox - self.scr_x,
 		self.vp_y - self.scr_y
 	)
 
 	-- Highlighted selection.
-	if color_highlight and line_ed.disp_highlighted then
+	if color_highlight and LE.disp_highlighted then
 		love.graphics.setColor(color_highlight)
 		love.graphics.rectangle(
 			"fill",
-			line_ed.highlight_x,
-			line_ed.highlight_y,
-			line_ed.highlight_w,
-			line_ed.highlight_h
+			LE.highlight_x,
+			LE.highlight_y,
+			LE.highlight_w,
+			LE.highlight_h
 		)
 	end
 
 	-- Ghost text. XXX: alignment
-	if font_ghost and self.ghost_text and #line_ed.line == 0 then
+	if font_ghost and self.LE_ghost_text and #LE.line == 0 then
 		love.graphics.setFont(font_ghost)
-		love.graphics.print(self.ghost_text, 0, 0)
+		love.graphics.print(self.LE_ghost_text, 0, 0)
 	end
 
 	-- Display Text.
 	if color_text then
 		love.graphics.setColor(color_text)
 		love.graphics.setFont(font)
-		love.graphics.print(line_ed.disp_text)
+		love.graphics.print(LE.disp_text)
 	end
 
 	-- Caret.
-	if color_caret and self.caret_is_showing and self:hasAnyThimble() then
+	if color_caret and self.LE_caret_showing and self:hasAnyThimble() then
 		love.graphics.setColor(color_caret)
 		love.graphics.rectangle(
-			self.caret_fill,
-			self.caret_x,
-			self.caret_y,
-			self.caret_w,
-			self.caret_h
+			self.LE_caret_fill,
+			self.LE_caret_x,
+			self.LE_caret_y,
+			self.LE_caret_w,
+			self.LE_caret_h
 		)
 	end
 end
@@ -527,21 +527,21 @@ end
 
 function lgcInputS.configItem_undo(item, client)
 	item.selectable = true
-	local hist = client.line_ed.hist
+	local hist = client.LE.hist
 	item.actionable = (hist.enabled and hist.pos > 1)
 end
 
 
 function lgcInputS.configItem_redo(item, client)
 	item.selectable = true
-	local hist = client.line_ed.hist
+	local hist = client.LE.hist
 	item.actionable = (hist.enabled and hist.pos < #hist.ledger)
 end
 
 
 function lgcInputS.configItem_cutCopyDelete(item, client)
 	item.selectable = true
-	item.actionable = client.line_ed:isHighlighted()
+	item.actionable = client.LE:isHighlighted()
 end
 
 
@@ -553,7 +553,7 @@ end
 
 function lgcInputS.configItem_selectAll(item, client)
 	item.selectable = true
-	item.actionable = (#client.line_ed.line > 0)
+	item.actionable = (#client.LE.line > 0)
 end
 
 

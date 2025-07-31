@@ -75,7 +75,7 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 
-	self.line_ed:updateDisplayText()
+	self.LE:updateDisplayText()
 end
 
 
@@ -200,7 +200,7 @@ end
 
 
 function def:uiCall_update(dt)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
@@ -232,13 +232,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-		self.line_ed:setFont(self.skin.font)
+		self.LE:setFont(self.skin.font)
 	end,
 
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
-		self.line_ed:setFont()
+		self.LE:setFont()
 	end,
 
 
@@ -249,7 +249,7 @@ def.default_skinner = {
 	render = function(self, ox, oy)
 		local skin = self.skin
 		local res = uiTheme.pickButtonResource(self, skin)
-		local line_ed = self.line_ed
+		local LE = self.LE
 
 		love.graphics.push("all")
 
@@ -266,7 +266,7 @@ def.default_skinner = {
 		)
 
 		-- Text editor component.
-		local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 
 		local is_active = self == self.context.thimble1
 		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
@@ -276,7 +276,7 @@ def.default_skinner = {
 			col_highlight,
 			skin.font_ghost,
 			res.color_text,
-			line_ed.font,
+			LE.font,
 			self.context.window_focus and color_caret
 		)
 
@@ -285,24 +285,24 @@ def.default_skinner = {
 		-- Debug renderer
 		--[[
 		love.graphics.print(
-			"line: " .. line_ed.line
-			.. "\n#line: " .. #line_ed.line
-			.. "\ncar_byte: " .. line_ed.car_byte
-			.. "\nh_byte: " .. line_ed.h_byte
-			.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
-			.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
-			.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+			"line: " .. LE.line
+			.. "\n#line: " .. #LE.line
+			.. "\ncar_byte: " .. LE.car_byte
+			.. "\nh_byte: " .. LE.h_byte
+			.. "\nLE_caret_showing: " .. tostring(self.LE_caret_showing)
+			.. "\nLE_caret_blink_time: " .. tostring(self.LE_caret_blink_time)
+			.. "\ncaret box: " .. LE.caret_box_x .. ", " .. LE.caret_box_y .. ", " .. LE.caret_box_w .. ", " .. LE.caret_box_h
 			.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
 			--.. "\ndoc_w: " .. self.doc_w
-			.. "\ninput_category: " .. tostring(self.input_category)
+			.. "\ninput_category: " .. tostring(self.LE_input_category)
 			,
 			0, 64
 		)
 
-		local yy, hh = 240, line_ed.font:getHeight()
+		local yy, hh = 240, LE.font:getHeight()
 		love.graphics.print("History state:", 0, 216)
 
-		for i, entry in ipairs(line_ed.hist.ledger) do
+		for i, entry in ipairs(LE.hist.ledger) do
 			love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
 			yy = yy + hh
 		end

@@ -89,13 +89,13 @@ def.movePageDown = lgcMenu.widgetMovePageDown
 
 local function refreshLineEdText(self)
 	local chosen_tbl = self.MN_items[self.MN_index]
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	if chosen_tbl then
 		self:replaceText(chosen_tbl.text)
 		editHistS.wipeEntries(self)
 
-		if self.allow_highlight then
+		if self.LE_allow_highlight then
 			self:highlightAll()
 		end
 	end
@@ -197,20 +197,20 @@ function def:setSelectionByIndex(item_i)
 
 	if index_old ~= self.MN_index then
 		refreshLineEdText(self)
-		self:wid_inputChanged(self.line_ed.line)
+		self:wid_inputChanged(self.LE.line)
 	end
 end
 
 
 --- Gets the internal text string.
 function def:getInternalText()
-	return self.line_ed.line
+	return self.LE.line
 end
 
 
 --- Gets the display text string (which may be modified to show different UTF-8 code points).
 function def:getDisplayText()
-	return self.line_ed.disp_text
+	return self.LE.disp_text
 end
 
 
@@ -377,7 +377,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	if check_chosen then
 		if index_old ~= self.MN_index then
 			refreshLineEdText(self)
-			self:wid_inputChanged(self.line_ed.line)
+			self:wid_inputChanged(self.LE.line)
 		end
 		return true
 	end
@@ -414,7 +414,7 @@ function def:uiCall_thimble1Release(inst)
 			self:_closePopUpMenu(false)
 		end
 
-		self:wid_thimble1Release(self.line_ed.line)
+		self:wid_thimble1Release(self.LE.line)
 	end
 end
 
@@ -443,7 +443,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 				self:_openPopUpMenu()
 				return true
 
-			elseif (key == "return" or key == "kpenter") and self:wid_action(self.line_ed.line) then
+			elseif (key == "return" or key == "kpenter") and self:wid_action(self.LE.line) then
 				return true
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then
@@ -451,10 +451,10 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 
 			-- Standard text box controls (caret navigation, etc.)
 			else
-				local old_line = self.line_ed.line
+				local old_line = self.LE.line
 				local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
-				if old_line ~= self.line_ed.line then
-					self:wid_inputChanged(self.line_ed.line)
+				if old_line ~= self.LE.line then
+					self:wid_inputChanged(self.LE.line)
 				end
 				return rv
 			end
@@ -465,10 +465,10 @@ end
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		local old_line = self.line_ed.line
+		local old_line = self.LE.line
 		local rv = lgcInputS.textInputLogic(self, text)
-		if old_line ~= self.line_ed.line then
-			self:wid_inputChanged(self.line_ed.line)
+		if old_line ~= self.LE.line then
+			self:wid_inputChanged(self.LE.line)
 		end
 		return rv
 	end
@@ -598,7 +598,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 			if check_chosen then
 				if index_old ~= self.MN_index then
 					refreshLineEdText(self)
-					self:wid_inputChanged(self.line_ed.line)
+					self:wid_inputChanged(self.LE.line)
 				end
 				return true
 			end
@@ -680,13 +680,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-		self.line_ed:setFont(self.skin.font)
+		self.LE:setFont(self.skin.font)
 	end,
 
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
-		self.line_ed:setFont()
+		self.LE:setFont()
 	end,
 
 
@@ -697,7 +697,7 @@ def.default_skinner = {
 	render = function(self, ox, oy)
 		local skin = self.skin
 		--local font = skin.font
-		local line_ed = self.line_ed
+		local LE = self.LE
 
 		local res
 		if self.enabled then
@@ -726,7 +726,7 @@ def.default_skinner = {
 		)
 
 		-- Text editor component.
-		local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 		local is_active = self == self.context.thimble1
 		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
 		lgcInputS.draw(
@@ -734,7 +734,7 @@ def.default_skinner = {
 			col_highlight,
 			skin.font_ghost,
 			res.color_text,
-			line_ed.font,
+			LE.font,
 			self.context.window_focus and not self.wid_drawer and color_caret -- Don't draw caret if drawer is pulled out. It's annoying.
 		)
 

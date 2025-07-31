@@ -83,7 +83,7 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 includes margins and excludes borders.
 
 	local skin = self.skin
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	widShared.resetViewport(self, 1)
 
@@ -100,7 +100,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollState(self)
 
 	editWidM.generalUpdate(self, true, true, false, true, true)
-	editWidM.updatePageJumpSteps(self, line_ed.font)
+	editWidM.updatePageJumpSteps(self, LE.font)
 
 	return true
 end
@@ -227,7 +227,7 @@ end
 
 
 function def:uiCall_update(dt)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 
@@ -289,9 +289,9 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-		self.line_ed:setFont(self.skin.font)
-		self.text_object:setFont(self.skin.font)
-		self.line_ed:updateDisplayText()
+		self.LE:setFont(self.skin.font)
+		self.LE_text_batch:setFont(self.skin.font)
+		self.LE:updateDisplayText()
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
@@ -299,7 +299,7 @@ def.default_skinner = {
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
-		self.line_ed:setFont()
+		self.LE:setFont()
 	end,
 
 
@@ -310,11 +310,11 @@ def.default_skinner = {
 	render = function(self, ox, oy)
 		local skin = self.skin
 
-		local line_ed = self.line_ed
-		local lines = line_ed.lines
-		local font = line_ed.font
+		local LE = self.LE
+		local lines = LE.lines
+		local font = LE.font
 
-		local res = self.allow_input and skin.res_readwrite or skin.res_readonly
+		local res = self.LE_allow_input and skin.res_readwrite or skin.res_readonly
 		local has_thimble = self == self.context.thimble1
 
 		-- XXX Debug renderer.
@@ -324,9 +324,9 @@ def.default_skinner = {
 
 		love.graphics.setColor(1, 1, 1, 1)
 		local yy = 0
-		for i, line in ipairs(self.line_ed.lines) do
+		for i, line in ipairs(self.LE.lines) do
 			love.graphics.print(i .. ": " .. line, 16, yy)
-			yy = yy + self.line_ed.font:getHeight()
+			yy = yy + self.LE.font:getHeight()
 		end
 		--]]
 
@@ -348,16 +348,16 @@ def.default_skinner = {
 		love.graphics.push()
 
 		-- Translate into core region, with scrolling offsets applied.
-		love.graphics.translate(self.align_offset - self.scr_x, -self.scr_y)
+		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.scr_y)
 
 		-- Draw highlight rectangles.
-		if line_ed:isHighlighted() then
+		if LE:isHighlighted() then
 			local is_active = self:hasAnyThimble()
 			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
 			love.graphics.setColor(col_highlight)
 
-			for i = self.vis_para_top, self.vis_para_bot do
-				local paragraph = line_ed.paragraphs[i]
+			for i = self.LE_vis_para1, self.LE_vis_para2 do
+				local paragraph = LE.paragraphs[i]
 				for j, sub_line in ipairs(paragraph) do
 					if sub_line.highlighted then
 						love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
@@ -368,8 +368,8 @@ def.default_skinner = {
 
 		-- Draw ghost text, if applicable.
 		-- XXX: center and right ghost text alignment modes aren't working correctly.
-		if self.ghost_text and lines:isEmpty() then
-			local align = self.ghost_text_align or line_ed.align
+		if self.LE_ghost_text and lines:isEmpty() then
+			local align = self.LE_ghost_text_align or LE.align
 
 			love.graphics.setFont(skin.font_ghost)
 
@@ -378,30 +378,30 @@ def.default_skinner = {
 				gx, gy = 0, 0
 
 			elseif align == "center" then
-				gx, gy = math.floor(-font:getWidth(self.ghost_text) / 2), 0
+				gx, gy = math.floor(-font:getWidth(self.LE_ghost_text) / 2), 0
 
 			elseif align == "right" then
-				gx, gy = math.floor(-font:getWidth(self.ghost_text)), 0
+				gx, gy = math.floor(-font:getWidth(self.LE_ghost_text)), 0
 			end
 
-			if line_ed.wrap_mode then
-				love.graphics.printf(self.ghost_text, -self.align_offset, 0, self.vp_w, align)
+			if LE.wrap_mode then
+				love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp_w, align)
 
 			else
-				love.graphics.print(self.ghost_text, gx, gy)
+				love.graphics.print(self.LE_ghost_text, gx, gy)
 			end
 		end
 
 		-- Draw the main text.
 		love.graphics.setColor(res.color_text)
 
-		if self.text_object then
-			love.graphics.draw(self.text_object)
+		if self.LE_text_batch then
+			love.graphics.draw(self.LE_text_batch)
 		else
 			love.graphics.setFont(skin.font)
 
-			for i = self.vis_para_top, self.vis_para_bot do
-				local paragraph = line_ed.paragraphs[i]
+			for i = self.LE_vis_para1, self.LE_vis_para2 do
+				local paragraph = LE.paragraphs[i]
 				for j, sub_line in ipairs(paragraph) do
 					love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
 				end
@@ -409,9 +409,9 @@ def.default_skinner = {
 		end
 
 		-- Draw the caret.
-		if self.context.window_focus and has_thimble and self.caret_is_showing then
+		if self.context.window_focus and has_thimble and self.LE_caret_showing then
 			love.graphics.setColor(res.color_insert) -- XXX: color_replace
-			love.graphics.rectangle(self.caret_fill, self.caret_x, self.caret_y, self.caret_w, self.caret_h)
+			love.graphics.rectangle(self.LE_caret_fill, self.LE_caret_x, self.LE_caret_y, self.LE_caret_w, self.LE_caret_h)
 		end
 
 		love.graphics.setScissor(scx, scy, scw, sch)
@@ -437,23 +437,23 @@ def.default_skinner = {
 			love.graphics.push("all")
 			love.graphics.setScissor()
 			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.setFont(self.line_ed.font)
+			love.graphics.setFont(self.LE.font)
 
-			local hist = self.hist
+			local hist = self.LE_hist
 
 			local hist_x = 8
 			local hist_y = 400
 			qp:reset()
 			qp:setOrigin(hist_x, hist_y)
-			qp:print("History Ledger. pos: ", hist.pos, " i_cat: ", self.input_category)
+			qp:print("History Ledger. pos: ", hist.pos, " i_cat: ", self.LE_input_category)
 
 			hist_y = qp:getYOrigin() + qp:getYPosition()
 
-			for i, entry in ipairs(self.hist.ledger) do
+			for i, entry in ipairs(hist.ledger) do
 				qp:reset()
 				qp:setOrigin(hist_x, hist_y)
 
-				if i == self.hist.pos then
+				if i == hist.pos then
 					love.graphics.setColor(1, 1, 1, 1)
 				else
 					love.graphics.setColor(0.8, 0.8, 0.8, 1)
@@ -471,7 +471,7 @@ def.default_skinner = {
 					qp:print(j, ": ", line)
 				end
 
-				hist_y = hist_y + self.line_ed.font:getHeight() * 5
+				hist_y = hist_y + self.LE.font:getHeight() * 5
 			end
 			love.graphics.pop()
 		end

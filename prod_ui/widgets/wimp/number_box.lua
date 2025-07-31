@@ -167,7 +167,7 @@ function def:fn_check()
 		error("couldn't match 'value_mode' to a search pattern")
 	end
 
-	local s = self.line_ed.line
+	local s = self.LE.line
 	return s:match(ptn) == s
 end
 
@@ -211,9 +211,9 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 		self.value = false
 	end
 
-	local line_ed = self.line_ed
-	local old_len = utf8.len(line_ed.line)
-	local old_car_u = edComS.utf8LenPlusOne(line_ed.line, line_ed.car_byte)
+	local LE = self.LE
+	local old_len = utf8.len(LE.line)
+	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.car_byte)
 
 	if update_text then
 		if v then
@@ -243,21 +243,21 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 	end
 
 	if preserve_caret then
-		local delta = utf8.len(line_ed.line) - old_len
-		local max_car_u = utf8.len(line_ed.line) + 1
-		line_ed:caretToByte(utf8.offset(line_ed.line, old_car_u + delta) or max_car_u)
-		line_ed:clearHighlight()
-		line_ed:syncDisplayCaretHighlight()
+		local delta = utf8.len(LE.line) - old_len
+		local max_car_u = utf8.len(LE.line) + 1
+		LE:caretToByte(utf8.offset(LE.line, old_car_u + delta) or max_car_u)
+		LE:clearHighlight()
+		LE:syncDisplayCaretHighlight()
 
 		editFuncS.updateCaretShape(self)
 		self:scrollGetCaretInBounds(true)
 	end
 
-	line_ed:clearHighlight()
+	LE:clearHighlight()
 
 	if write_history then
-		line_ed.hist:moveToEntry(2)
-		editHistS.writeEntry(line_ed, false)
+		LE.hist:moveToEntry(2)
+		editHistS.writeEntry(LE, false)
 	end
 end
 
@@ -275,8 +275,8 @@ end
 -- codepath for value changes through direct text input, copy+paste, etc.
 -- @param hist_changed If true, the action was a direct undo/redo, so we shouldn't meddle with the ledger.
 local function _textInputValue(self, hist_changed)
-	local line_ed = self.line_ed
-	local s = line_ed.line
+	local LE = self.LE
+	local s = LE.line
 	if self.fractional_comma then
 		s = s:gsub(",", ".")
 	end
@@ -286,7 +286,7 @@ local function _textInputValue(self, hist_changed)
 	if v ~= nil and self.value ~= v then
 		_setValue(self, v, false, true, true)
 		if not hist_changed then
-			line_ed.hist:moveToEntry(2)
+			LE.hist:moveToEntry(2)
 		end
 	end
 end
@@ -329,23 +329,23 @@ end
 function def:setValue(v)
 	uiShared.numberNotNaN(1, v)
 
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	_setValue(self, v, false, true)
-	line_ed.hist:clearAll()
-	line_ed.hist:moveToEntry(1)
-	editHistS.writeLockedFirst(line_ed)
+	LE.hist:clearAll()
+	LE.hist:moveToEntry(1)
+	editHistS.writeLockedFirst(LE)
 end
 
 
 function def:setValueToDefault()
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	_setValue(self, self.value_default, false, true)
 
-	line_ed.hist:clearAll()
-	line_ed.hist:moveToEntry(1)
-	editHistS.writeLockedFirst(line_ed)
+	LE.hist:clearAll()
+	LE.hist:moveToEntry(1)
+	editHistS.writeLockedFirst(LE)
 end
 
 
@@ -394,9 +394,9 @@ function def:uiCall_initialize()
 	self:skinInstall()
 
 	-- special history configuration
-	self.line_ed.hist:setLockedFirst(true)
-	self.line_ed.hist:setMaxEntries(2)
-	editHistS.writeLockedFirst(self.line_ed)
+	self.LE.hist:setLockedFirst(true)
+	self.LE.hist:setMaxEntries(2)
+	editHistS.writeLockedFirst(self.LE)
 
 	self:setTextAlignment(self.skin.text_align)
 
@@ -437,7 +437,7 @@ end
 
 
 function def:uiCall_update(dt)
-	local line_ed = self.line_ed
+	local LE = self.LE
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
@@ -466,12 +466,12 @@ function def:uiCall_thimble1Release(inst)
 		love.keyboard.setTextInput(false)
 
 		-- Forget history state when the user nagivates away from the NumberBox.
-		local line_ed = self.line_ed
-		local hist = line_ed.hist
+		local LE = self.LE
+		local hist = LE.hist
 		if hist.pos == 2 then
-			line_ed.hist:clearAll()
-			line_ed.hist:moveToEntry(1)
-			editHistS.writeLockedFirst(line_ed)
+			LE.hist:clearAll()
+			LE.hist:moveToEntry(1)
+			editHistS.writeLockedFirst(LE)
 		end
 	end
 end
@@ -733,13 +733,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-		self.line_ed:setFont(self.skin.font)
+		self.LE:setFont(self.skin.font)
 	end,
 
 
 	remove = function(self, skinner, skin)
 		uiTheme.skinnerClearData(self)
-		self.line_ed:setFont()
+		self.LE:setFont()
 	end,
 
 
@@ -750,7 +750,7 @@ def.default_skinner = {
 	render = function(self, ox, oy)
 		local skin = self.skin
 		--local font = skin.font
-		local line_ed = self.line_ed
+		local LE = self.LE
 
 		-- b1: increment sensor, b2: decrement sensor
 		local res, res_b1, res_b2
@@ -789,7 +789,7 @@ def.default_skinner = {
 		--love.graphics.setScissor()
 
 		-- Text editor component.
-		local color_caret = self.replace_mode and res.color_caret_replace or res.color_caret_insert
+		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 
 		local is_active = self == self.context.thimble1
 		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
@@ -799,7 +799,7 @@ def.default_skinner = {
 			col_highlight,
 			skin.font_ghost,
 			res.color_text,
-			line_ed.font,
+			LE.font,
 			self.context.window_focus and color_caret
 		)
 
@@ -822,24 +822,24 @@ def.default_skinner = {
 		-- Debug renderer
 		-- [[
 		love.graphics.print(
-			"line: " .. line_ed.line
-			.. "\n#line: " .. #line_ed.line
-			.. "\ncar_byte: " .. line_ed.car_byte
-			.. "\nh_byte: " .. line_ed.h_byte
-			.. "\ncaret_is_showing: " .. tostring(self.caret_is_showing)
-			.. "\ncaret_blink_time: " .. tostring(self.caret_blink_time)
-			.. "\ncaret box: " .. line_ed.caret_box_x .. ", " .. line_ed.caret_box_y .. ", " .. line_ed.caret_box_w .. ", " .. line_ed.caret_box_h
+			"line: " .. LE.line
+			.. "\n#line: " .. #LE.line
+			.. "\ncar_byte: " .. LE.car_byte
+			.. "\nh_byte: " .. LE.h_byte
+			.. "\nLE_caret_showing: " .. tostring(self.LE_caret_showing)
+			.. "\nLE_caret_blink_time: " .. tostring(self.LE_caret_blink_time)
+			.. "\ncaret box: " .. LE.caret_box_x .. ", " .. LE.caret_box_y .. ", " .. LE.caret_box_w .. ", " .. LE.caret_box_h
 			.. "\nscr_fx: " .. self.scr_fx .. ", scr_fy: " .. self.scr_fy
 			--.. "\ndoc_w: " .. self.doc_w
 			,
 			0, 256
 		)
 
-		local yy, hh = 240, line_ed.font:getHeight()
+		local yy, hh = 240, LE.font:getHeight()
 		love.graphics.print("History state:", 256, 216)
 
-		for i, entry in ipairs(line_ed.hist.ledger) do
-			if i == line_ed.hist.pos then
+		for i, entry in ipairs(LE.hist.ledger) do
+			if i == LE.hist.pos then
 				love.graphics.setColor(1, 1, 0, 1)
 			else
 				love.graphics.setColor(1, 1, 1, 1)
