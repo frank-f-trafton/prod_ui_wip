@@ -222,10 +222,10 @@ function plan.make(panel)
 
 	text_box.ghost_text = "Ghost text"
 
-	text_box.allow_tab = false
-	text_box.allow_untab = false
-	text_box.tabs_to_spaces = false
-	text_box.auto_indent = false
+	text_box:setAllowTab(false)
+	text_box:setAllowUntab(false)
+	text_box:setTabsToSpaces(false)
+	text_box:setAutoIndent(false)
 
 	-- Debug...
 	local quickPrint = require("lib.quick_print")
@@ -257,10 +257,10 @@ The five boxing wizards jump quickly.]=]
 
 	code_ed.ghost_text = "Ghost text"
 
-	code_ed.allow_tab = true
-	code_ed.allow_untab = true
-	code_ed.tabs_to_spaces = false
-	code_ed.auto_indent = true
+	code_ed:setAllowTab(true)
+	code_ed:setAllowUntab(true)
+	code_ed:setTabsToSpaces(false)
+	code_ed:setAutoIndent(true)
 
 	--[[
 	local str = ""

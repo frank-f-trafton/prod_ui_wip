@@ -647,8 +647,8 @@ function editCommandM.setColorization(self, enabled)
 end
 
 
-function editCommandM.setHighlightEnabled(self, enabled)
-	if editFuncM.setHighlightEnabled(self, enabled) then
+function editCommandM.setAllowHighlight(self, enabled)
+	if editFuncM.setAllowHighlight(self, enabled) then
 		return true, true, true
 	end
 end

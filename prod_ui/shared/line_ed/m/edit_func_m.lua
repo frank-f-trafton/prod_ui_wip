@@ -729,7 +729,7 @@ end
 --- Enables or disables highlight selection mode. When disabling, any current selection is removed. (Should only be
 --	used right after the widget is initialized, because a populated history ledger may contain entries with highlights.)
 -- @param enabled true or false/nil.
-function editFuncM.setHighlightEnabled(self, enabled)
+function editFuncM.setAllowHighlight(self, enabled)
 	local line_ed = self.line_ed
 
 	enabled = not not enabled
