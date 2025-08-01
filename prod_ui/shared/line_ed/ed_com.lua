@@ -1,7 +1,7 @@
 local context = select(1, ...)
 
 
-local edComBase = {}
+local edCom = {}
 
 
 -- LÖVE Supplemental
@@ -13,11 +13,14 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 -- stand-in text colors
-edComBase.default_text_color = {1, 1, 1, 1}
-edComBase.default_text_h_color = {0, 0, 0, 1}
+edCom.default_text_color = {1, 1, 1, 1}
+edCom.default_text_h_color = {0, 0, 0, 1}
 
 
-function edComBase.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed)
+edCom.dummy_font = love.graphics.newFont(12)
+
+
+function edCom.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_feed)
 	str = textUtil.sanitize(str, bad_byte_policy)
 
 	if not allow_line_feed then
@@ -36,4 +39,4 @@ function edComBase.cleanString(str, bad_byte_policy, tabs_to_spaces, allow_line_
 end
 
 
-return edComBase
+return edCom

@@ -27,6 +27,21 @@ function editWidM.updateCaretShape(self)
 end
 
 
+function editWidM.resetCaretBlink(self)
+	self.LE_caret_blink_time = self.LE_caret_blink_reset
+end
+
+
+function editWidM.updateCaretBlink(self, dt)
+	self.LE_caret_blink_time = self.LE_caret_blink_time + dt
+	if self.LE_caret_blink_time > self.LE_caret_blink_on + self.LE_caret_blink_off then
+		self.LE_caret_blink_time = math.max(-(self.LE_caret_blink_on + self.LE_caret_blink_off), self.LE_caret_blink_time - (self.LE_caret_blink_on + self.LE_caret_blink_off))
+	end
+
+	self.LE_caret_showing = self.LE_caret_blink_time < self.LE_caret_blink_off
+end
+
+
 function editWidM.updateTextBatch(self)
 	local LE = self.LE
 	local text_batch = self.LE_text_batch
@@ -136,21 +151,6 @@ function editWidM.scrollGetCaretInBounds(self, immediate)
 	local car_y2 = LE.caret_box_y + LE.caret_box_h + self.LE_caret_extend_y
 
 	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
-end
-
-
-function editWidM.resetCaretBlink(self)
-	self.LE_caret_blink_time = self.LE_caret_blink_reset
-end
-
-
-function editWidM.updateCaretBlink(self, dt)
-	self.LE_caret_blink_time = self.LE_caret_blink_time + dt
-	if self.LE_caret_blink_time > self.LE_caret_blink_on + self.LE_caret_blink_off then
-		self.LE_caret_blink_time = math.max(-(self.LE_caret_blink_on + self.LE_caret_blink_off), self.LE_caret_blink_time - (self.LE_caret_blink_on + self.LE_caret_blink_off))
-	end
-
-	self.LE_caret_showing = self.LE_caret_blink_time < self.LE_caret_blink_off
 end
 
 

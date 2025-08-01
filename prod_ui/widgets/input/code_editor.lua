@@ -292,7 +292,9 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 		self.LE:setFont(self.skin.font)
-		self.LE_text_batch:setFont(self.skin.font)
+		if self.LE_text_batch then
+			self.LE_text_batch:setFont(self.skin.font)
+		end
 		self.LE:updateDisplayText()
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
@@ -327,10 +329,9 @@ def.default_skinner = {
 			self.vp2_h
 		)
 
-		--print("render", "self.LE_vis_para1", self.LE_vis_para1, "self.LE_vis_para2", self.LE_vis_para2)
-
 		-- Draw background body
 		love.graphics.setColor(res.color_body)
+		-- TODO: replace with a texture slice.
 		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
 		-- ^ Variant with less overdraw?
@@ -353,69 +354,9 @@ def.default_skinner = {
 		-- Translate into core region, with scrolling offsets applied.
 		love.graphics.translate(self.vp_x + self.LE_align_ox - self.scr_x, self.vp_y - self.scr_y)
 
-		-- Draw highlight rectangles.
-		if LE:isHighlighted() then
-			local is_active = self:hasAnyThimble()
-			local col_highlight = is_active and res.color_highlight_active or res.color_highlight
-			love.graphics.setColor(col_highlight)
-
-			for i = self.LE_vis_para1, self.LE_vis_para2 do
-				local paragraph = LE.paragraphs[i]
-				for j, sub_line in ipairs(paragraph) do
-					if sub_line.highlighted then
-						love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
-					end
-				end
-			end
-		end
-
-		-- Draw ghost text, if applicable.
-		-- XXX: center and right ghost text alignment modes aren't working correctly.
-		if self.LE_ghost_text and lines:isEmpty() then
-			local align = self.LE_ghost_text_align or LE.align
-
-			love.graphics.setFont(skin.font_ghost)
-
-			local gx, gy
-			if align == "left" then
-				gx, gy = 0, 0
-
-			elseif align == "center" then
-				gx, gy = math.floor(-font:getWidth(self.LE_ghost_text) / 2), 0
-
-			elseif align == "right" then
-				gx, gy = math.floor(-font:getWidth(self.LE_ghost_text)), 0
-			end
-
-			if LE.wrap_mode then
-				love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp_w, align)
-
-			else
-				love.graphics.print(self.LE_ghost_text, gx, gy)
-			end
-		end
-
-		-- Draw the main text.
-		love.graphics.setColor(res.color_text)
-
-		if self.LE_text_batch then
-			love.graphics.draw(self.LE_text_batch)
-		else
-			love.graphics.setFont(skin.font)
-
-			for i = self.LE_vis_para1, self.LE_vis_para2 do
-				local paragraph = LE.paragraphs[i]
-				for j, sub_line in ipairs(paragraph) do
-					love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
-				end
-			end
-		end
-
-		-- Draw the caret.
-		if self.context.window_focus and has_thimble and self.LE_caret_showing then
-			love.graphics.setColor(res.color_insert) -- XXX: color_replace
-			love.graphics.rectangle(self.LE_caret_fill, self.LE_caret_x, self.LE_caret_y, self.LE_caret_w, self.LE_caret_h)
-		end
+		local col_highlight = self:hasAnyThimble() and res.color_highlight_active or res.color_highlight
+		local color_caret = self.context.window_focus and res.color_insert -- XXX and color_replace
+		lgcInputM.draw(self, col_highlight, skin.font_ghost, res.color_text, skin.font, color_caret)
 
 		love.graphics.setScissor(scx, scy, scw, sch)
 

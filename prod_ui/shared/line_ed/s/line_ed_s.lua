@@ -1,13 +1,6 @@
 -- LineEditor (single) core object.
 
-
 --[[
-WARNING: Functions tagged with the following comments require special attention:
-	[sync]: Must run self:syncDisplayCaretHighlight() when done making changes.
-	[update]: Must run self:updateDisplayText() when done making changes.
-
-Note that self:updateDisplayText() also calls self:syncDisplayCaretHighlight() internally.
-
 Widgets may need to run additional update code after a method is executed (for example,
 to update the visual state of the caret).
 --]]
@@ -25,9 +18,8 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local edComBase = context:getLua("shared/line_ed/ed_com_base")
+local edCom = context:getLua("shared/line_ed/ed_com")
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local structHistory = context:getLua("shared/struct_history")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -43,9 +35,23 @@ _mt_ed_s.__index = _mt_ed_s
 --- Creates a new Line Editor object.
 -- @return the LineEd table.
 function lineEdS.new()
-	local self = {}
+	local self = setmetatable({}, _mt_ed_s)
 
 	self.font = false
+
+	-- internal text
+	self.line = ""
+
+	-- internal caret position
+	self.cb = 1 -- caret byte
+	self.hb = 1 -- highlight byte
+
+	-- display caret position
+	self.dcb = 1 -- display caret byte
+	self.dhb = 1 -- display highlight byte
+
+	-- display text
+	self.disp_text = ""
 
 	-- dimensions of the display text and highlight box
 	self.disp_text_w = 0
@@ -58,19 +64,14 @@ function lineEdS.new()
 	self.highlight_w = 0
 	self.highlight_h = 0
 
-	-- The internal text.
-	self.line = ""
+	self.align = "left" -- "left", "center", "right"
 
-	-- bytes for internal caret and highlight
-	self.car_byte = 1
-	self.h_byte = 1
+	self.caret_line_width = 1
 
-	-- bytes for display caret and highlight
-	self.d_car_byte = 1
-	self.d_h_byte = 1
-
-	-- XXX: skin or some other config system. Currently, 'caret_line_width' is based on the width of 'M' in the current font.
-	self.caret_line_width = 0
+	-- Text colors, normal and highlighted.
+	-- References to these tables will be copied around.
+	self.text_color = edCom.default_text_color
+	self.text_h_color = edCom.default_text_h_color
 
 	-- The position and dimensions of the currently selected character.
 	-- The client widget uses these values to determine the size and location of its caret.
@@ -84,18 +85,6 @@ function lineEdS.new()
 
 	-- Width to use when keeping the caret in view against the far edge of the field.
 	self.caret_box_w_edge = 0
-
-	-- History state.
-	self.hist = structHistory.new() -- TODO: migrate to client widget; rename to 'LE_hist'
-	editHistS.writeEntry(self, true)
-
-	-- External display text.
-	self.disp_text = ""
-
-	-- Text colors, normal and highlighted.
-	-- References to these tables will be copied around.
-	self.text_color = edComBase.default_text_color
-	self.text_h_color = edComBase.default_text_h_color
 
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
@@ -129,8 +118,6 @@ function lineEdS.new()
 	-- Arbitrary table of state intended to help manage syntax highlighting.
 	self.syntax_work = {}
 
-	setmetatable(self, _mt_ed_s)
-
 	-- ASAP:
 	-- * Assign a font with LE:setFont()
 	-- * Update display text
@@ -144,8 +131,12 @@ function _mt_ed_s:getFont()
 end
 
 
-function _mt_ed_s:setFont(font) -- [update]
+function _mt_ed_s:setFont(font)
 	uiShared.loveTypeEval(1, font, "Font")
+
+	if font and self.font == font then
+		return
+	end
 
 	self.font = font or false
 	if self.font then
@@ -155,6 +146,9 @@ function _mt_ed_s:setFont(font) -- [update]
 		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
 		self.caret_box_w_empty = math.max(1, math.ceil(uscore_width))
 		self.caret_box_w_edge = math.max(1, math.ceil(em_width))
+
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
 	end
 end
 
@@ -163,31 +157,42 @@ function _mt_ed_s:setTextColors(text_color, text_h_color) -- [sync]
 	uiShared.typeEval(1, text_color, "table")
 	uiShared.typeEval(2, text_h_color, "table")
 
-	self.text_color = text_color or edComBase.default_text_color
-	self.text_h_color = text_h_color or edComBase.default_text_h_color
+	self.text_color = text_color or edCom.default_text_color
+	self.text_h_color = text_h_color or edCom.default_text_h_color
+
+	self:syncDisplayCaretHighlight()
 end
 
 
 function _mt_ed_s:getCaretOffsets()
-	return self.car_byte, self.h_byte
+	return self.cb, self.hb
 end
 
 
---- Gets caret and highlight offsets in the correct order.
-function _mt_ed_s:getHighlightOffsets()
-	local byte_1, byte_2 = self.car_byte, self.h_byte
+--- Gets caret and highlight offsets (in order from lowest to greatest).
+function _mt_ed_s:getCaretOffsetsInOrder()
+	local byte_1, byte_2 = self.cb, self.hb
 	return math.min(byte_1, byte_2), math.max(byte_1, byte_2)
+end
+
+
+function _mt_ed_s:compareCaretOffsets(cb, hb)
+	return cb == self.cb and hb == self.hb
 end
 
 
 --- Returns if the LineEd currently has a highlighted section (not whether highlighting itself is currently active.)
 function _mt_ed_s:isHighlighted()
-	return self.h_byte ~= self.car_byte
+	return self.hb ~= self.cb
 end
 
 
-function _mt_ed_s:clearHighlight() -- [sync]
-	self.h_byte = self.car_byte
+function _mt_ed_s:clearHighlight()
+	local xhb = self.hb
+	self.hb = self.cb
+	if xhb ~= self.hb then
+		self:syncDisplayCaretHighlight()
+	end
 end
 
 
@@ -220,12 +225,50 @@ function _mt_ed_s:getLineInfoAtX(x, split_x)
 end
 
 
+-- @param cb The new caret byte offset.
+-- @param clear_highlight When true, sets the highlight to the caret.
+-- @return true if the caret position (including highlight) changed.
+function _mt_ed_s:moveCaret(cb, clear_highlight)
+	cb = math.max(1, math.min(cb, #self.line + 1))
+
+	local xcb, xhb = self.cb, self.hb
+	self.cb = cb
+	if clear_highlight then
+		self.hb = cb
+	end
+
+	self:syncDisplayCaretHighlight()
+
+	return not (xcb == self.cb and xhb == self.hb)
+end
+
+
+-- @param cb, hb The new caret and highlight byte offsets.
+-- @return true if the caret position (including highlight) changed.
+function _mt_ed_s:moveCaretAndHighlight(cb, hb)
+	local line = self.line
+	cb = math.max(1, math.min(cb, #line + 1))
+	hb = math.max(1, math.min(hb, #line + 1))
+
+	local xcb, xhb = self.cb, self.hb
+	self.cb, self.hb = cb, hb
+
+	self:syncDisplayCaretHighlight()
+
+	return not (xcb == self.cb and xhb == self.hb)
+end
+
+
+
 --- Insert a string at the caret position.
 -- @param text The string to insert.
-function _mt_ed_s:insertText(text) -- [update]
-	self.line = edComS.add(self.line, text, self.car_byte)
-	self.car_byte = self.car_byte + #text
-	self.h_byte = self.car_byte
+function _mt_ed_s:insertText(text)
+	self.line = edComS.add(self.line, text, self.cb)
+	self.cb = self.cb + #text
+	self.hb = self.cb
+
+	self:updateDisplayText()
+	self:syncDisplayCaretHighlight()
 end
 
 
@@ -233,7 +276,7 @@ end
 -- @param copy_deleted If true, return the deleted text as a string.
 -- @param b1, b2 The first and last byte offsets to delete from and to.
 -- @return The deleted text as a string, if 'copy_deleted' was true (and at least one character was deleted), or nil.
-function _mt_ed_s:deleteText(copy_deleted, b1, b2) -- [update]
+function _mt_ed_s:deleteText(copy_deleted, b1, b2)
 	if b1 <= b2 then
 		local deleted
 		if copy_deleted then
@@ -241,7 +284,10 @@ function _mt_ed_s:deleteText(copy_deleted, b1, b2) -- [update]
 		end
 
 		self.line = edComS.delete(self.line, b1, b2)
-		self.car_byte, self.h_byte = b1, b1
+		self.cb, self.hb = b1, b1
+
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
 
 		return deleted ~= "" and deleted
 	end
@@ -269,7 +315,6 @@ function _mt_ed_s:getWordRange(byte_n)
 end
 
 
---- Update the display text.
 function _mt_ed_s:updateDisplayText()
 	local font = self.font
 
@@ -298,31 +343,35 @@ function _mt_ed_s:updateDisplayText()
 	-- XXX: syntax coloring.
 	self.syntax_colors = false
 	self.colored_text = false
+end
 
-	self:syncDisplayCaretHighlight()
+
+--- Updates caret shape and display offsets.
+function _mt_ed_s:updateCaret()
+	local line = self.line
+	local font = self.font
+
+	self.dcb = edComS.coreToDisplayOffsets(line, self.cb, self.disp_text)
+	self.dhb = edComS.coreToDisplayOffsets(line, self.hb, self.disp_text)
+
+	-- Update cached caret info.
+	self.caret_box_x = textUtil.getCharacterX(self.disp_text, self.dcb, font)
+
+	-- If we are at the end of the string + 1: use the width of the underscore character.
+	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.dcb, font) or font:getWidth("_")
+
+	self.caret_box_y = 0
+	self.caret_box_h = font:getHeight()
 end
 
 
 --- Updates the display caret offsets, the caret rectangle, and the highlight rectangle. The display text must be
 --	current at time of call.
 function _mt_ed_s:syncDisplayCaretHighlight()
-	local line = self.line
-	local font = self.font
-
-	self.d_car_byte = edComS.coreToDisplayOffsets(line, self.car_byte, self.disp_text)
-	self.d_h_byte = edComS.coreToDisplayOffsets(line, self.h_byte, self.disp_text)
-
-	-- Update cached caret info.
-	self.caret_box_x = textUtil.getCharacterX(self.disp_text, self.d_car_byte, font)
-
-	-- If we are at the end of the string + 1: use the width of the underscore character.
-	self.caret_box_w = textUtil.getCharacterW(self.disp_text, self.d_car_byte, font) or font:getWidth("_")
-
-	self.caret_box_y = 0
-	self.caret_box_h = font:getHeight()
+	self:updateCaret()
 
 	-- update highlight rect
-	local hi_1, hi_2 = math.min(self.d_car_byte, self.d_h_byte), math.max(self.d_car_byte, self.d_h_byte)
+	local hi_1, hi_2 = math.min(self.dcb, self.dhb), math.max(self.dcb, self.dhb)
 	if hi_1 == hi_2 then
 		self.disp_highlighted = false
 	else
@@ -377,23 +426,15 @@ function _mt_ed_s:syncDisplayCaretHighlight()
 end
 
 
-function _mt_ed_s:caretToByte(byte_n) -- [sync]
-	self.car_byte = math.max(1, math.min(byte_n, #self.line + 1))
-end
-
-
-function _mt_ed_s:highlightToByte(h_byte_n) -- [sync]
-	self.h_byte = math.max(1, math.min(h_byte_n, #self.line + 1))
-end
-
-
 function _mt_ed_s:copyState()
-	return self.line, self.disp_text, self.car_byte, self.h_byte
+	return self.line, self.disp_text, self.cb, self.hb
 end
 
 
-function _mt_ed_s:setState(line, disp_text, car_byte, h_byte)
-	self.line, self.disp_text, self.car_byte, self.h_byte = line, disp_text, car_byte, h_byte
+function _mt_ed_s:setState(line, disp_text, cb, hb)
+	self.line, self.disp_text, self.cb, self.hb = line, disp_text, cb, hb
+	self:updateDisplayText()
+	self:syncDisplayCaretHighlight()
 end
 
 

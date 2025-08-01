@@ -45,7 +45,7 @@ local context = select(1, ...)
 
 
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
@@ -70,8 +70,6 @@ widShared.scrollSetMethods(def)
 lgcInputS.setupDef(def)
 
 
-def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
-def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
 def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
 
@@ -93,7 +91,7 @@ local function refreshLineEdText(self)
 
 	if chosen_tbl then
 		self:replaceText(chosen_tbl.text)
-		editHistS.wipeEntries(self)
+		editFuncS.wipeHistoryEntries(self)
 
 		if self.LE_allow_highlight then
 			self:highlightAll()
@@ -263,7 +261,7 @@ function def:uiCall_reshapePre()
 
 	self:scrollClampViewport()
 
-	lgcInputS.reshapeUpdate(self)
+	editWidS.generalUpdate(self, true, true, false, true)
 
 	return true
 end
@@ -279,7 +277,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	lgcInputS.updateCaretBlink(self, dt)
+	editWidS.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end
@@ -681,6 +679,10 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 		self.LE:setFont(self.skin.font)
+		if self.LE_text_batch then
+			self.LE_text_batch:setFont(self.skin.font)
+		end
+		self.LE:updateDisplayText()
 	end,
 
 

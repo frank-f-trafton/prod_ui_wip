@@ -38,8 +38,9 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 function editCommandS.setTextAlignment(self, align)
-	if align ~= self.LE_align then
-		self.LE_align = align
+	local LE = self.LE
+	if align ~= LE.align then
+		LE.align = align
 		return true, true, true
 	end
 end
@@ -347,34 +348,28 @@ end
 
 
 function editCommandS.stepHistory(self, dir)
-	if self.LE.hist.enabled then
-		if editFuncS.stepHistory(self, dir) then
-			self.LE_input_category = false
+	if editFuncS.stepHistory(self, dir) then
+		self.LE_input_category = false
 
-			return true, true, true, nil, nil, true
-		end
+		return true, true, true, nil, nil, true
 	end
 end
 
 
 function editCommandS.undo(self)
-	if self.LE.hist.enabled then
-		if editFuncS.stepHistory(self, -1) then
-			self.LE_input_category = false
+	if editFuncS.stepHistory(self, -1) then
+		self.LE_input_category = false
 
-			return true, true, true, nil, nil, true
-		end
+		return true, true, true, nil, nil, true
 	end
 end
 
 
 function editCommandS.redo(self)
-	if self.LE.hist.enabled then
-		if editFuncS.stepHistory(self, 1) then
-			self.LE_input_category = false
+	if editFuncS.stepHistory(self, 1) then
+		self.LE_input_category = false
 
-			return true, true, true, nil, nil, true
-		end
+		return true, true, true, nil, nil, true
 	end
 end
 
