@@ -69,7 +69,7 @@ function plan.make(panel)
 		local DEMO_PURPLE = {1, 0, 1, 1}
 
 		wid_text_box:resizeWidget(512, 256)
-		wid_text_box.LE_obj.fn_colorize = function(self, str, syntax_colors, syntax_work)
+		wid_text_box.LE.fn_colorize = function(self, str, syntax_colors, syntax_work)
 
 			-- i: byte offset in string
 			-- j: the next byte offset
@@ -226,6 +226,7 @@ function plan.make(panel)
 	text_box:setAllowUntab(false)
 	text_box:setTabsToSpaces(false)
 	text_box:setAutoIndent(false)
+	--text_box:setAllowReplaceMode(false)
 
 	-- Debug...
 	local quickPrint = require("lib.quick_print")

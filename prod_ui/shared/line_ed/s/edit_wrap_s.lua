@@ -7,8 +7,8 @@ local editWrapS = {}
 local utf8 = require("utf8")
 
 
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
+local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 
 
 --- Helper that takes care of history changes following an action.
@@ -20,7 +20,7 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 -- @return true if the function reported success, and a boolean indicating if the action was undo/redo.
 function editWrapS.wrapAction(self, func, ...)
 	local LE = self.LE
-	local old_car, old_h = LE.car_byte, LE.h_byte
+	local xcb, xhb = LE:getCaretOffsets() -- old offsets
 
 	local ok, update_widget, caret_in_view, write_history, deleted, hist_change = func(self, ...)
 
@@ -36,17 +36,10 @@ function editWrapS.wrapAction(self, func, ...)
 	--]]
 
 	if ok then
-		editFuncS.updateCaretShape(self)
-		if update_widget then
-			self:updateDocumentDimensions(self)
-			self:scrollClampViewport()
-		end
+		editWidS.generalUpdate(self, true, update_widget, caret_in_view, update_widget)
 
-		if caret_in_view then
-			self:scrollGetCaretInBounds(true)
-		end
-
-		if LE.hist.enabled then
+		local hist = self.LE_hist
+		if hist.enabled then
 			-- 'Delete' and 'backspace' can amend history entries.
 			if type(write_history) == "string" then -- "del", "bsp"
 				assert(type(deleted) == "string", "expected string for deleted text")
@@ -55,30 +48,29 @@ function editWrapS.wrapAction(self, func, ...)
 				elseif write_history == "del" then cat1, cat2 = "deleting", "deleting-ws" end
 
 				-- Partial / conditional history updates
-				local hist = LE.hist
 				local non_ws = deleted:find("%S")
 				local entry = hist:getEntry()
 				local do_advance = true
 
 				if utf8.len(deleted) == 1
-				and (entry and entry.car_byte == old_car)
+				and (entry and entry.cb == xcb)
 				and ((self.LE_input_category == cat1 and non_ws) or (self.LE_input_category == cat2))
 				then
 					do_advance = false
 				end
 
 				if do_advance then
-					editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
+					editFuncS.doctorHistoryCaretOffsets(self, xcb, xhb)
 				end
-				editHistS.writeEntry(LE, do_advance)
+				editFuncS.writeHistoryEntry(self, do_advance)
 				self.LE_input_category = non_ws and cat1 or cat2
 
 			-- Unconditional new history entry:
 			elseif write_history then
 				self.LE_input_category = false
 
-				editHistS.doctorCurrentCaretOffsets(LE.hist, old_car, old_h)
-				editHistS.writeEntry(LE, true)
+				editFuncS.doctorHistoryCaretOffsets(self, xcb, xhb)
+				editFuncS.writeHistoryEntry(self, true)
 			end
 		end
 

@@ -25,7 +25,7 @@ local utf8 = require("utf8")
 
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -46,8 +46,6 @@ widShared.scrollSetMethods(def)
 lgcInputS.setupDef(def)
 
 
-def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
-def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
 def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
 
@@ -213,7 +211,7 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 
 	local LE = self.LE
 	local old_len = utf8.len(LE.line)
-	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.car_byte)
+	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.cb)
 
 	if update_text then
 		if v then
@@ -245,19 +243,16 @@ local function _setValue(self, v, write_history, update_text, preserve_caret)
 	if preserve_caret then
 		local delta = utf8.len(LE.line) - old_len
 		local max_car_u = utf8.len(LE.line) + 1
-		LE:caretToByte(utf8.offset(LE.line, old_car_u + delta) or max_car_u)
-		LE:clearHighlight()
-		LE:syncDisplayCaretHighlight()
+		LE:moveCaret(utf8.offset(LE.line, old_car_u + delta) or max_car_u, true)
 
-		editFuncS.updateCaretShape(self)
 		self:scrollGetCaretInBounds(true)
 	end
 
 	LE:clearHighlight()
 
 	if write_history then
-		LE.hist:moveToEntry(2)
-		editHistS.writeEntry(LE, false)
+		self.LE_hist:moveToEntry(2)
+		editFuncS.writeHistoryEntry(self, false)
 	end
 end
 
@@ -286,7 +281,7 @@ local function _textInputValue(self, hist_changed)
 	if v ~= nil and self.value ~= v then
 		_setValue(self, v, false, true, true)
 		if not hist_changed then
-			LE.hist:moveToEntry(2)
+			self.LE_hist:moveToEntry(2)
 		end
 	end
 end
@@ -329,23 +324,23 @@ end
 function def:setValue(v)
 	uiShared.numberNotNaN(1, v)
 
-	local LE = self.LE
+	local hist = self.LE_hist
 
 	_setValue(self, v, false, true)
-	LE.hist:clearAll()
-	LE.hist:moveToEntry(1)
-	editHistS.writeLockedFirst(LE)
+	hist:clearAll()
+	hist:moveToEntry(1)
+	editFuncS.writeHistoryLockedFirst(self)
 end
 
 
 function def:setValueToDefault()
-	local LE = self.LE
+	local hist = self.LE_hist
 
 	_setValue(self, self.value_default, false, true)
 
-	LE.hist:clearAll()
-	LE.hist:moveToEntry(1)
-	editHistS.writeLockedFirst(LE)
+	hist:clearAll()
+	hist:moveToEntry(1)
+	editFuncS.writeHistoryLockedFirst(self)
 end
 
 
@@ -394,9 +389,10 @@ function def:uiCall_initialize()
 	self:skinInstall()
 
 	-- special history configuration
-	self.LE.hist:setLockedFirst(true)
-	self.LE.hist:setMaxEntries(2)
-	editHistS.writeLockedFirst(self.LE)
+	local hist = self.LE_hist
+	hist:setLockedFirst(true)
+	hist:setMaxEntries(2)
+	editFuncS.writeHistoryLockedFirst(self)
 
 	self:setTextAlignment(self.skin.text_align)
 
@@ -427,10 +423,10 @@ function def:uiCall_reshapePre()
 	widShared.copyViewport(self, 1, 2)
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	self:updateDocumentDimensions()
+	editWidS.updateDocumentDimensions(self)
 	self:scrollClampViewport()
 
-	lgcInputS.reshapeUpdate(self)
+	editWidS.generalUpdate(self, true, true, false, true)
 
 	return true
 end
@@ -448,7 +444,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	lgcInputS.updateCaretBlink(self, dt)
+	editWidS.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end
@@ -466,12 +462,11 @@ function def:uiCall_thimble1Release(inst)
 		love.keyboard.setTextInput(false)
 
 		-- Forget history state when the user nagivates away from the NumberBox.
-		local LE = self.LE
-		local hist = LE.hist
+		local hist = self.LE_hist
 		if hist.pos == 2 then
-			LE.hist:clearAll()
-			LE.hist:moveToEntry(1)
-			editHistS.writeLockedFirst(LE)
+			hist:clearAll()
+			hist:moveToEntry(1)
+			editFuncS.writeHistoryLockedFirst(self)
 		end
 	end
 end
@@ -734,6 +729,10 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 		self.LE:setFont(self.skin.font)
+		if self.LE_text_batch then
+			self.LE_text_batch:setFont(self.skin.font)
+		end
+		self.LE:updateDisplayText()
 	end,
 
 
@@ -824,8 +823,8 @@ def.default_skinner = {
 		love.graphics.print(
 			"line: " .. LE.line
 			.. "\n#line: " .. #LE.line
-			.. "\ncar_byte: " .. LE.car_byte
-			.. "\nh_byte: " .. LE.h_byte
+			.. "\ncb: " .. LE.cb
+			.. "\nhb: " .. LE.hb
 			.. "\nLE_caret_showing: " .. tostring(self.LE_caret_showing)
 			.. "\nLE_caret_blink_time: " .. tostring(self.LE_caret_blink_time)
 			.. "\ncaret box: " .. LE.caret_box_x .. ", " .. LE.caret_box_y .. ", " .. LE.caret_box_w .. ", " .. LE.caret_box_h
@@ -838,13 +837,13 @@ def.default_skinner = {
 		local yy, hh = 240, LE.font:getHeight()
 		love.graphics.print("History state:", 256, 216)
 
-		for i, entry in ipairs(LE.hist.ledger) do
-			if i == LE.hist.pos then
+		for i, entry in ipairs(self.LE_hist.ledger) do
+			if i == self.LE_hist.pos then
 				love.graphics.setColor(1, 1, 0, 1)
 			else
 				love.graphics.setColor(1, 1, 1, 1)
 			end
-			love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: |" .. entry.line .. "|", 256, yy)
+			love.graphics.print(i .. " c: " .. entry.cb .. " h: " .. entry.hb .. "line: |" .. entry.line .. "|", 256, yy)
 			yy = yy + hh
 		end
 		--]]

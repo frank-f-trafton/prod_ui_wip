@@ -21,7 +21,7 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 -- ProdUI
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
+local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -48,8 +48,6 @@ widShared.scrollSetMethods(def)
 lgcInputS.setupDef(def)
 
 
-def.scrollGetCaretInBounds = lgcInputS.method_scrollGetCaretInBounds
-def.updateDocumentDimensions = lgcInputS.method_updateDocumentDimensions
 def.updateAlignOffset = lgcInputS.method_updateAlignOffset -- XXX: method doesn't exist.
 def.pop_up_def = lgcInputS.pop_up_def
 
@@ -92,7 +90,7 @@ function def:uiCall_reshapePre()
 
 	self:scrollClampViewport()
 
-	lgcInputS.reshapeUpdate(self)
+	editWidS.generalUpdate(self, true, true, false, true)
 
 	return true
 end
@@ -211,7 +209,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	lgcInputS.updateCaretBlink(self, dt)
+	editWidS.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end
@@ -233,6 +231,10 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 		self.LE:setFont(self.skin.font)
+		if self.LE_text_batch then
+			self.LE_text_batch:setFont(self.skin.font)
+		end
+		self.LE:updateDisplayText()
 	end,
 
 
@@ -287,8 +289,8 @@ def.default_skinner = {
 		love.graphics.print(
 			"line: " .. LE.line
 			.. "\n#line: " .. #LE.line
-			.. "\ncar_byte: " .. LE.car_byte
-			.. "\nh_byte: " .. LE.h_byte
+			.. "\ncb: " .. LE.cb
+			.. "\nhb: " .. LE.hb
 			.. "\nLE_caret_showing: " .. tostring(self.LE_caret_showing)
 			.. "\nLE_caret_blink_time: " .. tostring(self.LE_caret_blink_time)
 			.. "\ncaret box: " .. LE.caret_box_x .. ", " .. LE.caret_box_y .. ", " .. LE.caret_box_w .. ", " .. LE.caret_box_h
@@ -302,8 +304,8 @@ def.default_skinner = {
 		local yy, hh = 240, LE.font:getHeight()
 		love.graphics.print("History state:", 0, 216)
 
-		for i, entry in ipairs(LE.hist.ledger) do
-			love.graphics.print(i .. " c: " .. entry.car_byte .. " h: " .. entry.h_byte .. "line: " .. entry.line, 0, yy)
+		for i, entry in ipairs(self.LE_hist.ledger) do
+			love.graphics.print(i .. " c: " .. entry.cb .. " h: " .. entry.hb .. "line: " .. entry.line, 0, yy)
 			yy = yy + hh
 		end
 		--]]

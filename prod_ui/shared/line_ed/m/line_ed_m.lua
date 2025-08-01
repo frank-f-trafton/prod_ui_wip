@@ -24,7 +24,7 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local edComBase = context:getLua("shared/line_ed/ed_com_base")
+local edCom = context:getLua("shared/line_ed/ed_com")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local seqString = context:getLua("shared/line_ed/seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
@@ -59,7 +59,16 @@ function lineEdM.new()
 	-- Display state.
 	self.paragraphs = {}
 
-	-- To change align and wrap mode, use the methods in the LineEditor object.
+	-- Caret and highlight lines, sub-lines and bytes for the display text.
+	-- These are based on the internal caret and highlight positions.
+	self.dcp = 1 -- caret paragraph
+	self.dcs = 1 -- caret sub-line
+	self.dcb = 1 -- caret byte
+	self.dhp = 1 -- highlight paragraph
+	self.dhs = 1 -- highlight sub-line
+	self.dhb = 1 -- highlight byte
+
+	-- To change align and wrap mode, use the methods provided by the widget.
 	-- With center and right alignment, sub-lines will have negative X positions. The client
 	-- needs to keep track of the align mode and offset the positions based on the document
 	-- dimensions (which in turn are based on the number of lines and which lines are widest).
@@ -83,18 +92,8 @@ function lineEdM.new()
 
 	-- Text colors, normal and highlighted.
 	-- References to these tables will be copied around.
-	self.text_color = {1, 1, 1, 1} -- TODO: skin
-	self.text_h_color = {0, 0, 0, 1} -- TODO: skin
-
-
-	-- Caret and highlight lines, sub-lines and bytes for the display text.
-	-- These are based on the internal caret and highlight positions.
-	self.dcp = 1 -- Caret paragraph
-	self.dcs = 1 -- Caret sub-line
-	self.dcb = 1 -- Caret byte
-	self.dhp = 1 -- Highlight paragraph
-	self.dhs = 1 -- Highlight sub-line
-	self.dhb = 1 -- Highlight byte
+	self.text_color = edCom.default_text_color
+	self.text_h_color = edCom.default_text_h_color
 
 	-- The position and dimensions of the currently selected character.
 	-- The client widget uses these values to determine the size and location of its caret.
@@ -189,7 +188,7 @@ local function _updateDisplaySubLine(self, i_para, i_sub, str, syntax_colors, sy
 
 	-- Normal string display text.
 	if not str then
-		error("DEBUG TODO: check why 'str' might be false/nil here.")
+		error("DEBUG TODO: check why 'str' might be false/nil here.") -- TODO
 	end
 	sub_line.str = str or ""
 
@@ -331,8 +330,8 @@ function _mt_ed_m:setTextColors(text_color, text_h_color)
 	uiShared.typeEval(1, text_color, "table")
 	uiShared.typeEval(2, text_h_color, "table")
 
-	self.text_color = text_color or edComBase.default_text_color
-	self.text_h_color = text_h_color or edComBase.default_text_h_color
+	self.text_color = text_color or edCom.default_text_color
+	self.text_h_color = text_h_color or edCom.default_text_h_color
 
 	self:syncDisplayCaretHighlight()
 end
@@ -345,7 +344,6 @@ end
 
 --- Gets caret and highlight lines and offsets (in order from top to bottom).
 function _mt_ed_m:getCaretOffsetsInOrder()
-	-- You may need to subtract 1 from byte_2 to get the correct range.
 	local l1, b1, l2, b2 = self.cl, self.cb, self.hl, self.hb
 
 	if l1 == l2 then
@@ -372,9 +370,9 @@ end
 
 function _mt_ed_m:clearHighlight()
 	local l1, _, l2, _ = self:getCaretOffsetsInOrder()
-	local old_h_line, old_h_byte = self.hl, self.hb
+	local xhl, xhb = self.hl, self.hb
 	self.hl, self.hb = self.cl, self.cb
-	if not (self.hl == old_h_line and self.hb == old_h_byte) then
+	if not (self.hl == xhl and self.hb == xhb) then
 		self:syncDisplayCaretHighlight(l1, l2)
 	end
 end
@@ -451,19 +449,19 @@ function _mt_ed_m:moveCaret(cl, cb, clear_highlight, update_x_hint)
 	temp = self.lines[cl]
 	cb = math.max(1, math.min(cb, #temp + 1))
 
-	local old_cl, old_cb, old_hl, old_hb = self.cl, self.cb, self.hl, self.hb
+	local xcl, xcb, xhl, xhb = self.cl, self.cb, self.hl, self.hb
 	self.cl, self.cb = cl, cb
 	if clear_highlight then
 		self.hl, self.hb = cl, cb
 	end
-	self:syncDisplayCaretHighlight(math.min(old_cl, old_hl), math.max(old_cl, old_hl))
+	self:syncDisplayCaretHighlight(math.min(xcl, xhl), math.max(xcl, xhl))
 	self:syncDisplayCaretHighlight(math.min(self.cl, self.hl), math.max(self.cl, self.hl))
 
 	if update_x_hint then
 		_updateVerticalCaretHint(self)
 	end
 
-	return not (old_cl == self.cl and old_cb == self.cb and old_hl == self.hl and old_hb == self.hb)
+	return not (xcl == self.cl and xcb == self.cb and xhl == self.hl and xhb == self.hb)
 end
 
 
@@ -482,37 +480,37 @@ function _mt_ed_m:moveCaretAndHighlight(cl, cb, hl, hb, update_x_hint)
 	temp = self.lines[hl]
 	hb = math.max(1, math.min(hb, #temp + 1))
 
-	local old_cl, old_cb, old_hl, old_hb = self.cl, self.cb, self.hl, self.hb
+	local xcl, xcb, xhl, xhb = self.cl, self.cb, self.hl, self.hb
 	self.cl, self.cb, self.hl, self.hb = cl, cb, hl, hb
-	self:syncDisplayCaretHighlight(math.min(old_cl, old_hl), math.max(old_cl, old_hl))
+	self:syncDisplayCaretHighlight(math.min(xcl, xhl), math.max(xcl, xhl))
 	self:syncDisplayCaretHighlight(math.min(cl, hl), math.max(cl, hl))
 
 	if update_x_hint then
 		_updateVerticalCaretHint(self)
 	end
 
-	return not (old_cl == self.cl and old_cb == self.cb and old_hl == self.hl and old_hb == self.hb)
+	return not (xcl == self.cl and xcb == self.cb and xhl == self.hl and xhb == self.hb)
 end
 
 
 --- Insert a string at the caret position.
 -- @param text The string to insert.
 function _mt_ed_m:insertText(text)
-	local old_line = self.cl
+	local xcl = self.cl
 
 	self:clearHighlight()
 
 	self.cl, self.cb = self.lines:add(text, self.cl, self.cb)
 	self.hl, self.hb = self.cl, self.cb
 
-	if old_line ~= self.cl then
-		for i = old_line + 1, self.cl do
+	if xcl ~= self.cl then
+		for i = xcl + 1, self.cl do
 			table.insert(self.paragraphs, i, {})
 			--print("inserted at index " .. i, #self.paragraphs)
 		end
 	end
 
-	self:updateDisplayText(old_line, self.cl)
+	self:updateDisplayText(xcl, self.cl)
 	self:syncDisplayCaretHighlight(self.cl, self.cl)
 	_updateVerticalCaretHint(self)
 end

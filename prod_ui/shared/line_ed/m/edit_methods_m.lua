@@ -139,10 +139,14 @@ function client:setText(text)
 end
 
 
-function client:getText()
-	return self.LE.lines:copyString()
+function client:getText(l1, l2)
+	return self.LE.lines:copyString(l1, l2)
 end
 
+
+function client:getLineCount()
+	return #self.LE.lines
+end
 
 
 function client:cut()
@@ -268,6 +272,16 @@ end
 
 function client:scrollGetCaretInBounds(immediate)
 	editWidM.scrollGetCaretInBounds(self, immediate)
+end
+
+
+function client:setAllowReplaceMode(enabled)
+	editWrapM.wrapAction(self, editCommandM.setAllowReplaceMode, enabled)
+end
+
+
+function client:getAllowReplaceMode()
+	return self.LE_allow_replace
 end
 
 

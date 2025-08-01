@@ -31,14 +31,16 @@ local utf8 = require("utf8")
 
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
+local edCom = context:getLua("shared/line_ed/ed_com")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
+local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local widShared = context:getLua("core/wid_shared")
@@ -114,13 +116,10 @@ function lgcInputS.setupInstance(self)
 
 	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
 	self.LE_caret_extend_x = 0
-	self.LE_caret_extend_y = 0 -- TODO: unnecessary for single-line text, no?
 
 	-- Position offset when clicking the mouse.
 	-- This is only valid when a mouse action is in progress.
 	self.LE_click_byte = 1
-
-	self.LE_align = "left" -- "left", "center", "right"
 
 	-- How far to offset the line X position depending on the alignment.
 	self.LE_align_ox = 0
@@ -141,6 +140,8 @@ function lgcInputS.setupInstance(self)
 	self.LE_caret_blink_on = 0.5
 	self.LE_caret_blink_off = 0.5
 
+	self.LE_text_batch = uiGraphics.newTextBatch(edCom.dummy_font)
+
 	--[[
 	'self.fn_check': a function that can reject changes made to the text.
 	* Arguments: self (the widget)
@@ -148,21 +149,63 @@ function lgcInputS.setupInstance(self)
 	--]]
 
 	self.LE = lineEdS.new()
+
+	-- History state.
+	self.LE_hist = structHistory.new()
+	editFuncS.writeHistoryEntry(self, true)
 end
 
 
-function lgcInputS.updateCaretBlink(self, dt)
-	self.LE_caret_blink_time = self.LE_caret_blink_time + dt
-	if self.LE_caret_blink_time > self.LE_caret_blink_on + self.LE_caret_blink_off then
-		self.LE_caret_blink_time = math.max(-(self.LE_caret_blink_on + self.LE_caret_blink_off), self.LE_caret_blink_time - (self.LE_caret_blink_on + self.LE_caret_blink_off))
+-- @return true if the input was accepted, false if it was rejected or input is not allowed
+function lgcInputS.textInputLogic(self, text)
+	local LE = self.LE
+
+	if self.LE_allow_input then
+		local hist = self.LE_hist
+
+		editWidS.resetCaretBlink(self)
+
+		local xcb, xhb = LE:getCaretOffsets() -- old offsets
+
+		local clear_input_category = false
+
+		if self.LE_replace_mode then
+			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
+			if xcb < #LE.lines[#LE.lines] + 1 then
+				clear_input_category = true
+			end
+		end
+
+		local written = editFuncS.writeText(self, text, false)
+
+		if written then
+			editWidS.generalUpdate(self, true, true, true, true)
+
+			if clear_input_category then
+				self.LE_input_category = false
+			end
+
+			if hist.enabled then
+				local no_ws = written:find("%S")
+				local entry = hist:getEntry()
+				local do_advance = true
+
+				if (entry and entry.cb == xcb)
+				and ((self.LE_input_category == "typing" and no_ws) or (self.LE_input_category == "typing-ws"))
+				then
+					do_advance = false
+				end
+
+				if do_advance then
+					editFuncS.doctorHistoryCaretOffsets(self, xcb, xhb)
+				end
+				editFuncS.writeHistoryEntry(self, do_advance)
+				self.LE_input_category = no_ws and "typing" or "typing-ws"
+			end
+
+			return true
+		end
 	end
-
-	self.LE_caret_showing = self.LE_caret_blink_time < self.LE_caret_blink_off
-end
-
-
-function lgcInputS.cb_action(self, item_t)
-	return editWrapS.wrapAction(self, item_t.func)
 end
 
 
@@ -172,7 +215,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
-	editFuncS.resetCaretBlink(self)
+	editWidS.resetCaretBlink(self)
 
 	-- pop-up menu (undo, etc.)
 	if scancode == "application" or (shift_down and scancode == "f10") then
@@ -205,65 +248,31 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 end
 
 
--- @return true if the input was accepted, false if it was rejected or input is not allowed
-function lgcInputS.textInputLogic(self, text)
-	local LE = self.LE
-
-	if self.LE_allow_input then
-		editFuncS.resetCaretBlink(self)
-
-		local hist = LE.hist
-		local old_car, old_h = LE.car_byte, LE.h_byte
-		local written = editFuncS.writeText(self, text, false)
-
-		if written then
-			-- TODO: editWidS.generalUpdate()
-			if self.LE_replace_mode then
-				-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-				if LE.car_byte < #LE.line + 1 then
-					self.LE_input_category = false
-				end
-			end
-
-			if hist.enabled then
-				local non_ws = written:find("%S")
-				local entry = hist:getEntry()
-				local do_advance = true
-
-				if (entry and entry.car_byte == old_car)
-				and ((self.LE_input_category == "typing" and non_ws) or (self.LE_input_category == "typing-ws"))
-				then
-					do_advance = false
-				end
-
-				if do_advance then
-					editHistS.doctorCurrentCaretOffsets(hist, old_car, old_h)
-				end
-				editHistS.writeEntry(LE, do_advance)
-				self.LE_input_category = non_ws and "typing" or "typing-ws"
-			end
-
-			editFuncS.updateCaretShape(self)
-			self:updateDocumentDimensions()
-			self:scrollGetCaretInBounds(true)
-
-			return true
-		end
-	end
-end
-
-
-function lgcInputS.caretToX(self, clear_highlight, x, split_x)
+local function _caretToX(self, clear_highlight, x, split_x)
 	local LE = self.LE
 
 	local byte = LE:getCharacterDetailsAtPosition(x, split_x)
 
-	LE:caretToByte(byte)
+	LE:moveCaret(byte, clear_highlight)
+end
 
-	if clear_highlight then
-		LE:clearHighlight()
+
+local function _clickDragByWord(self, x, origin_byte)
+	local LE = self.LE
+
+	local drag_byte = LE:getCharacterDetailsAtPosition(x, true)
+
+	-- Expand ranges to cover full words
+	local db1, db2 = LE:getWordRange(drag_byte)
+	local cb1, cb2 = LE:getWordRange(origin_byte)
+
+	-- Merge the two ranges.
+	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
+	if origin_byte < drag_byte then
+		mb1, mb2 = mb2, mb1
 	end
-	LE:syncDisplayCaretHighlight()
+
+	LE:moveCaretAndHighlight(mb1, mb2)
 end
 
 
@@ -273,7 +282,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 	local LE = self.LE
 	local context = self.context
 
-	editFuncS.resetCaretBlink(self)
+	editWidS.resetCaretBlink(self)
 
 	local ctrl_down, shift_down, alt_down, gui_down = context.key_mgr:getModState()
 
@@ -300,24 +309,24 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 			end
 
 			if context.cseq_presses == 1 then
-				lgcInputS.caretToX(self, not shift_down, mouse_sx, true)
+				_caretToX(self, not shift_down, mouse_sx, true)
 
-				self.LE_click_byte = LE.car_byte
-				editFuncS.updateCaretShape(self)
+				self.LE_click_byte = LE.cb
+				editWidS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 2 then
-				self.LE_click_byte = LE.car_byte
+				self.LE_click_byte = LE.cb
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()
-				editFuncS.updateCaretShape(self)
+				editWidS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 3 then
-				self.LE_click_byte = LE.car_byte
+				self.LE_click_byte = LE.cb
 
 				--- Highlight everything.
 				self:highlightAll()
-				editFuncS.updateCaretShape(self)
+				editWidS.updateCaretShape(self)
 			end
 		end
 
@@ -340,33 +349,12 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 end
 
 
-function lgcInputS.clickDragByWord(self, x, origin_byte)
-	local LE = self.LE
-
-	local drag_byte = LE:getCharacterDetailsAtPosition(x, true)
-
-	-- Expand ranges to cover full words
-	local db1, db2 = LE:getWordRange(drag_byte)
-	local cb1, cb2 = LE:getWordRange(origin_byte)
-
-	-- Merge the two ranges.
-	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
-	if origin_byte < drag_byte then
-		mb1, mb2 = mb2, mb1
-	end
-
-	LE:caretToByte(mb1)
-	LE:highlightToByte(mb2)
-	LE:syncDisplayCaretHighlight()
-end
-
-
 -- Used in uiCall_update(). Before calling, check that text-drag state is active.
 function lgcInputS.mouseDragLogic(self)
 	local context = self.context
 	local LE = self.LE
 
-	editFuncS.resetCaretBlink(self)
+	editWidS.resetCaretBlink(self)
 
 	-- Mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -380,12 +368,12 @@ function lgcInputS.mouseDragLogic(self)
 
 	-- Handle drag highlight actions.
 	if context.cseq_presses == 1 then
-		lgcInputS.caretToX(self, false, s_mx, true)
-		editFuncS.updateCaretShape(self)
+		_caretToX(self, false, s_mx, true)
+		editWidS.updateCaretShape(self)
 
 	elseif context.cseq_presses == 2 then
-		lgcInputS.clickDragByWord(self, s_mx, self.LE_click_byte)
-		editFuncS.updateCaretShape(self)
+		_clickDragByWord(self, s_mx, self.LE_click_byte)
+		editWidS.updateCaretShape(self)
 	end
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
 
@@ -395,11 +383,11 @@ end
 
 
 function lgcInputS.thimble1Take(self)
-	editFuncS.resetCaretBlink(self)
+	editWidS.resetCaretBlink(self)
 
 	if self.LE_select_all_on_thimble1_take then
 		self:highlightAll()
-		editFuncS.updateCaretShape(self)
+		editWidS.updateCaretShape(self)
 	end
 end
 
@@ -408,61 +396,13 @@ function lgcInputS.thimble1Release(self)
 	love.keyboard.setTextInput(false)
 	if self.LE_deselect_all_on_thimble1_release then
 		self:caretFirst(true)
-		editFuncS.updateCaretShape(self)
+		editWidS.updateCaretShape(self)
 	end
 	if self.LE_clear_history_on_deselect then
-		editHistS.wipeEntries(self)
+		editFuncS.wipeHistoryEntries(self)
 	end
 	if self.LE_clear_input_category_on_deselect then
 		self:resetInputCategory()
-	end
-end
-
-
-function lgcInputS.reshapeUpdate(self)
-	self.LE:updateDisplayText()
-	self:updateDocumentDimensions()
-	editFuncS.updateCaretShape(self)
-	--self:scrollClampViewport()
-	--self:scrollGetCaretInBounds(true)
-end
-
-
-
-function lgcInputS.method_scrollGetCaretInBounds(self, immediate)
-	local LE = self.LE
-
-	-- get the extended caret rectangle
-	local car_x1 = self.LE_align_ox + LE.caret_box_x - self.LE_caret_extend_x
-	local car_y1 = LE.caret_box_y - self.LE_caret_extend_y
-	local car_x2 = self.LE_align_ox + LE.caret_box_x + math.max(LE.caret_box_w, LE.caret_box_w_edge) + self.LE_caret_extend_x
-	local car_y2 = LE.caret_box_y + LE.caret_box_h + self.LE_caret_extend_y
-
-	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
-end
-
-
-function lgcInputS.method_updateDocumentDimensions(self)
-	local LE = self.LE
-	local font = LE.font
-
-	--[[
-	The document width is the larger of: 1) viewport width, 2) text width (plus an empty caret slot).
-	When alignment is center or right and the text is smaller than the viewport, the text, caret,
-	etc. are transposed.
-	--]]
-	self.doc_w = math.max(self.vp_w, LE.disp_text_w)
-	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
-
-	local align = self.LE_align
-	if align == "left" then
-		self.LE_align_ox = 0
-
-	elseif align == "center" then
-		self.LE_align_ox = math.max(0, (self.vp_w - LE.disp_text_w) * .5)
-
-	else -- align == "right"
-		self.LE_align_ox = math.max(0, self.vp_w - LE.disp_text_w)
 	end
 end
 
@@ -504,8 +444,12 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 	-- Display Text.
 	if color_text then
 		love.graphics.setColor(color_text)
-		love.graphics.setFont(font)
-		love.graphics.print(LE.disp_text)
+		if self.LE_text_batch then
+			love.graphics.draw(self.LE_text_batch)
+		else
+			love.graphics.setFont(font)
+			love.graphics.print(LE.disp_text)
+		end
 	end
 
 	-- Caret.
@@ -522,19 +466,24 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 end
 
 
+function lgcInputS.cb_action(self, item_t)
+	return editWrapS.wrapAction(self, item_t.func)
+end
+
+
 -- Configuration functions for pop-up menu items.
 
 
 function lgcInputS.configItem_undo(item, client)
 	item.selectable = true
-	local hist = client.LE.hist
+	local hist = client.LE_hist
 	item.actionable = (hist.enabled and hist.pos > 1)
 end
 
 
 function lgcInputS.configItem_redo(item, client)
 	item.selectable = true
-	local hist = client.LE.hist
+	local hist = client.LE_hist
 	item.actionable = (hist.enabled and hist.pos < #hist.ledger)
 end
 

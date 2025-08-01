@@ -14,11 +14,9 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local edComBase = context:getLua("shared/line_ed/ed_com_base")
-local edComS = context:getLua("shared/line_ed/s/ed_com_s")
-local editHistS = context:getLua("shared/line_ed/s/edit_hist_s")
 local editCommandS = context:getLua("shared/line_ed/s/edit_command_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
+local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -201,7 +199,7 @@ end
 
 
 function client:getTextAlignment()
-	return self.LE_align
+	return self.LE.align
 end
 
 
@@ -217,6 +215,11 @@ end
 function client:resetInputCategory()
 	-- Used to force a new history entry.
 	self.LE_input_category = false
+end
+
+
+function client:scrollGetCaretInBounds(immediate)
+	editWidS.scrollGetCaretInBounds(self, immediate)
 end
 
 

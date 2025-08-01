@@ -9,6 +9,7 @@ local context = select(1, ...)
 local lgcInputM = {}
 
 
+local edCom = context:getLua("shared/line_ed/ed_com")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
 local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
@@ -28,9 +29,6 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
 -- LÖVE 12 compatibility
 local love_major, love_minor = love.getVersion()
-
-
-local _dummy_font = love.graphics.newFont(12)
 
 
 -- Widget def configuration.
@@ -83,7 +81,7 @@ function lgcInputM.setupInstance(self)
 	self.LE_click_line = 1
 	self.LE_click_byte = 1
 
-	self.LE_text_batch = uiGraphics.newTextBatch(_dummy_font)
+	self.LE_text_batch = uiGraphics.newTextBatch(edCom.dummy_font)
 
 	self.LE = lineEdM.new()
 
@@ -113,6 +111,9 @@ function lgcInputM.setupInstance(self)
 	-- the end of the text string).
 	self.LE_replace_mode = false
 
+	-- When false, cannot enable Replace Mode.
+	self.LE_allow_replace = true
+
 	-- What to do when there's a UTF-8 encoding problem.
 	-- Applies to input text, and also to clipboard get/set.
 	-- See 'textUtil.sanitize()' for options.
@@ -140,39 +141,49 @@ function lgcInputM.textInputLogic(self, text)
 		local xcl, xcb, xhl, xhb = LE:getCaretOffsets() -- old offsets
 
 		local suppress_replace = false
-		if self.LE_replace_mode then
-			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-			if LE.cb < #LE.lines[#LE.lines] + 1 then
-				self.LE_input_category = false
-			end
+		local clear_input_category = false
 
+		if self.LE_replace_mode then
 			-- Replace mode should not overwrite line feeds.
 			local line = LE.lines[LE.cl]
 			if LE.cb > #line then
 				suppress_replace = true
 			end
+
+			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
+			if xcb < #LE.lines[#LE.lines] + 1 then
+				clear_input_category = true
+			end
 		end
 
 		local written = editFuncM.writeText(self, text, suppress_replace)
 
-		editWidM.generalUpdate(self, true, true, true, true, true)
-
 		if written then
-			local no_ws = written:find("%S")
-			local entry = hist:getEntry()
-			local do_advance = true
+			editWidM.generalUpdate(self, true, true, true, true, true)
 
-			if (entry and entry.cl == xcl and entry.cb == xcb)
-			and ((self.LE_input_category == "typing" and no_ws) or (self.LE_input_category == "typing-ws"))
-			then
-				do_advance = false
+			if clear_input_category then
+				self.LE_input_category = false
 			end
 
-			if do_advance then
-				editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
+			if hist.enabled then
+				local no_ws = written:find("%S")
+				local entry = hist:getEntry()
+				local do_advance = true
+
+				if (entry and entry.cl == xcl and entry.cb == xcb)
+				and ((self.LE_input_category == "typing" and no_ws) or (self.LE_input_category == "typing-ws"))
+				then
+					do_advance = false
+				end
+
+				if do_advance then
+					editFuncM.doctorHistoryCaretOffsets(self, xcl, xcb, xhl, xhb)
+				end
+				editFuncM.writeHistoryEntry(self, do_advance)
+				self.LE_input_category = no_ws and "typing" or "typing-ws"
 			end
-			editFuncM.writeHistoryEntry(self, do_advance)
-			self.LE_input_category = no_ws and "typing" or "typing-ws"
+
+			return true
 		end
 	end
 end
@@ -376,6 +387,74 @@ function lgcInputM.mouseWheelLogic(self, x, y)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollBarShapes(self)
+end
+
+
+function lgcInputM.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
+	local LE = self.LE
+	local lines = LE.lines
+
+	-- Highlight rectangles.
+	if color_highlight and LE:isHighlighted() then
+		love.graphics.setColor(color_highlight)
+
+		for i = self.LE_vis_para1, self.LE_vis_para2 do
+			local paragraph = LE.paragraphs[i]
+			for j, sub_line in ipairs(paragraph) do
+				if sub_line.highlighted then
+					love.graphics.rectangle("fill", sub_line.x + sub_line.h_x, sub_line.y + sub_line.h_y, sub_line.h_w, sub_line.h_h)
+				end
+			end
+		end
+	end
+
+	-- Ghost text, if applicable.
+	-- XXX: center and right ghost text alignment modes aren't working correctly.
+	if font_ghost and self.LE_ghost_text and lines:isEmpty() then
+		local align = self.LE_ghost_text_align or LE.align
+
+		love.graphics.setFont(font_ghost)
+
+		local gx, gy
+		if align == "left" then
+			gx, gy = 0, 0
+
+		elseif align == "center" then
+			gx, gy = math.floor(-font:getWidth(self.LE_ghost_text) / 2), 0
+
+		elseif align == "right" then
+			gx, gy = math.floor(-font:getWidth(self.LE_ghost_text)), 0
+		end
+
+		if LE.wrap_mode then
+			love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp_w, align)
+
+		else
+			love.graphics.print(self.LE_ghost_text, gx, gy)
+		end
+	end
+
+	-- Main text.
+	love.graphics.setColor(color_text)
+
+	if self.LE_text_batch then
+		love.graphics.draw(self.LE_text_batch)
+	else
+		love.graphics.setFont(font)
+
+		for i = self.LE_vis_para1, self.LE_vis_para2 do
+			local paragraph = LE.paragraphs[i]
+			for j, sub_line in ipairs(paragraph) do
+				love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
+			end
+		end
+	end
+
+	-- Caret.
+	if color_caret and self.LE_caret_showing and self:hasAnyThimble() then
+		love.graphics.setColor(color_caret)
+		love.graphics.rectangle(self.LE_caret_fill, self.LE_caret_x, self.LE_caret_y, self.LE_caret_w, self.LE_caret_h)
+	end
 end
 
 

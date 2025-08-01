@@ -12,7 +12,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local edComBase = context:getLua("shared/line_ed/ed_com_base")
+local edCom = context:getLua("shared/line_ed/ed_com")
 local code_groups = context:getLua("shared/line_ed/code_groups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
@@ -681,7 +681,7 @@ function editFuncM.writeText(self, text, suppress_replace)
 	local lines = LE.lines
 
 	-- Sanitize input
-	text = edComBase.cleanString(text, self.LE_bad_input_rule, self.LE_tabs_to_spaces, self.LE_allow_line_feed)
+	text = edCom.cleanString(text, self.LE_bad_input_rule, self.LE_tabs_to_spaces, self.LE_allow_line_feed)
 
 	if not self.LE_allow_highlight then
 		LE:clearHighlight()
