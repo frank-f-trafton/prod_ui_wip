@@ -34,6 +34,7 @@ local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local edCom = context:getLua("shared/line_ed/ed_com")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
+local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
@@ -163,7 +164,7 @@ function lgcInputS.textInputLogic(self, text)
 	if self.LE_allow_input then
 		local hist = self.LE_hist
 
-		editWidS.resetCaretBlink(self)
+		editWid.resetCaretBlink(self)
 
 		local xcb, xhb = LE:getCaretOffsets() -- old offsets
 
@@ -215,7 +216,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
-	editWidS.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 
 	-- pop-up menu (undo, etc.)
 	if scancode == "application" or (shift_down and scancode == "f10") then
@@ -282,7 +283,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 	local LE = self.LE
 	local context = self.context
 
-	editWidS.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 
 	local ctrl_down, shift_down, alt_down, gui_down = context.key_mgr:getModState()
 
@@ -312,21 +313,18 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 				_caretToX(self, not shift_down, mouse_sx, true)
 
 				self.LE_click_byte = LE.cb
-				editWidS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 2 then
 				self.LE_click_byte = LE.cb
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()
-				editWidS.updateCaretShape(self)
 
 			elseif context.cseq_presses == 3 then
 				self.LE_click_byte = LE.cb
 
 				--- Highlight everything.
 				self:highlightAll()
-				editWidS.updateCaretShape(self)
 			end
 		end
 
@@ -354,7 +352,7 @@ function lgcInputS.mouseDragLogic(self)
 	local context = self.context
 	local LE = self.LE
 
-	editWidS.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 
 	-- Mouse position relative to viewport #1.
 	local ax, ay = self:getAbsolutePosition()
@@ -369,11 +367,9 @@ function lgcInputS.mouseDragLogic(self)
 	-- Handle drag highlight actions.
 	if context.cseq_presses == 1 then
 		_caretToX(self, false, s_mx, true)
-		editWidS.updateCaretShape(self)
 
 	elseif context.cseq_presses == 2 then
 		_clickDragByWord(self, s_mx, self.LE_click_byte)
-		editWidS.updateCaretShape(self)
 	end
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
 
@@ -383,11 +379,10 @@ end
 
 
 function lgcInputS.thimble1Take(self)
-	editWidS.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 
 	if self.LE_select_all_on_thimble1_take then
 		self:highlightAll()
-		editWidS.updateCaretShape(self)
 	end
 end
 
@@ -396,7 +391,6 @@ function lgcInputS.thimble1Release(self)
 	love.keyboard.setTextInput(false)
 	if self.LE_deselect_all_on_thimble1_release then
 		self:caretFirst(true)
-		editWidS.updateCaretShape(self)
 	end
 	if self.LE_clear_history_on_deselect then
 		editFuncS.wipeHistoryEntries(self)

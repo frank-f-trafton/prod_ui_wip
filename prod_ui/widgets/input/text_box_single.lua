@@ -21,6 +21,7 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 -- ProdUI
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
+local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
@@ -209,7 +210,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	editWidS.updateCaretBlink(self, dt)
+	editWid.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end

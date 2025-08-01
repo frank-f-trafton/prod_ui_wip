@@ -14,13 +14,12 @@ local utf8 = require("utf8")
 -- ProdUI
 local edCom = context:getLua("shared/line_ed/ed_com")
 local code_groups = context:getLua("shared/line_ed/code_groups")
+local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 
 
 function editFuncM.cutHighlightedToClipboard(self)
-	local LE = self.LE
-
 	local cut = editFuncM.deleteHighlighted(self)
 	if cut then
 		cut = textUtil.sanitize(cut, self.LE_bad_input_rule)
@@ -31,8 +30,6 @@ end
 
 
 function editFuncM.copyHighlightedToClipboard(self)
-	local LE = self.LE
-
 	local copied = self:getHighlightedText()
 	copied = textUtil.sanitize(copied, self.LE_bad_input_rule)
 
@@ -41,15 +38,13 @@ end
 
 
 function editFuncM.pasteClipboard(self)
-	local LE = self.LE
-
 	local text = love.system.getClipboardText()
 
 	-- love.system.getClipboardText() may return an empty string if there is nothing in the clipboard,
 	-- or if the current clipboard payload is not text. I'm not sure if it can return nil as well.
 	-- Check both cases here to be sure.
 	if text and text ~= "" then
-		if LE:isHighlighted() then
+		if self.LE:isHighlighted() then
 			editFuncM.deleteHighlighted(self)
 		end
 
@@ -70,7 +65,6 @@ end
 
 function editFuncM.deleteCaretToLineStart(self)
 	local LE = self.LE
-	local lines = LE.lines
 
 	LE:clearHighlight()
 
@@ -151,9 +145,8 @@ end
 
 function editFuncM.caretJumpLeft(self, clear_highlight)
 	local LE = self.LE
-	local lines = LE.lines
 
-	local cl, cb = edComM.huntWordBoundary(code_groups, lines, LE.cl, LE.cb, -1, false, -1, false)
+	local cl, cb = edComM.huntWordBoundary(code_groups, LE.lines, LE.cl, LE.cb, -1, false, -1, false)
 	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
@@ -190,33 +183,30 @@ end
 
 function editFuncM.caretSubLineFirst(self, clear_highlight)
 	local LE = self.LE
-	local lines = LE.lines
 
 	-- Find the first uChar offset for the current Paragraph + sub-line pair.
 	local u_count = edComM.getSubLineUCharOffsetStart(LE.paragraphs[LE.dcp], LE.dcs)
 
 	-- Convert the display u_count to a byte offset in the LineEd/source string.
-	local cl, cb = LE.cl, utf8.offset(lines[LE.cl], u_count)
+	local cl, cb = LE.cl, utf8.offset(LE.lines[LE.cl], u_count)
 	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretSubLineLast(self, clear_highlight)
 	local LE = self.LE
-	local lines = LE.lines
 
 	-- Find the last uChar offset for the current Paragraph + sub-line pair.
 	local u_count = edComM.getSubLineUCharOffsetEnd(LE.paragraphs[LE.dcp], LE.dcs)
 
 	-- Convert to internal LineEd byte offset
-	local cl, cb = LE.cl, utf8.offset(lines[LE.cl], u_count)
+	local cl, cb = LE.cl, utf8.offset(LE.lines[LE.cl], u_count)
 	LE:moveCaret(cl, cb, clear_highlight, true)
 end
 
 
 function editFuncM.caretLineFirst(self, clear_highlight)
 	local LE = self.LE
-	local lines = LE.lines
 
 	local cl, cb, hl, hb = LE:getCaretOffsets()
 	editFuncM.caretSubLineFirst(self, clear_highlight)
@@ -228,7 +218,6 @@ end
 
 function editFuncM.caretLineLast(self, clear_highlight)
 	local LE = self.LE
-	local lines = LE.lines
 
 	local cl, cb, hl, hb = LE:getCaretOffsets()
 	editFuncM.caretSubLineLast(self, clear_highlight)
@@ -239,9 +228,7 @@ end
 
 
 function editFuncM.caretFirst(self, clear_highlight)
-	local LE = self.LE
-
-	LE:moveCaret(1, 1, clear_highlight, true)
+	self.LE:moveCaret(1, 1, clear_highlight, true)
 end
 
 
@@ -254,8 +241,6 @@ end
 
 function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 	local LE = self.LE
-	local lines = LE.lines
-	local font = LE.font
 	local paragraphs = LE.paragraphs
 
 	n_steps = n_steps or 1
@@ -270,7 +255,7 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
 		local d_str = d_sub_t.str
-		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, LE.vertical_x_hint - d_sub_t.x)
+		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, LE.font, LE.vertical_x_hint - d_sub_t.x)
 
 		-- Not the last sub-line in the Paragraph: correct leftmost position so that it doesn't
 		-- spill over to the next sub-line (and get stuck).
@@ -280,7 +265,7 @@ function editFuncM.caretStepUp(self, clear_highlight, n_steps)
 
 		-- Convert display offsets to ones suitable for logical lines.
 		local u_count = edComM.displaytoUCharCount(paragraphs[d_para], d_sub, new_byte)
-		LE:moveCaret(d_para, utf8.offset(lines[d_para], u_count), clear_highlight, false)
+		LE:moveCaret(d_para, utf8.offset(LE.lines[d_para], u_count), clear_highlight, false)
 	end
 end
 
@@ -288,14 +273,13 @@ end
 function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 	local LE = self.LE
 	local lines = LE.lines
-	local font = LE.font
 	local paragraphs = LE.paragraphs
 
 	n_steps = n_steps or 1
 
 	-- Already at bottom sub-line: move to end.
 	if LE.dcp >= #paragraphs and LE.dcs >= #paragraphs[#paragraphs] then
-		LE:moveCaret(#LE.lines, #LE.lines[LE.cl] + 1, clear_highlight, true)
+		LE:moveCaret(#lines, #lines[LE.cl] + 1, clear_highlight, true)
 	else
 		-- Get the offsets for the sub-line 'n_steps' below.
 		local d_para, d_sub = edComM.stepSubLine(paragraphs, LE.dcp, LE.dcs, n_steps)
@@ -303,7 +287,7 @@ function editFuncM.caretStepDown(self, clear_highlight, n_steps)
 		-- Find the closest uChar / glyph to the current X hint.
 		local d_sub_t = paragraphs[d_para][d_sub]
 		local d_str = d_sub_t.str
-		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, font, LE.vertical_x_hint - d_sub_t.x)
+		local new_byte, new_u_char, pixels = textUtil.getByteOffsetAtX(d_str, LE.font, LE.vertical_x_hint - d_sub_t.x)
 
 		-- Not the last sub-line in the Paragraph: correct rightmost position so that it doesn't
 		-- spill over to the next sub-line.
@@ -320,7 +304,6 @@ end
 
 function editFuncM.caretStepUpCoreLine(self, clear_highlight)
 	local LE = self.LE
-	local lines = LE.lines
 
 	-- Already at top line: move to start.
 	if LE.cl <= 1 then
@@ -417,11 +400,10 @@ end
 
 function editFuncM.backspaceUChar(self, n_u_chars)
 	local LE = self.LE
-	local lines = LE.lines
 
 	LE:clearHighlight()
 
-	local line_1, byte_1, u_count = lines:countUChars(-1, LE.cl, LE.cb, n_u_chars)
+	local line_1, byte_1, u_count = LE.lines:countUChars(-1, LE.cl, LE.cb, n_u_chars)
 
 	if u_count > 0 then
 		return LE:deleteText(true, line_1, byte_1, LE.cl, LE.cb - 1)
@@ -431,11 +413,10 @@ end
 
 function editFuncM.deleteUChar(self, n_u_chars)
 	local LE = self.LE
-	local lines = LE.lines
 
 	LE:clearHighlight()
 
-	local line_2, byte_2, u_count = lines:countUChars(1, LE.cl, LE.cb, n_u_chars)
+	local line_2, byte_2, u_count = LE.lines:countUChars(1, LE.cl, LE.cb, n_u_chars)
 
 	if u_count > 0 then
 		-- Delete offsets are inclusive, so get the rightmost byte that is part of the final code point.
@@ -527,20 +508,22 @@ end
 
 local function _indentLine(self, line_n)
 	local LE = self.LE
+	local lines = LE.lines
 
-	local old_line = LE.lines[line_n]
+	local old_line = lines[line_n]
 
 	LE:moveCaretAndHighlight(line_n, 1, line_n, 1, false)
 	LE:insertText("\t")
 
-	return old_line ~= LE.lines[line_n]
+	return old_line ~= lines[line_n]
 end
 
 
 local function _unindentLine(self, line_n)
 	local LE = self.LE
+	local lines = LE.lines
 
-	local old_line = LE.lines[line_n]
+	local old_line = lines[line_n]
 
 	if old_line:sub(1, 1) == "\t" then
 		LE:deleteText(false, line_n, 1, line_n, 1)
@@ -552,7 +535,7 @@ local function _unindentLine(self, line_n)
 		end
 	end
 
-	return old_line ~= LE.lines[line_n]
+	return old_line ~= lines[line_n]
 end
 
 
@@ -615,15 +598,9 @@ end
 
 function editFuncM.highlightAll(self)
 	local LE = self.LE
+	local lines = LE.lines
 
-	LE:moveCaretAndHighlight(#LE.lines, #LE.lines[LE.cl] + 1, 1, 1, true)
-end
-
-
-function editFuncM.clearHighlight(self)
-	local LE = self.LE
-
-	self.LE:clearHighlight()
+	LE:moveCaretAndHighlight(#lines, #lines[LE.cl] + 1, 1, 1, true)
 end
 
 
@@ -644,13 +621,10 @@ end
 
 function editFuncM.highlightCurrentWrappedLine(self)
 	local LE = self.LE
-	local lines = LE.lines
 
 	local cl, hl = LE.cl, LE.cl
 	local cb, hb = LE:getWrappedLineRange(LE.cl, LE.cb)
 	LE:moveCaretAndHighlight(cl, cb, hl, hb, true)
-
-	--print("LE.cb", LE.cb, "LE.hl", LE.hb)
 end
 
 
@@ -671,6 +645,11 @@ function editFuncM.stepHistory(self, dir)
 end
 
 
+function editFuncM.getText(self, l1, l2)
+	return self.LE.lines:copyString(l1, l2)
+end
+
+
 --- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
 -- @param text The input text. It will be sanitized, and possibly trimmed to fit into the uChar limit.
 -- @param suppress_replace When true, the "replace mode" codepath is not selected. Use when pasting,
@@ -678,7 +657,6 @@ end
 -- @return The sanitized and trimmed text which was inserted into the field, or nil if no text was added.
 function editFuncM.writeText(self, text, suppress_replace)
 	local LE = self.LE
-	local lines = LE.lines
 
 	-- Sanitize input
 	text = edCom.cleanString(text, self.LE_bad_input_rule, self.LE_tabs_to_spaces, self.LE_allow_line_feed)
@@ -700,7 +678,7 @@ function editFuncM.writeText(self, text, suppress_replace)
 
 	-- XXX Planning to add and subtract to this as strings are written and deleted.
 	-- For now, just recalculate the length to ensure things are working.
-	LE.u_chars = lines:uLen()
+	LE.u_chars = LE.lines:uLen()
 	text = textUtil.trimString(text, self.LE_u_chars_max - LE.u_chars)
 
 	if #text > 0 then
@@ -713,8 +691,9 @@ end
 
 function editFuncM.replaceText(self, text)
 	local LE = self.LE
+	local lines = LE.lines
 
-	LE:deleteText(false, 1, 1, #LE.lines, #LE.lines[#LE.lines])
+	LE:deleteText(false, 1, 1, #lines, #lines[#lines])
 	return editFuncM.writeText(self, text, true)
 end
 
@@ -730,13 +709,11 @@ end
 --	used right after the widget is initialized, because a populated history ledger may contain entries with highlights.)
 -- @param enabled true or false/nil.
 function editFuncM.setAllowHighlight(self, enabled)
-	local LE = self.LE
-
 	enabled = not not enabled
 	if self.LE_allow_highlight ~= enabled then
 		self.LE_allow_highlight = enabled
 		if not enabled then
-			LE:clearHighlight()
+			self.LE:clearHighlight()
 		end
 		return true
 	end
@@ -745,16 +722,17 @@ end
 
 function editFuncM.initHistoryEntry(self, entry)
 	local LE = self.LE
-	local src_lines = LE.lines
+	local lines = LE.lines
 
 	entry.lines = entry.lines or {}
+	local e_lines = entry.lines
 	local cl, cb, hl, hb = LE:getCaretOffsets()
 
-	for i = #entry.lines, #src_lines + 1, -1 do
-		entry.lines[i] = nil
+	for i = #e_lines, #lines + 1, -1 do
+		e_lines[i] = nil
 	end
-	for i = 1, #src_lines do
-		entry.lines[i] = src_lines[i]
+	for i = 1, #lines do
+		e_lines[i] = lines[i]
 	end
 
 	entry.cl, entry.cb, entry.hl, entry.hb = cl, cb, hl, hb
@@ -770,15 +748,15 @@ end
 
 function editFuncM.applyHistoryEntry(self, entry)
 	local LE = self.LE
-	local src_lines = LE.lines
+	local lines = LE.lines
 	local paragraphs = LE.paragraphs
-	local entry_lines = entry.lines
+	local e_lines = entry.lines
 
-	for i = 1, #entry_lines do
-		src_lines[i] = entry_lines[i]
+	for i = 1, #e_lines do
+		lines[i] = e_lines[i]
 	end
-	for i = #src_lines, #entry_lines + 1, -1 do
-		src_lines[i] = nil
+	for i = #lines, #e_lines + 1, -1 do
+		lines[i] = nil
 		paragraphs[i] = nil
 	end
 
