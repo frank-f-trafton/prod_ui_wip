@@ -25,6 +25,7 @@ local utf8 = require("utf8")
 
 local edComS = context:getLua("shared/line_ed/s/ed_com_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
+local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
@@ -299,9 +300,8 @@ function def:setValueMode(mode)
 end
 
 
--- To get the internal or display text:
+-- To get the internal text:
 -- self:getText()
--- self:getDisplayText()
 
 
 function def:getDefaultValue()
@@ -444,7 +444,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	editWidS.updateCaretBlink(self, dt)
+	editWid.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end

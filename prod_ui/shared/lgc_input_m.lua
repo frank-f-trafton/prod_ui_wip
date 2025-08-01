@@ -16,6 +16,7 @@ local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
+local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
 local lgcMenu = context:getLua("shared/lgc_menu")
@@ -136,7 +137,7 @@ function lgcInputM.textInputLogic(self, text)
 	if self.LE_allow_input then
 		local hist = self.LE_hist
 
-		editWidM.resetCaretBlink(self)
+		editWid.resetCaretBlink(self)
 
 		local xcl, xcb, xhl, xhb = LE:getCaretOffsets() -- old offsets
 
@@ -194,7 +195,7 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
 
-	editWidM.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 
 	-- pop-up menu (undo, etc.)
 	if scancode == "application" or (shift_down and scancode == "f10") then
@@ -280,7 +281,7 @@ end
 function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 	local LE = self.LE
 
-	editWidM.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 	local mx, my = self:getRelativePosition(x, y)
 
 	if button == 1 then
@@ -349,7 +350,7 @@ function lgcInputM.mouseDragLogic(self)
 
 	local widget_needs_update = false
 
-	editWidM.resetCaretBlink(self)
+	editWid.resetCaretBlink(self)
 
 	-- relative mouse position
 	local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)

@@ -31,6 +31,7 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 
 -- ProdUI
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
+local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputM = context:getLua("shared/lgc_input_m")
@@ -202,7 +203,7 @@ end
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
-		editWidM.resetCaretBlink(self)
+		editWid.resetCaretBlink(self)
 	end
 end
 
@@ -246,7 +247,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	editWidM.updateCaretBlink(self, dt)
+	editWid.updateCaretBlink(self, dt)
 
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then

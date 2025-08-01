@@ -32,8 +32,7 @@ See wimp/dropdown_box.lua for relevant 'TODO's.
 
 The last chosen index is tracked to help the user keep their place in the drawer when repeatedly opening
 and closing it. This index should not be referenced by your program logic, however, because it might
-have no association with the current input text. Use `self:getDisplayText()` or `self:getInternalText()`
-instead.
+have no association with the current input text. Use `self:getText()` instead.
 
 Two kinds of pop-up menu are associated with this widget: the drawer, and also the standard context menu
 when right-clicking on the editable text area. Only one of these may be active at a time, and you cannot
@@ -45,6 +44,7 @@ local context = select(1, ...)
 
 
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
+local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
@@ -200,18 +200,6 @@ function def:setSelectionByIndex(item_i)
 end
 
 
---- Gets the internal text string.
-function def:getInternalText()
-	return self.LE.line
-end
-
-
---- Gets the display text string (which may be modified to show different UTF-8 code points).
-function def:getDisplayText()
-	return self.LE.disp_text
-end
-
-
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -277,7 +265,7 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	editWidS.updateCaretBlink(self, dt)
+	editWid.updateCaretBlink(self, dt)
 
 	self:scrollUpdate(dt)
 end

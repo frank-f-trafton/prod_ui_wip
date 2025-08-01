@@ -15,6 +15,7 @@ local utf8 = require("utf8")
 -- ProdUI
 local code_groups = context:getLua("shared/line_ed/code_groups")
 local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
+local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -64,7 +65,7 @@ end
 
 
 function client:clearHighlight()
-	editWrapM.wrapAction(self, editCommandM.clearHighlight) -- TODO: wrapped function doesn't exist
+	editWrapM.wrapAction(self, editCommandM.clearHighlight)
 end
 
 
@@ -140,7 +141,10 @@ end
 
 
 function client:getText(l1, l2)
-	return self.LE.lines:copyString(l1, l2)
+	uiShared.typeEval1(1, l1, "number")
+	uiShared.typeEval1(2, l2, "number")
+
+	return editFuncM.getText(self, l1, l2)
 end
 
 

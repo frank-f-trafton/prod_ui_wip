@@ -142,7 +142,7 @@ function editCommandM.caretToHighlightEdgeLeft(self)
 	if self.LE_allow_highlight then
 		editFuncM.caretToHighlightEdgeLeft(self)
 	else
-		editFuncM.clearHighlight(self)
+		self.LE:clearHighlight()
 	end
 
 	return true, true, true
@@ -153,7 +153,7 @@ function editCommandM.caretToHighlightEdgeRight(self)
 	if self.LE_allow_highlight then
 		editFuncM.caretToHighlightEdgeRight(self)
 	else
-		editFuncM.clearHighlight(self)
+		self.LE:clearHighlight()
 	end
 
 	return true, true, true
@@ -558,7 +558,7 @@ function editCommandM.highlightAll(self)
 	if self.LE_allow_highlight then
 		editFuncM.highlightAll(self)
 	else
-		editFuncM.clearHighlight(self)
+		self.LE:clearHighlight()
 	end
 
 	return true, true
@@ -569,7 +569,7 @@ function editCommandM.highlightCurrentWord(self)
 	if self.LE_allow_highlight then
 		editFuncM.highlightCurrentWord(self)
 	else
-		editFuncM.clearHighlight(self)
+		self.LE:clearHighlight()
 	end
 
 	return true, true
@@ -580,7 +580,7 @@ function editCommandM.highlightCurrentLine(self)
 	if self.LE_allow_highlight then
 		editFuncM.highlightCurrentLine(self)
 	else
-		editFuncM.clearHighlight(self)
+		self.LE:clearHighlight()
 	end
 
 	return true, true
@@ -591,8 +591,15 @@ function editCommandM.highlightCurrentWrappedLine(self)
 	if self.LE_allow_highlight then
 		editFuncM.highlightCurrentWrappedLine(self)
 	else
-		editFuncM.clearHighlight(self)
+		self.LE:clearHighlight()
 	end
+
+	return true, true
+end
+
+
+function editCommandM.clearHighlight(self)
+	self.LE:clearHighlight()
 
 	return true, true
 end

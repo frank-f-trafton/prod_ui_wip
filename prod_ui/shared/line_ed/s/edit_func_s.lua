@@ -82,14 +82,6 @@ local function _writeText(self, LE, text, suppress_replace)
 end
 
 
--- Do not use with methods that change the internal text.
-local function _checkClearHighlight(LE, clear_highlight)
-	if clear_highlight then
-		LE:clearHighlight()
-	end
-end
-
-
 function editFuncS.cutHighlightedToClipboard(self)
 	local LE = self.LE
 
@@ -154,9 +146,7 @@ end
 
 
 function editFuncS.caretFirst(self, clear_highlight)
-	local LE = self.LE
-
-	LE:moveCaret(1, clear_highlight)
+	self.LE:moveCaret(1, clear_highlight)
 end
 
 
@@ -396,11 +386,6 @@ function editFuncS.getHighlightedText(self)
 end
 
 
-function editFuncS.getDisplayText(self)
-	return self.LE.disp_text
-end
-
-
 --- Write text to the field, checking for bad input and trimming to fit into the uChar limit.
 -- @param self The widget.
 -- @param text The input text. It will be sanitized, and possibly trimmed to fit into the uChar limit.
@@ -472,9 +457,7 @@ end
 
 
 function editFuncS.initHistoryEntry(entry, source_line, cb, hb)
-	entry.line = source_line
-	entry.cb = cb
-	entry.hb = hb
+	entry.line, entry.cb, entry.hb = source_line, cb, hb
 end
 
 
@@ -515,9 +498,7 @@ function editFuncS.applyHistoryEntry(self, entry)
 
 	--print("editFuncS.applyHistoryEntry", "|"..entry.line.."|", entry.cb, entry.hb)
 
-	LE.line = entry.line
-	LE.cb = entry.cb
-	LE.hb = entry.hb
+	LE.line, LE.cb, LE.hb = entry.line, entry.cb, entry.hb
 end
 
 
@@ -528,8 +509,7 @@ function editFuncS.doctorHistoryCaretOffsets(self, cb, hb)
 			local entry = hist.ledger[hist.pos]
 
 			if entry then
-				entry.cb = cb
-				entry.hb = hb
+				entry.cb, entry.hb = cb, hb
 			end
 		end
 	end

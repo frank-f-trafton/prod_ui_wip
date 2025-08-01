@@ -71,11 +71,6 @@ function client:getText()
 end
 
 
-function client:getDisplayText()
-	return editFuncS.getDisplayText(self)
-end
-
-
 function client:getHighlightedText()
 	return editFuncS.getHighlightedText(self)
 end
