@@ -92,7 +92,7 @@ context:getLua() and context:tryLua() are similar to require(), but they use for
 and they pass the UI context table through varargs. The modules are cached inside of `context._shared`, with file paths as
 keys.
 
-Each context will have its own cached instance of a module. Avoid using both getLua() and require() on the same file.
+Each context will have its own cached instance of a module. Don't use both getLua() and require() on the same file.
 --]]
 
 

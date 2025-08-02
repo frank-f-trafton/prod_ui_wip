@@ -30,13 +30,11 @@ local utf8 = require("utf8")
 
 
 local editActS = context:getLua("shared/line_ed/s/edit_act_s")
-local editBindS = context:getLua("shared/line_ed/s/edit_bind_s")
 local edCom = context:getLua("shared/line_ed/ed_com")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
-local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
@@ -241,10 +239,13 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local bound_func = editBindS[hot_scan] or editBindS[hot_key]
+	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands_single, hot_key, hot_scan)
+	if id then
+		local bound_func = editActS[id]
 
-	if bound_func then
-		return editWrapS.wrapAction(self, bound_func)
+		if bound_func then
+			return editWidS.wrapAction(self, bound_func)
+		end
 	end
 end
 
@@ -461,7 +462,7 @@ end
 
 
 function lgcInputS.cb_action(self, item_t)
-	return editWrapS.wrapAction(self, item_t.func)
+	return editWidS.wrapAction(self, item_t.func)
 end
 
 

@@ -48,7 +48,7 @@ function _mt_loader:get(path)
 
 	local res, err = self:try(path)
 	if not res then
-		error(tostring(path) .. ": " .. tostring(err), 2)
+		error(tostring(err), 2)
 	end
 	return res
 end

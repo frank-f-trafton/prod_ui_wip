@@ -12,13 +12,12 @@ local lgcInputM = {}
 local edCom = context:getLua("shared/line_ed/ed_com")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local editActM = context:getLua("shared/line_ed/m/edit_act_m")
-local editBindM = context:getLua("shared/line_ed/m/edit_bind_m")
 local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
-local editWrapM = context:getLua("shared/line_ed/m/edit_wrap_m")
+local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
@@ -220,10 +219,13 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local bound_func = editBindM[hot_scan] or editBindM[hot_key]
+	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands_multi, hot_key, hot_scan)
+	if id then
+		local bound_func = editActM[id]
 
-	if bound_func then
-		return editWrapM.wrapAction(self, bound_func)
+		if bound_func then
+			return editWidM.wrapAction(self, bound_func)
+		end
 	end
 end
 
@@ -460,7 +462,7 @@ end
 
 
 function lgcInputM.cb_action(self, item_t)
-	return editWrapM.wrapAction(self, item_t.func)
+	return editWidM.wrapAction(self, item_t.func)
 end
 
 
