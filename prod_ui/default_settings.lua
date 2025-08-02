@@ -47,5 +47,106 @@ return {
 			draw_underlines = "always",
 		},
 
+		text_input = {
+			--[[
+			NOTE: holding control prevents love.textinput from firing, but holding alt does not.
+			--]]
+
+			-- TODO: MacOS shortcuts.
+
+			commands_single = {
+				{"caret-left", "+left"},
+				{"caret-right", "+right"},
+				{"caret-left-highlight", "S+left"},
+				{"caret-right-highlight", "S+right"},
+				{"caret-jump-left", "C+left"},
+				{"caret-jump-right", "C+right"},
+				{"caret-jump-left-highlight", "CS+left"},
+				{"caret-jump-right-highlight", "CS+right"},
+				{"caret-first", "+home", "C+home"},
+				{"caret-last", "+end", "C+end"},
+				{"caret-first-highlight", "S+home", "CS+home"},
+				{"caret-last-highlight", "S+end", "CS+end"},
+				{"backspace", "+backspace", "S+backspace"},
+				{"delete", "+delete", "S+delete"},
+				--{"delete-highlighted"},
+				{"delete-group", "C+delete"},
+				--{"delete-all", "C+d"},
+				{"backspace-group", "C+backspace"},
+				{"delete-caret-to-end", "CS+delete"},
+				{"backspace-caret-to-start", "CS+backspace"},
+				{"type-tab", "+tab"},
+				{"type-line-feed", "+return", "S+return", "+kpenter", "S+kpenter"},
+				{"select-all", "C+a"},
+				--{"select-current-word"},
+				{"cut", "C+x", "S+delete"},
+				{"copy", "C+c"},
+				{"paste", "C+v"},
+				{"toggle-replace-mode", "+insert"},
+				{"undo", "C+z"},
+				{"redo", "C+y", "CS+z"},
+			},
+
+			commands_multi = {
+				{"caret-left", "+left"},
+				{"caret-right", "+right"},
+				{"caret-left-highlight", "S+left"},
+				{"caret-right-highlight", "S+right"},
+				{"caret-jump-left", "C+left"},
+				{"caret-jump-right", "C+right"},
+				{"caret-jump-left-highlight", "CS+left"},
+				{"caret-jump-right-highlight", "CS+right"},
+				{"caret-first", "C+home"},
+				{"caret-last", "C+end"},
+				{"caret-first-highlight", "CS+home"},
+				{"caret-last-highlight", "CS+end"},
+				{"caret-step-up", "+up"},
+				{"caret-step-down", "+down"},
+				{"caret-page-up", "+pageup"},
+				{"caret-page-down", "+pagedown"},
+				{"caret-page-up-highlight", "S+pageup"},
+				{"caret-page-down-highlight", "S+pagedown"},
+				{"caret-step-up-highlight", "S+up"},
+				{"caret-step-down-highlight", "S+down"},
+				{"shift-lines-up", "A+up"},
+				{"shift-lines-down", "A+down"},
+				{"caret-line-first", "+home"},
+				{"caret-line-last", "+end"},
+				{"caret-line-first-highlight", "S+home"},
+				{"caret-line-last-highlight", "S+end"},
+				{"backspace", "+backspace", "S+backspace"},
+				{"delete", "+delete"},
+				{"delete-highlighted"},
+				{"delete-group", "C+delete"},
+				{"delete-all"},
+				{"backspace-group", "C+backspace"},
+				{"delete-caret-to-end", "CS+delete"},
+				{"backspace-caret-to-start", "CS+backspace"},
+				{"type-tab", "+tab"},
+				{"type-untab", "S+tab"},
+				{"type-line-feed", "S+return", "S+kpenter"},
+				{"type-line-feed-with-auto-indent", "+return", "+kpenter"},
+				{"select-all", "C+a"},
+				{"select-current-word"},
+				{"cut", "C+x", "S+delete"},
+				{"copy", "C+c"},
+				{"paste", "C+v"},
+				{"toggle-replace-mode", "+insert"},
+				{"undo", "C+z"},
+				{"redo", "C+y", "CS+z"},
+
+				--[=[
+				-- v ????????????????? v --
+
+				{"caret-step-up-core-line", "C+up"},
+				{"caret-step-down-core-line", "C+down"},
+
+				{"caret-step-up-core-line-highlight", "CS+up"},
+				{"caret-step-down-core-line-highlight", "CS+down"},
+
+				{"delete-line", "C+d"},
+				--]=]
+			},
+		}
 	}
 }

@@ -17,7 +17,6 @@ local code_groups = context:getLua("shared/line_ed/code_groups")
 local editCommandS = context:getLua("shared/line_ed/s/edit_command_s")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
-local editWrapS = context:getLua("shared/line_ed/s/edit_wrap_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
@@ -26,43 +25,43 @@ local _enum_align = uiShared.makeLUTV("left", "center", "right")
 
 
 function client:deleteHighlighted()
-	editWrapS.wrapAction(self, editCommandS.deleteHighlighted)
+	editWidS.wrapAction(self, editCommandS.deleteHighlighted)
 end
 
 
 function client:backspace()
-	editWrapS.wrapAction(self, editCommandS.backspace)
+	editWidS.wrapAction(self, editCommandS.backspace)
 end
 
 
 function client:writeText(text, suppress_replace)
 	uiShared.type1(1, text, "string")
 
-	editWrapS.wrapAction(self, editCommandS.writeText, text, suppress_replace)
+	editWidS.wrapAction(self, editCommandS.writeText, text, suppress_replace)
 end
 
 
 function client:replaceText(text)
 	uiShared.type1(1, text, "string")
 
-	editWrapS.wrapAction(self, editCommandS.replaceText, text)
+	editWidS.wrapAction(self, editCommandS.replaceText, text)
 end
 
 
 function client:setText(text)
 	uiShared.type1(1, text, "string")
 
-	editWrapS.wrapAction(self, editCommandS.setText, text)
+	editWidS.wrapAction(self, editCommandS.setText, text)
 end
 
 
 function client:undo()
-	editWrapS.wrapAction(self, editCommandS.undo)
+	editWidS.wrapAction(self, editCommandS.undo)
 end
 
 
 function client:redo()
-	editWrapS.wrapAction(self, editCommandS.redo)
+	editWidS.wrapAction(self, editCommandS.redo)
 end
 
 
@@ -82,99 +81,99 @@ end
 
 
 function client:clearHighlight()
-	editWrapS.wrapAction(self, editCommandS.clearHighlight)
+	editWidS.wrapAction(self, editCommandS.clearHighlight)
 end
 
 
 function client:highlightAll()
-	editWrapS.wrapAction(self, editCommandS.highlightAll)
+	editWidS.wrapAction(self, editCommandS.highlightAll)
 end
 
 
 function client:caretToHighlightEdgeLeft()
-	editWrapS.wrapAction(self, editCommandS.caretToHighlightEdgeLeft)
+	editWidS.wrapAction(self, editCommandS.caretToHighlightEdgeLeft)
 end
 
 
 function client:caretToHighlightEdgeRight()
-	editWrapS.wrapAction(self, editCommandS.caretToHighlightEdgeRight)
+	editWidS.wrapAction(self, editCommandS.caretToHighlightEdgeRight)
 end
 
 
 function client:highlightCurrentWord()
-	editWrapS.wrapAction(self, editCommandS.highlightCurrentWord)
+	editWidS.wrapAction(self, editCommandS.highlightCurrentWord)
 end
 
 
 function client:caretStepLeft(clear_highlight)
-	editWrapS.wrapAction(self, editCommandS.caretLeft, clear_highlight)
+	editWidS.wrapAction(self, editCommandS.caretLeft, clear_highlight)
 end
 
 
 function client:caretStepRight(clear_highlight)
-	editWrapS.wrapAction(self, editCommandS.caretRight, clear_highlight)
+	editWidS.wrapAction(self, editCommandS.caretRight, clear_highlight)
 end
 
 
 function client:caretJumpLeft(clear_highlight)
-	editWrapS.wrapAction(self, editCommandS.caretJumpRight, clear_highlight)
+	editWidS.wrapAction(self, editCommandS.caretJumpRight, clear_highlight)
 end
 
 
 function client:caretJumpRight(clear_highlight)
-	editWrapS.wrapAction(self, editCommandS.caretJumpRight, clear_highlight)
+	editWidS.wrapAction(self, editCommandS.caretJumpRight, clear_highlight)
 end
 
 
 function client:deleteUChar(n_u_chars)
 	uiShared.type1(1, n_u_chars, "number")
 
-	editWrapS.wrapAction(self, editCommandS.deleteUChar, n_u_chars)
+	editWidS.wrapAction(self, editCommandS.deleteUChar, n_u_chars)
 end
 
 
 function client:deleteGroup()
-	editWrapS.wrapAction(self, editCommandS.deleteGroup)
+	editWidS.wrapAction(self, editCommandS.deleteGroup)
 end
 
 
 function client:backspaceGroup()
-	editWrapS.wrapAction(self, editCommandS.backspaceGroup)
+	editWidS.wrapAction(self, editCommandS.backspaceGroup)
 end
 
 
 function client:deleteCaretToEnd()
-	editWrapS.wrapAction(self, editCommandS.deleteCaretToEnd)
+	editWidS.wrapAction(self, editCommandS.deleteCaretToEnd)
 end
 
 
 function client:deleteCaretToStart()
-	editWrapS.wrapAction(self, editCommandS.deleteCaretToStart)
+	editWidS.wrapAction(self, editCommandS.deleteCaretToStart)
 end
 
 
 function client:caretFirst(clear_highlight)
-	editWrapS.wrapAction(self, editFuncS.caretFirst, clear_highlight)
+	editWidS.wrapAction(self, editFuncS.caretFirst, clear_highlight)
 end
 
 
 function client:caretLast(clear_highlight)
-	editWrapS.wrapAction(self, editFuncS.caretLast, clear_highlight)
+	editWidS.wrapAction(self, editFuncS.caretLast, clear_highlight)
 end
 
 
 function client:cut()
-	editWrapS.wrapAction(self, editCommandS.cut)
+	editWidS.wrapAction(self, editCommandS.cut)
 end
 
 
 function client:copy()
-	editWrapS.wrapAction(self, editCommandS.copy)
+	editWidS.wrapAction(self, editCommandS.copy)
 end
 
 
 function client:paste()
-	editWrapS.wrapAction(self, editCommandS.paste)
+	editWidS.wrapAction(self, editCommandS.paste)
 end
 
 
@@ -184,12 +183,12 @@ end
 
 
 function client:setReplaceMode(enabled)
-	editWrapS.wrapAction(self, editCommandS.setReplaceMode, enabled)
+	editWidS.wrapAction(self, editCommandS.setReplaceMode, enabled)
 end
 
 
 function client:toggleReplaceMode()
-	editWrapS.wrapAction(self, editCommandS.toggleReplaceMode)
+	editWidS.wrapAction(self, editCommandS.toggleReplaceMode)
 end
 
 
@@ -203,7 +202,7 @@ function client:setTextAlignment(align)
 		error("invalid align mode")
 	end
 
-	editWrapS.wrapAction(self, editCommandS.setTextAlignment, align)
+	editWidS.wrapAction(self, editCommandS.setTextAlignment, align)
 end
 
 
