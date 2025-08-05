@@ -30,7 +30,7 @@ local _methods = lgcUIFrame.methods
 
 
 function lgcUIFrame.definitionSetup(def)
-	uiShared.attachFields(lgcUIFrame.methods, def, false)
+	uiShared.patchTable(def, lgcUIFrame.methods, false)
 end
 
 

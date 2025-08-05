@@ -1,5 +1,5 @@
--- WIP: copy of input/text_box_multi
--- A code editor widget, with a column for line numbers and a faint highlight for the current line.
+-- A more advanced multi-line text input widget, with a column for line numbers (TODO) and a faint highlight for the
+-- current line.
 
 --[[
 
@@ -44,7 +44,7 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "text_code1",
+	skin_id = "text_script1",
 	renderThimble = uiShared.dummyFunc
 }
 
@@ -72,7 +72,7 @@ function def:uiCall_initialize()
 	-- State flags (WIP)
 	self.enabled = true
 
-	lgcInputM.setupInstance(self)
+	lgcInputM.setupInstance(self, "script")
 
 	self.illuminate_current_line = true
 
@@ -230,10 +230,9 @@ end
 
 
 function def:uiCall_update(dt)
-	local LE = self.LE
+	editWid.updateCaretBlink(self, dt)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
-
 	local do_update
 
 	-- Handle update-time drag-scroll.
@@ -247,8 +246,6 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	editWid.updateCaretBlink(self, dt)
-
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
@@ -261,7 +258,7 @@ function def:uiCall_update(dt)
 
 	-- Force a cache update if the external scroll position is different.
 	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
-		do_update  = true
+		do_update = true
 	end
 
 	-- update scroll bar registers and thumb position

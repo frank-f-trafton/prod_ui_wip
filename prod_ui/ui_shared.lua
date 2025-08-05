@@ -105,27 +105,12 @@ function uiShared.assertText(n, text)
 end
 
 
--- * / Assertions *
-
-
--- * Type Utilities *
+-- * Utilities *
 
 
 uiShared.makeLUT = pTable.makeLUT -- (t); array of values to convert into a hash table.
 uiShared.makeLUTV = pTable.makeLUTV -- (...); varargs list of values to convert to a hash table.
-
-
-function uiShared.attachFields(src, dst, force)
-	for k, v in pairs(src) do
-		if not force and dst[k] then
-			error("attempted to overwrite an existing field: " .. tostring(k))
-		end
-		dst[k] = v
-	end
-end
-
-
--- * / Type Utilities *
+uiShared.patchTable = pTable.patch -- (a, b, overwrite); 'a' being the table to write to.
 
 
 return uiShared

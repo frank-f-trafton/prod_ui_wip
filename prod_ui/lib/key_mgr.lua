@@ -1097,7 +1097,6 @@ end
 -- @param str The input KeyString.
 -- @return The state of the Ctrl, Alt, Shift and Gui modifiers, 'Is Scancode' (bool), and the KeyConstant/Scancode, or nil plus error string if there was an issue parsing the input.
 function keyMgr.parseKeyString(str)
-
 	local ctrl, shift, alt, gui, is_sc, code = str:find("(C?)(S?)(A?)(G?)([%-%+])(.+)")
 	if not code then
 		return nil, "failed to parse KeyString."

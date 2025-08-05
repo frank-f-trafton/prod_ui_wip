@@ -76,9 +76,10 @@ local function _writeText(self, LE, text, suppress_replace)
 	-- Trim text to fit the allowed uChars limit.
 	text = textUtil.trimString(text, self.LE_u_chars_max - utf8.len(LE.line))
 
-	LE:insertText(text)
-
-	return text
+	if #text > 0 then
+		LE:insertText(text)
+		return text
+	end
 end
 
 
@@ -135,8 +136,7 @@ function editFuncS.pasteClipboard(self)
 			_deleteHighlighted(LE)
 		end
 
-		_writeText(self, LE, text, true)
-		if _check(self) then
+		if _writeText(self, LE, text, true) and _check(self) then
 			return true
 		end
 	end
@@ -338,16 +338,16 @@ end
 function editFuncS.caretToHighlightEdgeLeft(self)
 	local LE = self.LE
 
-	local b1, b2 = LE:getCaretOffsetsInOrder()
-	LE:moveCaretAndHighlight(b1, b2)
+	local b1, _ = LE:getCaretOffsetsInOrder()
+	LE:moveCaret(b1, true)
 end
 
 
 function editFuncS.caretToHighlightEdgeRight(self)
 	local LE = self.LE
 
-	local b1, b2 = LE:getCaretOffsetsInOrder()
-	LE:moveCaretAndHighlight(b1, b2)
+	local _, b2 = LE:getCaretOffsetsInOrder()
+	LE:moveCaret(b2, true)
 end
 
 
@@ -397,7 +397,7 @@ function editFuncS.writeText(self, text, suppress_replace)
 	local line, disp, cb, hb = LE:copyState()
 
 	local rv = _writeText(self, LE, text, suppress_replace)
-	if _check(self) then
+	if rv and _check(self) then
 		return rv
 	end
 
@@ -410,7 +410,7 @@ function editFuncS.replaceText(self, text)
 	local line, disp, cb, hb = LE:copyState()
 
 	LE:deleteText(false, 1, #LE.line)
-	local rv = _writeText(self, LE, text, true)
+	local rv = _writeText(self, LE, text, true) or ""
 
 	if _check(self) then
 		return rv

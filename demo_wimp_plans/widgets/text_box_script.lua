@@ -17,7 +17,7 @@ function plan.make(panel)
 
 
 	local function _updateButtons(panel)
-		local tb = panel:findTag("demo_text_box")
+		local tb = panel:findTag("demo_script_ed")
 		if tb then
 			local b_wrap = panel:findTag("demo_wrap")
 			if b_wrap then
@@ -96,28 +96,28 @@ function plan.make(panel)
 
 	local shortcuts = {
 		["+f5"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
+			local tb = panel:findTag("demo_script_ed")
 			if tb then
 				setWrapMode(tb, not tb:getWrapMode())
 			end
 			_updateButtons(panel)
 		end,
 		["+f2"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
+			local tb = panel:findTag("demo_script_ed")
 			if tb then
 				setAlign(tb, "left")
 			end
 			_updateButtons(panel)
 		end,
 		["+f3"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
+			local tb = panel:findTag("demo_script_ed")
 			if tb then
 				setAlign(tb, "center")
 			end
 			_updateButtons(panel)
 		end,
 		["+f4"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
+			local tb = panel:findTag("demo_script_ed")
 			if tb then
 				setAlign(tb, "right")
 			end
@@ -156,7 +156,7 @@ function plan.make(panel)
 	cbox_wrap:setTag("demo_wrap")
 	cbox_wrap:setLabel("Wrap (F5)", "single")
 	cbox_wrap.wid_buttonAction = function(self)
-		local tb = panel:findTag("demo_text_box")
+		local tb = panel:findTag("demo_script_ed")
 		if tb then
 			setWrapMode(tb, self.checked)
 		end
@@ -167,7 +167,7 @@ function plan.make(panel)
 	yy = yy + h2
 
 	local function radioAlignH(self)
-		local tb = panel:findTag("demo_text_box")
+		local tb = panel:findTag("demo_script_ed")
 		if tb then
 			setAlign(tb, self.usr_align)
 		end
@@ -209,37 +209,40 @@ function plan.make(panel)
 
 	local ED_W, ED_H = 496, 350
 
-	local text_box = panel:addChild("input/text_box_multi")
-	demoShared.setStaticLayout(panel, text_box, xx, yy, ED_W, ED_H)
-	text_box:setTag("demo_text_box")
-	text_box:setScrollBars(true, true)
+	local script_ed = panel:addChild("input/script_editor")
+	demoShared.setStaticLayout(panel, script_ed, xx, yy, ED_W, ED_H)
+	script_ed:setTag("demo_script_ed")
+	script_ed:setScrollBars(true, true)
 
-	text_box.LE_ghost_text = "Ghost text"
+	script_ed.LE_ghost_text = "Ghost text"
 
-	text_box:setAllowTab(false)
-	text_box:setAllowUntab(false)
-	text_box:setTabsToSpaces(false)
-	text_box:setAutoIndent(false)
-	--text_box:setAllowReplaceMode(false)
+	script_ed:setAllowTab(true)
+	script_ed:setAllowUntab(true)
+	script_ed:setTabsToSpaces(false)
+	script_ed:setAutoIndent(true)
+	--script_ed:setAllowReplaceMode(false)
 
 	-- Debug...
 	local quickPrint = require("lib.quick_print")
-	text_box.DEBUG_qp = quickPrint.new()
+	script_ed.DEBUG_qp = quickPrint.new()
 
 	--[[
 	local str = ""
 	for i = 1, 100 do
 		str = str .. i .. "\n"
 	end
-	text_box:setText(str)
+	script_ed:setText(str)
 	--]]
 
-	local demo_text = [=[
-The quick brown fox jumps over the lazy dog.
-Jackdaws love my black sphinx of quartz.
-The five boxing wizards jump quickly.]=]
+--[[
+This widget will contain "advanced" input features that
+are
+--]]
 
-	text_box:setText(demo_text)
+	local demo_text = [=[
+Hmm... this widget does not appear to be finished.]=]
+
+	script_ed:setText(demo_text)
 
 	xx = x1
 	yy = yy + h2 + ED_H

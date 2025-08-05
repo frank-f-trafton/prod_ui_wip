@@ -1,4 +1,4 @@
--- PILE Table v1.1.9
+-- PILE Table v1.1.9 (modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -18,7 +18,7 @@ local interp = require(PATH .. "pile_interp")
 local pArg = require(PATH .. "pile_arg_check")
 
 
-local ipairs, math, pairs, rawget, select, table, type = ipairs, math, pairs, rawget, select, table, type
+local ipairs, math, pairs, rawget, rawset, select, table, type = ipairs, math, pairs, rawget, rawset, select, table, type
 
 
 function M.clear(t)
@@ -183,9 +183,11 @@ end
 
 
 local function _patch2(t, k, v, overwrite)
-	if overwrite or rawget(t, k) == nil then
+	local rg = rawget(t, k)
+	if overwrite or rg == nil then
 		rawset(t, k, v)
 	end
+	return rg and 1 or 0
 end
 
 
@@ -193,15 +195,17 @@ function M.patch(a, b, overwrite)
 	pArg.type1(1, a, "table")
 	pArg.type1(2, b, "table")
 
+	local count = 0
 	for i, v in ipairs(b) do
-		_patch2(a, i, v, overwrite)
+		count = count + _patch2(a, i, v, overwrite)
 	end
 	local n = #b
 	for k, v in pairs(b) do
 		if type(k) ~= "number" or math.floor(k) ~= k or k < 1 or k > n then
-			_patch2(a, k, v, overwrite)
+			count = count + _patch2(a, k, v, overwrite)
 		end
 	end
+	return count
 end
 
 

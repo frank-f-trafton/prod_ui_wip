@@ -37,6 +37,17 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
+
+function editCommandS.noOpTrue(self)
+	return true
+end
+
+
+function editCommandS.noOpNil(self)
+	-- n/a
+end
+
+
 function editCommandS.setTextAlignment(self, align)
 	local LE = self.LE
 	if align ~= LE.align then

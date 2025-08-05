@@ -15,9 +15,9 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.text_box_single",
 	"widgets.text_box_multi",
 	"widgets.button_work",
-	"widgets.text_box_single",
 	"widgets.button_split",
 	"themes_and_scale",
 	"demo_welcome",
@@ -49,6 +49,8 @@ local demo_plan_list = {
 		{plan_id = "widgets.stepper", label = "Stepper"},
 		{plan_id = "widgets.text_box_single", label = "Textbox (Single-Line)"},
 		{plan_id = "widgets.text_box_multi", label = "Textbox (Multi-Line)"},
+		-- Working on it...
+		--{plan_id = "widgets.text_box_script", label = "Script Editor"},
 		{plan_id = "widgets.number_box", label = "Number Box"},
 		{plan_id = "widgets.properties_box", label = "Properties Box"},
 		{plan_id = "widgets.combo_box", label = "Combo Box"},

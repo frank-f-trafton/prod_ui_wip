@@ -23,6 +23,16 @@ local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
+function editCommandM.noOpTrue(self)
+	return true
+end
+
+
+function editCommandM.noOpNil(self)
+	-- n/a
+end
+
+
 function editCommandM.setAllowReplaceMode(self, enabled)
 	local LE = self.LE
 
