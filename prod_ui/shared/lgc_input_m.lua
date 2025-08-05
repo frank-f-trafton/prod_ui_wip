@@ -11,7 +11,7 @@ local lgcInputM = {}
 
 local edCom = context:getLua("shared/line_ed/ed_com")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
-local editActM = context:getLua("shared/line_ed/m/edit_act_m")
+local editAct = context:getLua("shared/line_ed/edit_act")
 local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
@@ -37,7 +37,12 @@ function lgcInputM.setupDef(def)
 end
 
 
-function lgcInputM.setupInstance(self)
+function lgcInputM.setupInstance(self, commands)
+	self.LE_commands = editAct[commands]
+	if not self.LE_commands then
+		error("invalid 'commands' ID")
+	end
+
 	-- How far to offset the line X position depending on the alignment.
 	self.LE_align_ox = 0
 
@@ -219,9 +224,9 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands_multi, hot_key, hot_scan)
+	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands, hot_key, hot_scan)
 	if id then
-		local bound_func = editActM[id]
+		local bound_func = self.LE_commands[id]
 
 		if bound_func then
 			return editWidM.wrapAction(self, bound_func)
@@ -462,7 +467,10 @@ end
 
 
 function lgcInputM.cb_action(self, item_t)
-	return editWidM.wrapAction(self, item_t.func)
+	local command = self.LE_commands[item_t.command_id]
+	if command then
+		return editWidM.wrapAction(self, command)
+	end
 end
 
 
@@ -516,13 +524,13 @@ lgcInputM.pop_up_def = {
 		type = "command",
 		text = "Undo",
 		callback = lgcInputM.cb_action,
-		func = editActM.undo,
+		command_id = "undo",
 		config = lgcInputM.configItem_undo,
 	}, {
 		type = "command",
 		text = "Redo",
 		callback = lgcInputM.cb_action,
-		func = editActM.redo,
+		command_id = "redo",
 		config = lgcInputM.configItem_redo,
 	},
 	{type="separator"},
@@ -530,25 +538,25 @@ lgcInputM.pop_up_def = {
 		type = "command",
 		text = "Cut",
 		callback = lgcInputM.cb_action,
-		func = editActM.cut,
+		command_id = "cut",
 		config = lgcInputM.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Copy",
 		callback = lgcInputM.cb_action,
-		func = editActM.copy,
+		command_id = "copy",
 		config = lgcInputM.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Paste",
 		callback = lgcInputM.cb_action,
-		func = editActM.paste,
+		command_id = "paste",
 		config = lgcInputM.configItem_paste,
 	}, {
 		type = "command",
 		text = "Delete",
 		callback = lgcInputM.cb_action,
-		func = editActM.deleteHighlighted,
+		command_id = "delete-highlighted",
 		config = lgcInputM.configItem_cutCopyDelete,
 	},
 	{type="separator"},
@@ -556,7 +564,7 @@ lgcInputM.pop_up_def = {
 		type = "command",
 		text = "Select All",
 		callback = lgcInputM.cb_action,
-		func = editActM.selectAll,
+		command_id = "select-all",
 		config = lgcInputM.configItem_selectAll,
 	},
 }

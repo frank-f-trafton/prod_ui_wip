@@ -24,7 +24,7 @@ local _methods = lgcContainer.methods
 
 
 function lgcContainer.setupMethods(self)
-	uiShared.attachFields(lgcContainer.methods, self, false)
+	uiShared.patchTable(self, lgcContainer.methods, false)
 end
 
 

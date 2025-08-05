@@ -1,5 +1,5 @@
 return {
-	skinner_id = "input/code_editor",
+	skinner_id = "input/script_editor",
 
 	box = "*boxes/input_box_m",
 	data_scroll = "*scroll_bar_data/scroll_bar1",

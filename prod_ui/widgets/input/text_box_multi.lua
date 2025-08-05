@@ -72,7 +72,7 @@ function def:uiCall_initialize()
 	-- State flags (WIP)
 	self.enabled = true
 
-	lgcInputM.setupInstance(self)
+	lgcInputM.setupInstance(self, "multi")
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -228,10 +228,9 @@ end
 
 
 function def:uiCall_update(dt)
-	local LE = self.LE
+	editWid.updateCaretBlink(self, dt)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
-
 	local do_update
 
 	-- Handle update-time drag-scroll.
@@ -244,8 +243,6 @@ function def:uiCall_update(dt)
 			do_update = true
 		end
 	end
-
-	editWid.updateCaretBlink(self, dt)
 
 	if lgcScroll.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then

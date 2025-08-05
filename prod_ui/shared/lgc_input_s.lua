@@ -29,8 +29,8 @@ local lgcInputS = {}
 local utf8 = require("utf8")
 
 
-local editActS = context:getLua("shared/line_ed/s/edit_act_s")
 local edCom = context:getLua("shared/line_ed/ed_com")
+local editAct = context:getLua("shared/line_ed/edit_act")
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
@@ -55,7 +55,12 @@ function lgcInputS.setupDef(def)
 end
 
 
-function lgcInputS.setupInstance(self)
+function lgcInputS.setupInstance(self, commands)
+	self.LE_commands = editAct[commands]
+	if not self.LE_commands then
+		error("invalid 'commands' ID")
+	end
+
 	-- When true, typing overwrites the current position instead of inserting.
 	self.LE_replace_mode = false
 
@@ -86,7 +91,7 @@ function lgcInputS.setupInstance(self)
 	self.LE_tabs_to_spaces = false -- affects '\t' in writeText()
 
 	-- Max number of Unicode characters (not bytes) permitted in the field.
-	self.LE_u_chars_max = math.huge
+	self.LE_u_chars_max = 5000
 
 	-- Helps with amending vs making new history entries.
 	self.LE_input_category = false
@@ -239,9 +244,9 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands_single, hot_key, hot_scan)
+	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands, hot_key, hot_scan)
 	if id then
-		local bound_func = editActS[id]
+		local bound_func = self.LE_commands[id]
 
 		if bound_func then
 			return editWidS.wrapAction(self, bound_func)
@@ -462,7 +467,10 @@ end
 
 
 function lgcInputS.cb_action(self, item_t)
-	return editWidS.wrapAction(self, item_t.func)
+	local command = self.LE_commands[item_t.command_id]
+	if command then
+		return editWidS.wrapAction(self, command)
+	end
 end
 
 
@@ -508,13 +516,13 @@ lgcInputS.pop_up_def = {
 		type = "command",
 		text = "Undo",
 		callback = lgcInputS.cb_action,
-		func = editActS.undo,
+		command_id = "undo",
 		config = lgcInputS.configItem_undo,
 	}, {
 		type = "command",
 		text = "Redo",
 		callback = lgcInputS.cb_action,
-		func = editActS.redo,
+		command_id = "redo",
 		config = lgcInputS.configItem_redo,
 	},
 	{type="separator"},
@@ -522,25 +530,25 @@ lgcInputS.pop_up_def = {
 		type = "command",
 		text = "Cut",
 		callback = lgcInputS.cb_action,
-		func = editActS.cut,
+		command_id = "cut",
 		config = lgcInputS.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Copy",
 		callback = lgcInputS.cb_action,
-		func = editActS.copy,
+		command_id = "copy",
 		config = lgcInputS.configItem_cutCopyDelete,
 	}, {
 		type = "command",
 		text = "Paste",
 		callback = lgcInputS.cb_action,
-		func = editActS.paste,
+		command_id = "paste",
 		config = lgcInputS.configItem_paste,
 	}, {
 		type = "command",
 		text = "Delete",
 		callback = lgcInputS.cb_action,
-		func = editActS.deleteHighlighted,
+		command_id = "delete-highlighted",
 		config = lgcInputS.configItem_cutCopyDelete,
 	},
 	{type="separator"},
@@ -548,7 +556,7 @@ lgcInputS.pop_up_def = {
 		type = "command",
 		text = "Select All",
 		callback = lgcInputS.cb_action,
-		func = editActS.selectAll,
+		command_id = "select-all",
 		config = lgcInputS.configItem_selectAll,
 	},
 }

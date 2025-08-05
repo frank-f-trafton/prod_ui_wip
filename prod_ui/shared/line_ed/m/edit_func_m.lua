@@ -683,7 +683,6 @@ function editFuncM.writeText(self, text, suppress_replace)
 
 	if #text > 0 then
 		LE:insertText(text)
-
 		return text
 	end
 end

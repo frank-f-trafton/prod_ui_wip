@@ -7,8 +7,6 @@ local plan = {}
 
 
 function plan.make(panel)
-	--title("Input Boxes")
-
 	panel:setLayoutBase("viewport-width")
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)

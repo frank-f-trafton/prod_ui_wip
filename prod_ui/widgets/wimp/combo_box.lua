@@ -223,7 +223,7 @@ function def:uiCall_initialize()
 	-- When opened, this holds a reference to the pop-up widget.
 	self.wid_drawer = false
 
-	lgcInputS.setupInstance(self)
+	lgcInputS.setupInstance(self, "single")
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -256,6 +256,10 @@ end
 
 
 function def:uiCall_update(dt)
+	editWid.updateCaretBlink(self, dt)
+
+	local do_update
+
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
 		-- Need to continuously update the selection.
@@ -263,9 +267,12 @@ function def:uiCall_update(dt)
 		if mouse_drag_x ~= 0 then
 			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
 		end
+		do_update = true
 	end
 
-	editWid.updateCaretBlink(self, dt)
+	if do_update then
+		editWidS.generalUpdate(self, true, false, false, true)
+	end
 
 	self:scrollUpdate(dt)
 end

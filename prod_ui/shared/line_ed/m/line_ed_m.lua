@@ -6,7 +6,7 @@ to update the visual state of the caret).
 
 Data structures:
 
-* LE.lines {strings}: The internal text, split by line feeds.
+* LE.lines {strings}: The internal text, split by line feeds. For the implementation, see 'seq_string.lua'.
 * LE.paragraphs {tables}: Display data for each line of text. Each paragraph is an array of sub-lines.
 * Sub-line: A single line of display text to be printed. May also include a coloredtext version of the text.
 --]]

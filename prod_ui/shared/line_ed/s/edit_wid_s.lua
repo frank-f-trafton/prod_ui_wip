@@ -90,7 +90,7 @@ end
 -- @param self The client widget
 -- @param func The function to call. It should take 'self' as its first argument; pass any variadic functions along, as
 --	well. It should return values that control if and how the lineEditor object is updated. For more info, see the
---	func(self) call here, and also in EditAct.
+--	func(self) call here, and also the comments at the top of EditCommandS.
 -- @param [...] Extra arguments for func.
 -- @return true if the function reported success, and a boolean indicating if the action was undo/redo (which is
 --	important to some widgets).
