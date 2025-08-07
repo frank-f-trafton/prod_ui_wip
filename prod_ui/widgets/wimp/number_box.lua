@@ -10,7 +10,7 @@ A single-line text box with controls for incrementing and decrementing numeric v
 │ ═╩═             │ - │ -- Decrement value (or press down-arrow)
 └─────────────────┴───┘
 
-Important: The internal value can be boolean false when the text input is empty or partially complete.
+Important: The value can be boolean false when the text input is empty or partially complete.
 
 Scientific notation is not supported; use a plain text box instead.
 Fractional parts are not supported for hexadecimal, octal and binary.
@@ -68,7 +68,7 @@ function def:wid_inputChanged(text)
 end
 
 
---- Callbacks that control the amount of addition and subtraction of the internal value.
+--- Callbacks that control the amount of addition and subtraction of the value.
 -- @param v The current value
 -- @param r Number of iterations for held buttons (ie mouse-repeat)
 -- @return The new value to assign.
@@ -97,6 +97,112 @@ for i = 0, 9 do
 end
 for i = 10, 36 do -- a-z
 	_nums[i] = string.char(i + 87)
+end
+
+
+local function _baseToString(n, base)
+	assert(base >= 2 and base <= 36, "unsupported base")
+
+	-- Fractional parts are supported only for base 10.
+	if base == 10 then
+		return tostring(n)
+	end
+
+	-- TODO: test usage of table.concat()
+	local s = ""
+	local n2 = math.abs(n)
+	while n2 >= 1 do
+		s = _nums[n2 % base] .. s
+		n2 = math.floor(n2 / base)
+	end
+	s = (n < 0 and "-" or "") .. s
+	if s == "" then
+		s = "0"
+	end
+
+	return s
+end
+
+
+local function _textFromValue(v, fractional_comma, value_mode, digit_pad1, digit_pad2)
+	if v then
+		local s = _baseToString(math.abs(v), _enum_value_mode[value_mode])
+
+		local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
+		s = string.rep("0", math.max(0, digit_pad1 - #s1)) .. s
+		if #s2 > 0 then
+			s = s .. string.rep("0", math.max(0, digit_pad2 - #s3))
+		end
+
+		if fractional_comma then
+			s = s:gsub("%.", ",")
+		end
+
+		-- minus
+		if v < 0 then
+			s = "-" .. s
+		end
+
+		return s
+	end
+
+	return false
+end
+
+
+local function _valueFromText(s, fractional_comma, value_mode)
+	if fractional_comma then
+		s = s:gsub(",", ".")
+	end
+
+	return tonumber(s, _enum_value_mode[value_mode]) or false
+end
+
+
+local function _processValue(v, value_mode, min, max)
+	v = math.max(min, math.min(v, max))
+	if value_mode ~= "decimal" then
+		v = math.floor(v)
+	end
+
+	return v
+end
+
+
+-- @param history_action True: reset history and move to ledger entry #1.
+local function _setTextFromValue(self, v, preserve_caret, history_action)
+	local LE = self.LE
+	local old_len = utf8.len(LE.line)
+	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.cb)
+
+	v = v and _processValue(v, self.value_mode, self.value_min, self.value_max) or false
+	if v then
+		local s = _textFromValue(v, self.fractional_comma, self.value_mode, self.digit_pad1, self.digit_pad2)
+		self:replaceText(s)
+	else
+		self:replaceText("")
+	end
+
+	if preserve_caret then
+		local delta = utf8.len(LE.line) - old_len
+		local max_car_u = utf8.len(LE.line) + 1
+
+		LE:moveCaret(utf8.offset(LE.line, old_car_u + delta) or max_car_u, true)
+		editWid.updateCaretShape(self)
+
+		self:scrollGetCaretInBounds(true)
+	end
+
+	local hist = self.LE_hist
+	if history_action then
+		hist:clearAll()
+		editFuncS.writeHistoryLockedFirst(self)
+	end
+end
+
+
+function def:setValue(v, preserve_caret)
+	_setTextFromValue(self, v, preserve_caret, true)
 end
 
 
@@ -167,93 +273,20 @@ function def:fn_check()
 	end
 
 	local s = self.LE.line
-	return s:match(ptn) == s
-end
-
-
-local function _baseToString(n, base)
-	assert(base >= 2 and base <= 36, "unsupported base")
-
-	-- Fractional parts are supported only for base 10.
-	-- TODO: test usage of table.concat()
-	if base == 10 then
-		return tostring(n)
-	end
-
-	local s = ""
-	local n2 = math.abs(n)
-	while n2 >= 1 do
-		s = _nums[n2 % base] .. s
-		n2 = math.floor(n2 / base)
-	end
-	s = (n < 0 and "-" or "") .. s
-	if s == "" then
-		s = "0"
-	end
-	return s
-end
-
-
--- @param self The widget.
--- @param v The new numeric value, or false.
--- @param write_history true to force a history update to ledger entry #2.
--- @param update_text true to update the lineEdS text.
--- @param preserve_caret true to (try to) keep the text input caret in the same place as before.
-local function _setValue(self, v, write_history, update_text, preserve_caret)
-	if v then
-		v = math.max(self.value_min, math.min(v, self.value_max))
-		if self.value_mode ~= "decimal" then
-			v = math.floor(v)
-		end
+	if s:match(ptn) == s then
+		local v = _valueFromText(s, self.fractional_comma, self.value_mode)
+		v = v and _processValue(v, self.value_mode, self.value_min, self.value_max) or false
 		self.value = v
-	else
-		self.value = false
-	end
+		local new_text = _textFromValue(v, self.fractional_comma, self.value_mode, self.digit_pad1, self.digit_pad2) or ""
 
-	local LE = self.LE
-	local old_len = utf8.len(LE.line)
-	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.cb)
-
-	if update_text then
-		if v then
-			local s = _baseToString(math.abs(v), _enum_value_mode[self.value_mode])
-
-			-- leading, trailing zeros
-			local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
-			s = string.rep("0", math.max(0, self.digit_pad1 - #s1)) .. s
-			if #s2 > 0 then
-				s = s .. string.rep("0", math.max(0, self.digit_pad2 - #s3))
-			end
-
-			-- comma for fractional part
-			if self.fractional_comma then
-				s = s:gsub("%.", ",")
-			end
-
-			-- minus
-			if v < 0 then
-				s = "-" .. s
-			end
-
-			self:replaceText(s)
-		else
-			self:replaceText("")
+		if new_text ~= s then
+			local LE = self.LE
+			LE:deleteText(false, 1, #self.LE.line)
+			LE:insertText(new_text)
+			LE:moveCaret(#LE.line + 1, true)
 		end
-	end
 
-	if preserve_caret then
-		local delta = utf8.len(LE.line) - old_len
-		local max_car_u = utf8.len(LE.line) + 1
-		LE:moveCaret(utf8.offset(LE.line, old_car_u + delta) or max_car_u, true)
-
-		self:scrollGetCaretInBounds(true)
-	end
-
-	LE:clearHighlight()
-
-	if write_history then
-		self.LE_hist:moveToEntry(2)
-		editFuncS.writeHistoryEntry(self, false)
+		return true
 	end
 end
 
@@ -261,35 +294,10 @@ end
 -- codepath for value changes through key up/down, pageup/pagedown and mouse clicks
 local function _callback(self, cb, reps)
 	if self.value then
-		_setValue(self, (cb(self, self.value, reps)), true, true, true)
+		_setTextFromValue(self, cb(self, self.value, reps), true, false)
 	else
-		self:setValueToDefault()
+		_setTextFromValue(self, self.value_default, true, false)
 	end
-end
-
-
--- codepath for value changes through direct text input, copy+paste, etc.
--- @param hist_changed If true, the action was a direct undo/redo, so we shouldn't meddle with the ledger.
-local function _textInputValue(self, hist_changed)
-	local LE = self.LE
-	local s = LE.line
-	if self.fractional_comma then
-		s = s:gsub(",", ".")
-	end
-
-	local v = tonumber(s, _enum_value_mode[self.value_mode]) or false
-	print("self.value", self.value, "v", v)
-	if v ~= nil and self.value ~= v then
-		_setValue(self, v, false, true, true)
-		if not hist_changed then
-			self.LE_hist:moveToEntry(2)
-		end
-	end
-end
-
-
-function def:getValueMode()
-	return self.value_mode
 end
 
 
@@ -300,13 +308,14 @@ function def:setValueMode(mode)
 end
 
 
+
+function def:getValueMode()
+	return self.value_mode
+end
+
+
 -- To get the internal text:
 -- self:getText()
-
-
-function def:getDefaultValue()
-	return self.value_default
-end
 
 
 function def:setDefaultValue(v)
@@ -316,31 +325,13 @@ function def:setDefaultValue(v)
 end
 
 
+function def:getDefaultValue()
+	return self.value_default
+end
+
+
 function def:getValue()
 	return self.value
-end
-
-
-function def:setValue(v)
-	uiShared.numberNotNaN(1, v)
-
-	local hist = self.LE_hist
-
-	_setValue(self, v, false, true)
-	hist:clearAll()
-	hist:moveToEntry(1)
-	editFuncS.writeHistoryLockedFirst(self)
-end
-
-
-function def:setValueToDefault()
-	local hist = self.LE_hist
-
-	_setValue(self, self.value_default, false, true)
-
-	hist:clearAll()
-	hist:moveToEntry(1)
-	editFuncS.writeHistoryLockedFirst(self)
 end
 
 
@@ -353,9 +344,11 @@ function def:uiCall_initialize()
 	widShared.setupDoc(self)
 	widShared.setupViewports(self, 3)
 
-	-- The internal value.
-	self.value_default = 0
+	-- Settings for the input value.
+	-- 'self.value' is cached whenever there is a change to the text (via 'fn_check').
+	-- It is false if the text cannot be interpreted as a number.
 	self.value = false
+	self.value_default = 0
 	self.value_min = 0
 	self.value_max = 999999
 
@@ -392,11 +385,14 @@ function def:uiCall_initialize()
 	local hist = self.LE_hist
 	hist:setLockedFirst(true)
 	hist:setMaxEntries(2)
+
+	self:setValue(self.value_default, true)
+
+	hist:clearAll()
 	editFuncS.writeHistoryLockedFirst(self)
 
 	self:setTextAlignment(self.skin.text_align)
 
-	self:setValueToDefault()
 	self:reshape()
 end
 
@@ -469,11 +465,8 @@ function def:uiCall_thimble1Release(inst)
 
 		-- Forget history state when the user nagivates away from the NumberBox.
 		local hist = self.LE_hist
-		if hist.pos == 2 then
-			hist:clearAll()
-			hist:moveToEntry(1)
-			editFuncS.writeHistoryLockedFirst(self)
-		end
+		hist:clearAll()
+		editFuncS.writeHistoryLockedFirst(self)
 	end
 end
 
@@ -495,8 +488,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 			self.rep_sc = scancode
 			self.rep_sc_count = self.rep_sc_count + 1
 		end
-
-		local value_old = self.value
 
 		if (key == "return" or key == "kpenter") and self:wid_action() then
 			return true
@@ -520,9 +511,6 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 		-- Standard text box controls (caret navigation, backspace, etc.)
 		else
 			local ok, hist_changed = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
-			if ok then
-				_textInputValue(self, hist_changed)
-			end
 			return ok
 		end
 	end
@@ -532,7 +520,6 @@ end
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		if lgcInputS.textInputLogic(self, text) then
-			_textInputValue(self)
 			return true
 		end
 	end
@@ -600,7 +587,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Clicked on increment button:
 		elseif widShared.pointInViewport(self, 3, mx, my) then
-			local value_old = self.value
 			if button == 1 then
 				self.btn_rep = 1
 				self.btn_hov = 1
@@ -610,7 +596,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Clicking on decrement button:
 		elseif widShared.pointInViewport(self, 4, mx, my) then
-			local value_old = self.value
 			if button == 1 then
 				self.btn_rep = 2
 				self.btn_hov = 2
@@ -626,7 +611,6 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
-				local value_old = self.value
 				if button == 1 then
 					if self.btn_rep == 1 then
 						_callback(self, self.wid_incrementButton, reps + 1)
@@ -810,7 +794,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		--[=====[
+		-- [=====[
 		-- Debug: show internal state
 		love.graphics.push("all")
 		love.graphics.setScissor()

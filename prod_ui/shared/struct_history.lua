@@ -93,7 +93,7 @@ end
 
 
 --- Writes a history entry to the ledger.
--- @param do_advance True, advance to the next ledger entry. False: overwrite the current entry, if one exists, or
+-- @param do_advance True: advance to the next ledger entry. False: overwrite the current entry, if one exists, or
 --	create entry #1.
 -- @return The current ledger entry (new or previously written, with old data), or nothing if the History object is
 --	disabled.

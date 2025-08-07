@@ -470,6 +470,7 @@ function editFuncS.writeHistoryEntry(self, do_advance)
 			hist.ledger[1] = hist.ledger[1] or {}
 			hist.ledger[2] = hist.ledger[2] or {}
 			entry = hist.ledger[2]
+			hist.pos = 2
 		else
 			entry = hist:writeEntry(do_advance)
 		end
@@ -488,6 +489,7 @@ function editFuncS.writeHistoryLockedFirst(self)
 		hist.ledger[1] = hist.ledger[1] or {}
 		local entry = hist.ledger[1]
 		editFuncS.initHistoryEntry(entry, LE.line, LE.cb, LE.hb)
+		hist.pos = 1
 		return entry
 	end
 end

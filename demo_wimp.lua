@@ -15,6 +15,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.number_box",
 	"widgets.text_box_single",
 	"widgets.text_box_multi",
 	"widgets.button_work",
@@ -25,7 +26,6 @@ local demo_panel_launch = {
 	"widgets.slider_work",
 	"widgets.properties_box",
 	"widgets.dropdown_box",
-	"widgets.number_box",
 	"widgets.list_box",
 }
 
@@ -317,7 +317,6 @@ end
 
 
 function love.keypressed(kc, sc, rep)
-	print("context:getThemeID()", context:getThemeID())
 	-- Debug stuff, specific to this demo.
 	-- [====[
 	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
