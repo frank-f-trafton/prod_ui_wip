@@ -149,9 +149,9 @@ function editWidS.wrapAction(self, func, ...)
 				editFuncS.writeHistoryEntry(self, true)
 			end
 		end
-
-		return true, hist_change
 	end
+
+	return ok, hist_change
 end
 
 
