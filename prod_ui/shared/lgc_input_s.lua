@@ -175,7 +175,7 @@ function lgcInputS.textInputLogic(self, text)
 
 		if self.LE_replace_mode then
 			-- Replace mode should force a new history entry, unless the caret is adding to the very end of the line.
-			if xcb < #LE.lines[#LE.lines] + 1 then
+			if xcb < #LE.line + 1 then
 				clear_input_category = true
 			end
 		end

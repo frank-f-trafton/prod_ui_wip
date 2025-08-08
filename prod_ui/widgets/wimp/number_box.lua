@@ -1,8 +1,7 @@
--- XXX: Under construction. Combination of `wimp/dropdown_box.lua` and `input/text_box_single.lua`.
--- XXX: Support commas for decimal place indicator
 --[[
 
 A single-line text box with controls for incrementing and decrementing numeric values.
+Fractional values are not supported.
 
 ┌─────────────────┬───┐
 │ ═╗              │ + │ -- Increment value (or press up-arrow)
@@ -13,7 +12,6 @@ A single-line text box with controls for incrementing and decrementing numeric v
 Important: The value can be boolean false when the text input is empty or partially complete.
 
 Scientific notation is not supported; use a plain text box instead.
-Fractional parts are not supported for hexadecimal, octal and binary.
 --]]
 
 
@@ -80,10 +78,8 @@ function def:wid_incrementPageKey(v, r) return v + 10 end
 function def:wid_decrementPageKey(v, r) return v - 10 end
 
 
--- (integer == decimal with no fractional part)
 local _enum_value_mode = {
 	decimal = 10,
-	integer = 10,
 	hexadecimal = 16,
 	octal = 8,
 	binary = 2
@@ -103,7 +99,10 @@ end
 local function _baseToString(n, base)
 	assert(base >= 2 and base <= 36, "unsupported base")
 
-	-- Fractional parts are supported only for base 10.
+	if math.floor(n) ~= n then
+		error("fractional parts are not supported.")
+	end
+
 	if base == 10 then
 		return tostring(n)
 	end
@@ -124,46 +123,14 @@ local function _baseToString(n, base)
 end
 
 
-local function _textFromValue(v, fractional_comma, value_mode, digit_pad1, digit_pad2)
-	if v then
-		local s = _baseToString(math.abs(v), _enum_value_mode[value_mode])
-
-		local s1, s2, s3 = s:match("(.*)(%.?)(.*)")
-		s = string.rep("0", math.max(0, digit_pad1 - #s1)) .. s
-		if #s2 > 0 then
-			s = s .. string.rep("0", math.max(0, digit_pad2 - #s3))
-		end
-
-		if fractional_comma then
-			s = s:gsub("%.", ",")
-		end
-
-		-- minus
-		if v < 0 then
-			s = "-" .. s
-		end
-
-		return s
-	end
-
-	return false
-end
-
-
-local function _valueFromText(s, fractional_comma, value_mode)
-	if fractional_comma then
-		s = s:gsub(",", ".")
-	end
-
+local function _valueFromText(s, value_mode)
 	return tonumber(s, _enum_value_mode[value_mode]) or false
 end
 
 
 local function _processValue(v, value_mode, min, max)
 	v = math.max(min, math.min(v, max))
-	if value_mode ~= "decimal" then
-		v = math.floor(v)
-	end
+	v = math.floor(v)
 
 	return v
 end
@@ -171,18 +138,19 @@ end
 
 -- @param history_action True: reset history and move to ledger entry #1.
 local function _setTextFromValue(self, v, preserve_caret, history_action)
+	--print("_setTextFromValue(): start")
 	local LE = self.LE
 	local old_len = utf8.len(LE.line)
 	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.cb)
 
-	v = v and _processValue(v, self.value_mode, self.value_min, self.value_max) or false
 	if v then
-		local s = _textFromValue(v, self.fractional_comma, self.value_mode, self.digit_pad1, self.digit_pad2)
+		local s = _baseToString(v, _enum_value_mode[self.value_mode])
 		self:replaceText(s)
 	else
 		self:replaceText("")
 	end
 
+	--print("_setTextFromValue(): preserve_caret", preserve_caret)
 	if preserve_caret then
 		local delta = utf8.len(LE.line) - old_len
 		local max_car_u = utf8.len(LE.line) + 1
@@ -198,6 +166,7 @@ local function _setTextFromValue(self, v, preserve_caret, history_action)
 		hist:clearAll()
 		editFuncS.writeHistoryLockedFirst(self)
 	end
+	--print("_setTextFromValue(): end")
 end
 
 
@@ -206,98 +175,116 @@ function def:setValue(v, preserve_caret)
 end
 
 
--- Blocks various non-numeric strings, while allowing partially complete input
--- (like a single '-' when negative numbers are enabled).
+--- Checks the form of a numeric string (but not the range, padding, etc.)
+local function _stringFormCheck(s, vmode)
+	local negative, whole
+
+	if vmode == "decimal" then
+		negative, whole = s:match("^(%-?)(%d*)$")
+
+	elseif vmode == "hexadecimal" then
+		negative, whole = s:match("^(%-?)(%x*)$")
+
+	elseif vmode == "octal" then
+		negative, whole = s:match("^(%-?)([0-7]*)$")
+
+	elseif vmode == "binary" then
+		negative, whole = s:match("^(%-?)([0-1]*)$")
+
+	else
+		error("invalid value mode.")
+	end
+
+	return negative, whole
+end
+
+
+-- Blocks various non-numeric strings.
 function def:fn_check()
-	local value_mode = self.value_mode
-	local ptn
+	local LE = self.LE
+	local s = LE.line
+	local vmode = self.value_mode
 
-	if value_mode == "integer" then
-		if self.value_min < 0 then
-			if self.value_max < 0 then -- integer, mandatory negative
-				ptn = "%-%d*"
-			else -- integer, optional negative
-				ptn = "%-?%d*"
-			end
-		else -- integer, no negative
-			ptn = "%d*"
-		end
+	--print("fn_check() start")
+	--print("fn_check() s", s)
 
-	elseif value_mode == "decimal" then
-		if self.value_min < 0 then
-			if self.value_max < 0 then -- decimal, mandatory negative
-				ptn = "%-%d*%.?%d*"
-			else -- decimal, optional negative
-				ptn = "%-?%d*%.?%d*"
-			end
-		else -- decimal, no negative
-			ptn = "%d*%.?%d*"
-		end
+	-- Some special cases for incomplete input:
+	if s == "" then
+		self.value = false
+		return true
 
-	elseif value_mode == "hexadecimal" then
-		if self.value_min < 0 then
-			if self.value_max < 0 then -- hexadecimal, mandatory negative
-				ptn = "%-%x*"
-			else -- hexadecimal, optional negative
-				ptn = "%-?%x*"
-			end
-		else -- hexadecimal, no negative
-			ptn = "%x*"
-		end
-
-	elseif value_mode == "octal" then
-		if self.value_min < 0 then
-			if self.value_max < 0 then -- octal, mandatory negative
-				ptn = "%-[0-7]*"
-			else -- octal, optional negative
-				ptn = "%-?[0-7]*"
-			end
-		else -- octal, no negative
-			ptn = "[0-7]*"
-		end
-
-	elseif value_mode == "binary" then
-		if self.value_min < 0 then
-			if self.value_max < 0 then -- binary, mandatory negative
-				ptn = "%-[0-1]*"
-			else -- binary, optional negative
-				ptn = "%-?[0-1]*"
-			end
-		else -- binary, no negative
-			ptn = "[0-1]*"
-		end
-	end
-
-	if not ptn then
-		error("couldn't match 'value_mode' to a search pattern")
-	end
-
-	local s = self.LE.line
-	if s:match(ptn) == s then
-		local v = _valueFromText(s, self.fractional_comma, self.value_mode)
-		v = v and _processValue(v, self.value_mode, self.value_min, self.value_max) or false
-		self.value = v
-		local new_text = _textFromValue(v, self.fractional_comma, self.value_mode, self.digit_pad1, self.digit_pad2) or ""
-
-		if new_text ~= s then
-			local LE = self.LE
-			LE:deleteText(false, 1, #self.LE.line)
-			LE:insertText(new_text)
-			LE:moveCaret(#LE.line + 1, true)
-		end
-
+	elseif s == "-" and self.value_min < 0 then
+		self.value = false
 		return true
 	end
+
+	-- Check the initial string form.
+	local negative, whole = _stringFormCheck(s, vmode)
+
+	--print("fn_check() negative", negative, "whole", whole)
+	if not negative then
+		--print("fn_check() end (form check failed)")
+		return false
+	end
+
+	-- Don't allow more than one leading zero, and only if no other digits are present.
+	local whole_zeros, whole_rest = whole:match("^(0*)(.*)")
+	if whole_zeros then
+		if #whole_rest > 0 and #whole_zeros > 0 then
+			return false
+
+		elseif #whole_zeros > 1 then
+			return false
+		end
+	end
+
+	-- Convert to a number, apply min/max range and flooring.
+	local v = _valueFromText(s, vmode)
+	if not v then
+		--print("fn_check() end (re-convert to number failed)")
+		return false
+	end
+	local v2 = v
+	v = _processValue(v, self.value_mode, self.value_min, self.value_max)
+
+	-- If the value was clamped or floored, recreate the string and chunks.
+	local v_changed
+	if v ~= v2 then
+		local s2 = _baseToString(v, _enum_value_mode[vmode])
+		negative, whole = _stringFormCheck(s2, vmode)
+		v_changed = true
+	end
+
+	-- Reform the string.
+	local s3 = negative .. whole
+
+	--print("s", s, "s3", s3)
+
+	if v_changed or s ~= s3 then
+		local old_caret = LE.cb
+		LE:deleteText(false, 1, #self.LE.line)
+		LE:insertText(s3)
+		LE:moveCaret(old_caret, true)
+	end
+
+	-- Update the cached value.
+	self.value = v
+
+	--print("fn_check() end (accepted)")
+	return true
 end
 
 
 -- codepath for value changes through key up/down, pageup/pagedown and mouse clicks
 local function _callback(self, cb, reps)
+	--print("_callback(): start")
+	--print("_callback(): self.value", self.value)
 	if self.value then
 		_setTextFromValue(self, cb(self, self.value, reps), true, false)
 	else
 		_setTextFromValue(self, self.value_default, true, false)
 	end
+	--print("_callback(): end")
 end
 
 
@@ -306,7 +293,6 @@ function def:setValueMode(mode)
 
 	self.value_mode = mode
 end
-
 
 
 function def:getValueMode()
@@ -348,20 +334,10 @@ function def:uiCall_initialize()
 	-- 'self.value' is cached whenever there is a change to the text (via 'fn_check').
 	-- It is false if the text cannot be interpreted as a number.
 	self.value = false
+	self.value_min = -99999
+	self.value_max = 99999
 	self.value_default = 0
-	self.value_min = 0
-	self.value_max = 999999
-
 	self.value_mode = "decimal"
-
-	-- when true, use ',' to mark the fractional part
-	self.fractional_comma = false
-
-	-- padding of digits before and after the fractional part
-	self.digit_pad1 = 0
-	self.digit_pad2 = 0
-	-- maximum digits in the fractional part
-	self.fractional_max = 2^15
 
 	-- hover and repeat-press state for inc/dec sensors
 	-- false for N/A, 1 for increment, 2 for decrement
@@ -803,7 +779,6 @@ def.default_skinner = {
 			.. "\nvalue: " .. tostring(self.value)
 			.. "\nvalue_min: " .. tostring(self.value_min)
 			.. "\nvalue_max: " .. tostring(self.value_max)
-			.. "\nfractional_comma: " .. tostring(self.fractional_comma)
 			, 0, 64
 		)
 
