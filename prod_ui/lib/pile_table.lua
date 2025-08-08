@@ -1,4 +1,4 @@
--- PILE Table v1.1.9 (modified)
+-- PILE Table v1.1.91
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
@@ -195,17 +195,17 @@ function M.patch(a, b, overwrite)
 	pArg.type1(1, a, "table")
 	pArg.type1(2, b, "table")
 
-	local count = 0
+	local c = 0
 	for i, v in ipairs(b) do
-		count = count + _patch2(a, i, v, overwrite)
+		c = c + _patch2(a, i, v, overwrite)
 	end
 	local n = #b
 	for k, v in pairs(b) do
 		if type(k) ~= "number" or math.floor(k) ~= k or k < 1 or k > n then
-			count = count + _patch2(a, k, v, overwrite)
+			c = c + _patch2(a, k, v, overwrite)
 		end
 	end
-	return count
+	return c
 end
 
 

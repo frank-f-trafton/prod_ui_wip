@@ -291,7 +291,7 @@ def.default_skinner = {
 		love.graphics.pop()
 
 		-- Debug renderer
-		-- [[
+		--[[
 		love.graphics.print(
 			"line: " .. LE.line
 			.. "\n#line: " .. #LE.line

@@ -1,4 +1,4 @@
--- PILE Path v1.1.9
+-- PILE Path v1.1.91
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/rabbitboots/pile_base
