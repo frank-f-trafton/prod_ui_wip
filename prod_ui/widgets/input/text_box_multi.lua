@@ -370,7 +370,7 @@ def.default_skinner = {
 		love.graphics.pop()
 		--]]
 
-		-- [[
+		--[[
 		-- Debug: history state
 		local qp = self.DEBUG_qp
 		if qp then

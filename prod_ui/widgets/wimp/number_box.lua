@@ -26,7 +26,6 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
-local lgcMenu = context:getLua("shared/lgc_menu")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -49,12 +48,6 @@ def.updateAlignOffset = lgcInputS.method_updateAlignOffset
 def.pop_up_def = lgcInputS.pop_up_def
 
 
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
-def.moveFirst = lgcMenu.widgetMoveFirst
-def.moveLast = lgcMenu.widgetMoveLast
-
-
 -- Called when the user presses 'enter'. Return true to halt the logic that checks for
 -- typing literal newlines with the enter key.
 def.wid_action = uiShared.dummyFunc
@@ -68,58 +61,33 @@ end
 
 --- Callbacks that control the amount of addition and subtraction of the value.
 -- @param v The current value
--- @param r Number of iterations for held buttons (ie mouse-repeat)
+-- @param radix The current radix, or base. (10 for decimal, 16 for hex, etc.)
+-- @param reps Number of iterations for held buttons (ie mouse-repeat)
 -- @return The new value to assign.
-function def:wid_incrementButton(v, r) return v + 1 end
-function def:wid_decrementButton(v, r) return v - 1 end
-function def:wid_incrementArrowKey(v, r) return v + 1 end
-function def:wid_decrementArrowKey(v, r) return v - 1 end
-function def:wid_incrementPageKey(v, r) return v + 10 end
-function def:wid_decrementPageKey(v, r) return v - 10 end
+function def:wid_incrementButton(v, radix, reps) return v + 1 end
+function def:wid_decrementButton(v, radix, reps) return v - 1 end
+function def:wid_incrementArrowKey(v, radix, reps) return v + 1 end
+function def:wid_decrementArrowKey(v, radix, reps) return v - 1 end
+function def:wid_incrementPageKey(v, radix, reps) return v + radix end
+function def:wid_decrementPageKey(v, radix, reps) return v - radix end
 
 
 local _enum_value_mode = {
-	decimal = 10,
-	hexadecimal = 16,
 	octal = 8,
-	binary = 2
+	decimal = 10,
+	hexadecimal = 16
 }
 
 
--- string characters for various base conversions (0-9, a-z)
-local _nums = {}
-for i = 0, 9 do
-	_nums[i] = string.char(i + 48)
-end
-for i = 10, 36 do -- a-z
-	_nums[i] = string.char(i + 87)
-end
+local _specifiers = {
+	octal = "%o",
+	decimal = "%u",
+	hexadecimal = "%x"
+}
 
 
-local function _baseToString(n, base)
-	assert(base >= 2 and base <= 36, "unsupported base")
-
-	if math.floor(n) ~= n then
-		error("fractional parts are not supported.")
-	end
-
-	if base == 10 then
-		return tostring(n)
-	end
-
-	-- TODO: test usage of table.concat()
-	local s = ""
-	local n2 = math.abs(n)
-	while n2 >= 1 do
-		s = _nums[n2 % base] .. s
-		n2 = math.floor(n2 / base)
-	end
-	s = (n < 0 and "-" or "") .. s
-	if s == "" then
-		s = "0"
-	end
-
-	return s
+local function _getValueString(v, mode)
+	return (v < 0 and "-" or "") .. string.format(_specifiers[mode], math.abs(v))
 end
 
 
@@ -144,7 +112,7 @@ local function _setTextFromValue(self, v, preserve_caret, history_action)
 	local old_car_u = edComS.utf8LenPlusOne(LE.line, LE.cb)
 
 	if v then
-		local s = _baseToString(v, _enum_value_mode[self.value_mode])
+		local s = _getValueString(v, self.value_mode)
 		self:replaceText(s)
 	else
 		self:replaceText("")
@@ -187,9 +155,6 @@ local function _stringFormCheck(s, vmode)
 
 	elseif vmode == "octal" then
 		negative, whole = s:match("^(%-?)([0-7]*)$")
-
-	elseif vmode == "binary" then
-		negative, whole = s:match("^(%-?)([0-1]*)$")
 
 	else
 		error("invalid value mode.")
@@ -250,7 +215,7 @@ function def:fn_check()
 	-- If the value was clamped or floored, recreate the string and chunks.
 	local v_changed
 	if v ~= v2 then
-		local s2 = _baseToString(v, _enum_value_mode[vmode])
+		local s2 = _getValueString(v, vmode)
 		negative, whole = _stringFormCheck(s2, vmode)
 		v_changed = true
 	end
@@ -280,10 +245,12 @@ local function _callback(self, cb, reps)
 	--print("_callback(): start")
 	--print("_callback(): self.value", self.value)
 	if self.value then
-		_setTextFromValue(self, cb(self, self.value, reps), true, false)
+		_setTextFromValue(self, cb(self, self.value, _enum_value_mode[self.value_mode], reps), true, false)
 	else
 		_setTextFromValue(self, self.value_default, true, false)
 	end
+
+	editWid.resetCaretBlink(self)
 	--print("_callback(): end")
 end
 
@@ -466,6 +433,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 		end
 
 		if (key == "return" or key == "kpenter") and self:wid_action() then
+			editWid.resetCaretBlink(self)
 			return true
 
 		elseif scancode == "up" then
@@ -770,7 +738,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		-- [=====[
+		--[=====[
 		-- Debug: show internal state
 		love.graphics.push("all")
 		love.graphics.setScissor()
@@ -784,7 +752,7 @@ def.default_skinner = {
 
 
 		-- Debug renderer
-		-- [[
+		--[[
 		love.graphics.print(
 			"line: " .. LE.line
 			.. "\n#line: " .. #LE.line
