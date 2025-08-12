@@ -719,6 +719,15 @@ function editFuncM.setAllowHighlight(self, enabled)
 end
 
 
+function editFuncM.setAllowInput(self, enabled)
+	self.LE_allow_input = not not enabled
+	-- Turn off Replace Mode when editing is disabled.
+	if not self.LE_allow_input and self.LE_replace_mode then
+		self.LE_replace_mode = false
+	end
+end
+
+
 function editFuncM.initHistoryEntry(self, entry)
 	local LE = self.LE
 	local lines = LE.lines
@@ -739,9 +748,15 @@ end
 
 
 function editFuncM.writeHistoryEntry(self, do_advance)
-	local entry = self.LE_hist:writeEntry(do_advance)
-	editFuncM.initHistoryEntry(self, entry)
-	return entry
+	local LE = self.LE
+	local hist = self.LE_hist
+	if hist.enabled then
+		local entry = hist:writeEntry(do_advance)
+		if entry then
+			editFuncM.initHistoryEntry(self, entry)
+			return entry
+		end
+	end
 end
 
 

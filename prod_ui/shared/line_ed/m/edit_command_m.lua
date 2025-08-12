@@ -49,7 +49,7 @@ end
 
 
 function editCommandM.setReplaceMode(self, enabled)
-	if not self.LE_allow_replace then
+	if not (self.LE_allow_input and self.LE_allow_replace) then
 		enabled = false
 	end
 	self.LE_replace_mode = not not enabled
@@ -58,11 +58,17 @@ end
 
 
 function editCommandM.toggleReplaceMode(self)
-	if not self.LE_allow_replace then
+	if not (self.LE_allow_input and self.LE_allow_replace) then
 		self.LE_replace_mode = false
 	else
 		self.LE_replace_mode = not self.LE_replace_mode
 	end
+	return true, true
+end
+
+
+function editCommandM.setAllowInput(self, enabled)
+	editFuncM.setAllowInput(self, enabled)
 	return true, true
 end
 
@@ -616,18 +622,15 @@ end
 
 
 function editCommandM.stepHistory(self, dir)
-	if self.LE_hist.enabled then
-		if editFuncM.stepHistory(self, dir) then
-			self.LE_input_category = false
-
-			return true, true, true, nil, nil, true
-		end
+	if self.LE_allow_input and editFuncM.stepHistory(self, dir) then
+		self.LE_input_category = false
+		return true, true, true, nil, nil, true
 	end
 end
 
 
 function editCommandM.undo(self)
-	if editFuncM.stepHistory(self, -1) then
+	if self.LE_allow_input and editFuncM.stepHistory(self, -1) then
 		self.LE_input_category = false
 		return true, true, true, nil, nil, true
 	end
@@ -635,7 +638,7 @@ end
 
 
 function editCommandM.redo(self)
-	if editFuncM.stepHistory(self, 1) then
+	if self.LE_allow_input and editFuncM.stepHistory(self, 1) then
 		self.LE_input_category = false
 		return true, true, true, nil, nil, true
 	end

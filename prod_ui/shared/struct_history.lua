@@ -136,14 +136,15 @@ function _mt_hist:writeEntry(do_advance)
 end
 
 
-function _mt_hist:_debugGetState()
+function _mt_hist:_debugGetState(fn_entry)
 	local tbl = {}
 
-	table.insert(tbl, "enabled: " .. self.enabled .. "\n")
-	table.insert(tbl, "pos/max: " .. self.pos .. "/" .. self.max .. "\n")
+	table.insert(tbl, "enabled: " .. tostring(self.enabled) .. ", locked_first: " .. tostring(self.locked_first) .. "\n")
+	table.insert(tbl, "pos/max: " .. tostring(self.pos) .. "/" .. tostring(self.max) .. "\n")
 
 	for i, entry in ipairs(self.ledger) do
-		table.insert(tbl, "\t" .. i .. tostring(entry) .. "\n")
+		local str_entry = fn_entry and fn_entry(entry) or tostring(entry)
+		table.insert(tbl, "  " .. i .. ": " .. tostring(str_entry) .. "\n")
 	end
 
 	local str = table.concat(tbl)

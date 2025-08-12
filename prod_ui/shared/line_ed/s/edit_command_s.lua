@@ -57,18 +57,43 @@ function editCommandS.setTextAlignment(self, align)
 end
 
 
-function editCommandS.setReplaceMode(self, enabled)
+function editCommandS.setAllowInput(self, enabled)
+	editFuncS.setAllowInput(self, enabled)
+	return true, true
+end
+
+
+function editCommandS.setAllowReplaceMode(self, enabled)
+	local LE = self.LE
+
 	enabled = not not enabled
-	if enabled ~= self.LE_replace_mode then
-		self.LE_replace_mode = enabled
-		return true
+	if self.LE_allow_replace ~= enabled then
+		self.LE_allow_replace = enabled
+		if not enabled then
+			self.LE_replace_mode = false
+		end
 	end
+
+	return true, true
+end
+
+
+function editCommandS.setReplaceMode(self, enabled)
+	if not (self.LE_allow_input and self.LE_allow_replace) then
+		enabled = false
+	end
+	self.LE_replace_mode = not not enabled
+	return true, true
 end
 
 
 function editCommandS.toggleReplaceMode(self)
-	self.LE_replace_mode = not self.LE_replace_mode
-	return true
+	if not (self.LE_allow_input and self.LE_allow_replace) then
+		self.LE_replace_mode = false
+	else
+		self.LE_replace_mode = not self.LE_replace_mode
+	end
+	return true, true
 end
 
 
@@ -359,27 +384,24 @@ end
 
 
 function editCommandS.stepHistory(self, dir)
-	if editFuncS.stepHistory(self, dir) then
+	if self.LE_allow_input and editFuncS.stepHistory(self, dir) then
 		self.LE_input_category = false
-
 		return true, true, true, nil, nil, true
 	end
 end
 
 
 function editCommandS.undo(self)
-	if editFuncS.stepHistory(self, -1) then
+	if self.LE_allow_input and editFuncS.stepHistory(self, -1) then
 		self.LE_input_category = false
-
 		return true, true, true, nil, nil, true
 	end
 end
 
 
 function editCommandS.redo(self)
-	if editFuncS.stepHistory(self, 1) then
+	if self.LE_allow_input and editFuncS.stepHistory(self, 1) then
 		self.LE_input_category = false
-
 		return true, true, true, nil, nil, true
 	end
 end
