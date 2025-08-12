@@ -16,22 +16,15 @@ function plan.make(panel)
 	local input_single = panel:addChild("input/text_box_single")
 	demoShared.setStaticLayout(panel, input_single, 32, 96, 256, 32)
 
-	--input_single:setText("Single-Line Text Box")
+	input_single:setText("Single-Line Text Box")
 
-	--input_single.LE_allow_line_feed = true
-	--input_single.LE_allow_enter_line_feed = true
+	--input_single:setAllowLineFeed(true)
+	--input_single:setAllowEnterLineFeed(true)
 
 	input_single.wid_action = function(self)
 		print("input_single: Pressed 'enter': " .. input_single.LE.line)
 	end
 	--]=]
-
-	-- TODO: history state is buggy after a call to setText().
-	--[[
-	input_single:setText("Sombrero")
-	input_single:setText("Chapeau")
-	input_single:setText("Hat")
-	--]]
 end
 
 
