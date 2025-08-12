@@ -457,7 +457,7 @@ end
 function editCommandM.deleteHighlighted(self)
 	if self.LE_allow_input and self.LE:isHighlighted() then
 		-- Always write history if anything was deleted.
-		if editFuncM.deleteHighlighted() then
+		if editFuncM.deleteHighlighted(self) then
 			return true, true, true, true
 		end
 	end
