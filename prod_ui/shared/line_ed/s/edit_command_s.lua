@@ -317,7 +317,8 @@ end
 function editCommandS.setText(self, text)
 	editFuncS.setText(self, text)
 
-	return true, true, true, true
+	-- Don't write a history entry from here. One has already been set up in editFuncS.setText().
+	return true, true, true
 end
 
 
