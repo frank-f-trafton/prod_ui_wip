@@ -381,7 +381,7 @@ end
 
 
 function client:setAllowInput(enabled)
-	self.LE_allow_input = not not enabled
+	editWidM.wrapAction(self, editCommandM.setAllowInput, enabled)
 end
 
 

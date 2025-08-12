@@ -25,6 +25,13 @@ function plan.make(panel)
 		print("input_single: Pressed 'enter': " .. input_single.LE.line)
 	end
 	--]=]
+
+	-- TODO: history state is buggy after a call to setText().
+	--[[
+	input_single:setText("Sombrero")
+	input_single:setText("Chapeau")
+	input_single:setText("Hat")
+	--]]
 end
 
 

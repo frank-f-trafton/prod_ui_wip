@@ -177,8 +177,74 @@ function client:paste()
 end
 
 
-function client:getReplaceMode()
-	return self.LE_replace_mode
+function client:setAllowInput(enabled)
+	editWidS.wrapAction(self, editCommandS.setAllowInput, enabled)
+end
+
+
+function client:getAllowInput()
+	return self.LE_allow_input
+end
+
+
+function client:setAllowCut(enabled)
+	self.LE_allow_cut = not not enabled
+end
+
+
+function client:getAllowCut()
+	return self.LE_allow_cut
+end
+
+
+function client:setAllowCopy(enabled)
+	self.LE_allow_copy = not not enabled
+end
+
+
+function client:getAllowCopy()
+	return self.LE_allow_copy
+end
+
+
+function client:setAllowPaste(enabled)
+	self.LE_allow_paste = not not enabled
+end
+
+
+function client:getAllowPaste()
+	return self.LE_allow_paste
+end
+
+
+function client:setAllowLineFeed(enabled)
+	self.LE_allow_line_feed = not not enabled
+end
+
+
+function client:getAllowLineFeed()
+	return self.LE_allow_line_feed
+end
+
+
+-- ie strike enter to activate a widget action callback.
+function client:setAllowEnterLineFeed(enabled) -- single-line only
+	self.LE_allow_enter_line_feed = not not enabled
+end
+
+
+function client:getAllowEnterLineFeed() -- single-line only
+	return self.LE_allow_enter_line_feed
+end
+
+
+function client:setAllowReplaceMode(enabled)
+	editWidS.wrapAction(self, editCommandS.setAllowReplaceMode, enabled)
+end
+
+
+function client:getAllowReplaceMode()
+	return self.LE_allow_replace
 end
 
 
@@ -187,13 +253,8 @@ function client:setReplaceMode(enabled)
 end
 
 
-function client:toggleReplaceMode()
-	editWidS.wrapAction(self, editCommandS.toggleReplaceMode)
-end
-
-
-function client:getTextAlignment()
-	return self.LE.align
+function client:getReplaceMode()
+	return self.LE_replace_mode
 end
 
 
@@ -203,6 +264,11 @@ function client:setTextAlignment(align)
 	end
 
 	editWidS.wrapAction(self, editCommandS.setTextAlignment, align)
+end
+
+
+function client:getTextAlignment()
+	return self.LE.align
 end
 
 

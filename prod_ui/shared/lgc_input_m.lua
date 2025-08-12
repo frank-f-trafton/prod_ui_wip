@@ -95,7 +95,7 @@ function lgcInputM.setupInstance(self, commands)
 	editFuncM.writeHistoryEntry(self, true)
 
 	-- Enable/disable specific editing actions.
-	self.LE_allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
+	self.LE_allow_input = true -- prevents editing actions; does not affect navigation, highlighting and copying.
 	self.LE_allow_cut = true
 	self.LE_allow_copy = true
 	self.LE_allow_paste = true
@@ -479,19 +479,33 @@ end
 
 function lgcInputM.configItem_undo(item, client)
 	item.selectable = true
-	item.actionable = (client.LE_hist.pos > 1)
+	local hist = client.LE_hist
+	item.actionable = client.LE_allow_input and hist.enabled and hist.pos > 1
 end
 
 
 function lgcInputM.configItem_redo(item, client)
 	item.selectable = true
-	item.actionable = (client.LE_hist.pos < #client.LE_hist.ledger)
+	local hist = client.LE_hist
+	item.actionable = client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
 end
 
 
-function lgcInputM.configItem_cutCopyDelete(item, client)
+function lgcInputM.configItem_cut(item, client)
 	item.selectable = true
-	item.actionable = client.LE:isHighlighted()
+	item.actionable = client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
+end
+
+
+function lgcInputM.configItem_copy(item, client)
+	item.selectable = true
+	item.actionable = client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
+end
+
+
+function lgcInputM.configItem_delete(item, client)
+	item.selectable = true
+	item.actionable = client.LE_allow_input and client.LE:isHighlighted()
 end
 
 
@@ -507,13 +521,13 @@ function lgcInputM.configItem_paste(item, client)
 	-- Something like this:
 	-- item.actionable = love.system.hasClipboardText()
 
-	item.actionable = true
+	item.actionable = client.LE_allow_input and client.LE_allow_paste and true or false
 end
 
 
 function lgcInputM.configItem_selectAll(item, client)
 	item.selectable = true
-	item.actionable = (not client.LE.lines:isEmpty())
+	item.actionable = not client.LE.lines:isEmpty()
 end
 
 
@@ -539,13 +553,13 @@ lgcInputM.pop_up_def = {
 		text = "Cut",
 		callback = lgcInputM.cb_action,
 		command_id = "cut",
-		config = lgcInputM.configItem_cutCopyDelete,
+		config = lgcInputM.configItem_cut,
 	}, {
 		type = "command",
 		text = "Copy",
 		callback = lgcInputM.cb_action,
 		command_id = "copy",
-		config = lgcInputM.configItem_cutCopyDelete,
+		config = lgcInputM.configItem_copy,
 	}, {
 		type = "command",
 		text = "Paste",
@@ -557,7 +571,7 @@ lgcInputM.pop_up_def = {
 		text = "Delete",
 		callback = lgcInputM.cb_action,
 		command_id = "delete-highlighted",
-		config = lgcInputM.configItem_cutCopyDelete,
+		config = lgcInputM.configItem_delete,
 	},
 	{type="separator"},
 	{

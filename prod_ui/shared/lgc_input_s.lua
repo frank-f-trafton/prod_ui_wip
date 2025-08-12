@@ -70,7 +70,7 @@ function lgcInputS.setupInstance(self, commands)
 	self.LE_bad_input_rule = false
 
 	-- Enable/disable specific editing actions.
-	self.LE_allow_input = true -- affects nearly all operations, except navigation, highlighting and copying
+	self.LE_allow_input = true -- prevents editing actions; does not affect navigation, highlighting and copying.
 	self.LE_allow_cut = true
 	self.LE_allow_copy = true
 	self.LE_allow_paste = true
@@ -480,32 +480,44 @@ end
 function lgcInputS.configItem_undo(item, client)
 	item.selectable = true
 	local hist = client.LE_hist
-	item.actionable = (hist.enabled and hist.pos > 1)
+	item.actionable = client.LE_allow_input and hist.enabled and hist.pos > 1
 end
 
 
 function lgcInputS.configItem_redo(item, client)
 	item.selectable = true
 	local hist = client.LE_hist
-	item.actionable = (hist.enabled and hist.pos < #hist.ledger)
+	item.actionable = client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
 end
 
 
-function lgcInputS.configItem_cutCopyDelete(item, client)
+function lgcInputS.configItem_cut(item, client)
 	item.selectable = true
-	item.actionable = client.LE:isHighlighted()
+	item.actionable = client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
+end
+
+
+function lgcInputS.configItem_copy(item, client)
+	item.selectable = true
+	item.actionable = client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
+end
+
+
+function lgcInputS.configItem_delete(item, client)
+	item.selectable = true
+	item.actionable = client.LE_allow_input and client.LE:isHighlighted()
 end
 
 
 function lgcInputS.configItem_paste(item, client)
 	item.selectable = true
-	item.actionable = true
+	item.actionable = client.LE_allow_input and client.LE_allow_paste and true or false
 end
 
 
 function lgcInputS.configItem_selectAll(item, client)
 	item.selectable = true
-	item.actionable = (#client.LE.line > 0)
+	item.actionable = #client.LE.line > 0
 end
 
 
@@ -531,13 +543,13 @@ lgcInputS.pop_up_def = {
 		text = "Cut",
 		callback = lgcInputS.cb_action,
 		command_id = "cut",
-		config = lgcInputS.configItem_cutCopyDelete,
+		config = lgcInputS.configItem_cut,
 	}, {
 		type = "command",
 		text = "Copy",
 		callback = lgcInputS.cb_action,
 		command_id = "copy",
-		config = lgcInputS.configItem_cutCopyDelete,
+		config = lgcInputS.configItem_copy,
 	}, {
 		type = "command",
 		text = "Paste",
@@ -549,7 +561,7 @@ lgcInputS.pop_up_def = {
 		text = "Delete",
 		callback = lgcInputS.cb_action,
 		command_id = "delete-highlighted",
-		config = lgcInputS.configItem_cutCopyDelete,
+		config = lgcInputS.configItem_delete,
 	},
 	{type="separator"},
 	{

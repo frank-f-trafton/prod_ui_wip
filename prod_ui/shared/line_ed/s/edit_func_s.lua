@@ -420,10 +420,29 @@ function editFuncS.replaceText(self, text)
 end
 
 
+local function _debugHistEntry(entry)
+	return "line: " .. tostring(entry.line) .. ", cb: " .. tostring(entry.cb) .. ", hb: " .. entry.hb
+end
+
+
 function editFuncS.setText(self, text)
 	-- Like replaceText(), but also wipes history.
+
+	--print(debug.traceback())
+	--print("1/3", self.LE_hist:_debugGetState(_debugHistEntry))
 	editFuncS.replaceText(self, text)
+	--print("2/3", self.LE_hist:_debugGetState(_debugHistEntry))
 	editFuncS.wipeHistoryEntries(self)
+	--print("3/3", self.LE_hist:_debugGetState(_debugHistEntry))
+end
+
+
+function editFuncS.setAllowInput(self, enabled)
+	self.LE_allow_input = not not enabled
+	-- Turn off Replace Mode when editing is disabled.
+	if not self.LE_allow_input and self.LE_replace_mode then
+		self.LE_replace_mode = false
+	end
 end
 
 
@@ -475,8 +494,10 @@ function editFuncS.writeHistoryEntry(self, do_advance)
 			entry = hist:writeEntry(do_advance)
 		end
 
-		editFuncS.initHistoryEntry(entry, LE.line, LE.cb, LE.hb)
-		return entry
+		if entry then
+			editFuncS.initHistoryEntry(entry, LE.line, LE.cb, LE.hb)
+			return entry
+		end
 	end
 end
 
