@@ -64,6 +64,9 @@ function lgcInputS.setupInstance(self, commands)
 	-- When true, typing overwrites the current position instead of inserting.
 	self.LE_replace_mode = false
 
+	-- When false, cannot enable Replace Mode.
+	self.LE_allow_replace = true
+
 	-- What to do when there's a UTF-8 encoding problem.
 	-- Applies to input text, and also to clipboard get/set.
 	-- See 'textUtil.sanitize()' for options.
@@ -76,16 +79,13 @@ function lgcInputS.setupInstance(self, commands)
 	self.LE_allow_paste = true
 	self.LE_allow_highlight = true
 
-	-- Allows '\n' as text input (including pasting from the clipboard).
+	-- Allows '\n' as text input (whether by hitting enter or pasting from the clipboard).
 	-- Single-line input treats line feeds like any other character. For example, 'home' and 'end' will not
 	-- stop at line feeds.
 	-- In the external display string, line feed code points (0xa) are replaced with U+23CE (⏎).
+	-- Note that enter key events may be intercepted by widget logic before the text input code gets a
+	-- chance to consider it.
 	self.LE_allow_line_feed = false
-
-	-- Allows typing a line feed by pressing enter/return. `self.LE_allow_line_feed` must be true.
-	-- Note that this may override other uses of enter/return in the owning widget.
-	-- (In particular, this setting is unrelated to a widget being "activated" by the enter key.)
-	self.LE_allow_enter_line_feed = false
 
 	-- 'LE_allow_tab' and 'LE_allow_untab' are not supported in the single-line code.
 	-- You can paste in tabs, however.

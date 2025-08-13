@@ -417,7 +417,7 @@ end
 
 function editCommandS.typeLineFeed(self)
 	-- (Return / Enter key)
-	if self.LE_allow_input and self.LE_allow_line_feed and self.LE_allow_enter_line_feed then
+	if self.LE_allow_input and self.LE_allow_line_feed then
 		self.LE_input_category = false
 		editFuncS.writeText(self, "\n", true)
 

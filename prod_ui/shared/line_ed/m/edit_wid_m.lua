@@ -112,8 +112,8 @@ function editWidM.scrollGetCaretInBounds(self, immediate)
 
 	-- get the extended caret rectangle
 	local car_x1 = self.LE_align_ox + LE.caret_box_x - self.LE_caret_extend_x
+	local car_x2 = self.LE_align_ox + LE.caret_box_x + self.LE_caret_extend_x
 	local car_y1 = LE.caret_box_y - self.LE_caret_extend_y
-	local car_x2 = self.LE_align_ox + LE.caret_box_x + LE.caret_box_w + self.LE_caret_extend_x
 	local car_y2 = LE.caret_box_y + LE.caret_box_h + self.LE_caret_extend_y
 
 	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
