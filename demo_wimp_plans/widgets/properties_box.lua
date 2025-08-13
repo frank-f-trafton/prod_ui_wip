@@ -22,8 +22,8 @@ function plan.make(panel)
 	local c1 = properties_box:addControl("wimp/embed/checkbox", "Foobar")
 	local c2 = properties_box:addControl("wimp/embed/checkbox", "Cat")
 	local c3 = properties_box:addControl("input/text_box_single", "Dog")
-	--c3.LE_select_all_on_thimble1_take = true
-	--c3.LE_deselect_all_on_thimble1_release = true
+	--c3:setSelectAllOnThimble1Take(true)
+	--c3:setDeselectAllOnThimble1Release(true)
 	local c4 = properties_box:addControl("wimp/number_box", "Number")
 
 	properties_box:setScrollBars(false, true)

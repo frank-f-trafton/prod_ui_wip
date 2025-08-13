@@ -97,7 +97,7 @@ function edComM.coreToDisplayOffsets(line, byte_n, paragraph)
 	if byte_n == #line + 1 then
 		return #paragraph[#paragraph].str + 1, #paragraph
 	else
-		print("line", "|" .. line .. "|", #line, byte_n)
+		--print("line", "|" .. line .. "|", #line, byte_n)
 		local code_point_index = utf8.len(line, 1, byte_n)
 		local line_sub = 1
 

@@ -201,23 +201,28 @@ end
 function def:uiCall_update(dt)
 	editWid.updateCaretBlink(self, dt)
 
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 	local do_update
 
-	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
-		-- Need to continuously update the selection.
-		local mouse_drag_x = lgcInputS.mouseDragLogic(self)
-		if mouse_drag_x ~= 0 then
-			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
+		if lgcInputS.mouseDragLogic(self) then
+			do_update = true
 		end
+		if widShared.dragToScroll(self, dt) then
+			do_update = true
+		end
+	end
+
+	self:scrollUpdate(dt)
+
+	-- Force a cache update if the external scroll position is different.
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		do_update = true
 	end
 
 	if do_update then
 		editWidS.generalUpdate(self, true, false, false, true)
 	end
-
-	self:scrollUpdate(dt)
 end
 
 
@@ -273,6 +278,9 @@ def.default_skinner = {
 			self.vp2_h
 		)
 
+		-- Translate into core region, with scrolling offsets applied.
+		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.LE_align_oy - self.scr_y)
+
 		-- Text editor component.
 		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 
@@ -314,6 +322,16 @@ def.default_skinner = {
 			love.graphics.print(i .. " c: " .. entry.cb .. " h: " .. entry.hb .. "line: " .. entry.line, 0, yy)
 			yy = yy + hh
 		end
+
+		love.graphics.print(
+			"LE_click_byte: " .. self.LE_click_byte
+			.. "\nLE_align_ox: " .. self.LE_align_ox
+			.. "\nscr: " .. self.scr_x .. ", " .. self.scr_y
+			.. "\nvp #1: " .. self.vp_x .. ", " .. self.vp_y .. ", " .. self.vp_w .. ", " .. self.vp_h
+			.. "\ndoc: " .. self.doc_w .. ", " .. self.doc_h
+			,
+			0, 448
+		)
 		--]]
 	end,
 }

@@ -4,6 +4,13 @@ local context = select(1, ...)
 local editWid = {}
 
 
+local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+
+
+editWid._enum_align = uiShared.makeLUTV("left", "center", "right")
+editWid._enum_bad_input = uiShared.makeLUTV("trim", "replacement_char")
+
+
 function editWid.updateCaretShape(self)
 	local LE = self.LE
 

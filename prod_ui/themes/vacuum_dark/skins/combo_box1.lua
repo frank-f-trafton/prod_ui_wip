@@ -7,6 +7,8 @@ return {
 	font_ghost = "*fonts/p",
 
 	cursor_on = "ibeam",
+	text_align = "left",
+	text_align_v = 0.5,
 
 	button_spacing = 24,
 	button_placement = "right",

@@ -84,11 +84,11 @@ function lgcInputS.setupInstance(self, commands)
 
 	-- Allows typing a line feed by pressing enter/return. `self.LE_allow_line_feed` must be true.
 	-- Note that this may override other uses of enter/return in the owning widget.
+	-- (In particular, this setting is unrelated to a widget being "activated" by the enter key.)
 	self.LE_allow_enter_line_feed = false
 
-	self.LE_allow_tab = false -- affects single presses of the tab key
-	self.LE_allow_untab = false -- affects shift+tab (unindenting)
-	self.LE_tabs_to_spaces = false -- affects '\t' in writeText()
+	-- 'LE_allow_tab' and 'LE_allow_untab' are not supported in the single-line code.
+	-- You can paste in tabs, however.
 
 	-- Max number of Unicode characters (not bytes) permitted in the field.
 	self.LE_u_chars_max = 5000
@@ -98,13 +98,13 @@ function lgcInputS.setupInstance(self, commands)
 
 	-- When these fields are true, the widget should…
 	-- * Select all text upon receiving the thimble
-	self.LE_select_all_on_thimble1_take = false -- TODO: add to multi-line code
+	self.LE_select_all_on_thimble1_take = false
 
 	-- * Deselect all text upon releasing the thimble (the caret is moved to the first position).
-	self.LE_deselect_all_on_thimble1_release = false -- TODO: add to multi-line code
+	self.LE_deselect_all_on_thimble1_release = false
 
 	-- * Clear history when deselected
-	self.LE_clear_history_on_deselect = false -- TODO: add to multi-line code
+	self.LE_clear_history_on_deselect = false
 
 	-- * Clear the input category when deselected (forcing a new history entry to be made upon the
 	-- next user text input event). ('LE_clear_history_on_deselect' also does this.)
@@ -121,12 +121,15 @@ function lgcInputS.setupInstance(self, commands)
 	-- Extends the caret dimensions when keeping the caret within the bounds of the viewport.
 	self.LE_caret_extend_x = 0
 
-	-- Position offset when clicking the mouse.
+	-- Byte offset when clicking the mouse.
 	-- This is only valid when a mouse action is in progress.
 	self.LE_click_byte = 1
 
 	-- How far to offset the line X position depending on the alignment.
 	self.LE_align_ox = 0
+
+	-- How far to offset text vertically. (See 'text_align_v' in widget skins.)
+	self.LE_align_oy = 0
 
 	-- string: display this text when the input box is empty.
 	-- false: disabled.
@@ -226,7 +229,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
 		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
-		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h
+		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h + self.LE_align_oy
 
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
@@ -283,51 +286,49 @@ local function _clickDragByWord(self, x, origin_byte)
 end
 
 
--- @param mouse_x, mouse_y Mouse position relative to widget top-left.
+-- @param mx, my Mouse position relative to widget top-left.
 -- @return true if event propagation should be halted.
-function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_before)
+function lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 	local LE = self.LE
-	local context = self.context
 
 	editWid.resetCaretBlink(self)
 
-	local ctrl_down, shift_down, alt_down, gui_down = context.key_mgr:getModState()
-
 	if button == 1 then
-		-- WIP: this isn't quite right.
-		-- [[
 		if not had_thimble1_before and self.LE_select_all_on_thimble1_take then
 			return
 		end
-		--]]
 
 		self.press_busy = "text-drag"
 
-		-- Apply scroll + margin offsets
-		local mouse_sx = mouse_x + self.scr_x - self.vp_x - self.LE_align_ox
+		-- apply offsets
+		local msx = mx + self.scr_x - self.LE_align_ox
 
-		local core_byte = LE:getCharacterDetailsAtPosition(mouse_sx, true)
+		local core_byte = LE:getCharacterDetailsAtPosition(msx, true)
 
 		if context.cseq_button == 1 then
 			-- Not the same byte position as last click: force single-click mode.
 			if context.cseq_presses > 1  and core_byte ~= self.LE_click_byte then
 				context:forceClickSequence(self, button, 1)
-				-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
 			end
 
 			if context.cseq_presses == 1 then
-				_caretToX(self, not shift_down, mouse_sx, true)
+				local _, shift_down, _, _ = context.key_mgr:getModState()
+				_caretToX(self, not shift_down, msx, true)
 
 				self.LE_click_byte = LE.cb
+
 
 			elseif context.cseq_presses == 2 then
 				self.LE_click_byte = LE.cb
+
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()
 
 			elseif context.cseq_presses == 3 then
 				self.LE_click_byte = LE.cb
+
+				context:forceClickSequence(false, false, 0)
 
 				--- Highlight everything.
 				self:highlightAll()
@@ -342,7 +343,7 @@ function lgcInputS.mousePressLogic(self, button, mouse_x, mouse_y, had_thimble1_
 
 		local ax, ay = self:getAbsolutePosition()
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, ax + mouse_x, ay + mouse_y)
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, ax + mx, ay + my)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
@@ -358,29 +359,29 @@ function lgcInputS.mouseDragLogic(self)
 	local context = self.context
 	local LE = self.LE
 
+	local widget_needs_update = false
+
 	editWid.resetCaretBlink(self)
 
-	-- Mouse position relative to viewport #1.
-	local ax, ay = self:getAbsolutePosition()
-	local mx, my = self.context.mouse_x - ax - self.vp_x, self.context.mouse_y - ay - self.vp_y
+	-- relative mouse position
+	local mx, _ = self:getRelativePosition(context.mouse_x, context.mouse_y)
 
-	-- ...And with scroll offsets applied.
-	local s_mx = mx + self.scr_x - self.LE_align_ox
-	local s_my = my + self.scr_y
-
-	--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
+	-- ...And with offsets applied.
+	local msx = mx + self.scr_x - self.LE_align_ox
 
 	-- Handle drag highlight actions.
 	if context.cseq_presses == 1 then
-		_caretToX(self, false, s_mx, true)
+		_caretToX(self, false, msx, true)
+		widget_needs_update = true
 
 	elseif context.cseq_presses == 2 then
-		_clickDragByWord(self, s_mx, self.LE_click_byte)
+		_clickDragByWord(self, msx, self.LE_click_byte)
+		widget_needs_update = true
 	end
+
 	-- cseq_presses == 3: selecting whole line (nothing to do at drag-time).
 
-	-- Amount to drag for the update() callback (to be scaled down and multiplied by dt).
-	return (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
+	return widget_needs_update
 end
 
 
@@ -414,14 +415,9 @@ end
 -- @param font Font to use when printing the main text (required, even if printing is disabled by color_text being false).
 -- @param color_caret Table of colors for the text caret, or nil/false to not draw the caret.
 function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
-	-- Call after setting up the text area scissor box, within `love.graphics.push("all")` and `pop()`.
+	-- Call after setting up the text area scissor box and scrolling, within `love.graphics.push("all")` and `pop()`.
 
 	local LE = self.LE
-
-	love.graphics.translate(
-		self.vp_x + self.LE_align_ox - self.scr_x,
-		self.vp_y - self.scr_y
-	)
 
 	-- Highlighted selection.
 	if color_highlight and LE.disp_highlighted then

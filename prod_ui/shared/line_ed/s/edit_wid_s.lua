@@ -12,7 +12,11 @@ local utf8 = require("utf8")
 
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local widShared = context:getLua("core/wid_shared")
+
+
+local _lerp = pMath.lerp
 
 
 function editWidS.updateTextBatch(self)
@@ -33,24 +37,23 @@ function editWidS.updateDocumentDimensions(self)
 	local LE = self.LE
 	local font = LE.font
 
-	--[[
-	The document width is the larger of: 1) viewport width, 2) text width (plus an empty caret slot).
-	When alignment is center or right and the text is smaller than the viewport, the text, caret,
-	etc. are transposed.
-	--]]
-	self.doc_w = math.max(self.vp_w, LE.disp_text_w)
+	self.doc_w = LE.disp_text_w
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
 
-	local align = LE.align
+	local align = self.LE.align
 	if align == "left" then
 		self.LE_align_ox = 0
 
 	elseif align == "center" then
-		self.LE_align_ox = math.max(0, (self.vp_w - LE.disp_text_w) * .5)
+		self.LE_align_ox = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
 
 	else -- align == "right"
-		self.LE_align_ox = math.max(0, self.vp_w - LE.disp_text_w)
+		self.LE_align_ox = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
 	end
+
+	local align_v = math.max(0, math.min(self.skin.text_align_v, 1.0))
+
+	self.LE_align_oy = _lerp(0, self.doc_h - self.vp_h, align_v)
 end
 
 
@@ -61,7 +64,7 @@ function editWidS.scrollGetCaretInBounds(self, immediate)
 	local car_x1 = self.LE_align_ox + LE.caret_box_x - self.LE_caret_extend_x
 	local car_y1 = LE.caret_box_y
 	local car_x2 = self.LE_align_ox + LE.caret_box_x + math.max(LE.caret_box_w, LE.caret_box_w_edge) + self.LE_caret_extend_x
-	local car_y2 = LE.caret_box_y + LE.caret_box_h
+	local car_y2 = LE.caret_box_y + LE.caret_box_h + self.LE_align_oy
 
 	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)
 end

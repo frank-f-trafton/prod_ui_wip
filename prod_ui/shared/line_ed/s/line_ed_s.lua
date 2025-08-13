@@ -126,44 +126,6 @@ function lineEdS.new()
 end
 
 
-function _mt_ed_s:getFont()
-	return self.font
-end
-
-
-function _mt_ed_s:setFont(font)
-	uiShared.loveTypeEval(1, font, "Font")
-
-	if font and self.font == font then
-		return
-	end
-
-	self.font = font or false
-	if self.font then
-		local em_width = font:getWidth("M")
-		local uscore_width = font:getWidth("_")
-		self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
-		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-		self.caret_box_w_empty = math.max(1, math.ceil(uscore_width))
-		self.caret_box_w_edge = math.max(1, math.ceil(em_width))
-
-		self:updateDisplayText()
-		self:syncDisplayCaretHighlight()
-	end
-end
-
-
-function _mt_ed_s:setTextColors(text_color, text_h_color) -- [sync]
-	uiShared.typeEval(1, text_color, "table")
-	uiShared.typeEval(2, text_h_color, "table")
-
-	self.text_color = text_color or edCom.default_text_color
-	self.text_h_color = text_h_color or edCom.default_text_h_color
-
-	self:syncDisplayCaretHighlight()
-end
-
-
 function _mt_ed_s:getCaretOffsets()
 	return self.cb, self.hb
 end
@@ -422,6 +384,50 @@ function _mt_ed_s:syncDisplayCaretHighlight()
 			i = i + 2
 			j = j + 1
 		end
+	end
+end
+
+
+function _mt_ed_s:setFont(font)
+	uiShared.loveTypeEval(1, font, "Font")
+
+	if font and self.font == font then
+		return
+	end
+
+	self.font = font or false
+	if self.font then
+		local em_width = font:getWidth("M")
+		local uscore_width = font:getWidth("_")
+		self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
+		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
+		self.caret_box_w_empty = math.max(1, math.ceil(uscore_width))
+		self.caret_box_w_edge = math.max(1, math.ceil(em_width))
+
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
+	end
+end
+
+
+function _mt_ed_s:setTextColors(text_color, text_h_color)
+	uiShared.typeEval(1, text_color, "table")
+	uiShared.typeEval(2, text_h_color, "table")
+
+	self.text_color = text_color or edCom.default_text_color
+	self.text_h_color = text_h_color or edCom.default_text_h_color
+
+	self:syncDisplayCaretHighlight()
+end
+
+
+function _mt_ed_s:setColorization(enabled)
+	enabled = not not enabled
+	if self.generate_colored_text ~= enabled then
+		self.generate_colored_text = enabled
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
+		return true
 	end
 end
 

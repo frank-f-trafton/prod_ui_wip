@@ -57,6 +57,13 @@ function editCommandS.setTextAlignment(self, align)
 end
 
 
+function editCommandS.setColorization(self, enabled)
+	if self.LE:setColorization(enabled) then
+		return true, true, true
+	end
+end
+
+
 function editCommandS.setAllowInput(self, enabled)
 	editFuncS.setAllowInput(self, enabled)
 	return true, true
@@ -415,16 +422,6 @@ function editCommandS.typeLineFeed(self)
 		editFuncS.writeText(self, "\n", true)
 
 		return true, true, true, true
-	end
-end
-
-
-function editCommandS.typeTab(self)
-	if self.LE_allow_input and self.LE_allow_tab then
-		local written = editFuncS.writeText(self, "\t", true)
-		local changed = #written > 0
-
-		return true, true, true, changed
 	end
 end
 
