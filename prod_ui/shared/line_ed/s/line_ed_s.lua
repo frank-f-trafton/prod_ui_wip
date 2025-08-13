@@ -80,12 +80,6 @@ function lineEdS.new()
 	self.caret_box_w = 0
 	self.caret_box_h = 0
 
-	-- Width of the caret box when it is not placed over text (ie at the far end, or the Line Editor is empty)
-	self.caret_box_w_empty = 0
-
-	-- Width to use when keeping the caret in view against the far edge of the field.
-	self.caret_box_w_edge = 0
-
 	-- Swaps out missing glyphs in the display string with a replacement glyph.
 	-- The internal contents (and results of clipboard actions) remain the same.
 	self.replace_missing = true
@@ -299,7 +293,7 @@ function _mt_ed_s:updateDisplayText()
 	end
 
 	self.disp_text = work_str
-	self.disp_text_w = font:getWidth(self.disp_text) + self.caret_box_w_empty
+	self.disp_text_w = font:getWidth(self.disp_text)
 	self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 
 	-- XXX: syntax coloring.
@@ -398,11 +392,8 @@ function _mt_ed_s:setFont(font)
 	self.font = font or false
 	if self.font then
 		local em_width = font:getWidth("M")
-		local uscore_width = font:getWidth("_")
 		self.disp_text_h = math.ceil(font:getHeight() * font:getLineHeight())
 		self.caret_line_width = math.max(1, math.ceil(em_width / 16))
-		self.caret_box_w_empty = math.max(1, math.ceil(uscore_width))
-		self.caret_box_w_edge = math.max(1, math.ceil(em_width))
 
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()

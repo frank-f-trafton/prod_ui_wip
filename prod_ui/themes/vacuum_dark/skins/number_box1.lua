@@ -6,7 +6,7 @@ return {
 	font_ghost = "*fonts/p",
 
 	cursor_on = "ibeam",
-	text_align = "left", -- TODO: it should be right, but I broke scrolling for center and right-aligned text in single-line textbox code.
+	text_align = "right",
 	text_align_v = 0.5,
 
 	button_spacing = 24,

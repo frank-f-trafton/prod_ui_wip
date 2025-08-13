@@ -1,3 +1,6 @@
+-- Functions, methods and plug-ins for widgets with LineEditor (either) state.
+
+
 local context = select(1, ...)
 
 

@@ -45,10 +45,10 @@ function editWidS.updateDocumentDimensions(self)
 		self.LE_align_ox = 0
 
 	elseif align == "center" then
-		self.LE_align_ox = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
+		self.LE_align_ox = math.max(0, math.floor((self.vp_w - self.doc_w) / 2))
 
 	else -- align == "right"
-		self.LE_align_ox = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
+		self.LE_align_ox = math.max(0, self.vp_w - self.doc_w)
 	end
 
 	local align_v = math.max(0, math.min(self.skin.text_align_v, 1.0))
@@ -62,8 +62,8 @@ function editWidS.scrollGetCaretInBounds(self, immediate)
 
 	-- get the extended caret rectangle
 	local car_x1 = self.LE_align_ox + LE.caret_box_x - self.LE_caret_extend_x
+	local car_x2 = self.LE_align_ox + LE.caret_box_x + self.LE_caret_extend_x
 	local car_y1 = LE.caret_box_y
-	local car_x2 = self.LE_align_ox + LE.caret_box_x + math.max(LE.caret_box_w, LE.caret_box_w_edge) + self.LE_caret_extend_x
 	local car_y2 = LE.caret_box_y + LE.caret_box_h + self.LE_align_oy
 
 	widShared.scrollRectInBounds(self, car_x1, car_y1, car_x2, car_y2, immediate)

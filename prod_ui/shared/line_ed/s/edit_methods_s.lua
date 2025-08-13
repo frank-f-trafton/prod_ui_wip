@@ -115,7 +115,6 @@ end
 
 
 function client:highlightAll()
-	print("highlight all!")
 	editWidS.wrapAction(self, editCommandS.highlightAll)
 end
 
@@ -292,16 +291,6 @@ end
 
 function client:getAllowLineFeed()
 	return self.LE_allow_line_feed
-end
-
-
-function client:setAllowEnterLineFeed(enabled) -- S
-	self.LE_allow_enter_line_feed = not not enabled
-end
-
-
-function client:getAllowEnterLineFeed() -- S
-	return self.LE_allow_enter_line_feed
 end
 
 
