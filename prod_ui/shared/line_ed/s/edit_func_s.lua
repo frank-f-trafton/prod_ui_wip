@@ -58,7 +58,7 @@ end
 
 local function _writeText(self, LE, text, suppress_replace)
 	-- Sanitize input
-	text = edCom.cleanString(text, self.LE_bad_input_rule, self.LE_tabs_to_spaces, self.LE_allow_line_feed)
+	text = edCom.cleanString(text, self.LE_bad_input_rule, false, self.LE_allow_line_feed)
 
 	if not self.LE_allow_highlight then
 		LE:clearHighlight()

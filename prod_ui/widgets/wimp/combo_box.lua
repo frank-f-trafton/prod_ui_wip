@@ -258,23 +258,29 @@ end
 function def:uiCall_update(dt)
 	editWid.updateCaretBlink(self, dt)
 
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 	local do_update
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
-		-- Need to continuously update the selection.
-		local mouse_drag_x = lgcInputS.mouseDragLogic(self)
-		if mouse_drag_x ~= 0 then
-			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
+		if lgcInputS.mouseDragLogic(self) then
+			do_update = true
 		end
+		if widShared.dragToScroll(self, dt) then
+			do_update = true
+		end
+	end
+
+	self:scrollUpdate(dt)
+
+	-- Force a cache update if the external scroll position is different.
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		do_update = true
 	end
 
 	if do_update then
 		editWidS.generalUpdate(self, true, false, false, true)
 	end
-
-	self:scrollUpdate(dt)
 end
 
 
@@ -507,9 +513,9 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
+		local had_thimble1_before = self == self.context.thimble1
 		if button <= 3 then
 			self:tryTakeThimble1()
-			print("hasInput", love.keyboard.hasTextInput())
 		end
 
 		local closed_drawer
@@ -524,7 +530,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Clicking the text area:
 		if widShared.pointInViewport(self, 1, mx, my) then
 			-- Propagation is halted when a context menu is created.
-			if lgcInputS.mousePressLogic(self, button, mx, my) then
+			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
 			end
 
@@ -693,7 +699,6 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		--local font = skin.font
 		local LE = self.LE
 
 		local res
@@ -709,7 +714,7 @@ def.default_skinner = {
 		love.graphics.setColor(res.color_body)
 		uiGraphics.drawSlice(res.slice, 0, 0, self.w, self.h)
 
-		-- XXX: "Open menu" button.
+		-- "Open menu" button.
 		love.graphics.setColor(1, 1, 1, 1)
 		uiGraphics.drawSlice(res.slc_deco_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
 		uiGraphics.quadShrinkOrCenterXYWH(res.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
@@ -721,6 +726,9 @@ def.default_skinner = {
 			self.vp2_w,
 			self.vp2_h
 		)
+
+		-- Translate into core region, with scrolling offsets applied.
+		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.LE_align_oy - self.scr_y)
 
 		-- Text editor component.
 		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert

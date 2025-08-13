@@ -69,22 +69,6 @@ function editWidM.updatePageJumpSteps(self, font)
 end
 
 
---- Call after changing alignment, then update the alignment of all sub-lines.
-function editWidM.updateAlignOffset(self)
-	local align = self.LE.align
-
-	if align == "left" then
-		self.LE_align_ox = 0
-
-	elseif align == "center" then
-		self.LE_align_ox = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
-
-	else -- align == "right"
-		self.LE_align_ox = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
-	end
-end
-
-
 function editWidM.updateDocumentDimensions(self)
 	local LE = self.LE
 
@@ -110,7 +94,16 @@ function editWidM.updateDocumentDimensions(self)
 		self.doc_w = self.vp_w
 	end
 
-	editWidM.updateAlignOffset(self)
+	local align = self.LE.align
+	if align == "left" then
+		self.LE_align_ox = 0
+
+	elseif align == "center" then
+		self.LE_align_ox = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
+
+	else -- align == "right"
+		self.LE_align_ox = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
+	end
 end
 
 

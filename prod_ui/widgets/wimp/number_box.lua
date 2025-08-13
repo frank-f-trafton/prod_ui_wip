@@ -374,37 +374,55 @@ end
 function def:uiCall_update(dt)
 	editWid.updateCaretBlink(self, dt)
 
+	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 	local do_update
 
-	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
-		-- Need to continuously update the selection.
-		local mouse_drag_x = lgcInputS.mouseDragLogic(self)
-		if mouse_drag_x ~= 0 then
-			self:scrollDeltaH(mouse_drag_x * dt * 4) -- XXX style/config
+		if lgcInputS.mouseDragLogic(self) then
+			do_update = true
 		end
+		if widShared.dragToScroll(self, dt) then
+			do_update = true
+		end
+	end
+
+	self:scrollUpdate(dt)
+
+	-- Force a cache update if the external scroll position is different.
+	if scr_x_old ~= self.scr_x or scr_y_old ~= self.scr_y then
 		do_update = true
 	end
 
 	if do_update then
 		editWidS.generalUpdate(self, true, false, false, true)
 	end
-
-	self:scrollUpdate(dt)
 end
 
 
-
-function def:uiCall_thimble1Take(inst)
+function def:uiCall_thimbleTopTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:uiCall_thimble1Release(inst)
+function def:uiCall_thimbleTopRelease(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
+	end
+end
+
+
+function def:uiCall_thimble1Take(inst)
+	if self == inst then
+		lgcInputS.thimble1Take(self)
+	end
+end
+
+
+function def:uiCall_thimble1Release(inst)
+	if self == inst then
+		lgcInputS.thimble1Release(self)
 
 		-- Forget history state when the user nagivates away from the NumberBox.
 		local hist = self.LE_hist
@@ -514,6 +532,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
+		local had_thimble1_before = self == self.context.thimble1
 		if button <= 3 then
 			self:tryTakeThimble1()
 		end
@@ -525,7 +544,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self.btn_rep = false
 			self.btn_hov = false
 			-- Propagation is halted when a context menu is created.
-			if lgcInputS.mousePressLogic(self, button, mx, my) then
+			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
 			end
 
@@ -682,7 +701,6 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		--local font = skin.font
 		local LE = self.LE
 
 		-- b1: increment sensor, b2: decrement sensor
@@ -717,6 +735,9 @@ def.default_skinner = {
 			self.vp2_w,
 			self.vp2_h
 		)
+
+		-- Translate into core region, with scrolling offsets applied.
+		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.LE_align_oy - self.scr_y)
 
 		-- debug
 		--love.graphics.setScissor()

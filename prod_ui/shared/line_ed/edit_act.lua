@@ -44,7 +44,7 @@ return {
 		--["delete-caret-to-line-end"] = editCommandS.deleteCaretToEnd,
 		--["backspace-caret-to-line-start"] = editCommandS.deleteCaretToStart,
 
-		["type-tab"] = editCommandS.typeTab,
+		-- no "type-tab"
 		-- no "type-untab"
 		["type-line-feed"] = editCommandS.typeLineFeed,
 		["type-line-feed-with-auto-indent"] = editCommandS.typeLineFeed,

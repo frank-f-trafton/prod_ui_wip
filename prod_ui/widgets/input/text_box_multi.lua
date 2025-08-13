@@ -84,7 +84,6 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 includes margins and excludes borders.
 
 	local skin = self.skin
-	local LE = self.LE
 
 	widShared.resetViewport(self, 1)
 
@@ -101,7 +100,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollState(self)
 
 	editWidM.generalUpdate(self, true, true, false, true, true)
-	editWidM.updatePageJumpSteps(self, LE.font)
+	editWidM.updatePageJumpSteps(self, self.LE.font)
 
 	return true
 end
@@ -136,6 +135,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
+		local had_thimble1_before = self == self.context.thimble1
 		if button <= 3 then
 			self:tryTakeThimble1()
 		end
@@ -155,8 +155,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self.context:forceClickSequence(false, button, 1)
 
 		elseif widShared.pointInViewport(self, 2, mx, my) then
-			if lgcInputM.mousePressLogic(self, x, y, button, istouch, presses) then
-				-- Propagation is halted when a context menu is created.
+			-- Propagation is halted when a context menu is created.
+			if lgcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
 			end
 		end
@@ -198,22 +198,36 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_thimble1Take(inst)
+function def:uiCall_thimbleTopTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
-		editWid.resetCaretBlink(self)
 	end
 end
 
 
-function def:uiCall_thimble1Release(inst)
+function def:uiCall_thimbleTopRelease(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
 end
 
 
+function def:uiCall_thimble1Take(inst)
+	if self == inst then
+		lgcInputM.thimble1Take(self)
+	end
+end
+
+
+function def:uiCall_thimble1Release(inst)
+	if self == inst then
+		lgcInputM.thimble1Release(self)
+	end
+end
+
+
 function def:uiCall_textInput(inst, text)
+	print("self.LE_allow_input", self.LE_allow_input)
 	if self == inst then
 		lgcInputM.textInputLogic(self, text)
 	end
@@ -233,9 +247,7 @@ function def:uiCall_update(dt)
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
 	local do_update
 
-	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
-		-- Need to continuously update the selection.
 		if lgcInputM.mouseDragLogic(self) then
 			do_update = true
 		end

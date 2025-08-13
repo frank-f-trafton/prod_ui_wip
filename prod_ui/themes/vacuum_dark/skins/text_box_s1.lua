@@ -6,7 +6,8 @@ return {
 	font_ghost = "*fonts/p",
 
 	cursor_on = "ibeam",
-	text_align = "left", -- "left", "center", "right"
+	text_align = "left",
+	text_align_v = 0.5,
 
 	res_idle = {
 		slice = "*slices/atlas/input_box",

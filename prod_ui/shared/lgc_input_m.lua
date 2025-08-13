@@ -81,7 +81,7 @@ function lgcInputM.setupInstance(self, commands)
 	self.LE_caret_extend_x = 0
 	self.LE_caret_extend_y = 0
 
-	-- Position offsets when clicking the mouse.
+	-- Line and byte offsets when clicking the mouse.
 	-- These are only valid when a mouse action is in progress.
 	self.LE_click_line = 1
 	self.LE_click_byte = 1
@@ -129,6 +129,20 @@ function lgcInputM.setupInstance(self, commands)
 
 	-- Helps with amending vs making new history entries
 	self.LE_input_category = false
+
+	-- When these fields are true, the widget should…
+	-- * Select all text upon receiving the thimble
+	self.LE_select_all_on_thimble1_take = false
+
+	-- * Deselect all text upon releasing the thimble (the caret is moved to the first position).
+	self.LE_deselect_all_on_thimble1_release = false
+
+	-- * Clear history when deselected
+	self.LE_clear_history_on_deselect = false
+
+	-- * Clear the input category when deselected (forcing a new history entry to be made upon the
+	-- next user text input event). ('LE_clear_history_on_deselect' also does this.)
+	self.LE_clear_input_category_on_deselect = true
 
 	-- Max number of Unicode characters (not bytes) permitted in the field.
 	self.LE_u_chars_max = 5000
@@ -285,13 +299,16 @@ local function _clickDragByLine(self, x, y, origin_line, origin_byte)
 end
 
 
-function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
+function lgcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before)
 	local LE = self.LE
 
 	editWid.resetCaretBlink(self)
-	local mx, my = self:getRelativePosition(x, y)
 
 	if button == 1 then
+		if not had_thimble1_before and self.LE_select_all_on_thimble1_take then
+			return
+		end
+
 		self.press_busy = "text-drag"
 
 		-- apply offsets
@@ -304,13 +321,11 @@ function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 			-- Not the same line+byte position as last click: force single-click mode.
 			if context.cseq_presses > 1  and (core_line ~= self.LE_click_line or core_byte ~= self.LE_click_byte) then
 				context:forceClickSequence(self, button, 1)
-				-- XXX Causes 'cseq_presses' to go from 3 to 1. Not a huge deal but worth checking over.
 			end
 
 			if context.cseq_presses == 1 then
-				local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+				local _, shift_down, _, _ = context.key_mgr:getModState()
 				_caretToXY(self, not shift_down, msx, msy, true)
-				--self:scrollGetCaretInBounds() -- Helpful, or distracting?
 
 				self.LE_click_line = LE.cl
 				self.LE_click_byte = LE.cb
@@ -326,20 +341,22 @@ function lgcInputM.mousePressLogic(self, x, y, button, istouch, presses)
 				self.LE_click_line = LE.cl
 				self.LE_click_byte = LE.cb
 
+				context:forceClickSequence(false, false, 0)
+
 				--- Highlight sub-lines from highlight position to mouse position
-				--LE:highlightCurrentLine()
 				self:highlightCurrentWrappedLine()
 			end
 		end
 
 	elseif button == 2 then
+		local root = self:getRootWidget()
 		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
 
-		local root = self:getRootWidget()
-
 		--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
+
+		local ax, ay = self:getAbsolutePosition()
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, x, y)
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, ax + mx, ay + my)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
@@ -363,22 +380,22 @@ function lgcInputM.mouseDragLogic(self)
 	local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 
 	-- ...and with offsets applied
-	local s_mx = mx + self.scr_x - self.LE_align_ox
-	local s_my = my + self.scr_y
+	local msx = mx + self.scr_x - self.LE_align_ox
+	local msy = my + self.scr_y
 
-	--print("s_mx", s_mx, "s_my", s_my, "scr_x", self.scr_x, "scr_y", self.scr_y)
+	--print("msx", msx, "msy", msy, "scr_x", self.scr_x, "scr_y", self.scr_y)
 
 	-- Handle drag highlight actions
 	if context.cseq_presses == 1 then
-		_caretToXY(self, false, s_mx, s_my, true)
+		_caretToXY(self, false, msx, msy, true)
 		widget_needs_update = true
 
 	elseif context.cseq_presses == 2 then
-		_clickDragByWord(self, s_mx, s_my, self.LE_click_line, self.LE_click_byte)
+		_clickDragByWord(self, msx, msy, self.LE_click_line, self.LE_click_byte)
 		widget_needs_update = true
 
 	elseif context.cseq_presses == 3 then
-		_clickDragByLine(self, s_mx, s_my, self.LE_click_line, self.LE_click_byte)
+		_clickDragByLine(self, msx, msy, self.LE_click_line, self.LE_click_byte)
 		widget_needs_update = true
 	end
 
@@ -395,6 +412,29 @@ function lgcInputM.mouseWheelLogic(self, x, y)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollBarShapes(self)
+end
+
+
+function lgcInputM.thimble1Take(self)
+	editWid.resetCaretBlink(self)
+
+	if self.LE_select_all_on_thimble1_take then
+		self:highlightAll()
+	end
+end
+
+
+function lgcInputM.thimble1Release(self)
+	love.keyboard.setTextInput(false)
+	if self.LE_deselect_all_on_thimble1_release then
+		self:caretFirst(true)
+	end
+	if self.LE_clear_history_on_deselect then
+		editFuncM.wipeHistoryEntries(self)
+	end
+	if self.LE_clear_input_category_on_deselect then
+		self:resetInputCategory()
+	end
 end
 
 
@@ -436,7 +476,6 @@ function lgcInputM.draw(self, color_highlight, font_ghost, color_text, font, col
 
 		if LE.wrap_mode then
 			love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp_w, align)
-
 		else
 			love.graphics.print(self.LE_ghost_text, gx, gy)
 		end
