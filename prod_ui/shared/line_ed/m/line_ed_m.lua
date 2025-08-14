@@ -77,8 +77,8 @@ function lineEdM.new()
 
 	self.wrap_mode = false
 
-	-- Copy of viewport #1 width. Used when wrapping text.
-	self.view_w = 0
+	-- Used when wrapping text. See: LE:setWrapWidth()
+	self.wrap_w = 0
 
 	-- Additional space between logical lines (in pixels).
 	-- TODO: theming/scaling
@@ -574,7 +574,7 @@ function _mt_ed_m:updateDisplayText(para_1, para_2)
 		if not self.wrap_mode then
 			_updateDisplaySubLine(self, i, 1, work_str, self.wip_syntax_colors, 1)
 		else
-			local width, wrapped = font:getWrap(work_str, self.view_w)
+			local width, wrapped = font:getWrap(work_str, self.wrap_w)
 			local start_code_point = 1
 			--[[
 			XXX 13-NOV-2023: LÖVE 12-Development (17362b6) returns an empty table when given an empty string.
@@ -724,7 +724,7 @@ function _mt_ed_m:syncDisplayAlignment(line_1, line_2)
 	line_1 = line_1 or 1
 	line_2 = line_2 or #paragraphs
 
-	local align, font, width = self.align, self.font, self.view_w
+	local align, font, width = self.align, self.font, self.wrap_w
 
 	for i = line_1, line_2 do
 		local paragraph = paragraphs[i]
@@ -817,6 +817,11 @@ function _mt_ed_m:setFont(font)
 		self:syncDisplayCaretHighlight()
 		_updateVerticalCaretHint(self)
 	end
+end
+
+
+function _mt_ed_m:setWrapWidth(w)
+	self.wrap_w = w
 end
 
 

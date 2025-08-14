@@ -403,18 +403,6 @@ function lgcInputM.mouseDragLogic(self)
 end
 
 
-function lgcInputM.mouseWheelLogic(self, x, y)
-	local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
-
-	self.scr_tx = self.scr_tx - x * wheel_scale
-	self.scr_ty = self.scr_ty - y * wheel_scale
-	-- XXX add support for non-animated, immediate scroll-to
-
-	self:scrollClampViewport()
-	lgcScroll.updateScrollBarShapes(self)
-end
-
-
 function lgcInputM.thimble1Take(self)
 	editWid.resetCaretBlink(self)
 

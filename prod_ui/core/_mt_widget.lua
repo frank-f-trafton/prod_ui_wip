@@ -994,7 +994,7 @@ end
 
 
 function _mt_widget:reshape()
-	print("Reshape! " .. self:_getHierarchy())
+	--print("Reshape! " .. self:_getHierarchy())
 
 	if self:uiCall_reshapePre() then
 		return

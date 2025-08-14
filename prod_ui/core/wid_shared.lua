@@ -760,6 +760,8 @@ XXX support horizontal wheels
 
 
 function widShared.checkScrollWheelScroll(self, x, y)
+	-- TODO: properly handle horizontal scrolling.
+
 	if (y > 0 and self.scr_y > -self.vp_y)
 	or (y < 0 and self.scr_y < self.doc_h - self.vp_y - self.vp_h)
 	then
