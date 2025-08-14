@@ -79,8 +79,7 @@ function editWidM.updateDocumentDimensions(self)
 	self.doc_h = last_sub.y + last_sub.h
 
 	-- width
-	-- Use viewport #1's width for wrapping text.
-	LE.view_w = self.vp_w
+	LE:setWrapWidth(self.vp_w)
 
 	-- When not wrapping, the document width is the widest sub-line.
 	if not LE.wrap_mode then
@@ -140,6 +139,18 @@ function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, txt)
 	if txt and self.LE_text_batch then
 		editWidM.updateTextBatch(self)
 	end
+end
+
+
+function editWidM.updateAfterReshape(self)
+	-- TODO: need to discern if the widget truly needs to update its LineEditor internals or not.
+	local LE = self.LE
+
+	LE:setWrapWidth(self.vp_w)
+	LE:updateDisplayText()
+	LE:syncDisplayCaretHighlight()
+	editWidM.generalUpdate(self, true, true, false, true, true)
+	editWidM.updatePageJumpSteps(self, self.LE.font)
 end
 
 

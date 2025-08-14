@@ -245,6 +245,8 @@ The five boxing wizards jump quickly.]=]
 	yy = yy + h2 + ED_H
 
 	_updateButtons(panel)
+
+	--demoShared.makeLabel(panel, 0, 800, 500, 64, "(make this page scroll)", "single")
 end
 
 

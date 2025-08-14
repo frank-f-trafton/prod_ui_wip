@@ -308,24 +308,30 @@ end
 
 
 function editCommandS.writeText(self, text)
-	editFuncS.writeText(self, text)
+	if self.LE_allow_input then
+		editFuncS.writeText(self, text)
 
-	return true, true, true, true
+		return true, true, true, true
+	end
 end
 
 
 function editCommandS.replaceText(self, text)
-	editFuncS.replaceText(self, text)
+	if self.LE_allow_input then
+		editFuncS.replaceText(self, text)
 
-	return true, true, true, true
+		return true, true, true, true
+	end
 end
 
 
 function editCommandS.setText(self, text)
-	editFuncS.setText(self, text)
+	if self.LE_allow_input then
+		editFuncS.setText(self, text)
 
-	-- Don't write a history entry from here. One has already been set up in editFuncS.setText().
-	return true, true, true
+		-- Don't write a history entry from here. One has already been set up in editFuncS.setText().
+		return true, true, true
+	end
 end
 
 

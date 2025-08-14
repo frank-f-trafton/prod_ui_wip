@@ -99,8 +99,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
-	editWidM.generalUpdate(self, true, true, false, true, true)
-	editWidM.updatePageJumpSteps(self, self.LE.font)
+	editWidM.updateAfterReshape(self)
 
 	return true
 end
@@ -189,12 +188,11 @@ end
 
 
 function def:uiCall_pointerWheel(inst, x, y)
-	-- Catch wheel events from descendants that did not block it.
-
-	lgcInputM.mouseWheelLogic(self, x, y)
-
-	-- stop bubbling
-	return true
+	if self == inst then
+		if widShared.checkScrollWheelScroll(self, x, y) then
+			return true
+		end
+	end
 end
 
 
@@ -227,7 +225,6 @@ end
 
 
 function def:uiCall_textInput(inst, text)
-	print("self.LE_allow_input", self.LE_allow_input)
 	if self == inst then
 		lgcInputM.textInputLogic(self, text)
 	end
@@ -303,7 +300,6 @@ def.default_skinner = {
 		if self.LE_text_batch then
 			self.LE_text_batch:setFont(self.skin.font)
 		end
-		self.LE:updateDisplayText()
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
