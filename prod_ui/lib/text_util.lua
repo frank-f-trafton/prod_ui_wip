@@ -284,9 +284,9 @@ function textUtil.getCharacterW(str, byte, font)
 end
 
 
---- Given a string of text and an X position (relative to the leftmost side of the text), get the byte offset, glyph X position
---  and glyph width for the character closest to the provided X position. If the X position is to the right of all text, then a
---	width of zero is returned.
+--- Given a string of text and an X position (relative to the leftmost side of the text), get the byte offset, glyph X
+--	position and glyph width for the character closest to the provided X position. If the X position is to the right of
+--	all text, then a width of zero is returned.
 -- @param text The string to check.
 -- @param font The font.
 -- @param x X position, starting at the leftmost side of the text.
@@ -346,6 +346,8 @@ function textUtil.getTextInfoAtX(text, font, x, split_x)
 			glyph_w = 0
 		end
 	end
+
+	--print("byte", byte, "glyph_x", glyph_x, "glyph_w", glyph_w)
 
 	return byte, glyph_x, glyph_w
 end

@@ -871,6 +871,11 @@ function _mt_ed_m:setTextAlignment(align)
 end
 
 
+function _mt_ed_m:setParagraphPadding(pad)
+	self.paragraph_pad = math.max(0, pad)
+end
+
+
 -- Debug methods.
 -- [====[
 function _mt_ed_m:_printInternalText(first, last)

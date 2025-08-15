@@ -43,6 +43,9 @@ function lgcInputM.setupInstance(self, commands)
 		error("invalid 'commands' ID")
 	end
 
+	-- Helps determine when a text reflow is necessary. See: editWidM.updateDuringReshape().
+	self.LE_last_font = false
+
 	-- How far to offset the line X position depending on the alignment.
 	self.LE_align_ox = 0
 

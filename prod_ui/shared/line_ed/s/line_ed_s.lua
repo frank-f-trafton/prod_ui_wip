@@ -85,8 +85,8 @@ function lineEdS.new()
 	self.replace_missing = true
 
 	-- Glyph masking mode, as used in password fields.
-	-- Note that this only changes the UTF-8 string which is sent to text rendering functions.
-	-- It does nothing else in terms of security.
+	-- Note that this only changes the UTF-8 string which is sent to text rendering functions and to the
+	-- clipboard. It does nothing else in terms of security.
 	self.masked = false
 	self.mask_glyph = "*" -- A string of one code point that references one glyph.
 
@@ -157,10 +157,10 @@ end
 -- @return Byte and character string of the character at (or nearest to) the position.
 function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	local font = self.font
-	local line = self.line
+	local line = self.masked and textUtil.getMaskedString(self.line, self.mask_glyph) or self.line
 	local disp_text = self.disp_text
 
-	local byte, x_pos, width = self:getLineInfoAtX(x, split_x)
+	local byte, x_pos, width = textUtil.getTextInfoAtX(line, self.font, x, split_x)
 
 	-- Convert display offset to core byte.
 	local u_count = edComS.utf8LenPlusOne(disp_text, byte)
@@ -172,12 +172,6 @@ function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	end
 
 	return core_byte, core_char
-end
-
-
--- @return Byte, X position and width of the glyph (if applicable).
-function _mt_ed_s:getLineInfoAtX(x, split_x)
-	return textUtil.getTextInfoAtX(self.line, self.font, x, split_x)
 end
 
 
@@ -346,7 +340,7 @@ function _mt_ed_s:syncDisplayCaretHighlight()
 	end
 
 	-- If applicable, overwrite or restore syntax colors.
-	if self.colored_text and self.syntax_colors then
+	if not self.masked and self.colored_text and self.syntax_colors then
 		local disp_text = self.disp_text
 		local col_text = self.colored_text
 		local syn_col = self.syntax_colors
@@ -416,6 +410,17 @@ function _mt_ed_s:setColorization(enabled)
 	enabled = not not enabled
 	if self.generate_colored_text ~= enabled then
 		self.generate_colored_text = enabled
+		self:updateDisplayText()
+		self:syncDisplayCaretHighlight()
+		return true
+	end
+end
+
+
+function _mt_ed_s:setMasked(enabled)
+	enabled = not not enabled
+	if self.masked ~= enabled then
+		self.masked = enabled
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()
 		return true

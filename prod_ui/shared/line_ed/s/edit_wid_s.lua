@@ -29,7 +29,11 @@ function editWidS.updateTextBatch(self)
 		text_batch:setFont(LE.font)
 	end
 
-	text_batch:add(LE.colored_text or LE.line, 0, 0)
+	if not self.masked and LE.colored_text then
+		text_batch:add(LE.colored_text, 0, 0)
+	else
+		text_batch:add(LE.disp_text, 0, 0)
+	end
 end
 
 
