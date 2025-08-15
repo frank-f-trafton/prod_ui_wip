@@ -153,8 +153,6 @@ function plan.make(panel)
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
 
-	-- TODO: problems with masked characters, syncing internal and display text, and mouse-to-caret calculations.
-	--[====[
 	local input_s_mask = panel:addChild("input/text_box_single")
 	demoShared.setStaticLayout(panel, input_s_mask, xx, yy, 256, 32)
 
@@ -169,7 +167,7 @@ function plan.make(panel)
 	end
 
 	--demoShared.makeLabel(panel, xx, yy, 512, 96, "foobar", "multi")
-	--]====]
+
 	_updateButtons(panel)
 end
 

@@ -96,7 +96,6 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
 	editWidM.updateDuringReshape(self)

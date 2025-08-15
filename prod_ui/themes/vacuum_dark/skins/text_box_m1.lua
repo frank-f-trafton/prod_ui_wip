@@ -3,6 +3,7 @@ return {
 
 	box = "*boxes/input_box_m",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
+	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 	font_ghost = "*fonts/p",
 
