@@ -484,4 +484,11 @@ function editCommandS.caretJumpRightHighlight(self)
 end
 
 
+function editCommandS.setCharacterMasking(self, enabled)
+	self.LE:setMasked(enabled)
+
+	return true, true
+end
+
+
 return editCommandS

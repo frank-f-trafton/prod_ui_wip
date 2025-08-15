@@ -8,6 +8,8 @@ return {
 
 	cursor_on = "ibeam",
 
+	paragraph_pad = 0,
+
 	res_readwrite = {
 		color_body = {0.15, 0.15, 0.15, 1.0},
 		color_current_line_illuminate = {0.2, 0.2, 0.2, 1.0},

@@ -48,7 +48,6 @@ function plan.make(panel)
 		end
 	end
 
-
 	local function setWrapMode(tb, enabled)
 		tb:setWrapMode(not not enabled)
 	end

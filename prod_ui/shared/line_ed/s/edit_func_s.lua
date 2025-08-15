@@ -27,6 +27,22 @@ local function _check(self)
 end
 
 
+local function _checkMask(self, str)
+	local LE = self.LE
+	if LE.masked then
+		return textUtil.getMaskedString(str, LE.mask_glyph)
+	end
+	return str
+end
+
+
+local function _assertNotMasked(self)
+	if self.LE.masked then
+		error("this function should not be called on a text box with masked (hidden) text.")
+	end
+end
+
+
 local function _deleteHighlighted(LE)
 	if LE:isHighlighted() then
 		local byte_1, byte_2 = LE:getCaretOffsetsInOrder()
@@ -92,9 +108,7 @@ function editFuncS.cutHighlightedToClipboard(self)
 		cut = textUtil.sanitize(cut, self.LE_bad_input_rule)
 
 		-- Don't leak masked string info.
-		if LE.masked then
-			cut = LE.mask_glyph:rep(utf8.len(cut))
-		end
+		cut = _checkMask(self, cut)
 
 		if _check(self) then
 			love.system.setClipboardText(cut)
@@ -112,9 +126,7 @@ function editFuncS.copyHighlightedToClipboard(self)
 	local copied = editFuncS.getHighlightedText(self)
 
 	-- Don't leak masked string info.
-	if LE.masked then
-		copied = string.rep(LE.mask_glyph, utf8.len(copied))
-	end
+	copied = _checkMask(self, copied)
 
 	copied = textUtil.sanitize(copied, self.LE_bad_input_rule)
 
@@ -188,6 +200,8 @@ end
 
 
 function editFuncS.backspaceGroup(self)
+	_assertNotMasked(self)
+
 	local LE = self.LE
 	local line, disp, cb, hb = LE:copyState()
 
@@ -208,6 +222,8 @@ end
 
 
 function editFuncS.deleteGroup(self)
+	_assertNotMasked(self)
+
 	local LE = self.LE
 	local line, disp, cb, hb = LE:copyState()
 
@@ -293,6 +309,8 @@ end
 
 
 function editFuncS.caretJumpLeft(self, clear_highlight)
+	_assertNotMasked(self)
+
 	local LE = self.LE
 
 	local new_cb = edComS.huntWordBoundary(code_groups, LE.line, LE.cb, -1, false, -1)
@@ -301,6 +319,8 @@ end
 
 
 function editFuncS.caretJumpRight(self, clear_highlight)
+	_assertNotMasked(self)
+
 	local LE = self.LE
 
 	local hit_non_ws = false
@@ -354,8 +374,13 @@ end
 function editFuncS.highlightCurrentWord(self)
 	local LE = self.LE
 
-	local b1, b2 = LE:getWordRange(LE.cb)
-	LE:moveCaretAndHighlight(b1, b2)
+	-- Don't leak masked info.
+	if LE.masked then
+		LE:moveCaretAndHighlight(#LE.line + 1, 1)
+	else
+		local b1, b2 = LE:getWordRange(LE.cb)
+		LE:moveCaretAndHighlight(b1, b2)
+	end
 end
 
 
@@ -371,8 +396,13 @@ function editFuncS.clearHighlight(self)
 end
 
 
-function editFuncS.getText(self)
-	return self.LE.line
+function editFuncS.getText(self, unmask)
+	local LE = self.LE
+	if not LE.masked or unmask then
+		return LE.line
+	else
+		return textUtil.getMaskedString(LE.line, LE.mask_glyph)
+	end
 end
 
 
@@ -381,7 +411,14 @@ function editFuncS.getHighlightedText(self)
 
 	if LE:isHighlighted() then
 		local b1, b2 = LE:getCaretOffsetsInOrder()
-		return LE.line:sub(b1, b2 - 1)
+		local rv = LE.line:sub(b1, b2 - 1)
+
+		-- Don't leak masked string info.
+		if LE.masked then
+			rv = textUtil.getMaskedString(rv, LE.mask_glyph)
+		end
+
+		return rv
 	end
 end
 

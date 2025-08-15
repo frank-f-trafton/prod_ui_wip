@@ -142,15 +142,19 @@ function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, txt)
 end
 
 
-function editWidM.updateAfterReshape(self)
-	-- TODO: need to discern if the widget truly needs to update its LineEditor internals or not.
+function editWidM.updateDuringReshape(self)
 	local LE = self.LE
 
-	LE:setWrapWidth(self.vp_w)
-	LE:updateDisplayText()
-	LE:syncDisplayCaretHighlight()
-	editWidM.generalUpdate(self, true, true, false, true, true)
-	editWidM.updatePageJumpSteps(self, self.LE.font)
+	local new_wrap = self.vp_w
+
+	if LE.font ~= self.LE_last_font or LE.wrap_w ~= new_wrap then
+		LE:setWrapWidth(new_wrap)
+		LE:updateDisplayText()
+		LE:syncDisplayCaretHighlight()
+		editWidM.generalUpdate(self, true, true, false, true, true)
+		editWidM.updatePageJumpSteps(self, self.LE.font)
+		self.LE_last_font = LE.font
+	end
 end
 
 

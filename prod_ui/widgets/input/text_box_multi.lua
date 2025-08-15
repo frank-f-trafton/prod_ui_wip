@@ -99,7 +99,7 @@ function def:uiCall_reshapePre()
 	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
-	editWidM.updateAfterReshape(self)
+	editWidM.updateDuringReshape(self)
 
 	return true
 end
@@ -296,10 +296,11 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-		self.LE:setFont(self.skin.font)
+		self.LE:setFont(skin.font)
 		if self.LE_text_batch then
-			self.LE_text_batch:setFont(self.skin.font)
+			self.LE_text_batch:setFont(skin.font)
 		end
+		self.LE:setParagraphPadding(skin.paragraph_pad)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,

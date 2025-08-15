@@ -270,19 +270,24 @@ end
 local function _clickDragByWord(self, x, origin_byte)
 	local LE = self.LE
 
-	local drag_byte = LE:getCharacterDetailsAtPosition(x, true)
+	-- Don't leak masked info.
+	if LE.masked then
+		LE:moveCaretAndHighlight(#LE.line + 1, 1)
+	else
+		local drag_byte = LE:getCharacterDetailsAtPosition(x, true)
 
-	-- Expand ranges to cover full words
-	local db1, db2 = LE:getWordRange(drag_byte)
-	local cb1, cb2 = LE:getWordRange(origin_byte)
+		-- Expand ranges to cover full words
+		local db1, db2 = LE:getWordRange(drag_byte)
+		local cb1, cb2 = LE:getWordRange(origin_byte)
 
-	-- Merge the two ranges.
-	local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
-	if origin_byte < drag_byte then
-		mb1, mb2 = mb2, mb1
+		-- Merge the two ranges.
+		local mb1, mb2 = math.min(cb1, db1), math.max(cb2, db2)
+		if origin_byte < drag_byte then
+			mb1, mb2 = mb2, mb1
+		end
+
+		LE:moveCaretAndHighlight(mb1, mb2)
 	end
-
-	LE:moveCaretAndHighlight(mb1, mb2)
 end
 
 
@@ -320,7 +325,6 @@ function lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 			elseif context.cseq_presses == 2 then
 				self.LE_click_byte = LE.cb
-
 
 				-- Highlight group from highlight position to mouse position.
 				self:highlightCurrentWord()

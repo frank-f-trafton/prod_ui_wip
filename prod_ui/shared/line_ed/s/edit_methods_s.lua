@@ -49,6 +49,11 @@ function client:getText()
 end
 
 
+function client:getUnmaskedText()
+	return editFuncS.getText(self, true)
+end
+
+
 function client:getHighlightedText()
 	return editFuncS.getHighlightedText(self)
 end
@@ -347,6 +352,16 @@ end
 
 function client:getClearInputCategoryOnDeselect()
 	return self.LE_clear_input_category_on_deselect
+end
+
+
+function client:setCharacterMasking(enabled)
+	editWidS.wrapAction(self, editCommandS.setCharacterMasking, enabled)
+end
+
+
+function client:getCharacterMasking()
+	return self.LE.masked
 end
 
 
