@@ -154,24 +154,19 @@ end
 
 -- @param x X position.
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
--- @return Byte and character string of the character at (or nearest to) the position.
+-- @return Byte of the character at (or nearest to) the position.
 function _mt_ed_s:getCharacterDetailsAtPosition(x, split_x)
 	local font = self.font
-	local line = self.masked and textUtil.getMaskedString(self.line, self.mask_glyph) or self.line
+	local line = self.line
 	local disp_text = self.disp_text
 
-	local byte, x_pos, width = textUtil.getTextInfoAtX(line, self.font, x, split_x)
+	local byte, x_pos, width = textUtil.getTextInfoAtX(disp_text, self.font, x, split_x)
 
 	-- Convert display offset to core byte.
 	local u_count = edComS.utf8LenPlusOne(disp_text, byte)
-
 	local core_byte = utf8.offset(line, u_count)
-	local core_char = false
-	if core_byte <= #line then
-		core_char = line:sub(core_byte, utf8.offset(line, 2, core_byte) - 1)
-	end
 
-	return core_byte, core_char
+	return core_byte
 end
 
 

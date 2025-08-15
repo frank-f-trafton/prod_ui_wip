@@ -86,7 +86,6 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 includes margins and excludes borders.
 
 	local skin = self.skin
-	local LE = self.LE
 
 	widShared.resetViewport(self, 1)
 
@@ -99,7 +98,6 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollBarShapes(self)
 	lgcScroll.updateScrollState(self)
 
 	editWidM.updateDuringReshape(self)

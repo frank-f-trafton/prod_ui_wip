@@ -48,7 +48,7 @@ end
 function textUtil.trimString(text, max_code_points)
 	max_code_points = math.max(0, math.min(max_code_points, utf8.len(text)))
 
-	return string.sub(text, 1, utf8.offset(text, max_code_points + 1) - 1)
+	return text:sub(1, utf8.offset(text, max_code_points + 1) - 1)
 end
 
 
@@ -56,7 +56,7 @@ function textUtil.trimToFirstLine(text)
 --	if type(text) == "string" then
 		local i = string.find(text, "\n", i, true)
 		if i then
-			text = string.sub(text, 1, i - 1)
+			text = text:sub(1, i - 1)
 		end
 
 --[[
@@ -68,7 +68,7 @@ function textUtil.trimToFirstLine(text)
 				for k = 1, i - 1 do
 					ret[k] = text[i]
 				end
-				ret[#ret + 1] = string.sub(text[i], 1, j - 1)
+				ret[#ret + 1] = text[i]:sub(1, j - 1)
 				text = ret
 			end
 		end
@@ -162,9 +162,9 @@ function textUtil.processUnderline(str, font)
 
 	if i then
 		-- Extract string chunks around the underscores.
-		local s1 = string.sub(str, 1, i - 1)
-		local s2 = string.sub(str, i + 1, j - 1)
-		local s3 = string.sub(str, j + 1)
+		local s1 = str:sub(1, i - 1)
+		local s2 = str:sub(i + 1, j - 1)
+		local s3 = str:sub(j + 1)
 
 		local x = font:getWidth(s1)
 		local w = font:getWidth(s2)
@@ -251,7 +251,7 @@ function textUtil.trimStringToWidth(str, font, width)
 	local last_fit = ""
 
 	while true do
-		local sub = string.sub(str, 1, byte)
+		local sub = str:sub(1, byte)
 		if font:getWidth(sub) > width then
 			break
 		else
@@ -270,7 +270,7 @@ end
 
 
 function textUtil.getCharacterX(str, byte, font)
-	local str_before = string.sub(str, 1, byte - 1)
+	local str_before = str:sub(1, byte - 1)
 
 	return font:getWidth(str_before)
 end
@@ -280,7 +280,7 @@ function textUtil.getCharacterW(str, byte, font)
 	local cw
 	local offset = utf8.offset(str, 2, byte)
 
-	return (offset) and font:getWidth(string.sub(str, byte, offset - 1)) or nil
+	return (offset) and font:getWidth(str:sub(byte, offset - 1)) or nil
 end
 
 
@@ -288,37 +288,32 @@ end
 --	position and glyph width for the character closest to the provided X position. If the X position is to the right of
 --	all text, then a width of zero is returned.
 -- @param text The string to check.
--- @param font The font.
--- @param x X position, starting at the leftmost side of the text.
+-- @param font The LÖVE Font.
+-- @param x The X position, starting at the leftmost side of the text.
 -- @param split_x When true, select the glyph to the right when the X position is on the right half of a glyph.
 function textUtil.getTextInfoAtX(text, font, x, split_x)
 	local byte, glyph_x, glyph_w
 
 	-- Empty string
 	if #text == 0 then
-		byte = 1
-		glyph_x = 0
-		glyph_w = 0
+		byte, glyph_x, glyph_w = 1, 0, 0
 
 	-- Input X is left of the line
 	elseif x < 0 then
-		byte = 1
-		local char_str = string.sub(text, 1, utf8.offset(text, 2) - 1)
-		glyph_x = 0
+		byte, glyph_x = 1, 0
+		local char_str = text:sub(1, utf8.offset(text, 2) - 1)
 		glyph_w = font:getWidth(char_str)
 
 	-- Input X is within, or to the right of the line
 	else
-		byte = 1
-		glyph_x = 0
-		glyph_w = 0
+		byte, glyph_x, glyph_w = 1, 0, 0
 
 		local char_str
 		local last_glyph = false
 
 		while byte <= #text do
 			local byte_2 = utf8.offset(text, 2, byte)
-			char_str = string.sub(text, byte, byte_2 - 1)
+			char_str = text:sub(byte, byte_2 - 1)
 			glyph_w = font:getWidth(char_str)
 
 			-- Apply kerning offset
@@ -386,7 +381,7 @@ function textUtil.getByteOffsetAtX(str, font, x)
 		end
 
 		-- [UPGRADE] Use codepoint integers in LÖVE 12
-		local ch = string.sub(str, byte, byte_2 - 1)
+		local ch = str:sub(byte, byte_2 - 1)
 
 		pixels = pixels + font:getWidth(ch)
 
@@ -424,7 +419,7 @@ function textUtil.stringToColoredText(str, text_t, col_t, color_seq)
 		local i2 = utf8.offset(str, 2, i)
 
 		text_t[j] = color_seq[i] or col_t
-		text_t[j + 1] = string.sub(str, i, i2 - 1)
+		text_t[j + 1] = str:sub(i, i2 - 1)
 
 		i = i2
 		j = j + 2
@@ -456,15 +451,15 @@ function textUtil.sanitize(str, bad_byte_policy)
 			local ok, bad_byte, err_str = pUTF8.check(str, byte_n)
 
 			if ok then
-				str_out = str_out .. string.sub(str, byte_n)
+				str_out = str_out .. str:sub(byte_n)
 				break
 
 			elseif bad_byte_policy == "trim" then
-				str_out = string.sub(str, 1, bad_byte - 1)
+				str_out = str:sub(1, bad_byte - 1)
 				break
 
 			elseif bad_byte_policy == "replacement_char" then
-				str_out = str_out .. string.sub(str, byte_n, bad_byte - 1) .. "�"
+				str_out = str_out .. str:sub(byte_n, bad_byte - 1) .. "�"
 				byte_n = bad_byte + 1
 
 			-- no policy: return empty string on bad input

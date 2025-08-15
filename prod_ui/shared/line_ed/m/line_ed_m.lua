@@ -345,7 +345,7 @@ end
 -- @param x X position.
 -- @param y Y position.
 -- @param split_x When true, if the X position is on the right half of a character, get details for the next character to the right.
--- @return Line, byte and character string of the character at (or nearest to) the position.
+-- @return Line and byte at (or nearest to) the position.
 function _mt_ed_m:getCharacterDetailsAtPosition(x, y, split_x)
 	local paragraphs = self.paragraphs
 	local font = self.font
@@ -377,12 +377,8 @@ function _mt_ed_m:getCharacterDetailsAtPosition(x, y, split_x)
 	local core_line = para_i
 	local core_str = self.lines[core_line]
 	local core_byte = utf8.offset(core_str, u_count)
-	local core_char = false
-	if core_byte <= #core_str then
-		core_char = string.sub(core_str, core_byte, utf8.offset(core_str, 2, core_byte) - 1)
-	end
 
-	return core_line, core_byte, core_char
+	return core_line, core_byte
 end
 
 

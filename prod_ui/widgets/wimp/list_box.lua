@@ -308,14 +308,12 @@ function def:uiCall_reshapePost()
 
 	widShared.resetViewport(self, 1)
 
-	-- Border and scroll bars.
 	widShared.carveViewport(self, 1, skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	widShared.copyViewport(self, 1, 2)
 
-	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	self:scrollClampViewport()
