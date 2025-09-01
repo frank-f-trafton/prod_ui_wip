@@ -234,9 +234,43 @@ function def:uiCall_destroy(inst)
 end
 
 
+local check, change = uiTheme.check, uiTheme.change
+
+
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+
+	check.slice(res, "slice")
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_text")
+	check.colorTuple(res, "color_highlight")
+	check.colorTuple(res, "color_highlight_active")
+	check.colorTuple(res, "color_caret_insert")
+	check.colorTuple(res, "color_caret_replace")
+
+	uiTheme.popLabel()
+end
+
+
 def.default_skinner = {
-	--validate = function(skin) -- TODO
-	--transform = function(skin, scale) -- TODO
+	validate = function(skin)
+		check.box(skin, "box")
+		check.loveType(skin, "font", "Font")
+		check.loveType(skin, "font_ghost", "Font")
+
+		check.type(skin, "cursor_on", "nil", "string")
+		check.exact(skin, "text_align", "left", "center", "right")
+		check.unitInterval(skin, "text_align_v")
+
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_disabled")
+	end,
+
+
+	--transform = function(skin, scale)
 
 
 	install = function(self, skinner, skin)

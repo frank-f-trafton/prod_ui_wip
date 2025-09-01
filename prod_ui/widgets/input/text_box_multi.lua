@@ -288,9 +288,47 @@ function def:uiCall_destroy(inst)
 end
 
 
+local check, change = uiTheme.check, uiTheme.change
+
+
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+
+	check.colorTuple(res, "color_body")
+	check.colorTuple(res, "color_current_line_illuminate")
+	check.colorTuple(res, "color_highlight")
+	check.colorTuple(res, "color_highlight_active")
+	check.colorTuple(res, "color_text")
+	check.colorTuple(res, "color_readonly")
+	check.colorTuple(res, "color_ghost_text")
+	check.colorTuple(res, "color_insert")
+	check.colorTuple(res, "color_replace")
+	check.colorTuple(res, "color_margin")
+	check.colorTuple(res, "color_margin_line_numbers")
+
+	uiTheme.popLabel()
+end
+
+
 def.default_skinner = {
-	--validate = function(skin) -- TODO
-	--transform = function(skin, scale) -- TODO
+	validate = function(skin)
+		check.box(skin, "box")
+		check.scrollBarData(skin, "data_scroll")
+		check.scrollBarStyle(skin, "scr_style")
+		check.loveType(skin, "font", "Font")
+		check.loveType(skin, "font_ghost", "Font")
+
+		check.type(skin, "cursor_on", "nil", "string")
+		check.integer(skin, "paragraph_pad", 0, nil)
+
+		_checkRes(skin, "res_readwrite")
+		_checkRes(skin, "res_readonly")
+	end,
+
+
+	--transform = function(skin, scale)
 
 
 	install = function(self, skinner, skin)
