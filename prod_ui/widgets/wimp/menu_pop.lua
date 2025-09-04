@@ -95,7 +95,12 @@ local def = {
 
 lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
+
+
+local _arrange_tb = lgcMenu.arrangers["list-tb"]
+function def:arrangeItems(first, last)
+	_arrange_tb(self, 1, true, first, last)
+end
 
 
 def.setBlocking = lgcPopUps.setBlocking

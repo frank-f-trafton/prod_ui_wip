@@ -16,6 +16,7 @@ local lgcScroll = context:getLua("shared/lgc_scroll")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local widShared = context:getLua("core/wid_shared")
 
 
 local viewport_keys = context:getLua("core/viewport_keys")
@@ -711,148 +712,120 @@ end
 
 
 --[[
-	Here are some built-in arrangement functions.
-	These are all very basic in design. They expect the dimensions of items to already be correct,
-	relative to the size of the viewport specified (default #1).
+	Here are some built-in arrangement functions. They expect the dimensions of items to already be correct,
+	relative to the size of the viewport (or the widget, if no viewport index is provided).
+
+	Wrap them in 'def:arrangeItems(first, last)' in your widget code.
+
+	General notes:
+
+	* If the list is empty or the range is invalid, do nothing.
+	* If there is an item before 'first', then piggy-back off of its location.
+
+	rel_zero: when true, the function does not account for viewport positions. This is desirable
+	when the menu items are placed in a scrolling widget relative to Viewport #1 (where position
+	0,0 is offset a bit from the edge, due to margins).
 --]]
 
 
--- Vertical list, top to bottom
-function lgcMenu.arrangeItemsVerticalTB(self, v, first, last) -- ('v' is unused)
-	local items = self.MN_items
-
-	first = first or 1
-	last = last or #items
-
-	-- Empty list or invalid range: nothing to do.
-	if #items == 0 or first > last then
-		return
-	end
-
-	local yy = 0
-
-	-- If there is an item before the start, piggy-back off of its location.
-	local item_prev = items[first - 1]
-	if item_prev then
-		yy = item_prev.y + item_prev.h
-	end
-
-	for i = first, last do
-		local item = items[i]
-
-		item.x = 0
-		item.y = yy
-
-		yy = item.y + item.h
-	end
-end
-
-
--- Vertical list, left-to-right then top-to-bottom.
-function lgcMenu.arrangeItemsVerticalLRTB(self, v, first, last)
-	local items = self.MN_items
-
-	v = v or 1
-	first = first or 1
-	last = last or #items
-
-	-- Empty list or invalid range: nothing to do.
-	if #items == 0 or first > last then
-		return
-	end
-
-	local xx, yy = 0, 0
-
-	-- If there is an item before the start, piggy-back off of its location.
-	local item_prev = items[first - 1]
-	if item_prev then
-		xx = item_prev.x + item_prev.w
-		yy = item_prev.y
-	end
-
-	for i = first, last do
-		local item = items[i]
-
-		if xx + item.w > self[viewport_keys[v].w] then
-			xx = 0
-			yy = yy + item.h
+lgcMenu.arrangers = {
+	-- list, top-to-bottom
+	["list-tb"] = function(self, v, rel_zero, i1, i2)
+		local items = self.MN_items
+		i1, i2 = i1 or 1, i2 or #items
+		if #items == 0 or i1 > i2 then
+			return
 		end
-
-		item.x = xx
-		item.y = yy
-
-		xx = item.x + item.w
-	end
-end
-
-
--- Horizontal list, left to right
-function lgcMenu.arrangeItemsHorizontalLR(self, v, first, last) -- ('v' is unused)
-	local items = self.MN_items
-
-	first = first or 1
-	last = last or #items
-
-	-- Empty list or invalid range: nothing to do.
-	if #items == 0 or first > last then
-		return
-	end
-
-	local xx = 0
-
-	-- If there is an item before the start, piggy-back off of its location.
-	local item_prev = items[first - 1]
-	if item_prev then
-		xx = item_prev.x + item_prev.x
-	end
-
-	for i = first, last do
-		local item = items[i]
-
-		item.x = xx
-		item.y = 0
-
-		xx = item.x + item.w
-	end
-end
-
-
--- Horizontal list, top to bottom then left to right.
-function lgcMenu.arrangeItemsHorizontalTBLR(self, v, first, last)
-	local items = self.MN_items
-
-	v = v or 1
-	first = first or 1
-	last = last or #items
-
-	-- Empty list or invalid range: nothing to do.
-	if #items == 0 or first > last then
-		return
-	end
-
-	local xx, yy = 0, 0
-
-	-- If there is an item before the start, piggy-back off of its location.
-	local item_prev = items[first - 1]
-	if item_prev then
-		xx = item_prev.x
-		yy = item_prev.y + item_prev.w
-	end
-
-	for i = first, last do
-		local item = items[i]
-
-		if yy + item.h > self[viewport_keys[v].h] then
-			xx = xx + item.w
-			yy = 0
+		local vx, vy = widShared.getViewportXYWH(self, v, rel_zero)
+		local yy = vy
+		local item_prev = items[i1 - 1]
+		if item_prev then
+			yy = item_prev.y + item_prev.h
 		end
+		for i = i1, i2 do
+			local item = items[i]
+			item.x, item.y = vx, yy
+			yy = item.y + item.h
+		end
+	end,
 
-		item.x = xx
-		item.y = yy
+	-- list, left-to-right then top-to-bottom
+	--[[
+	123
+	456
+	…
+	--]]
+	["list-lrtb"] = function(self, v, rel_zero, i1, i2)
+		local items = self.MN_items
+		i1, i2 = i1 or 1, i2 or #items
+		if #items == 0 or i1 > i2 then
+			return
+		end
+		local vx, vy, vw = widShared.getViewportXYWH(self, v, rel_zero)
+		local xx, yy = vx, vy
+		local item_prev = items[i1 - 1]
+		if item_prev then
+			xx, yy = item_prev.x + item_prev.w, item_prev.y
+		end
+		for i = i1, i2 do
+			local item = items[i]
+			if xx + item.w > vw then
+				xx, yy = vx, yy + item.h
+			end
+			item.x, item.y = xx, yy
+			xx = item.x + item.w
+		end
+	end,
 
-		yy = item.y + item.h
+	-- list, left-to-right
+	["list-lr"] = function(self, v, rel_zero, i1, i2)
+		local items = self.MN_items
+		i1, i2 = i1 or 1, i2 or #items
+		if #items == 0 or i1 > i2 then
+			return
+		end
+		local vx, vy = widShared.getViewportXYWH(self, v, rel_zero)
+		local xx = vx
+		local item_prev = items[i1 - 1]
+		if item_prev then
+			xx = item_prev.x + item_prev.x
+		end
+		for i = i1, i2 do
+			local item = items[i]
+			item.x, item.y = xx, vy
+			xx = item.x + item.w
+		end
+	end,
+
+	-- list, top-to-bottom then left-to-right
+	--[[
+	14…
+	25
+	36
+	--]]
+	["list-tblr"] = function(self, v, rel_zero, i1, i2)
+		local items = self.MN_items
+		i1, i2 = i1 or 1, i2 or #items
+		if #items == 0 or i1 > i2 then
+			return
+		end
+		local vx, vy, vw, vh = widShared.getViewportXYWH(self, v, rel_zero)
+		local xx, yy = vx, vy
+		local item_prev = items[i1 - 1]
+		if item_prev then
+			xx = item_prev.x
+			yy = item_prev.y + item_prev.w
+		end
+		for i = i1, i2 do
+			local item = items[i]
+			if yy + item.h > vh then
+				xx, yy = xx + item.w, vy
+			end
+			item.x, item.y = xx, yy
+			yy = item.y + item.h
+		end
 	end
-end
+}
 
 
 --[[
