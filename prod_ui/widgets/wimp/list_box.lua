@@ -50,7 +50,11 @@ widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
-def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
+
+local _arrange_tb = lgcMenu.arrangers["list-tb"]
+function def:arrangeItems(first, last)
+	_arrange_tb(self, 1, true, first, last)
+end
 
 
 -- * Scroll helpers *

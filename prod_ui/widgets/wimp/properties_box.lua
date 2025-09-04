@@ -12,7 +12,7 @@ Optional icons (bijoux)  │
 ┌───────────────────────────────────────────────┬─┐
 │ [B] Foo                |                  [x] │^│
 │:[B]:Bar::::::::::::::::│:[              0.02]:├─┤
-│ [B] Baz                │ ["Twist"           ]:│ │
+│ [B] Baz                │ ["Twist"           ] │ │
 │ [B] Qux                │ [dir/ectory        ] │ │
 │                        |                      ├─┤
 │                        |                      │v│
@@ -25,9 +25,6 @@ Stuff to fix:
 
 * The function attached to 'self:arrangeItems()' doesn't use the viewport argument.
   Might need to write a custom one for this widget.
-
-* 'items' should be its own array of tables with linked widgets. As it is, item
-  selection is mixed into the control widget tables.
 
 * Fix how icon resources are loaded.
 --]]
@@ -54,7 +51,23 @@ widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
-def.arrangeItems = lgcMenu.arrangeItemsVerticalTB
+
+local _arrange_tb = lgcMenu.arrangers["list-tb"]
+function def:arrangeItems(first, last)
+	_arrange_tb(self, 1, true, first, last)
+
+	-- position control widgets
+	local items = self.MN_items
+	first, last = first or 1, last or #items
+	for i = first, last do
+		local item = items[i]
+		local wid = item.wid_ref
+		if wid then
+			wid.x = self.vp4_x - self.vp_x
+			wid.y = item.y
+		end
+	end
+end
 
 
 -- * Scroll helpers *
@@ -109,7 +122,7 @@ function def:wid_action3(item, item_i)
 end
 
 
--- Called when there is a change in the selected item.
+-- Called when there is a change in the item selection.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
 function def:wid_select(item, item_i)
@@ -176,68 +189,90 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-local function updateItemDimensions(self, v, item)
+local function updateItemDimensions(self, item)
 	local skin = self.skin
-	local vx, vy, vw, vh = widShared.getViewportXYWH(self, v)
-	item.w = vw
+	item.w = self.vp_w
 	item.h = skin.item_h
+
+	local wid = item.wid_ref
+	if wid then
+		wid.w = self.vp4_w
+		wid.h = item.h
+	end
 end
 
 
-function def:addControl(wid_id, text, pos, bijou_id)
+function def:addItem(wid_id, text, pos, bijou_id)
 	uiShared.type1(2, text, "string")
 	uiShared.intEval(3, pos, "number")
 	uiShared.typeEval1(4, bijou_id, "string")
 
+	local items = self.MN_items
+
+	local item = {}
+
+	item.selectable = true
+	item.marked = false -- multi-select
+	item.x, item.y, item.w, item.h = 0, 0, 0, 0
+	item.text = text
+	item.bijou_id = bijou_id
+	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix this up
+
+	pos = pos or #items + 1
+
+	if pos < 1 or pos > #items + 1 then
+		error("addItem: insert position is out of range.")
+	end
+
 	local wid = self:addChild(wid_id, pos)
 
-	wid.selectable = true
-	wid.marked = false -- multi-select
-	wid.x, wid.y = 0, 0
-	updateItemDimensions(self, 4, wid)
-	wid.text = text
-	wid.bijou_id = bijou_id
-	wid.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix this up
+	item.wid_ref = wid
 
-	self:arrangeItems(nil, pos, #self.children)
+	table.insert(items, pos, item)
 
-	print("addControl text:", wid.text, "xywh: ", wid.x, wid.y, wid.w, wid.h)
+	updateItemDimensions(self, item)
+	self:arrangeItems(1, pos, #items)
+	wid:reshape()
 
-	return wid
+	print("addItem text:", item.text, "y: ", item.y)
+
+	return item
 end
 
 
-function def:removeControl(wid)
-	uiShared.type1(1, wid, "table")
+function def:removeItem(item_t)
+	uiShared.type1(1, item_t, "table")
 
-	local wid_i = self:menuGetItemIndex(wid)
+	local item_i = self:menuGetItemIndex(item_t)
 
-	self:removeControlByIndex(wid_i)
+	local removed_item = self:removeItemByIndex(item_i)
+	return removed_item
 end
 
 
-function def:removeControlByIndex(wid_i)
-	uiShared.numberNotNaN(1, wid_i)
+function def:removeItemByIndex(item_i)
+	uiShared.numberNotNaN(1, item_i)
 
-	local children = self.children
-	local to_remove = children[wid_i]
-	if not to_remove then
-		error("no control to remove at index: " .. tostring(wid_i))
+	local items = self.MN_items
+	local item_t = items[item_i]
+	if not item_t then
+		error("no item to remove at index: " .. tostring(item_i))
 	end
 
-	to_remove:remove()
+	table.remove(items, item_i)
 
-	-- Removed control was the last in the list, and was selected:
-	if self.MN_index > #children then
-		local landing_i = self:menuFindSelectableLanding(#children, -1)
-		self:setSelectionByIndex(landing_i or 0)
-
-	-- Removed control was not selected, and the selected control appears after the removed control in the list:
-	elseif self.MN_index > wid_i then
-		self.MN_index = self.MN_index - 1
+	-- clean up the control widget
+	local wid_ref = item_t.wid_ref
+	if wid_ref then
+		wid_ref:remove()
 	end
+	item_t.wid_ref = false
 
-	self:arrangeItems(nil, wid_i, #children)
+	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+
+	self:arrangeItems(1, item_i, #items)
+
+	return item_t
 end
 
 
@@ -267,8 +302,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	-- (self.MN_items == self.children)
-	lgcMenu.setup(self, self.children, true, true) -- with mark and drag+drop state
+	lgcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
 	self.MN_wrap_selection = false
 
 	self.sash_enabled = true
@@ -315,7 +349,7 @@ function def:uiCall_reshapePre()
 
 	-- Label and control areas.
 	widShared.copyViewport(self, 1, 3)
-	widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "right")
+	widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "right") -- TODO: make the control side configurable.
 
 	-- Sash.
 	self.vp5_w = skin.sash_w
@@ -324,15 +358,10 @@ function def:uiCall_reshapePre()
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
 
-	-- Resize and reposition controls.
-	local yy = self.vp_y
-	for i, wid in ipairs(self.MN_items) do
-		wid.x = self.vp4_x - self.vp_x
-		wid.y = yy
-		updateItemDimensions(self, 4, wid)
-		yy = yy + wid.h
+	for i, item in ipairs(self.MN_items) do
+		updateItemDimensions(self, item)
 	end
-	--self:arrangeItems()
+	self:arrangeItems()
 
 	self:cacheUpdate(true)
 end
@@ -347,7 +376,7 @@ function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
-		local children = self.MN_items
+		local children = self.children
 
 		-- Document height is based on the last control in the menu.
 		local last_wid = children[#children]
@@ -393,10 +422,18 @@ local function updateSelectedControl(self, control)
 	local old_item = self.MN_items[self.MN_index]
 
 	self:menuClearAllMarkedItems()
-	self:menuSetSelectedItem(control)
 
-	if old_item ~= control then
-		self:wid_select(control, self:menuGetItemIndex(control))
+	local new_item
+	for i, item in ipairs(self.MN_items) do
+		if item.wid_ref == control then
+			self:menuSetSelectedItem(item)
+			new_item = item
+			break
+		end
+	end
+
+	if old_item ~= new_item then
+		self:wid_select(new_item, self:menuGetItemIndex(new_item))
 	end
 end
 
@@ -425,8 +462,8 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 		elseif self:wid_keyPressed(key, scancode, isrepeat)
 		or self:wid_defaultKeyNav(key, scancode, isrepeat)
 		then
-			local control = items[self.MN_index]
-			if old_item ~= control then
+			local new_item = items[self.MN_index]
+			if old_item ~= new_item then
 				if self.MN_mark_mode == "cursor" then
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
@@ -439,7 +476,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					end
 				end
 
-				self:wid_select(control, self.MN_index)
+				self:wid_select(new_item, self.MN_index)
 			end
 			return true
 		end
@@ -450,7 +487,8 @@ end
 function def:uiCall_keyReleased(inst, keycode, scancode)
 	if self == inst then
 		-- If there is a selected child widget, forward keyboard events to it first.
-		local control = self.MN_items[self.MN_index]
+		local item = self.MN_items[self.MN_index]
+		local control = item and item.wid_ref
 		if control and control:sendEvent("uiCall_keyReleased", control, keycode, scancode) then
 			return true
 		end
@@ -461,7 +499,8 @@ end
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		-- If there is a selected child widget, forward keyboard events to it first.
-		local control = self.MN_items[self.MN_index]
+		local item = self.MN_items[self.MN_index]
+		local control = item and item.wid_ref
 		if control and control:sendEvent("uiCall_textInput", control, text) then
 			return true
 		end
@@ -647,7 +686,8 @@ function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 	and self.enabled
 	then
 		-- If there is an active, selected control widget, then try to give it the thimble.
-		local control = self.MN_items[self.MN_index]
+		local item = self.MN_items[self.MN_index]
+		local control = item and item.wid_ref
 		if control and control:tryTakeThimble1() then
 			return true
 		end
@@ -663,7 +703,8 @@ function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
-		local control = self.MN_items[self.MN_index]
+		local item = self.MN_items[self.MN_index]
+		local control = item and item.wid_ref
 		self:wid_action2(control, self.MN_index)
 
 		return true
@@ -799,11 +840,12 @@ def.default_skinner = {
 
 		-- Selection glow.
 		local sel_item = items[self.MN_index]
-		if sel_item then
-			local is_active = self == self.context.thimble1 or sel_item == self.context.thimble1
+		local sel_control = sel_item and sel_item.wid_ref
+		if sel_control then
+			local is_active = self == self.context.thimble1 or sel_control == self.context.thimble1
 			local col = is_active and skin.color_active_glow or skin.color_select_glow
 			love.graphics.setColor(col)
-			uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
+			uiGraphics.quadXYWH(tq_px, 0, sel_control.y, self.doc_w, sel_control.h)
 		end
 
 		-- Menu items.

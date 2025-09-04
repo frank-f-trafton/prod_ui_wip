@@ -32,12 +32,18 @@ end
 
 --- Gets the XYWH values of a widget viewport, or (0, 0) and the widget's dimensions if no viewport index is specified.
 -- @param self The widget.
--- @param v The viewport index, or `nil`.
+-- @param v The viewport index, or nil.
+-- @param rel_zero When true, reports the viewport's position as (0, 0). This is desirable in some cases involving
+--	Viewport #1 and scrolling. This argument has no effect when 'v' is nil.
 -- @return The viewport / widget position and dimensions.
-function widShared.getViewportXYWH(self, v)
+function widShared.getViewportXYWH(self, v, rel_zero)
 	if v then
 		v = vpk[v]
-		return self[v.x], self[v.y], self[v.w], self[v.h]
+		if rel_zero then
+			return 0, 0, self[v.w], self[v.h]
+		else
+			return self[v.x], self[v.y], self[v.w], self[v.h]
+		end
 	else
 		return 0, 0, self.w, self.h
 	end
@@ -80,7 +86,7 @@ function widShared.keepInBoundsOfParent(self, v)
 		return
 	end
 
-	local px, py, pw, ph = widShared.getViewportXYWH(parent, v)
+	local px, py, pw, ph = widShared.getViewportXYWH(parent, v) -- TODO: rel_zero?
 
 	self.x = math.max(px, math.min(self.x, pw - self.w))
 	self.y = math.max(py, math.min(self.y, ph - self.h))
@@ -98,7 +104,7 @@ function widShared.keepInBoundsExtended(self, v, x1, x2, y1, y2)
 		return
 	end
 
-	local px, py, pw, ph = widShared.getViewportXYWH(parent, v)
+	local px, py, pw, ph = widShared.getViewportXYWH(parent, v) -- TODO: rel_zero?
 
 	self.x = math.max(-self.w - x1 + px, math.min(self.x, pw + x2))
 	self.y = math.max(-self.h - y1 + py, math.min(self.y, ph + y2))
