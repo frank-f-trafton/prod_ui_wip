@@ -23,9 +23,6 @@ Optional icons (bijoux)  │
 --[[
 Stuff to fix:
 
-* The function attached to 'self:arrangeItems()' doesn't use the viewport argument.
-  Might need to write a custom one for this widget.
-
 * Fix how icon resources are loaded.
 --]]
 
