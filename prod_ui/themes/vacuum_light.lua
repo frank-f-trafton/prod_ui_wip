@@ -453,7 +453,7 @@ return {
 				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
 			},
 		},
-		text_code1 = {
+		text_script1 = {
 			res_readwrite = {
 				color_body = {0.9, 0.9, 0.9, 1.0},
 				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},

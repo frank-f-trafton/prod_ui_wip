@@ -47,9 +47,7 @@ function lgcWimp.makePopUpMenu(self, menu_def, x, y)
 
 	-- Append items to fresh menu.
 	if menu_def then
-		for i, item_guide in ipairs(menu_def) do
-			pop_up:appendItem(item_guide)
-		end
+		pop_up:applyMenuPrototype(menu_def)
 	end
 
 	-- Refresh dimensions and reshape

@@ -464,6 +464,10 @@ function methods:applyTheme(theme)
 	uiTheme.assertLabelLevel(0)
 
 	for k, v in pairs(resources.skins) do
+		print("k", k, "v", v)
+		for kk,vv in pairs(v) do
+			print("", kk, vv)
+		end
 		local skinner = context.skinners[v.skinner_id]
 		if not skinner then
 			error("no skinner with ID: " .. tostring(v.skinner_id))

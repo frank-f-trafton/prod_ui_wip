@@ -3,6 +3,7 @@ require("lib.test.strict")
 
 local demoShared = require("demo_shared")
 local inspect = require("lib.test.inspect")
+local popUpMenuPrototype = require("prod_ui.pop_up_menu_prototype")
 
 
 print("Start WIMP Demo.")
@@ -15,8 +16,8 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
-	"widgets.properties_box",
 	"widgets.text_box_multi",
+	"widgets.properties_box",
 	"widgets.text_box_single",
 	"widgets.number_box",
 	"widgets.button_work",
@@ -389,192 +390,167 @@ do
 		end
 		--]]
 
+
+		local function cb_hide_menu(client, item)
+			local root = client:getRootWidget()
+			if root then
+				local menu_bar = root:findTag("root_menu_bar")
+				if menu_bar then
+					menu_bar:setHidden(not menu_bar:getHidden())
+					root:reshape()
+				end
+			end
+		end
+
+
+		local function cb_quit(client, item)
+			love.event.quit()
+		end
+
+
+		local function _tryLaunchFrame(self, plan_id)
+			local root = self:getRootWidget()
+			if root then
+				demoShared.launchWindowFrameFromPlan(root, plan_id, true)
+			end
+		end
+
+
+		local P = popUpMenuPrototype.P
+
+
 		local def_demo = {
-			{
-				type = "command",
-				text = "Video Settings",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						demoShared.launchWindowFrameFromPlan(root, "window_frames.video_settings", true)
-					end
-				end,
+			P.command {
+				text="Video Settings",
+				callback=function(client, item) _tryLaunchFrame(client, "window_frames.video_settings") end
 			},
-			{
-				type = "command",
-				text = "Widget Tree View",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						demoShared.launchWindowFrameFromPlan(root, "window_frames.wimp_widget_tree", true)
-					end
-				end,
+			P.command {
+				text="Widget Tree View",
+				callback=function(client, item) _tryLaunchFrame(client, "window_frames.wimp_widget_tree") end
 			},
-			{
-				type = "command",
-				text = "Window Frame Selector",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						demoShared.launchWindowFrameFromPlan(root, "window_frames.window_frame_selector", true)
-					end
-				end,
+			P.command {
+				text="Window Frame Selector",
+				callback=function(client, item) _tryLaunchFrame(client, "window_frames.window_frame_selector") end
 			},
-			{type="separator"},
-			{
-				type = "command",
-				text = "Hide Menu",
-				text_shortcut = "F8",
-				callback = function(client, item)
-					local root = client:getRootWidget()
-					if root then
-						local menu_bar = root:findTag("root_menu_bar")
-						if menu_bar then
-							menu_bar:setHidden(not menu_bar:getHidden())
-							root:reshape()
-						end
-					end
-				end,
+			P.separator(),
+			P.command {
+				text="Hide Menu",
+				text_shortcut="F8",
+				callback=cb_hide_menu
 			},
-			{type="separator"},
-			{
-				type = "command",
-				text = "_Q_uit",
-				text_shortcut = "Ctrl+Q",
-				--callback = function() print("QUIT!") end,
-				callback = function(client, item) love.event.quit() end,
-				key_mnemonic = "q",
-				key_shortcut = "KC q",
-			},
+			P.separator(),
+			P.command {
+				text="_Q_uit",
+				text_shortcut="Ctrl+Q",
+				callback=cb_quit
+			}
 		}
+
+
 		menu_bar:appendCategory({
 			text = "_D_emo",
 			key_mnemonic = "d",
 			pop_up_def = def_demo,
 		})
 
+
 		local def_sub2 = {
-			{
-				type = "command",
-				text = "Sub",
-				callback = function(client, item) print("1") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
-			}, {
-				type = "command",
-				text = "Blurp",
-				callback = function(client, item) print("2") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
+			P.command {
+				text="Sub",
+				callback=function(client, item) print("1") end
+			},
+			P.command {
+				text="Blurp",
+				callback=function(client, item) print("2") end
 			},
 		}
 
 		local def_recent = {
-			{
-				type = "command",
-				text = "One",
-				callback = function(client, item) print("1") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
-			}, {
-				type = "group",
-				text = "Two",
-				group_def = def_sub2,
-				callback = function(client, item) print("2") end,
-				--key_mnemonic = ,
-			}, {
-				type = "command",
-				text = "Three",
-				callback = function(client, item) print("3") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
+			P.command {
+				text="One",
+				callback=function(client, item) print("1") end
+			},
+			P.group {
+				text="Two",
+				group_def=def_sub2
+			},
+			P.command {
+				text="Three"
 			},
 		}
 
 		local def_file = {
-			{
-				type = "command",
-				text = "_N_ew",
-				text_shortcut = "Ctrl+N",
-				key_mnemonic = "n",
-				key_shortcut = "KC n",
-				callback = function(client, item) print("NEW!") end,
-			}, {
-				type = "command",
-				text = "_O_pen",
-				text_shortcut = "Ctrl+O",
-				key_mnemonic = "o",
-				key_shortcut = "KC o",
-				callback = function(client, item) print("OPEN!") end,
+			P.command {
+				text="_N_ew",
+				text_shortcut="Ctrl+N",
+				key_mnemonic="n",
+				key_shortcut="KC n",
+				callback=function(client, item) print("NEW!") end
 			},
-			{type="separator"},
-			{
-				type = "group",
-				text = "_R_ecent",
-				group_def = def_recent,
-				key_mnemonic = "r",
+			P.command {
+				text="_O_pen",
+				text_shortcut="Ctrl+O",
+				key_mnemonic="o",
+				key_shortcut="KC o",
+				callback=function(client, item) print("OPEN!") end
+			},
+			P.separator(),
+			P.group {
+				text="_R_ecent",
+				group_def=def_recent,
+				key_mnemonic="r",
+				actionable=true,
 			},
 		}
 		menu_bar:appendCategory({
-			text = "_M_enu Example",
-			key_mnemonic = "m",
-			pop_up_def = def_file,
+			text="_M_enu Example",
+			key_mnemonic="m",
+			pop_up_def=def_file,
 		})
 
 		--[==[
 		local def_edit = {
-			{
-				type = "command",
-				text = "Foo",
-				callback = function(client, item) print("FOO") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
-			}, {
-				type = "command",
-				text = "Bar",
-				callback = function(client, item) print("BAR") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
+			P.command {
+				text="Foo",
+				callback=function(client, item) print("FOO") end
 			},
-			{type="separator"},
-			{
-				type = "command",
-				text = "Baz",
-				callback = function(client, item) print("BAZ") end,
-				--key_mnemonic = ,
-				--key_shortcut = ,
+			P.command {
+				text="Bar",
+				callback=function(client, item) print("BAR") end
 			},
+			P.separator(),
+			P.command {
+				text="Baz",
+				callback=function(client, item) print("BAZ") end
+			}
 		}
 		menu_bar:appendCategory({
-			text = "_E_dit",
-			key_mnemonic = "e",
-			pop_up_def = def_edit,
+			text="_E_dit",
+			key_mnemonic="e",
+			pop_up_def=def_edit,
 		})
 		--]==]
 
 		--[==[
 		local def_help = {
-			{
-				type = "command",
-				text = "_C_ontents...",
-				text_shortcut = "F1",
-				callback = function(client, item) print("HELP") end,
+			P.command {
+				text="_C_ontents...",
+				text_shortcut="F1",
+				callback=function(client, item) print("HELP") end,
 				key_mnemonic = "c",
-				key_shortcut = "K f1",
+				key_shortcut = "K f1"
 			},
-			{type="separator"},
-			{
-				type = "command",
-				text = "_A_bout...",
-				callback = function(client, item) print("BAR") end,
-				key_mnemonic = "a",
-				--key_shortcut = ,
+			P.separator(),
+			P.command {
+				text="_A_bout...",
+				callback=function(client, item) print("BAR") end,
+				key_mnemonic="a",
 			},
 		}
 		menu_bar:appendCategory({
-			text = "_H_elp",
-			key_mnemonic = "h",
-			pop_up_def = def_help,
+			text="_H_elp",
+			key_mnemonic="h",
+			pop_up_def=def_help,
 		})
 		--]==]
 

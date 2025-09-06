@@ -36,8 +36,8 @@ local editMethodsS = context:getLua("shared/line_ed/s/edit_methods_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
-local lgcMenu = context:getLua("shared/lgc_menu")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -231,7 +231,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
 		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h + self.LE_align_oy
 
-		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+		popUpMenuPrototype.configurePrototype(self, self.pop_up_def)
 
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
@@ -341,7 +341,7 @@ function lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 	elseif button == 2 then
 		local root = self:getRootWidget()
-		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+		popUpMenuPrototype.configurePrototype(self, self.pop_up_def)
 
 		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
@@ -466,8 +466,8 @@ function lgcInputS.draw(self, color_highlight, font_ghost, color_text, font, col
 end
 
 
-function lgcInputS.cb_action(self, item_t)
-	local command = self.LE_commands[item_t.command_id]
+function lgcInputS.cb_action(self, command_id)
+	local command = self.LE_commands[command_id]
 	if command then
 		return editWidS.wrapAction(self, command)
 	end
@@ -477,101 +477,88 @@ end
 -- Configuration functions for pop-up menu items.
 
 
-function lgcInputS.configItem_undo(item, client)
-	item.selectable = true
+function lgcInputS.configProto_undo(client)
 	local hist = client.LE_hist
-	item.actionable = client.LE_allow_input and hist.enabled and hist.pos > 1
+	return client.LE_allow_input and hist.enabled and hist.pos > 1
 end
 
 
-function lgcInputS.configItem_redo(item, client)
-	item.selectable = true
+function lgcInputS.configProto_redo(client)
 	local hist = client.LE_hist
-	item.actionable = client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
+	return client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
 end
 
 
-function lgcInputS.configItem_cut(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
+function lgcInputS.configProto_cut(client)
+	return client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
 end
 
 
-function lgcInputS.configItem_copy(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
+function lgcInputS.configProto_copy(client)
+	return client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
 end
 
 
-function lgcInputS.configItem_delete(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE:isHighlighted()
+function lgcInputS.configProto_delete(client)
+	return client.LE_allow_input and client.LE:isHighlighted()
 end
 
 
-function lgcInputS.configItem_paste(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE_allow_paste and true or false
+function lgcInputS.configProto_paste(client)
+	return client.LE_allow_input and client.LE_allow_paste and true or false
 end
 
 
-function lgcInputS.configItem_selectAll(item, client)
-	item.selectable = true
-	item.actionable = #client.LE.line > 0
+function lgcInputS.configProto_selectAll(client)
+	return #client.LE.line > 0
 end
 
 
 -- The default pop-up menu definition.
 -- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
-lgcInputS.pop_up_def = {
-	{
-		type = "command",
-		text = "Undo",
-		callback = lgcInputS.cb_action,
-		command_id = "undo",
-		config = lgcInputS.configItem_undo,
-	}, {
-		type = "command",
-		text = "Redo",
-		callback = lgcInputS.cb_action,
-		command_id = "redo",
-		config = lgcInputS.configItem_redo,
-	},
-	{type="separator"},
-	{
-		type = "command",
-		text = "Cut",
-		callback = lgcInputS.cb_action,
-		command_id = "cut",
-		config = lgcInputS.configItem_cut,
-	}, {
-		type = "command",
-		text = "Copy",
-		callback = lgcInputS.cb_action,
-		command_id = "copy",
-		config = lgcInputS.configItem_copy,
-	}, {
-		type = "command",
-		text = "Paste",
-		callback = lgcInputS.cb_action,
-		command_id = "paste",
-		config = lgcInputS.configItem_paste,
-	}, {
-		type = "command",
-		text = "Delete",
-		callback = lgcInputS.cb_action,
-		command_id = "delete-highlighted",
-		config = lgcInputS.configItem_delete,
-	},
-	{type="separator"},
-	{
-		type = "command",
-		text = "Select All",
-		callback = lgcInputS.cb_action,
-		command_id = "select-all",
-		config = lgcInputS.configItem_selectAll,
-	},
-}
+do
+	local P = popUpMenuPrototype.P
+
+	lgcInputS.pop_up_def = {
+		P.command {
+			text="Undo",
+			callback=function(client, item) return lgcInputS.cb_action(client, "undo") end,
+			config=lgcInputS.configProto_undo
+		},
+		P.command {
+			text="Redo",
+			callback=function(client, item) return lgcInputS.cb_action(client, "redo") end,
+			config=lgcInputS.configProto_redo
+		},
+		P.separator(),
+		P.command {
+			text="Cut",
+			callback=function(client, item) return lgcInputS.cb_action(client, "cut") end,
+			config=lgcInputS.configProto_cut
+		},
+		P.command {
+			text="Copy",
+			callback=function(client, item) return lgcInputS.cb_action(client, "copy") end,
+			config=lgcInputS.configProto_copy
+		},
+		P.command {
+			text="Paste",
+			callback=function(client, item) return lgcInputS.cb_action(client, "paste") end,
+			config=lgcInputS.configProto_paste
+		},
+		P.command {
+			text="Delete",
+			callback=function(client, item) return lgcInputS.cb_action(client, "delete-highlighted") end,
+			config = lgcInputS.configProto_delete
+		},
+		P.separator(),
+		P.command {
+			text="Select All",
+			callback=function(client, item) return lgcInputS.cb_action(client, "select-all") end,
+			config=lgcInputS.configProto_selectAll
+		},
+	}
+end
 
 
 return lgcInputS

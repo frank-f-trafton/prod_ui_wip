@@ -1,5 +1,5 @@
 --[[
-wimp/menu_bar: A horizontal menu bar that sits at the top of the application or within a window frame.
+wimp/menu_bar: A horizontal menu bar that is placed at the top of the application or within a window frame.
 
 ┌───────────────────────────────┐
 │File  Edit  View  Help         │  <--  Menu Bar Widget
@@ -10,13 +10,14 @@ wimp/menu_bar: A horizontal menu bar that sits at the top of the application or 
 │ Quit     ctrl+q │
 └─────────────────┘
 
-The menu bar may act strangely if it is too narrow to display all categories.
+The menu bar may act strangely if it becomes too narrow to display all categories.
 
 --]]
 
 local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
+local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -119,7 +120,7 @@ end
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
 local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to lgcWimp.makePopUpMenu()
-	lgcMenu.widgetConfigureMenuItems(item, item.pop_up_def)
+	popUpMenuPrototype.configurePrototype(item, item.pop_up_def)
 
 	-- Locate bottom of menu item in UI space.
 	local ax, ay = client:getAbsolutePosition()
