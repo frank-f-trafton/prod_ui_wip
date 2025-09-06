@@ -1087,21 +1087,6 @@ function lgcMenu.keyNavLR(self, key, scancode, isrepeat, id)
 end
 
 
---- For every table in an array, if a 'config' method is present, run it on the table with 'self' as an argument.
---  Use to refresh the selectable / usable state of menu items. (Depending on the use case, the tables need not be
---  fully functional menu items. They could also be shared definition tables that are copied to live items at a later
---  time.)
--- @param self Presumably the client widget that owns the menu. (Could be something else depending on the implementation.)
--- @param array The array containing menu-items or tables similar to menu-items.
-function lgcMenu.widgetConfigureMenuItems(self, array)
-	for i, tbl in ipairs(array) do
-		if tbl.config then
-			tbl:config(self)
-		end
-	end
-end
-
-
 --- Get the combined dimensions of all items in the menu. Assumes that all items have X and Y positions >= 0.
 -- @param items The table of menu-items to scan.
 -- @return The bounding width and height of all items.

@@ -1,7 +1,7 @@
--- PILE UTF-8 v1.1.91
+-- PILE UTF-8 v1.200
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
--- https://github.com/rabbitboots/pile_base
+-- https://github.com/frank-f-trafton/pile_base
 
 
 local floor, char, concat, type = math.floor, string.char, table.concat, type

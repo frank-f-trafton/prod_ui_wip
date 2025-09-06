@@ -76,6 +76,7 @@ local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
+local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
@@ -106,12 +107,6 @@ end
 def.setBlocking = lgcPopUps.setBlocking
 
 
--- Removing items in pop-up menus is not supported.
-
-
--- * Internal: Sub-menu creation and teardown *
-
-
 local function destroySubMenus(self)
 	if self.chain_next then
 		widShared.chainRemovePost(self)
@@ -138,13 +133,11 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.wid_ref = client.wid_ref
 
 			-- Configure menu defs.
-			lgcMenu.widgetConfigureMenuItems(client_sub, group_def)
+			popUpMenuPrototype.configurePrototype(client_sub, group_def)
 
 			-- Append items to fresh menu
 			if group_def then
-				for i, item_guide in ipairs(group_def) do
-					client_sub:appendItem(item_guide)
-				end
+				client_sub:applyMenuPrototype(group_def)
 			end
 
 			-- Set dimensions and decide whether to place on the right or left (if not enough space).
@@ -195,12 +188,6 @@ local function activateGroup(client, item, set_selection)
 end
 
 
--- * / Internal: Sub-menu creation and teardown *
-
-
--- * Internal: Item activation *
-
-
 local function activateCommand(client, item)
 	local wid_ref = client.wid_ref
 
@@ -211,9 +198,6 @@ local function activateCommand(client, item)
 	local root = client:getRootWidget()
 	root:sendEvent("rootCall_destroyPopUp", client, "concluded")
 end
-
-
--- * / Internal: Item activation *
 
 
 local function keyMnemonicSearch(items, key)
@@ -235,63 +219,105 @@ local function _getRes(item, client, skin)
 end
 
 
--- * MenuItem Defs *
+-- 'item.text_int' == internal version of 'item.text', with the underline notation stripped.
+-- For items with icons, 'item.tq_icon' is set in 'self:updateDimensions()'.
 
 
---- Append an item based on one of a few hardcoded types.
--- @param item_type Identifier (typically a string) for the kind of item to append.
--- @param info Table of default fields to assign to the fresh item.
--- @return The new item table for additional tweaks.
-function def:appendItem(info)
-	uiShared.type1(1, info, "table")
+local function _makeCommand(self, info)
+	uiShared.type1(2, info, "table")
 
-	--[[
-	TODO: The interface for adding menu items needs an overhaul.
-	--]]
+	uiShared.fieldType1(info, "info", "text", "string")
+	uiShared.fieldTypeEval1(info, "info", "text_shortcut", "string")
+	uiShared.fieldTypeEval1(info, "info", "key_mnemonic", "string")
+	uiShared.fieldTypeEval1(info, "info", "key_shortcut", "string")
+	uiShared.fieldTypeEval1(info, "info", "icon_id", "string")
+	uiShared.fieldTypeEval1(info, "info", "callback", "function")
+	uiShared.fieldTypeEval1(info, "info", "config", "function")
+	uiShared.fieldTypeEval1(info, "info", "actionable", "boolean")
 
-	local item_type = info.type
-	local item = {x=0, y=0, w=0, h=0}
+	local item = {
+		x = 0, y = 0, w = 0, h = 0,
+		type = "command",
+		text = info.text,
+		text_int = "",
+		text_shortcut = info.text_shortcut or false,
+		icon_id = info.icon_id or false,
 
-	-- 'item.text_int' == internal version of 'item.text', with the underline notation stripped.
-	-- For items with icons, 'item.tq_icon' is set in 'self:updateDimensions()'.
-
-	if item_type == "command" then
-		item.text = info.text or ""
-		item.text_int = ""
-		item.text_shortcut = info.text_shortcut or false
-		item.icon_id = info.bijou or false -- TODO: renaming from bijou to icon
-
-		item.selectable = true
-		item.callback = info.callback
-		item.actionable = not not item.callback
-
-	elseif item_type == "group" then
-		item.text = info.text or ""
-		item.text_int = ""
-		item.icon_id = info.bijou or false -- TODO: renaming from bijou to icon
-
-		item.selectable = true
-		item.group_def = info.group_def
-		item.actionable = not not item.group_def
-
-	elseif item_type == "separator" then
-		-- …
-
-	else
-		error("unknown item type: " .. tostring(item_type))
+		selectable = true,
+		callback = info.callback or false,
+		actionable = not not info.callback
+	}
+	if item.callback and info.actionable ~= nil then
+		item.actionable = not not info.actionable
 	end
-
-	for k, v in pairs(info) do
-		item[k] = v
-	end
-
-	table.insert(self.MN_items, item)
 
 	return item
 end
 
 
--- * / MenuItem Defs *
+local function _makeGroup(self, info)
+	uiShared.type1(2, info, "table")
+
+	uiShared.fieldType1(info, "info", "text", "string")
+	uiShared.fieldTypeEval1(info, "info", "key_mnemonic", "string")
+	uiShared.fieldTypeEval1(info, "info", "icon_id", "string")
+	uiShared.fieldTypeEval1(info, "info", "group_def", "table")
+	uiShared.fieldTypeEval1(info, "info", "config", "function")
+
+	local item = {
+		x = 0, y = 0, w = 0, h = 0,
+		type = "group",
+		text = info.text,
+		text_int = "",
+		icon_id = info.icon_id or false,
+
+		selectable = true,
+		group_def = info.group_def,
+		actionable = not not info.group_def
+	}
+
+	if item.group_def and info.actionable ~= nil then
+		item.actionable = not not info.actionable
+	end
+
+	return item
+end
+
+
+local function _makeSeparator()
+	return {
+		x=0, y=0, w=0, h=0,
+		type = "separator"
+	}
+end
+
+
+function def:applyMenuPrototype(menu_prototype)
+	uiShared.type1(1, menu_prototype, "table")
+
+	if #self.MN_items > 0 then
+		error("this menu already contains items.")
+	end
+
+	for i, info in ipairs(menu_prototype) do
+		local typ = info.type
+		local item
+		if typ == "command" then
+			item = _makeCommand(self, info)
+
+		elseif typ == "group" then
+			item = _makeGroup(self, info)
+
+		elseif typ == "separator" then
+			item = _makeSeparator()
+
+		else
+			error("invalid item type: " .. typ)
+		end
+
+		table.insert(self.MN_items, item)
+	end
+end
 
 
 --- Sets the correct widget dimensions for the menu, updating its internal contents along the way.

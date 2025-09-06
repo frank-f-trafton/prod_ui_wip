@@ -18,9 +18,9 @@ local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
-local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
+local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -225,7 +225,7 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
 		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h
 
-		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+		popUpMenuPrototype.configurePrototype(self, self.pop_up_def)
 
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
@@ -353,7 +353,7 @@ function lgcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 	elseif button == 2 then
 		local root = self:getRootWidget()
-		lgcMenu.widgetConfigureMenuItems(self, self.pop_up_def)
+		popUpMenuPrototype.configurePrototype(self, self.pop_up_def)
 
 		--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
@@ -496,8 +496,8 @@ function lgcInputM.draw(self, color_highlight, font_ghost, color_text, font, col
 end
 
 
-function lgcInputM.cb_action(self, item_t)
-	local command = self.LE_commands[item_t.command_id]
+function lgcInputM.cb_action(self, command_id)
+	local command = self.LE_commands[command_id]
 	if command then
 		return editWidM.wrapAction(self, command)
 	end
@@ -507,111 +507,97 @@ end
 -- Configuration functions for pop-up menu items.
 
 
-function lgcInputM.configItem_undo(item, client)
-	item.selectable = true
+function lgcInputM.configProto_undo(client)
 	local hist = client.LE_hist
-	item.actionable = client.LE_allow_input and hist.enabled and hist.pos > 1
+	return client.LE_allow_input and hist.enabled and hist.pos > 1
 end
 
 
-function lgcInputM.configItem_redo(item, client)
-	item.selectable = true
+function lgcInputM.configProto_redo(client)
 	local hist = client.LE_hist
-	item.actionable = client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
+	return client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
 end
 
 
-function lgcInputM.configItem_cut(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
+function lgcInputM.configProto_cut(client)
+	return client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
 end
 
 
-function lgcInputM.configItem_copy(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
+function lgcInputM.configProto_copy(client)
+	return client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
 end
 
 
-function lgcInputM.configItem_delete(item, client)
-	item.selectable = true
-	item.actionable = client.LE_allow_input and client.LE:isHighlighted()
+function lgcInputM.configProto_delete(client)
+	return client.LE_allow_input and client.LE:isHighlighted()
 end
 
 
-function lgcInputM.configItem_paste(item, client)
-	item.selectable = true
-
-	-- XXX: There is an SDL function to check if the clipboard has text: https://wiki.libsdl.org/SDL_HasClipboardText
+function lgcInputM.configProto_paste(client)
+	-- TODO: There is an SDL function to check if the clipboard has text: https://wiki.libsdl.org/SDL_HasClipboardText
 	-- I tested it here: https://github.com/rabbitboots/love/tree/12.0-development-clipboard/src/modules/system
 	-- (Search 'hasclipboard' in src/modules/system.)
 	-- But the SDL function didn't seem to be 100% reliable when I looked at it (and I don't recall when that
 	-- was). Have to follow up on it.
 
 	-- Something like this:
-	-- item.actionable = love.system.hasClipboardText()
+	-- return love.system.hasClipboardText()
 
-	item.actionable = client.LE_allow_input and client.LE_allow_paste and true or false
+	return client.LE_allow_input and client.LE_allow_paste and true or false
 end
 
 
-function lgcInputM.configItem_selectAll(item, client)
-	item.selectable = true
-	item.actionable = not client.LE.lines:isEmpty()
+function lgcInputM.configProto_selectAll(client)
+	return not client.LE.lines:isEmpty()
 end
 
 
 -- The default pop-up menu definition.
 -- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
-lgcInputM.pop_up_def = {
-	{
-		type = "command",
-		text = "Undo",
-		callback = lgcInputM.cb_action,
-		command_id = "undo",
-		config = lgcInputM.configItem_undo,
-	}, {
-		type = "command",
-		text = "Redo",
-		callback = lgcInputM.cb_action,
-		command_id = "redo",
-		config = lgcInputM.configItem_redo,
-	},
-	{type="separator"},
-	{
-		type = "command",
-		text = "Cut",
-		callback = lgcInputM.cb_action,
-		command_id = "cut",
-		config = lgcInputM.configItem_cut,
-	}, {
-		type = "command",
-		text = "Copy",
-		callback = lgcInputM.cb_action,
-		command_id = "copy",
-		config = lgcInputM.configItem_copy,
-	}, {
-		type = "command",
-		text = "Paste",
-		callback = lgcInputM.cb_action,
-		command_id = "paste",
-		config = lgcInputM.configItem_paste,
-	}, {
-		type = "command",
-		text = "Delete",
-		callback = lgcInputM.cb_action,
-		command_id = "delete-highlighted",
-		config = lgcInputM.configItem_delete,
-	},
-	{type="separator"},
-	{
-		type = "command",
-		text = "Select All",
-		callback = lgcInputM.cb_action,
-		command_id = "select-all",
-		config = lgcInputM.configItem_selectAll,
-	},
-}
+do
+	local P = popUpMenuPrototype.P
+
+	lgcInputM.pop_up_def = {
+		P.command {
+			text="Undo",
+			callback=function(client, item) return lgcInputM.cb_action(client, "undo") end,
+			config=lgcInputM.configProto_undo
+		},
+		P.command {
+			text="Redo",
+			callback=function(client, item) return lgcInputM.cb_action(client, "redo") end,
+			config=lgcInputM.configProto_redo
+		},
+		P.separator(),
+		P.command {
+			text="Cut",
+			callback=function(client, item) return lgcInputM.cb_action(client, "cut") end,
+			config=lgcInputM.configProto_cut
+		},
+		P.command {
+			text="Copy",
+			callback=function(client, item) return lgcInputM.cb_action(client, "copy") end,
+			config=lgcInputM.configProto_copy
+		},
+		P.command {
+			text="Paste",
+			callback=function(client, item) return lgcInputM.cb_action(client, "paste") end,
+			config=lgcInputM.configProto_paste
+		},
+		P.command {
+			text="Delete",
+			callback=function(client, item) return lgcInputM.cb_action(client, "delete-highlighted") end,
+			config=lgcInputM.configProto_delete
+		},
+		P.separator(),
+		P.command {
+			text="Select All",
+			callback=function(client, item) return lgcInputM.cb_action(client, "select-all") end,
+			config=lgcInputM.configProto_selectAll
+		},
+	}
+end
 
 
 return lgcInputM
