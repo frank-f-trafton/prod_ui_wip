@@ -22,6 +22,7 @@ local context = select(1, ...)
 local lgcButton = context:getLua("shared/lgc_button")
 local lgcLabel = context:getLua("shared/lgc_label")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
@@ -88,7 +89,7 @@ end
 
 
 function def:setDialPosition(pos)
-	uiShared.numberNotNaN(1, pos)
+	uiAssert.numberNotNaN(1, pos)
 
 	-- Does not check `self.enabled` or `self.dial_allow_changes`.
 
@@ -121,7 +122,7 @@ end
 
 
 function def:setDialMax(max)
-	uiShared.numberNotNaN(1, max)
+	uiAssert.numberNotNaN(1, max)
 
 	-- Does not check `self.enabled` or `self.dial_allow_changes`.
 

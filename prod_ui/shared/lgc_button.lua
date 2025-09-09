@@ -12,7 +12,8 @@ local context = select(1, ...)
 local lgcButton = {}
 
 
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 
 
 -- * Widget Action Callbacks *
@@ -20,17 +21,17 @@ local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 -- Called when the user left-clicks on the button or presses 'space', 'return' or 'kpenter' while the button has thimble focus.
 -- Args: (<implicit self>)
-lgcButton.wid_buttonAction = uiShared.dummyFunc
+lgcButton.wid_buttonAction = uiDummy.func
 
 
 -- Called when the user right-clicks on the button, or presses the 'application' KeyConstant while the button has thimble focus.
 -- Args: (<implicit self>)
-lgcButton.wid_buttonAction2 = uiShared.dummyFunc
+lgcButton.wid_buttonAction2 = uiDummy.func
 
 
 -- Called when the user middle-clicks on the button. There is no built-in keyboard trigger.
 -- Args: (<implicit self>)
-lgcButton.wid_buttonAction3 = uiShared.dummyFunc
+lgcButton.wid_buttonAction3 = uiDummy.func
 
 
 -- * Widget Plug-In Methods *
@@ -74,7 +75,7 @@ end
 
 --- Sets the value of a multi-state checkbox.
 function lgcButton.setValue(self, value)
-	uiShared.intRange(2, value, 1, self.value_max)
+	uiAssert.intRange(2, value, 1, self.value_max)
 
 	self.value = value
 end
@@ -90,7 +91,7 @@ end
 
 --- Sets the maximum value for multi-state checkboxes.
 function lgcButton.setMaxValue(self, max)
-	uiShared.intGE(1, max, 1)
+	uiAssert.intGE(1, max, 1)
 
 	self.value_max = max
 end

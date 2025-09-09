@@ -14,8 +14,9 @@ _mt_widget.context = context
 
 -- For loading widget defs, see the UI Context source.
 
+local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local viewport_keys = context:getLua("core/viewport_keys")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
@@ -491,9 +492,9 @@ end
 -- @param [...] Additional arguments for the widget's uiCall_initialize() callback.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, pos, skin_id, ...)
-	uiShared.notNilNotFalseNotNaN(1, id)
-	uiShared.numberNotNaNEval(2, pos)
-	uiShared.typeEval1(3, skin_id, "string")
+	uiAssert.notNilNotFalseNotNaN(1, id)
+	uiAssert.numberNotNaNEval(2, pos)
+	uiAssert.typeEval1(3, skin_id, "string")
 
 	local children = self.children
 	pos = pos or #children + 1
@@ -502,7 +503,7 @@ function _mt_widget:addChild(id, pos, skin_id, ...)
 	end
 
 	if context.locks[self] then
-		uiShared.errLocked("add child")
+		coreErr.errLocked("add child")
 
 	elseif children == _mt_no_descendants then
 		errNoDescendants()
@@ -531,10 +532,10 @@ function _mt_widget:remove()
 
 	local locks = context.locks
 	if locks[self.parent] then
-		uiShared.errLockedParent("remove")
+		coreErr.errLockedParent("remove")
 
 	elseif locks[self] then
-		uiShared.errLocked("remove")
+		coreErr.errLocked("remove")
 	end
 
 	-- Handle children, grandchildren, etc.
@@ -795,7 +796,7 @@ function _mt_widget:sortChildren(recurse)
 	--]]
 
 	if context.locks[self] then
-		uiShared.errLocked("sort children")
+		coreErr.errLocked("sort children")
 	end
 
 	local seq = self.children
@@ -858,10 +859,10 @@ end
 --  Locked during update: yes (parent)
 -- @param var The new position. This value is clamped, so you may pass 0 for the first position and math.huge for the last.
 function _mt_widget:reorder(var)
-	uiShared.numberNotNaN(1, var)
+	uiAssert.numberNotNaN(1, var)
 
 	if context.locks[self.parent] then
-		uiShared.errLockedParent("reorder")
+		coreErr.errLockedParent("reorder")
 	end
 
 	if not self.parent then
@@ -884,7 +885,7 @@ end
 --- Sets the widget's tag string.
 -- @param tag (string) The tag to assign.
 function _mt_widget:setTag(tag)
-	uiShared.type1(1, tag, "string")
+	uiAssert.type1(1, tag, "string")
 
 	self.tag = tag
 end
@@ -1023,8 +1024,8 @@ end
 
 
 function _mt_widget:setPreferredDimensions(w, h)
-	uiShared.typeEval1(1, w, "number")
-	uiShared.typeEval1(2, h, "number")
+	uiAssert.typeEval1(1, w, "number")
+	uiAssert.typeEval1(2, h, "number")
 
 	self.pref_w = w and math.max(0, w) or false
 	self.pref_h = h and math.max(0, h) or false

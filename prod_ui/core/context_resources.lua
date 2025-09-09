@@ -12,8 +12,8 @@ local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
 local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
@@ -49,7 +49,7 @@ end
 
 
 function methods:interpolatePath(path)
-	uiShared.type1(1, path, "string")
+	uiAssert.type1(1, path, "string")
 
 	return (path:gsub(pString.ptn_percent, self.path_symbols))
 end
@@ -278,7 +278,7 @@ local themes_max = 100
 
 
 function methods:loadTheme(id)
-	uiShared.type1(1, id, "string")
+	uiAssert.type1(1, id, "string")
 
 	local id_orig = id
 	local theme_hash, theme_ids = {}, {}
@@ -323,7 +323,7 @@ end
 
 
 function methods:applyTheme(theme)
-	uiShared.type1(1, theme, "table")
+	uiAssert.type1(1, theme, "table")
 
 	local resources = self.resources
 	local scale = self.scale

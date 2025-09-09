@@ -38,8 +38,8 @@ local context = select(1, ...)
 local lgcButton = context:getLua("shared/lgc_button")
 local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -111,8 +111,8 @@ end
 -- @param i (#options + 1) where to insert the option in the array. Must be between 1 and #options + 1. If not specified, the option will be added to the end of the array.
 -- @return The index of the newly-added option.
 function def:insertOption(option, i)
-	uiShared.type(1, option, "string", "table")
-	uiShared.intRangeEval(2, i, 1, #self.options + 1)
+	uiAssert.type(1, option, "string", "table")
+	uiAssert.intRangeEval(2, i, 1, #self.options + 1)
 
 	i = i or #self.options + 1
 
@@ -137,7 +137,7 @@ end
 -- @param i *(#options)* Index of the option to remove in the array. Must be between 1 and #options. If not specified, the last option in the array will be removed.
 -- @return The removed option value.
 function def:removeOption(i)
-	uiShared.intRangeEval(1, i, 1, #self.options)
+	uiAssert.intRangeEval(1, i, 1, #self.options)
 
 	i = i or #self.options
 
@@ -171,7 +171,7 @@ end
 -- @param index The new index number. The value is clamped between 1 and the number of options, or is set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:setIndex(index)
-	uiShared.numberNotNaN(1, index)
+	uiAssert.numberNotNaN(1, index)
 
 	index = math.floor(index)
 
@@ -199,7 +199,7 @@ end
 -- @param delta The amount to increment or decrement, expected to be -1, 0 or 1. The final index value will wrap around, or be set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:stepIndex(delta)
-	uiShared.numberNotNaN(1, delta)
+	uiAssert.numberNotNaN(1, delta)
 
 	delta = math.floor(delta)
 

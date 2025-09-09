@@ -13,10 +13,10 @@ local context = select(1, ...)
 local widLayout = {}
 
 
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
-widLayout._enum_layout_base = uiShared.makeLUTV(
+widLayout._enum_layout_base = uiTable.makeLUTV(
 	"zero",
 	"self",
 	"viewport",

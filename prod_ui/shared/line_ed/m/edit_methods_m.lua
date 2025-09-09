@@ -19,34 +19,34 @@ local editCommandM = context:getLua("shared/line_ed/m/edit_command_m")
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local widShared = context:getLua("core/wid_shared")
 
 
 function client:writeText(text, suppress_replace)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.writeText, text, suppress_replace)
 end
 
 
 function client:replaceText(text)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.replaceText, text)
 end
 
 
 function client:setText(text)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.setText, text)
 end
 
 
 function client:getText(l1, l2)
-	uiShared.typeEval1(1, l1, "number")
-	uiShared.typeEval1(2, l2, "number")
+	uiAssert.typeEval1(1, l1, "number")
+	uiAssert.typeEval1(2, l2, "number")
 
 	return editFuncM.getText(self, l1, l2)
 end
@@ -249,7 +249,7 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
-	uiShared.type1(1, n_u_chars, "number")
+	uiAssert.type1(1, n_u_chars, "number")
 
 	editWidM.wrapAction(self, editCommandM.deleteUChar, n_u_chars)
 end
@@ -307,7 +307,7 @@ end
 
 
 function client:setTextAlignment(align)
-	uiShared.enum(1, align, "AlignMode", editWid._enum_align)
+	uiAssert.enum(1, align, "AlignMode", editWid._enum_align)
 
 	editWidM.wrapAction(self, editCommandM.setTextAlignment, align)
 end
@@ -433,7 +433,7 @@ end
 -- * "replacement_char": Replace every unrecognized byte with the Unicode replacement code point.
 -- * false/nil: return an empty string on bad unput.
 function client:setBadInputRule(rule)
-	uiShared.enumEval(1, rule, "BadInputRule", editWid._enum_bad_input)
+	uiAssert.enumEval(1, rule, "BadInputRule", editWid._enum_bad_input)
 
 	self.LE_bad_input_rule = rule or false
 end

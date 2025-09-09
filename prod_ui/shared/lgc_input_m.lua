@@ -17,13 +17,14 @@ local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editMethodsM = context:getLua("shared/line_ed/m/edit_methods_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
-local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
+local numLockMap = require(context.conf.prod_ui_req .. "data.keyboard.num_lock_map")
 local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 --local widShared = context:getLua("core/wid_shared")
 
 
@@ -236,12 +237,12 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 	end
 
 	-- (LÖVE 12) if this key should behave differently when NumLock is disabled, swap out the scancode and key constant.
-	if love_major >= 12 and keyMgr.scan_numlock[scancode] and not love.keyboard.isModifierActive("numlock") then
-		scancode = keyMgr.scan_numlock[scancode]
+	if love_major >= 12 and numLockMap[scancode] and not love.keyboard.isModifierActive("numlock") then
+		scancode = numLockMap[scancode]
 		key = love.keyboard.getKeyFromScancode(scancode)
 	end
 
-	local id = keyMgr.keyStringsInKeyBinds(context.settings.wimp.text_input.commands, hot_key, hot_scan)
+	local id = uiKeyboard.keyStringsInKeyBinds(context.settings.wimp.text_input.commands, hot_key, hot_scan)
 	if id then
 		local bound_func = self.LE_commands[id]
 

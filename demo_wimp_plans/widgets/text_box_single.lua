@@ -1,7 +1,7 @@
 
 -- ProdUI
 local demoShared = require("demo_shared")
-local keyMgr = require("prod_ui.lib.key_mgr")
+local uiKeyboard = require("prod_ui.ui_keyboard")
 local pTable = require("prod_ui.lib.pile_table")
 
 
@@ -73,7 +73,7 @@ function plan.make(panel)
 		local key_mgr = self.context.key_mgr
 		local mod = key_mgr.mod
 
-		local input_str = keyMgr.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
+		local input_str = uiKeyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
 		if shortcuts[input_str] then
 			shortcuts[input_str](self, key, scancode, isrepeat)
 			return true

@@ -20,7 +20,7 @@ local lgcSlider = {}
 
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
 local _lerp = pMath.lerp
@@ -376,7 +376,7 @@ end
 
 
 function lgcSlider.widSetSliderPosition(self, pos)
-	uiShared.numberNotNaN(1, pos)
+	uiAssert.numberNotNaN(1, pos)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
@@ -393,7 +393,7 @@ end
 
 
 function lgcSlider.widSetSliderMax(self, max)
-	uiShared.numberNotNaN(1, max)
+	uiAssert.numberNotNaN(1, max)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
@@ -410,7 +410,7 @@ end
 
 
 function lgcSlider.widSetSliderAxis(self, axis)
-	uiShared.enum(1, axis, "sliderAxis", _slider_axes)
+	uiAssert.enum(1, axis, "sliderAxis", _slider_axes)
 
 	self.trough_vertical = (axis == "vertical") and true or false
 	self:reshape()

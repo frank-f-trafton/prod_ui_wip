@@ -14,18 +14,20 @@ local context = select(1, ...)
 
 local contextDraw = context:getLua("core/context_draw")
 local contextResources = context:getLua("core/context_resources")
+local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 _mt_context.draw = contextDraw.draw
 
 
 -- Called first and last in context:love_update():
-_mt_context.updateFirst = uiShared.dummyFunc
-_mt_context.updateLast = uiShared.dummyFunc
+_mt_context.updateFirst = uiDummy.func
+_mt_context.updateLast = uiDummy.func
 
 
 local function _pointInRect(px, py, x1, y1, x2, y2)
@@ -802,8 +804,8 @@ end
 -- @return The def table. Raises a Lua error if there's an issue with file handling, or parsing and executing the Lua
 --	chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
-	uiShared.type1(1, chunk, "function")
-	uiShared.notNilNotFalseNotNaN(2, id)
+	uiAssert.type1(1, chunk, "function")
+	uiAssert.notNilNotFalseNotNaN(2, id)
 
 	if self.widget_defs[id] then
 		error("widget ID " .. id .. " is already loaded.")
@@ -844,8 +846,8 @@ end
 -- @param def_conf An arbitrary config table for the chunk function.
 -- @return The def table or fab function. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDef(file_path, id, def_conf)
-	uiShared.type1(1, file_path, "string")
-	uiShared.notNilNotFalseNotNaN(2, id)
+	uiAssert.type1(1, file_path, "string")
+	uiAssert.notNilNotFalseNotNaN(2, id)
 
 	local chunk = uiRes.assertLoad(file_path)
 
@@ -915,7 +917,7 @@ end
 -- @param id The widget definition ID. Cannot be NaN.
 -- @return the definition table, or nil if nothing is registered by that ID.
 function _mt_context:getWidgetDef(id)
-	uiShared.notNilNotFalseNotNaN(1, id)
+	uiAssert.notNilNotFalseNotNaN(1, id)
 
 	return self.widget_defs[id]
 end
@@ -951,11 +953,11 @@ end
 -- @param [...] Additional arguments for the root's uiCall_initialize() callback.
 -- @return A reference to the new root instance.
 function _mt_context:addRoot(id, skin_id, ...)
-	uiShared.notNilNotFalseNotNaN(1, id)
-	uiShared.typeEval1(2, skin_id, "string")
+	uiAssert.notNilNotFalseNotNaN(1, id)
+	uiAssert.typeEval1(2, skin_id, "string")
 
 	if self.locked then
-		uiShared.errLockedContext("add root widget")
+		coreErr.errLockedContext("add root widget")
 
 	elseif self.root then
 		error("this context already has a root widget.")
@@ -982,8 +984,8 @@ end
 -- @param skinner The skinner table.
 -- @param id The skinner's ID. Can be a string or a number.
 function _mt_context:registerSkinnerTable(skinner, id)
-	uiShared.type1(1, skinner, "table")
-	uiShared.type1(2, id, "string", "number")
+	uiAssert.type1(1, skinner, "table")
+	uiAssert.type1(2, id, "string", "number")
 
 	uiRes.assertNotRegistered("skinner", self.skinners, id)
 
@@ -995,8 +997,8 @@ end
 -- @param file_path The path to the Lua file.
 -- @param id The skinner's ID. Can be a string or a number.
 function _mt_context:loadSkinner(file_path, id)
-	uiShared.type1(1, file_path, "string")
-	uiShared.type1(2, id, "string", "number")
+	uiAssert.type1(1, file_path, "string")
+	uiAssert.type1(2, id, "string", "number")
 
 	uiRes.assertNotRegistered("skinner", self.skinners, id)
 
@@ -1087,7 +1089,7 @@ end
 
 
 function _mt_context:setScale(scale)
-	uiShared.numberNotNaN(1, scale)
+	uiAssert.numberNotNaN(1, scale)
 
 	self.scale = math.max(0.1, math.min(scale, 10.0))
 end
@@ -1099,7 +1101,7 @@ end
 
 
 function _mt_context:setDPI(dpi)
-	uiShared.numberNotNaN(1, dpi)
+	uiAssert.numberNotNaN(1, dpi)
 
 	self.dpi = math.max(1, dpi)
 	self.path_symbols.dpi = tostring(self.dpi)

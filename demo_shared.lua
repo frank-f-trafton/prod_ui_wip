@@ -2,8 +2,8 @@ local demoShared = {}
 
 
 local pTable = require("prod_ui.lib.pile_table")
+local uiAssert = require("prod_ui.ui_assert")
 local uiRes = require("prod_ui.ui_res")
-local uiShared = require("prod_ui.ui_shared")
 
 
 local function _openURL(self)
@@ -154,11 +154,11 @@ end
 
 
 function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
-	uiShared.type1(2, title, "string")
-	uiShared.type1(3, text, "string")
-	uiShared.typeEval1(4, b1, "string")
-	uiShared.typeEval1(5, b2, "string")
-	uiShared.typeEval1(6, b3, "string")
+	uiAssert.type1(2, title, "string")
+	uiAssert.type1(3, text, "string")
+	uiAssert.typeEval1(4, b1, "string")
+	uiAssert.typeEval1(5, b2, "string")
+	uiAssert.typeEval1(6, b3, "string")
 
 	local root = context.root
 

@@ -20,7 +20,6 @@ local utf8 = require("utf8")
 
 -- ProdUI
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 function editCommandM.noOpTrue(self)

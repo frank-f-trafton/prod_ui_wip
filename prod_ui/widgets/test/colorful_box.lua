@@ -7,8 +7,8 @@ local def = {}
 local context = select(1, ...)
 
 
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 
 
 -- For convenience...
@@ -71,7 +71,7 @@ end
 
 
 function def:setText(text)
-	uiShared.typeEval(1, text, "string", "table")
+	uiAssert.typeEval(1, text, "string", "table")
 
 	self.text = text or false
 end

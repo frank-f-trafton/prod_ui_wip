@@ -25,8 +25,8 @@ local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -39,7 +39,7 @@ local def = {
 -- Override to make something happen when the user presses 'return' or 'kpenter' while the
 -- widget is active and has keyboard focus. Return true to halt further processing
 -- (specifically, the logic to check if users typed literal newlines via 'return' and 'kpenter').
-def.wid_action = uiShared.dummyFunc -- args: (self)
+def.wid_action = uiDummy.func -- args: (self)
 
 
 widShared.scrollSetMethods(def)

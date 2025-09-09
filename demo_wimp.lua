@@ -95,15 +95,8 @@ end
 --]]
 
 
--- Libs: ProdUI
-local keyMgr = require("prod_ui.lib.key_mgr")
-local pMath = require("prod_ui.lib.pile_math")
-local uiContext = require("prod_ui.ui_context")
-local uiGraphics = require("prod_ui.ui_graphics")
-local uiRes = require("prod_ui.ui_res")
-
-
-local _lerp = pMath.lerp
+-- ProdUI
+local ui = require("prod_ui")
 
 
 -- Libs: QuickPrint / DebugPanel
@@ -167,12 +160,12 @@ reloadFont()
 -- / LÖVE Setup
 
 
-local app_settings = require("prod_ui.default_settings")
+local app_settings = require("prod_ui.data.default_settings")
 --app_settings.wimp.pop_up_menu.block_1st_click_out = true
 
 
 local function newWimpContext()
-	local context = uiContext.newContext("prod_ui", app_settings)
+	local context = ui.context.newContext("prod_ui", app_settings)
 
 	context:setScale(1.0)
 	context:setDPI(96)
@@ -578,7 +571,7 @@ do
 				local key_mgr = self.context.key_mgr
 				local mod = key_mgr.mod
 
-				local input_str = keyMgr.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
+				local input_str = ui.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
 				if shortcuts[input_str] then
 					shortcuts[input_str](self, key, scancode, isrepeat)
 					return true

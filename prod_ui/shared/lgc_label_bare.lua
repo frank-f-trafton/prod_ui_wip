@@ -11,7 +11,7 @@ local context = select(1, ...)
 local lgcLabelBare = {}
 
 
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
 function lgcLabelBare.setup(self)
@@ -27,7 +27,7 @@ end
 function lgcLabelBare.widSetLabel(self, text)
 	-- Assertions
 	-- [[
-	uiShared.assertText(2, text)
+	uiAssert.assertText(2, text)
 	--]]
 
 	self.label = text
