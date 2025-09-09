@@ -1,7 +1,7 @@
 
 -- ProdUI
 local demoShared = require("demo_shared")
-local popUpMenuPrototype = require("prod_ui.pop_up_menu_prototype")
+local uiPopUpMenu = require("prod_ui.ui_pop_up_menu")
 
 
 local plan = {}
@@ -13,7 +13,7 @@ local function _dummy() end
 -- A pop-up menu definition for when the aux part of the button is activated.
 local _pop_up_def
 do
-	local P = popUpMenuPrototype.P
+	local P = uiPopUpMenu.P
 	_pop_up_def = {
 		P.command {text="Pretend"},
 		P.command {text="something"},
@@ -38,7 +38,7 @@ local function _createPopUpMenu(self)
 		self.aux_pressed = true
 
 		local lgcMenu = self.context:getLua("shared/lgc_menu")
-		popUpMenuPrototype.configurePrototype(self, _pop_up_def)
+		uiPopUpMenu.configurePrototype(self, _pop_up_def)
 
 		local root = self:getRootWidget()
 		local ax, ay = self:getAbsolutePosition()

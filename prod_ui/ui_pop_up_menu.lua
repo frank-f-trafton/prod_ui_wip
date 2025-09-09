@@ -1,7 +1,7 @@
 -- Helpers for writing WIMP pop up menu definitions (wimp/menu_pop).
 
 
-local popUpMenuPrototype = {}
+local uiPopUpMenu = {}
 
 
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
@@ -12,7 +12,7 @@ local uiTable = require(REQ_PATH .. "ui_table")
 
 
 local P = {}
-popUpMenuPrototype.P = P
+uiPopUpMenu.P = P
 
 
 local _keys_command = uiTable.makeLUTV(
@@ -103,7 +103,7 @@ function P.separator()
 end
 
 
-function popUpMenuPrototype.configurePrototype(self, array)
+function uiPopUpMenu.configurePrototype(self, array)
 	for i, tbl in ipairs(array) do
 		if tbl.config then
 			tbl.actionable = tbl.config(self)
@@ -112,4 +112,4 @@ function popUpMenuPrototype.configurePrototype(self, array)
 end
 
 
-return popUpMenuPrototype
+return uiPopUpMenu
