@@ -37,11 +37,11 @@ local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local numLockMap = require(context.conf.prod_ui_req .. "data.keyboard.num_lock_map")
-local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
+local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -231,7 +231,7 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
 		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h + self.LE_align_oy
 
-		popUpMenuPrototype.configurePrototype(self, self.pop_up_def)
+		uiPopUpMenu.configurePrototype(self, self.pop_up_def)
 
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
@@ -341,7 +341,7 @@ function lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 	elseif button == 2 then
 		local root = self:getRootWidget()
-		popUpMenuPrototype.configurePrototype(self, self.pop_up_def)
+		uiPopUpMenu.configurePrototype(self, self.pop_up_def)
 
 		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
@@ -517,7 +517,7 @@ end
 -- The default pop-up menu definition.
 -- [XXX 17] Add key mnemonics and shortcuts for text box pop-up menu
 do
-	local P = popUpMenuPrototype.P
+	local P = uiPopUpMenu.P
 
 	lgcInputS.pop_up_def = {
 		P.command {

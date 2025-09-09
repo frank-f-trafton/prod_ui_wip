@@ -3,7 +3,7 @@ require("lib.test.strict")
 
 local demoShared = require("demo_shared")
 local inspect = require("lib.test.inspect")
-local popUpMenuPrototype = require("prod_ui.pop_up_menu_prototype")
+local uiPopUpMenu = require("prod_ui.ui_pop_up_menu")
 
 
 print("Start WIMP Demo.")
@@ -409,7 +409,7 @@ do
 		end
 
 
-		local P = popUpMenuPrototype.P
+		local P = uiPopUpMenu.P
 
 
 		local def_demo = {

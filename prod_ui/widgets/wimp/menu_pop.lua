@@ -76,10 +76,10 @@ local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
-local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -133,7 +133,7 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.wid_ref = client.wid_ref
 
 			-- Configure menu defs.
-			popUpMenuPrototype.configurePrototype(client_sub, group_def)
+			uiPopUpMenu.configurePrototype(client_sub, group_def)
 
 			-- Append items to fresh menu
 			if group_def then

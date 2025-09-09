@@ -17,9 +17,9 @@ The menu bar may act strangely if it becomes too narrow to display all categorie
 local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
-local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -119,7 +119,7 @@ end
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
 local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to lgcWimp.makePopUpMenu()
-	popUpMenuPrototype.configurePrototype(item, item.pop_up_def)
+	uiPopUpMenu.configurePrototype(item, item.pop_up_def)
 
 	-- Locate bottom of menu item in UI space.
 	local ax, ay = client:getAbsolutePosition()
