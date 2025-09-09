@@ -4,8 +4,9 @@ local context = select(1, ...)
 local lgcButton = context:getLua("shared/lgc_button")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -13,8 +14,8 @@ local widShared = context:getLua("core/wid_shared")
 local _lerp = pMath.lerp
 
 
-local _enum_align = uiShared.makeLUTV("left", "center", "right", "justify")
-local _enum_size_mode = uiShared.makeLUTV("h", "v")
+local _enum_align = uiTable.makeLUTV("left", "center", "right", "justify")
+local _enum_size_mode = uiTable.makeLUTV("h", "v")
 
 
 local def = {
@@ -61,7 +62,7 @@ end
 
 
 function def:setText(text)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	self.text = text
 end
@@ -73,7 +74,7 @@ end
 
 
 function def:setURL(url)
-	uiShared.type1(1, url, "string")
+	uiAssert.type1(1, url, "string")
 
 	self.url = url or false
 
@@ -102,7 +103,7 @@ end
 
 
 function def:setAlign(align)
-	uiShared.enum(1, align, "Alignment", _enum_align)
+	uiAssert.enum(1, align, "Alignment", _enum_align)
 
 	self.align = align
 end
@@ -114,7 +115,7 @@ end
 
 
 function def:setVerticalAlign(v)
-	uiShared.type1(1, v, "number")
+	uiAssert.type1(1, v, "number")
 
 	self.align_v = math.max(0, math.min(v, 1))
 end
@@ -126,7 +127,7 @@ end
 
 
 function def:setAutoSize(mode)
-	uiShared.enumEval(1, mode, "SizeMode", _enum_size_mode)
+	uiAssert.enumEval(1, mode, "SizeMode", _enum_size_mode)
 
 	self.auto_size = mode
 end

@@ -20,25 +20,25 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
 function client:writeText(text, suppress_replace)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.writeText, text, suppress_replace)
 end
 
 
 function client:replaceText(text)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.replaceText, text)
 end
 
 
 function client:setText(text)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.setText, text)
 end
@@ -155,7 +155,7 @@ end
 
 
 function client:deleteUChar(n_u_chars)
-	uiShared.type1(1, n_u_chars, "number")
+	uiAssert.type1(1, n_u_chars, "number")
 
 	editWidS.wrapAction(self, editCommandS.deleteUChar, n_u_chars)
 end
@@ -218,7 +218,7 @@ end
 
 
 function client:setTextAlignment(align)
-	uiShared.enum(1, align, "AlignMode", editWid._enum_align)
+	uiAssert.enum(1, align, "AlignMode", editWid._enum_align)
 
 	editWidS.wrapAction(self, editCommandS.setTextAlignment, align)
 end
@@ -304,7 +304,7 @@ end
 -- * "replacement_char": Replace every unrecognized byte with the Unicode replacement code point.
 -- * false/nil: return an empty string on bad unput.
 function client:setBadInputRule(rule)
-	uiShared.enumEval(1, rule, "BadInputRule", editWid._enum_bad_input)
+	uiAssert.enumEval(1, rule, "BadInputRule", editWid._enum_bad_input)
 
 	self.LE_bad_input_rule = rule or false
 end

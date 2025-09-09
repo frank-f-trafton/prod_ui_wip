@@ -28,7 +28,7 @@ local edCom = context:getLua("shared/line_ed/ed_com")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 local seqString = context:getLua("shared/line_ed/seq_string")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
 lineEdM.code_groups = code_groups
@@ -797,7 +797,7 @@ end
 
 
 function _mt_ed_m:setFont(font)
-	uiShared.loveTypeEval(1, font, "Font")
+	uiAssert.loveTypeEval(1, font, "Font")
 
 	if font and self.font == font then
 		return
@@ -822,8 +822,8 @@ end
 
 
 function _mt_ed_m:setTextColors(text_color, text_h_color)
-	uiShared.typeEval(1, text_color, "table")
-	uiShared.typeEval(2, text_h_color, "table")
+	uiAssert.typeEval(1, text_color, "table")
+	uiAssert.typeEval(2, text_h_color, "table")
 
 	self.text_color = text_color or edCom.default_text_color
 	self.text_h_color = text_h_color or edCom.default_text_h_color

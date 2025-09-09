@@ -1,4 +1,4 @@
--- ProdUI: Theme supportfunctions.
+-- ProdUI: Theme support functions.
 
 
 local uiTheme = {}
@@ -10,9 +10,9 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 -- ProdUI
 local pTable = require(REQ_PATH .. "lib.pile_table")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
+local uiAssert = require(REQ_PATH .. "ui_assert")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
 local uiRes = require(REQ_PATH .. "ui_res")
-local uiShared = require(REQ_PATH .. "ui_shared")
 
 
 local _makeLUTV = pTable.makeLUTV
@@ -35,7 +35,7 @@ local err_label = {}
 
 
 function uiTheme.pushLabel(k)
-	uiShared.notNilNotNaN(1, k)
+	uiAssert.notNilNotNaN(1, k)
 
 	table.insert(err_label, tostring(k))
 end
@@ -47,7 +47,7 @@ end
 
 
 function uiTheme.setLabel(s)
-	uiShared.typeEval(1, s, "string")
+	uiAssert.typeEval(1, s, "string")
 
 	pTable.clearArray(err_label)
 	if s then
@@ -729,11 +729,11 @@ end
 
 
 function change.numberScaled(skin, k, scale, min, max)
-	uiShared.type1(1, skin, "table")
-	uiShared.notNilNotNaN(2, k)
-	uiShared.type1(3, scale, "number")
-	uiShared.typeEval1(4, min, "number")
-	uiShared.typeEval1(5, max, "number")
+	uiAssert.type1(1, skin, "table")
+	uiAssert.notNilNotNaN(2, k)
+	uiAssert.type1(3, scale, "number")
+	uiAssert.typeEval1(4, min, "number")
+	uiAssert.typeEval1(5, max, "number")
 
 	min = min or -math.huge
 	max = max or math.huge
@@ -743,11 +743,11 @@ end
 
 
 function change.integerScaled(skin, k, scale, min, max)
-	uiShared.type1(1, skin, "table")
-	uiShared.notNilNotNaN(2, k)
-	uiShared.type1(3, scale, "number")
-	uiShared.typeEval1(4, min, "number")
-	uiShared.typeEval1(5, max, "number")
+	uiAssert.type1(1, skin, "table")
+	uiAssert.notNilNotNaN(2, k)
+	uiAssert.type1(3, scale, "number")
+	uiAssert.typeEval1(4, min, "number")
+	uiAssert.typeEval1(5, max, "number")
 
 	min = min or -math.huge
 	max = max or math.huge

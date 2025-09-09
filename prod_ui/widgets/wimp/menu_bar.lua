@@ -20,7 +20,6 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 

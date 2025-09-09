@@ -50,8 +50,8 @@ local lgcInputS = context:getLua("shared/lgc_input_s")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -137,8 +137,8 @@ function def:addItem(text, pos)
 	local font = skin.font
 	local items = self.MN_items
 
-	uiShared.type1(1, text, "string")
-	uiShared.intRangeEval(2, pos, 1, #items + 1)
+	uiAssert.type1(1, text, "string")
+	uiAssert.intRangeEval(2, pos, 1, #items + 1)
 
 	pos = pos or #items + 1
 
@@ -156,7 +156,7 @@ end
 
 
 function def:removeItem(item_t)
-	uiShared.type1(1, item_t, "table")
+	uiAssert.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 	local removed_item = self:removeItemByIndex(item_i)
@@ -165,7 +165,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiShared.intGE(1, item_i, 0)
+	uiAssert.intGE(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -182,7 +182,7 @@ end
 
 
 function def:setSelection(item_t)
-	uiShared.type1(1, item_t, "table")
+	uiAssert.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 	self:setSelectionByIndex(item_i)
@@ -190,7 +190,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiShared.intGE(1, item_i, 0)
+	uiAssert.intGE(1, item_i, 0)
 
 	local index_old = self.MN_index
 

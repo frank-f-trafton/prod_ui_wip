@@ -7,8 +7,9 @@ local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
@@ -17,7 +18,7 @@ local widShared = context:getLua("core/wid_shared")
 local _lerp = pMath.lerp
 
 
-local _enum_header_sizes = uiShared.makeLUTV("small", "normal", "large")
+local _enum_header_sizes = uiTable.makeLUTV("small", "normal", "large")
 
 
 local def = {
@@ -103,7 +104,7 @@ end
 
 function def:setHeaderSize(size)
 	size = size and size
-	uiShared.enumEval(1, size, "HeaderSize", _enum_header_sizes)
+	uiAssert.enumEval(1, size, "HeaderSize", _enum_header_sizes)
 
 	if self.header_size ~= size then
 		local sx, sy = self:scrollGetXY()
@@ -205,7 +206,7 @@ end
 
 
 function def:setFrameTitle(text)
-	uiShared.type1(1, text, "string", "nil")
+	uiAssert.type1(1, text, "string", "nil")
 
 	self:writeSetting("header_text", text)
 end
@@ -334,7 +335,7 @@ end
 
 
 function def:setFrameBlock(target)
-	uiShared.type1(1, target, "table")
+	uiAssert.type1(1, target, "table")
 
 	if not target.frame_type or (target.frame_type ~= "window" and target.frame_type ~= "workspace") then
 		error("target must be a UI Frame of type 'window' or 'workspace'.")

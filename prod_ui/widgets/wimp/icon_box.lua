@@ -82,7 +82,6 @@ local context = select(1, ...)
 
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 

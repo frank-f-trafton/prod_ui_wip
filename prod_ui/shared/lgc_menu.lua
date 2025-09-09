@@ -15,7 +15,7 @@ local lgcMenu = {}
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -54,7 +54,7 @@ end
 -- @param index The item index to check. Must be an integer (or else the method throws an error).
 -- @param return true if selectable, false plus string if not.
 function menuMethods:menuCanSelect(index)
-	uiShared.int(1, index)
+	uiAssert.int(1, index)
 
 	-- Permit deselection
 	if index == 0 then
@@ -353,21 +353,21 @@ end
 
 
 function menuMethods:menuSetMarkedItem(item_t, marked)
-	uiShared.type1(1, item_t, "table")
+	uiAssert.type1(1, item_t, "table")
 
 	item_t.marked = not not marked
 end
 
 
 function menuMethods:menuToggleMarkedItem(item_t)
-	uiShared.type1(1, item_t, "table")
+	uiAssert.type1(1, item_t, "table")
 
 	item_t.marked = not item_t.marked
 end
 
 
 function menuMethods:menuSetMarkedItemByIndex(item_i, marked)
-	uiShared.type1(1, item_i, "number")
+	uiAssert.type1(1, item_i, "number")
 
 	local item_t = self.MN_items[item_i]
 
@@ -398,8 +398,8 @@ end
 
 function menuMethods:menuSetMarkedItemRange(marked, first, last)
 	local items = self.MN_items
-	uiShared.intRange(2, first, 1, #items)
-	uiShared.intRange(3, last, 1, #items)
+	uiAssert.intRange(2, first, 1, #items)
+	uiAssert.intRange(3, last, 1, #items)
 	marked = not not marked
 
 	for i = first, last do
@@ -1352,7 +1352,7 @@ end
 
 
 function lgcMenu.setIconSetID(self, icon_set_id) -- TODO: untested
-	uiShared.type1(1, icon_set_id, "string")
+	uiAssert.type1(1, icon_set_id, "string")
 
 	self:writeSetting("icon_set_id", icon_set_id)
 end

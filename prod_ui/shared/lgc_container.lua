@@ -12,11 +12,12 @@ local context = select(1, ...)
 local lgcContainer = {}
 
 
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widLayout = context:getLua("core/wid_layout")
 
 
-local _enum_scr_rng = uiShared.makeLUTV("zero", "auto", "manual")
+local _enum_scr_rng = uiTable.makeLUTV("zero", "auto", "manual")
 
 
 lgcContainer.methods = {}
@@ -24,12 +25,12 @@ local _methods = lgcContainer.methods
 
 
 function lgcContainer.setupMethods(self)
-	uiShared.patchTable(self, lgcContainer.methods, false)
+	uiTable.patch(self, lgcContainer.methods, false)
 end
 
 
 function _methods:setLayoutBase(layout_base)
-	uiShared.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
+	uiAssert.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
 
 	self.layout_base = layout_base
 end
@@ -41,7 +42,7 @@ end
 
 
 function _methods:setScrollRangeMode(mode)
-	uiShared.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
+	uiAssert.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
 
 	self.scroll_range_mode = mode
 end
@@ -75,8 +76,8 @@ end
 
 
 function _methods:configureSashNode(n1, n2)
-	uiShared.type1(1, n1, "table")
-	uiShared.type1(2, n2, "table")
+	uiAssert.type1(1, n1, "table")
+	uiAssert.type1(2, n2, "table")
 
 	if n1.mode ~= "slice" then
 		error("argument #1: expected a slice node.")

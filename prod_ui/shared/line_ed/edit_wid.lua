@@ -7,11 +7,11 @@ local context = select(1, ...)
 local editWid = {}
 
 
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
-editWid._enum_align = uiShared.makeLUTV("left", "center", "right")
-editWid._enum_bad_input = uiShared.makeLUTV("trim", "replacement_char")
+editWid._enum_align = uiTable.makeLUTV("left", "center", "right")
+editWid._enum_bad_input = uiTable.makeLUTV("trim", "replacement_char")
 
 
 function editWid.updateCaretShape(self)

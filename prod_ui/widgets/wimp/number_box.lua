@@ -26,8 +26,9 @@ local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -50,7 +51,7 @@ def.pop_up_def = lgcInputS.pop_up_def
 
 -- Called when the user presses 'enter'. Return true to halt the logic that checks for
 -- typing literal newlines with the enter key.
-def.wid_action = uiShared.dummyFunc
+def.wid_action = uiDummy.func
 
 
 --- Callback for a change in the NumberBox state.
@@ -256,7 +257,7 @@ end
 
 
 function def:setValueMode(mode)
-	uiShared.enum(1, mode, "ValueMode", _enum_value_mode)
+	uiAssert.enum(1, mode, "ValueMode", _enum_value_mode)
 
 	self.value_mode = mode
 end
@@ -272,7 +273,7 @@ end
 
 
 function def:setDefaultValue(v)
-	uiShared.numberNotNaN(1, v)
+	uiAssert.numberNotNaN(1, v)
 
 	self.value_default = v
 end

@@ -1,4 +1,4 @@
--- PILE Table v1.200
+-- PILE Table v1.200 (Modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -417,6 +417,18 @@ function M.assertResolve(t, str, raw)
 	end
 	return ret, count
 end
+
+
+lang.undeclared = "undeclared field: '$1'"
+M.mt_restrict = {
+	__index = function(t, k)
+		error(interp(lang.undeclared, k))
+	end,
+
+	__newindex = function(t, k, v)
+		error(interp(lang.undeclared, k))
+	end
+}
 
 
 return M

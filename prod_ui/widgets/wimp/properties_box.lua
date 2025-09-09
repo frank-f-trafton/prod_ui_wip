@@ -32,8 +32,9 @@ local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -200,9 +201,9 @@ end
 
 
 function def:addItem(wid_id, text, pos, bijou_id)
-	uiShared.type1(2, text, "string")
-	uiShared.intEval(3, pos, "number")
-	uiShared.typeEval1(4, bijou_id, "string")
+	uiAssert.type1(2, text, "string")
+	uiAssert.intEval(3, pos, "number")
+	uiAssert.typeEval1(4, bijou_id, "string")
 
 	local items = self.MN_items
 
@@ -238,7 +239,7 @@ end
 
 
 function def:removeItem(item_t)
-	uiShared.type1(1, item_t, "table")
+	uiAssert.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 
@@ -248,7 +249,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiShared.numberNotNaN(1, item_i)
+	uiAssert.numberNotNaN(1, item_i)
 
 	local items = self.MN_items
 	local item_t = items[item_i]
@@ -274,7 +275,7 @@ end
 
 
 function def:setSelection(wid)
-	uiShared.type1(1, wid, "table")
+	uiAssert.type1(1, wid, "table")
 
 	local wid_i = self:menuGetItemIndex(wid)
 	self:setSelectionByIndex(wid_i)
@@ -282,7 +283,7 @@ end
 
 
 function def:setSelectionByIndex(wid_i)
-	uiShared.intGE(1, wid_i, 0)
+	uiAssert.intGE(1, wid_i, 0)
 
 	self:menuSetSelectedIndex(wid_i)
 end
@@ -931,7 +932,7 @@ def.default_skinner = {
 
 	-- Do not render a standard thimble outline for this widget.
 	-- We change the color of the current selection glow instead.
-	renderThimble = uiShared.dummyFunc,
+	renderThimble = uiDummy.func,
 }
 
 

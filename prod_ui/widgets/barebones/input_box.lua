@@ -20,8 +20,9 @@ local context = select(1, ...)
 
 local lgcButtonBare = context:getLua("shared/lgc_button_bare")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 
@@ -33,7 +34,7 @@ local utf8 = require("utf8")
 local def = {}
 
 
-def.wid_action = uiShared.dummyFunc
+def.wid_action = uiDummy.func
 
 
 local function updateTextWidth(self)
@@ -43,7 +44,7 @@ end
 
 
 function def:setText(text)
-	uiShared.type1(1, text, "string")
+	uiAssert.type1(1, text, "string")
 
 	if self.max_code_points then
 		-- Trim text if it exceeds the max code point count.
@@ -60,7 +61,7 @@ end
 
 -- @param max The maximum number of code points. Pass false or nil to effectively disable the limit.
 function def:setMaxCodePoints(max)
-	uiShared.numberNotNaNEval(1, max)
+	uiAssert.numberNotNaNEval(1, max)
 
 	if max then
 		max = math.floor(math.max(0, max))

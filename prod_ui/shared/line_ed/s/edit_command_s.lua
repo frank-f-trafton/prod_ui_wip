@@ -34,8 +34,6 @@ local editCommandS = {}
 
 -- ProdUI
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
-
 
 
 function editCommandS.noOpTrue(self)

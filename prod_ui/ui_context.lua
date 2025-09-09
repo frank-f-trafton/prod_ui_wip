@@ -9,11 +9,11 @@ local _mcursors_supported = love.mouse.isCursorSupported()
 
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
-local keyMgr = require(REQ_PATH .. "lib.key_mgr")
 local pTable = require(REQ_PATH .. "lib.pile_table")
+local uiAssert = require(REQ_PATH .. "ui_assert")
+local uiKeyboard = require(REQ_PATH .. "ui_keyboard")
 local uiLoad = require(REQ_PATH .. "ui_load")
 local uiRes = require(REQ_PATH .. "ui_res")
-local uiShared = require(REQ_PATH .. "ui_shared")
 
 
 -- (Key-down and key-up handling is fed through callbacks in a keyboard manager table.)
@@ -61,7 +61,7 @@ end
 
 local _path_stack = {}
 local function _loader_lua(self, file_path)
-	uiShared.type1(2, file_path, "string")
+	uiAssert.type1(2, file_path, "string")
 
 	for i, v in ipairs(_path_stack) do
 		if v == file_path then
@@ -113,8 +113,8 @@ end
 --	table will be provisioned.
 -- @return The UI context.
 function uiContext.newContext(prod_ui_path, settings)
-	uiShared.type1(1, prod_ui_path, "string")
-	uiShared.typeEval1(2, settings, "table")
+	uiAssert.type1(1, prod_ui_path, "string")
+	uiAssert.typeEval1(2, settings, "table")
 
 	-- Ensure that 'prod_ui_path' ends in a slash so that it doesn't need to be
 	-- appended upon later use.
@@ -129,6 +129,14 @@ function uiContext.newContext(prod_ui_path, settings)
 	end
 
 	local self = {}
+
+	-- Cache for shared Lua source files.
+	-- For convenience, cache:get() and cache:try() are wrapped as context:getLua() and
+	-- context:tryLua() in the metatable.
+	self._shared = uiLoad.new(self, _loader_lua)
+
+	self.getLua = _getLua
+	self.tryLua = _tryLua
 
 	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
 	self.scale = 1.0
@@ -292,7 +300,8 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.cseq_range = 32 -- (x - range, x + range; y - range, y + range)
 
 	-- Keyboard input manager
-	self.key_mgr = keyMgr.newManager()
+	local keyMgr = self:getLua("core/key_mgr")
+	self.key_mgr = keyMgr.new()
 	self.key_mgr.cb_keyDown = cb_keyDown
 	self.key_mgr.cb_keyUp = cb_keyUp
 
@@ -303,14 +312,6 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	self.cursor_low = false
 	self.cursor_high = false
-
-	-- Cache for shared Lua source files.
-	-- For convenience, cache:get() and cache:try() are wrapped as context:getLua() and
-	-- context:tryLua() in the metatable.
-	self._shared = uiLoad.new(self, _loader_lua)
-
-	self.getLua = _getLua
-	self.tryLua = _tryLua
 
 	local _mt_context = self:getLua("core/_mt_context")
 	setmetatable(self, _mt_context)

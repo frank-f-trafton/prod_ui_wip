@@ -78,8 +78,8 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local popUpMenuPrototype = require(context.conf.prod_ui_req .. "pop_up_menu_prototype")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -224,16 +224,16 @@ end
 
 
 local function _makeCommand(self, info)
-	uiShared.type1(2, info, "table")
+	uiAssert.type1(2, info, "table")
 
-	uiShared.fieldType1(info, "info", "text", "string")
-	uiShared.fieldTypeEval1(info, "info", "text_shortcut", "string")
-	uiShared.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiShared.fieldTypeEval1(info, "info", "key_shortcut", "string")
-	uiShared.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiShared.fieldTypeEval1(info, "info", "callback", "function")
-	uiShared.fieldTypeEval1(info, "info", "config", "function")
-	uiShared.fieldTypeEval1(info, "info", "actionable", "boolean")
+	uiAssert.fieldType1(info, "info", "text", "string")
+	uiAssert.fieldTypeEval1(info, "info", "text_shortcut", "string")
+	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
+	uiAssert.fieldTypeEval1(info, "info", "key_shortcut", "string")
+	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
+	uiAssert.fieldTypeEval1(info, "info", "callback", "function")
+	uiAssert.fieldTypeEval1(info, "info", "config", "function")
+	uiAssert.fieldTypeEval1(info, "info", "actionable", "boolean")
 
 	local item = {
 		x = 0, y = 0, w = 0, h = 0,
@@ -256,13 +256,13 @@ end
 
 
 local function _makeGroup(self, info)
-	uiShared.type1(2, info, "table")
+	uiAssert.type1(2, info, "table")
 
-	uiShared.fieldType1(info, "info", "text", "string")
-	uiShared.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiShared.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiShared.fieldTypeEval1(info, "info", "group_def", "table")
-	uiShared.fieldTypeEval1(info, "info", "config", "function")
+	uiAssert.fieldType1(info, "info", "text", "string")
+	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
+	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
+	uiAssert.fieldTypeEval1(info, "info", "group_def", "table")
+	uiAssert.fieldTypeEval1(info, "info", "config", "function")
 
 	local item = {
 		x = 0, y = 0, w = 0, h = 0,
@@ -293,7 +293,7 @@ end
 
 
 function def:applyMenuPrototype(menu_prototype)
-	uiShared.type1(1, menu_prototype, "table")
+	uiAssert.type1(1, menu_prototype, "table")
 
 	if #self.MN_items > 0 then
 		error("this menu already contains items.")

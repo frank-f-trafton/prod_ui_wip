@@ -1,12 +1,12 @@
 local context = select(1, ...)
 
 
-local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local hndStep = context:getLua("shared/hnd_step")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -236,7 +236,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 		-- Try to close the selected Window Frame.
 		elseif self.selected_frame
 		and self.selected_frame.frame_type == "window"
-		and keyMgr.keyStringsEqual(context.settings.wimp.key_bindings.close_window_frame, hot_scan, hot_key)
+		and uiKeyboard.keyStringsEqual(context.settings.wimp.key_bindings.close_window_frame, hot_scan, hot_key)
 		then
 			self.selected_frame:closeFrame(false)
 
@@ -585,7 +585,7 @@ end
 
 
 function def:rootCall_setModalFrame(inst)
-	uiShared.type1(1, inst, "table")
+	uiAssert.type1(1, inst, "table")
 
 	if inst.frame_type ~= "window" then
 		error("only Window Frames can be assigned as modal.")
@@ -606,7 +606,7 @@ end
 
 
 function def:rootCall_clearModalFrame(inst)
-	uiShared.type1(1, inst, "table")
+	uiAssert.type1(1, inst, "table")
 
 	if self.modals[#self.modals] ~= inst then
 		error("tried to clear the modal status of a frame that is not at the top of the 'modals' stack.")
@@ -618,8 +618,8 @@ end
 
 
 function def:rootCall_setDragAndDropState(inst, drop_state)
-	uiShared.type1(1, inst, "table")
-	uiShared.type1(2, drop_state, "table")
+	uiAssert.type1(1, inst, "table")
+	uiAssert.type1(2, drop_state, "table")
 
 	self.drop_state = drop_state
 end

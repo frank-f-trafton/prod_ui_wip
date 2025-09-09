@@ -14,8 +14,8 @@ local context = select(1, ...)
 
 
 local lgcLabel = context:getLua("shared/lgc_label")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -41,8 +41,8 @@ def.setLabel = lgcLabel.widSetLabel
 -- @param pos The position value. Clamped between 0 and max.
 -- @param max The maximum value. Clamped to 0 on the low end.
 function def:setCounter(pos, max)
-	uiShared.numberNotNaN(1, pos)
-	uiShared.numberNotNaNEval(2, max)
+	uiAssert.numberNotNaN(1, pos)
+	uiAssert.numberNotNaNEval(2, max)
 
 	local old_pos = self.pos
 	local old_max = self.max

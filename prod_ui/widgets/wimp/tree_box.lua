@@ -29,8 +29,8 @@ local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcTree = context:getLua("shared/lgc_tree")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local structTree = context:getLua("shared/struct_tree")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -143,7 +143,7 @@ def.removeNode = lgcTree.removeNode
 
 
 function def:setSelection(item_t)
-	uiShared.type1(1, item_t, "table")
+	uiAssert.type1(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 	self:setSelectionByIndex(item_i)
@@ -151,7 +151,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiShared.intGE(1, item_i, 0)
+	uiAssert.intGE(1, item_i, 0)
 
 	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)

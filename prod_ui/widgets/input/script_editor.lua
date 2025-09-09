@@ -33,19 +33,18 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
-local keyMgr = require(context.conf.prod_ui_req .. "lib.key_mgr")
 local lgcInputM = context:getLua("shared/lgc_input_m")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiShared = require(context.conf.prod_ui_req .. "ui_shared")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
 	skin_id = "text_script1",
-	renderThimble = uiShared.dummyFunc
+	renderThimble = uiDummy.func
 }
 
 

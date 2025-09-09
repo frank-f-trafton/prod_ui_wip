@@ -7,15 +7,15 @@ local popUpMenuPrototype = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pTable = require(REQ_PATH .. "lib.pile_table")
-local uiShared = require(REQ_PATH .. "ui_shared")
+local uiAssert = require(REQ_PATH .. "ui_assert")
+local uiTable = require(REQ_PATH .. "ui_table")
 
 
 local P = {}
 popUpMenuPrototype.P = P
 
 
-local _keys_command = uiShared.makeLUTV(
+local _keys_command = uiTable.makeLUTV(
 	"text",
 	"text_shortcut",
 	"key_mnemonic",
@@ -27,7 +27,7 @@ local _keys_command = uiShared.makeLUTV(
 )
 
 
-local _keys_group = uiShared.makeLUTV(
+local _keys_group = uiTable.makeLUTV(
 	"text",
 	"key_mnemonic",
 	"icon_id",
@@ -39,16 +39,16 @@ local _keys_group = uiShared.makeLUTV(
 
 --key_mnemonic
 function P.command(info)
-	uiShared.type1(1, info, "table")
+	uiAssert.type1(1, info, "table")
 
-	uiShared.fieldType1(info, "info", "text", "string")
-	uiShared.fieldTypeEval1(info, "info", "text_shortcut", "string")
-	uiShared.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiShared.fieldTypeEval1(info, "info", "key_shortcut", "string")
-	uiShared.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiShared.fieldTypeEval1(info, "info", "callback", "function")
-	uiShared.fieldTypeEval1(info, "info", "config", "function")
-	uiShared.fieldTypeEval1(info, "info", "actionable", "boolean")
+	uiAssert.fieldType1(info, "info", "text", "string")
+	uiAssert.fieldTypeEval1(info, "info", "text_shortcut", "string")
+	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
+	uiAssert.fieldTypeEval1(info, "info", "key_shortcut", "string")
+	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
+	uiAssert.fieldTypeEval1(info, "info", "callback", "function")
+	uiAssert.fieldTypeEval1(info, "info", "config", "function")
+	uiAssert.fieldTypeEval1(info, "info", "actionable", "boolean")
 
 	for k in pairs(info) do
 		if not _keys_command[k] then
@@ -71,13 +71,13 @@ end
 
 
 function P.group(info)
-	uiShared.type1(1, info, "table")
+	uiAssert.type1(1, info, "table")
 
-	uiShared.fieldType1(info, "info", "text", "string")
-	uiShared.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiShared.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiShared.fieldTypeEval1(info, "info", "group_def", "table")
-	uiShared.fieldTypeEval1(info, "info", "config", "function")
+	uiAssert.fieldType1(info, "info", "text", "string")
+	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
+	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
+	uiAssert.fieldTypeEval1(info, "info", "group_def", "table")
+	uiAssert.fieldTypeEval1(info, "info", "config", "function")
 
 	for k in pairs(info) do
 		if not _keys_group[k] then
