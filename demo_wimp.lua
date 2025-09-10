@@ -412,139 +412,122 @@ do
 		local P = uiPopUpMenu.P
 
 
-		local def_demo = {
-			P.command {
-				text="Video Settings",
-				callback=function(client, item) _tryLaunchFrame(client, "window_frames.video_settings") end
-			},
-			P.command {
-				text="Widget Tree View",
-				callback=function(client, item) _tryLaunchFrame(client, "window_frames.wimp_widget_tree") end
-			},
-			P.command {
-				text="Window Frame Selector",
-				callback=function(client, item) _tryLaunchFrame(client, "window_frames.window_frame_selector") end
-			},
+		local proto_demo = P.prototype {
+			P.command()
+				:setText("Video Settings")
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.video_settings") end),
+
+			P.command()
+				:setText("Widget Tree View")
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.video_settings") end),
+
+			P.command()
+				:setText("Window Frame Selector")
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.window_frame_selector") end),
+
 			P.separator(),
-			P.command {
-				text="Hide Menu",
-				text_shortcut="F8",
-				callback=cb_hide_menu
-			},
+
+			P.command()
+				:setText("Hide Menu")
+				:setTextShortcut("F8")
+				:setCallback(cb_hide_menu),
+
 			P.separator(),
-			P.command {
-				text="_Q_uit",
-				text_shortcut="Ctrl+Q",
-				callback=cb_quit
-			}
+
+			P.command()
+				:setText("_Q_uit")
+				:setTextShortcut("Ctrl+Q")
+				:setCallback(cb_quit)
 		}
 
+		menu_bar:addCategory("_D_emo", "d", proto_demo)
 
-		menu_bar:appendCategory({
-			text = "_D_emo",
-			key_mnemonic = "d",
-			pop_up_def = def_demo,
-		})
+		local proto_sub2 = P.prototype {
+			P.command()
+				:setText("Sub")
+				:setCallback(function(client, item) print("1") end),
 
-
-		local def_sub2 = {
-			P.command {
-				text="Sub",
-				callback=function(client, item) print("1") end
-			},
-			P.command {
-				text="Blurp",
-				callback=function(client, item) print("2") end
-			},
+			P.command()
+				:setText("Blurp")
+				:setCallback(function(client, item) print("2") end)
 		}
 
-		local def_recent = {
-			P.command {
-				text="One",
-				callback=function(client, item) print("1") end
-			},
-			P.group {
-				text="Two",
-				group_def=def_sub2
-			},
-			P.command {
-				text="Three"
-			},
+		local proto_recent = P.prototype {
+			P.command()
+				:setText("One")
+				:setCallback(function(client, item) print("1") end),
+
+			P.group()
+				:setText("Two")
+				:setGroupPrototype(proto_sub2),
+
+			P.command()
+				:setText("Three"),
 		}
 
-		local def_file = {
-			P.command {
-				text="_N_ew",
-				text_shortcut="Ctrl+N",
-				key_mnemonic="n",
-				key_shortcut="KC n",
-				callback=function(client, item) print("NEW!") end
-			},
-			P.command {
-				text="_O_pen",
-				text_shortcut="Ctrl+O",
-				key_mnemonic="o",
-				key_shortcut="KC o",
-				callback=function(client, item) print("OPEN!") end
-			},
+		local proto_file = P.prototype {
+			P.command()
+				:setText("_N_ew")
+				:setTextShortcut("Ctrl+N")
+				:setKeyMnemonic("n")
+				:setKeyShortcut("KC n")
+				:setCallback(function(client, item) print("NEW!") end),
+
+			P.command()
+				:setText("_O_pen")
+				:setTextShortcut("Ctrl+O")
+				:setKeyMnemonic("o")
+				:setKeyShortcut("KC o")
+				:setCallback(function(client, item) print("OPEN!") end),
+
 			P.separator(),
-			P.group {
-				text="_R_ecent",
-				group_def=def_recent,
-				key_mnemonic="r",
-				actionable=true,
-			},
+
+			P.group()
+				:setText("_R_ecent")
+				:setGroupPrototype(proto_recent)
+				:setKeyMnemonic("r")
 		}
-		menu_bar:appendCategory({
-			text="_M_enu Example",
-			key_mnemonic="m",
-			pop_up_def=def_file,
-		})
+
+		menu_bar:addCategory("_M_enu Example", "m", proto_file)
 
 		--[==[
-		local def_edit = {
-			P.command {
-				text="Foo",
-				callback=function(client, item) print("FOO") end
-			},
-			P.command {
-				text="Bar",
-				callback=function(client, item) print("BAR") end
-			},
+		local proto_edit = P.prototype {
+			P.command()
+				:setText("Foo")
+				:setCallback(function(client, item) print("FOO") end),
+
+			P.command()
+				:setText("Bar")
+				:setCallback(function(client, item) print("BAR") end),
+
 			P.separator(),
-			P.command {
-				text="Baz",
-				callback=function(client, item) print("BAZ") end
-			}
+
+			P.command()
+				:setText("Baz")
+				:setCallback(function(client, item) print("BAZ") end),
 		}
-		menu_bar:appendCategory({
-			text="_E_dit",
-			key_mnemonic="e",
-			pop_up_def=def_edit,
-		})
+
+		menu_bar:addCategory("_E_dit", "e", proto_edit)
 		--]==]
 
 		--[==[
-		local def_help = {
-			P.command {
-				text="_C_ontents...",
-				text_shortcut="F1",
-				callback=function(client, item) print("HELP") end,
-				key_mnemonic = "c",
-				key_shortcut = "K f1"
-			},
+		local proto_help = P.prototype {
+			P.command()
+				:setText("_C_ontents...")
+				:setTextShortcut("F1")
+				:setCallback(function(client, item) print("HELP") end)
+				:setKeyMnemonic("c")
+				:setKeyShortcut("K f1"),
+
 			P.separator(),
-			P.command {
-				text="_A_bout...",
-				callback=function(client, item) print("BAR") end,
-				key_mnemonic="a",
-			},
+
+			P.command()
+				:setText("_A_bout...")
+				:setCallback(function(client, item) print("BAR") end)
+				:setKeyMnemonic("a")
 		}
-		menu_bar:appendCategory({
-			text="_H_elp",
-			key_mnemonic="h",
-			pop_up_def=def_help,
-		})
+
+		menu_bar:addCategory("_H_elp", "h", proto_help)
 		--]==]
 
 		menu_bar:arrangeItems()

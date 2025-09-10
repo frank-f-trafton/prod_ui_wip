@@ -54,7 +54,7 @@ lgcInputM.setupDef(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
-def.pop_up_def = lgcInputM.pop_up_def
+def.pop_up_proto = lgcInputM.pop_up_proto
 
 
 function def:uiCall_initialize()

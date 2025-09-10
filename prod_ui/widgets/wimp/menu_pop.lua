@@ -124,8 +124,8 @@ local function assignSubMenu(item, client, set_selection)
 		destroySubMenus(client)
 
 		local parent = client.parent
-		local group_def = item.group_def
-		if group_def and parent then
+		local group_prototype = item.group_prototype
+		if group_prototype and parent then
 			-- Add as a sibling and attach to the menu chain.
 			local client_sub = parent:addChild("wimp/menu_pop")
 			client.chain_next = client_sub
@@ -133,11 +133,11 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub.wid_ref = client.wid_ref
 
 			-- Configure menu defs.
-			uiPopUpMenu.configurePrototype(client_sub, group_def)
+			group_prototype:configure(client_sub)
 
 			-- Append items to fresh menu
-			if group_def then
-				client_sub:applyMenuPrototype(group_def)
+			if group_prototype then
+				client_sub:applyMenuPrototype(group_prototype)
 			end
 
 			-- Set dimensions and decide whether to place on the right or left (if not enough space).
@@ -261,7 +261,7 @@ local function _makeGroup(self, info)
 	uiAssert.fieldType1(info, "info", "text", "string")
 	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
 	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiAssert.fieldTypeEval1(info, "info", "group_def", "table")
+	uiAssert.fieldTypeEval1(info, "info", "group_prototype", "table")
 	uiAssert.fieldTypeEval1(info, "info", "config", "function")
 
 	local item = {
@@ -272,11 +272,11 @@ local function _makeGroup(self, info)
 		icon_id = info.icon_id or false,
 
 		selectable = true,
-		group_def = info.group_def,
-		actionable = not not info.group_def
+		group_prototype = info.group_prototype,
+		actionable = not not info.group_prototype
 	}
 
-	if item.group_def and info.actionable ~= nil then
+	if item.group_prototype and info.actionable ~= nil then
 		item.actionable = not not info.actionable
 	end
 
@@ -300,6 +300,16 @@ function def:applyMenuPrototype(menu_prototype)
 	end
 
 	for i, info in ipairs(menu_prototype) do
+		for k, v in pairs(info) do
+			print("i", i, k, v)
+		end
+		local mt = getmetatable(info)
+		if mt then
+			for kk, vv in pairs(mt) do
+				print("mt", kk, vv)
+			end
+		end
+
 		local typ = info.type
 		local item
 		if typ == "command" then
@@ -312,7 +322,7 @@ function def:applyMenuPrototype(menu_prototype)
 			item = _makeSeparator()
 
 		else
-			error("invalid item type: " .. typ)
+			error("invalid item type: " .. tostring(typ))
 		end
 
 		table.insert(self.MN_items, item)
@@ -602,7 +612,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 
 		if sel_item and sel_item.selectable and sel_item.actionable then
 			if sel_item.type == "group" then
-				if sel_item.group_def and (key == "return" or key == "kpenter" or key == "space" or key == "right") then
+				if sel_item.group_prototype and (key == "return" or key == "kpenter" or key == "space" or key == "right") then
 					activateGroup(self, sel_item, true)
 					return true
 				end
@@ -636,7 +646,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				self:menuSetSelectedIndex(item_i)
 				if item.actionable then
 					if item.type == "group" then
-						if item.group_def then
+						if item.group_prototype then
 							activateGroup(self, item, true)
 							return true
 						end
@@ -664,7 +674,7 @@ function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
 		self:menuSetSelectedIndex(item_i)
 		if item.actionable then
 			if item.type == "group" then
-				if item.group_def then
+				if item.group_prototype then
 					activateGroup(self, item, true)
 					return true
 				end
@@ -781,7 +791,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		-- Immediately open groups when dragging over them.
 		if item_t.type == "group" then
-			if item_t.group_def then
+			if item_t.group_prototype then
 				activateGroup(self, item_t, false)
 			end
 		end
@@ -882,7 +892,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				if item_t then
 					-- Don't activate commands on press-down.
 					if item_t.type == "group" then
-						if item_t.group_def then
+						if item_t.group_prototype then
 							activateGroup(self, item_t, false)
 						end
 					end

@@ -231,10 +231,10 @@ function lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
 		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h + self.LE_align_oy
 
-		uiPopUpMenu.configurePrototype(self, self.pop_up_def)
+		self.pop_up_proto:configure(self)
 
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, caret_x, caret_y)
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_proto, caret_x, caret_y)
 		pop_up:tryTakeThimble2()
 
 		-- Halt propagation
@@ -341,13 +341,13 @@ function lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 	elseif button == 2 then
 		local root = self:getRootWidget()
-		uiPopUpMenu.configurePrototype(self, self.pop_up_def)
+		self.pop_up_proto:configure(self)
 
 		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
 		local ax, ay = self:getAbsolutePosition()
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_def, ax + mx, ay + my)
+		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_proto, ax + mx, ay + my)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
@@ -519,44 +519,45 @@ end
 do
 	local P = uiPopUpMenu.P
 
-	lgcInputS.pop_up_def = {
-		P.command {
-			text="Undo",
-			callback=function(client, item) return lgcInputS.cb_action(client, "undo") end,
-			config=lgcInputS.configProto_undo
-		},
-		P.command {
-			text="Redo",
-			callback=function(client, item) return lgcInputS.cb_action(client, "redo") end,
-			config=lgcInputS.configProto_redo
-		},
+	lgcInputS.pop_up_proto = P.prototype {
+		P.command()
+			:setText("Undo")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "undo") end)
+			:setConfig(lgcInputS.configProto_undo),
+
+		P.command()
+			:setText("Redo")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "redo") end)
+			:setConfig(lgcInputS.configProto_redo),
+
 		P.separator(),
-		P.command {
-			text="Cut",
-			callback=function(client, item) return lgcInputS.cb_action(client, "cut") end,
-			config=lgcInputS.configProto_cut
-		},
-		P.command {
-			text="Copy",
-			callback=function(client, item) return lgcInputS.cb_action(client, "copy") end,
-			config=lgcInputS.configProto_copy
-		},
-		P.command {
-			text="Paste",
-			callback=function(client, item) return lgcInputS.cb_action(client, "paste") end,
-			config=lgcInputS.configProto_paste
-		},
-		P.command {
-			text="Delete",
-			callback=function(client, item) return lgcInputS.cb_action(client, "delete-highlighted") end,
-			config = lgcInputS.configProto_delete
-		},
+
+		P.command()
+			:setText("Cut")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "cut") end)
+			:setConfig(lgcInputS.configProto_cut),
+
+		P.command()
+			:setText("Copy")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "copy") end)
+			:setConfig(lgcInputS.configProto_copy),
+
+		P.command()
+			:setText("Paste")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "paste") end)
+			:setConfig(lgcInputS.configProto_paste),
+
+		P.command()
+			:setText("Delete")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "delete-highlighted") end)
+			:setConfig(lgcInputS.configProto_delete),
+
 		P.separator(),
-		P.command {
-			text="Select All",
-			callback=function(client, item) return lgcInputS.cb_action(client, "select-all") end,
-			config=lgcInputS.configProto_selectAll
-		},
+
+		P.command()
+			:setText("Select All")
+			:setCallback(function(client, item) return lgcInputS.cb_action(client, "select-all") end)
+			:setConfig(lgcInputS.configProto_selectAll),
 	}
 end
 

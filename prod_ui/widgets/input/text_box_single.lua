@@ -50,7 +50,7 @@ lgcInputS.setupDef(def)
 
 
 def.updateAlignOffset = lgcInputS.method_updateAlignOffset -- XXX: method doesn't exist.
-def.pop_up_def = lgcInputS.pop_up_def
+def.pop_up_proto = lgcInputS.pop_up_proto
 
 
 function def:uiCall_initialize()
