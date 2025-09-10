@@ -2,24 +2,24 @@
 wimp/menu_bar: A horizontal menu bar that is placed at the top of the application or within a window frame.
 
 ┌───────────────────────────────┐
-│File  Edit  View  Help         │  <--  Menu Bar Widget
+│File  Edit  View  Help         │  <--  Menu bar widget
 ├─────────────────┬─────────────┘
 │ New      ctrl+n │
-│ Open     ctrl+o │                <--  Pop-up menu spawned by Menu Bar
+│ Open     ctrl+o │                <--  Pop up menu spawned by menu bar
 │┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄│
 │ Quit     ctrl+q │
 └─────────────────┘
 
 The menu bar may act strangely if it becomes too narrow to display all categories.
-
 --]]
+
 
 local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
-local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -33,6 +33,16 @@ lgcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 
 
+def.getInBounds = lgcMenu.getItemInBoundsRect
+def.selectionInView = lgcMenu.selectionInView
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.movePrev = lgcMenu.widgetMovePrev
+def.moveNext = lgcMenu.widgetMoveNext
+--def.moveFirst = lgcMenu.widgetMoveFirst
+--def.moveLast = lgcMenu.widgetMoveLast
+
+
 --[[
 You can show labels for shortcut key-combos (like "Ctrl+Q" for Quit), but the actual implementation is handled by
 whatever widget the menu bar is attached to.
@@ -41,7 +51,7 @@ The reason is that these shortcuts should work even if the menu bar is destroyed
 
 
 local function determineItemColor(item, client)
-	if item.pop_up_def then
+	if item.pop_up_proto then
 		return client.skin.color_cat_enabled
 
 	elseif client.MN_items[client.MN_index] == item then
@@ -50,6 +60,60 @@ local function determineItemColor(item, client)
 	else
 		return client.skin.color_cat_disabled
 	end
+end
+
+
+-- @param item The menu item containing the Pop-up menu definition.
+-- @param client The widget that owns the menu item.
+-- @param doctor_press When true, if user is pressing down a mouse button, transfer pressed state to the pop-up widget.
+-- @param set_selection When true, set the default selection in the pop-up menu.
+-- @return true if the pop-up was created, false if not.
+local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to lgcWimp.makePopUpMenu()
+	item.pop_up_proto:configure(item)
+
+	-- Locate bottom of menu item in UI space.
+	local ax, ay = client:getAbsolutePosition()
+	local p_x = ax + item.x
+	local p_y = ay + client.h
+	--local p_y = ay + item.y + item.h
+
+	local root = client:getRootWidget()
+
+	if client.chain_next then
+		root:sendEvent("rootCall_destroyPopUp", client)
+	end
+
+	local lgcWimp = client.context:getLua("shared/lgc_wimp")
+	local pop_up = lgcWimp.makePopUpMenu(client, item.pop_up_proto, p_x, p_y)
+
+	if doctor_press then
+		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
+	end
+
+	client.chain_next = pop_up
+	client.state = "opened"
+	client.last_open = item
+
+	pop_up.chain_prev = client
+
+	if set_selection then
+		pop_up.MN_default_deselect = false
+	end
+	pop_up:menuSetDefaultSelection()
+
+	if take_thimble then
+		pop_up:tryTakeThimble2()
+	end
+end
+
+
+local function _destroyPopUpMenu(client, reason_code)
+	local root = client:getRootWidget()
+
+	root:sendEvent("rootCall_destroyPopUp", client, reason_code)
+
+	client.last_open = false
+	client.chain_next = false
 end
 
 
@@ -77,31 +141,101 @@ local function _shapeItem(self, item)
 end
 
 
-local _mt_category = {type="category"}
+local _mt_category = {
+	type="category",
+}
 _mt_category.__index = _mt_category
 
 
-function def:appendCategory(info)
-	local item = {x=0, y=0, w=0, h=0}
+function def:addCategory(text, key_mnemonic, pop_up_proto, selectable, pos)
+	-- args 1-4 are checked in item:setParameters()
+	uiAssert.intEval(5, pos, "number")
 
-	item.text = info.text or ""
-	item.text_int = ""
-	item.text_x = 0
-	item.text_y = 0
-	item.text_w = 0
-
-	item.pop_up_def = info.pop_up_def
-	item.selectable = true
-
-	setmetatable(item, self._mt_category)
-
-	for k, v in pairs(info) do
-		item[k] = v
+	local items = self.MN_items
+	pos = pos or #items + 1
+	if pos < 1 or pos > #items + 1 then
+		error("position is out of range")
 	end
 
-	self.MN_items[#self.MN_items + 1] = item
+	local item = setmetatable({
+		text = "",
+		key_mnemonic = false,
+		pop_up_proto = false,
+		selectable = true,
+
+		x=0, y=0, w=0, h=0,
+		text_int = "",
+		text_x = 0,
+		text_y = 0,
+		text_w = 0,
+	}, _mt_category)
+	self:updateCategory(item, text, key_mnemonic, pop_up_proto, selectable)
+
+	table.insert(items, pos, item)
+
+	self:arrangeItems()
 
 	return item
+end
+
+
+function def:updateCategory(item, text, key_mnemonic, pop_up_proto, selectable)
+	uiAssert.type1(1, item, "table")
+	uiAssert.typeEval1(2, text, "string")
+	uiAssert.typeEval1(3, key_mnemonic, "string")
+	uiAssert.typeEval1(4, pop_up_proto, "table")
+	-- don't assert 'selectable'
+
+	if text ~= nil then
+		item.text = text
+	end
+	if key_mnemonic ~= nil then
+		item.key_mnemonic = key_mnemonic or false
+	end
+	if pop_up_proto ~= nil then
+		item.pop_up_proto = pop_up_proto or false
+	end
+	if selectable ~= nil then
+		item.selectable = not not selectable
+	end
+
+	_shapeItem(self, item)
+
+	-- Invoke widget:arrangeItems() after you are done updating categories.
+end
+
+
+function def:removeCategory(item_t)
+	uiAssert.type1(1, item_t, "table")
+
+	local item_i = self:menuGetItemIndex(item_t)
+
+	local removed_item = self:removeItemByIndex(item_i)
+	return removed_item
+end
+
+
+function def:removeCategoryByIndex(item_i)
+	uiAssert.numberNotNaN(1, item_i)
+
+	local items = self.MN_items
+	local removed_item = items[item_i]
+	if not removed_item then
+		error("no item to remove at index: " .. tostring(item_i))
+	end
+
+	table.remove(items, item_i)
+
+	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+
+	self:arrangeItems()
+
+	-- If there is a pop up menu associated with this category, destroy it.
+	if self.chain_next then
+		_destroyPopUpMenu(self, "concluded")
+	end
+
+	return removed_item
 end
 
 
@@ -110,60 +244,6 @@ local function setStateIdle(self)
 	self.last_open = false
 	self:menuSetSelectedIndex(0)
 	self.state = "idle"
-end
-
-
--- @param item The menu item containing the Pop-up menu definition.
--- @param client The widget that owns the menu item.
--- @param doctor_press When true, if user is pressing down a mouse button, transfer pressed state to the pop-up widget.
--- @param set_selection When true, set the default selection in the pop-up menu.
--- @return true if the pop-up was created, false if not.
-local function makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to lgcWimp.makePopUpMenu()
-	uiPopUpMenu.configurePrototype(item, item.pop_up_def)
-
-	-- Locate bottom of menu item in UI space.
-	local ax, ay = client:getAbsolutePosition()
-	local p_x = ax + item.x
-	local p_y = ay + client.h
-	--local p_y = ay + item.y + item.h
-
-	local root = client:getRootWidget()
-
-	if client.chain_next then
-		root:sendEvent("rootCall_destroyPopUp", client)
-	end
-
-	local lgcWimp = client.context:getLua("shared/lgc_wimp")
-	local pop_up = lgcWimp.makePopUpMenu(client, item.pop_up_def, p_x, p_y)
-
-	if doctor_press then
-		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
-	end
-
-	client.chain_next = pop_up
-	client.state = "opened"
-	client.last_open = item
-
-	pop_up.chain_prev = client
-
-	if set_selection then
-		pop_up.MN_default_deselect = false
-	end
-	pop_up:menuSetDefaultSelection()
-
-	if take_thimble then
-		pop_up:tryTakeThimble2()
-	end
-end
-
-
-local function destroyPopUpMenu(client, reason_code)
-	local root = client:getRootWidget()
-
-	root:sendEvent("rootCall_destroyPopUp", client, reason_code)
-
-	client.last_open = false
-	client.chain_next = false
 end
 
 
@@ -183,7 +263,7 @@ end
 
 
 function def:wid_popUpCleanup(reason_code)
-	print("wid_popUpCleanup", "reason_code", reason_code, "thimble1", self.context.thimble1, "thimble2", self.context.thimble2, "self", self)
+	--print("wid_popUpCleanup", "reason_code", reason_code, "thimble1", self.context.thimble1, "thimble2", self.context.thimble2, "self", self)
 	--print(debug.traceback())
 
 	if reason_code == "concluded" then
@@ -207,41 +287,6 @@ function def:getHidden()
 end
 
 
--- * Scroll helpers *
-
-
-def.getInBounds = lgcMenu.getItemInBoundsRect
-def.selectionInView = lgcMenu.selectionInView
-
-
--- * / Scroll helpers *
-
-
--- * Spatial selection *
-
-
-def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
-
-
--- * / Spatial selection *
-
-
--- * Selection movement *
-
-
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
---def.moveFirst = lgcMenu.widgetMoveFirst
---def.moveLast = lgcMenu.widgetMoveLast
-
-
--- * / Selection movement *
-
-
--- * Item management *
-
-
 --- Call after adding or removing items. Side effect: resets menu bar state.
 function def:menuChangeCleanup()
 	setStateIdle(self)
@@ -252,9 +297,6 @@ function def:menuChangeCleanup()
 
 	self:cacheUpdate(true)
 end
-
-
--- * / Item management *
 
 
 function def:uiCall_initialize()
@@ -309,7 +351,6 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 end
-
 
 
 function def:uiCall_getSliceLength(x_axis, cross_length)
@@ -371,7 +412,6 @@ local function _findMenuInParent(parent)
 end
 
 
-
 --- KeyPress hooks for the widget that owns the menu.
 function def:widHook_pressed(key, scancode, isrepeat)
 	-- 'self' is the menu's parent.
@@ -391,7 +431,7 @@ function def:widHook_pressed(key, scancode, isrepeat)
 		if key == "f10" then
 			local root = self:getRootWidget()
 			if root.pop_up_menu then
-				destroyPopUpMenu(menu_bar, "concluded")
+				_destroyPopUpMenu(menu_bar, "concluded")
 				setStateIdle(menu_bar)
 
 				key_mgr:stunRecent()
@@ -452,8 +492,8 @@ function def:widCall_keyboardRunItem(item_t)
 	end
 
 	if item_t.selectable then
-		if item_t.pop_up_def then
-			makePopUpMenu(item_t, self, true, false, true)
+		if item_t.pop_up_proto then
+			_makePopUpMenu(item_t, self, true, false, true)
 			self.state = "opened"
 			self:menuSetSelectedIndex(item_i)
 		end
@@ -468,7 +508,7 @@ function def:widCall_keyboardActivate()
 	-- If there is already a pop-up menu (whether chained to the menu bar or just in general), destroy it
 	local root = self:getRootWidget()
 	if root.pop_up_menu then
-		destroyPopUpMenu(self, "concluded")
+		_destroyPopUpMenu(self, "concluded")
 		setStateIdle(self)
 	else
 		-- If the menu bar is currently active, blank out the current selection and restore thimble state if possible.
@@ -485,8 +525,8 @@ function def:widCall_keyboardActivate()
 				end
 			end
 
-			if item_t and item_t.selectable and item_t.pop_up_def then
-				makePopUpMenu(item_t, self, true, false, true)
+			if item_t and item_t.selectable and item_t.pop_up_proto then
+				_makePopUpMenu(item_t, self, true, false, true)
 				self.state = "opened"
 				self:menuSetSelectedIndex(item_i)
 			end
@@ -515,13 +555,13 @@ local function handleLeftRightKeys(self, key, scancode, isrepeat)
 
 	if selection_old ~= selection_new then
 		local item = self.MN_items[self.MN_index]
-		if item.selectable and item.pop_up_def then
-			makePopUpMenu(item, self, true, false, true)
+		if item.selectable and item.pop_up_proto then
+			_makePopUpMenu(item, self, true, false, true)
 
 			self:menuSetSelectedIndex(selection_new)
 			return true
 		else
-			destroyPopUpMenu(self, "concluded")
+			_destroyPopUpMenu(self, "concluded")
 			setStateIdle(self)
 
 			return true
@@ -598,14 +638,14 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 			--self:selectionInView()
 
 			if self.context.mouse_pressed_button == 1 then
-				--print("item_t.pop_up_def", item_t.pop_up_def, "self.state", self.state)
-				if item_t.pop_up_def and self.state ~= "idle" then
+				--print("item_t.pop_up_proto", item_t.pop_up_proto, "self.state", self.state)
+				if item_t.pop_up_proto and self.state ~= "idle" then
 					if self.last_open ~= item_t then
 						if self.chain_next then
-							destroyPopUpMenu(self)
+							_destroyPopUpMenu(self)
 						end
-						if item_t.pop_up_def then
-							makePopUpMenu(item_t, self, false, false, false)
+						if item_t.pop_up_proto then
+							_makePopUpMenu(item_t, self, false, false, false)
 						end
 					end
 				end
@@ -615,21 +655,8 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
---function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-
-
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		--[[
-		-- XXX: Commented out 2023-Apr-07. I don't think this is necessary anymore. When active,
-		-- the current pop-up selection is lost when the mouse sweeps across the menu
-		-- bar body. This is undesirable behavior when navigating the menu with the keyboard
-		-- (something bumps against the mouse and your selection disappears).
-		if (mouse_dx ~= 0 or mouse_dy ~= 0) and self.chain_next then
-			self.chain_next:menuSetSelectedIndex(0)
-		end
-		--]]
-
 		local ax, ay = self:getAbsolutePosition()
 		mouse_x = mouse_x - ax
 		mouse_y = mouse_y - ay
@@ -663,10 +690,10 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 					if self.last_open ~= item then
 						if self.chain_next then
-							destroyPopUpMenu(self)
+							_destroyPopUpMenu(self)
 						end
-						if item.pop_up_def then
-							makePopUpMenu(item, self, true, false, false)
+						if item.pop_up_proto then
+							_makePopUpMenu(item, self, true, false, false)
 						end
 					end
 				end
@@ -704,7 +731,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			then
 				-- Menu's already opened: close it
 				if self.state == "opened" then
-					destroyPopUpMenu(self)
+					_destroyPopUpMenu(self)
 					setStateIdle(self)
 					self.MN_item_hover = false
 
@@ -724,17 +751,17 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						if item_t then
 							-- If this menu already has a pop-up menu opened, close it and restore thimble state.
 							if self.chain_next then
-								destroyPopUpMenu(self)
+								_destroyPopUpMenu(self)
 
-							elseif item_t.pop_up_def then
-								makePopUpMenu(item_t, self, true, false, false)
+							elseif item_t.pop_up_proto then
+								_makePopUpMenu(item_t, self, true, false, false)
 								self:cacheUpdate(true)
 								-- Halt propagation
 								return true
 							end
 						-- Clicked on bare or non-interactive part of widget: close any open category.
 						else
-							destroyPopUpMenu(self)
+							_destroyPopUpMenu(self)
 							setStateIdle(self)
 						end
 
@@ -747,9 +774,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
---function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
-
-
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
@@ -757,7 +781,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 			-- Mouse is over the selected item
 			local item_selected = self.MN_items[self.MN_index]
-			if item_selected and item_selected.selectable  and item_selected.pop_up_def then
+			if item_selected and item_selected.selectable  and item_selected.pop_up_proto then
 
 				local ax, ay = self:getAbsolutePosition()
 				local mouse_x = x - ax
@@ -773,9 +797,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 		end
 	end
 end
-
-
--- function def:uiCall_pointerWheel(inst, x, y)
 
 
 local function async_remove(self, _reserved, dt)
@@ -830,7 +851,7 @@ function def:uiCall_destroy(inst)
 	if self == inst then
 		-- If a pop-up menu exists that references this widget, destroy it.
 		if self.chain_next then
-			destroyPopUpMenu(self, "concluded")
+			_destroyPopUpMenu(self, "concluded")
 		end
 		widShared.chainUnlink(self)
 	end

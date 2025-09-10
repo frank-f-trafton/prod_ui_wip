@@ -46,7 +46,7 @@ lgcInputS.setupDef(def)
 
 
 def.updateAlignOffset = lgcInputS.method_updateAlignOffset
-def.pop_up_def = lgcInputS.pop_up_def
+def.pop_up_proto = lgcInputS.pop_up_proto
 
 
 -- Called when the user presses 'enter'. Return true to halt the logic that checks for

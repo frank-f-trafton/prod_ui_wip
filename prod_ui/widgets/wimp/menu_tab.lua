@@ -135,7 +135,7 @@ def.movePageDown = lgcMenu.widgetMovePageDown
 
 
 -- Needs to be rewritten for every call
-local cat_pop_up_def = {}
+local cat_pop_up_proto = {}
 
 
 local function callback_toggleCategoryVisibility(self, item)
@@ -150,8 +150,8 @@ end
 
 
 local function setupCategoryPopUp(self)
-	for i = #cat_pop_up_def, 1, -1 do
-		cat_pop_up_def[i] = nil
+	for i = #cat_pop_up_proto, 1, -1 do
+		cat_pop_up_proto[i] = nil
 	end
 
 	for i, column in ipairs(self.columns) do
@@ -166,7 +166,7 @@ local function setupCategoryPopUp(self)
 		tbl.actionable = not column.lock_visibility
 		tbl.column_index = i
 
-		table.insert(cat_pop_up_def, tbl)
+		table.insert(cat_pop_up_proto, tbl)
 	end
 end
 
@@ -177,7 +177,7 @@ local function invokePopUpMenu(self, x, y)
 	local root = self:getRootWidget()
 
 	local lgcWimp = self.context:getLua("shared/lgc_wimp")
-	local pop_up = lgcWimp.makePopUpMenu(self, cat_pop_up_def, x, y)
+	local pop_up = lgcWimp.makePopUpMenu(self, cat_pop_up_proto, x, y)
 	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 	pop_up:tryTakeThimble2()

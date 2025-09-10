@@ -11,15 +11,25 @@ local function _dummy() end
 
 
 -- A pop-up menu definition for when the aux part of the button is activated.
-local _pop_up_def
+local _pop_up_proto
 do
 	local P = uiPopUpMenu.P
-	_pop_up_def = {
-		P.command {text="Pretend"},
-		P.command {text="something"},
-		P.command {text="cool"},
-		P.command {text="just"},
-		P.command {text="happened"}
+
+	_pop_up_proto = P.prototype {
+		P.command()
+			:setText("Pretend"),
+
+		P.command()
+			:setText("something"),
+
+		P.command()
+			:setText("cool"),
+
+		P.command()
+			:setText("just"),
+
+		P.command()
+			:setText("happened")
 	}
 end
 
@@ -38,7 +48,7 @@ local function _createPopUpMenu(self)
 		self.aux_pressed = true
 
 		local lgcMenu = self.context:getLua("shared/lgc_menu")
-		uiPopUpMenu.configurePrototype(self, _pop_up_def)
+		_pop_up_proto:configure(self)
 
 		local root = self:getRootWidget()
 		local ax, ay = self:getAbsolutePosition()
@@ -51,7 +61,7 @@ local function _createPopUpMenu(self)
 		end
 
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, _pop_up_def, menu_x, menu_y)
+		local pop_up = lgcWimp.makePopUpMenu(self, _pop_up_proto, menu_x, menu_y)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()

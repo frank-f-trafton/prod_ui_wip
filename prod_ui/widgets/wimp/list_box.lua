@@ -208,14 +208,12 @@ function def:addItem(text, pos, icon_id)
 	pos = pos or #items + 1
 
 	if pos < 1 or pos > #items + 1 then
-		error("addItem: insert position is out of range.")
+		error("position is out of range")
 	end
 
 	table.insert(items, pos, item)
 
 	self:arrangeItems(1, pos, #items)
-
-	print("addItem text:", item.text, "y: ", item.y)
 
 	return item
 end

@@ -1,4 +1,4 @@
--- Helpers for writing WIMP pop up menu definitions (wimp/menu_pop).
+-- The prototype API for WIMP pop up menus (wimp/menu_pop).
 
 
 local uiPopUpMenu = {}
@@ -8,108 +8,261 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local uiAssert = require(REQ_PATH .. "ui_assert")
-local uiTable = require(REQ_PATH .. "ui_table")
 
 
-local P = {}
-uiPopUpMenu.P = P
+-- forward declarations
+local _mt_proto, _mt_command, _mt_group, _mt_separator
 
 
-local _keys_command = uiTable.makeLUTV(
-	"text",
-	"text_shortcut",
-	"key_mnemonic",
-	"key_shortcut",
-	"icon_id",
-	"callback",
-	"config",
-	"actionable"
-)
+local function _setText(self, text)
+	uiAssert.type1(1, text, "string")
+
+	self.text = text
+
+	return self
+end
 
 
-local _keys_group = uiTable.makeLUTV(
-	"text",
-	"key_mnemonic",
-	"icon_id",
-	"group_def",
-	"config",
-	"actionable"
-)
+local function _getText(self)
+	return self.text
+end
 
 
---key_mnemonic
-function P.command(info)
-	uiAssert.type1(1, info, "table")
+local function _setTextShortcut(self, text)
+	uiAssert.typeEval1(1, text, "string")
 
-	uiAssert.fieldType1(info, "info", "text", "string")
-	uiAssert.fieldTypeEval1(info, "info", "text_shortcut", "string")
-	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiAssert.fieldTypeEval1(info, "info", "key_shortcut", "string")
-	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiAssert.fieldTypeEval1(info, "info", "callback", "function")
-	uiAssert.fieldTypeEval1(info, "info", "config", "function")
-	uiAssert.fieldTypeEval1(info, "info", "actionable", "boolean")
+	self.text_shortcut = text or nil
 
-	for k in pairs(info) do
-		if not _keys_command[k] then
-			error("invalid field for commands: " .. tostring(k))
-		end
+	return self
+end
+
+
+local function _getTextShortcut(self)
+	return self.text_shortcut
+end
+
+
+local function _setKeyMnemonic(self, text)
+	uiAssert.typeEval1(1, text, "string")
+
+	self.key_mnemonic = text or nil
+
+	return self
+end
+
+
+local function _getKeyMnemonic(self)
+	return self.key_mnemonic
+end
+
+
+local function _setKeyShortcut(self, text)
+	uiAssert.typeEval1(1, text, "string")
+
+	self.key_shortcut = text or nil
+
+	return self
+end
+
+
+local function _getKeyShortcut(self)
+	return self.key_shortcut
+end
+
+
+local function _setIconID(self, text)
+	uiAssert.typeEval1(1, text, "string")
+
+	self.icon_id = text or nil
+
+	return self
+end
+
+
+local function _getIconID(self)
+	return self.icon_id
+end
+
+
+local function _setCallback(self, fn)
+	uiAssert.typeEval1(1, fn, "function")
+
+	self.callback = fn or nil
+
+	return self
+end
+
+
+local function _getCallback(self)
+	return self.callback
+end
+
+
+local function _setConfig(self, config)
+	uiAssert.typeEval1(1, config, "function")
+
+	self.config = config
+
+	return self
+end
+
+
+local function _getConfig(self)
+	return self.config
+end
+
+
+local function _setActionable(self, enabled)
+	uiAssert.typeEval1(1, enabled, "boolean")
+
+	self.actionable = enabled
+
+	return self
+end
+
+
+local function _getActionable(self)
+	return self.actionable
+end
+
+
+local function _setGroupPrototype(self, proto)
+	uiAssert.typeEval1(1, proto, "table")
+	if getmetatable(proto) ~= _mt_proto then
+		error("expected a pop up menu prototype (wrong metatable)")
 	end
 
-	return {
-		type = "command",
-		text = info.text,
-		text_shortcut = info.text_shortcut or nil,
-		key_mnemonic = info.key_mnemonic or nil,
-		key_shortcut = info.key_shortcut or nil,
-		icon_id = info.icon_id or nil,
-		callback = info.callback or nil,
-		config = info.config or nil,
-		actionable = info.actionable or nil
-	}
+	self.group_prototype = proto
+
+	return self
 end
 
 
-function P.group(info)
-	uiAssert.type1(1, info, "table")
+local function _getGroupPrototype(self)
+	return self.group_prototype
+end
 
-	uiAssert.fieldType1(info, "info", "text", "string")
-	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiAssert.fieldTypeEval1(info, "info", "group_def", "table")
-	uiAssert.fieldTypeEval1(info, "info", "config", "function")
 
-	for k in pairs(info) do
-		if not _keys_group[k] then
-			error("invalid field for groups: " .. tostring(k))
+_mt_command = {
+	type = "command",
+	text = "",
+	text_shortcut = false,
+	key_mnemonic = false,
+	key_shortcut = false,
+	icon_id = false,
+	callback = false,
+	config = false,
+	actionable = true,
+
+	setText = _setText,
+	getText = _getText,
+	setTextShortcut = _setTextShortcut,
+	getTextShortcut = _getTextShortcut,
+	setKeyMnemonic = _setKeyMnemonic,
+	getKeyMnemonic = _getKeyMnemonic,
+	setKeyShortcut = _setKeyShortcut,
+	getKeyShortcut = _getKeyShortcut,
+	setIconID = _setIconID,
+	getIconID = _getIconID,
+	setCallback = _setCallback,
+	getCallback = _getCallback,
+	setConfig = _setConfig,
+	getConfig = _getConfig,
+	setActionable = _setActionable,
+	getActionable = _getActionable
+}
+_mt_command.__index = _mt_command
+
+
+function uiPopUpMenu.newCommand()
+	return setmetatable({}, _mt_command)
+end
+
+
+_mt_group = {
+	type = "group",
+	text = "",
+	key_mnemonic = false,
+	icon_id = false,
+	group_prototype = false,
+	config = false,
+	actionable = true,
+
+	setText = _setText,
+	getText = _getText,
+	setKeyMnemonic = _setKeyMnemonic,
+	getKeyMnemonic = _getKeyMnemonic,
+	setIconID = _setIconID,
+	getIconID = _getIconID,
+	setGroupPrototype = _setGroupPrototype,
+	getGroupPrototype = _getGroupPrototype,
+	setConfig = _setConfig,
+	getConfig = _getConfig,
+	setActionable = _setActionable,
+	getActionable = _getActionable
+}
+_mt_group.__index = _mt_group
+
+
+function uiPopUpMenu.newGroup()
+	return setmetatable({}, _mt_group)
+end
+
+
+_mt_separator = {
+	type = "separator"
+}
+_mt_separator.__index = _mt_separator
+
+
+function uiPopUpMenu.newSeparator()
+	return setmetatable({}, _mt_separator)
+end
+
+
+_mt_proto = {}
+_mt_proto.__index = _mt_proto
+uiPopUpMenu._mt_proto = _mt_proto
+
+
+function uiPopUpMenu.assertPrototypeItems(proto)
+	for i, item in ipairs(proto) do
+		uiAssert.fieldType1(proto, "proto", i, "table")
+		local mt = getmetatable(item)
+		if mt ~= _mt_command and mt ~= _mt_group and mt ~= _mt_separator then
+			error("prototype item #" .. i .. ": invalid item (wrong metatable)")
 		end
 	end
-
-	return {
-		type = "group",
-		text = info.text,
-		key_mnemonic = info.key_mnemonic or nil,
-		icon_id = info.icon_id or nil,
-		group_def = info.group_def or nil,
-		config = info.config or nil
-	}
 end
 
 
-function P.separator()
-	return {
-		type="separator"
-	}
+function uiPopUpMenu.newMenuPrototype(proto)
+	uiAssert.typeEval1(1, proto, "table")
+
+	proto = proto or {}
+
+	uiPopUpMenu.assertPrototypeItems(proto)
+
+	return setmetatable(proto, _mt_proto)
 end
 
 
-function uiPopUpMenu.configurePrototype(self, array)
-	for i, tbl in ipairs(array) do
-		if tbl.config then
-			tbl.actionable = tbl.config(self)
+function _mt_proto:configure(client)
+	for i, item in ipairs(self) do
+		if item.config then
+			item.actionable = item.config(client)
 		end
 	end
 end
+
+
+uiPopUpMenu.P = {
+	command = uiPopUpMenu.newCommand,
+	group = uiPopUpMenu.newGroup,
+	separator = uiPopUpMenu.newSeparator,
+
+	prototype = uiPopUpMenu.newMenuPrototype
+}
 
 
 return uiPopUpMenu
