@@ -199,8 +199,7 @@ function def:addItem(text, pos, icon_id)
 
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = false
-	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
 
 	item.x, item.y = 0, 0
 	_shapeItem(self, item)

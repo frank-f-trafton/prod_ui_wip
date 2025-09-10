@@ -1,6 +1,10 @@
 return {
 	skinner_id = "wimp/properties_box",
 
+	-- settings
+	icon_set_id = "bureau",
+	-- /settings
+
 	box = "*boxes/panel",
 	tq_px = "*quads/atlas/pixel",
 	data_scroll = "*scroll_bar_data/scroll_bar1",

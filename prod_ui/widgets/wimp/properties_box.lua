@@ -40,7 +40,8 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
-	skin_id = "properties_box1"
+	skin_id = "properties_box1",
+	icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
 }
 
 
@@ -200,10 +201,10 @@ local function updateItemDimensions(self, item)
 end
 
 
-function def:addItem(wid_id, text, pos, bijou_id)
+function def:addItem(wid_id, text, pos, icon_id)
 	uiAssert.type1(2, text, "string")
 	uiAssert.intEval(3, pos, "number")
-	uiAssert.typeEval1(4, bijou_id, "string")
+	uiAssert.typeEval1(4, icon_id, "string")
 
 	local items = self.MN_items
 
@@ -213,8 +214,8 @@ function def:addItem(wid_id, text, pos, bijou_id)
 	item.marked = false -- multi-select
 	item.x, item.y, item.w, item.h = 0, 0, 0, 0
 	item.text = text
-	item.bijou_id = bijou_id
-	item.tq_bijou = self.context.resources.quads["atlas"][bijou_id] -- TODO: fix this up
+	item.icon_id = icon_id
+	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
 
 	pos = pos or #items + 1
 
@@ -758,6 +759,10 @@ local check, change = uiTheme.check, uiTheme.change
 
 def.default_skinner = {
 	validate = function(skin)
+		-- Settings
+		check.type(skin, "icon_set_id", "nil", "string")
+		-- / Settings
+
 		check.box(skin, "box")
 		check.quad(skin, "tq_px")
 		check.scrollBarData(skin, "data_scroll")
@@ -796,6 +801,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		-- Update shapes, positions, and icons of any existing items
+		for i, item in ipairs(self.MN_items) do
+			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+			updateItemDimensions(self, item)
+		end
+
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
@@ -865,14 +877,14 @@ def.default_skinner = {
 			end
 		end
 
-		-- 2: Bijou icons, if enabled
+		-- 2: Icons, if enabled
 		love.graphics.setColor(rr, gg, bb, aa)
 		if self.show_icons then
 			for i = first, last do
 				local item = items[i]
-				local tq_bijou = item.tq_bijou
-				if tq_bijou then
-					uiGraphics.quadShrinkOrCenterXYWH(tq_bijou, self.col_icon_x, item.y, self.col_icon_w, item.h)
+				local tq_icon = item.tq_icon
+				if tq_icon then
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.col_icon_x, item.y, self.col_icon_w, item.h)
 				end
 			end
 		end
