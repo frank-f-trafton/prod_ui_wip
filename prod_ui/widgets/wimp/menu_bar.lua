@@ -16,6 +16,7 @@ The menu bar may act strangely if it becomes too narrow to display all categorie
 
 local context = select(1, ...)
 
+
 local lgcMenu = context:getLua("shared/lgc_menu")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -26,6 +27,10 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "menu_bar1",
+
+	default_settings = {
+		icon_set_id = false -- lookup for 'resources.icons[icon_set_id]'
+	}
 }
 
 
@@ -118,11 +123,25 @@ end
 
 
 local function _shapeItem(self, item)
-	local font = self.skin.font_item
+	local skin = self.skin
+	local font = skin.font_item
 
 	item.h = self.vp_h
-	item.text_x = self.text_pad_x
+
+	local xx = 0
+	item.text_x = xx
+	if item.icon_id then
+		xx = xx + skin.icon_pad_x
+		item.icon_x = xx
+		xx = xx + skin.icon_w
+		item.text_x = xx
+	end
+	xx = xx + skin.text_pad_x
+	item.text_x = xx
+
 	item.text_y = math.floor(0.5 + item.h/2 - font:getHeight()/2)
+
+	item.icon_y = math.floor(0.5 + item.h/2 - skin.icon_h/2)
 
 	-- Underline state
 	local temp_str, x, w = textUtil.processUnderline(item.text, font)
@@ -133,11 +152,11 @@ local function _shapeItem(self, item)
 		item.ul_on = true
 		item.text_int = temp_str
 		item.ul_x = item.text_x + x
-		item.ul_y = item.text_y + textUtil.getUnderlineOffset(font, self.underline_width)
+		item.ul_y = item.text_y + textUtil.getUnderlineOffset(font, skin.underline_width)
 		item.ul_w = w
 	end
 
-	item.w = font:getWidth(item.text_int) + self.text_pad_x*2
+	item.w = (item.icon_id and skin.icon_w or 0) + font:getWidth(item.text_int) + skin.text_pad_x*2
 end
 
 
@@ -147,9 +166,9 @@ local _mt_category = {
 _mt_category.__index = _mt_category
 
 
-function def:addCategory(text, key_mnemonic, pop_up_proto, selectable, pos)
-	-- args 1-4 are checked in item:setParameters()
-	uiAssert.intEval(5, pos, "number")
+function def:addCategory(text, key_mnemonic, icon_id, pop_up_proto, selectable, pos)
+	-- args 1-5 are checked in item:setParameters()
+	uiAssert.intEval(6, pos, "number")
 
 	local items = self.MN_items
 	pos = pos or #items + 1
@@ -160,16 +179,20 @@ function def:addCategory(text, key_mnemonic, pop_up_proto, selectable, pos)
 	local item = setmetatable({
 		text = "",
 		key_mnemonic = false,
+		icon_id = false,
 		pop_up_proto = false,
 		selectable = true,
 
 		x=0, y=0, w=0, h=0,
 		text_int = "",
+		tq_icon = false,
+		icon_x = 0,
+		icon_y = 0,
 		text_x = 0,
 		text_y = 0,
 		text_w = 0,
 	}, _mt_category)
-	self:updateCategory(item, text, key_mnemonic, pop_up_proto, selectable)
+	self:updateCategory(item, text, key_mnemonic, icon_id, pop_up_proto, selectable)
 
 	table.insert(items, pos, item)
 
@@ -179,11 +202,12 @@ function def:addCategory(text, key_mnemonic, pop_up_proto, selectable, pos)
 end
 
 
-function def:updateCategory(item, text, key_mnemonic, pop_up_proto, selectable)
+function def:updateCategory(item, text, key_mnemonic, icon_id, pop_up_proto, selectable)
 	uiAssert.type1(1, item, "table")
 	uiAssert.typeEval1(2, text, "string")
 	uiAssert.typeEval1(3, key_mnemonic, "string")
-	uiAssert.typeEval1(4, pop_up_proto, "table")
+	uiAssert.typeEval1(4, icon_id, "string")
+	uiAssert.typeEval1(5, pop_up_proto, "table")
 	-- don't assert 'selectable'
 
 	if text ~= nil then
@@ -191,6 +215,13 @@ function def:updateCategory(item, text, key_mnemonic, pop_up_proto, selectable)
 	end
 	if key_mnemonic ~= nil then
 		item.key_mnemonic = key_mnemonic or false
+	end
+	print("icon_id", icon_id)
+	if icon_id ~= nil then
+		item.icon_id = icon_id or false
+		item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
+		print("self.icon_set_id", self.icon_set_id)
+		print("new tq_icon", item.tq_icon)
 	end
 	if pop_up_proto ~= nil then
 		item.pop_up_proto = pop_up_proto or false
@@ -331,8 +362,6 @@ function def:uiCall_initialize()
 	self.MN_items_first = 0 -- max(first, 1)
 	self.MN_items_last = 2^53 -- min(last, #items)
 
-	self.text_pad_x = 12
-
 	-- References populated when this widget is part of a chain of menus.
 	self.chain_next = false
 
@@ -346,10 +375,10 @@ function def:uiCall_initialize()
 
 	-- Used when underlining shortcut key letters in menu items.
 	self.show_underlines = true
-	self.underline_width = 1
 
 	self:skinSetRefs()
 	self:skinInstall()
+	self:applyAllSettings()
 end
 
 
@@ -442,7 +471,7 @@ function def:widHook_pressed(key, scancode, isrepeat)
 		else
 			local alt_state = key_mgr:getModAlt()
 			if (menu_bar.state == "idle" and alt_state) then
-				print("hook_pressed", key, alt_state, "menu_bar.state", menu_bar.state)
+				--print("hook_pressed", key, alt_state, "menu_bar.state", menu_bar.state)
 
 				local item_i, item = keyMnemonicSearch(menu_bar.MN_items, key)
 				if item then
@@ -877,10 +906,16 @@ def.default_skinner = {
 		check.colorTuple(skin, "color_cat_disabled")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
+		check.colorTuple(skin, "color_item_icon")
 
 		check.numberOrExact(skin, "base_height", 0, nil, "auto")
 		check.integer(skin, "underline_width", 1)
 		check.number(skin, "height_mult", 1.0)
+
+		check.integer(skin, "icon_pad_x", 0)
+		check.integer(skin, "icon_w", 0)
+		check.integer(skin, "icon_h", 0)
+		check.integer(skin, "text_pad_x", 0)
 	end,
 
 
@@ -889,13 +924,15 @@ def.default_skinner = {
 		if type(skin.base_height) == "number" then
 			change.integerScaled(skin, "base_height", scale)
 		end
+
+		change.integerScaled(skin, "icon_pad_x", scale)
+		change.integerScaled(skin, "icon_w", scale)
+		change.integerScaled(skin, "text_pad_x", scale)
 	end,
 
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
-
-		self.underline_width = skin.underline_width
 
 		if skin.base_height == "auto" then
 			self.base_height = math.floor(skin.font_item:getHeight() * skin.height_mult) + skin.box.border.y1 + skin.box.border.y2
@@ -950,6 +987,17 @@ def.default_skinner = {
 			uiGraphics.quad1x1(skin.tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
 		end
 
+		-- Item icons
+		love.graphics.setColor(skin.color_item_icon)
+		for i = 1, #items do
+			local item = items[i]
+			local tq_icon = item.tq_icon
+			--print("item #", i, "tq_icon", tq_icon)
+			if tq_icon then
+				uiGraphics.quadShrinkOrCenterXYWH(tq_icon, item.x + item.icon_x, item.y + item.icon_y, skin.icon_w, skin.icon_h)
+			end
+		end
+
 		if self.show_underlines then
 			for i = 1, #items do
 				local item = items[i]
@@ -961,7 +1009,7 @@ def.default_skinner = {
 						item.x + item.ul_x,
 						item.y + item.ul_y,
 						item.ul_w,
-						self.underline_width
+						skin.underline_width
 					)
 				end
 			end

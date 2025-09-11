@@ -41,7 +41,10 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "properties_box1",
-	icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
+
+	default_settings = {
+		icon_set_id = false -- lookup for 'resources.icons[icon_set_id]'
+	}
 }
 
 

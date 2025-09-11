@@ -440,7 +440,9 @@ do
 				:setCallback(cb_quit)
 		}
 
-		menu_bar:addCategory("_D_emo", "d", proto_demo)
+		menu_bar:addCategory("_D_emo", "d", nil, proto_demo)
+		-- Test menu category icons:
+		--menu_bar:addCategory("", "d", "file", proto_demo)
 
 		local proto_sub2 = P.prototype {
 			P.command()
@@ -488,7 +490,7 @@ do
 				:setKeyMnemonic("r")
 		}
 
-		menu_bar:addCategory("_M_enu Example", "m", proto_file)
+		menu_bar:addCategory("_M_enu Example", "m", nil, proto_file)
 
 		--[==[
 		local proto_edit = P.prototype {
@@ -507,7 +509,7 @@ do
 				:setCallback(function(client, item) print("BAZ") end),
 		}
 
-		menu_bar:addCategory("_E_dit", "e", proto_edit)
+		menu_bar:addCategory("_E_dit", "e", nil, proto_edit)
 		--]==]
 
 		--[==[
@@ -527,7 +529,7 @@ do
 				:setKeyMnemonic("a")
 		}
 
-		menu_bar:addCategory("_H_elp", "h", proto_help)
+		menu_bar:addCategory("_H_elp", "h", nil¸ proto_help)
 		--]==]
 
 		menu_bar:arrangeItems()
