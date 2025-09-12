@@ -7,6 +7,7 @@ local def = {}
 local context = select(1, ...)
 
 
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
@@ -50,6 +51,7 @@ function def:uiCall_initialize()
 	self.fill = self.colors.darkcyan
 	self.outline = self.colors.yellow
 	self.text = false -- false, string, table (LÖVE coloredtext)
+	self.text_lines = 0
 	self.text_color = self.colors.black
 end
 
@@ -74,6 +76,10 @@ function def:setText(text)
 	uiAssert.typeEval(1, text, "string", "table")
 
 	self.text = text or false
+
+	if text then
+		self.text_lines = textUtil.countStringPatterns(text, "\n", true) + 1
+	end
 end
 
 
@@ -93,11 +99,10 @@ function def:render(ox, oy)
 
 	if self.text then
 		local font = context.resources.fonts.internal
-		local _, n_lines = self.text:gsub("\n", "\n")
 		love.graphics.setFont(font)
 		love.graphics.setColor(self.text_color)
-		local h = font:getHeight() * n_lines
-		love.graphics.printf(self.text, 0, math.floor(self.h/2 - h/2), self.w, "center")
+		local h = font:getHeight() * self.text_lines
+		love.graphics.printf(self.text, 0, math.floor((self.h - h) / 2), self.w, "center")
 	end
 
 	love.graphics.pop()
