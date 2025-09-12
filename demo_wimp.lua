@@ -419,7 +419,7 @@ do
 
 			P.command()
 				:setText("Widget Tree View")
-				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.video_settings") end),
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.wimp_widget_tree") end),
 
 			P.command()
 				:setText("Window Frame Selector")
