@@ -31,10 +31,9 @@ function textUtil.countStringPatterns(str, sub, plain)
 	local i, c = 1, 0
 
 	while i <= #str do
-		i = string.find(str, sub, i, plain)
+		i = str:find(sub, i, plain)
 		if not i then
 			break
-
 		end
 
 		i = i + 1
