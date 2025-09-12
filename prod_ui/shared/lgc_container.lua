@@ -86,7 +86,7 @@ function _methods:configureSashNode(n1, n2)
 		error("argument #2: sashes are supposed to be leaf nodes.")
 	end
 
-	n2:setMode("slice", "px", n1.slice_edge, self.skin.sash_breadth, true, true)
+	n2:setSliceMode("px", n1.slice_edge, self.skin.sash_breadth, true, true)
 end
 
 

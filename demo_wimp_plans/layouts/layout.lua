@@ -11,7 +11,7 @@ end
 
 
 function plan.make(panel)
-	--title("Dividers")
+	--title("Layout")
 
 	panel:setLayoutBase("viewport")
 	panel:setScrollRangeMode("zero")
@@ -47,37 +47,37 @@ function plan.make(panel)
 	panel.layout_tree:setWidget(wg)
 
 	local n_grid = panel.layout_tree:newNode()
-		:setMode("slice", "unit", "left", 0.4)
+		:setSliceMode("unit", "left", 0.4)
 		:setMargin(4, 4, 4, 4)
 		:setGridDimensions(2, 2)
 
 	local na = n_grid:newNode()
-		:setMode("grid", 0, 0)
+		:setGridMode(0, 0)
 		:setMargin(4, 4, 4, 4)
 		:setWidget(wa)
 
 	local nb = n_grid:newNode()
-		:setMode("grid", 0, 1)
+		:setGridMode(0, 1)
 		:setMargin(4, 4, 4, 4)
 		:setWidget(wb)
 
 	local nc = n_grid:newNode()
-		:setMode("grid", 1, 0)
+		:setGridMode(1, 0)
 		:setMargin(4, 4, 4, 4)
 		:setWidget(wc)
 
 	local nd = n_grid:newNode()
-		:setMode("grid", 1, 1)
+		:setGridMode(1, 1)
 		:setMargin(4, 4, 4, 4)
 		:setWidget(wd)
 
 	local ne = panel.layout_tree:newNode()
-		:setMode("slice", "unit", "left", 0.2)
+		:setSliceMode("unit", "left", 0.2)
 		:setWidget(we)
 
 	local nf = panel.layout_tree:newNode()
-		--:setMode("slice", "unit", "left", 0.2)
-		:setMode("slice", "px", "left", 140)
+		--:setSliceMode("unit", "left", 0.2)
+		:setSliceMode("px", "left", 140)
 		:setWidget(wf)
 
 	local ns = panel.layout_tree:newNode()

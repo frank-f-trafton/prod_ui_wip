@@ -191,19 +191,19 @@ function plan.makeWindowFrame(root)
 	tree_box:setExpandersActive(true)
 
 	local n1 = frame.layout_tree:newNode()
-		:setMode("slice", "px", "bottom", 32, true)
+		:setSliceMode("px", "bottom", 32, true)
 		:setWidget(chk_exclude)
 
 	local n2 = frame.layout_tree:newNode()
-		:setMode("slice", "px", "bottom", 32, true)
+		:setSliceMode("px", "bottom", 32, true)
 		:setWidget(chk_highlight)
 
 	local n3 = frame.layout_tree:newNode()
-		:setMode("slice", "px", "bottom", 32, true)
+		:setSliceMode("px", "bottom", 32, true)
 		:setWidget(chk_vp)
 
 	local n4 = frame.layout_tree:newNode()
-		:setMode("slice", "px", "bottom", 32, true)
+		:setSliceMode("px", "bottom", 32, true)
 		:setWidget(chk_ly)
 
 	frame.layout_tree:setWidget(tree_box)
