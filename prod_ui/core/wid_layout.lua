@@ -93,7 +93,38 @@ function _mt_node:newNode()
 	self.nodes = self.nodes or {}
 	local node = setmetatable({parent = self}, _mt_node)
 	table.insert(self.nodes, node)
+
 	return node
+end
+
+
+function _mt_node:setWidget(wid)
+	if wid then
+		local parent = wid.parent
+		local layout_tree = parent.layout_tree
+
+		if not layout_tree then
+			error("widget's parent does not have a layout tree.")
+
+		elseif wid and not widLayout.nodeInHierarchy(layout_tree, self) then
+			error("node is not in the widget's layout hierarchy.")
+		end
+
+		-- disconnect any currently referenced widget
+		if self.wid_ref then
+			self.wid_ref.layout_ref = false
+		end
+
+		self.wid_ref = wid
+		wid.layout_ref = self
+	else
+		if self.wid_ref then
+			self.wid_ref.layout_ref = false
+		end
+		self.wid_ref = false
+	end
+
+	return self
 end
 
 
@@ -101,37 +132,8 @@ function _mt_node:reset()
 	for k in pairs(self) do
 		self[k] = nil
 	end
-end
 
-
-function widLayout.nodeInTree(root, node)
-	if node == root then
-		return true
-
-	elseif root.nodes then
-		for i, child in ipairs(root.nodes) do
-			if widLayout.nodeInTree(child, node) then
-				return true
-			end
-		end
-	end
-
-	return false
-end
-
-
-function _mt_node:forEach(fn, ...)
-	if fn(self, ...) then
-		return self
-
-	elseif self.nodes then
-		for i, child in ipairs(self.nodes) do
-			local rv = child:forEach(fn, ...)
-			if rv then
-				return rv
-			end
-		end
-	end
+	return self
 end
 
 
@@ -142,6 +144,8 @@ function _mt_node:setMargin(x1, y1, x2, y2)
 	self.margin_y1 = math.floor(y1 * scale)
 	self.margin_x2 = math.floor(x2 * scale)
 	self.margin_y2 = math.floor(y2 * scale)
+
+	return self
 end
 
 
@@ -150,6 +154,8 @@ function _mt_node:setMarginPrescaled(x1, y1, x2, y2)
 	self.margin_y1 = y1
 	self.margin_x2 = x2
 	self.margin_y2 = y2
+
+	return self
 end
 
 
@@ -183,6 +189,8 @@ function _mt_node:setMode(mode, a, b, c, d, e)
 		self.static_w = c
 		self.static_h = d
 	end
+
+	return self
 end
 
 
@@ -192,6 +200,23 @@ function _mt_node:setGridDimensions(rows, cols)
 
 	self.grid_rows = rows
 	self.grid_cols = cols
+
+	return self
+end
+
+
+function _mt_node:forEach(fn, ...)
+	if fn(self, ...) then
+		return self
+
+	elseif self.nodes then
+		for i, child in ipairs(self.nodes) do
+			local rv = child:forEach(fn, ...)
+			if rv then
+				return rv
+			end
+		end
+	end
 end
 
 
@@ -411,6 +436,18 @@ function widLayout.getPreviousSibling(node)
 			end
 		end
 	end
+end
+
+
+function widLayout.nodeInHierarchy(root, node)
+	while node do
+		if node == root then
+			return true
+		end
+		node = node.parent
+	end
+
+	return false
 end
 
 

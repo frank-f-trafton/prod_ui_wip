@@ -48,7 +48,7 @@ function plan.makeWindowFrame(root)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
 
-	frame:setLayoutNode(menu_tab, frame.layout_tree)
+	frame.layout_tree:setWidget(menu_tab)
 
 	menu_tab.renderThimble = function() end
 

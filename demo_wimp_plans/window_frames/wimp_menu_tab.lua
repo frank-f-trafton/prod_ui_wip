@@ -68,7 +68,7 @@ function plan.makeWindowFrame(root)
 	menu_tab.w = 640
 	menu_tab.h = 480
 
-	frame:setLayoutNode(menu_tab, frame.layout_tree)
+	frame.layout_tree:setWidget(menu_tab)
 
 	menu_tab.renderThimble = function() end
 

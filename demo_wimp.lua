@@ -368,8 +368,8 @@ do
 
 		-- [[
 		local node = wimp_root.layout_tree:newNode()
-		node:setMode("slice", "px", "top", 32)
-		wimp_root:setLayoutNode(menu_bar, node)
+			:setMode("slice", "px", "top", 32)
+			:setWidget(menu_bar)
 		--]]
 
 		menu_bar.tag = "root_menu_bar"
@@ -605,8 +605,8 @@ do
 
 		-- [[
 		local node_list = ws1.layout_tree:newNode()
-		node_list:setMode("slice", "px", "left", 300)
-		ws1:setLayoutNode(demo_list, node_list)
+			:setMode("slice", "px", "left", 300)
+			:setWidget(demo_list)
 		--]]
 
 		-- Put a sash between the items list and the demo panel.
@@ -658,8 +658,9 @@ do
 			until not wid
 
 			local plan_container = workspace:addChild("base/container")
-			workspace:setLayoutNode(plan_container, workspace.layout_tree)
-			plan_container.tag = "plan_container"
+			plan_container:setTag("plan_container")
+			workspace.layout_tree:setWidget(plan_container)
+
 
 			return plan_container
 		end

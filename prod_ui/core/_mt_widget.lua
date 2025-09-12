@@ -561,8 +561,7 @@ function _mt_widget:remove()
 			error("the root widget should not have a layout node.")
 		end
 
-		self.layout_ref.wid_ref = false
-		self.layout_ref = false
+		self.layout_ref:setWidget()
 	end
 
 	-- If parent exists, find and remove self from parent's list of children
@@ -1307,32 +1306,6 @@ function _mt_widget:forEachDescendant(callback, ...)
 		if a then
 			return a, b, c, d
 		end
-	end
-end
-
-
-function _mt_widget:setLayoutNode(wid, node)
-	if not self.layout_tree then
-		error("this widget does not have a layout tree.")
-
-	elseif not self:hasDirectChild(wid) then
-		error("'wid' is not a direct child of this widget.")
-
-	elseif wid._dead then
-		error("attempted to attach a dead or dying widget to the layout node.")
-
-	elseif node and not widLayout.nodeInTree(self.layout_tree, node) then
-		error("'node' is not part of this widget's layout tree.")
-	end
-
-	if node then
-		if node.wid_ref then
-			node.wid_ref.layout_ref = false
-		end
-		node.wid_ref = wid
-		wid.layout_ref = node
-	else
-		wid.layout_ref = false
 	end
 end
 
