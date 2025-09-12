@@ -100,13 +100,13 @@ function demoShared.makeTitle(self, tag, text)
 		text_block.tag = tag
 	end
 
-	local node = self.layout_tree:newNode()
-	node:setMode("slice", "px", "top", 32)
-	self:setLayoutNode(text_block, node)
-
 	text_block:setAutoSize("v")
 	text_block:setFontID("h1")
 	text_block:setText(text)
+
+	local node = self.layout_tree:newNode()
+		:setMode("slice", "px", "top", 32)
+		:setWidget(text_block)
 
 	return text_block
 end
@@ -118,14 +118,14 @@ function demoShared.makeParagraph(self, tag, text)
 		text_block.tag = tag
 	end
 
-	local node = self.layout_tree:newNode()
-	node:setMode("slice", "px", "top", 32)
-	self:setLayoutNode(text_block, node)
-
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
+
+	local node = self.layout_tree:newNode()
+		:setMode("slice", "px", "top", 32)
+		:setWidget(text_block)
 
 	return text_block
 end
@@ -137,10 +137,6 @@ function demoShared.makeHyperlink(self, tag, text, url)
 		text_block.tag = tag
 	end
 
-	local node = self.layout_tree:newNode()
-	node:setMode("slice", "px", "top", 32)
-	self:setLayoutNode(text_block, node)
-
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
@@ -148,6 +144,10 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	text_block:setURL(url)
 	text_block.wid_buttonAction = _openURL
 	text_block.wid_buttonAction3 = _openURL
+
+	local node = self.layout_tree:newNode()
+		:setMode("slice", "px", "top", 32)
+		:setWidget(text_block)
 
 	return text_block
 end
@@ -181,42 +181,39 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 
 
 	local text_block = dialog:addChild("wimp/text_block")
-
-	local nt = dialog.layout_tree:newNode()
-	nt:setMode("slice", "px", "top", 32)
-	dialog:setLayoutNode(text_block, nt)
-
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
 
+	local nt = dialog.layout_tree:newNode()
+		:setMode("slice", "px", "top", 32)
+		:setWidget(text_block)
+
 	local node_buttons = dialog.layout_tree:newNode()
-	node_buttons:setMode("slice", "px", "bottom", 64)
+		:setMode("slice", "px", "bottom", 64)
+
+	local button_n = dialog:addChild("base/button")
+	button_n:setLabel("No")
+	button_n.wid_buttonAction = function(self)
+		self:bubbleEvent("frameCall_close", true)
+	end
 
 	local node_button1 = node_buttons:newNode()
-	node_button1:setMode("slice", "px", "left", 160)
-
-	local node_button2 = node_buttons:newNode()
-	node_button2:setMode("slice", "px", "right", 160)
-
-	local btn_w, btn_h = 96, 32
+		:setMode("slice", "px", "left", 160)
+		:setWidget(button_n)
 
 	local button_y = dialog:addChild("base/button")
-	dialog:setLayoutNode(button_y, node_button2)
-
 	button_y:setLabel("Yes")
 	button_y.wid_buttonAction = function(self)
 		self:bubbleEvent("frameCall_close", true)
 	end
 
-	local button_n = dialog:addChild("base/button")
-	dialog:setLayoutNode(button_n, node_button1)
+	local node_button2 = node_buttons:newNode()
+		:setMode("slice", "px", "right", 160)
+		:setWidget(button_y)
 
-	button_n:setLabel("No")
-	button_n.wid_buttonAction = function(self)
-		self:bubbleEvent("frameCall_close", true)
-	end
+	local btn_w, btn_h = 96, 32
 
 	dialog:center(true, true)
 
@@ -230,7 +227,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	dialog:reshape()
 
 	local nb1 = node_button1
-	print("node_button1 xywh:", nb1.x, nb1.y, nb1.w, nb1.h)
+	--print("node_button1 xywh:", nb1.x, nb1.y, nb1.w, nb1.h)
 
 	return dialog
 end
@@ -249,8 +246,8 @@ end
 
 function demoShared.setStaticLayout(parent, child, x, y, w, h)
 	local node = parent.layout_tree:newNode()
-	node:setMode("static", x, y, w, h)
-	parent:setLayoutNode(child, node)
+		:setMode("static", x, y, w, h)
+		:setWidget(child)
 
 	return node
 end
