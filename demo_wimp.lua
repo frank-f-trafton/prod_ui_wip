@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"layouts.layout2",
 	"widgets.text_box_multi",
 	"widgets.properties_box",
 	"widgets.text_box_single",
@@ -64,7 +65,8 @@ local demo_plan_list = {
 		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
 		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
 		{plan_id = "themes_and_scale", label = "Themes and Scale"},
-		{plan_id = "widgets.unfinished.layout", label = "Layout"},
+		{plan_id = "layouts.layout", label = "Layout"},
+		{plan_id = "layouts.layout2", label = "Layout 2"},
 		--[[
 		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
 			{plan_id = "unfinished.drag_box", label = "Drag Box"},
@@ -368,7 +370,7 @@ do
 
 		-- [[
 		local node = wimp_root.layout_tree:newNode()
-			:setMode("slice", "px", "top", 32)
+			:setSliceMode("px", "top", 32)
 			:setWidget(menu_bar)
 		--]]
 
@@ -605,7 +607,7 @@ do
 
 		-- [[
 		local node_list = ws1.layout_tree:newNode()
-			:setMode("slice", "px", "left", 300)
+			:setSliceMode("px", "left", 300)
 			:setWidget(demo_list)
 		--]]
 

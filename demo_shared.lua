@@ -105,7 +105,7 @@ function demoShared.makeTitle(self, tag, text)
 	text_block:setText(text)
 
 	local node = self.layout_tree:newNode()
-		:setMode("slice", "px", "top", 32)
+		:setSliceMode("px", "top", 32)
 		:setWidget(text_block)
 
 	return text_block
@@ -124,7 +124,7 @@ function demoShared.makeParagraph(self, tag, text)
 	text_block:setText(text)
 
 	local node = self.layout_tree:newNode()
-		:setMode("slice", "px", "top", 32)
+		:setSliceMode("px", "top", 32)
 		:setWidget(text_block)
 
 	return text_block
@@ -146,7 +146,7 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	text_block.wid_buttonAction3 = _openURL
 
 	local node = self.layout_tree:newNode()
-		:setMode("slice", "px", "top", 32)
+		:setSliceMode("px", "top", 32)
 		:setWidget(text_block)
 
 	return text_block
@@ -187,11 +187,11 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	text_block:setText(text)
 
 	local nt = dialog.layout_tree:newNode()
-		:setMode("slice", "px", "top", 32)
+		:setSliceMode("px", "top", 32)
 		:setWidget(text_block)
 
 	local node_buttons = dialog.layout_tree:newNode()
-		:setMode("slice", "px", "bottom", 64)
+		:setSliceMode("px", "bottom", 64)
 
 	local button_n = dialog:addChild("base/button")
 	button_n:setLabel("No")
@@ -200,7 +200,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	end
 
 	local node_button1 = node_buttons:newNode()
-		:setMode("slice", "px", "left", 160)
+		:setSliceMode("px", "left", 160)
 		:setWidget(button_n)
 
 	local button_y = dialog:addChild("base/button")
@@ -210,7 +210,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	end
 
 	local node_button2 = node_buttons:newNode()
-		:setMode("slice", "px", "right", 160)
+		:setSliceMode("px", "right", 160)
 		:setWidget(button_y)
 
 	local btn_w, btn_h = 96, 32
@@ -246,7 +246,7 @@ end
 
 function demoShared.setStaticLayout(parent, child, x, y, w, h)
 	local node = parent.layout_tree:newNode()
-		:setMode("static", x, y, w, h)
+		:setStaticMode(x, y, w, h)
 		:setWidget(child)
 
 	return node

@@ -13,7 +13,12 @@ local context = select(1, ...)
 local widLayout = {}
 
 
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+
+
+local _clamp = pMath.clamp
 
 
 widLayout._enum_layout_base = uiTable.makeLUTV(
@@ -24,6 +29,10 @@ widLayout._enum_layout_base = uiTable.makeLUTV(
 	"viewport-height",
 	"unbounded"
 )
+
+widLayout._enum_slice_mode = uiTable.makeLUTV("px", "unit")
+
+widLayout._enum_slice_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
 
 local _mt_node = {
@@ -65,7 +74,7 @@ local _mt_node = {
 	slice_mode = "unit", -- "px", "unit"
 	slice_scale = false, -- scales "px" values when true.
 	slice_edge = "left", -- "left", "top", "right", "bottom"
-	slice_amount = 0.5,
+	slice_amount = 0.5, -- 0.0 - 1.0
 
 	-- Used by the divider container to mark nodes as draggable bars.
 	slice_is_sash = false,
@@ -85,6 +94,15 @@ local _mt_node = {
 	static_y = 0,
 	static_w = 0,
 	static_h = 0,
+
+	-- true: position is based on the parent node's remaining layout space
+	-- false: position is based on the the parent node's original size (just before margins are applied)
+	static_rel = false,
+
+	-- when true, the position is relative to the edge of the right and/or
+	-- bottom sides of the layout space.
+	static_flip_x = false,
+	static_flip_y = false
 }
 _mt_node.__index = _mt_node
 
@@ -138,6 +156,11 @@ end
 
 
 function _mt_node:setMargin(x1, y1, x2, y2)
+	uiAssert.numberNotNaN(1, x1)
+	uiAssert.numberNotNaN(2, y1)
+	uiAssert.numberNotNaN(3, x2)
+	uiAssert.numberNotNaN(4, y2)
+
 	local scale = context.scale
 
 	self.margin_x1 = math.floor(x1 * scale)
@@ -150,6 +173,11 @@ end
 
 
 function _mt_node:setMarginPrescaled(x1, y1, x2, y2)
+	uiAssert.numberNotNaN(1, x1)
+	uiAssert.numberNotNaN(2, y1)
+	uiAssert.numberNotNaN(3, x2)
+	uiAssert.numberNotNaN(4, y2)
+
 	self.margin_x1 = x1
 	self.margin_y1 = y1
 	self.margin_x2 = x2
@@ -164,31 +192,61 @@ function _mt_node:getMargin()
 end
 
 
--- "slice": slice_mode, slice_edge, slice_amount, [slice_scale], [slice_is_sash]
--- "grid": grid_x, grid_y
--- "static": x, y, w, h, scaled
--- "null": No arguments.
-function _mt_node:setMode(mode, a, b, c, d, e)
-	-- TODO: assertions
+function _mt_node:setSliceMode(slice_mode, slice_edge, slice_amount, slice_scale, slice_is_sash)
+	uiAssert.enum(1, slice_mode, "slice_mode", widLayout._enum_slice_mode)
+	uiAssert.enum(2, slice_edge, "slice_edge", widLayout._enum_slice_edge)
+	uiAssert.numberNotNaN(3, slice_amount)
+	-- don't assert 'slice_scale' and 'slice_is_sash'
 
-	self.mode = mode
-	if mode == "slice" then
-		self.slice_mode = a
-		self.slice_edge = b
-		self.slice_amount = c
-		self.slice_scale = not not d
-		self.slice_is_sash = not not e
+	self.mode = "slice"
 
-	elseif mode == "grid" then
-		self.grid_x = a
-		self.grid_y = b
+	self.slice_mode = slice_mode
+	self.slice_edge = slice_edge
+	self.slice_amount = slice_amount
+	self.slice_scale = not not slice_scale
+	self.slice_is_sash = not not slice_is_sash
 
-	elseif mode == "static" then
-		self.static_x = a
-		self.static_y = b
-		self.static_w = c
-		self.static_h = d
-	end
+	return self
+end
+
+
+function _mt_node:setGridMode(grid_x, grid_y)
+	uiAssert.numberNotNaN(1, grid_x)
+	uiAssert.numberNotNaN(2, grid_y)
+
+	self.mode = "grid"
+
+	self.grid_x = grid_x
+	self.grid_y = grid_y
+
+	return self
+end
+
+
+function _mt_node:setStaticMode(static_x, static_y, static_w, static_h, static_rel, static_flip_x, static_flip_y)
+	uiAssert.numberNotNaN(1, static_x)
+	uiAssert.numberNotNaN(2, static_y)
+	uiAssert.numberNotNaN(3, static_w)
+	uiAssert.numberNotNaN(4, static_h)
+	-- don't assert 'static_rel', 'static_flip_x' or 'static_flip_y'
+
+	self.mode = "static"
+
+	self.static_x = static_x
+	self.static_y = static_y
+	self.static_w = math.max(0, static_w)
+	self.static_h = math.max(0, static_h)
+
+	self.static_rel = not not static_rel
+	self.static_flip_x = not not static_flip_x
+	self.static_flip_y = not not static_flip_y
+
+	return self
+end
+
+
+function _mt_node:setNullMode()
+	self.mode = "null"
 
 	return self
 end
@@ -196,7 +254,8 @@ end
 
 -- This is a parent node setting that affects its children.
 function _mt_node:setGridDimensions(rows, cols)
-	-- TODO: assertions.
+	uiAssert.numberNotNaN(1, rows)
+	uiAssert.numberNotNaN(2, cols)
 
 	self.grid_rows = rows
 	self.grid_cols = cols
@@ -303,10 +362,27 @@ widLayout.handlers = {}
 
 widLayout.handlers["static"] = function(np, nc)
 	local scale = context.scale
+
+	local px, py, pw, ph
+	if nc.static_rel then
+		px, py, pw, ph = np.x, np.y, np.w, np.h
+	else
+		px, py, pw, ph = 0, 0, np.orig_w, np.orig_h
+	end
+
+	nc.w = math.floor(nc.static_w * scale)
 	nc.x = math.floor(nc.static_x * scale)
+	if nc.static_flip_x then
+		nc.x = pw - nc.w - nc.x
+	end
+	nc.x = nc.x + px
+
+	nc.h = math.floor(nc.static_h * scale)
 	nc.y = math.floor(nc.static_y * scale)
-	nc.w = math.floor(math.max(0, nc.static_w * scale))
-	nc.h = math.floor(math.max(0, nc.static_h * scale))
+	if nc.static_flip_y then
+		nc.y = ph - nc.h - nc.y
+	end
+	nc.y = nc.y + py
 end
 
 
@@ -385,13 +461,13 @@ function widLayout.splitNode(n, _depth)
 	n.w = math.max(n.w_min, math.min(n.w, n.w_max))
 	n.h = math.max(n.h_min, math.min(n.h, n.h_max))
 
+	n.orig_w, n.orig_h = n.w, n.h
+
 	-- Margin reduction
 	n.x = n.x + n.margin_x1
 	n.y = n.y + n.margin_y1
 	n.w = math.max(0, n.w - n.margin_x1 - n.margin_x2)
 	n.h = math.max(0, n.h - n.margin_y1 - n.margin_y2)
-
-	n.orig_w, n.orig_h = n.w, n.h
 
 	if n.nodes then
 		--print("old n XYWH", n.x, n.y, n.w, n.h)
