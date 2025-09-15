@@ -42,10 +42,10 @@ function plan.make(panel)
 	--]]
 
 	local c1 = panel:addChild("base/container")
-	c1.x = 0
-	c1.y = 0
-	c1.w = 256
-	c1.h = 256
+	local nc1 = panel.layout_tree:newNode()
+		:setStaticMode(0, 0, 256, 256, false, false, false)
+		:setWidget(c1)
+
 	c1.layout_tree:setMargin(16, 16, 16, 16)
 
 	local c1_box = _makeBox(c1, "lightyellow", "darkyellow", "black", "Not Relative")
@@ -73,10 +73,10 @@ function plan.make(panel)
 
 
 	local c2 = panel:addChild("base/container")
-	c2.x = c1.x + c1.w + 32
-	c2.y = 0
-	c2.w = 256
-	c2.h = 256
+	local nc2 = panel.layout_tree:newNode()
+		:setStaticMode(0+256+32, 0, 256, 256, false, false, false)
+		:setWidget(c2)
+
 	c2.layout_tree:setMargin(16, 16, 16, 16)
 
 	local c2_box = _makeBox(c2, "darkgrey", "lightgrey", "white", "Relative")
