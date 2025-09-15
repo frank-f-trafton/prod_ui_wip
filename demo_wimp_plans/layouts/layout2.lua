@@ -31,14 +31,14 @@ function plan.make(panel)
 	C1: not relative; C2: relative
 
 	Flipping:
-	       ┌┈┈┈┬┈┈┈┐
+	       ┌───┬───┐
 	       | X | Y |
-	┌┈┈┈┈┈┈┼┈┈┈┼┈┈┈┤
+	┌──────┼───┼───┤
 	| A, E |   |   |
 	| B, F | * |   |
 	| C, G |   | * |
 	| D, H | * | * |
-	└┈┈┈┈┈┈┴┈┈┈┴┈┈┈┘
+	└──────┴───┴───┘
 	--]]
 
 	local c1 = panel:addChild("base/container")
