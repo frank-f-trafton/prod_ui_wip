@@ -1,6 +1,5 @@
---[[
-	A bare-minimum container.
---]]
+-- A bare-minimum container.
+
 
 local context = select(1, ...)
 
@@ -15,8 +14,6 @@ function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 0
-	--self.clip_hover = true
-	--self.clip_scissor = true
 
 	-- Don't highlight when holding the UI thimble.
 	self.renderThimble = widShared.dummy
@@ -32,13 +29,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		end
 	end
 end
-
-
---[[
-function def:uiCall_reshape???()
-	widShared.clampDimensions(self)
-end
---]]
 
 
 return def
