@@ -1,6 +1,3 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
 -- ProdUI: Widget implementation.
 
 
@@ -14,6 +11,7 @@ _mt_widget.context = context
 
 -- For loading widget defs, see the UI Context source.
 
+
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -26,15 +24,15 @@ local dummyFunc = function() end
 local dummy_table = {}
 
 
-local function errNoDescendants()
+local function _errNoDescendants()
 	error("widget is not configured to have descendants.", 2)
 end
 
 
 local _mt_no_descendants = {}
--- Unfortunately, table.insert() does not trigger __newindex, so this only handles part of the issue.
+-- Unfortunately, table.insert() does not trigger __newindex in Lua 5.1, so this only handles part of the issue.
 _mt_no_descendants.__newindex = function()
-	errNoDescendants()
+	_errNoDescendants()
 end
 setmetatable(_mt_no_descendants, _mt_no_descendants)
 
@@ -54,21 +52,13 @@ _mt_widget.w = 0
 _mt_widget.h = 0
 
 
-_mt_widget.min_w = 0
-_mt_widget.min_h = 0
-_mt_widget.max_w = math.huge
-_mt_widget.max_h = math.huge
-
-_mt_widget.pref_w = false
-_mt_widget.pref_h = false
-
-
 -- Scroll offsets. These apply to a widget's children (a `scr_x` of 50 would offset all of a widget's
--- children to the left by 50 pixels). They may also be used for offsetting built-in components.
+-- children to the left by 50 pixels). They may also be used for offsetting built-in components (menu items, etc.).
 _mt_widget.scr_x = 0
 _mt_widget.scr_y = 0
 
 
+-- Which thimble (if any) this widget is allowed to hold. 0: none, 1: thimble1, 2: thimble2.
 _mt_widget.thimble_mode = 0
 
 
@@ -506,7 +496,7 @@ function _mt_widget:addChild(id, pos, skin_id, ...)
 		coreErr.errLocked("add child")
 
 	elseif children == _mt_no_descendants then
-		errNoDescendants()
+		_errNoDescendants()
 	end
 
 	local child = context:_prepareWidgetInstance(id, self, skin_id)
@@ -782,7 +772,7 @@ local sort_count = {} -- sortChildren
 
 
 --- The default sorting method, which is a counting sort applied to the widget's children. Sorting is skipped if the
--- widget has a sort_max of 0 or fewer than two children. Otherwise, all children must have 'sort_id' set with integers
+-- widget has a sort_max of 0 or if it has only one child. Otherwise, all children must have 'sort_id' set with integers
 -- between 1 and the parent widget's 'sort_max', inclusive.
 -- @param recurse If true, recursively sort children with the same function.
 function _mt_widget:sortChildren(recurse)
@@ -836,7 +826,6 @@ function _mt_widget:sortChildren(recurse)
 			seq[i] = sort_work[i]
 
 			-- Overwrite workspace entries with 'false' so that it doesn't interfere with garbage collection.
-			-- ^ Weak tables are another option, but could add gaps to the sequence and flag the table as sparse.
 			sort_work[i] = false
 		end
 
@@ -887,6 +876,11 @@ function _mt_widget:setTag(tag)
 	uiAssert.type1(1, tag, "string")
 
 	self.tag = tag
+end
+
+
+function _mt_widget:getTag()
+	return self.tag
 end
 
 
@@ -1018,26 +1012,6 @@ end
 function _mt_widget:reshapeDescendants()
 	for i, child in ipairs(self.children) do
 		child:reshape()
-	end
-end
-
-
-function _mt_widget:setPreferredDimensions(w, h)
-	uiAssert.typeEval1(1, w, "number")
-	uiAssert.typeEval1(2, h, "number")
-
-	self.pref_w = w and math.max(0, w) or false
-	self.pref_h = h and math.max(0, h) or false
-end
-
-
-function _mt_widget:applyPreferredDimensions()
-	local scale = context.scale
-	if type(self.pref_w) == "number" then
-		self.w = math.floor(self.pref_w * scale)
-	end
-	if type(self.pref_h) == "number" then
-		self.h = math.floor(self.pref_h * scale)
 	end
 end
 
@@ -1268,21 +1242,41 @@ function _mt_widget:isAwake()
 end
 
 
-function _mt_widget:nextWidget()
+function _mt_widget:previousWidget() -- untested
+	local parent = self.parent
+	if not parent then
+		return
+	end
+	local siblings = parent.children
+	local i = self:getIndex(siblings)
+	if i == 1 then
+		return parent
+	else
+		local wid = self
+		while wid.children do
+			wid = wid.children[#wid.children]
+		end
+		return wid
+	end
+end
+
+
+function _mt_widget:nextWidget() -- untested
 	if self.children[1] then
 		return self.children[1]
 	else
 		local wid = self
 		while wid do
-			if not wid.parent then
+			local parent = wid.parent
+			if not parent then
 				break
 			end
-			local siblings = wid.parent.children
+			local siblings = parent.children
 			local i = wid:getIndex(siblings)
 			if i < #siblings then
 				return siblings[i + 1]
 			else
-				wid = wid.parent
+				wid = parent
 			end
 		end
 	end

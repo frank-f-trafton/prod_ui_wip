@@ -17,12 +17,6 @@ widShared.debug = context:getLua("core/wid/debug")
 function widShared.dummy() end
 
 
-function widShared.clampDimensions(self)
-	self.w = math.max(self.min_w, math.min(self.w, self.max_w))
-	self.h = math.max(self.min_h, math.min(self.h, self.max_h))
-end
-
-
 --- Gets the table keys for a widget viewport. (ie index 2 will return 'vp2_x', 'vp2_y', 'vp2_w' and 'vp2_h'.)
 function widShared.getViewportKeys(self, v)
 	assert(vpk[v], "invalid viewport index.")

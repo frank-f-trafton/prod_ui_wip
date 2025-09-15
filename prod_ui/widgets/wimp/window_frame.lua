@@ -399,6 +399,11 @@ function def:uiCall_initialize(unselectable, view_level)
 	self.scroll_range_mode = "zero"
 	self.halt_reshape = false
 
+	self.min_w = 0
+	self.min_h = 0
+	self.max_w = math.huge
+	self.max_h = math.huge
+
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 6)
@@ -830,7 +835,8 @@ function def:uiCall_reshapePre()
 		end
 	end
 
-	widShared.clampDimensions(self)
+	self.w = math.max(self.min_w, math.min(self.w, self.max_w))
+	self.h = math.max(self.min_h, math.min(self.h, self.max_h))
 
 	widShared.resetViewport(self, 3)
 	widShared.carveViewport(self, 3, skin.box.border)
