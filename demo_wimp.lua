@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"layouts.layout",
 	"layouts.layout2",
 	"widgets.text_box_multi",
 	"widgets.properties_box",
@@ -207,7 +208,7 @@ local function newWimpContext()
 		},
 
 		-- Shows the widget's layout nodes in love.draw()
-		dbg_ly = {
+		dbg_lo = {
 			active = false,
 			wid = false
 		}
@@ -367,14 +368,10 @@ do
 	do
 		-- Construct the application menu bar.
 		local menu_bar = wimp_root:addChild("wimp/menu_bar")
+		menu_bar:setTag("root_menu_bar")
+		menu_bar:layoutSetMode("slice", "px", "top", 32)
+			:layoutAdd()
 
-		-- [[
-		local node = wimp_root.layout_tree:newNode()
-			:setSliceMode("px", "top", 32)
-			:setWidget(menu_bar)
-		--]]
-
-		menu_bar.tag = "root_menu_bar"
 
 		-- Test the (normally commented out) debug render user event.
 		--[[
@@ -592,7 +589,7 @@ do
 	do
 		local ws1 = wimp_root:newWorkspace()
 
-		ws1:setLayoutBase("viewport")
+		ws1:layoutSetBase("viewport")
 		ws1:setScrollRangeMode("zero")
 		ws1:setSashesEnabled(true)
 
@@ -606,15 +603,13 @@ do
 		demo_list.MN_wrap_selection = "no-rep"
 
 		-- [[
-		local node_list = ws1.layout_tree:newNode()
-			:setSliceMode("px", "left", 300)
-			:setWidget(demo_list)
+		demo_list:layoutSetMode("slice", "px", "left", 300)
+			:layoutAdd()
 		--]]
 
-		-- Put a sash between the items list and the demo panel.
-		-- [[
-		local ns = ws1.layout_tree:newNode()
-		ws1:configureSashNode(node_list, ns)
+		-- Put a sash between the items list and the demo panel. -- TODO: fix this up
+		--[[
+		ws1:configureSashNode(node_list, ???)
 		--]]
 
 		demo_list.tag = "plan_menu"
@@ -661,8 +656,8 @@ do
 
 			local plan_container = workspace:addChild("base/container")
 			plan_container:setTag("plan_container")
-			workspace.layout_tree:setWidget(plan_container)
-
+			plan_container:layoutSetMode("remaining")
+				:layoutAdd()
 
 			return plan_container
 		end
@@ -973,15 +968,15 @@ function love.draw()
 		love.graphics.pop()
 	end
 
-	local dbg_ly = context.app.dbg_ly
-	if dbg_ly and dbg_ly.active and dbg_ly.wid and not dbg_ly.wid._dead and dbg_ly.wid.layout_tree then
+	local dbg_lo = context.app.dbg_lo
+	if dbg_lo and dbg_lo.active and dbg_lo.wid and not dbg_lo.wid._dead then
 		love.graphics.push("all")
 
 		local widShared = context:getLua("core/wid_shared")
-		local wid = dbg_ly.wid
+		local wid = dbg_lo.wid
 		love.graphics.translate(wid:getAbsolutePosition())
 		love.graphics.translate(-wid.scr_x, -wid.scr_y)
-		widShared.debug.debugDrawLayoutNodes(dbg_ly.wid.layout_tree, 1)
+		widShared.debug.debugDrawLayoutNodes(dbg_lo.wid)
 
 		love.graphics.pop()
 	end

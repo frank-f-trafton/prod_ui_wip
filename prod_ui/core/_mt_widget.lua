@@ -1,6 +1,9 @@
 -- ProdUI: Widget implementation.
 
 
+-- TODO: remove '_depth' debug fields in layout code
+
+
 local context = select(1, ...)
 
 
@@ -15,13 +18,12 @@ _mt_widget.context = context
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+
 local viewport_keys = context:getLua("core/viewport_keys")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
-
-
-local dummyFunc = function() end
-local dummy_table = {}
 
 
 local function _errNoDescendants()
@@ -89,6 +91,42 @@ _mt_widget.sort_max = 0
 _mt_widget.sort_id = 1
 
 
+-- Layout fields.
+
+
+-- Outer pad for children in a layout.
+_mt_widget.lo_outpad_x1, _mt_widget.lo_outpad_y1, _mt_widget.lo_outpad_x2, _mt_widget.lo_outpad_y2 = 0, 0, 0, 0
+
+-- "slice", "grid", "static", "null"
+_mt_widget.lo_mode = "null"
+
+
+-- Layout parameters that depend on the mode. See the 'setMode' methods for more info.
+_mt_widget.lo_a = false
+_mt_widget.lo_b = false
+_mt_widget.lo_c = false
+_mt_widget.lo_d = false
+_mt_widget.lo_e = false
+_mt_widget.lo_f = false
+_mt_widget.lo_g = false
+
+
+--[[
+These commented out fields are set in widLayout.setupLayoutList(). They apply to parents.
+
+.lo_list: When a table, this specifies the order in which the widget's children should be laid out.
+	All entries in this list must be direct children of the widget.
+
+.lo_base: Enum that controls how a parent's layout space is reset.
+
+.lo_x, .lo_y, .lo_w, .lo_h: Temporary layout space for parents.
+
+.lo_margin_x1, .lo_margin_y1, .lo_margin_x2, .lo_margin_y2: Layout margin for parents.
+
+.lo_grid_rows, .lo_grid_cols: The number of columns and rows in a parent's grid.
+--]]
+
+
 -- Default canvas stack parameters. (See: ui_draw.lua)
 
 
@@ -128,8 +166,8 @@ _mt_widget.ly_qh = 0
 
 
 -- Functions called before and after drawing the canvas. Can be used to set up shaders.
-_mt_widget.ly_fn_start = dummyFunc -- XXX untested
-_mt_widget.ly_fn_end = dummyFunc -- XXX untested
+_mt_widget.ly_fn_start = uiDummy.func -- XXX untested
+_mt_widget.ly_fn_end = uiDummy.func -- XXX untested
 
 
 function _mt_widget:uiCall_initialize(...)
@@ -466,11 +504,6 @@ end
 function _mt_widget:getRelativePositionScrolled(x, y)
 	local ax, ay = self:getAbsolutePosition()
 	return x - ax + self.scr_x, y - ay + self.scr_y, ax, ay
-end
-
-
-function _mt_widget:initialize()
-	error("Delete this call!")
 end
 
 
@@ -994,10 +1027,8 @@ function _mt_widget:reshape()
 		return
 	end
 
-	local n = self.layout_tree
-	if n then
-		widLayout.splitNode(n, 1)
-		widLayout.setWidgetSizes(n, 1)
+	if self.lo_list then
+		widLayout.applyLayout(self, 1)
 	end
 
 	for i, child in ipairs(self.children) do
@@ -1301,6 +1332,80 @@ function _mt_widget:forEachDescendant(callback, ...)
 			return a, b, c, d
 		end
 	end
+end
+
+
+function _mt_widget:layoutSetMode(mode, ...)
+	local setter = widLayout.mode_setters[mode]
+	if setter then
+		setter(self, ...)
+	else
+		error("invalid layout mode: " .. tostring(mode))
+	end
+
+	return self
+end
+
+
+function _mt_widget:layoutGetMode()
+	return self.lo_mode, self.lo_a, self.lo_b, self.lo_c, self.lo_d, self.lo_e, self.lo_f, self.lo_g
+end
+
+
+function _mt_widget:layoutSetPadding(x1, y1, x2, y2)
+	uiAssert.numberNotNaN(1, x1)
+
+	if y1 then
+		uiAssert.numberNotNaN(2, y1)
+		uiAssert.numberNotNaN(3, x2)
+		uiAssert.numberNotNaN(4, y2)
+
+		self.lo_outpad_x1 = math.max(0, x1)
+		self.lo_outpad_y1 = math.max(0, y1)
+		self.lo_outpad_x2 = math.max(0, x2)
+		self.lo_outpad_y2 = math.max(0, y2)
+	else
+		self.lo_outpad_x1 = math.max(0, x1)
+		self.lo_outpad_y1 = math.max(0, x1)
+		self.lo_outpad_x2 = math.max(0, x1)
+		self.lo_outpad_y2 = math.max(0, x1)
+	end
+
+	return self
+end
+
+
+function _mt_widget:layoutGetPadding()
+	return self.lo_outpad_x1, self.lo_outpad_y1, self.lo_outpad_x2, self.lo_outpad_y2
+end
+
+
+function _mt_widget:layoutAdd(n)
+	local list = self.parent.lo_list
+	if not list then
+		error("parent is not configured for layouts")
+
+	elseif uiTable.valueInArray(list, self) then
+		error("widget is already in its parent's layout list")
+	end
+
+	n = n or #list + 1
+	table.insert(list, n, self)
+
+	return self
+end
+
+
+function _mt_widget:layoutRemove()
+	local list = self.parent.lo_list
+	if not list then
+		error("parent is not configured for layouts")
+
+	elseif uiTable.removeElement(list, self) > 1 then
+		error("parent layout list contained multiple references to this widget")
+	end
+
+	return self
 end
 
 

@@ -17,6 +17,9 @@ local def = {}
 def.trickle = {}
 
 
+widLayout.setupContainerDef(def)
+
+
 local function _printUIFrames(self)
 	print("_printUIFrames()")
 	local selected = self.selected_frame
@@ -50,7 +53,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 2)
 
-	widLayout.initializeLayoutTree(self)
+	widLayout.setupLayoutList(self)
 
 	self.halt_reshape = false
 
@@ -95,7 +98,7 @@ end
 function def:uiCall_reshapePre()
 	print("root_wimp: uiCall_reshapePre")
 
-	widLayout.resetLayout(self, "self")
+	widLayout.resetLayout(self)
 
 	return self.halt_reshape
 end
@@ -104,12 +107,11 @@ end
 function def:uiCall_reshapePost()
 	print("root_wimp: uiCall_reshapePost")
 
-	local lay = self.layout_tree
 	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
-	self.vp2_x = lay.x
-	self.vp2_y = lay.y
-	self.vp2_w = lay.w
-	self.vp2_h = lay.h
+	self.vp2_x = self.lo_x
+	self.vp2_y = self.lo_y
+	self.vp2_w = self.lo_w
+	self.vp2_h = self.lo_h
 
 	-- Handle the current active Workspace.
 	local workspace = self.workspace

@@ -9,7 +9,7 @@ local plan = {}
 function plan.make(panel)
 	--title("Progress Bar Stuff")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
@@ -20,7 +20,8 @@ function plan.make(panel)
 	local v_bar_width, v_bar_height = 100, 160
 
 	local p_bar = panel:addChild("status/progress_bar")
-	demoShared.setStaticLayout(panel, p_bar, 32, 32, h_bar_width, h_bar_height)
+	p_bar:layoutSetMode("static", 32, 32, h_bar_width, h_bar_height)
+		:layoutAdd()
 	p_bar:setTag("demo_prog_bar")
 
 	p_bar.pos = starting_pos
@@ -37,7 +38,8 @@ function plan.make(panel)
 
 
 	local btn_active = panel:addChild("base/button")
-	demoShared.setStaticLayout(panel, btn_active, 256, 32, 128, 40)
+	btn_active:layoutSetMode("static", 256, 32, 128, 40)
+		:layoutAdd()
 
 	btn_active:setLabel("setActive()")
 
@@ -50,7 +52,8 @@ function plan.make(panel)
 
 
 	local btn_vertical = panel:addChild("base/button")
-	demoShared.setStaticLayout(panel, btn_vertical, 256, 32+40, 128, 40)
+	btn_vertical:layoutSetMode("static", 256, 32+40, 128, 40)
+		:layoutAdd()
 
 	btn_vertical:setLabel("Orientation")
 
@@ -74,7 +77,8 @@ function plan.make(panel)
 
 
 	local btn_far_end = panel:addChild("base/button")
-	demoShared.setStaticLayout(panel, btn_far_end, 256, 32+40+40, 128, 40)
+	btn_far_end:layoutSetMode("static", 256, 32+40+40, 128, 40)
+		:layoutAdd()
 
 	btn_far_end:setLabel("Near/Far Start")
 
@@ -118,7 +122,8 @@ function plan.make(panel)
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
-	demoShared.setStaticLayout(panel, sld_pos, 256, 160+32+8, 256, 32)
+	sld_pos:layoutSetMode("static", 256, 160+32+8, 256, 32)
+		:layoutAdd()
 
 	sld_pos:setTag("position_slider")
 
@@ -136,7 +141,8 @@ function plan.make(panel)
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")
-	demoShared.setStaticLayout(panel, sld_max, 256, 160+32+8+32+32+8, 256, 32)
+	sld_max:layoutSetMode("static", 256, 160+32+8+32+32+8, 256, 32)
+		:layoutAdd()
 	sld_max:setTag("maximum_slider")
 
 	sld_max.slider_pos = starting_max

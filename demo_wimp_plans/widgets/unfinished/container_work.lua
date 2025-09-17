@@ -4,7 +4,7 @@ local plan = {}
 function plan.make(panel)
 	--title("Widget Containers")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 

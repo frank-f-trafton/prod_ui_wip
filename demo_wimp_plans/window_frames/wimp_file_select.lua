@@ -268,13 +268,13 @@ function plan.makeWindowFrame(root)
 	frame.h = 480
 	frame:setFrameTitle("File Selector")
 
-	frame:setLayoutBase("viewport")
+	frame:layoutSetBase("viewport")
 	frame:setScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
-
-	frame.layout_tree:setWidget(menu_tab)
+		:layoutSetMode("remaining")
+		:layoutAdd()
 
 	menu_tab.renderThimble = function() end
 

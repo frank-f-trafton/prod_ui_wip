@@ -103,10 +103,8 @@ function demoShared.makeTitle(self, tag, text)
 	text_block:setAutoSize("v")
 	text_block:setFontID("h1")
 	text_block:setText(text)
-
-	local node = self.layout_tree:newNode()
-		:setSliceMode("px", "top", 32)
-		:setWidget(text_block)
+	text_block:layoutSetMode("slice", "px", "top", 32)
+		:layoutAdd()
 
 	return text_block
 end
@@ -122,10 +120,8 @@ function demoShared.makeParagraph(self, tag, text)
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
-
-	local node = self.layout_tree:newNode()
-		:setSliceMode("px", "top", 32)
-		:setWidget(text_block)
+	text_block:layoutSetMode("slice", "px", "top", 32)
+		:layoutAdd()
 
 	return text_block
 end
@@ -144,10 +140,8 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	text_block:setURL(url)
 	text_block.wid_buttonAction = _openURL
 	text_block.wid_buttonAction3 = _openURL
-
-	local node = self.layout_tree:newNode()
-		:setSliceMode("px", "top", 32)
-		:setWidget(text_block)
+	text_block:layoutSetMode("slice", "px", "top", 32)
+		:layoutAdd()
 
 	return text_block
 end
@@ -172,7 +166,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 
 	dialog:setFrameTitle(title)
 
-	dialog:setLayoutBase("viewport")
+	dialog:layoutSetBase("viewport")
 	dialog:setScrollRangeMode("zero")
 	dialog:setScrollBars(false, false)
 
@@ -185,33 +179,24 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
-
-	local nt = dialog.layout_tree:newNode()
-		:setSliceMode("px", "top", 32)
-		:setWidget(text_block)
-
-	local node_buttons = dialog.layout_tree:newNode()
-		:setSliceMode("px", "bottom", 64)
+	text_block:layoutSetMode("slice", "px", "top", 32)
+		:layoutAdd()
 
 	local button_n = dialog:addChild("base/button")
 	button_n:setLabel("No")
 	button_n.wid_buttonAction = function(self)
 		self:bubbleEvent("frameCall_close", true)
 	end
-
-	local node_button1 = node_buttons:newNode()
-		:setSliceMode("px", "left", 160)
-		:setWidget(button_n)
+	button_n:layoutSetMode("slice", "px", "left", 160)
+		:layoutAdd()
 
 	local button_y = dialog:addChild("base/button")
 	button_y:setLabel("Yes")
 	button_y.wid_buttonAction = function(self)
 		self:bubbleEvent("frameCall_close", true)
 	end
-
-	local node_button2 = node_buttons:newNode()
-		:setSliceMode("px", "right", 160)
-		:setWidget(button_y)
+	button_y:layoutSetMode("slice", "px", "right", 160)
+		:layoutAdd()
 
 	local btn_w, btn_h = 96, 32
 
@@ -226,9 +211,6 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 
 	dialog:reshape()
 
-	local nb1 = node_button1
-	--print("node_button1 xywh:", nb1.x, nb1.y, nb1.w, nb1.h)
-
 	return dialog
 end
 
@@ -237,19 +219,11 @@ function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
 	label_mode = label_mode or "single"
 
 	local label = parent:addChild("base/label")
-	demoShared.setStaticLayout(parent, label, x, y, w, h)
 	label:setLabel(text, label_mode)
+	label:layoutSetMode("static", x, y, w, h)
+		:layoutAdd()
 
 	return label
-end
-
-
-function demoShared.setStaticLayout(parent, child, x, y, w, h)
-	local node = parent.layout_tree:newNode()
-		:setStaticMode(x, y, w, h)
-		:setWidget(child)
-
-	return node
 end
 
 

@@ -9,7 +9,7 @@ local plan = {}
 function plan.make(panel)
 	--title("Number Box")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
@@ -19,7 +19,8 @@ function plan.make(panel)
 		-- WIP
 	end
 
-	demoShared.setStaticLayout(panel, num_box, 32, 96, 256, 32)
+	num_box:layoutSetMode("static", 32, 96, 256, 32)
+		:layoutAdd()
 end
 
 

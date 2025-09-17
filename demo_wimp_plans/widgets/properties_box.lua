@@ -9,12 +9,13 @@ local plan = {}
 function plan.make(panel)
 	--title("Properties Box Test")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local properties_box = panel:addChild("wimp/properties_box")
-	demoShared.setStaticLayout(panel, properties_box, 0, 64, 400, 300)
+	properties_box:layoutSetMode("static", 0, 64, 400, 300)
+		:layoutAdd()
 
 	properties_box:setTag("demo_properties_box")
 

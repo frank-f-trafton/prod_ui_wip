@@ -1,24 +1,11 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
--- The new layout system.
-
-
--- TODO: remove '_depth' debug fields
-
-
 local context = select(1, ...)
 
 
 local widLayout = {}
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
-
-
-local _clamp = pMath.clamp
 
 
 widLayout._enum_layout_base = uiTable.makeLUTV(
@@ -30,325 +17,131 @@ widLayout._enum_layout_base = uiTable.makeLUTV(
 	"unbounded"
 )
 
+-- "px": pixels
+-- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any slices
+-- were taken off at this level.
 widLayout._enum_slice_mode = uiTable.makeLUTV("px", "unit")
 
 widLayout._enum_slice_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
 
-local _mt_node = {
-	-- "slice", "grid", "static", "null"
-	mode = "null",
+--[[
+	"grid":
+	lo_a grid_x: (integer) Tile position, for children. From 0 to len - 1.
+	lo_b grid_y: (integer)
+	lo_c grid_w: (integer) Number of tiles the child occupies (for more granular positioning)
+	lo_d grid_h: (integer)
 
-	parent = false, -- parent node, if applicable.
-	wid_ref = false,
-	nodes = false, -- false, or array of child nodes.
+	"null":
+	No parameters used.
 
-	x = 0,
-	y = 0,
-	w = 0,
-	h = 0,
+	"remaining":
+	No paremeters used.
 
-	w_min = 0,
-	w_max = math.huge,
-	h_min = 0,
-	h_max = math.huge,
+	"slice":
+	lo_a slice_mode: (_enum_slice_mode)
+	lo_b slice_edge: (_enum_slice_edge)
+	lo_c slice_amount: (number) 0-1 for "unit" slice_mode, an integer for "px" slice_mode.
+	lo_d slice_scale: (boolean) -- scales "px" values when true.
+	lo_e slice_is_sash: (boolean) Used by the divider container to mark nodes as draggable bars.
 
-	w_pref = false,
-	h_pref = false,
-
-	-- Parent original dimensions, before any splitting has occurred.
-	orig_w = 0,
-	orig_h = 0,
-
-	-- Shrinks the node along its four edges.
-	margin_x1 = 0,
-	margin_y1 = 0,
-	margin_x2 = 0,
-	margin_y2 = 0,
-
-	-- * Mode: slice
-
-	-- "px": pixels
-	-- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any slices
-	-- were taken off at this level.
-	slice_mode = "unit", -- "px", "unit"
-	slice_scale = false, -- scales "px" values when true.
-	slice_edge = "left", -- "left", "top", "right", "bottom"
-	slice_amount = 0.5, -- 0.0 - 1.0
-
-	-- Used by the divider container to mark nodes as draggable bars.
-	slice_is_sash = false,
-
-	-- * Mode: grid
-	-- Number of tiles in the grid (for parents)
-	grid_rows = 0,
-	grid_cols = 0,
-
-	-- Tile position, from 0 to len - 1 (for children)
-	grid_x = 0,
-	grid_y = 0,
-
-	-- * Mode: static
-	-- Position and dimensions.
-	static_x = 0,
-	static_y = 0,
-	static_w = 0,
-	static_h = 0,
-
-	-- true: position is based on the parent node's remaining layout space
-	-- false: position is based on the the parent node's original size (just before margins are applied)
-	static_rel = false,
-
-	-- when true, the position is relative to the edge of the right and/or
-	-- bottom sides of the layout space.
-	static_flip_x = false,
-	static_flip_y = false
-}
-_mt_node.__index = _mt_node
+	"static":
+	lo_a static_x: (integer) Position and dimensions.
+	lo_b static_y: (integer)
+	lo_c static_w: (integer)
+	lo_d static_h: (integer)
+	lo_e static_rel: (boolean) Use parent node's remaining layout space (true) or the original space (false).
+	lo_f static_flip_x: (boolean) When true, the position is against the other side of the layout space.
+	lo_g static_flip_y: (boolean)
+--]]
 
 
-function _mt_node:newNode()
-	self.nodes = self.nodes or {}
-	local node = setmetatable({parent = self}, _mt_node)
-	table.insert(self.nodes, node)
+widLayout.mode_setters = {
+	grid = function(self, grid_x, grid_y, grid_w, grid_h)
+		uiAssert.numberNotNaN(1, grid_x)
+		uiAssert.numberNotNaN(2, grid_y)
+		grid_w = grid_w or 1
+		uiAssert.numberNotNaN(3, grid_w)
+		grid_h = grid_h or 1
+		uiAssert.numberNotNaN(4, grid_h)
 
-	return node
-end
+		self.lo_mode = "grid"
+		self.lo_a = grid_x
+		self.lo_b = grid_y
+		self.lo_c = grid_w
+		self.lo_d = grid_h
 
+		self.lo_e, self.lo_f, self.lo_g = nil
 
-function _mt_node:setWidget(wid)
-	if wid then
-		local parent = wid.parent
-		local layout_tree = parent.layout_tree
-
-		if not layout_tree then
-			error("widget's parent does not have a layout tree.")
-
-		elseif wid and not widLayout.nodeInHierarchy(layout_tree, self) then
-			error("node is not in the widget's layout hierarchy.")
-		end
-
-		-- disconnect any currently referenced widget
-		if self.wid_ref then
-			self.wid_ref.layout_ref = false
-		end
-
-		self.wid_ref = wid
-		wid.layout_ref = self
-	else
-		if self.wid_ref then
-			self.wid_ref.layout_ref = false
-		end
-		self.wid_ref = false
-	end
-
-	return self
-end
-
-
-function _mt_node:reset()
-	for k in pairs(self) do
-		self[k] = nil
-	end
-
-	return self
-end
-
-
-function _mt_node:setMargin(x1, y1, x2, y2)
-	uiAssert.numberNotNaN(1, x1)
-	uiAssert.numberNotNaN(2, y1)
-	uiAssert.numberNotNaN(3, x2)
-	uiAssert.numberNotNaN(4, y2)
-
-	local scale = context.scale
-
-	self.margin_x1 = math.floor(x1 * scale)
-	self.margin_y1 = math.floor(y1 * scale)
-	self.margin_x2 = math.floor(x2 * scale)
-	self.margin_y2 = math.floor(y2 * scale)
-
-	return self
-end
-
-
-function _mt_node:setMarginPrescaled(x1, y1, x2, y2)
-	uiAssert.numberNotNaN(1, x1)
-	uiAssert.numberNotNaN(2, y1)
-	uiAssert.numberNotNaN(3, x2)
-	uiAssert.numberNotNaN(4, y2)
-
-	self.margin_x1 = x1
-	self.margin_y1 = y1
-	self.margin_x2 = x2
-	self.margin_y2 = y2
-
-	return self
-end
-
-
-function _mt_node:getMargin()
-	return self.margin_x1, self.margin_y1, self.margin_x2, self.margin_y2
-end
-
-
-function _mt_node:setSliceMode(slice_mode, slice_edge, slice_amount, slice_scale, slice_is_sash)
-	uiAssert.enum(1, slice_mode, "slice_mode", widLayout._enum_slice_mode)
-	uiAssert.enum(2, slice_edge, "slice_edge", widLayout._enum_slice_edge)
-	uiAssert.numberNotNaN(3, slice_amount)
-	-- don't assert 'slice_scale' and 'slice_is_sash'
-
-	self.mode = "slice"
-
-	self.slice_mode = slice_mode
-	self.slice_edge = slice_edge
-	self.slice_amount = slice_amount
-	self.slice_scale = not not slice_scale
-	self.slice_is_sash = not not slice_is_sash
-
-	return self
-end
-
-
-function _mt_node:setGridMode(grid_x, grid_y)
-	uiAssert.numberNotNaN(1, grid_x)
-	uiAssert.numberNotNaN(2, grid_y)
-
-	self.mode = "grid"
-
-	self.grid_x = grid_x
-	self.grid_y = grid_y
-
-	return self
-end
-
-
-function _mt_node:setStaticMode(static_x, static_y, static_w, static_h, static_rel, static_flip_x, static_flip_y)
-	uiAssert.numberNotNaN(1, static_x)
-	uiAssert.numberNotNaN(2, static_y)
-	uiAssert.numberNotNaN(3, static_w)
-	uiAssert.numberNotNaN(4, static_h)
-	-- don't assert 'static_rel', 'static_flip_x' or 'static_flip_y'
-
-	self.mode = "static"
-
-	self.static_x = static_x
-	self.static_y = static_y
-	self.static_w = math.max(0, static_w)
-	self.static_h = math.max(0, static_h)
-
-	self.static_rel = not not static_rel
-	self.static_flip_x = not not static_flip_x
-	self.static_flip_y = not not static_flip_y
-
-	return self
-end
-
-
-function _mt_node:setNullMode()
-	self.mode = "null"
-
-	return self
-end
-
-
--- This is a parent node setting that affects its children.
-function _mt_node:setGridDimensions(rows, cols)
-	uiAssert.numberNotNaN(1, rows)
-	uiAssert.numberNotNaN(2, cols)
-
-	self.grid_rows = rows
-	self.grid_cols = cols
-
-	return self
-end
-
-
-function _mt_node:forEach(fn, ...)
-	if fn(self, ...) then
 		return self
+	end,
 
-	elseif self.nodes then
-		for i, child in ipairs(self.nodes) do
-			local rv = child:forEach(fn, ...)
-			if rv then
-				return rv
-			end
-		end
+	null = function(self)
+		self.lo_mode = "null"
+
+		self.lo_a, self.lo_b, self.lo_c, self.lo_d, self.lo_e, self.lo_f, self.lo_g = nil
+
+		return self
+	end,
+
+	remaining = function(self)
+		self.lo_mode = "remaining"
+
+		self.lo_a, self.lo_b, self.lo_c, self.lo_d, self.lo_e, self.lo_f, self.lo_g = nil
+
+		return self
+	end,
+
+	slice = function(self, slice_mode, slice_edge, slice_amount, slice_scale, slice_is_sash)
+		uiAssert.enum(1, slice_mode, "slice_mode", widLayout._enum_slice_mode)
+		uiAssert.enum(2, slice_edge, "slice_edge", widLayout._enum_slice_edge)
+		uiAssert.numberNotNaN(3, slice_amount)
+		-- don't assert 'slice_scale' and 'slice_is_sash'
+
+		self.lo_mode = "slice"
+		self.lo_a = slice_mode
+		self.lo_b = slice_edge
+		self.lo_c = slice_amount
+		self.lo_d = not not slice_scale
+		self.lo_e = not not slice_is_sash
+
+		self.lo_f, self.lo_g = nil
+
+		return self
+	end,
+
+	static = function(self, static_x, static_y, static_w, static_h, static_rel, static_flip_x, static_flip_y)
+		uiAssert.numberNotNaN(1, static_x)
+		uiAssert.numberNotNaN(2, static_y)
+		uiAssert.numberNotNaN(3, static_w)
+		uiAssert.numberNotNaN(4, static_h)
+		-- don't assert 'static_rel', 'static_flip_x' or 'static_flip_y'
+
+		self.lo_mode = "static"
+
+		self.lo_a = static_x
+		self.lo_b = static_y
+		self.lo_c = math.max(0, static_w)
+		self.lo_d = math.max(0, static_h)
+
+		self.lo_e = not not static_rel
+		self.lo_f = not not static_flip_x
+		self.lo_g = not not static_flip_y
+
+		return self
 	end
-end
+}
 
 
-function widLayout.initializeLayoutTree(self)
-	self.layout_tree = setmetatable({}, _mt_node)
-end
-
-
-function widLayout.resetLayout(self, to)
-	local n = self.layout_tree
-	if to == "zero" then
-		n.x, n.y, n.w, n.h = 0, 0, 0, 0
-
-	elseif to == "self" then
-		n.x, n.y, n.w, n.h = 0, 0, self.w, self.h
-
-	elseif to == "viewport" then
-		n.x, n.y, n.w, n.h = 0, 0, self.vp_w, self.vp_h
-
-	elseif to == "viewport-full" then
-		n.x, n.y, n.w, n.h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
-
-	elseif to == "viewport-width" then
-		n.x, n.y, n.w, n.h = 0, 0, self.vp_w, math.huge
-
-	elseif to == "viewport-height" then
-		n.x, n.y, n.w, n.h = 0, 0, math.huge, self.vp_h
-
-	elseif to == "unbounded" then
-		n.x, n.y, n.w, n.h = 0, 0, math.huge, math.huge
-
-	else
-		error("invalid layout base mode.")
-	end
-end
-
-
-function _mt_node:carveEdgePixels(x_left, y_top, x_right, y_bottom)
-	self.w = math.max(0, self.w - x_left - x_right)
-	self.h = math.max(0, self.h - y_top - y_bottom)
-	self.x = self.x + x_left
-	self.y = self.y + y_top
-end
-
-
-function _mt_node:carveEdgeUnit(x_left, y_top, x_right, y_bottom)
-	x_left = math.max(0.0, math.min(x_left, 1.0))
-	y_top = math.max(0.0, math.min(y_top, 1.0))
-	x_right = math.max(0.0, math.min(x_right, 1.0))
-	y_bottom = math.max(0.0, math.min(y_bottom, 1.0))
-
-	x_left = math.floor(0.5 + x_left * self.w)
-	y_top = math.floor(0.5 + y_top * self.h)
-	x_right = math.floor(0.5 + x_right * self.w)
-	y_bottom = math.floor(0.5 + y_bottom * self.h)
-
-	self:carveEdgePixels(x_left, y_top, x_right, y_bottom)
-end
-
-
-function widLayout.applySlice(slice_mode, amount, length, original_length, do_scale)
+local function _calculateSlice(slice_mode, amount, length, original_length, do_scale)
 	--print("slice_mode", slice_mode, "amount", amount, "length", length, "original_length", original_length)
 	local cut
 	if slice_mode == "unit" then
 		cut = math.floor(original_length * math.max(0, math.min(amount, 1)))
 
 	elseif slice_mode == "px" then
-		if do_scale then
-			cut = math.floor(math.max(0, math.min(amount * context.scale, length)))
-		else
-			cut = math.floor(math.max(0, math.min(amount, length)))
-		end
-
+		local scale = do_scale and context.scale or 1.0
+		cut = math.floor(math.max(0, math.min(amount * scale, length)))
 	else
 		error("invalid 'slice_mode' enum.")
 	end
@@ -357,173 +150,252 @@ function widLayout.applySlice(slice_mode, amount, length, original_length, do_sc
 end
 
 
-widLayout.handlers = {}
-
-
-widLayout.handlers["static"] = function(np, nc)
-	local scale = context.scale
-
-	local px, py, pw, ph
-	if nc.static_rel then
-		px, py, pw, ph = np.x, np.y, np.w, np.h
-	else
-		px, py, pw, ph = 0, 0, np.orig_w, np.orig_h
+local function _querySliceLength(wid, x_axis, cross_length)
+	local a, b = wid:uiCall_getSliceLength(x_axis, cross_length)
+	if a then
+		return a, b
 	end
-
-	nc.w = math.floor(nc.static_w * scale)
-	nc.x = math.floor(nc.static_x * scale)
-	if nc.static_flip_x then
-		nc.x = pw - nc.w - nc.x
-	end
-	nc.x = nc.x + px
-
-	nc.h = math.floor(nc.static_h * scale)
-	nc.y = math.floor(nc.static_y * scale)
-	if nc.static_flip_y then
-		nc.y = ph - nc.h - nc.y
-	end
-	nc.y = nc.y + py
+	return wid.lo_c, wid.lo_d -- slice_amount, slice_scale
 end
 
 
-widLayout.handlers["grid"] = function(np, nc)
-	if np.grid_rows > 0 and np.grid_cols > 0 then
-		nc.x = np.x + math.floor(nc.grid_x * np.w / np.grid_rows)
-		nc.y = np.y + math.floor(nc.grid_y * np.h / np.grid_cols)
-		nc.w = math.floor(np.w / np.grid_rows)
-		nc.h = math.floor(np.h / np.grid_cols)
-	else
-		nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
-	end
-end
+widLayout.handlers = {
+	grid = function(np, nc, orig_w, orig_h)
+		local grid_x, grid_y, grid_w, grid_h = nc.lo_a, nc.lo_b, nc.lo_c, nc.lo_d
 
-
-local function _querySliceLength(wid, nc, x_axis, cross_length)
-	if wid then
-		local a, b = wid:uiCall_getSliceLength(x_axis, cross_length)
-		if a then
-			return a, b
+		if np.lo_grid_rows > 0 and np.lo_grid_cols > 0 then
+			nc.x = np.lo_x + math.floor(grid_x * np.lo_w / np.lo_grid_rows)
+			nc.y = np.lo_y + math.floor(grid_y * np.lo_h / np.lo_grid_cols)
+			nc.w = math.floor(np.lo_w / np.lo_grid_rows * grid_w)
+			nc.h = math.floor(np.lo_h / np.lo_grid_cols * grid_h)
+		else
+			nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
 		end
-	end
-	return nc.slice_amount, nc.slice_scale
+	end,
+
+	null = function(np, nc, orig_w, orig_h)
+		-- Do nothing.
+	end,
+
+	remaining = function(np, nc, orig_w, orig_h)
+		nc.x, nc.y, nc.w, nc.h = np.lo_x, np.lo_y, np.lo_w, np.lo_h
+	end,
+
+	slice = function(np, nc, orig_w, orig_h)
+		local slice_mode, slice_edge = nc.lo_a, nc.lo_b
+
+		if slice_edge == "left" then
+			nc.y = np.lo_y
+			nc.h = np.lo_h
+			local amount, scaled = _querySliceLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSlice(slice_mode, amount, np.lo_w, orig_w, scaled)
+			nc.x = np.lo_x
+			np.lo_x = np.lo_x + nc.w
+
+		elseif slice_edge == "right" then
+			nc.y = np.lo_y
+			nc.h = np.lo_h
+			local amount, scaled = _querySliceLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSlice(slice_mode, amount, np.lo_w, orig_w, scaled)
+			nc.x = np.lo_x + np.lo_w
+
+		elseif slice_edge == "top" then
+			nc.x = np.lo_x
+			nc.w = np.lo_w
+			local amount, scaled = _querySliceLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSlice(slice_mode, amount, np.lo_h, orig_h, scaled)
+			nc.y = np.lo_y
+			np.lo_y = np.lo_y + nc.h
+
+		elseif slice_edge == "bottom" then
+			nc.x = np.lo_x
+			nc.w = np.lo_w
+			local amount, scaled = _querySliceLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSlice(slice_mode, amount, np.lo_h, orig_h, scaled)
+			nc.y = np.lo_y + np.lo_h
+
+		else
+			error("bad slice_edge enum.")
+		end
+	end,
+
+	static = function(np, nc, orig_w, orig_h)
+		local scale = context.scale
+		local static_x, static_y, static_w, static_h = nc.lo_a, nc.lo_b, nc.lo_c, nc.lo_d
+		local static_rel, static_flip_x, static_flip_y = nc.lo_e, nc.lo_f, nc.lo_g
+
+		local px, py, pw, ph
+		if static_rel then
+			px, py, pw, ph = np.lo_x, np.lo_y, np.lo_w, np.lo_h
+		else
+			px, py, pw, ph = 0, 0, orig_w, orig_h
+		end
+
+		nc.w = math.floor(static_w * scale)
+		nc.x = math.floor(static_x * scale)
+		if static_flip_x then
+			nc.x = pw - nc.w - nc.x
+		end
+		nc.x = nc.x + px
+
+		nc.h = math.floor(static_h * scale)
+		nc.y = math.floor(static_y * scale)
+		if static_flip_y then
+			nc.y = ph - nc.h - nc.y
+		end
+		nc.y = nc.y + py
+	end,
+}
+
+
+local function _layoutSetBase(self, layout_base)
+	uiAssert.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
+
+	self.lo_base = layout_base
 end
 
 
-widLayout.handlers["slice"] = function(np, nc)
-	local wid = nc.wid_ref
+local function _layoutGetBase(self)
+	return self.lo_base
+end
 
-	if nc.slice_edge == "left" then
-		nc.y = np.y
-		nc.h = np.h
-		local amount, scaled = _querySliceLength(wid, nc, true, nc.h)
-		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w, scaled)
-		nc.x = np.x
-		np.x = np.x + nc.w
 
-	elseif nc.slice_edge == "right" then
-		nc.y = np.y
-		nc.h = np.h
-		local amount, scaled = _querySliceLength(wid, nc, true, nc.h)
-		nc.w, np.w = widLayout.applySlice(nc.slice_mode, amount, np.w, np.orig_w, scaled)
-		nc.x = np.x + np.w
+local function _layoutSetGridDimensions(self, rows, cols)
+	uiAssert.numberNotNaN(1, rows)
+	uiAssert.numberNotNaN(2, cols)
 
-	elseif nc.slice_edge == "top" then
-		nc.x = np.x
-		nc.w = np.w
-		local amount, scaled = _querySliceLength(wid, nc, false, nc.w)
-		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h, scaled)
-		nc.y = np.y
-		np.y = np.y + nc.h
+	self.lo_grid_rows = rows
+	self.lo_grid_cols = cols
 
-	elseif nc.slice_edge == "bottom" then
-		nc.x = np.x
-		nc.w = np.w
-		local amount, scaled = _querySliceLength(wid, nc, false, nc.w)
-		nc.h, np.h = widLayout.applySlice(nc.slice_mode, amount, np.h, np.orig_h, scaled)
-		nc.y = np.y + np.h
+	return self
+end
+
+
+local function _layoutGetGridDimensions(self, rows, cols)
+	return self.lo_grid_rows, self.lo_grid_cols
+end
+
+
+local function _layoutSetMargin(self, x1, y1, x2, y2)
+	uiAssert.numberNotNaN(1, x1)
+
+	if y1 then
+		uiAssert.numberNotNaN(2, y1)
+		uiAssert.numberNotNaN(3, x2)
+		uiAssert.numberNotNaN(4, y2)
+
+		self.lo_margin_x1 = math.max(0, x1)
+		self.lo_margin_y1 = math.max(0, y1)
+		self.lo_margin_x2 = math.max(0, x2)
+		self.lo_margin_y2 = math.max(0, y2)
+	else
+		self.lo_margin_x1 = math.max(0, x1)
+		self.lo_margin_y1 = math.max(0, x1)
+		self.lo_margin_x2 = math.max(0, x1)
+		self.lo_margin_y2 = math.max(0, x1)
+	end
+
+	return self
+end
+
+
+local function _layoutGetMargin(self)
+	return self.lo_margin_x1, self.lo_margin_y1, self.lo_margin_x2, self.lo_margin_y2
+end
+
+
+function widLayout.setupContainerDef(def)
+	def.layoutSetBase = _layoutSetBase
+	def.layoutGetBase = _layoutGetBase
+	def.layoutSetGridDimensions = _layoutSetGridDimensions
+	def.layoutGetGridDimensions = _layoutGetGridDimensions
+	def.layoutSetMargin = _layoutSetMargin
+	def.layoutGetMargin = _layoutGetMargin
+end
+
+
+function widLayout.setupLayoutList(self)
+	self.lo_list = {}
+	self.lo_base = "self"
+	self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, 0, 0
+	self.lo_margin_x1, self.lo_margin_y1, self.lo_margin_x2, self.lo_margin_y2 = 0, 0, 0, 0
+	self.lo_grid_rows, self.lo_grid_cols = 0, 0 -- grid layout mode
+end
+
+
+function widLayout.resetLayout(self)
+	local to = self.lo_base
+
+	if to == "zero" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, 0, 0
+
+	elseif to == "self" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, self.w, self.h
+
+	elseif to == "viewport" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, self.vp_w, self.vp_h
+
+	elseif to == "viewport-full" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
+
+	elseif to == "viewport-width" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, self.vp_w, math.huge
+
+	elseif to == "viewport-height" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, math.huge, self.vp_h
+
+	elseif to == "unbounded" then
+		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, math.huge, math.huge
 
 	else
-		error("bad slice_edge enum.")
+		error("invalid layout base mode.")
 	end
 end
 
 
-widLayout.handlers["null"] = function(np, nc)
-	-- Do nothing.
-end
+function widLayout.applyLayout(self, _depth)
+	-- check 'self.lo_list' before calling.
 
-
-function widLayout.splitNode(n, _depth)
-	--print("_splitNode() " .. _depth .. ": start")
+	--print("_applyLayout() " .. _depth .. ": start")
 	--print(n, "#nodes:", n and n.nodes and (#n.nodes))
 
-	-- Min/max dimensions
-	n.w = math.max(n.w_min, math.min(n.w, n.w_max))
-	n.h = math.max(n.h_min, math.min(n.h, n.h_max))
-
-	n.orig_w, n.orig_h = n.w, n.h
+	local scale = context.scale
+	local orig_w, orig_h = self.lo_w, self.lo_h
 
 	-- Margin reduction
-	n.x = n.x + n.margin_x1
-	n.y = n.y + n.margin_y1
-	n.w = math.max(0, n.w - n.margin_x1 - n.margin_x2)
-	n.h = math.max(0, n.h - n.margin_y1 - n.margin_y2)
+	local mx1 = math.floor(self.lo_margin_x1 * scale)
+	local my1 = math.floor(self.lo_margin_y1 * scale)
+	local mx2 = math.floor(self.lo_margin_x2 * scale)
+	local my2 = math.floor(self.lo_margin_y2 * scale)
 
-	if n.nodes then
-		--print("old n XYWH", n.x, n.y, n.w, n.h)
-		local nodes = n.nodes
-		for i, n2 in ipairs(nodes) do
-			local handler = widLayout.handlers[n2.mode]
-			if not handler then
-				error("invalid or missing layout handler: " .. tostring(n2.mode))
-			end
+	self.lo_x = self.lo_x + mx1
+	self.lo_y = self.lo_y + my1
+	self.lo_w = math.max(0, self.lo_w - mx1 - mx2)
+	self.lo_h = math.max(0, self.lo_h - my1 - my2)
 
-			handler(n, n2)
-
-			--print("new n XYWH", n.x, n.y, n.w, n.h)
-			--print("new child " .. i .. " XYWH", n2.x, n2.y, n2.w, n2.h)
-			widLayout.splitNode(n2, _depth + 1)
+	for i, child in ipairs(self.lo_list) do
+		local handler = widLayout.handlers[child.lo_mode]
+		if not handler then
+			error("invalid or missing layout handler: " .. tostring(child.lo_mode))
 		end
+
+		--print("old self XYWH", self.x, self.y, self.w, self.h)
+		handler(self, child, orig_w, orig_h)
+		--print("new self XYWH", self.x, self.y, self.w, self.h)
+
+		-- Outpad reduction
+		local ox1 = math.floor(child.lo_outpad_x1 * scale)
+		local oy1 = math.floor(child.lo_outpad_y1 * scale)
+		local ox2 = math.floor(child.lo_outpad_x2 * scale)
+		local oy2 = math.floor(child.lo_outpad_y2 * scale)
+
+		child.x = child.x + ox1
+		child.y = child.y + oy1
+		child.w = math.max(0, child.w - ox1 - ox2)
+		child.h = math.max(0, child.h - oy1 - oy2)
 	end
 
-	--print("_splitNode() " .. _depth .. ": end")
-end
-
-
-function widLayout.setWidgetSizes(n, _depth)
-	local wid = n.wid_ref
-	if wid then
-		wid.x, wid.y, wid.w, wid.h = n.x, n.y, n.w, n.h
-	end
-	if n.nodes then
-		for i, n2 in ipairs(n.nodes) do
-			widLayout.setWidgetSizes(n2, _depth + 1)
-		end
-	end
-end
-
-
-function widLayout.getPreviousSibling(node)
-	local parent = node.parent
-	if parent then
-		for i, child in ipairs(parent.nodes) do
-			if child == node then
-				return i > 1 and parent.nodes[i - 1]
-			end
-		end
-	end
-end
-
-
-function widLayout.nodeInHierarchy(root, node)
-	while node do
-		if node == root then
-			return true
-		end
-		node = node.parent
-	end
-
-	return false
+	--print("_applyLayout() " .. _depth .. ": end")
 end
 
 

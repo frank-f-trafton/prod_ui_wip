@@ -11,7 +11,7 @@ local plan = {}
 function plan.make(panel)
 	local context = panel.context
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
@@ -151,7 +151,8 @@ function plan.make(panel)
 	local w2, h2 = 168, 40
 
 	local cbox_wrap = panel:addChild("barebones/checkbox")
-	demoShared.setStaticLayout(panel, cbox_wrap, xx, yy, ww, hh)
+	cbox_wrap:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 	cbox_wrap:setTag("demo_wrap")
 	cbox_wrap:setLabel("Wrap (F5)", "single")
 	cbox_wrap.wid_buttonAction = function(self)
@@ -176,7 +177,8 @@ function plan.make(panel)
 	local rdo_align
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	demoShared.setStaticLayout(panel, rdo_align, xx, yy, ww, hh)
+	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 	rdo_align:setTag("demo_align_l")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "left"
@@ -186,7 +188,8 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	demoShared.setStaticLayout(panel, rdo_align, xx, yy, ww, hh)
+	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 	rdo_align:setTag("demo_align_c")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "center"
@@ -196,7 +199,8 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	demoShared.setStaticLayout(panel, rdo_align, xx, yy, ww, hh)
+	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 	rdo_align:setTag("demo_align_r")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "right"
@@ -209,7 +213,8 @@ function plan.make(panel)
 	local ED_W, ED_H = 496, 350
 
 	local text_box = panel:addChild("input/text_box_multi")
-	demoShared.setStaticLayout(panel, text_box, xx, yy, ED_W, ED_H)
+	text_box:layoutSetMode("static", xx, yy, ED_W, ED_H)
+		:layoutAdd()
 	text_box:setTag("demo_text_box")
 	text_box:setScrollBars(true, true)
 
