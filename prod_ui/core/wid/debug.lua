@@ -29,13 +29,6 @@ local function isNum(n)
 end
 
 
-local function setupLineState()
-	love.graphics.setLineWidth(1)
-	love.graphics.setLineStyle("smooth")
-	love.graphics.setLineJoin("miter")
-end
-
-
 --- Draws a colored outline around a widget viewport.
 -- @param self The widget.
 -- @param v The viewport index.
@@ -58,7 +51,9 @@ function debug.debugDrawViewport(self, v, r, g, b, a)
 	v = viewport_keys[v]
 
 	if isNum(self[v.x]) and isNum(self[v.y]) and isNum(self[v.w]) and isNum(self[v.h]) then
-		setupLineState()
+		love.graphics.setLineWidth(1)
+		love.graphics.setLineStyle("smooth")
+		love.graphics.setLineJoin("miter")
 		love.graphics.rectangle("line", 0.5 + self[v.x], 0.5 + self[v.y], self[v.w] - 1, self[v.h] - 1)
 	end
 
@@ -66,43 +61,41 @@ function debug.debugDrawViewport(self, v, r, g, b, a)
 end
 
 
-function debug.countLayoutNodes(n)
-	local c = 1
-	if n.nodes then
-		for i, child in ipairs(n.nodes) do
-			c = c + debug.countLayoutNodes(child)
-		end
-	end
-	return c
-end
-
-
-function debug.debugDrawLayoutNodes(node, _depth, _index)
+function debug.debugDrawLayoutNodes(wid)
 	-- Translate to the widget's position and scroll offsets before calling.
-	_index = _index or 1
+
+	if not wid.lo_list then
+		return
+	end
 
 	love.graphics.push("all")
 	love.graphics.setScissor()
 
-	love.graphics.setColor(1, 1, 1, 1)
-	-- Don't render nodes that are infinitely wide or tall.
-	if node.w ~= math.huge and node.h ~= math.huge then
-		love.graphics.rectangle("line", node.x, node.y, node.w, node.h)
+	if wid.lo_w > 0 and wid.lo_h > 0 then
+		love.graphics.setColor(0.75, 0.75, 1, 0.5)
+		love.graphics.setLineWidth(2)
+		love.graphics.setLineStyle("smooth")
+		love.graphics.setLineJoin("miter")
+		love.graphics.rectangle("fill", wid.lo_x, wid.lo_y, wid.lo_w, wid.lo_h)
 	end
 
-	-- [depth:index], where depth is the layout tree level, and index is the child slot at that level.
-	love.graphics.print("[" .. tostring(_depth) .. ":" .. tostring(_index) .. "]", node.x, node.y)
+	-- TODO: grid stuff in parent
 
-	if node.nodes then
-		--love.graphics.translate(node.x, node.y)
-		for i, child in ipairs(node.nodes) do
-			debug.debugDrawLayoutNodes(child, _depth + 1, i)
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.setLineWidth(1)
+
+	for i, child in ipairs(wid.children) do
+		if child.lo_mode ~= "null" then
+			love.graphics.rectangle("line", child.x, child.y, child.w, child.h)
+			love.graphics.setColor(0, 0, 0, 0.5)
+			love.graphics.print(child.lo_mode, child.x + 2, child.y + 2)
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.print(child.lo_mode, child.x, child.y)
 		end
 	end
 
 	love.graphics.pop()
 end
-
 
 
 return debug -- widShared.debug

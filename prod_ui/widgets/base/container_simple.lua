@@ -4,16 +4,22 @@
 local context = select(1, ...)
 
 
+local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
 local def = {}
 
 
+widLayout.setupContainerDef(def)
+
+
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 0
+
+	widLayout.setupLayoutList(self)
 
 	-- Don't highlight when holding the UI thimble.
 	self.renderThimble = widShared.dummy
@@ -28,6 +34,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 		end
 	end
+end
+
+
+function def:uiCall_reshapePre()
+	widLayout.resetLayout(self)
 end
 
 

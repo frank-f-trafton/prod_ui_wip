@@ -44,7 +44,8 @@ local function _setupWS2(root)
 	ws2.tag = "alt_workspace"
 
 	local btn = ws2:addChild("base/button")
-	demoShared.setStaticLayout(ws2, btn, 32, 32, 256, 64)
+	btn:layoutSetMode("static", 32, 32, 256, 64)
+		:layoutAdd()
 	btn:setLabel("Back to Workspace #1")
 
 	btn.wid_buttonAction = function(self)
@@ -141,7 +142,7 @@ end
 function plan.make(panel)
 	--title("Workspace Frames")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
@@ -151,7 +152,8 @@ function plan.make(panel)
 	-- Button: Create Workspace #2
 	do
 		local btn = panel:addChild("base/button")
-		demoShared.setStaticLayout(panel, btn, xx, yy, ww, hh)
+		btn:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		btn.tag = "btn_crt"
 		btn:setLabel("Create Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -164,7 +166,8 @@ function plan.make(panel)
 	-- Button: Select Workspace #2
 	do
 		local btn = panel:addChild("base/button")
-		demoShared.setStaticLayout(panel, btn, xx, yy, ww, hh)
+		btn:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		btn.tag = "btn_act"
 		btn:setLabel("Activate Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -180,7 +183,8 @@ function plan.make(panel)
 	-- Button: Destroy Workspace #2
 	do
 		local btn = panel:addChild("base/button")
-		demoShared.setStaticLayout(panel, btn, xx, yy, ww, hh)
+		btn:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		btn.tag = "btn_dst"
 		btn:setLabel("Destroy Workspace #2")
 		btn.wid_buttonAction = function(self)

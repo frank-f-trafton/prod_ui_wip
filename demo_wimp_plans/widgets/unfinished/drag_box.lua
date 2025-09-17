@@ -4,7 +4,7 @@ local plan = {}
 function plan.make(panel)
 	--title("DragBox Test")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 

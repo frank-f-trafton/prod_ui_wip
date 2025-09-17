@@ -13,78 +13,74 @@ end
 function plan.make(panel)
 	--title("Layout")
 
-	panel:setLayoutBase("viewport")
+	panel:layoutSetBase("viewport")
 	panel:setScrollRangeMode("zero")
 	panel:setSashesEnabled(true)
 
 	--[[
-	┌┈┬┈┬┈┬┈┬┈┐
+	  H
+	┌─┴─┐
+	┌─┬─┬─┬─┬─┐
 	│A│C│ │ │ │
-	├┈┼┈┤E│FsG│
+	├─┼─┤E│FsG│
 	│B│D│ │ │ │
 	└─┴─┴─┴─┴─┘
 
-	      G
-	      |
-	   +-----+-+-+-+
-	   |     | | | |
-	n_grid   E F s G
-	   |
-	+-+-+-+
-	| | | |
+	    panel
+	      │
+	   ┌──┴──┬─┬─┬─┐
+	   │     │ │ │ │
+	   H     E F s G
+	   │
+	┌─┬─┬─┐
+	│ │ │ │
 	A B C D
 	--]]
 
-	local wa = _makeBox(panel, "lightgreen", "green", "black", "(Grid 0,0)")
-	local wb = _makeBox(panel, "lightblue", "blue", "white", "(Grid 0,1)")
-	local wc = _makeBox(panel, "lightgrey", "darkgrey", "black", "(Grid 1,0)")
-	local wd = _makeBox(panel, "lightmagenta", "magenta", "black", "(Grid 1,1)")
+	local container_h = panel:addChild("base/container_simple")
+		:layoutSetMode("slice", "unit", "left", 0.4)
+		:layoutSetMargin(16, 16, 16, 16)
+		:layoutSetGridDimensions(2, 2)
+		:layoutAdd()
+
+	local wa = _makeBox(container_h, "lightgreen", "green", "black", "(Grid 0,0)")
+		:layoutSetMode("grid", 0, 0)
+		--:layoutSetPadding(4, 4, 4, 4)
+		:layoutAdd()
+
+	local wb = _makeBox(container_h, "lightblue", "blue", "white", "(Grid 0,1)")
+		:layoutSetMode("grid", 0, 1)
+		--:layoutSetPadding(4, 4, 4, 4)
+		:layoutAdd()
+
+	local wc = _makeBox(container_h, "lightgrey", "darkgrey", "black", "(Grid 1,0)")
+		:layoutSetMode("grid", 1, 0)
+		--:layoutSetPadding(4, 4, 4, 4)
+		:layoutAdd()
+
+	local wd = _makeBox(container_h, "lightmagenta", "magenta", "black", "(Grid 1,1)")
+		:layoutSetMode("grid", 1, 1)
+		--:layoutSetPadding(4, 4, 4, 4)
+		:layoutAdd()
+
 	local we = _makeBox(panel, "lightyellow", "darkyellow", "black", "(E)")
+		:layoutSetMode("slice", "unit", "left", 0.2)
+		:layoutAdd()
+
 	local wf = _makeBox(panel, "darkgrey", "lightgrey", "white", "(F)")
-	-- s: no widget
+		--:layoutSetMode("slice", "unit", "left", 0.2)
+		:layoutSetMode("slice", "px", "left", 140)
+		:layoutAdd()
+
+	--[[
+	local sash = panel:addChild("base/sash")
+		:setLayoutMode("slice", "px", " -- TODO
+	--]]
+	--panel:configureSashNode(nf, ns) TODO: fix this up
+
 	local wg = _makeBox(panel, "darkblue", "lightblue", "white", "(G)")
-
-	panel.layout_tree:setWidget(wg)
-
-	local n_grid = panel.layout_tree:newNode()
-		:setSliceMode("unit", "left", 0.4)
-		:setMargin(4, 4, 4, 4)
-		:setGridDimensions(2, 2)
-
-	local na = n_grid:newNode()
-		:setGridMode(0, 0)
-		:setMargin(4, 4, 4, 4)
-		:setWidget(wa)
-
-	local nb = n_grid:newNode()
-		:setGridMode(0, 1)
-		:setMargin(4, 4, 4, 4)
-		:setWidget(wb)
-
-	local nc = n_grid:newNode()
-		:setGridMode(1, 0)
-		:setMargin(4, 4, 4, 4)
-		:setWidget(wc)
-
-	local nd = n_grid:newNode()
-		:setGridMode(1, 1)
-		:setMargin(4, 4, 4, 4)
-		:setWidget(wd)
-
-	local ne = panel.layout_tree:newNode()
-		:setSliceMode("unit", "left", 0.2)
-		:setWidget(we)
-
-	local nf = panel.layout_tree:newNode()
-		--:setSliceMode("unit", "left", 0.2)
-		:setSliceMode("px", "left", 140)
-		:setWidget(wf)
-
-	local ns = panel.layout_tree:newNode()
-	-- Sash nodes do not refer to widgets, at least not in the original design.
-	panel:configureSashNode(nf, ns)
-
-	-- 'wg' is part of the root node.
+		:layoutSetMode("remaining")
+		:layoutAdd()
 
 	panel:reshape()
 end

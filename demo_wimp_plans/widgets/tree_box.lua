@@ -25,14 +25,15 @@ end
 function plan.make(panel)
 	--title("TreeBox Test")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local wid_id = "wimp/tree_box"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local tree_box = panel:addChild(wid_id, nil, skin_id)
-	demoShared.setStaticLayout(panel, tree_box, 0, 0, 224, 256)
+	tree_box:layoutSetMode("static", 0, 0, 224, 256)
+		:layoutAdd()
 	tree_box:setTag("demo_treebox")
 
 	tree_box.wid_action = function(self, item, index)
@@ -86,7 +87,8 @@ function plan.make(panel)
 
 	do
 		local rdo_btn = panel:addChild("barebones/radio_button")
-		demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
+		rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		rdo_btn.radio_group = "tb_item_h_align"
 		rdo_btn:setLabel("left")
 		rdo_btn.usr_item_align_h = "left"
@@ -97,7 +99,8 @@ function plan.make(panel)
 
 	do
 		local rdo_btn = panel:addChild("barebones/radio_button")
-		demoShared.setStaticLayout(panel, rdo_btn, wx, wy, ww, wh)
+		rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		rdo_btn.radio_group = "tb_item_h_align"
 		rdo_btn:setLabel("right")
 		rdo_btn.usr_item_align_h = "right"
@@ -111,7 +114,8 @@ function plan.make(panel)
 
 	do
 		local sld = panel:addChild("barebones/slider_bar")
-		demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
+		sld:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		sld.trough_vertical = false
 		sld:setLabel("Item Vertical Pad")
 		sld.slider_pos = 0
@@ -130,7 +134,8 @@ function plan.make(panel)
 
 	do
 		local sld = panel:addChild("barebones/slider_bar")
-		demoShared.setStaticLayout(panel, sld, wx, wy, ww, wh)
+		sld:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		sld.trough_vertical = false
 		sld:setLabel("Pipe width")
 		sld.slider_pos = 0
@@ -150,7 +155,8 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("barebones/checkbox")
-		demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
+		chk:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		chk:setLabel("Draw pipes")
 		chk:setChecked(tree_box.skin.draw_pipes)
 		chk.wid_buttonAction = function(self)
@@ -166,7 +172,8 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("barebones/checkbox")
-		demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
+		chk:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		chk:setLabel("Draw icons")
 		chk:setChecked(tree_box.TR_show_icons)
 		chk.wid_buttonAction = function(self)
@@ -182,7 +189,8 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("barebones/checkbox")
-		demoShared.setStaticLayout(panel, chk, wx, wy, ww, wh)
+		chk:layoutSetMode("static", wx, wy, ww, wh)
+			:layoutAdd()
 		chk:setLabel("Expanders enabled")
 		chk:setChecked(tree_box.TR_expanders_active)
 		chk.wid_buttonAction = function(self)

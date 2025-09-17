@@ -13,12 +13,13 @@ end
 function plan.make(panel)
 	--title("Stepper")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local stepper_h = panel:addChild("base/stepper")
-	demoShared.setStaticLayout(panel, stepper_h, 32, 32, 240, 32)
+	stepper_h:layoutSetMode("static", 32, 32, 240, 32)
+		:layoutAdd()
 
 	stepper_h:insertOption("Foobar")
 	stepper_h:insertOption("Bazbop")
@@ -31,7 +32,8 @@ function plan.make(panel)
 
 
 	local stepper_v = panel:addChild("base/stepper")
-	demoShared.setStaticLayout(panel, stepper_v, 288, 32, 64, 128)
+	stepper_v:layoutSetMode("static", 288, 32, 64, 128)
+		:layoutAdd()
 	stepper_v:insertOption("Foobar")
 	stepper_v:insertOption("Bazbop")
 	stepper_v:insertOption({text = "Dipdop"})

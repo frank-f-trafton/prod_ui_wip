@@ -12,7 +12,7 @@ function plan.makeWindowFrame(root)
 	frame.h = 480
 	frame:setFrameTitle("Hiding Window Frames")
 
-	frame:setLayoutBase("viewport-width")
+	frame:layoutSetBase("viewport-width")
 	frame:setScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
@@ -22,7 +22,8 @@ function plan.makeWindowFrame(root)
 	-- Button: Hide this frame
 	do
 		local btn = frame:addChild("base/button")
-		demoShared.setStaticLayout(frame, btn, xx, yy, 250, hh)
+		btn:layoutSetMode("static", xx, yy, 250, hh)
+			:layoutAdd()
 		btn.usr_time = 0.0
 		btn.usr_time_max = 5.0
 		btn:setLabel("Hide for " .. btn.usr_time_max .. " seconds")

@@ -5,7 +5,7 @@ local demoShared = require("demo_shared")
 
 
 function plan.make(panel)
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 

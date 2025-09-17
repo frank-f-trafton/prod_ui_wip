@@ -19,7 +19,8 @@ local function _makeButton(frame, id, label, x, y, w, h)
 
 	local bb_btn = frame:addChild("base/button")
 	bb_btn.wid_buttonAction = _button_launchFrame
-	demoShared.setStaticLayout(frame, bb_btn, x, y, w, h)
+	bb_btn:layoutSetMode("static", x, y, w, h)
+		:layoutAdd()
 	bb_btn:setLabel(label)
 	bb_btn.usr_plan = id
 	return bb_btn
@@ -34,7 +35,7 @@ function plan.makeWindowFrame(root)
 	frame.h = 480
 	frame:setFrameTitle("Window Frame Selector")
 
-	frame:setLayoutBase("viewport-width")
+	frame:layoutSetBase("viewport-width")
 	frame:setScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
@@ -42,7 +43,8 @@ function plan.makeWindowFrame(root)
 	local bb_btn
 
 	bb_btn = frame:addChild("base/button")
-	demoShared.setStaticLayout(frame, bb_btn, xx, yy, ww, hh)
+	bb_btn:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 	bb_btn:setLabel("Open all")
 	bb_btn.wid_buttonAction = function(self)
 		local siblings = self:getParent().children

@@ -8,7 +8,7 @@ function plan.makeWindowFrame(root)
 	frame.h = 300
 	frame:setFrameTitle("Canvas Layering Test")
 
-	frame:setLayoutBase("viewport-width")
+	frame:layoutSetBase("viewport-width")
 	frame:setScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 

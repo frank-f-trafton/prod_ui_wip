@@ -29,18 +29,6 @@ function lgcContainer.setupMethods(self)
 end
 
 
-function _methods:setLayoutBase(layout_base)
-	uiAssert.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
-
-	self.layout_base = layout_base
-end
-
-
-function _methods:getLayoutBase()
-	return self.layout_base
-end
-
-
 function _methods:setScrollRangeMode(mode)
 	uiAssert.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
 
@@ -109,6 +97,8 @@ end
 
 
 local function _checkMouseOverSash(self, node, mx, my, con_x, con_y)
+	return nil -- TODO
+	--[===[
 	if node.slice_is_sash then
 		if mx >= node.x + con_x
 		and mx < node.x + node.w - con_x
@@ -126,6 +116,7 @@ local function _checkMouseOverSash(self, node, mx, my, con_x, con_y)
 			end
 		end
 	end
+	--]===]
 end
 
 
@@ -168,7 +159,7 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	local mxs, mys = self:getRelativePositionScrolled(mouse_x, mouse_y)
 	if not self.sash_hover then
 		local skin = self.skin
-		local node = _checkMouseOverSash(self, self.layout_tree, mxs, mys, skin.sash_contract_x, skin.sash_contract_y)
+		local node = _checkMouseOverSash(self, nil, mxs, mys, skin.sash_contract_x, skin.sash_contract_y) -- TODO
 		if node then
 			self.sash_hover = node
 			local cursor_id = lgcContainer.getSashCursorID(node.slice_edge, false)
@@ -209,7 +200,8 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 	and button == 1
 	and self.context.mouse_pressed_button == button
 	then
-		local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
+		local cn -- TODO
+		--local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
 		if cn and cn.mode == "slice" and cn.slice_mode == "px" then
 			self.press_busy = "sash"
 			self.sash_att_ax, self.sash_att_ay = x, y
@@ -231,7 +223,8 @@ function lgcContainer.sashDragLogic(self, x, y)
 	if self.sashes_enabled
 	and self.press_busy == "sash"
 	then
-		local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
+		local cn -- TODO
+		--local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
 		if cn and cn.mode == "slice" then
 			local parent = cn.parent
 			if not parent then

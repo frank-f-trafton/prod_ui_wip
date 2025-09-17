@@ -10,7 +10,7 @@ function plan.makeWindowFrame(root)
 	frame.w, frame.h = 300, 300
 	frame:setFrameTitle("Frame Destroy Test")
 
-	frame:setLayoutBase("viewport-width")
+	frame:layoutSetBase("viewport-width")
 	frame:setScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
@@ -19,7 +19,8 @@ function plan.makeWindowFrame(root)
 	bb_lbl.y = 0
 	bb_lbl.w = 256
 	bb_lbl.h = 192
-	demoShared.setStaticLayout(frame, bb_lbl, 0, 0, 256, 192)
+	bb_lbl:layoutSetMode("static", 0, 0, 256, 192)
+		:layoutAdd()
 	bb_lbl:setTag("countdown_label")
 
 	frame.usr_time = 0.0

@@ -8,7 +8,7 @@ local demoShared = require("demo_shared")
 function plan.make(panel)
 	--title("Barebones widgets")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
@@ -16,7 +16,8 @@ function plan.make(panel)
 	local ww, hh = 224, 64
 
 	local bb_button = panel:addChild("barebones/button")
-	demoShared.setStaticLayout(panel, bb_button, xx, yy, ww, hh)
+	bb_button:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_button:setLabel("<Button>")
 
@@ -27,7 +28,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	local bb_rep = panel:addChild("barebones/button_repeat")
-	demoShared.setStaticLayout(panel, bb_rep, xx, yy, ww, hh)
+	bb_rep:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_rep:setLabel("<Repeat #0>")
 	bb_rep.usr_count = 0
@@ -40,7 +42,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	local bb_instant = panel:addChild("barebones/button_instant")
-	demoShared.setStaticLayout(panel, bb_instant, xx, yy, ww, hh)
+	bb_instant:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_instant:setLabel("Instant-Action Button")
 	bb_instant.usr_n = 0
@@ -53,7 +56,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	local bb_stick = panel:addChild("barebones/button_sticky")
-	demoShared.setStaticLayout(panel, bb_stick, xx, yy, ww, hh)
+	bb_stick:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_stick:setLabel("Sticky Button")
 
@@ -64,7 +68,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	local bb_checkbox = panel:addChild("barebones/checkbox")
-	demoShared.setStaticLayout(panel, bb_checkbox, xx, yy, ww, hh)
+	bb_checkbox:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_checkbox:setLabel("Checkbox")
 
@@ -72,7 +77,8 @@ function plan.make(panel)
 
 	local bb_radio
 	bb_radio = panel:addChild("barebones/radio_button")
-	demoShared.setStaticLayout(panel, bb_radio, xx, yy, ww, hh)
+	bb_radio:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_radio.radio_group = "bare1"
 	bb_radio:setLabel("Radio1")
@@ -80,7 +86,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	bb_radio = panel:addChild("barebones/radio_button")
-	demoShared.setStaticLayout(panel, bb_radio, xx, yy, ww, hh)
+	bb_radio:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_radio.radio_group = "bare1"
 	bb_radio:setLabel("Radio2")
@@ -89,7 +96,8 @@ function plan.make(panel)
 
 	local bb_lbl
 	bb_lbl = panel:addChild("barebones/label")
-	demoShared.setStaticLayout(panel, bb_lbl, xx, yy, ww, hh)
+	bb_lbl:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_lbl.enabled = true
 	bb_lbl:setLabel("Label (enabled)")
@@ -97,7 +105,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	bb_lbl = panel:addChild("barebones/label")
-	demoShared.setStaticLayout(panel, bb_lbl, xx, yy, ww, hh)
+	bb_lbl:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_lbl.enabled = false
 	bb_lbl:setLabel("Label (disabled)")
@@ -105,7 +114,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	local bb_sl1 = panel:addChild("barebones/slider_bar")
-	demoShared.setStaticLayout(panel, bb_sl1, xx, yy, ww, hh)
+	bb_sl1:layoutSetMode("static", xx, yy, ww, hh)
+		:layoutAdd()
 
 	bb_sl1.trough_vertical = false
 	bb_sl1:setLabel("Barebones Slider Bar")
@@ -117,7 +127,8 @@ function plan.make(panel)
 	yy = yy + hh
 
 	local bb_sl2 = panel:addChild("barebones/slider_bar")
-	demoShared.setStaticLayout(panel, bb_sl2, xx, yy, hh, ww)
+	bb_sl2:layoutSetMode("static", xx, yy, hh, ww)
+		:layoutAdd()
 
 	bb_sl2.trough_vertical = true
 	bb_sl2:setLabel("Vertical")
@@ -129,7 +140,8 @@ function plan.make(panel)
 	yy = yy + ww
 
 	local bb_input = panel:addChild("barebones/input_box")
-	demoShared.setStaticLayout(panel, bb_input, xx, yy, ww, 32)
+	bb_input:layoutSetMode("static", xx, yy, ww, 32)
+		:layoutAdd()
 
 	bb_input:setText("Barebones Input Box")
 	--bb_input:setMaxCodePoints(4)

@@ -13,7 +13,7 @@ end
 function plan.make(panel)
 	--title("")
 
-	panel:setLayoutBase("viewport")
+	panel:layoutSetBase("viewport")
 	panel:setScrollRangeMode("zero")
 	panel:setSashesEnabled(true)
 
@@ -41,67 +41,58 @@ function plan.make(panel)
 	└──────┴───┴───┘
 	--]]
 
-	local c1 = panel:addChild("base/container")
-	local nc1 = panel.layout_tree:newNode()
-		:setStaticMode(0, 0, 256, 256, false, false, false)
-		:setWidget(c1)
-
-	c1.layout_tree:setMargin(16, 16, 16, 16)
+	local c1 = panel:addChild("base/container_simple")
+		:layoutSetMode("static", 0, 0, 256, 256, false, false, false)
+		:layoutSetMargin(16, 16, 16, 16)
+		:layoutAdd()
 
 	local c1_box = _makeBox(c1, "lightyellow", "darkyellow", "black", "Not Relative")
-	c1.layout_tree:setWidget(c1_box)
 
 	local wa = _makeBox(c1, "lightgreen", "green", "black", "(A)")
-	local na = c1.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, false, false, false)
-		:setWidget(wa)
+		:layoutSetMode("static", 0, 0, 48, 48, false, false, false)
+		:layoutAdd()
 
 	local wb = _makeBox(c1, "lightblue", "blue", "white", "(B)")
-	local nb = c1.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, false, true, false)
-		:setWidget(wb)
+		:layoutSetMode("static", 0, 0, 48, 48, false, true, false)
+		:layoutAdd()
 
 	local wc = _makeBox(c1, "lightgrey", "darkgrey", "black", "(C)")
-	local nc = c1.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, false, false, true)
-		:setWidget(wc)
+		:layoutSetMode("static", 0, 0, 48, 48, false, false, true)
+		:layoutAdd()
 
 	local wd = _makeBox(c1, "lightmagenta", "magenta", "black", "(D)")
-	local nd = c1.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, false, true, true)
-		:setWidget(wd)
+		:layoutSetMode("static", 0, 0, 48, 48, false, true, true)
+		:layoutAdd()
+
+	c1_box:layoutSetMode("remaining")
+		:layoutAdd()
 
 
-	local c2 = panel:addChild("base/container")
-	local nc2 = panel.layout_tree:newNode()
-		:setStaticMode(0+256+32, 0, 256, 256, false, false, false)
-		:setWidget(c2)
-
-	c2.layout_tree:setMargin(16, 16, 16, 16)
+	local c2 = panel:addChild("base/container_simple")
+		:layoutSetMode("static", 0+256+32, 0, 256, 256, false, false, false)
+		:layoutSetMargin(16, 16, 16, 16)
+		:layoutAdd()
 
 	local c2_box = _makeBox(c2, "darkgrey", "lightgrey", "white", "Relative")
-	c2.layout_tree:setWidget(c2_box)
 
 	local we = _makeBox(c2, "lightgreen", "green", "black", "(E)")
-	local ne = c2.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, true, false, false)
-		:setWidget(we)
+		:layoutSetMode("static", 0, 0, 48, 48, true, false, false)
+		:layoutAdd()
 
 	local wf = _makeBox(c2, "lightblue", "blue", "white", "(F)")
-	local nf = c2.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, true, true, false)
-		:setWidget(wf)
+		:layoutSetMode("static", 0, 0, 48, 48, true, true, false)
+		:layoutAdd()
 
 	local wg = _makeBox(c2, "lightgrey", "darkgrey", "black", "(G)")
-	local ng = c2.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, true, false, true)
-		:setWidget(wg)
+		:layoutSetMode("static", 0, 0, 48, 48, true, false, true)
+		:layoutAdd()
 
 	local wh = _makeBox(c2, "lightmagenta", "magenta", "black", "(H)")
-	local nh = c2.layout_tree:newNode()
-		:setStaticMode(0, 0, 48, 48, true, true, true)
-		:setWidget(wh)
+		:layoutSetMode("static", 0, 0, 48, 48, true, true, true)
+		:layoutAdd()
 
+	c2_box:layoutSetMode("remaining")
+		:layoutAdd()
 
 	panel:reshape()
 end

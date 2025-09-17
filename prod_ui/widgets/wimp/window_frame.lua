@@ -44,6 +44,7 @@ def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
+widLayout.setupContainerDef(def)
 widShared.scrollSetMethods(def)
 lgcUIFrame.definitionSetup(def)
 lgcContainer.setupMethods(def)
@@ -408,8 +409,8 @@ function def:uiCall_initialize(unselectable, view_level)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 6)
 
-	self.layout_base = "viewport"
-	widLayout.initializeLayoutTree(self)
+	widLayout.setupLayoutList(self)
+	self:layoutSetBase("viewport")
 
 	lgcContainer.sashStateSetup(self)
 	lgcKeyHooks.setupInstance(self)
@@ -903,7 +904,7 @@ function def:uiCall_reshapePre()
 		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
-	widLayout.resetLayout(self, self.layout_base)
+	widLayout.resetLayout(self)
 
 	--return self.halt_reshape -- ?
 end

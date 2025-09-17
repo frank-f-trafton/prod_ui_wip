@@ -86,7 +86,7 @@ end
 function plan.make(panel)
 	--title("Split Button")
 
-	panel:setLayoutBase("viewport-width")
+	panel:layoutSetBase("viewport-width")
 	panel:setScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
@@ -94,7 +94,8 @@ function plan.make(panel)
 	local wid_id = "wimp/button_split"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local btn_spl = panel:addChild(wid_id, nil, skin_id)
-	demoShared.setStaticLayout(panel, btn_spl, 0, 0, 224, 64)
+	btn_spl:layoutSetMode("static", 0, 0, 224, 64)
+		:layoutAdd()
 	btn_spl:setTag("demo_split_btn")
 
 	btn_spl:setLabel("Split Button")
@@ -108,7 +109,8 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("base/checkbox")
-		demoShared.setStaticLayout(panel, chk, xx, yy, ww, hh)
+		chk:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		chk:setLabel("Aux Enabled")
 		chk:setChecked(not not btn_spl.aux_enabled)
 		chk.wid_buttonAction = function(self)
@@ -125,7 +127,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
+		rdo:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "right"
 		rdo:setLabel("Right")
@@ -138,7 +141,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
+		rdo:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "left"
 		rdo:setLabel("Left")
@@ -151,7 +155,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
+		rdo:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "top"
 		rdo:setLabel("Top")
@@ -164,7 +169,8 @@ function plan.make(panel)
 
 	do
 		local rdo = panel:addChild("barebones/radio_button")
-		demoShared.setStaticLayout(panel, rdo, xx, yy, ww, hh)
+		rdo:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		rdo.radio_group = "split_placement"
 		rdo.usr_placement = "bottom"
 		rdo:setLabel("Bottom")
@@ -182,7 +188,8 @@ function plan.make(panel)
 
 	do
 		local sld = panel:addChild("barebones/slider_bar")
-		demoShared.setStaticLayout(panel, sld, xx, yy, ww, hh)
+		sld:layoutSetMode("static", xx, yy, ww, hh)
+			:layoutAdd()
 		sld.trough_vertical = false
 		sld:setLabel("Aux Size")
 		sld.slider_def = btn_spl.skin.aux_size
