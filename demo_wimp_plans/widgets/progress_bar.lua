@@ -16,11 +16,12 @@ function plan.make(panel)
 	local starting_pos = 23
 	local starting_max = 42
 
+	local bar_x, bar_y = 32, 32
 	local h_bar_width, h_bar_height = 160, 40
 	local v_bar_width, v_bar_height = 100, 160
 
 	local p_bar = panel:addChild("status/progress_bar")
-	p_bar:layoutSetMode("static", 32, 32, h_bar_width, h_bar_height)
+	p_bar:layoutSetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
 		:layoutAdd()
 	p_bar:setTag("demo_prog_bar")
 
@@ -61,17 +62,13 @@ function plan.make(panel)
 		local pb = self:findSiblingTag("demo_prog_bar")
 		if pb then
 			pb.vertical = not pb.vertical
-
-			local node = pb.layout_ref
-			if node then
-				if pb.vertical then
-					node.static_w, node.static_h = v_bar_width, v_bar_height
-				else
-					node.static_w, node.static_h = h_bar_width, h_bar_height
-				end
-				pb.parent:reshape()
-				print(pb.vertical, node.static_w, node.static_h, pb.w, pb.h)
+			if pb.vertical then
+				pb:layoutSetMode("static", bar_x, bar_y, v_bar_width, v_bar_height)
+			else
+				pb:layoutSetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
 			end
+			pb.parent:reshape()
+			print(pb.vertical, pb:layoutGetMode())
 		end
 	end
 

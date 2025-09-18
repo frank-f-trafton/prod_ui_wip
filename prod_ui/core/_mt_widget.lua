@@ -542,11 +542,13 @@ function _mt_widget:addChild(id, pos, skin_id, ...)
 end
 
 
---- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable, the widget is removed from its layout node, though the node itself is not destroyed.
+--- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable, the widget is removed from the parent's layout list.
 --  Locked during update: yes (parent)
 --	Callbacks:
 --	* Bubble: uiCall_destroy()
 function _mt_widget:remove()
+	local parent = self.parent
+
 	if self._dead then
 		error("attempted to remove widget that is already " .. tostring(self._dead) .. ".")
 	end
@@ -554,7 +556,7 @@ function _mt_widget:remove()
 	self._dead = "dying"
 
 	local locks = context.locks
-	if locks[self.parent] then
+	if locks[parent] then
 		coreErr.errLockedParent("remove")
 
 	elseif locks[self] then
@@ -578,30 +580,14 @@ function _mt_widget:remove()
 	self:_runUserEvent("userDestroy")
 	self:bubbleEvent("uiCall_destroy", self)
 
-	-- Remove from parent layout node, if applicable
-	if self.layout_ref then
-		if not self.parent then
-			error("the root widget should not have a layout node.")
-		end
-
-		self.layout_ref:setWidget()
-	end
-
-	-- If parent exists, find and remove self from parent's list of children
-	if self.parent then
-		local parent = self.parent
-		local ok = false
-
-		for i = #parent.children, 1, -1 do
-			if parent.children[i] == self then
-				table.remove(parent.children, i)
-				ok = true
-				break
-			end
-		end
-
-		if not ok then
+	-- If parent exists, find and remove self from parent's 1) children and 2) layout
+	if parent then
+		if uiTable.removeElement(parent.children, self) == 0 then
 			error("widget can't find itself in parent's list of children.")
+		end
+
+		if parent.lo_list then
+			self:layoutRemove()
 		end
 
 		self.parent = false
