@@ -3,7 +3,8 @@ local mouseLogic = {}
 
 --- Recursive loop for determining hover-over state for widgets.
 -- @param x, y Mouse X and Y positions in UI space.
--- @param os_x, os_y X and Y offsets for this widget in UI space, such that (x - os_x) and (y - os_y) are the top-left side of the widget body.
+-- @param os_x, os_y X and Y offsets for this widget in UI space, such that (x - os_x) and (y - os_y) are the top-left
+--	corner of the widget body.
 -- @param widget The widget being considered.
 -- @param x1, y1, x2, y2 Left, top, right and bottom clipping boundaries.
 -- @return The widget that the mouse is hovering over, or nil if no match was found.

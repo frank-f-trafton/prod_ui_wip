@@ -25,7 +25,6 @@ function uiAssert.loveTypeEval(n, obj, typ)
 end
 
 
-
 function uiAssert.loveTypeOf(n, obj, typ)
 	if not obj:typeOf(typ) then
 		error("argument #" .. n .. ": expected LÖVE object type '" .. typ .. "' in class hierarchy", 2)
@@ -39,6 +38,9 @@ function uiAssert.assertText(n, text)
 		error("argument #" .. n .. ": bad type (expected text (string or table), got " .. type(text), 2)
 	end
 end
+
+
+-- Checking widgets: use 'context:assertWidget(wid)'
 
 
 return uiAssert
