@@ -412,7 +412,7 @@ function def:uiCall_initialize(unselectable, view_level)
 	widLayout.setupLayoutList(self)
 	self:layoutSetBase("viewport")
 
-	lgcContainer.sashStateSetup(self)
+	lgcContainer.setupSashState(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.hover_zone = false -- false, "button-close", "button-size"
@@ -1114,7 +1114,7 @@ def.default_skinner = {
 		check.colorTuple(skin, "color_body")
 		check.colorTuple(skin, "color_shadow")
 
-		check.sashState(skin)
+		check.sashStyle(skin, "sash_style")
 
 		_checkResTopLevel(skin, "res_normal")
 		_checkResTopLevel(skin, "res_small")

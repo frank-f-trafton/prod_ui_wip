@@ -198,6 +198,7 @@ function methods:_initResourcesTable()
 		icons = {},
 		info = {},
 		labels = {},
+		sash_styles = {},
 		scroll_bar_data = {},
 		scroll_bar_styles = {},
 
@@ -400,6 +401,19 @@ function methods:applyTheme(theme)
 		_deepCopyFields(theme.labels, resources.labels)
 
 		-- TODO
+
+		uiTheme.popLabel()
+		uiTheme.assertLabelLevel(0)
+	end
+
+	if theme.sash_styles then
+		uiTheme.pushLabel("sash_styles")
+
+		_deepCopyFields(theme.sash_styles, resources.sash_styles)
+
+		for k, v in pairs(resources.sash_styles) do
+			uiTheme.scaleSashStyle(v, scale)
+		end
 
 		uiTheme.popLabel()
 		uiTheme.assertLabelLevel(0)

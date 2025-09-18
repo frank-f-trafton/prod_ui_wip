@@ -1,16 +1,18 @@
 --[[
-A sash that allows resizing a widget in a layout.
+A sash. Click and drag to resize an associated widget in a layout.
 
-┌──────╦──────┐
-│      ║      │
-│      ║      │
-│  A   S   B  │
-│      ║      │
-│      ║      │
-└──────╩──────┘
+┌───╦────────────────┐
+│   ║  It was the    │
+│   ║ best of times, │
+│ W ║ it was the     │
+│   ║ worst of times,│
+│   ║ it was the age │
+└───╩────────────────┘
 
-The parent container implements most of the sash's functionality. Mouse hover detection has to
-happen one level above so that the sash's hover box may overlap siblings that come after it.
+This widget depends on a parent that uses the sash code in 'shared/lgc_container.lua'. The
+parent itself pulls in size data from a table in 'theme/sash_styles'. This is necessary
+because the parent has to perform mouse overlap detection with expansion and compression
+of the sash's bounding box.
 --]]
 
 
@@ -37,6 +39,8 @@ function def:uiCall_initialize()
 	self:skinInstall()
 
 	self.UI_is_sash = true
+
+	self.tall = true
 
 	self:reshape()
 end
@@ -66,9 +70,34 @@ end
 local check, change = uiTheme.check, uiTheme.change
 
 
+local function _checkRes(skin, k)
+	uiTheme.pushLabel(k)
+
+	local res = check.getRes(skin, k)
+
+	check.slice(res, "slc_lr")
+	check.slice(res, "slc_tb")
+	check.colorTuple(res, "col_body")
+
+	uiTheme.popLabel()
+end
+
+
 def.default_skinner = {
-	--validate = function(skin) -- TODO
-	--transform = function(skin, scale) -- TODO
+	-- Sash measurements are in 'theme/sash_styles'.
+
+	validate = function(skin)
+		-- The box adds a margin around the quadslice graphic.
+		check.box(skin, "box")
+
+		_checkRes(skin, "res_idle")
+		_checkRes(skin, "res_hover")
+		_checkRes(skin, "res_press")
+		_checkRes(skin, "res_disabled")
+	end,
+
+
+	--transform = function(skin, scale) -- n/a
 
 
 	install = function(self, skinner, skin)
@@ -85,18 +114,33 @@ def.default_skinner = {
 	--update = function(self, skinner, skin, dt)
 
 
-	--[===[
 	render = function(self, ox, oy)
+		local parent = self.parent
 		local skin = self.skin
 
 		love.graphics.push()
 
-		love.graphics.setColor(1, 0, 0, 1)
-		love.graphics.rectangle("fill", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+		local res
+		if not parent.sashes_enabled then
+			res = skin.res_disabled
+
+		elseif parent.sash_hover == self then
+			if parent.press_busy == "sash" then
+				res = skin.res_press
+			else
+				res = skin.res_hover
+			end
+		else
+			res = skin.res_idle
+		end
+
+		love.graphics.setColor(res.col_body)
+		local slc = self.tall and res.slc_tb or res.slc_lr
+		uiGraphics.drawSlice(slc, self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+
 
 		love.graphics.pop()
 	end,
-	--]===]
 
 
 	--renderLast = function(self, ox, oy) end,

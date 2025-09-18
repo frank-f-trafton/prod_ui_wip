@@ -47,7 +47,7 @@ function def:uiCall_initialize(unselectable)
 	widLayout.setupLayoutList(self)
 	self:layoutSetBase("viewport")
 
-	lgcContainer.sashStateSetup(self)
+	lgcContainer.setupSashState(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.press_busy = false
@@ -243,7 +243,7 @@ def.default_skinner = {
 		check.integer(skin, "in_view_pad_x", 0)
 		check.integer(skin, "in_view_pad_y", 0)
 
-		check.sashState(skin)
+		check.sashStyle(skin, "sash_style")
 	end,
 
 
