@@ -54,7 +54,7 @@ function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
 end
 
 
-function lgcContainer.sashStateSetup(self)
+function lgcContainer.setupSashState(self)
 	self.sashes_enabled = false
 	self.sash_hover = false
 
@@ -83,29 +83,26 @@ function _methods:getSashesEnabled()
 end
 
 
-function _methods:getSashBreadth()
-	return self.skin.sash_breadth
-end
-
-
 function _methods:configureSashWidget(w1, w2)
 	if not uiTable.valueInArray(self.children, w1) then
 		error("'w1' must be a direct child of the calling widget")
 
 	elseif not uiTable.valueInArray(self.children, w2) then
 		error("'w2' must be a direct child of the calling widget")
+
+	elseif not w2.UI_is_sash then
+		error("'w2' is not a sash widget")
 	end
 
 	local mode, _, slice_edge = w1:layoutGetMode()
 
 	if mode ~= "slice" then
 		error("argument #1: expected a widget configured for 'slice' layout mode")
-
-	elseif #w2.children > 0 then
-		error("argument #2: sash widgets are supposed to be leaf nodes")
 	end
 
-	w2:layoutSetMode("slice", "px", slice_edge, self.skin.sash_breadth, true, true)
+	w2:layoutSetMode("slice", "px", slice_edge, self.skin.sash_style.breadth, true, true)
+
+	w2.tall = (slice_edge == "left" or slice_edge == "right") and true or false
 end
 
 
@@ -126,9 +123,9 @@ end
 
 function lgcContainer.getSashCursorID(edge, is_drag)
 	if is_drag then
-		return (edge == "left" or edge == "right") and "cursor_sash_drag_h" or "cursor_sash_drag_v"
+		return (edge == "left" or edge == "right") and "cursor_drag_h" or "cursor_drag_v"
 	else
-		return (edge == "left" or edge == "right") and "cursor_sash_hover_h" or "cursor_sash_hover_v"
+		return (edge == "left" or edge == "right") and "cursor_hover_h" or "cursor_hover_v"
 	end
 end
 
@@ -141,14 +138,14 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	end
 
 	local mxs, mys = self:getRelativePositionScrolled(mouse_x, mouse_y)
+	local sash_style = self.skin.sash_style
 	if not self.sash_hover then
-		local skin = self.skin
-		local wid = _checkMouseOverSash(self, mxs, mys, skin.sash_contract_x, skin.sash_contract_y)
+		local wid = _checkMouseOverSash(self, mxs, mys, sash_style.contract_x, sash_style.contract_y)
 		if wid then
 			self.sash_hover = wid
 			local _, _, slice_edge = wid:layoutGetMode()
 			local cursor_id = lgcContainer.getSashCursorID(slice_edge, false)
-			self.cursor_hover = self.skin[cursor_id]
+			self.cursor_hover = sash_style[cursor_id]
 			return true
 		else
 			self.sash_hover = false
@@ -156,9 +153,8 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 		end
 	else
 		local wid = self.sash_hover
-		local skin = self.skin
-		local expand_x = skin.sash_expand_x
-		local expand_y = skin.sash_expand_y
+		local expand_x = sash_style.expand_x
+		local expand_y = sash_style.expand_y
 
 		if not (mxs >= wid.x - expand_x
 		and mxs < wid.x + wid.w + expand_x
@@ -200,7 +196,7 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 						self.sash_att_len = cn.h
 					end
 					local cursor_id = lgcContainer.getSashCursorID(slice_edge, true)
-					self.cursor_press = self.skin[cursor_id]
+					self.cursor_press = self.skin.sash_style[cursor_id]
 
 					return true
 				end

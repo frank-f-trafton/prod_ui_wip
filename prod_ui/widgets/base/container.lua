@@ -55,7 +55,7 @@ function def:uiCall_initialize()
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
-	lgcContainer.sashStateSetup(self)
+	lgcContainer.setupSashState(self)
 	widLayout.setupLayoutList(self)
 
 	self:layoutSetBase("viewport")
@@ -247,7 +247,7 @@ def.default_skinner = {
 		check.number(skin, "in_view_pad_x")
 		check.number(skin, "in_view_pad_y")
 
-		check.sashState(skin)
+		check.sashStyle(skin, "sash_style")
 	end,
 
 

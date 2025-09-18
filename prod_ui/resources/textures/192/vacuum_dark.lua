@@ -906,7 +906,6 @@ return {
       y = 0
     },
     sash_lr = {
-      draw_fn_id = "x0y1w3h1",
       h1 = 6,
       h2 = 4,
       h3 = 6,
@@ -917,7 +916,6 @@ return {
       y = 0
     },
     sash_tb = {
-      draw_fn_id = "x1y0w1h3",
       h1 = 6,
       h2 = 4,
       h3 = 6,
