@@ -288,10 +288,6 @@ def.default_skinner = {
 		love.graphics.push("all")
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-		if self.sash_hover then
-			lgcContainer.renderSash(self.sash_hover, self, ox, oy)
-		end
-
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 
 		love.graphics.pop()

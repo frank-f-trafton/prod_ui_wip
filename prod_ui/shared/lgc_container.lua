@@ -1,9 +1,4 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
---[[
-Shared container logic.
---]]
+-- Shared container logic.
 
 
 local context = select(1, ...)
@@ -41,6 +36,36 @@ function _methods:getScrollRangeMode()
 end
 
 
+function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
+	-- Get widget position relative to this container.
+	local x, y = wid:getPositionInAncestor(self)
+	local w, h = wid.w, wid.h
+
+	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
+	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
+	if wid.focal_x then -- [XXX 1] Untested
+		x = x + wid.focal_x
+		y = y + wid.focal_y
+		w = wid.focal_w
+		h = wid.focal_h
+	end
+
+	self:scrollRectInBounds(x - pad_x, y - pad_y, x + w + pad_x, y + h + pad_y, false)
+end
+
+
+function lgcContainer.sashStateSetup(self)
+	self.sashes_enabled = false
+	self.sash_hover = false
+
+	-- Length of the node to resize at start of drag state
+	self.sash_att_len = 0
+
+	-- Mouse cursor position (absolute) at start of drag state
+	self.sash_att_ax, self.sash_att_ay = 0, 0
+end
+
+
 function _methods:setSashesEnabled(enabled)
 	self.sashes_enabled = not not enabled
 
@@ -63,67 +88,38 @@ function _methods:getSashBreadth()
 end
 
 
-function _methods:configureSashNode(n1, n2)
-	uiAssert.type1(1, n1, "table")
-	uiAssert.type1(2, n2, "table")
+function _methods:configureSashWidget(w1, w2)
+	if not uiTable.valueInArray(self.children, w1) then
+		error("'w1' must be a direct child of the calling widget")
 
-	if n1.mode ~= "slice" then
-		error("argument #1: expected a slice node.")
-
-	elseif n2.nodes and #n2.nodes > 0 then
-		error("argument #2: sashes are supposed to be leaf nodes.")
+	elseif not uiTable.valueInArray(self.children, w2) then
+		error("'w2' must be a direct child of the calling widget")
 	end
 
-	n2:setSliceMode("px", n1.slice_edge, self.skin.sash_breadth, true, true)
+	local mode, _, slice_edge = w1:layoutGetMode()
+
+	if mode ~= "slice" then
+		error("argument #1: expected a widget configured for 'slice' layout mode")
+
+	elseif #w2.children > 0 then
+		error("argument #2: sash widgets are supposed to be leaf nodes")
+	end
+
+	w2:layoutSetMode("slice", "px", slice_edge, self.skin.sash_breadth, true, true)
 end
 
 
-function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
-	-- Get widget position relative to this container.
-	local x, y = wid:getPositionInAncestor(self)
-	local w, h = wid.w, wid.h
-
-	-- [XXX 1] There should be an optional rectangle within the widget that gets priority for being in view.
-	-- Examples include the caret in a text box, the selection in a menu, and the thumb in a slider bar.
-	if wid.focal_x then -- [XXX 1] Untested
-		x = x + wid.focal_x
-		y = y + wid.focal_y
-		w = wid.focal_w
-		h = wid.focal_h
-	end
-
-	self:scrollRectInBounds(x - pad_x, y - pad_y, x + w + pad_x, y + h + pad_y, false)
-end
-
-
-local function _checkMouseOverSash(self, node, mx, my, con_x, con_y)
-	return nil -- TODO
-	--[===[
-	if node.slice_is_sash then
-		if mx >= node.x + con_x
-		and mx < node.x + node.w - con_x
-		and my >= node.y + con_y
-		and my < node.y + node.h - con_y
-		then
-			return node
-		end
-
-	elseif node.nodes then
-		for i, child in ipairs(node.nodes) do
-			local rv = _checkMouseOverSash(self, child, mx, my, con_x, con_y)
-			if rv then
-				return rv
+local function _checkMouseOverSash(self, mx, my, con_x, con_y)
+	for i, wid in ipairs(self.children) do
+		if wid.UI_is_sash then
+			if mx >= wid.x + con_x
+			and mx < wid.x + wid.w - con_x
+			and my >= wid.y + con_y
+			and my < wid.y + wid.h - con_y
+			then
+				return wid
 			end
 		end
-	end
-	--]===]
-end
-
-
-function lgcContainer.renderSash(node, wid, ox, oy)
-	if node.slice_is_sash then
-		love.graphics.setColor(1, 0, 0, 1)
-		love.graphics.rectangle("fill", node.x - wid.scr_x, node.y - wid.scr_y, node.w, node.h)
 	end
 end
 
@@ -137,18 +133,6 @@ function lgcContainer.getSashCursorID(edge, is_drag)
 end
 
 
-function lgcContainer.sashStateSetup(self)
-	self.sashes_enabled = false
-	self.sash_hover = false
-
-	-- Length of the node to resize at start of drag state
-	self.sash_att_len = 0
-
-	-- Mouse cursor position (absolute) at start of drag state
-	self.sash_att_ax, self.sash_att_ay = 0, 0
-end
-
-
 -- For widgets that support dragging sashes. Call in def.trickle:uiCall_pointerHover().
 -- @return true if a sash hover action occurred.
 function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
@@ -159,10 +143,11 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	local mxs, mys = self:getRelativePositionScrolled(mouse_x, mouse_y)
 	if not self.sash_hover then
 		local skin = self.skin
-		local node = _checkMouseOverSash(self, nil, mxs, mys, skin.sash_contract_x, skin.sash_contract_y) -- TODO
-		if node then
-			self.sash_hover = node
-			local cursor_id = lgcContainer.getSashCursorID(node.slice_edge, false)
+		local wid = _checkMouseOverSash(self, mxs, mys, skin.sash_contract_x, skin.sash_contract_y)
+		if wid then
+			self.sash_hover = wid
+			local _, _, slice_edge = wid:layoutGetMode()
+			local cursor_id = lgcContainer.getSashCursorID(slice_edge, false)
 			self.cursor_hover = self.skin[cursor_id]
 			return true
 		else
@@ -170,15 +155,15 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 			self.cursor_hover = false
 		end
 	else
-		local node = self.sash_hover
+		local wid = self.sash_hover
 		local skin = self.skin
 		local expand_x = skin.sash_expand_x
 		local expand_y = skin.sash_expand_y
 
-		if not (mxs >= node.x - expand_x
-		and mxs < node.x + node.w + expand_x
-		and mys >= node.y - expand_y
-		and mys < node.y + node.h + expand_y)
+		if not (mxs >= wid.x - expand_x
+		and mxs < wid.x + wid.w + expand_x
+		and mys >= wid.y - expand_y
+		and mys < wid.y + wid.h + expand_y)
 		then
 			self.sash_hover = false
 			self.cursor_hover = false
@@ -195,25 +180,31 @@ end
 
 
 function lgcContainer.sashPressLogic(self, x, y, button)
-	if self.sashes_enabled
-	and self.sash_hover
-	and button == 1
-	and self.context.mouse_pressed_button == button
-	then
-		local cn -- TODO
-		--local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
-		if cn and cn.mode == "slice" and cn.slice_mode == "px" then
-			self.press_busy = "sash"
-			self.sash_att_ax, self.sash_att_ay = x, y
-			if cn.slice_edge == "right" or cn.slice_edge == "left" then
-				self.sash_att_len = cn.w
-			else -- "top", "bottom"
-				self.sash_att_len = cn.h
-			end
-			local cursor_id = lgcContainer.getSashCursorID(cn.slice_edge, true)
-			self.cursor_press = self.skin[cursor_id]
+	if self.sashes_enabled then
+		local sash = self.sash_hover
 
-			return true
+		if sash
+		and not sash._dead
+		and button == 1
+		and self.context.mouse_pressed_button == button
+		then
+			local cn = self.children[sash:getIndex() - 1] -- prev sibling
+			if cn then
+				local mode, slice_mode, slice_edge = cn:layoutGetMode()
+				if mode == "slice" and slice_mode == "px" then
+					self.press_busy = "sash"
+					self.sash_att_ax, self.sash_att_ay = x, y
+					if slice_edge == "right" or slice_edge == "left" then
+						self.sash_att_len = cn.w
+					else -- "top", "bottom"
+						self.sash_att_len = cn.h
+					end
+					local cursor_id = lgcContainer.getSashCursorID(slice_edge, true)
+					self.cursor_press = self.skin[cursor_id]
+
+					return true
+				end
+			end
 		end
 	end
 end
@@ -223,41 +214,41 @@ function lgcContainer.sashDragLogic(self, x, y)
 	if self.sashes_enabled
 	and self.press_busy == "sash"
 	then
-		local cn -- TODO
-		--local cn = widLayout.getPreviousSibling(self.sash_hover) -- change_node
-		if cn and cn.mode == "slice" then
-			local parent = cn.parent
-			if not parent then
-				error("missing parent node (no original dimensions to resize against).")
+		local sash = self.sash_hover
+		if sash then
+			local cn = self.children[sash:getIndex() - 1] -- prev sibling
+			if cn then
+				local mode, slice_mode, slice_edge, slice_amount, slice_scale = cn:layoutGetMode()
+				if mode == "slice" then
+					if slice_edge == "right" then
+						slice_amount = math.min(slice_amount + self.w, self.sash_att_len - (x - self.sash_att_ax))
+
+					elseif slice_edge == "left" then
+						slice_amount = math.min(slice_amount + self.w, self.sash_att_len + (x - self.sash_att_ax))
+
+					elseif slice_edge == "top" then
+						slice_amount = math.min(slice_amount + self.h, self.sash_att_len - (y - self.sash_att_ay))
+
+					elseif slice_edge == "bottom" then
+						slice_amount = math.min(slice_amount + self.h, self.sash_att_len + (y - self.sash_att_ay))
+
+					else
+						error("invalid slice edge.")
+					end
+
+					cn:layoutSetMode("slice", slice_mode, slice_edge, slice_amount, slice_scale, true)
+					self:reshape()
+				end
+
+				return true
 			end
-
-			local edge = cn.slice_edge
-			if edge == "right" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.w, self.sash_att_len - (x - self.sash_att_ax))
-
-			elseif edge == "left" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.w, self.sash_att_len + (x - self.sash_att_ax))
-
-			elseif edge == "top" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.h, self.sash_att_len - (y - self.sash_att_ay))
-
-			elseif edge == "bottom" then
-				cn.slice_amount = math.min(cn.slice_amount + parent.h, self.sash_att_len + (y - self.sash_att_ay))
-
-			else
-				error("invalid slice edge.")
-			end
-
-			self:reshape()
 		end
-
-		return true
 	end
 end
 
 
 function lgcContainer.sashUnpressLogic(self)
-	if self.sashes_enabled and self.press_busy == "sash" then
+	if self.press_busy == "sash" then
 		self.press_busy = false
 		self.cursor_press = false
 

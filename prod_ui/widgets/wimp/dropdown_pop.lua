@@ -263,9 +263,7 @@ def.getIconSetID = lgcMenu.getIconSetID
 
 -- @param wid_ref The widget that owns this drawer.
 function def:uiCall_initialize(wid_ref)
-	if not self.context:checkWidget(wid_ref) then
-		error("argument #1: expected owner widget (check that the value is a table, that it is a proper widget, and that it isn't dead)")
-	end
+	context:assertWidget(wid_ref)
 
 	self.wid_ref = wid_ref
 
@@ -479,7 +477,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 		if handled_scroll_bars then
-			self.context:clearClickSequence()
+			context:clearClickSequence()
 		else
 			if widShared.pointInViewport(self, 2, mx, my) then
 
@@ -508,7 +506,7 @@ end
 
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
 		lgcScroll.widgetClearPress(self)
 
@@ -564,8 +562,8 @@ function def:uiCall_update(dt)
 		needs_update = true
 
 	elseif lgcScroll.press_busy_codes[self.press_busy] then
-		if self.context.mouse_pressed_ticks > 1 then
-			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		if context.mouse_pressed_ticks > 1 then
+			local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 			local button_step = 350 -- XXX style/config
 			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
 		end

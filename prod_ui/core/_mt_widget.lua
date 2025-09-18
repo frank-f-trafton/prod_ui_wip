@@ -542,16 +542,14 @@ function _mt_widget:addChild(id, pos, skin_id, ...)
 end
 
 
---- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable, the widget is removed from the parent's layout list.
+--- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling
+--	it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable,
+--	the widget is removed from the parent's layout list.
 --  Locked during update: yes (parent)
 --	Callbacks:
 --	* Bubble: uiCall_destroy()
 function _mt_widget:remove()
 	local parent = self.parent
-
-	if self._dead then
-		error("attempted to remove widget that is already " .. tostring(self._dead) .. ".")
-	end
 
 	self._dead = "dying"
 
@@ -630,6 +628,7 @@ function _mt_widget:remove()
 	end
 
 	self._dead = "dead"
+	setmetatable(self, nil)
 end
 
 
@@ -654,12 +653,6 @@ end
 -- @param a,b,c,d,e,f Additional arguments to pass.
 -- @return the return results of the called function, or nil if nothing was called.
 function _mt_widget:sendEvent(field, a,b,c,d,e,f)
-	-- Debug
-	--[[
-	if wid._dead then
-		error("attempt to run a statement on a dead widget.")
-	end
-	--]]
 	local var = self[field]
 	if type(var) == "function" then
 		return var(self, a,b,c,d,e,f)

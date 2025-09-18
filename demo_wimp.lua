@@ -607,9 +607,11 @@ do
 			:layoutAdd()
 		--]]
 
-		-- Put a sash between the items list and the demo panel. -- TODO: fix this up
-		--[[
-		ws1:configureSashNode(node_list, ???)
+		-- Put a sash between the items list and the demo panel.
+		-- [[
+		local sash = ws1:addChild("base/sash")
+			:layoutAdd()
+		ws1:configureSashWidget(demo_list, sash)
 		--]]
 
 		demo_list.tag = "plan_menu"

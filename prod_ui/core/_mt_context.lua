@@ -431,14 +431,18 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 	if old_current_pressed then
 		old_current_pressed:cycleEvent("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
 
-		local old_x, old_y = old_current_pressed:getAbsolutePosition()
-		if _pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
-			old_current_pressed:cycleEvent("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
+		if not old_current_pressed._dead then
+			local old_x, old_y = old_current_pressed:getAbsolutePosition()
+			if _pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
+				old_current_pressed:cycleEvent("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
+			end
 		end
 
 	elseif self.root then
 		self.root:sendEvent("uiCall_pointerUnpress", self.root, x, y, button, istouch, presses) -- no ancestors
-		self.root:sendEvent("uiCall_pointerRelease", self.root, x, y, button, istouch, presses) -- no ancestors
+		if self.root then
+			self.root:sendEvent("uiCall_pointerRelease", self.root, x, y, button, istouch, presses) -- no ancestors
+		end
 	end
 
 	if self.mouse_pressed_button == button then
@@ -446,7 +450,9 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 		local old_drag_dest = self.current_drag_dest
 		if old_drag_dest then
 			old_drag_dest:cycleEvent("uiCall_pointerDragDestOff", old_drag_dest, x, y, 0, 0)
-			old_drag_dest:cycleEvent("uiCall_pointerDragDestRelease", old_drag_dest, x, y, button, istouch, presses)
+			if not old_drag_dest._dead then
+				old_drag_dest:cycleEvent("uiCall_pointerDragDestRelease", old_drag_dest, x, y, button, istouch, presses)
+			end
 			self.current_drag_dest = false
 		end
 
@@ -536,7 +542,9 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 				-- Hover on + move
 				self.current_hover = wid_pressed
 				wid_pressed:cycleEvent("uiCall_pointerHoverOn", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
-				wid_pressed:cycleEvent("uiCall_pointerHover", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+				if not wid_pressed._dead then
+					wid_pressed:cycleEvent("uiCall_pointerHover", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+				end
 			end
 		end
 	end
@@ -1118,20 +1126,16 @@ function _mt_context:getThemeID()
 end
 
 
-function _mt_context:checkWidget(wid)
-	if not wid._dead then
-		local wid_mt = getmetatable(wid)
-		local id = wid.id
-		if wid_mt and type(id) == "string" then
-			local def = self.widget_defs[id]
-			if type(def) == "table" then
-				if wid_mt == def._inst_mt then
-					return true
-				end
-			end
-		end
+function _mt_context:assertWidget(wid)
+	if type(wid) ~= "table" then
+		error("expected table (widget), got " .. type(wid))
 	end
-	return false
+
+	local def = self.widget_defs[wid.id]
+
+	if not def or getmetatable(wid) ~= def._inst_mt then
+		error("invalid or corrupt widget. Check that the value is a table, that it is a proper widget, and that it isn't dead.")
+	end
 end
 
 

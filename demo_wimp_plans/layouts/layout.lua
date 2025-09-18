@@ -72,11 +72,9 @@ function plan.make(panel)
 		:layoutSetMode("slice", "px", "left", 140)
 		:layoutAdd()
 
-	--[[
 	local sash = panel:addChild("base/sash")
-		:setLayoutMode("slice", "px", " -- TODO
-	--]]
-	--panel:configureSashNode(nf, ns) TODO: fix this up
+		:layoutAdd()
+	panel:configureSashWidget(wf, sash)
 
 	local wg = _makeBox(panel, "darkblue", "lightblue", "white", "(G)")
 		:layoutSetMode("remaining")

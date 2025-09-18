@@ -1,7 +1,3 @@
--- ***Under construction***
--- This widget doesn't work yet.
-
-
 --[[
 A sash that allows resizing a widget in a layout.
 
@@ -13,8 +9,8 @@ A sash that allows resizing a widget in a layout.
 │      ║      │
 └──────╩──────┘
 
-This widget acts as a sensor for containers which implement sash functionality.
-It doesn't do much on its own, besides rendering and mouse hover detection.
+The parent container implements most of the sash's functionality. Mouse hover detection has to
+happen one level above so that the sash's hover box may overlap siblings that come after it.
 --]]
 
 
@@ -30,68 +26,40 @@ local def = {
 }
 
 
-function def:uiCall_pointerHover(inst, x, y, dx, dy)
-	if self == inst then
-
-	end
-end
-
-
-function def:uiCall_pointerHoverOff(inst, x, y, dx, dy)
-	if self == inst then
-
-	end
-end
-
-
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
-
-	end
-end
-
-
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
-
-	end
-end
-
-
-function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
-	if self == inst then
-
-	end
-end
-
-
 function def:uiCall_initialize()
 	self.visible = true
-	self.allow_hover = true
+	self.allow_hover = false
 	self.thimble_mode = 0
 
 	widShared.setupViewports(self, 1)
 
-	-- State flags
-	self.enabled = true
-	self.hovered = false
-	self.pressed = false
-
 	self:skinSetRefs()
 	self:skinInstall()
+
+	self.UI_is_sash = true
 
 	self:reshape()
 end
 
 
 function def:uiCall_reshapePre()
-	-- Viewport #1 is the sash graphic.
+	-- Viewport #1 is for the sash graphic.
 	local skin = self.skin
 
 	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
+	widShared.carveViewport(self, 1, skin.box.margin)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		if self.parent.sash_hover == self then
+			self.parent.sash_hover = false
+			self.parent.cursor_hover = false
+		end
+	end
 end
 
 
@@ -117,6 +85,7 @@ def.default_skinner = {
 	--update = function(self, skinner, skin, dt)
 
 
+	--[===[
 	render = function(self, ox, oy)
 		local skin = self.skin
 
@@ -127,6 +96,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 	end,
+	--]===]
 
 
 	--renderLast = function(self, ox, oy) end,
