@@ -226,7 +226,7 @@ function def:addItem(wid_id, text, pos, icon_id)
 		error("addItem: insert position is out of range.")
 	end
 
-	local wid = self:addChild(wid_id, pos)
+	local wid = self:addChild(wid_id, nil, pos) -- XXX: fit in skin_id?
 
 	item.wid_ref = wid
 

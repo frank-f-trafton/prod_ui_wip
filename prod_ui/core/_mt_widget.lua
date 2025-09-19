@@ -511,14 +511,14 @@ end
 --- Adds a new child widget instance.
 --  Locked during update: yes (self)
 -- @param id The widget def ID.
--- @param [pos] (default: #self.children + 1) Where to place the new widget in the table of children.
 -- @param [skin_id] The starting Skin ID, if applicable.
+-- @param [pos] (default: #self.children + 1) Where to place the new widget in the table of children.
 -- @param [...] Additional arguments for the widget's uiCall_initialize() callback.
 -- @return New instance table. An error is raised if there is a problem.
-function _mt_widget:addChild(id, pos, skin_id, ...)
+function _mt_widget:addChild(id, skin_id, pos, ...)
 	uiAssert.notNilNotFalseNotNaN(1, id)
-	uiAssert.numberNotNaNEval(2, pos)
-	uiAssert.typeEval1(3, skin_id, "string")
+	uiAssert.typeEval1(2, skin_id, "string")
+	uiAssert.numberNotNaNEval(3, pos)
 
 	local children = self.children
 	pos = pos or #children + 1

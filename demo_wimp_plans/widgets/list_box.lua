@@ -117,10 +117,9 @@ end
 
 
 local function makeListBox1(panel, x, y)
-	--:addChild(id, pos, skin_id, ...)
 	local wid_id = "wimp/list_box"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
-	local list_box = panel:addChild(wid_id, nil, skin_id)
+	local list_box = panel:addChild(wid_id, skin_id)
 
 	list_box:layoutSetMode("static", x, y, 224, 256)
 		:layoutAdd()

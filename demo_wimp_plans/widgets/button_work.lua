@@ -57,7 +57,7 @@ function plan.make(panel)
 	end
 
 	-- Button with a quad graphic
-	local btn_q = panel:addChild("base/button", nil, "button_tq1")
+	local btn_q = panel:addChild("base/button", "button_tq1")
 	btn_q.graphic = context.resources.quads["atlas"]["checkbox_on"] -- TODO: fix
 	btn_q:layoutSetMode("static", 64, 64, 64, 64)
 		:layoutAdd()

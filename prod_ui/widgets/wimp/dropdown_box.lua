@@ -255,7 +255,7 @@ function def:_openPopUpMenu()
 
 		local ax, ay = self:getAbsolutePosition()
 
-		local drawer = root:addChild("wimp/dropdown_pop", nil, skin.skin_id_pop, self)
+		local drawer = root:addChild("wimp/dropdown_pop", skin.skin_id_pop, nil, self)
 		drawer.x = ax
 		drawer.y = ay + self.h
 		self.wid_drawer = drawer

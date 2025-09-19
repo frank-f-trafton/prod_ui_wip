@@ -93,7 +93,7 @@ function plan.make(panel)
 	-- Split Button
 	local wid_id = "wimp/button_split"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
-	local btn_spl = panel:addChild(wid_id, nil, skin_id)
+	local btn_spl = panel:addChild(wid_id, skin_id)
 	btn_spl:layoutSetMode("static", 0, 0, 224, 64)
 		:layoutAdd()
 	btn_spl:setTag("demo_split_btn")
