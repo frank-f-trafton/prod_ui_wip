@@ -15,7 +15,7 @@ function plan.make(panel)
 
 	local wid_id = "base/button"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
-	local button_norm = panel:addChild(wid_id, nil, skin_id)
+	local button_norm = panel:addChild(wid_id, skin_id)
 	button_norm:layoutSetMode("static", 256, 0, 224, 64)
 		:layoutAdd()
 	button_norm:setLabel("Normal Skinned Button")

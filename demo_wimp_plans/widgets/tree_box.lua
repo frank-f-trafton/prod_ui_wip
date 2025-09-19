@@ -31,7 +31,7 @@ function plan.make(panel)
 
 	local wid_id = "wimp/tree_box"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
-	local tree_box = panel:addChild(wid_id, nil, skin_id)
+	local tree_box = panel:addChild(wid_id, skin_id)
 	tree_box:layoutSetMode("static", 0, 0, 224, 256)
 		:layoutAdd()
 	tree_box:setTag("demo_treebox")
