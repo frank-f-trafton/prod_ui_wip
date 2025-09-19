@@ -125,7 +125,7 @@ end
 -- @param self The widget.
 -- @param key The key to check.
 -- @param value The value to check.
--- @return The widget which is now checked, or nil if no match was found.
+-- @return self (for chaining).
 function lgcButton.setCheckedRadioConditional(self, key, value)
 	local parent = self:getParent()
 	local siblings = parent.children
@@ -133,9 +133,11 @@ function lgcButton.setCheckedRadioConditional(self, key, value)
 	for i, wid in ipairs(parent.children) do
 		if wid.is_radio_button and wid.radio_group == self.radio_group and wid[key] == value then
 			wid:setChecked(true)
-			return wid
+			break
 		end
 	end
+
+	return self
 end
 
 

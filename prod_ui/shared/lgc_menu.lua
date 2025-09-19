@@ -13,9 +13,9 @@ local lgcMenu = {}
 
 
 local lgcScroll = context:getLua("shared/lgc_scroll")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -30,12 +30,7 @@ local menuMethods = {}
 
 
 function lgcMenu.attachMenuMethods(self)
-	for k, v in pairs(menuMethods) do
-		if self[k] then
-			error("attempt to overwrite field: " .. tostring(k))
-		end
-		self[k] = v
-	end
+	uiTable.patch(self, menuMethods, false)
 end
 
 
@@ -433,12 +428,12 @@ end
 
 
 function menuMethods:menuMoveItem(i, j)
-	pTable.moveElement(self.MN_items, i, j)
+	uiTable.moveElement(self.MN_items, i, j)
 end
 
 
 function menuMethods:menuSwapItems(i, j)
-	pTable.swapElements(self.MN_items, i, j)
+	uiTable.swapElements(self.MN_items, i, j)
 end
 
 

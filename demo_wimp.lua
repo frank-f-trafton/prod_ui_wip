@@ -368,8 +368,8 @@ do
 	do
 		-- Construct the application menu bar.
 		local menu_bar = wimp_root:addChild("wimp/menu_bar")
-		menu_bar:setTag("root_menu_bar")
-		menu_bar:geometrySetMode("slice", "px", "top", 32)
+			:setTag("root_menu_bar")
+			:geometrySetMode("slice", "px", "top", 32)
 
 		-- Test the (normally commented out) debug render user event.
 		--[[
@@ -568,19 +568,6 @@ do
 			table.insert(wimp_root.hooks_key_pressed, menu_bar.widHook_pressed)
 			table.insert(wimp_root.hooks_key_released, menu_bar.widHook_released)
 		end
-
-
-		-- Test sneaking a button into a menu bar.
-		--[[
-		local bar_button = menu_bar:addChild("base/button")
-
-		bar_button.w = menu_bar.h - 4
-		bar_button.x = menu_bar.w - bar_button.w + 2
-		bar_button.h = 2
-		bar_button.h = bar_button.w
-
-		bar_button.thimble_mode = 0
-		--]]
 	end
 
 
@@ -597,20 +584,15 @@ do
 		ws1.tag = "main_workspace"
 
 		local demo_list = ws1:addChild("wimp/tree_box")
+			:geometrySetMode("slice", "px", "left", 300)
+			:setTag("plan_menu")
 
 		demo_list.MN_wrap_selection = "no-rep"
 
-		-- [[
-		demo_list:geometrySetMode("slice", "px", "left", 300)
-		--]]
 
 		-- Put a sash between the items list and the demo panel.
-		-- [[
 		local sash = ws1:addChild("base/sash")
 		ws1:configureSashWidget(demo_list, sash)
-		--]]
-
-		demo_list.tag = "plan_menu"
 
 
 		-- Uncomment this to continuously select menu items as you scrub the mouse cursor

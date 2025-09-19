@@ -28,6 +28,8 @@ function _methods:setScrollRangeMode(mode)
 	uiAssert.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
 
 	self.scroll_range_mode = mode
+
+	return self
 end
 
 
@@ -75,6 +77,8 @@ function _methods:setSashesEnabled(enabled)
 			self.press_busy = false
 		end
 	end
+
+	return self
 end
 
 
@@ -103,6 +107,8 @@ function _methods:configureSashWidget(w1, w2)
 	w2:geometrySetMode("slice", "px", slice_edge, self.skin.sash_style.breadth, true, true)
 
 	w2.tall = (slice_edge == "left" or slice_edge == "right") and true or false
+
+	return self
 end
 
 

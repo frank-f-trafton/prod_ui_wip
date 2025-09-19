@@ -249,13 +249,13 @@ end
 
 
 --- Check if the mouse pointer is hovering over the widget's contact box.
-function _mt_widget:checkHovered()
+function _mt_widget:isMouseHovering()
 	return context.current_hover == self
 end
 
 
 --- Check if the mouse pointer is currently pressing the widget.
-function _mt_widget:checkPressed()
+function _mt_widget:isMousePressed()
 	return context.current_pressed == self
 end
 
@@ -347,10 +347,13 @@ end
 --	'thimble_mode' set to 1, and the context must not be captured by any other widget. If the widget already has
 --	thimble1, nothing happens.
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
+-- @return self (for chaining).
 function _mt_widget:takeThimble1(a, b, c, d)
 	--print("takeThimble1", debug.traceback())
 	_assertCanHaveThimble(self, 1)
 	_takeThimble1(self, a, b, c, d)
+
+	return self
 end
 
 
@@ -358,30 +361,35 @@ end
 --	'thimble_mode' set to 2, and the context must not be captured by any other widget. If the widget already has
 --	thimble2, nothing happens.
 -- @param a, b, c, d Generic arguments which are passed to the bubbled callbacks. These args are implementation-dependent.
+-- @return self (for chaining).
 function _mt_widget:takeThimble2(a, b, c, d)
 	--print("takeThimble2", debug.traceback())
 	_assertCanHaveThimble(self, 2)
 	_takeThimble2(self, a, b, c, d)
+
+	return self
 end
 
 
 --- Like takeThimble1(), but doesn't error out if the widget's 'thimble_mode' doesn't match. It may still fail if the
 --	context is in captured mode.
 -- @param a, b, c, d Generic arguments (same as takeThimble()).
--- @return True if takeThimble() was called, nil if not.
+-- @return self (for chaining).
 function _mt_widget:tryTakeThimble1(a, b, c, d)
 	if self:canTakeThimble(1) then
 		_takeThimble1(self, a, b, c, d)
-		return true
 	end
+
+	return self
 end
 
 
 function _mt_widget:tryTakeThimble2(a, b, c, d)
 	if self:canTakeThimble(2) then
 		_takeThimble2(self, a, b, c, d)
-		return true
 	end
+
+	return self
 end
 
 
@@ -398,6 +406,8 @@ function _mt_widget:releaseThimble1(a, b, c, d)
 			thimble2:cycleEvent("uiCall_thimble1Changed", self, a, b, c, d)
 		end
 	end
+
+	return self
 end
 
 
@@ -413,6 +423,8 @@ function _mt_widget:releaseThimble2(a, b, c, d)
 			thimble1:cycleEvent("uiCall_thimble2Changed", thimble1, a, b, c, d)
 		end
 	end
+
+	return self
 end
 
 
@@ -451,6 +463,8 @@ function _mt_widget:captureFocus()
 	context.captured_focus = self
 
 	self:sendEvent("uiCall_capture")
+
+	return self
 end
 
 
@@ -463,6 +477,8 @@ function _mt_widget:uncaptureFocus()
 	self:sendEvent("uiCall_uncapture")
 
 	context.captured_focus = false
+
+	return self
 end
 
 
@@ -674,6 +690,7 @@ local function _removeAsync(self)
 end
 function _mt_widget:removeAsync()
 	context:appendAsyncAction(self, _removeAsync)
+	return self
 end
 --]]
 
@@ -823,6 +840,7 @@ local sort_count = {} -- sortChildren
 -- widget has a sort_max of 0 or if it has only one child. Otherwise, all children must have 'sort_id' set with integers
 -- between 1 and the parent widget's 'sort_max', inclusive.
 -- @param recurse If true, recursively sort children with the same function.
+-- @return self (for chaining).
 function _mt_widget:sortChildren(recurse)
 	-- More info on counting sort: https://en.wikipedia.org/wiki/Counting_sort
 
@@ -888,12 +906,15 @@ function _mt_widget:sortChildren(recurse)
 			child:sortChildren(true)
 		end
 	end
+
+	return self
 end
 
 
 --- Reorder a widget among its siblings. Do not call while iterating through widgets. Note that sorting is left to the caller.
 --  Locked during update: yes (parent)
 -- @param var The new position. This value is clamped, so you may pass 0 for the first position and math.huge for the last.
+-- @return self (for chaining).
 function _mt_widget:reorder(var)
 	uiAssert.numberNotNaN(1, var)
 
@@ -915,15 +936,20 @@ function _mt_widget:reorder(var)
 	end
 
 	table.insert(seq, dest_i, table.remove(seq, self_i))
+
+	return self
 end
 
 
 --- Sets the widget's tag string.
 -- @param tag (string) The tag to assign.
+-- @return self (for chaining).
 function _mt_widget:setTag(tag)
 	uiAssert.type1(1, tag, "string")
 
 	self.tag = tag
+
+	return self
 end
 
 
@@ -1051,6 +1077,8 @@ function _mt_widget:reshape()
 	end
 
 	self:uiCall_reshapePost()
+
+	return self
 end
 
 
@@ -1059,6 +1087,8 @@ function _mt_widget:reshapeDescendants()
 	for i, child in ipairs(self.children) do
 		child:reshape()
 	end
+
+	return self
 end
 
 
@@ -1170,6 +1200,8 @@ function _mt_widget:skinInstall()
 	if self.skinner.install then
 		self.skinner.install(self, self.skinner, self.skin)
 	end
+
+	return self
 end
 
 
@@ -1177,6 +1209,8 @@ function _mt_widget:skinRemove()
 	if self.skinner.remove then
 		self.skinner.remove(self, self.skinner, self.skin)
 	end
+
+	return self
 end
 
 
@@ -1205,6 +1239,8 @@ function _mt_widget:skinSetRefs()
 
 	self.skinner = skinner
 	self.skin = skin_inst
+
+	return self
 end
 
 
@@ -1212,6 +1248,8 @@ function _mt_widget:skinRefresh()
 	if self.skinner.refresh then
 		self.skinner.refresh(self, self.skinner, self.skin)
 	end
+
+	return self
 end
 
 
@@ -1219,6 +1257,8 @@ function _mt_widget:skinUpdate(dt)
 	if self.skinner.update then
 		self.skinner.update(self, self.skinner, self.skin, dt)
 	end
+
+	return self
 end
 
 
@@ -1252,6 +1292,8 @@ function _mt_widget:applySetting(key)
 	end
 
 	_applySetting(self, key, self.default_settings, self.skin, self.settings)
+
+	return self
 end
 
 
@@ -1261,6 +1303,8 @@ function _mt_widget:applyAllSettings()
 	for k, v in pairs(default_settings) do
 		_applySetting(self, k, default_settings, skin, settings)
 	end
+
+	return self
 end
 
 
@@ -1273,6 +1317,8 @@ function _mt_widget:writeSetting(key, val)
 
 	settings[key] = val
 	_applySetting(self, key, default_settings, skin, settings)
+
+	return self
 end
 
 

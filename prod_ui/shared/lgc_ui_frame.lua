@@ -41,6 +41,8 @@ function _methods:setFrameSelectable(enabled)
 
 	self.frame_is_selectable = not not enabled
 	self.thimble_mode = self.frame_is_selectable and 1 or 0
+
+	return self
 end
 
 
@@ -65,6 +67,8 @@ function _methods:setFrameHidden(enabled)
 	if self.frame_hidden and self.context.root.selected_frame == self then
 		self.context.root:stepSelectedFrame(-1)
 	end
+
+	return self
 end
 
 
