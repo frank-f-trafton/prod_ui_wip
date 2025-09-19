@@ -1,6 +1,3 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
 --[[
 Loads and caches LÖVE Font data, creates Font objects, and assigns fallbacks.
 
