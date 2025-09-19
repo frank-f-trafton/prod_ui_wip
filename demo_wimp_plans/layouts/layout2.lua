@@ -42,57 +42,45 @@ function plan.make(panel)
 	--]]
 
 	local c1 = panel:addChild("base/container_simple")
-		:layoutSetMode("static", 0, 0, 256, 256, false, false, false)
+		:geometrySetMode("static", 0, 0, 256, 256, false, false, false)
 		:layoutSetMargin(16, 16, 16, 16)
-		:layoutAdd()
 
 	local c1_box = _makeBox(c1, "lightyellow", "darkyellow", "black", "Not Relative")
 
 	local wa = _makeBox(c1, "lightgreen", "green", "black", "(A)")
-		:layoutSetMode("static", 0, 0, 48, 48, false, false, false)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, false, false, false)
 
 	local wb = _makeBox(c1, "lightblue", "blue", "white", "(B)")
-		:layoutSetMode("static", 0, 0, 48, 48, false, true, false)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, false, true, false)
 
 	local wc = _makeBox(c1, "lightgrey", "darkgrey", "black", "(C)")
-		:layoutSetMode("static", 0, 0, 48, 48, false, false, true)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, false, false, true)
 
 	local wd = _makeBox(c1, "lightmagenta", "magenta", "black", "(D)")
-		:layoutSetMode("static", 0, 0, 48, 48, false, true, true)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, false, true, true)
 
-	c1_box:layoutSetMode("remaining")
-		:layoutAdd()
+	c1_box:geometrySetMode("remaining")
 
 
 	local c2 = panel:addChild("base/container_simple")
-		:layoutSetMode("static", 0+256+32, 0, 256, 256, false, false, false)
+		:geometrySetMode("static", 0+256+32, 0, 256, 256, false, false, false)
 		:layoutSetMargin(16, 16, 16, 16)
-		:layoutAdd()
 
 	local c2_box = _makeBox(c2, "darkgrey", "lightgrey", "white", "Relative")
 
 	local we = _makeBox(c2, "lightgreen", "green", "black", "(E)")
-		:layoutSetMode("static", 0, 0, 48, 48, true, false, false)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, true, false, false)
 
 	local wf = _makeBox(c2, "lightblue", "blue", "white", "(F)")
-		:layoutSetMode("static", 0, 0, 48, 48, true, true, false)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, true, true, false)
 
 	local wg = _makeBox(c2, "lightgrey", "darkgrey", "black", "(G)")
-		:layoutSetMode("static", 0, 0, 48, 48, true, false, true)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, true, false, true)
 
 	local wh = _makeBox(c2, "lightmagenta", "magenta", "black", "(H)")
-		:layoutSetMode("static", 0, 0, 48, 48, true, true, true)
-		:layoutAdd()
+		:geometrySetMode("static", 0, 0, 48, 48, true, true, true)
 
-	c2_box:layoutSetMode("remaining")
-		:layoutAdd()
+	c2_box:geometrySetMode("remaining")
 
 	panel:reshape()
 end

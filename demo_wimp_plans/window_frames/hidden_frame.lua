@@ -22,8 +22,8 @@ function plan.makeWindowFrame(root)
 	-- Button: Hide this frame
 	do
 		local btn = frame:addChild("base/button")
-		btn:layoutSetMode("static", xx, yy, 250, hh)
-			:layoutAdd()
+		btn:geometrySetMode("static", xx, yy, 250, hh)
+
 		btn.usr_time = 0.0
 		btn.usr_time_max = 5.0
 		btn:setLabel("Hide for " .. btn.usr_time_max .. " seconds")

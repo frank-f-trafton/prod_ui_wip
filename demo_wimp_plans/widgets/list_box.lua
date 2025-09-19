@@ -121,10 +121,8 @@ local function makeListBox1(panel, x, y)
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local list_box = panel:addChild(wid_id, skin_id)
 
-	list_box:layoutSetMode("static", x, y, 224, 256)
-		:layoutAdd()
+	list_box:geometrySetMode("static", x, y, 224, 256)
 	list_box:setTag("demo_listbox")
-
 	list_box:writeSetting("show_icons", true)
 
 	list_box.wid_action = function(self, item, index)
@@ -201,8 +199,7 @@ local function makeListBox1(panel, x, y)
 
 	local rdo_btn
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_align = "left"
@@ -211,8 +208,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("center")
 	rdo_btn.usr_align = "center"
@@ -221,8 +217,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_text_align"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_align = "right"
@@ -234,8 +229,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	local chk = panel:addChild("barebones/checkbox")
-	chk:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	chk:geometrySetMode("static", wx, wy, ww, wh)
 	chk:setChecked(list_box.show_icons)
 	chk:setLabel("Icons")
 	chk.wid_buttonAction = function(self)
@@ -263,8 +257,7 @@ local function makeListBox1(panel, x, y)
 	end
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("left")
 	rdo_btn.usr_icon_side = "left"
@@ -273,8 +266,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 
 	rdo_btn = panel:addChild("barebones/radio_button")
-	rdo_btn:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
 	rdo_btn.radio_group = "lb_icon_side"
 	rdo_btn:setLabel("right")
 	rdo_btn.usr_icon_side = "right"
@@ -290,8 +282,7 @@ local function makeListBox1(panel, x, y)
 
 	wy = wy + wh
 
-	sld:layoutSetMode("static", wx, wy, ww, wh)
-		:layoutAdd()
+	sld:geometrySetMode("static", wx, wy, ww, wh)
 
 	sld.slider_pos = 0
 	sld.slider_max = 64
@@ -316,8 +307,7 @@ end
 
 local function makeListBox2(panel, x, y)
 	local list_box = panel:addChild("wimp/list_box")
-	list_box:layoutSetMode("static", x, y, 224, 256)
-		:layoutAdd()
+	list_box:geometrySetMode("static", x, y, 224, 256)
 
 	list_box:setTag("demo_listbox2")
 
@@ -355,8 +345,7 @@ end
 
 local function makeListBox3(panel, x, y)
 	local lb1 = panel:addChild("wimp/list_box")
-	lb1:layoutSetMode("static", x, y, 224, 256)
-		:layoutAdd()
+	lb1:geometrySetMode("static", x, y, 224, 256)
 	lb1:setTag("demo_listbox3a")
 
 	lb1.wid_action = function(self, item, index) print("[3a] wid_action()", item, index) end
@@ -384,8 +373,7 @@ local function makeListBox3(panel, x, y)
 
 
 	local lb2 = panel:addChild("wimp/list_box")
-	lb2:layoutSetMode("static", x + 320, y, 224, 256)
-		:layoutAdd()
+	lb2:geometrySetMode("static", x + 320, y, 224, 256)
 	lb2:setTag("demo_listbox3b")
 
 	lb2.wid_action = function(self, item, index) print("[3b] wid_action()", item, index) end
@@ -415,8 +403,7 @@ end
 
 local function makeListBox4(panel, x, y)
 	local lb1 = panel:addChild("wimp/list_box")
-	lb1:layoutSetMode("static", x, y, 224, 256)
-		:layoutAdd()
+	lb1:geometrySetMode("static", x, y, 224, 256)
 	lb1:setTag("demo_listbox4a")
 
 	lb1.wid_action = function(self, item, index) print("[4a] wid_action()", item, index) end
@@ -444,8 +431,7 @@ local function makeListBox4(panel, x, y)
 	lb1:reshape()
 
 	local b1 = panel:addChild("base/button")
-	b1:layoutSetMode("static", x + 224 + 32, y, 32, 32)
-		:layoutAdd()
+	b1:geometrySetMode("static", x + 224 + 32, y, 32, 32)
 
 	b1:setLabel(">")
 
@@ -462,8 +448,7 @@ local function makeListBox4(panel, x, y)
 	end
 
 	local b2 = panel:addChild("base/button")
-	b2:layoutSetMode("static", x + 224 + 32, y + 256 - 32, 32, 32)
-		:layoutAdd()
+	b2:geometrySetMode("static", x + 224 + 32, y + 256 - 32, 32, 32)
 
 	b2:setLabel("<")
 
@@ -484,8 +469,7 @@ local function makeListBox4(panel, x, y)
 	lb2.wid_action2 = function(self, item, index) print("[4b] wid_action2()", item, index) end
 	lb2.wid_action3 = function(self, item, index) print("[4b] wid_action3()", item, index) end
 	lb2.wid_select = function(self, item, index) print("[4b] wid_select()", item, index) end
-	lb2:layoutSetMode("static", x + 320, y, 224, 256)
-		:layoutAdd()
+	lb2:geometrySetMode("static", x + 320, y, 224, 256)
 	lb2:setTag("demo_listbox4b")
 
 	lb2:writeSetting("show_icons", true)

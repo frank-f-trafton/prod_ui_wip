@@ -103,8 +103,7 @@ function demoShared.makeTitle(self, tag, text)
 	text_block:setAutoSize("v")
 	text_block:setFontID("h1")
 	text_block:setText(text)
-	text_block:layoutSetMode("slice", "px", "top", 32)
-		:layoutAdd()
+	text_block:geometrySetMode("slice", "px", "top", 32)
 
 	return text_block
 end
@@ -120,8 +119,7 @@ function demoShared.makeParagraph(self, tag, text)
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
-	text_block:layoutSetMode("slice", "px", "top", 32)
-		:layoutAdd()
+	text_block:geometrySetMode("slice", "px", "top", 32)
 
 	return text_block
 end
@@ -140,8 +138,7 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	text_block:setURL(url)
 	text_block.wid_buttonAction = _openURL
 	text_block.wid_buttonAction3 = _openURL
-	text_block:layoutSetMode("slice", "px", "top", 32)
-		:layoutAdd()
+	text_block:geometrySetMode("slice", "px", "top", 32)
 
 	return text_block
 end
@@ -179,24 +176,21 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
-	text_block:layoutSetMode("slice", "px", "top", 32)
-		:layoutAdd()
+	text_block:geometrySetMode("slice", "px", "top", 32)
 
 	local button_n = dialog:addChild("base/button")
 	button_n:setLabel("No")
 	button_n.wid_buttonAction = function(self)
 		self:bubbleEvent("frameCall_close", true)
 	end
-	button_n:layoutSetMode("slice", "px", "left", 160)
-		:layoutAdd()
+	button_n:geometrySetMode("slice", "px", "left", 160)
 
 	local button_y = dialog:addChild("base/button")
 	button_y:setLabel("Yes")
 	button_y.wid_buttonAction = function(self)
 		self:bubbleEvent("frameCall_close", true)
 	end
-	button_y:layoutSetMode("slice", "px", "right", 160)
-		:layoutAdd()
+	button_y:geometrySetMode("slice", "px", "right", 160)
 
 	local btn_w, btn_h = 96, 32
 
@@ -220,8 +214,7 @@ function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
 
 	local label = parent:addChild("base/label")
 	label:setLabel(text, label_mode)
-	label:layoutSetMode("static", x, y, w, h)
-		:layoutAdd()
+	label:geometrySetMode("static", x, y, w, h)
 
 	return label
 end

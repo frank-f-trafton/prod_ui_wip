@@ -14,9 +14,7 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	local properties_box = panel:addChild("wimp/properties_box")
-	properties_box:layoutSetMode("static", 0, 64, 400, 300)
-		:layoutAdd()
-
+	properties_box:geometrySetMode("static", 0, 64, 400, 300)
 	properties_box:setTag("demo_properties_box")
 
 	-- (wid_id, text, pos, icon_id)

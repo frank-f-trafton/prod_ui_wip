@@ -38,47 +38,38 @@ function plan.make(panel)
 	--]]
 
 	local container_h = panel:addChild("base/container_simple")
-		:layoutSetMode("slice", "unit", "left", 0.4)
+		:geometrySetMode("slice", "unit", "left", 0.4)
 		:layoutSetMargin(16, 16, 16, 16)
 		:layoutSetGridDimensions(2, 2)
-		:layoutAdd()
 
 	local wa = _makeBox(container_h, "lightgreen", "green", "black", "(Grid 0,0)")
-		:layoutSetMode("grid", 0, 0)
-		--:layoutSetPadding(4, 4, 4, 4)
-		:layoutAdd()
+		:geometrySetMode("grid", 0, 0)
+		--:geometrySetPadding(4, 4, 4, 4)
 
 	local wb = _makeBox(container_h, "lightblue", "blue", "white", "(Grid 0,1)")
-		:layoutSetMode("grid", 0, 1)
-		--:layoutSetPadding(4, 4, 4, 4)
-		:layoutAdd()
+		:geometrySetMode("grid", 0, 1)
+		--:geometrySetPadding(4, 4, 4, 4)
 
 	local wc = _makeBox(container_h, "lightgrey", "darkgrey", "black", "(Grid 1,0)")
-		:layoutSetMode("grid", 1, 0)
-		--:layoutSetPadding(4, 4, 4, 4)
-		:layoutAdd()
+		:geometrySetMode("grid", 1, 0)
+		--:geometrySetPadding(4, 4, 4, 4)
 
 	local wd = _makeBox(container_h, "lightmagenta", "magenta", "black", "(Grid 1,1)")
-		:layoutSetMode("grid", 1, 1)
-		--:layoutSetPadding(4, 4, 4, 4)
-		:layoutAdd()
+		:geometrySetMode("grid", 1, 1)
+		--:geometrySetPadding(4, 4, 4, 4)
 
 	local we = _makeBox(panel, "lightyellow", "darkyellow", "black", "(E)")
-		:layoutSetMode("slice", "unit", "left", 0.2)
-		:layoutAdd()
+		:geometrySetMode("slice", "unit", "left", 0.2)
 
 	local wf = _makeBox(panel, "darkgrey", "lightgrey", "white", "(F)")
-		--:layoutSetMode("slice", "unit", "left", 0.2)
-		:layoutSetMode("slice", "px", "left", 140)
-		:layoutAdd()
+		--:geometrySetMode("slice", "unit", "left", 0.2)
+		:geometrySetMode("slice", "px", "left", 140)
 
 	local sash = panel:addChild("base/sash")
-		:layoutAdd()
 	panel:configureSashWidget(wf, sash)
 
 	local wg = _makeBox(panel, "darkblue", "lightblue", "white", "(G)")
-		:layoutSetMode("remaining")
-		:layoutAdd()
+		:geometrySetMode("remaining")
 
 	panel:reshape()
 end

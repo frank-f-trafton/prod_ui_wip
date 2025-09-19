@@ -98,7 +98,7 @@ end
 function def:uiCall_reshapePre()
 	print("root_wimp: uiCall_reshapePre")
 
-	widLayout.resetLayout(self)
+	widLayout.resetLayoutSpace(self)
 
 	return self.halt_reshape
 end

@@ -88,7 +88,7 @@ function def:uiCall_reshapePre()
 	widShared.setClipScissorToViewport(self, 2)
 	widShared.setClipHoverToViewport(self, 2)
 
-	widLayout.resetLayout(self)
+	widLayout.resetLayoutSpace(self)
 
 	return self.halt_reshape
 end
