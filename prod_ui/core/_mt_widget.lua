@@ -16,6 +16,7 @@ _mt_widget.context = context
 
 
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
+--local pools = context:getLua("core/res/pools")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -562,11 +563,22 @@ function _mt_widget:remove()
 	end
 
 	-- Handle children, grandchildren, etc.
-	if self.children then
-		for i = #self.children, 1, -1 do
-			self.children[i]:remove()
+	local children = self.children
+	if children then
+		for i = #children, 1, -1 do
+			children[i]:remove()
 			-- Removal from 'children' list is handled below.
 		end
+
+		self.children = nil
+		--[[
+		if children == _mt_no_descendants then
+			self.children = nil
+		else
+			self.children = pools.children:push(children)
+		end
+		--]]
+
 	end
 
 	if context.captured_focus == self then

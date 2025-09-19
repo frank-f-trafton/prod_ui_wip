@@ -1013,5 +1013,12 @@ function love.draw()
 		end
 	end
 
+	--[=[
+	-- Debug: testing pooled resources
+	local pools = context:getLua("core/res/pools")
+	local aa, bb = pools.children:getCounters()
+	love.graphics.print(aa .. ", " .. bb, 32, 600)
+	--]=]
+
 	demo_perf = love.graphics.getStats(demo_perf)
 end

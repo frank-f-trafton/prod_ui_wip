@@ -16,6 +16,7 @@ local contextDraw = context:getLua("core/context_draw")
 local contextResources = context:getLua("core/context_resources")
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
+--local pools = context:getLua("core/res/pools")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -948,6 +949,7 @@ function _mt_context:_prepareWidgetInstance(id, parent, skin_id)
 
 	if not inst._no_descendants then
 		inst.children = {}
+		--inst.children = pools.children:pop()
 	end
 
 	return inst
