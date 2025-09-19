@@ -44,8 +44,7 @@ local function _setupWS2(root)
 	ws2.tag = "alt_workspace"
 
 	local btn = ws2:addChild("base/button")
-	btn:layoutSetMode("static", 32, 32, 256, 64)
-		:layoutAdd()
+	btn:geometrySetMode("static", 32, 32, 256, 64)
 	btn:setLabel("Back to Workspace #1")
 
 	btn.wid_buttonAction = function(self)
@@ -152,8 +151,7 @@ function plan.make(panel)
 	-- Button: Create Workspace #2
 	do
 		local btn = panel:addChild("base/button")
-		btn:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		btn:geometrySetMode("static", xx, yy, ww, hh)
 		btn.tag = "btn_crt"
 		btn:setLabel("Create Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -166,8 +164,7 @@ function plan.make(panel)
 	-- Button: Select Workspace #2
 	do
 		local btn = panel:addChild("base/button")
-		btn:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		btn:geometrySetMode("static", xx, yy, ww, hh)
 		btn.tag = "btn_act"
 		btn:setLabel("Activate Workspace #2")
 		btn.wid_buttonAction = function(self)
@@ -183,8 +180,7 @@ function plan.make(panel)
 	-- Button: Destroy Workspace #2
 	do
 		local btn = panel:addChild("base/button")
-		btn:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		btn:geometrySetMode("static", xx, yy, ww, hh)
 		btn.tag = "btn_dst"
 		btn:setLabel("Destroy Workspace #2")
 		btn.wid_buttonAction = function(self)

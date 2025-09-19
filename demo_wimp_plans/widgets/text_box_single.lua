@@ -105,8 +105,7 @@ function plan.make(panel)
 	local rdo_align
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_l")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "left"
@@ -116,8 +115,7 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_c")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "center"
@@ -127,8 +125,7 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_r")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "right"
@@ -140,9 +137,7 @@ function plan.make(panel)
 
 	-- [=[
 	local input_single = panel:addChild("input/text_box_single")
-	input_single:layoutSetMode("static", xx, yy, 256, 32)
-		:layoutAdd()
-
+	input_single:geometrySetMode("static", xx, yy, 256, 32)
 	input_single:setTag("demo_text_box_s")
 	input_single:setText("Single-Line Text Box")
 
@@ -158,9 +153,7 @@ function plan.make(panel)
 	yy = yy + h2 + math.floor(h2/2)
 
 	local input_s_mask = panel:addChild("input/text_box_single")
-	input_s_mask:layoutSetMode("static", xx, yy, 256, 32)
-		:layoutAdd()
-
+	input_s_mask:geometrySetMode("static", xx, yy, 256, 32)
 	input_s_mask:setTag("demo_text_box_s_masked")
 
 	input_s_mask.LE_hist.enabled = false -- TODO: write up an actual method to do this

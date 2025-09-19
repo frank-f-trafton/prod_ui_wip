@@ -152,8 +152,7 @@ function plan.make(panel)
 	local w2, h2 = 168, 40
 
 	local cbox_wrap = panel:addChild("barebones/checkbox")
-	cbox_wrap:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	cbox_wrap:geometrySetMode("static", xx, yy, ww, hh)
 	cbox_wrap:setTag("demo_wrap")
 	cbox_wrap:setLabel("Wrap (F5)", "single")
 	cbox_wrap.wid_buttonAction = function(self)
@@ -178,8 +177,7 @@ function plan.make(panel)
 	local rdo_align
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_l")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "left"
@@ -189,8 +187,7 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_c")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "center"
@@ -200,8 +197,7 @@ function plan.make(panel)
 	xx = xx + w2
 
 	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
 	rdo_align:setTag("demo_align_r")
 	rdo_align.radio_group = "align_h"
 	rdo_align.usr_align = "right"
@@ -214,8 +210,7 @@ function plan.make(panel)
 	local ED_W, ED_H = 496, 350
 
 	local script_ed = panel:addChild("input/script_editor")
-	script_ed:layoutSetMode("static", xx, yy, ED_W, ED_H)
-		:layoutAdd()
+	script_ed:geometrySetMode("static", xx, yy, ED_W, ED_H)
 	script_ed:setTag("demo_script_ed")
 	script_ed:setScrollBars(true, true)
 

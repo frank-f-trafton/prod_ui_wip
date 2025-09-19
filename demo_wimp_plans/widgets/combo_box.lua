@@ -14,9 +14,7 @@ function plan.make(panel)
 	panel:setScrollBars(false, false)
 
 	local combo_box = panel:addChild("wimp/combo_box")
-	combo_box:layoutSetMode("static", 32, 96, 256, 32)
-		:layoutAdd()
-
+	combo_box:geometrySetMode("static", 32, 96, 256, 32)
 	combo_box:addItem("foo")
 	combo_box:addItem("bar")
 	combo_box:addItem("baz")

@@ -41,8 +41,7 @@ function plan.makeWindowFrame(root)
 	local ww, hh = 224, 64
 
 	local bb_button = frame:addChild("base/button")
-	bb_button:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	bb_button:geometrySetMode("static", xx, yy, ww, hh)
 
 	bb_button.uiCall_thimble1Take = _assertNoThimble
 	bb_button.uiCall_thimble2Take = _assertNoThimble
@@ -54,8 +53,7 @@ function plan.makeWindowFrame(root)
 	yy = yy + hh
 
 	local bb_cbox = frame:addChild("base/checkbox")
-	bb_cbox:layoutSetMode("static", xx, yy, ww, hh)
-		:layoutAdd()
+	bb_cbox:geometrySetMode("static", xx, yy, ww, hh)
 
 	bb_cbox.uiCall_thimble1Take = _assertNoThimble
 	bb_cbox.uiCall_thimble2Take = _assertNoThimble

@@ -26,8 +26,7 @@ function plan.makeWindowFrame(root)
 	do
 		local text1 = frame:addChild("wimp/text_block")
 		-- XXX work on syncing padding with embedded widget labels
-		text1:layoutSetMode("static", xx + 9, yy, ww, hh)
-			:layoutAdd()
+		text1:geometrySetMode("static", xx + 9, yy, ww, hh)
 		text1:setText("Header size")
 		yy = yy + hh
 
@@ -41,8 +40,8 @@ function plan.makeWindowFrame(root)
 		-- Small
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Small")
 			rad_btn.usr_header_size = "small"
@@ -58,8 +57,8 @@ function plan.makeWindowFrame(root)
 		-- Normal
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Normal")
 			rad_btn.usr_header_size = "normal"
@@ -75,8 +74,8 @@ function plan.makeWindowFrame(root)
 		-- Large
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Large")
 			rad_btn.usr_header_size = "large"
@@ -94,8 +93,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Enable resizing
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getResizable()
 		checkbox:setLabel("Resizable frame", "single-ul")
 
@@ -113,8 +112,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Show resize sensors
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = false
 		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
 
@@ -133,8 +132,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle 'Close' button visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getCloseControlVisibility()
 		checkbox:setLabel("Show 'Close' control", "single-ul")
 
@@ -153,8 +152,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Enable closing the frame
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getCloseEnabled()
 		checkbox:setLabel("Enable 'Close'", "single-ul")
 
@@ -173,8 +172,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle 'Maximize' button visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getMaximizeControlVisibility()
 		checkbox:setLabel("Show 'Maximize' control", "single-ul")
 
@@ -193,8 +192,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Allow maximize
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getMaximizeEnabled()
 		checkbox:setLabel("Enable 'Maximize'", "single-ul")
 
@@ -213,8 +212,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle header visibility
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getHeaderVisible()
 		checkbox:setLabel("Visible header", "single-ul")
 
@@ -233,8 +232,8 @@ function plan.makeWindowFrame(root)
 	-- Checkbox: Toggle draggable frame
 	do
 		local checkbox = frame:addChild("base/checkbox")
-		checkbox:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		checkbox:geometrySetMode("static", xx, yy, ww, hh)
+
 		checkbox.checked = frame:getDraggable()
 		checkbox:setLabel("Draggable header", "single-ul")
 
@@ -255,8 +254,8 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 		local text1 = frame:addChild("wimp/text_block")
 		-- XXX work on syncing padding with embedded widget labels
-		text1:layoutSetMode("static", xx + 9, yy, ww, hh)
-			:layoutAdd()
+		text1:geometrySetMode("static", xx + 9, yy, ww, hh)
+
 		text1:setText("Control Placement")
 		yy = yy + hh
 
@@ -271,8 +270,8 @@ function plan.makeWindowFrame(root)
 		-- Left side
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Left")
 			rad_btn.usr_button_side = "left"
@@ -288,8 +287,8 @@ function plan.makeWindowFrame(root)
 		-- Right side
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Right")
 			rad_btn.usr_button_side = "right"
@@ -310,8 +309,8 @@ function plan.makeWindowFrame(root)
 		local text1 = frame:addChild("wimp/text_block")
 		text1.font = context.resources.fonts.p
 		-- XXX work on syncing padding with embedded widget labels
-		text1:layoutSetMode("static", xx + 9, yy, ww, hh)
-			:layoutAdd()
+		text1:geometrySetMode("static", xx + 9, yy, ww, hh)
+
 		text1:setText("Header Text Alignment")
 		yy = yy + hh
 
@@ -327,8 +326,8 @@ function plan.makeWindowFrame(root)
 		-- Left
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Left")
 			rad_btn.usr_text_align_h = 0
@@ -344,8 +343,8 @@ function plan.makeWindowFrame(root)
 		-- Center
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Center")
 			rad_btn.usr_text_align_h = 0.5
@@ -361,8 +360,8 @@ function plan.makeWindowFrame(root)
 		-- Right
 		do
 			local rad_btn = frame:addChild("base/radio_button")
-			rad_btn:layoutSetMode("static", xx, yy, ww, hh)
-				:layoutAdd()
+			rad_btn:geometrySetMode("static", xx, yy, ww, hh)
+
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Right")
 			rad_btn.usr_text_align_h = 1
@@ -380,8 +379,8 @@ function plan.makeWindowFrame(root)
 	-- Button: Close
 	do
 		local btn = frame:addChild("base/button")
-		btn:layoutSetMode("static", xx, yy, ww, hh)
-			:layoutAdd()
+		btn:geometrySetMode("static", xx, yy, ww, hh)
+
 		btn:setLabel("Close (forcefully)")
 		btn.wid_buttonAction = function(self)
 			self:bubbleEvent("frameCall_close", true)

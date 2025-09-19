@@ -38,7 +38,7 @@ end
 
 
 function def:uiCall_reshapePre()
-	widLayout.resetLayout(self)
+	widLayout.resetLayoutSpace(self)
 end
 
 

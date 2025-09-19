@@ -151,67 +151,13 @@ function plan.makeWindowFrame(root)
 	frame:setScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
+
 	local tree_box = frame:addChild("wimp/tree_box")
-	local chk_highlight = frame:addChild("base/checkbox")
-	local chk_vp = frame:addChild("base/checkbox")
-	local chk_ly = frame:addChild("base/checkbox")
-	local chk_exclude = frame:addChild("base/checkbox")
-
-	chk_vp:setLabel("Show Viewports")
-	chk_vp:setChecked(context.app.dbg_vp.active)
-
-	chk_vp.wid_buttonAction = function(self)
-		local vp = self.context.app.dbg_vp
-		vp.active = not not self.checked
-	end
-
-
-	chk_ly:setLabel("Show layout nodes")
-	chk_ly:setChecked(context.app.dbg_lo.active)
-
-	chk_ly.wid_buttonAction = function(self)
-		local ly = self.context.app.dbg_lo
-		ly.active = not not self.checked
-	end
-
-
-	chk_highlight:setLabel("Highlight Selected")
-	chk_highlight:setChecked(context.app.dbg_outline.active)
-
-	chk_highlight.wid_buttonAction = function(self)
-		local outline = self.context.app.dbg_outline
-		outline.active = not not self.checked
-	end
-
-
-	chk_exclude:setLabel("Exclude this window frame")
-	frame.usr_exclude = true
-	chk_exclude:setChecked(frame.usr_exclude)
-
-	chk_exclude.wid_buttonAction = function(self)
-		self.parent.usr_exclude = not self.parent.usr_exclude
-	end
+		:geometrySetMode("remaining")
+		:geometrySetOrder(-1)
 
 	tree_box:setExpandersActive(true)
-
-	chk_exclude:layoutSetMode("slice", "px", "bottom", 32, true)
-		:layoutAdd()
-
-	chk_ly:layoutSetMode("slice", "px", "bottom", 32, true)
-		:layoutAdd()
-
-	chk_vp:layoutSetMode("slice", "px", "bottom", 32, true)
-		:layoutAdd()
-
-	chk_highlight:layoutSetMode("slice", "px", "bottom", 32, true)
-		:layoutAdd()
-
-	tree_box:layoutSetMode("remaining")
-		:layoutAdd()
-
 	tree_box:setScrollBars(false, true)
-
-	tree_box:reshape()
 
 	tree_box.MN_drag_scroll = true
 	tree_box.MN_drag_select = true
@@ -222,6 +168,60 @@ function plan.makeWindowFrame(root)
 	tree_box.userUpdate = tree_userUpdate
 	tree_box.userDestroy = tree_userDestroy
 	-- Also reads 'self.parent.usr_exclude'
+
+
+	local chk_highlight = frame:addChild("base/checkbox")
+		:geometrySetMode("slice", "px", "bottom", 32, true)
+		:geometrySetOrder(-2)
+
+	chk_highlight:setLabel("Highlight Selected")
+	chk_highlight:setChecked(context.app.dbg_outline.active)
+
+	chk_highlight.wid_buttonAction = function(self)
+		local outline = self.context.app.dbg_outline
+		outline.active = not not self.checked
+	end
+
+
+	local chk_vp = frame:addChild("base/checkbox")
+		:geometrySetMode("slice", "px", "bottom", 32, true)
+		:geometrySetOrder(-3)
+
+	chk_vp:setLabel("Show Viewports")
+	chk_vp:setChecked(context.app.dbg_vp.active)
+
+	chk_vp.wid_buttonAction = function(self)
+		local vp = self.context.app.dbg_vp
+		vp.active = not not self.checked
+	end
+
+
+	local chk_ly = frame:addChild("base/checkbox")
+		:geometrySetMode("slice", "px", "bottom", 32, true)
+		:geometrySetOrder(-4)
+
+	chk_ly:setLabel("Show layout nodes")
+	chk_ly:setChecked(context.app.dbg_lo.active)
+
+	chk_ly.wid_buttonAction = function(self)
+		local ly = self.context.app.dbg_lo
+		ly.active = not not self.checked
+	end
+
+
+	local chk_exclude = frame:addChild("base/checkbox")
+		:geometrySetMode("slice", "px", "bottom", 32, true)
+		:geometrySetOrder(-5)
+
+	chk_exclude:setLabel("Exclude this window frame")
+	frame.usr_exclude = true
+	chk_exclude:setChecked(frame.usr_exclude)
+
+	chk_exclude.wid_buttonAction = function(self)
+		self.parent.usr_exclude = not self.parent.usr_exclude
+	end
+
+	frame:layoutSort()
 
 	frame:reshape()
 

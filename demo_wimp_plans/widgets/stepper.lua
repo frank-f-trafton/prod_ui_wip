@@ -18,9 +18,7 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	local stepper_h = panel:addChild("base/stepper")
-	stepper_h:layoutSetMode("static", 32, 32, 240, 32)
-		:layoutAdd()
-
+	stepper_h:geometrySetMode("static", 32, 32, 240, 32)
 	stepper_h:insertOption("Foobar")
 	stepper_h:insertOption("Bazbop")
 	local remove_test_i = stepper_h:insertOption("Remove Test")
@@ -32,8 +30,7 @@ function plan.make(panel)
 
 
 	local stepper_v = panel:addChild("base/stepper")
-	stepper_v:layoutSetMode("static", 288, 32, 64, 128)
-		:layoutAdd()
+	stepper_v:geometrySetMode("static", 288, 32, 64, 128)
 	stepper_v:insertOption("Foobar")
 	stepper_v:insertOption("Bazbop")
 	stepper_v:insertOption({text = "Dipdop"})

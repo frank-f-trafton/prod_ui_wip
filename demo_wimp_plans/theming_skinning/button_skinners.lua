@@ -16,8 +16,7 @@ function plan.make(panel)
 	local wid_id = "base/button"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local button_norm = panel:addChild(wid_id, skin_id)
-	button_norm:layoutSetMode("static", 256, 0, 224, 64)
-		:layoutAdd()
+	button_norm:geometrySetMode("static", 256, 0, 224, 64)
 	button_norm:setLabel("Normal Skinned Button")
 
 	local function radioAlignH(self)
@@ -36,8 +35,7 @@ function plan.make(panel)
 
 	local bb_rdo
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww1, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "left"
 	bb_rdo:setLabel("Left")
@@ -46,8 +44,7 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww1, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "center"
 	bb_rdo:setLabel("Center")
@@ -56,8 +53,7 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww1, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "right"
 	bb_rdo:setLabel("Right")
@@ -67,8 +63,7 @@ function plan.make(panel)
 	yy = yy + hh2
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww2, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww2, hh2)
 	bb_rdo.radio_group = "align_h"
 	bb_rdo.usr_align = "justify"
 	bb_rdo:setLabel("Justify")
@@ -86,8 +81,7 @@ function plan.make(panel)
 
 	local bb_rdo
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww1, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "top"
 	bb_rdo:setLabel("Top")
@@ -96,8 +90,7 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww1, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "middle"
 	bb_rdo:setLabel("Middle")
@@ -106,8 +99,7 @@ function plan.make(panel)
 	xx = xx + ww1
 
 	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:layoutSetMode("static", xx, yy, ww1, hh2)
-		:layoutAdd()
+	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
 	bb_rdo.radio_group = "align_v"
 	bb_rdo.usr_align = "bottom"
 	bb_rdo:setLabel("Bottom")

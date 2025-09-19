@@ -19,8 +19,7 @@ function plan.make(panel)
 		-- WIP
 	end
 
-	num_box:layoutSetMode("static", 32, 96, 256, 32)
-		:layoutAdd()
+	num_box:geometrySetMode("static", 32, 96, 256, 32)
 end
 
 

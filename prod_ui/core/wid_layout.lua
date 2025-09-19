@@ -27,10 +27,10 @@ widLayout._enum_slice_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
 --[[
 	"grid":
-	lo_a grid_x: (integer) Tile position, for children. From 0 to len - 1.
-	lo_b grid_y: (integer)
-	lo_c grid_w: (integer) Number of tiles the child occupies (for more granular positioning)
-	lo_d grid_h: (integer)
+	ge_a grid_x: (integer) Tile position, for children. From 0 to len - 1.
+	ge_b grid_y: (integer)
+	ge_c grid_w: (integer) Number of tiles the child occupies (for more granular positioning)
+	ge_d grid_h: (integer)
 
 	"null":
 	No parameters used.
@@ -39,20 +39,20 @@ widLayout._enum_slice_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 	No paremeters used.
 
 	"slice":
-	lo_a slice_mode: (_enum_slice_mode)
-	lo_b slice_edge: (_enum_slice_edge)
-	lo_c slice_amount: (number) 0-1 for "unit" slice_mode, an integer for "px" slice_mode.
-	lo_d slice_scale: (boolean) -- scales "px" values when true.
-	lo_e slice_is_sash: (boolean) Used by the divider container to mark nodes as draggable bars.
+	ge_a slice_mode: (_enum_slice_mode)
+	ge_b slice_edge: (_enum_slice_edge)
+	ge_c slice_amount: (number) 0-1 for "unit" slice_mode, an integer for "px" slice_mode.
+	ge_d slice_scale: (boolean) -- scales "px" values when true.
+	ge_e slice_is_sash: (boolean) Used by the divider container to mark nodes as draggable bars.
 
 	"static":
-	lo_a static_x: (integer) Position and dimensions.
-	lo_b static_y: (integer)
-	lo_c static_w: (integer)
-	lo_d static_h: (integer)
-	lo_e static_rel: (boolean) Use parent node's remaining layout space (true) or the original space (false).
-	lo_f static_flip_x: (boolean) When true, the position is against the other side of the layout space.
-	lo_g static_flip_y: (boolean)
+	ge_a static_x: (integer) Position and dimensions.
+	ge_b static_y: (integer)
+	ge_c static_w: (integer)
+	ge_d static_h: (integer)
+	ge_e static_rel: (boolean) Use parent node's remaining layout space (true) or the original space (false).
+	ge_f static_flip_x: (boolean) When true, the position is against the other side of the layout space.
+	ge_g static_flip_y: (boolean)
 --]]
 
 
@@ -65,29 +65,29 @@ widLayout.mode_setters = {
 		grid_h = grid_h or 1
 		uiAssert.numberNotNaN(4, grid_h)
 
-		self.lo_mode = "grid"
-		self.lo_a = grid_x
-		self.lo_b = grid_y
-		self.lo_c = grid_w
-		self.lo_d = grid_h
+		self.ge_mode = "grid"
+		self.ge_a = grid_x
+		self.ge_b = grid_y
+		self.ge_c = grid_w
+		self.ge_d = grid_h
 
-		self.lo_e, self.lo_f, self.lo_g = nil
+		self.ge_e, self.ge_f, self.ge_g = nil
 
 		return self
 	end,
 
 	null = function(self)
-		self.lo_mode = "null"
+		self.ge_mode = "null"
 
-		self.lo_a, self.lo_b, self.lo_c, self.lo_d, self.lo_e, self.lo_f, self.lo_g = nil
+		self.ge_a, self.ge_b, self.ge_c, self.ge_d, self.ge_e, self.ge_f, self.ge_g = nil
 
 		return self
 	end,
 
 	remaining = function(self)
-		self.lo_mode = "remaining"
+		self.ge_mode = "remaining"
 
-		self.lo_a, self.lo_b, self.lo_c, self.lo_d, self.lo_e, self.lo_f, self.lo_g = nil
+		self.ge_a, self.ge_b, self.ge_c, self.ge_d, self.ge_e, self.ge_f, self.ge_g = nil
 
 		return self
 	end,
@@ -98,14 +98,14 @@ widLayout.mode_setters = {
 		uiAssert.numberNotNaN(3, slice_amount)
 		-- don't assert 'slice_scale' and 'slice_is_sash'
 
-		self.lo_mode = "slice"
-		self.lo_a = slice_mode
-		self.lo_b = slice_edge
-		self.lo_c = slice_amount
-		self.lo_d = not not slice_scale
-		self.lo_e = not not slice_is_sash
+		self.ge_mode = "slice"
+		self.ge_a = slice_mode
+		self.ge_b = slice_edge
+		self.ge_c = slice_amount
+		self.ge_d = not not slice_scale
+		self.ge_e = not not slice_is_sash
 
-		self.lo_f, self.lo_g = nil
+		self.ge_f, self.ge_g = nil
 
 		return self
 	end,
@@ -117,16 +117,16 @@ widLayout.mode_setters = {
 		uiAssert.numberNotNaN(4, static_h)
 		-- don't assert 'static_rel', 'static_flip_x' or 'static_flip_y'
 
-		self.lo_mode = "static"
+		self.ge_mode = "static"
 
-		self.lo_a = static_x
-		self.lo_b = static_y
-		self.lo_c = math.max(0, static_w)
-		self.lo_d = math.max(0, static_h)
+		self.ge_a = static_x
+		self.ge_b = static_y
+		self.ge_c = math.max(0, static_w)
+		self.ge_d = math.max(0, static_h)
 
-		self.lo_e = not not static_rel
-		self.lo_f = not not static_flip_x
-		self.lo_g = not not static_flip_y
+		self.ge_e = not not static_rel
+		self.ge_f = not not static_flip_x
+		self.ge_g = not not static_flip_y
 
 		return self
 	end
@@ -155,13 +155,13 @@ local function _querySliceLength(wid, x_axis, cross_length)
 	if a then
 		return a, b
 	end
-	return wid.lo_c, wid.lo_d -- slice_amount, slice_scale
+	return wid.ge_c, wid.ge_d -- slice_amount, slice_scale
 end
 
 
 widLayout.handlers = {
 	grid = function(np, nc, orig_w, orig_h)
-		local grid_x, grid_y, grid_w, grid_h = nc.lo_a, nc.lo_b, nc.lo_c, nc.lo_d
+		local grid_x, grid_y, grid_w, grid_h = nc.ge_a, nc.ge_b, nc.ge_c, nc.ge_d
 
 		if np.lo_grid_rows > 0 and np.lo_grid_cols > 0 then
 			nc.x = np.lo_x + math.floor(grid_x * np.lo_w / np.lo_grid_rows)
@@ -182,7 +182,7 @@ widLayout.handlers = {
 	end,
 
 	slice = function(np, nc, orig_w, orig_h)
-		local slice_mode, slice_edge = nc.lo_a, nc.lo_b
+		local slice_mode, slice_edge = nc.ge_a, nc.ge_b
 
 		if slice_edge == "left" then
 			nc.y = np.lo_y
@@ -221,8 +221,8 @@ widLayout.handlers = {
 
 	static = function(np, nc, orig_w, orig_h)
 		local scale = context.scale
-		local static_x, static_y, static_w, static_h = nc.lo_a, nc.lo_b, nc.lo_c, nc.lo_d
-		local static_rel, static_flip_x, static_flip_y = nc.lo_e, nc.lo_f, nc.lo_g
+		local static_x, static_y, static_w, static_h = nc.ge_a, nc.ge_b, nc.ge_c, nc.ge_d
+		local static_rel, static_flip_x, static_flip_y = nc.ge_e, nc.ge_f, nc.ge_g
 
 		local px, py, pw, ph
 		if static_rel then
@@ -304,6 +304,16 @@ local function _layoutGetMargin(self)
 end
 
 
+local function _hof_sortLayoutList(a, b)
+	return a.ge_order < b.ge_order
+end
+
+
+local function _layoutSort(self)
+	table.sort(self.lo_list, _hof_sortLayoutList)
+end
+
+
 function widLayout.setupContainerDef(def)
 	def.layoutSetBase = _layoutSetBase
 	def.layoutGetBase = _layoutGetBase
@@ -311,6 +321,7 @@ function widLayout.setupContainerDef(def)
 	def.layoutGetGridDimensions = _layoutGetGridDimensions
 	def.layoutSetMargin = _layoutSetMargin
 	def.layoutGetMargin = _layoutGetMargin
+	def.layoutSort = _layoutSort
 end
 
 
@@ -323,7 +334,7 @@ function widLayout.setupLayoutList(self)
 end
 
 
-function widLayout.resetLayout(self)
+function widLayout.resetLayoutSpace(self)
 	local to = self.lo_base
 
 	if to == "zero" then
@@ -374,9 +385,9 @@ function widLayout.applyLayout(self, _depth)
 	self.lo_h = math.max(0, self.lo_h - my1 - my2)
 
 	for i, child in ipairs(self.lo_list) do
-		local handler = widLayout.handlers[child.lo_mode]
+		local handler = widLayout.handlers[child.ge_mode]
 		if not handler then
-			error("invalid or missing layout handler: " .. tostring(child.lo_mode))
+			error("invalid or missing layout handler: " .. tostring(child.ge_mode))
 		end
 
 		--print("old self XYWH", self.x, self.y, self.w, self.h)
@@ -384,10 +395,10 @@ function widLayout.applyLayout(self, _depth)
 		--print("new self XYWH", self.x, self.y, self.w, self.h)
 
 		-- Outpad reduction
-		local ox1 = math.floor(child.lo_outpad_x1 * scale)
-		local oy1 = math.floor(child.lo_outpad_y1 * scale)
-		local ox2 = math.floor(child.lo_outpad_x2 * scale)
-		local oy2 = math.floor(child.lo_outpad_y2 * scale)
+		local ox1 = math.floor(child.ge_outpad_x1 * scale)
+		local oy1 = math.floor(child.ge_outpad_y1 * scale)
+		local ox2 = math.floor(child.ge_outpad_x2 * scale)
+		local oy2 = math.floor(child.ge_outpad_y2 * scale)
 
 		child.x = child.x + ox1
 		child.y = child.y + oy1

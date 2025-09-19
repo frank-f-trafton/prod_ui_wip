@@ -47,8 +47,7 @@ function plan.makeWindowFrame(root)
 	frame:setScrollBars(false, false)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")
-		:layoutSetMode("remaining")
-		:layoutAdd()
+		:geometrySetMode("remaining")
 
 	menu_tab.renderThimble = function() end
 

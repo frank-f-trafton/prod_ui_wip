@@ -21,8 +21,7 @@ function plan.make(panel)
 	local v_bar_width, v_bar_height = 100, 160
 
 	local p_bar = panel:addChild("status/progress_bar")
-	p_bar:layoutSetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
-		:layoutAdd()
+	p_bar:geometrySetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
 	p_bar:setTag("demo_prog_bar")
 
 	p_bar.pos = starting_pos
@@ -39,9 +38,7 @@ function plan.make(panel)
 
 
 	local btn_active = panel:addChild("base/button")
-	btn_active:layoutSetMode("static", 256, 32, 128, 40)
-		:layoutAdd()
-
+	btn_active:geometrySetMode("static", 256, 32, 128, 40)
 	btn_active:setLabel("setActive()")
 
 	btn_active.wid_buttonAction = function(self)
@@ -53,9 +50,7 @@ function plan.make(panel)
 
 
 	local btn_vertical = panel:addChild("base/button")
-	btn_vertical:layoutSetMode("static", 256, 32+40, 128, 40)
-		:layoutAdd()
-
+	btn_vertical:geometrySetMode("static", 256, 32+40, 128, 40)
 	btn_vertical:setLabel("Orientation")
 
 	btn_vertical.wid_buttonAction = function(self)
@@ -63,20 +58,18 @@ function plan.make(panel)
 		if pb then
 			pb.vertical = not pb.vertical
 			if pb.vertical then
-				pb:layoutSetMode("static", bar_x, bar_y, v_bar_width, v_bar_height)
+				pb:geometrySetMode("static", bar_x, bar_y, v_bar_width, v_bar_height)
 			else
-				pb:layoutSetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
+				pb:geometrySetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
 			end
 			pb.parent:reshape()
-			print(pb.vertical, pb:layoutGetMode())
+			print(pb.vertical, pb:geometryGetMode())
 		end
 	end
 
 
 	local btn_far_end = panel:addChild("base/button")
-	btn_far_end:layoutSetMode("static", 256, 32+40+40, 128, 40)
-		:layoutAdd()
-
+	btn_far_end:geometrySetMode("static", 256, 32+40+40, 128, 40)
 	btn_far_end:setLabel("Near/Far Start")
 
 	btn_far_end.wid_buttonAction = function(self)
@@ -119,9 +112,7 @@ function plan.make(panel)
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
-	sld_pos:layoutSetMode("static", 256, 160+32+8, 256, 32)
-		:layoutAdd()
-
+	sld_pos:geometrySetMode("static", 256, 160+32+8, 256, 32)
 	sld_pos:setTag("position_slider")
 
 	sld_pos.slider_pos = starting_pos
@@ -138,8 +129,7 @@ function plan.make(panel)
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")
-	sld_max:layoutSetMode("static", 256, 160+32+8+32+32+8, 256, 32)
-		:layoutAdd()
+	sld_max:geometrySetMode("static", 256, 160+32+8+32+32+8, 256, 32)
 	sld_max:setTag("maximum_slider")
 
 	sld_max.slider_pos = starting_max

@@ -369,9 +369,7 @@ do
 		-- Construct the application menu bar.
 		local menu_bar = wimp_root:addChild("wimp/menu_bar")
 		menu_bar:setTag("root_menu_bar")
-		menu_bar:layoutSetMode("slice", "px", "top", 32)
-			:layoutAdd()
-
+		menu_bar:geometrySetMode("slice", "px", "top", 32)
 
 		-- Test the (normally commented out) debug render user event.
 		--[[
@@ -603,14 +601,12 @@ do
 		demo_list.MN_wrap_selection = "no-rep"
 
 		-- [[
-		demo_list:layoutSetMode("slice", "px", "left", 300)
-			:layoutAdd()
+		demo_list:geometrySetMode("slice", "px", "left", 300)
 		--]]
 
 		-- Put a sash between the items list and the demo panel.
 		-- [[
 		local sash = ws1:addChild("base/sash")
-			:layoutAdd()
 		ws1:configureSashWidget(demo_list, sash)
 		--]]
 
@@ -658,8 +654,7 @@ do
 
 			local plan_container = workspace:addChild("base/container")
 			plan_container:setTag("plan_container")
-			plan_container:layoutSetMode("remaining")
-				:layoutAdd()
+			plan_container:geometrySetMode("remaining")
 
 			return plan_container
 		end
