@@ -72,6 +72,8 @@ function _mt_ring:setMax(max)
 	end
 
 	self.last = #self.buf
+
+	return self
 end
 
 
@@ -86,6 +88,8 @@ function _mt_ring:advanceLast()
 			self.last = 1
 		end
 	end
+
+	return self
 
 	-- If `ring.last` > 0 and there is nothing in the last slot, assign something ASAP.
 end

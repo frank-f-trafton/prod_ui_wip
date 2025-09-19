@@ -13,12 +13,12 @@ local context = select(1, ...)
 local lgcButtonBare = {}
 
 
-local dummyFunc = function() end
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 
 
-lgcButtonBare.wid_buttonAction = dummyFunc
-lgcButtonBare.wid_buttonAction2 = dummyFunc
-lgcButtonBare.wid_buttonAction3 = dummyFunc
+lgcButtonBare.wid_buttonAction = uiDummy.func
+lgcButtonBare.wid_buttonAction2 = uiDummy.func
+lgcButtonBare.wid_buttonAction3 = uiDummy.func
 
 
 function lgcButtonBare.setEnabled(self, enabled)
@@ -28,6 +28,8 @@ function lgcButtonBare.setEnabled(self, enabled)
 		self.hovered = false
 		self.pressed = false
 	end
+
+	return self
 end
 
 
@@ -38,16 +40,22 @@ function lgcButtonBare.setEnabledSticky(self, enabled)
 		self.hovered = false
 		-- Do not reset 'pressed' state when disabling sticky buttons.
 	end
+
+	return self
 end
 
 
 function lgcButtonBare.setPressedSticky(self, pressed)
 	self.pressed = not not pressed
+
+	return self
 end
 
 
 function lgcButtonBare.setChecked(self, checked)
 	self.checked = not not checked
+
+	return self
 end
 
 
@@ -64,12 +72,16 @@ function lgcButtonBare.uncheckAllRadioSiblings(self)
 			end
 		end
 	end
+
+	return self
 end
 
 
 function lgcButtonBare.setCheckedRadio(self, checked)
 	lgcButtonBare.uncheckAllRadioSiblings(self)
 	self.checked = not not checked
+
+	return self
 end
 
 
@@ -80,9 +92,11 @@ function lgcButtonBare.setCheckedRadioConditional(self, key, value)
 	for i, wid in ipairs(parent.children) do
 		if wid.is_radio_button and wid.radio_group == self.radio_group and wid[key] == value then
 			wid:setChecked(true)
-			return wid
+			break
 		end
 	end
+
+	return self
 end
 
 

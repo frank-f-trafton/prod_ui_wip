@@ -32,11 +32,15 @@ function _mt_hist:setEnabled(enabled)
 	if not self.enabled then
 		self:clearAll()
 	end
+
+	return self
 end
 
 
 function _mt_hist:setLockedFirst(locked)
 	self.locked_first = not not locked
+
+	return self
 end
 
 
@@ -50,6 +54,8 @@ function _mt_hist:setMaxEntries(max)
 	-- Allow setting max entries, even if not enabled.
 	self.max = math.floor(max)
 	self:clearAll()
+
+	return self
 end
 
 
@@ -63,6 +69,8 @@ function _mt_hist:clearAll()
 	end
 
 	self.pos = 0
+
+	return self
 end
 
 
