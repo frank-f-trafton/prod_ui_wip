@@ -369,7 +369,7 @@ do
 		-- Construct the application menu bar.
 		local menu_bar = wimp_root:addChild("wimp/menu_bar")
 			:setTag("root_menu_bar")
-			:geometrySetMode("slice", "px", "top", 32)
+			:geometrySetMode("segment", "px", "top", 32)
 
 		-- Test the (normally commented out) debug render user event.
 		--[[
@@ -584,7 +584,7 @@ do
 		ws1.tag = "main_workspace"
 
 		local demo_list = ws1:addChild("wimp/tree_box")
-			:geometrySetMode("slice", "px", "left", 300)
+			:geometrySetMode("segment", "px", "left", 300)
 			:setTag("plan_menu")
 
 		demo_list.MN_wrap_selection = "no-rep"
