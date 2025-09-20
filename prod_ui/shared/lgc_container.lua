@@ -98,15 +98,15 @@ function _methods:configureSashWidget(w1, w2)
 		error("'w2' is not a sash widget")
 	end
 
-	local mode, _, slice_edge = w1:geometryGetMode()
+	local mode, _, segment_edge = w1:geometryGetMode()
 
-	if mode ~= "slice" then
-		error("argument #1: expected a widget configured for 'slice' layout mode")
+	if mode ~= "segment" then
+		error("argument #1: expected a widget configured for 'segment' layout mode")
 	end
 
-	w2:geometrySetMode("slice", "px", slice_edge, self.skin.sash_style.breadth, true, true)
+	w2:geometrySetMode("segment", "px", segment_edge, self.skin.sash_style.breadth, true, true)
 
-	w2.tall = (slice_edge == "left" or slice_edge == "right") and true or false
+	w2.tall = (segment_edge == "left" or segment_edge == "right") and true or false
 
 	return self
 end
@@ -149,8 +149,8 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 		local wid = _checkMouseOverSash(self, mxs, mys, sash_style.contract_x, sash_style.contract_y)
 		if wid then
 			self.sash_hover = wid
-			local _, _, slice_edge = wid:geometryGetMode()
-			local cursor_id = lgcContainer.getSashCursorID(slice_edge, false)
+			local _, _, segment_edge = wid:geometryGetMode()
+			local cursor_id = lgcContainer.getSashCursorID(segment_edge, false)
 			self.cursor_hover = sash_style[cursor_id]
 			return true
 		else
@@ -192,16 +192,16 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 		then
 			local cn = self.children[sash:getIndex() - 1] -- prev sibling
 			if cn then
-				local mode, slice_mode, slice_edge = cn:geometryGetMode()
-				if mode == "slice" and slice_mode == "px" then
+				local mode, segment_mode, segment_edge = cn:geometryGetMode()
+				if mode == "segment" and segment_mode == "px" then
 					self.press_busy = "sash"
 					self.sash_att_ax, self.sash_att_ay = x, y
-					if slice_edge == "right" or slice_edge == "left" then
+					if segment_edge == "right" or segment_edge == "left" then
 						self.sash_att_len = cn.w
 					else -- "top", "bottom"
 						self.sash_att_len = cn.h
 					end
-					local cursor_id = lgcContainer.getSashCursorID(slice_edge, true)
+					local cursor_id = lgcContainer.getSashCursorID(segment_edge, true)
 					self.cursor_press = self.skin.sash_style[cursor_id]
 
 					return true
@@ -220,25 +220,25 @@ function lgcContainer.sashDragLogic(self, x, y)
 		if sash then
 			local cn = self.children[sash:getIndex() - 1] -- prev sibling
 			if cn then
-				local mode, slice_mode, slice_edge, slice_amount, slice_scale = cn:geometryGetMode()
-				if mode == "slice" then
-					if slice_edge == "right" then
-						slice_amount = math.min(slice_amount + self.w, self.sash_att_len - (x - self.sash_att_ax))
+				local mode, segment_mode, segment_edge, segment_amount, segment_scale = cn:geometryGetMode()
+				if mode == "segment" then
+					if segment_edge == "right" then
+						segment_amount = math.min(segment_amount + self.w, self.sash_att_len - (x - self.sash_att_ax))
 
-					elseif slice_edge == "left" then
-						slice_amount = math.min(slice_amount + self.w, self.sash_att_len + (x - self.sash_att_ax))
+					elseif segment_edge == "left" then
+						segment_amount = math.min(segment_amount + self.w, self.sash_att_len + (x - self.sash_att_ax))
 
-					elseif slice_edge == "top" then
-						slice_amount = math.min(slice_amount + self.h, self.sash_att_len - (y - self.sash_att_ay))
+					elseif segment_edge == "top" then
+						segment_amount = math.min(segment_amount + self.h, self.sash_att_len - (y - self.sash_att_ay))
 
-					elseif slice_edge == "bottom" then
-						slice_amount = math.min(slice_amount + self.h, self.sash_att_len + (y - self.sash_att_ay))
+					elseif segment_edge == "bottom" then
+						segment_amount = math.min(segment_amount + self.h, self.sash_att_len + (y - self.sash_att_ay))
 
 					else
-						error("invalid slice edge.")
+						error("invalid segment edge.")
 					end
 
-					cn:geometrySetMode("slice", slice_mode, slice_edge, slice_amount, slice_scale, true)
+					cn:geometrySetMode("segment", segment_mode, segment_edge, segment_amount, segment_scale, true)
 					self:reshape()
 				end
 

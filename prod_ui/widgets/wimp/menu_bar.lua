@@ -382,7 +382,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_getSliceLength(x_axis, cross_length)
+function def:uiCall_getSegmentLength(x_axis, cross_length)
 	if not x_axis then
 		if self.hidden then
 			return 0, false

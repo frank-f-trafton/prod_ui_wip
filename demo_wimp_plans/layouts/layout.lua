@@ -38,7 +38,7 @@ function plan.make(panel)
 	--]]
 
 	local container_h = panel:addChild("base/container_simple")
-		:geometrySetMode("slice", "unit", "left", 0.4)
+		:geometrySetMode("segment", "unit", "left", 0.4)
 		:layoutSetMargin(16, 16, 16, 16)
 		:layoutSetGridDimensions(2, 2)
 
@@ -59,11 +59,11 @@ function plan.make(panel)
 		--:geometrySetPadding(4, 4, 4, 4)
 
 	local we = _makeBox(panel, "lightyellow", "darkyellow", "black", "(E)")
-		:geometrySetMode("slice", "unit", "left", 0.2)
+		:geometrySetMode("segment", "unit", "left", 0.2)
 
 	local wf = _makeBox(panel, "darkgrey", "lightgrey", "white", "(F)")
-		--:geometrySetMode("slice", "unit", "left", 0.2)
-		:geometrySetMode("slice", "px", "left", 140)
+		--:geometrySetMode("segment", "unit", "left", 0.2)
+		:geometrySetMode("segment", "px", "left", 140)
 
 	local sash = panel:addChild("base/sash")
 	panel:configureSashWidget(wf, sash)

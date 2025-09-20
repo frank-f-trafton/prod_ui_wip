@@ -18,11 +18,11 @@ widLayout._enum_layout_base = uiTable.makeLUTV(
 )
 
 -- "px": pixels
--- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any slices
--- were taken off at this level.
-widLayout._enum_slice_mode = uiTable.makeLUTV("px", "unit")
+-- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any segments
+-- were assigned at this level.
+widLayout._enum_segment_mode = uiTable.makeLUTV("px", "unit")
 
-widLayout._enum_slice_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
+widLayout._enum_segment_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
 
 --[[
@@ -38,12 +38,12 @@ widLayout._enum_slice_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 	"remaining":
 	No paremeters used.
 
-	"slice":
-	ge_a slice_mode: (_enum_slice_mode)
-	ge_b slice_edge: (_enum_slice_edge)
-	ge_c slice_amount: (number) 0-1 for "unit" slice_mode, an integer for "px" slice_mode.
-	ge_d slice_scale: (boolean) -- scales "px" values when true.
-	ge_e slice_is_sash: (boolean) Used by the divider container to mark nodes as draggable bars.
+	"segment":
+	ge_a segment_mode: (_enum_segment_mode)
+	ge_b segment_edge: (_enum_segment_edge)
+	ge_c segment_amount: (number) 0-1 for "unit" segment_mode, an integer for "px" segment_mode.
+	ge_d segment_scale: (boolean) -- scales "px" values when true.
+	ge_e segment_is_sash: (boolean) Used by the divider container to mark nodes as draggable bars.
 
 	"static":
 	ge_a static_x: (integer) Position and dimensions.
@@ -92,18 +92,18 @@ widLayout.mode_setters = {
 		return self
 	end,
 
-	slice = function(self, slice_mode, slice_edge, slice_amount, slice_scale, slice_is_sash)
-		uiAssert.enum(1, slice_mode, "slice_mode", widLayout._enum_slice_mode)
-		uiAssert.enum(2, slice_edge, "slice_edge", widLayout._enum_slice_edge)
-		uiAssert.numberNotNaN(3, slice_amount)
-		-- don't assert 'slice_scale' and 'slice_is_sash'
+	segment = function(self, segment_mode, segment_edge, segment_amount, segment_scale, segment_is_sash)
+		uiAssert.enum(1, segment_mode, "segment_mode", widLayout._enum_segment_mode)
+		uiAssert.enum(2, segment_edge, "segment_edge", widLayout._enum_segment_edge)
+		uiAssert.numberNotNaN(3, segment_amount)
+		-- don't assert 'segment_scale' and 'segment_is_sash'
 
-		self.ge_mode = "slice"
-		self.ge_a = slice_mode
-		self.ge_b = slice_edge
-		self.ge_c = slice_amount
-		self.ge_d = not not slice_scale
-		self.ge_e = not not slice_is_sash
+		self.ge_mode = "segment"
+		self.ge_a = segment_mode
+		self.ge_b = segment_edge
+		self.ge_c = segment_amount
+		self.ge_d = not not segment_scale
+		self.ge_e = not not segment_is_sash
 
 		self.ge_f, self.ge_g = nil
 
@@ -133,29 +133,29 @@ widLayout.mode_setters = {
 }
 
 
-local function _calculateSlice(slice_mode, amount, length, original_length, do_scale)
-	--print("slice_mode", slice_mode, "amount", amount, "length", length, "original_length", original_length)
+local function _calculateSegment(segment_mode, amount, length, original_length, do_scale)
+	--print("segment_mode", segment_mode, "amount", amount, "length", length, "original_length", original_length)
 	local cut
-	if slice_mode == "unit" then
+	if segment_mode == "unit" then
 		cut = math.floor(original_length * math.max(0, math.min(amount, 1)))
 
-	elseif slice_mode == "px" then
+	elseif segment_mode == "px" then
 		local scale = do_scale and context.scale or 1.0
 		cut = math.floor(math.max(0, math.min(amount * scale, length)))
 	else
-		error("invalid 'slice_mode' enum.")
+		error("invalid 'segment_mode' enum.")
 	end
 
 	return cut, length - cut
 end
 
 
-local function _querySliceLength(wid, x_axis, cross_length)
-	local a, b = wid:uiCall_getSliceLength(x_axis, cross_length)
+local function _querySegmentLength(wid, x_axis, cross_length)
+	local a, b = wid:uiCall_getSegmentLength(x_axis, cross_length)
 	if a then
 		return a, b
 	end
-	return wid.ge_c, wid.ge_d -- slice_amount, slice_scale
+	return wid.ge_c, wid.ge_d -- segment_amount, segment_scale
 end
 
 
@@ -181,41 +181,41 @@ widLayout.handlers = {
 		nc.x, nc.y, nc.w, nc.h = np.lo_x, np.lo_y, np.lo_w, np.lo_h
 	end,
 
-	slice = function(np, nc, orig_w, orig_h)
-		local slice_mode, slice_edge = nc.ge_a, nc.ge_b
+	segment = function(np, nc, orig_w, orig_h)
+		local segment_mode, segment_edge = nc.ge_a, nc.ge_b
 
-		if slice_edge == "left" then
+		if segment_edge == "left" then
 			nc.y = np.lo_y
 			nc.h = np.lo_h
-			local amount, scaled = _querySliceLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSlice(slice_mode, amount, np.lo_w, orig_w, scaled)
+			local amount, scaled = _querySegmentLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSegment(segment_mode, amount, np.lo_w, orig_w, scaled)
 			nc.x = np.lo_x
 			np.lo_x = np.lo_x + nc.w
 
-		elseif slice_edge == "right" then
+		elseif segment_edge == "right" then
 			nc.y = np.lo_y
 			nc.h = np.lo_h
-			local amount, scaled = _querySliceLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSlice(slice_mode, amount, np.lo_w, orig_w, scaled)
+			local amount, scaled = _querySegmentLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSegment(segment_mode, amount, np.lo_w, orig_w, scaled)
 			nc.x = np.lo_x + np.lo_w
 
-		elseif slice_edge == "top" then
+		elseif segment_edge == "top" then
 			nc.x = np.lo_x
 			nc.w = np.lo_w
-			local amount, scaled = _querySliceLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSlice(slice_mode, amount, np.lo_h, orig_h, scaled)
+			local amount, scaled = _querySegmentLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSegment(segment_mode, amount, np.lo_h, orig_h, scaled)
 			nc.y = np.lo_y
 			np.lo_y = np.lo_y + nc.h
 
-		elseif slice_edge == "bottom" then
+		elseif segment_edge == "bottom" then
 			nc.x = np.lo_x
 			nc.w = np.lo_w
-			local amount, scaled = _querySliceLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSlice(slice_mode, amount, np.lo_h, orig_h, scaled)
+			local amount, scaled = _querySegmentLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSegment(segment_mode, amount, np.lo_h, orig_h, scaled)
 			nc.y = np.lo_y + np.lo_h
 
 		else
-			error("bad slice_edge enum.")
+			error("bad segment_edge enum.")
 		end
 	end,
 
