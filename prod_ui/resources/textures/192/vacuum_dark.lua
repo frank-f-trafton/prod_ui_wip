@@ -751,7 +751,7 @@ return {
       y = 0
     },
     group_perimeter_a = {
-      draw_fn_id = "hollow",
+      draw_fn_id = 495,
       h1 = 0,
       h2 = 32,
       h3 = 8,
@@ -762,7 +762,7 @@ return {
       y = 4
     },
     group_perimeter_b = {
-      draw_fn_id = "x0y0w3h1",
+      draw_fn_id = 448,
       h1 = 4,
       h2 = 0,
       h3 = 0,
@@ -773,7 +773,7 @@ return {
       y = 2
     },
     group_perimeter_c = {
-      draw_fn_id = "x0y0w3h1",
+      draw_fn_id = 448,
       h1 = 4,
       h2 = 0,
       h3 = 0,
@@ -784,7 +784,7 @@ return {
       y = 2
     },
     group_perimeter_unbroken = {
-      draw_fn_id = "hollow",
+      draw_fn_id = 495,
       h1 = 8,
       h2 = 24,
       h3 = 8,
@@ -865,7 +865,7 @@ return {
       y = 0
     },
     menu_bar_body = {
-      draw_fn_id = "x1y1w1h2",
+      draw_fn_id = 18,
       h1 = 0,
       h2 = 18,
       h3 = 6,
@@ -1036,7 +1036,7 @@ return {
       y = 0
     },
     win_shadow = {
-      draw_fn_id = "hollow",
+      draw_fn_id = 495,
       h1 = 22,
       h2 = 4,
       h3 = 22,
