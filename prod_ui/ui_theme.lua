@@ -73,7 +73,6 @@ function uiTheme.assertLabelLevel(n)
 end
 
 
-
 function uiTheme.error(s, l)
 	l = l or 1
 	local label = uiTheme.concatLabel()
@@ -704,9 +703,41 @@ function check.slice(skin, k)
 	check.loveType(slice, "texture", "Canvas", "Image", "Texture")
 	check.enum(slice, "blend_mode", "BlendMode")
 	check.enum(slice, "alpha_mode", "BlendAlphaMode")
+
+	check.type(slice, "slice", "table")
 	check.metatableAsType(slice, "slice", "QuadSlice", quadSlice._mt_slice)
-	-- TODO: write a validation function for QuadSlices within quad_slice.lua,
-	-- and then call it here.
+
+	uiTheme.pushLabel("(QuadSlice)")
+
+	local slc = slice.slice
+
+	check.number(slc, "x")
+	check.number(slc, "y")
+	check.number(slc, "w", 0)
+	check.number(slc, "h", 0)
+	check.number(slc, "w1", 0)
+	check.number(slc, "h1", 0)
+	check.number(slc, "w2", 0)
+	check.number(slc, "h2", 0)
+	check.number(slc, "w3", 0)
+	check.number(slc, "h3", 0)
+	check.number(slc, "iw", 0)
+	check.number(slc, "ih", 0)
+
+	check.type(slc, "mirror_h", "boolean")
+	check.type(slc, "mirror_v", "boolean")
+
+	check.type(slc, "quads", "table")
+
+	uiTheme.pushLabel("(Quads)")
+
+	for n = 1, 9 do
+		check.loveType(slc.quads, n, "Quad")
+	end
+
+	uiTheme.popLabel() -- "(Quads)"
+
+	uiTheme.popLabel() -- "(QuadSlice)"
 
 	uiTheme.popLabel()
 end

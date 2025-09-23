@@ -133,7 +133,7 @@ local function _initTexture(texture, metadata)
 				if v.draw_fn_id then
 					local draw_fn = quadSlice.draw_functions[v.draw_fn_id]
 					if not draw_fn then
-						error("in 'quadSlice.draw_functions', cannot find function with ID: " .. v.draw_fn_id)
+						error("in 'quadSlice.draw_functions', cannot find function with ID: " .. tostring(v.draw_fn_id)) -- XXX: print in binary
 					end
 
 					tex_slice.slice.drawFromParams = draw_fn

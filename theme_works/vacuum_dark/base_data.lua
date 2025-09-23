@@ -35,7 +35,7 @@ return {
 
 	w3,h3: Dimensions of the right column and bottom row.
 
-	draw_fn_id: Optional string indicating that a particular function from `quadSlice.draw_functions`
+	draw_fn_id: Optional number indicating that a particular function from `quadSlice.draw_functions`
 	should be attached when creating the slice def. If not present, use the default draw function. Invalid
 	IDs will raise an error.
 
@@ -127,19 +127,19 @@ return {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
 		},
 		["group_perimeter_unbroken"] = { -- XXX: untested.
-			draw_fn_id = "hollow",
+			draw_fn_id = 0b111101111,
 			x = 2, y = 2, w1 = 4, h1 = 4, w2 = 12, h2 = 12, w3 = 4, h3 = 4,
 		},
 		["group_perimeter_a"] = {
-			draw_fn_id = "hollow", -- XXX: 3x2 mosaic with a hollow middle.
+			draw_fn_id = 0b111101111, -- XXX: 3x2 mosaic with a hollow middle.
 			x = 2, y = 2, w1 = 4, h1 = 0, w2 = 12, h2 = 16, w3 = 4, h3 = 4,
 		},
 		["group_perimeter_b"] = {
-			draw_fn_id = "x0y0w3h1",
+			draw_fn_id = 0b111000000,
 			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
 		},
 		["group_perimeter_c"] = {
-			draw_fn_id = "x0y0w3h1",
+			draw_fn_id = 0b111000000,
 			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
 		},
 		["input_box"] = {
@@ -164,7 +164,7 @@ return {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
 		},
 		["menu_bar_body"] = {
-			draw_fn_id = "x1y1w1h2",
+			draw_fn_id = 0b000010010,
 	 		x = 0, y = 0, w1 = 0, h1 = 0, w2 = 4, h2 = 9, w3 = 0, h3 = 3,
 		},
 		["menu_pop_body"] = {
@@ -176,12 +176,12 @@ return {
 		["progress_ichor"] = {
 			x = 0, y = 0, w1 = 1, h1 = 3, w2 = 1, h2 = 2, w3 = 1, h3 = 3,
 		},
-		["sash_lr"] = { -- (vertical bar)
-			--draw_fn_id = "x0y1w3h1",
+		["sash_lr"] = {
+			--draw_fn_id = 0b000111000,
 			x = 0, y = 0, w1 = 3, h1 = 3, w2 = 2, h2 = 2, w3 = 3, h3 = 3,
 		},
-		["sash_tb"] = { -- (horizontal bar)
-			--draw_fn_id = "x1y0w1h3",
+		["sash_tb"] = {
+			--draw_fn_id = 0b010010010,
 			x = 0, y = 0, w1 = 3, h1 = 3, w2 = 2, h2 = 2, w3 = 3, h3 = 3,
 		},
 		["scroll_button"] = {
@@ -218,7 +218,7 @@ return {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
 		},
 		["win_shadow"] = {
-			draw_fn_id = "hollow",
+			draw_fn_id = 0b111101111,
 			x = 0, y = 0, w1 = 11, h1 = 11, w2 = 2, h2 = 2, w3 = 11, h3 = 11,
 		},
 		["winheader_normal"] = {
