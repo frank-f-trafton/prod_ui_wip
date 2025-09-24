@@ -20,16 +20,16 @@ widLayout._enum_layout_base = uiTable.makeLUTV(
 -- "px": pixels
 -- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any segments
 -- were assigned at this level.
-widLayout._enum_segment_mode = uiTable.makeLUTV("px", "unit")
+widLayout._enum_seg_mode = uiTable.makeLUTV("px", "unit")
 
-widLayout._enum_segment_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
+widLayout._enum_seg_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
 
 --[[
 	"grid":
-	ge_a grid_x: (integer) Tile position, for children. From 0 to len - 1.
+	ge_a grid_x: (integer) Tile position, from 0 to len - 1.
 	ge_b grid_y: (integer)
-	ge_c grid_w: (integer) Number of tiles the child occupies (for more granular positioning)
+	ge_c grid_w: (integer) Number of tiles the widget occupies.
 	ge_d grid_h: (integer)
 
 	"null":
@@ -39,14 +39,20 @@ widLayout._enum_segment_edge = uiTable.makeLUTV("left", "right", "top", "bottom"
 	No paremeters used.
 
 	"segment":
-	ge_a segment_mode: (_enum_segment_mode)
-	ge_b segment_edge: (_enum_segment_edge)
-	ge_c segment_amount: (number) 0-1 for "unit" segment_mode, an integer for "px" segment_mode.
-	ge_d segment_scale: (boolean) -- scales "px" values when true.
-	ge_e segment_is_sash: (boolean) Used by the divider container to mark nodes as draggable bars.
+	ge_a seg_mode: (_enum_seg_mode)
+	ge_b seg_edge: (_enum_seg_edge)
+	ge_c seg_amount: (number) an integer >= 0 for "px" seg_mode, 0-1 for "unit" seg_mode.
+	ge_d seg_scale: (boolean) When true and seg_mode is "px", seg_amount is scaled.
+		Not used with "unit" seg_mode. Pixel segments should be scaled in most cases, except when
+		direct measurements of already-scaled entities are used to determine the segment length.
+	ge_e seg_sash: (boolean) When true, supported containers provide a sash sensor for resizing the
+		widget. The sash appears on the opposite side of 'seg_edge', and it is expected that the
+		sashed side will be facing a "remaining" widget. Part of the widget segment and the
+		remaining layout space are subtracted to make room for the sash sensor.
+	ge_f seg_sash_half: (number >= 0) half the width of tall sashes; half the height of wide sashes.
 
 	"static":
-	ge_a static_x: (integer) Position and dimensions.
+	ge_a static_x: (integer) Position and dimensions. Always scaled.
 	ge_b static_y: (integer)
 	ge_c static_w: (integer)
 	ge_d static_h: (integer)
@@ -92,20 +98,24 @@ widLayout.mode_setters = {
 		return self
 	end,
 
-	segment = function(self, segment_mode, segment_edge, segment_amount, segment_scale, segment_is_sash)
-		uiAssert.enum(1, segment_mode, "segment_mode", widLayout._enum_segment_mode)
-		uiAssert.enum(2, segment_edge, "segment_edge", widLayout._enum_segment_edge)
-		uiAssert.numberNotNaN(3, segment_amount)
-		-- don't assert 'segment_scale' and 'segment_is_sash'
+	segment = function(self, seg_mode, seg_edge, seg_amount, seg_scale, seg_sash, seg_sash_half)
+		uiAssert.enum(1, seg_mode, "seg_mode", widLayout._enum_seg_mode)
+		uiAssert.enum(2, seg_edge, "seg_edge", widLayout._enum_seg_edge)
+		uiAssert.numberNotNaN(3, seg_amount)
+		-- don't assert 'seg_scale' or 'seg_sash'
+		if seg_sash then
+			uiAssert.numberNotNaN(6, seg_sash_half)
+		end
 
 		self.ge_mode = "segment"
-		self.ge_a = segment_mode
-		self.ge_b = segment_edge
-		self.ge_c = segment_amount
-		self.ge_d = not not segment_scale
-		self.ge_e = not not segment_is_sash
+		self.ge_a = seg_mode
+		self.ge_b = seg_edge
+		self.ge_c = seg_mode == "px" and math.floor(math.max(0, seg_amount)) or math.max(0, math.min(seg_amount, 1))
+		self.ge_d = not not seg_scale
+		self.ge_e = not not seg_sash
+		self.ge_f = seg_sash and math.max(0, seg_sash_half) or 0
 
-		self.ge_f, self.ge_g = nil
+		self.ge_g = nil
 
 		return self
 	end,
@@ -133,18 +143,24 @@ widLayout.mode_setters = {
 }
 
 
-local function _calculateSegment(segment_mode, amount, length, original_length, do_scale)
-	--print("segment_mode", segment_mode, "amount", amount, "length", length, "original_length", original_length)
-	local cut
-	if segment_mode == "unit" then
-		cut = math.floor(original_length * math.max(0, math.min(amount, 1)))
+local function _calculateSegment(mode, amount, do_scale, sash_half, length, orig_length)
+	-- 'sash_half' should be scaled.
 
-	elseif segment_mode == "px" then
+	--print("mode", mode, "amount", amount, "do_scale", do_scale, "sash_half", sash_half, "length", length, "orig_length", orig_length)
+	local cut
+	if mode == "px" then
 		local scale = do_scale and context.scale or 1.0
-		cut = math.floor(math.max(0, math.min(amount * scale, length)))
+		cut = math.floor(math.max(0, math.min(amount * scale, length) - sash_half))
+
+	elseif mode == "unit" then
+		local norm_sash_half = sash_half > 0 and (1 / sash_half) or 0
+		cut = math.floor(orig_length * math.max(0, math.min(amount, 1 - norm_sash_half)))
+
 	else
-		error("invalid 'segment_mode' enum.")
+		error("invalid 'seg_mode' enum.")
 	end
+
+	print("cut", cut, "length - cut", length - cut)
 
 	return cut, length - cut
 end
@@ -155,12 +171,12 @@ local function _querySegmentLength(wid, x_axis, cross_length)
 	if a then
 		return a, b
 	end
-	return wid.ge_c, wid.ge_d -- segment_amount, segment_scale
+	return wid.ge_c, wid.ge_d -- seg_amount, seg_scale
 end
 
 
 widLayout.handlers = {
-	grid = function(np, nc, orig_w, orig_h)
+	grid = function(np, nc, orig_x, orig_y, orig_w, orig_h)
 		local grid_x, grid_y, grid_w, grid_h = nc.ge_a, nc.ge_b, nc.ge_c, nc.ge_d
 
 		if np.lo_grid_rows > 0 and np.lo_grid_cols > 0 then
@@ -173,53 +189,53 @@ widLayout.handlers = {
 		end
 	end,
 
-	null = function(np, nc, orig_w, orig_h)
+	null = function(np, nc, orig_x, orig_y, orig_w, orig_h)
 		-- Do nothing.
 	end,
 
-	remaining = function(np, nc, orig_w, orig_h)
+	remaining = function(np, nc, orig_x, orig_y, orig_w, orig_h)
 		nc.x, nc.y, nc.w, nc.h = np.lo_x, np.lo_y, np.lo_w, np.lo_h
 	end,
 
-	segment = function(np, nc, orig_w, orig_h)
-		local segment_mode, segment_edge = nc.ge_a, nc.ge_b
+	segment = function(np, nc, orig_x, orig_y, orig_w, orig_h)
+		local seg_mode, seg_edge, seg_sash_half = nc.ge_a, nc.ge_b, nc.ge_f
 
-		if segment_edge == "left" then
+		if seg_edge == "left" then
 			nc.y = np.lo_y
 			nc.h = np.lo_h
-			local amount, scaled = _querySegmentLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSegment(segment_mode, amount, np.lo_w, orig_w, scaled)
+			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_w, orig_w)
 			nc.x = np.lo_x
 			np.lo_x = np.lo_x + nc.w
 
-		elseif segment_edge == "right" then
+		elseif seg_edge == "right" then
 			nc.y = np.lo_y
 			nc.h = np.lo_h
-			local amount, scaled = _querySegmentLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSegment(segment_mode, amount, np.lo_w, orig_w, scaled)
+			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_w, orig_w)
 			nc.x = np.lo_x + np.lo_w
 
-		elseif segment_edge == "top" then
+		elseif seg_edge == "top" then
 			nc.x = np.lo_x
 			nc.w = np.lo_w
-			local amount, scaled = _querySegmentLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSegment(segment_mode, amount, np.lo_h, orig_h, scaled)
+			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_h, orig_h)
 			nc.y = np.lo_y
 			np.lo_y = np.lo_y + nc.h
 
-		elseif segment_edge == "bottom" then
+		elseif seg_edge == "bottom" then
 			nc.x = np.lo_x
 			nc.w = np.lo_w
-			local amount, scaled = _querySegmentLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSegment(segment_mode, amount, np.lo_h, orig_h, scaled)
+			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_h, orig_h)
 			nc.y = np.lo_y + np.lo_h
 
 		else
-			error("bad segment_edge enum.")
+			error("bad segment edge enum.")
 		end
 	end,
 
-	static = function(np, nc, orig_w, orig_h)
+	static = function(np, nc, orig_x, orig_y, orig_w, orig_h)
 		local scale = context.scale
 		local static_x, static_y, static_w, static_h = nc.ge_a, nc.ge_b, nc.ge_c, nc.ge_d
 		local static_rel, static_flip_x, static_flip_y = nc.ge_e, nc.ge_f, nc.ge_g
@@ -228,7 +244,7 @@ widLayout.handlers = {
 		if static_rel then
 			px, py, pw, ph = np.lo_x, np.lo_y, np.lo_w, np.lo_h
 		else
-			px, py, pw, ph = 0, 0, orig_w, orig_h
+			px, py, pw, ph = orig_x, orig_y, orig_w, orig_h
 		end
 
 		nc.w = math.floor(static_w * scale)
@@ -371,7 +387,6 @@ function widLayout.applyLayout(self, _depth)
 	--print(n, "#nodes:", n and n.nodes and (#n.nodes))
 
 	local scale = context.scale
-	local orig_w, orig_h = self.lo_w, self.lo_h
 
 	-- Margin reduction
 	local mx1 = math.floor(self.lo_margin_x1 * scale)
@@ -384,6 +399,8 @@ function widLayout.applyLayout(self, _depth)
 	self.lo_w = math.max(0, self.lo_w - mx1 - mx2)
 	self.lo_h = math.max(0, self.lo_h - my1 - my2)
 
+	local orig_x, orig_y, orig_w, orig_h = self.lo_x, self.lo_y, self.lo_w, self.lo_h
+
 	for i, child in ipairs(self.lo_list) do
 		local handler = widLayout.handlers[child.ge_mode]
 		if not handler then
@@ -391,7 +408,7 @@ function widLayout.applyLayout(self, _depth)
 		end
 
 		--print("old self XYWH", self.x, self.y, self.w, self.h)
-		handler(self, child, orig_w, orig_h)
+		handler(self, child, orig_x, orig_y, orig_w, orig_h)
 		--print("new self XYWH", self.x, self.y, self.w, self.h)
 
 		-- Outpad reduction
