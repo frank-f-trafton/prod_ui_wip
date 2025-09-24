@@ -63,10 +63,13 @@ function plan.make(panel)
 
 	local wf = _makeBox(panel, "darkgrey", "lightgrey", "white", "(F)")
 		--:geometrySetMode("segment", "unit", "left", 0.2)
-		:geometrySetMode("segment", "px", "left", 140)
+		:geometrySetMode("segment", "px", "left", 140, false, true, 16)
 
+	-- WIP
+	--[[
 	local sash = panel:addChild("base/sash")
 	panel:configureSashWidget(wf, sash)
+	--]]
 
 	local wg = _makeBox(panel, "darkblue", "lightblue", "white", "(G)")
 		:geometrySetMode("remaining")

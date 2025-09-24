@@ -584,15 +584,18 @@ do
 		ws1.tag = "main_workspace"
 
 		local demo_list = ws1:addChild("wimp/tree_box")
-			:geometrySetMode("segment", "px", "left", 300)
+			:geometrySetMode("segment", "px", "left", 300, true, true, 16)
 			:setTag("plan_menu")
 
 		demo_list.MN_wrap_selection = "no-rep"
 
 
+		-- WIP
+		--[[
 		-- Put a sash between the items list and the demo panel.
 		local sash = ws1:addChild("base/sash")
 		ws1:configureSashWidget(demo_list, sash)
+		--]]
 
 
 		-- Uncomment this to continuously select menu items as you scrub the mouse cursor
