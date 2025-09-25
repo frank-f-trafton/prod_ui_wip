@@ -98,35 +98,35 @@ _mt_widget.sort_id = 1
 --[[
 The sorting order for a widget in a layout. Can be any number (besides NaN).
 
-The default 'ge_order' is the widget's number of siblings plus one at creation time. This default is
+The default 'GE_order' is the widget's number of siblings plus one at creation time. This default is
 sufficient for the common case of widgets being arranged in the same order in which they were made.
 For more complicated situations, widgets can be ordered at the beginning or end of the list by using
 negative numbers or very big numbers (bigger than the plausible number of siblings), respectively.
 
-If you specify custom 'ge_order' values at all in a layout, you must call 'wid:sortLayout()' in the
+If you specify custom 'GE_order' values at all in a layout, you must call 'wid:sortLayout()' in the
 parent container after you are done.
 
-The sorting order of widgets with the same 'ge_order' values is undefined.
+The sorting order of widgets with the same 'GE_order' values is undefined.
 --]]
-_mt_widget.ge_order = 0
+_mt_widget.GE_order = 0
 
 
 -- Outer pad for children in a layout.
-_mt_widget.ge_outpad_x1, _mt_widget.ge_outpad_y1, _mt_widget.ge_outpad_x2, _mt_widget.ge_outpad_y2 = 0, 0, 0, 0
+_mt_widget.GE_outpad_x1, _mt_widget.GE_outpad_y1, _mt_widget.GE_outpad_x2, _mt_widget.GE_outpad_y2 = 0, 0, 0, 0
 
 
 -- See: core/wid_layout.lua
-_mt_widget.ge_mode = "null"
+_mt_widget.GE_mode = "null"
 
 
 -- Layout parameters that depend on the mode. See the 'setMode' methods for more info.
-_mt_widget.ge_a = false
-_mt_widget.ge_b = false
-_mt_widget.ge_c = false
-_mt_widget.ge_d = false
-_mt_widget.ge_e = false
-_mt_widget.ge_f = false
-_mt_widget.ge_g = false
+_mt_widget.GE_a = false
+_mt_widget.GE_b = false
+_mt_widget.GE_c = false
+_mt_widget.GE_d = false
+_mt_widget.GE_e = false
+_mt_widget.GE_f = false
+_mt_widget.GE_g = false
 
 
 --[[
@@ -569,7 +569,7 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 	local child = context:_prepareWidgetInstance(id, self, skin_id)
 	table.insert(children, pos, child)
 
-	child.ge_order = #children
+	child.GE_order = #children
 
 	local lo_list = self.lo_list
 	if lo_list then
@@ -1409,7 +1409,7 @@ end
 
 
 function _mt_widget:geometryGetMode()
-	return self.ge_mode, self.ge_a, self.ge_b, self.ge_c, self.ge_d, self.ge_e, self.ge_f, self.ge_g
+	return self.GE_mode, self.GE_a, self.GE_b, self.GE_c, self.GE_d, self.GE_e, self.GE_f, self.GE_g
 end
 
 
@@ -1421,15 +1421,15 @@ function _mt_widget:geometrySetPadding(x1, y1, x2, y2)
 		uiAssert.numberNotNaN(3, x2)
 		uiAssert.numberNotNaN(4, y2)
 
-		self.ge_outpad_x1 = math.max(0, x1)
-		self.ge_outpad_y1 = math.max(0, y1)
-		self.ge_outpad_x2 = math.max(0, x2)
-		self.ge_outpad_y2 = math.max(0, y2)
+		self.GE_outpad_x1 = math.max(0, x1)
+		self.GE_outpad_y1 = math.max(0, y1)
+		self.GE_outpad_x2 = math.max(0, x2)
+		self.GE_outpad_y2 = math.max(0, y2)
 	else
-		self.ge_outpad_x1 = math.max(0, x1)
-		self.ge_outpad_y1 = math.max(0, x1)
-		self.ge_outpad_x2 = math.max(0, x1)
-		self.ge_outpad_y2 = math.max(0, x1)
+		self.GE_outpad_x1 = math.max(0, x1)
+		self.GE_outpad_y1 = math.max(0, x1)
+		self.GE_outpad_x2 = math.max(0, x1)
+		self.GE_outpad_y2 = math.max(0, x1)
 	end
 
 	return self
@@ -1437,21 +1437,21 @@ end
 
 
 function _mt_widget:geometryGetPadding()
-	return self.ge_outpad_x1, self.ge_outpad_y1, self.ge_outpad_x2, self.ge_outpad_y2
+	return self.GE_outpad_x1, self.GE_outpad_y1, self.GE_outpad_x2, self.GE_outpad_y2
 end
 
 
 function _mt_widget:geometrySetOrder(n)
 	uiAssert.numberNotNaN(1, n)
 
-	self.ge_order = n
+	self.GE_order = n
 
 	return self
 end
 
 
 function _mt_widget:geometryGetOrder()
-	return self.ge_order
+	return self.GE_order
 end
 
 
