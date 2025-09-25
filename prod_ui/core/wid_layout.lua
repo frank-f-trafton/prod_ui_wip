@@ -8,6 +8,9 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
+local sash_styles = context.resources.sash_styles
+
+
 widLayout._enum_layout_base = uiTable.makeLUTV(
 	"zero",
 	"self",
@@ -17,10 +20,6 @@ widLayout._enum_layout_base = uiTable.makeLUTV(
 	"unbounded"
 )
 
--- "px": pixels
--- "unit": value from 0.0 - 1.0, representing a portion of the original parent area before any segments
--- were assigned at this level.
-widLayout._enum_seg_mode = uiTable.makeLUTV("px", "unit")
 
 widLayout._enum_seg_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
@@ -28,9 +27,9 @@ widLayout._enum_seg_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 --[[
 	"grid":
 	ge_a grid_x: (integer) Tile position, from 0 to len - 1.
-	ge_b grid_y: (integer)
+	ge_b grid_y: ^
 	ge_c grid_w: (integer) Number of tiles the widget occupies.
-	ge_d grid_h: (integer)
+	ge_d grid_h: ^
 
 	"null":
 	No parameters used.
@@ -39,23 +38,26 @@ widLayout._enum_seg_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 	No paremeters used.
 
 	"segment":
-	ge_a seg_mode: (_enum_seg_mode)
-	ge_b seg_edge: (_enum_seg_edge)
-	ge_c seg_amount: (number) an integer >= 0 for "px" seg_mode, 0-1 for "unit" seg_mode.
-	ge_d seg_scale: (boolean) When true and seg_mode is "px", seg_amount is scaled.
-		Not used with "unit" seg_mode. Pixel segments should be scaled in most cases, except when
-		direct measurements of already-scaled entities are used to determine the segment length.
-	ge_e seg_sash: (boolean) When true, supported containers provide a sash sensor for resizing the
-		widget. The sash appears on the opposite side of 'seg_edge', and it is expected that the
-		sashed side will be facing a "remaining" widget. Part of the widget segment and the
-		remaining layout space are subtracted to make room for the sash sensor.
-	ge_f seg_sash_half: (number >= 0) half the width of tall sashes; half the height of wide sashes.
+	ge_a seg_edge: (_enum_seg_edge)
+	ge_b seg_amount: (number) An integer >= 0
+	ge_c seg_sash (string|false/nil) When a string, this segment has a sash on the opposite edge. The
+		string represents the sash style to use.
+	ge_d sash_x (integer) Position and dimensions of the sash bounding box. Internal use.
+	ge_e sash_y ^
+	ge_f sash_w ^
+	ge_g sash_h ^
+
+	"segment-unit":
+	ge_a seg_edge: (_enum_seg_edge)
+	ge_b seg_amount: (number) A number between 0.0 and 1.0.
+	ge_c seg_sash (string|false/nil) When a string, this segment has a sash on the opposite edge. The
+		string represents the sash style to use.
 
 	"static":
 	ge_a static_x: (integer) Position and dimensions. Always scaled.
-	ge_b static_y: (integer)
-	ge_c static_w: (integer)
-	ge_d static_h: (integer)
+	ge_b static_y: ^
+	ge_c static_w: ^
+	ge_d static_h: ^
 	ge_e static_rel: (boolean) Use parent node's remaining layout space (true) or the original space (false).
 	ge_f static_flip_x: (boolean) When true, the position is against the other side of the layout space.
 	ge_g static_flip_y: (boolean)
@@ -98,24 +100,32 @@ widLayout.mode_setters = {
 		return self
 	end,
 
-	segment = function(self, seg_mode, seg_edge, seg_amount, seg_scale, seg_sash, seg_sash_half)
-		uiAssert.enum(1, seg_mode, "seg_mode", widLayout._enum_seg_mode)
-		uiAssert.enum(2, seg_edge, "seg_edge", widLayout._enum_seg_edge)
-		uiAssert.numberNotNaN(3, seg_amount)
-		-- don't assert 'seg_scale' or 'seg_sash'
-		if seg_sash then
-			uiAssert.numberNotNaN(6, seg_sash_half)
-		end
+	segment = function(self, seg_edge, seg_amount, seg_sash)
+		uiAssert.enum(1, seg_edge, "seg_edge", widLayout._enum_seg_edge)
+		uiAssert.numberNotNaN(2, seg_amount)
+		uiAssert.typeEval(3, seg_sash, "string")
 
 		self.ge_mode = "segment"
-		self.ge_a = seg_mode
-		self.ge_b = seg_edge
-		self.ge_c = seg_mode == "px" and math.floor(math.max(0, seg_amount)) or math.max(0, math.min(seg_amount, 1))
-		self.ge_d = not not seg_scale
-		self.ge_e = not not seg_sash
-		self.ge_f = seg_sash and math.max(0, seg_sash_half) or 0
+		self.ge_a = seg_edge
+		self.ge_b = math.max(0, seg_amount)
+		self.ge_c = seg_sash or nil
 
-		self.ge_g = nil
+		self.ge_d, self.ge_e, self.ge_f, self.ge_g = 0, 0, 0, 0 -- internal use
+
+		return self
+	end,
+
+	["segment-unit"] = function(self, seg_edge, seg_amount, seg_sash)
+		uiAssert.enum(1, seg_edge, "seg_edge", widLayout._enum_seg_edge)
+		uiAssert.numberNotNaN(2, seg_amount)
+		uiAssert.typeEval(3, seg_sash, "string")
+
+		self.ge_mode = "segment-unit"
+		self.ge_a = seg_edge
+		self.ge_b = math.max(0, math.min(seg_amount, 1))
+		self.ge_c = seg_sash or nil
+
+		self.ge_d, self.ge_e, self.ge_f, self.ge_g = nil
 
 		return self
 	end,
@@ -143,35 +153,47 @@ widLayout.mode_setters = {
 }
 
 
-local function _calculateSegment(mode, amount, do_scale, sash_half, length, orig_length)
-	-- 'sash_half' should be scaled.
-
-	--print("mode", mode, "amount", amount, "do_scale", do_scale, "sash_half", sash_half, "length", length, "orig_length", orig_length)
-	local cut
-	if mode == "px" then
-		local scale = do_scale and context.scale or 1.0
-		cut = math.floor(math.max(0, math.min(amount * scale, length) - sash_half))
-
-	elseif mode == "unit" then
-		local norm_sash_half = sash_half > 0 and (1 / sash_half) or 0
-		cut = math.floor(orig_length * math.max(0, math.min(amount, 1 - norm_sash_half)))
-
-	else
-		error("invalid 'seg_mode' enum.")
-	end
-
-	print("cut", cut, "length - cut", length - cut)
-
+local function _calculateSegment(amount, sash_half, length, do_scale)
+	local scale = do_scale and context.scale or 1.0
+	local cut = math.floor(math.max(0, math.min(amount * scale, length) - sash_half))
 	return cut, length - cut
 end
 
 
-local function _querySegmentLength(wid, x_axis, cross_length)
+local function _calculateSegmentUnit(amount, sash_half, length, orig_length)
+	local norm_sash_half = sash_half > 0 and (1 / sash_half) or 0
+	local cut = math.floor(orig_length * math.max(0, math.min(amount, 1 - norm_sash_half)))
+	return cut, length - cut
+end
+
+
+local function _querySegmentLength(wid, x_axis, cross_length) -- pixel segments only.
 	local a, b = wid:uiCall_getSegmentLength(x_axis, cross_length)
 	if a then
 		return a, b
 	end
-	return wid.ge_c, wid.ge_d -- seg_amount, seg_scale
+	return wid.ge_b, true -- seg_amount, do_scale
+end
+
+
+local function _getSashBreadth(seg_sash)
+	if seg_sash then
+		local sash_style = sash_styles[seg_sash]
+		if not sash_style then
+			error("unprovisioned sash style: " .. seg_sash)
+		end
+		return sash_style.breadth_half
+	end
+	return 0
+end
+
+
+function widLayout.getSashStyleTable(id)
+	local sash_style = sash_styles[id]
+	if not sash_style then
+		error("unprovisioned sash style: " .. id)
+	end
+	return sash_style
 end
 
 
@@ -198,40 +220,89 @@ widLayout.handlers = {
 	end,
 
 	segment = function(np, nc, orig_x, orig_y, orig_w, orig_h)
-		local seg_mode, seg_edge, seg_sash_half = nc.ge_a, nc.ge_b, nc.ge_f
+		local seg_edge, seg_sash = nc.ge_a, nc.ge_c
+		local sash_half = _getSashBreadth(seg_sash)
+		-- ge_d, ge_e, ge_f, ge_g == sash bounding box (XYWH)
 
 		if seg_edge == "left" then
-			nc.y = np.lo_y
-			nc.h = np.lo_h
+			nc.y, nc.h = np.lo_y, np.lo_h
 			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_w, orig_w)
+			nc.w, np.lo_w = _calculateSegment(amount, sash_half, np.lo_w, do_scale)
+			nc.x = np.lo_x
+			np.lo_x = np.lo_x + nc.w
+			if seg_sash then
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = -sash_half*2, 0, sash_half*2, nc.h
+			else
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = 0, 0, 0, 0
+			end
+
+		elseif seg_edge == "right" then
+			nc.y, nc.h = np.lo_y, np.lo_h
+			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
+			nc.w, np.lo_w = _calculateSegment(amount, sash_half, np.lo_w, do_scale)
+			nc.x = np.lo_x + np.lo_w
+			if seg_sash then
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = nc.w + sash_half*2, 0, sash_half*2, nc.h
+			else
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = 0, 0, 0, 0
+			end
+
+		elseif seg_edge == "top" then
+			nc.x, nc.w = np.lo_x, np.lo_w
+			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSegment(amount, sash_half, np.lo_h, do_scale)
+			nc.y = np.lo_y
+			np.lo_y = np.lo_y + nc.h
+			if seg_sash then
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = 0, -sash_half*2, nc.w, sash_half*2
+			else
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = 0, 0, 0, 0
+			end
+
+		elseif seg_edge == "bottom" then
+			nc.x, nc.w = np.lo_x, np.lo_w
+			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
+			nc.h, np.lo_h = _calculateSegment(amount, sash_half, np.lo_h, do_scale)
+			nc.y = np.lo_y + np.lo_h
+			if seg_sash then
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = 0, nc.h + sash_half*2, nc.w, sash_half * 2
+			else
+				nc.ge_d, nc.ge_e, nc.ge_f, nc.ge_g = 0, 0, 0, 0
+			end
+
+		else
+			error("bad segment edge ID")
+		end
+	end,
+
+	["segment-unit"] = function(np, nc, orig_x, orig_y, orig_w, orig_h)
+		local seg_edge, seg_amount, seg_sash = nc.ge_a, nc.ge_b, nc.ge_c
+		local sash_half = _getSashBreadth(seg_sash)
+
+		if seg_edge == "left" then
+			nc.y, nc.h = np.lo_y, np.lo_h
+			nc.w, np.lo_w = _calculateSegmentUnit(seg_amount, sash_half, np.lo_w, orig_w)
 			nc.x = np.lo_x
 			np.lo_x = np.lo_x + nc.w
 
 		elseif seg_edge == "right" then
-			nc.y = np.lo_y
-			nc.h = np.lo_h
-			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_w, orig_w)
+			nc.y, nc.h = np.lo_y, np.lo_h
+			nc.w, np.lo_w = _calculateSegmentUnit(seg_amount, sash_half, np.lo_w, orig_w)
 			nc.x = np.lo_x + np.lo_w
 
 		elseif seg_edge == "top" then
-			nc.x = np.lo_x
-			nc.w = np.lo_w
-			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_h, orig_h)
+			nc.x, nc.w = np.lo_x, np.lo_w
+			nc.h, np.lo_h = _calculateSegmentUnit(seg_amount, sash_half, np.lo_h, orig_h)
 			nc.y = np.lo_y
 			np.lo_y = np.lo_y + nc.h
 
 		elseif seg_edge == "bottom" then
-			nc.x = np.lo_x
-			nc.w = np.lo_w
-			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSegment(seg_mode, amount, do_scale, seg_sash_half, np.lo_h, orig_h)
+			nc.x, nc.w = np.lo_x, np.lo_w
+			nc.h, np.lo_h = _calculateSegmentUnit(seg_amount, sash_half, np.lo_h, orig_h)
 			nc.y = np.lo_y + np.lo_h
 
 		else
-			error("bad segment edge enum.")
+			error("bad segment edge ID")
 		end
 	end,
 

@@ -164,7 +164,7 @@ end
 
 
 function uiTheme.scaleSashStyle(s, scale)
-	change.integerScaled(s, "breadth", scale, 0)
+	change.integerScaled(s, "breadth_half", scale, 0)
 	change.integerScaled(s, "contract_x", scale, 0)
 	change.integerScaled(s, "contract_y", scale, 0)
 	change.integerScaled(s, "expand_x", scale, 0)
@@ -589,36 +589,56 @@ function check.scrollBarStyle(skin, k)
 end
 
 
-function check.sashStyle(skin, k)
+local function _checkSashRes(skin, k)
 	uiTheme.pushLabel(k)
 
-	local t = skin[k]
-	if type(t) ~= "table" then
-		uiTheme.error("expected sashStyle table")
-	end
-	-- Width of tall sashes; height of wide sashes.
-	check.integer(t, "breadth", 0)
+	local res = check.getRes(skin, k)
 
-	-- Reduces the intersection box when checking for the mouse *entering* a sash.
-	-- NOTE: overly large values will make the sash unclickable.
-	check.integer(t, "contract_x", 0)
-	check.integer(t, "contract_y", 0)
-
-	-- Increases the intersection box when checking for the mouse *leaving* a sash.
-	-- NOTES:
-	-- * Overly large values will prevent the user from clicking on widgets that
-	--   are descendants of the divider.
-	-- * The expansion does not go beyond the divider's body.
-	check.integer(t, "expand_x", 0)
-	check.integer(t, "expand_y", 0)
-
-	check.type(t, "cursor_hover_h", "nil", "string")
-	check.type(t, "cursor_hover_v", "nil", "string")
-	check.type(t, "cursor_drag_h", "nil", "string")
-	check.type(t, "cursor_drag_v", "nil", "string")
+	print("???", res.slc_lr)
+	check.slice(res, "slc_lr")
+	check.slice(res, "slc_tb")
+	check.colorTuple(res, "col_body")
 
 	uiTheme.popLabel()
-	return t
+end
+
+
+function uiTheme.checkSashStyles(sash_styles)
+	for k, v in pairs(sash_styles) do
+		uiTheme.pushLabel(k)
+
+		check.type(sash_styles, k, "table")
+
+		-- Width of tall sashes; height of wide sashes.
+		check.integer(v, "breadth_half", 0)
+
+		-- Reduces the intersection box when checking for the mouse *entering* a sash.
+		-- NOTE: overly large values will make the sash unclickable.
+		check.integer(v, "contract_x", 0)
+		check.integer(v, "contract_y", 0)
+
+		-- Increases the intersection box when checking for the mouse *leaving* a sash.
+		-- NOTES:
+		-- * Overly large values will prevent the user from clicking on widgets that
+		--   are descendants of the container.
+		-- * The expansion does not go beyond the container's body.
+		check.integer(v, "expand_x", 0)
+		check.integer(v, "expand_y", 0)
+
+		-- To apply a graphical margin to a sash mosaic, please bake the margin into the texture.
+
+		check.type(v, "cursor_hover_h", "nil", "string")
+		check.type(v, "cursor_hover_v", "nil", "string")
+		check.type(v, "cursor_drag_h", "nil", "string")
+		check.type(v, "cursor_drag_v", "nil", "string")
+
+		_checkSashRes(v, "res_idle")
+		_checkSashRes(v, "res_hover")
+		_checkSashRes(v, "res_press")
+		_checkSashRes(v, "res_disabled")
+
+		uiTheme.popLabel()
+	end
 end
 
 
@@ -799,6 +819,7 @@ function change.integerScaled(skin, k, scale, min, max)
 	min = min or -math.huge
 	max = max or math.huge
 
+	print(k, skin, skin[k])
 	skin[k] = math.floor(math.max(min, math.min(skin[k] * scale, max)))
 end
 

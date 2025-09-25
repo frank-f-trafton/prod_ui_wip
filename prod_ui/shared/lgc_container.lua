@@ -8,8 +8,12 @@ local lgcContainer = {}
 
 
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widLayout = context:getLua("core/wid_layout")
+
+
+local sash_styles = context.resources.sash_styles
 
 
 local _enum_scr_rng = uiTable.makeLUTV("zero", "auto", "manual")
@@ -87,46 +91,6 @@ function _methods:getSashesEnabled()
 end
 
 
-function _methods:configureSashWidget(w1, w2)
-	if not uiTable.valueInArray(self.children, w1) then
-		error("'w1' must be a direct child of the calling widget")
-
-	elseif not uiTable.valueInArray(self.children, w2) then
-		error("'w2' must be a direct child of the calling widget")
-
-	elseif not w2.UI_is_sash then
-		error("'w2' is not a sash widget")
-	end
-
-	local mode, _, seg_edge = w1:geometryGetMode()
-
-	if mode ~= "segment" then
-		error("argument #1: expected a widget configured for 'segment' layout mode")
-	end
-
-	w2:geometrySetMode("segment", "px", seg_edge, self.skin.sash_style.breadth, true, true)
-
-	w2.tall = (seg_edge == "left" or seg_edge == "right") and true or false
-
-	return self
-end
-
-
-local function _checkMouseOverSash(self, mx, my, con_x, con_y)
-	for i, wid in ipairs(self.children) do
-		if wid.UI_is_sash then
-			if mx >= wid.x + con_x
-			and mx < wid.x + wid.w - con_x
-			and my >= wid.y + con_y
-			and my < wid.y + wid.h - con_y
-			then
-				return wid
-			end
-		end
-	end
-end
-
-
 function lgcContainer.getSashCursorID(edge, is_drag)
 	if is_drag then
 		return (edge == "left" or edge == "right") and "cursor_drag_h" or "cursor_drag_v"
@@ -144,12 +108,28 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	end
 
 	local mxs, mys = self:getRelativePositionScrolled(mouse_x, mouse_y)
-	local sash_style = self.skin.sash_style
 	if not self.sash_hover then
-		local wid = _checkMouseOverSash(self, mxs, mys, sash_style.contract_x, sash_style.contract_y)
+		-- check hover-on
+		local wid, sash_style
+		for i, child in ipairs(self.children) do
+			-- ge_c == seg_sash
+			if child.ge_mode == "segment" and child.ge_c then
+				local style = widLayout.getSashStyleTable(child.ge_c)
+				local con_x, con_y = style.contract_x, style.contract_y
+				local sx, sy, sw, sh = child.ge_d, child.ge_e, child.ge_f, child.ge_g -- sash bounding box
+				if mxs >= child.x + sx + con_x
+				and mxs < child.x + sx + sw - con_x
+				and mys >= child.y + sy + con_y
+				and mys < child.y + sy + sh - con_y
+				then
+					wid, sash_style = child, style
+				end
+			end
+		end
+
 		if wid then
 			self.sash_hover = wid
-			local _, _, seg_edge = wid:geometryGetMode()
+			local seg_edge = wid.ge_a
 			local cursor_id = lgcContainer.getSashCursorID(seg_edge, false)
 			self.cursor_hover = sash_style[cursor_id]
 			return true
@@ -157,24 +137,33 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 			self.sash_hover = false
 			self.cursor_hover = false
 		end
+		-- check hover-off
 	else
 		local wid = self.sash_hover
-		local expand_x = sash_style.expand_x
-		local expand_y = sash_style.expand_y
-
-		if not (mxs >= wid.x - expand_x
-		and mxs < wid.x + wid.w + expand_x
-		and mys >= wid.y - expand_y
-		and mys < wid.y + wid.h + expand_y)
-		then
+		-- widget is dead or no longer has a sash?
+		if wid._dead or wid.ge_mode ~= "segment" or not wid.ge_c then
 			self.sash_hover = false
 			self.cursor_hover = false
+		else
+			local sash_style = widLayout.getSashStyleTable(wid.ge_c)
+			local exp_x, exp_y = sash_style.expand_x, sash_style.expand_y
+			local sx, sy, sw, sh = wid.ge_d, wid.ge_e, wid.ge_f, wid.ge_g -- sash bounding box
+
+			-- no longer hovering?
+			if not (mxs >= wid.x + sx - exp_x
+			and mxs < wid.x + sx + sw + exp_x
+			and mys >= wid.y + sy - exp_y
+			and mys < wid.y + sy + sh + exp_y)
+			then
+				self.sash_hover = false
+				self.cursor_hover = false
+			end
 		end
 	end
 end
 
 
--- For widgets with draggable sashes, call in def.trickle:uiCall_pointerHoverOff().
+-- For containers that support draggable sashes. Call in def.trickle:uiCall_pointerHoverOff().
 function lgcContainer.sashHoverOffLogic(self)
 	self.sash_hover = false
 	self.cursor_hover = false
@@ -182,31 +171,29 @@ end
 
 
 function lgcContainer.sashPressLogic(self, x, y, button)
-	if self.sashes_enabled then
-		local sash = self.sash_hover
-
-		if sash
-		and not sash._dead
-		and button == 1
-		and self.context.mouse_pressed_button == button
+	if button == 1
+	and self.context.mouse_pressed_button == button
+	and self.sashes_enabled
+	then
+		local wid = self.sash_hover
+		if wid
+		and not wid._dead
+		and wid.ge_mode == "segment"
+		and wid.ge_c -- seg_sash
 		then
-			local cn = self.children[sash:getIndex() - 1] -- prev sibling
-			if cn then
-				local mode, seg_mode, seg_edge = cn:geometryGetMode()
-				if mode == "segment" and seg_mode == "px" then
-					self.press_busy = "sash"
-					self.sash_att_ax, self.sash_att_ay = x, y
-					if seg_edge == "right" or seg_edge == "left" then
-						self.sash_att_len = cn.w
-					else -- "top", "bottom"
-						self.sash_att_len = cn.h
-					end
-					local cursor_id = lgcContainer.getSashCursorID(seg_edge, true)
-					self.cursor_press = self.skin.sash_style[cursor_id]
-
-					return true
-				end
+			self.press_busy = "sash"
+			self.sash_att_ax, self.sash_att_ay = x, y
+			local seg_edge = wid.ge_a
+			if seg_edge == "right" or seg_edge == "left" then
+				self.sash_att_len = wid.w
+			else -- "top", "bottom"
+				self.sash_att_len = wid.h
 			end
+			local cursor_id = lgcContainer.getSashCursorID(seg_edge, true)
+			local sash_style = widLayout.getSashStyleTable(wid.ge_c)
+			self.cursor_press = sash_style[cursor_id]
+
+			return true
 		end
 	end
 end
@@ -216,35 +203,38 @@ function lgcContainer.sashDragLogic(self, x, y)
 	if self.sashes_enabled
 	and self.press_busy == "sash"
 	then
-		local sash = self.sash_hover
-		if sash then
-			local cn = self.children[sash:getIndex() - 1] -- prev sibling
-			if cn then
-				local mode, seg_mode, seg_edge, seg_amount, seg_scale = cn:geometryGetMode()
-				if mode == "segment" then
-					if seg_edge == "right" then
-						seg_amount = self.sash_att_len - (x - self.sash_att_ax)
+		local wid = self.sash_hover
+		if wid
+		and not wid._dead
+		and wid.ge_mode == "segment"
+		and wid.ge_c -- seg_sash
+		then
+			local old_amount = wid.ge_b
+			local seg_edge = wid.ge_a
+			-- wid.ge_b == seg_amount
 
-					elseif seg_edge == "left" then
-						seg_amount = self.sash_att_len + (x - self.sash_att_ax)
+			if seg_edge == "right" then
+				wid.ge_b = math.max(0, self.sash_att_len - (x - self.sash_att_ax))
 
-					elseif seg_edge == "top" then
-						seg_amount = self.sash_att_len - (y - self.sash_att_ay)
+			elseif seg_edge == "left" then
+				wid.ge_b = math.max(0, self.sash_att_len + (x - self.sash_att_ax))
 
-					elseif seg_edge == "bottom" then
-						seg_amount = self.sash_att_len + (y - self.sash_att_ay)
+			elseif seg_edge == "top" then
+				wid.ge_b = math.max(0, self.sash_att_len - (y - self.sash_att_ay))
 
-					else
-						error("invalid segment edge.")
-					end
+			elseif seg_edge == "bottom" then
+				wid.ge_b = math.max(0, self.sash_att_len + (y - self.sash_att_ay))
 
-					cn:geometrySetMode("segment", seg_mode, seg_edge, seg_amount, seg_scale, true)
-					self:reshape()
-				end
+			else
+				error("invalid segment edge")
+			end
 
-				return true
+			if wid.ge_b ~= old_amount then
+				self:reshape()
 			end
 		end
+
+		return true
 	end
 end
 
@@ -255,6 +245,37 @@ function lgcContainer.sashUnpressLogic(self)
 		self.cursor_press = false
 
 		return true
+	end
+end
+
+
+function lgcContainer.renderSashes(self)
+	for i, child in ipairs(self.children) do
+		-- ge_c == seg_sash
+		if child.ge_mode == "segment" and child.ge_c then
+			local style = widLayout.getSashStyleTable(child.ge_c)
+			local res
+			if not self.sashes_enabled then
+				res = style.res_disabled
+
+			elseif self.sash_hover == child then
+				if self.press_busy == "sash" then
+					res = style.res_press
+				else
+					res = style.res_hover
+				end
+			else
+				res = style.res_idle
+			end
+
+			love.graphics.setColor(res.col_body)
+			local slc = (child.ge_a == "left" or child.ge_a == "right") and res.slc_tb or res.slc_lr
+			local sx, sy, sw, sh = child.ge_d, child.ge_e, child.ge_f, child.ge_g
+			uiGraphics.drawSlice(slc, child.x + sx, child.y + sy, sw, sh)
+
+			love.graphics.setColor(1, 0, 0, 1)
+			love.graphics.rectangle("fill", child.x + sx, child.y + sy, sw, sh)
+		end
 	end
 end
 

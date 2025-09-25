@@ -171,7 +171,7 @@ function plan.makeWindowFrame(root)
 
 
 	local chk_highlight = frame:addChild("base/checkbox")
-		:geometrySetMode("segment", "px", "bottom", 32, true)
+		:geometrySetMode("segment", "bottom", 32)
 		:geometrySetOrder(-2)
 
 	chk_highlight:setLabel("Highlight Selected")
@@ -184,7 +184,7 @@ function plan.makeWindowFrame(root)
 
 
 	local chk_vp = frame:addChild("base/checkbox")
-		:geometrySetMode("segment", "px", "bottom", 32, true)
+		:geometrySetMode("segment", "bottom", 32)
 		:geometrySetOrder(-3)
 
 	chk_vp:setLabel("Show Viewports")
@@ -197,7 +197,7 @@ function plan.makeWindowFrame(root)
 
 
 	local chk_ly = frame:addChild("base/checkbox")
-		:geometrySetMode("segment", "px", "bottom", 32, true)
+		:geometrySetMode("segment", "bottom", 32)
 		:geometrySetOrder(-4)
 
 	chk_ly:setLabel("Show layout nodes")
@@ -210,7 +210,7 @@ function plan.makeWindowFrame(root)
 
 
 	local chk_exclude = frame:addChild("base/checkbox")
-		:geometrySetMode("segment", "px", "bottom", 32, true)
+		:geometrySetMode("segment", "bottom", 32)
 		:geometrySetOrder(-5)
 
 	chk_exclude:setLabel("Exclude this window frame")

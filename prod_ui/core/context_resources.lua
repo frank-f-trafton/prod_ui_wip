@@ -411,10 +411,6 @@ function methods:applyTheme(theme)
 
 		_deepCopyFields(theme.sash_styles, resources.sash_styles)
 
-		for k, v in pairs(resources.sash_styles) do
-			uiTheme.scaleSashStyle(v, scale)
-		end
-
 		uiTheme.popLabel()
 		uiTheme.assertLabelLevel(0)
 	end
@@ -476,6 +472,11 @@ function methods:applyTheme(theme)
 
 	uiTheme.checkIconSets(resources.icons)
 	uiTheme.assertLabelLevel(0)
+
+	uiTheme.checkSashStyles(resources.sash_styles)
+	for k, v in pairs(resources.sash_styles) do
+		uiTheme.scaleSashStyle(v, scale)
+	end
 
 	for k, v in pairs(resources.skins) do
 		local skinner = context.skinners[v.skinner_id]

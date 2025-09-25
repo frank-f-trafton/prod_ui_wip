@@ -4,7 +4,6 @@ return {
 	box = "*boxes/wimp_frame",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
-	sash_style = "*sash_styles/norm",
 
 	in_view_pad_x = 0,
 	in_view_pad_y = 0,

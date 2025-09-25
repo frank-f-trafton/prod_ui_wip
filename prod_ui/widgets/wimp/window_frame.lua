@@ -1114,8 +1114,6 @@ def.default_skinner = {
 		check.colorTuple(skin, "color_body")
 		check.colorTuple(skin, "color_shadow")
 
-		check.sashStyle(skin, "sash_style")
-
 		_checkResTopLevel(skin, "res_normal")
 		_checkResTopLevel(skin, "res_small")
 		_checkResTopLevel(skin, "res_large")
