@@ -242,8 +242,6 @@ def.default_skinner = {
 		-- Padding when scrolling to put a widget into view.
 		check.integer(skin, "in_view_pad_x", 0)
 		check.integer(skin, "in_view_pad_y", 0)
-
-		check.sashStyle(skin, "sash_style")
 	end,
 
 

@@ -246,8 +246,6 @@ def.default_skinner = {
 		-- Padding when scrolling to put a widget into view.
 		check.number(skin, "in_view_pad_x")
 		check.number(skin, "in_view_pad_y")
-
-		check.sashStyle(skin, "sash_style")
 	end,
 
 
@@ -287,6 +285,8 @@ def.default_skinner = {
 	renderLast = function(self, ox, oy)
 		love.graphics.push("all")
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+
+		lgcContainer.renderSashes(self)
 
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 
