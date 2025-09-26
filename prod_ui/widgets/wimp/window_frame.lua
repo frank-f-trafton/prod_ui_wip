@@ -1262,7 +1262,11 @@ def.default_skinner = {
 
 	renderLast = function(self, ox, oy)
 		love.graphics.push("all")
+
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
+
+		lgcContainer.renderSashes(self)
+
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 		love.graphics.pop()
 	end,

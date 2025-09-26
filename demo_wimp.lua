@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"layouts.layout_sashes",
 	"layouts.layout",
 	"layouts.layout2",
 	"widgets.text_box_multi",
@@ -68,6 +69,7 @@ local demo_plan_list = {
 		{plan_id = "themes_and_scale", label = "Themes and Scale"},
 		{plan_id = "layouts.layout", label = "Layout"},
 		{plan_id = "layouts.layout2", label = "Layout 2"},
+		{plan_id = "layouts.layout_sashes", label = "Layout (Sashes)"},
 		--[[
 		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
 			{plan_id = "unfinished.drag_box", label = "Drag Box"},

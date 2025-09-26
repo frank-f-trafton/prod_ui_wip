@@ -64,11 +64,11 @@ function lgcContainer.setupSashState(self)
 	self.SA_enabled = false
 	self.SA_hover = false
 
-	-- Length of the sash to resize at start of drag state
-	self.SA_att_len = 0
-
 	-- Mouse cursor position (absolute) at start of drag state
 	self.SA_att_ax, self.SA_att_ay = 0, 0
+
+	-- Segment "amount" at start of drag state.
+	self.SA_click_amount = 0
 end
 
 
@@ -183,12 +183,8 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 		then
 			self.press_busy = "sash"
 			self.SA_att_ax, self.SA_att_ay = x, y
+			self.SA_click_amount = wid.GE_b
 			local seg_edge = wid.GE_a
-			if seg_edge == "right" or seg_edge == "left" then
-				self.SA_att_len = wid.w
-			else -- "top", "bottom"
-				self.SA_att_len = wid.h
-			end
 			local cursor_id = lgcContainer.getSashCursorID(seg_edge, true)
 			local sash_style = widLayout.getSashStyleTable(wid.GE_c)
 			self.cursor_press = sash_style[cursor_id]
@@ -213,17 +209,21 @@ function lgcContainer.sashDragLogic(self, x, y)
 			local seg_edge = wid.GE_a
 			-- wid.GE_b == seg_amount
 
-			if seg_edge == "right" then
-				wid.GE_b = math.max(0, self.SA_att_len - (x - self.SA_att_ax))
+			if seg_edge == "left" then
+				local drag_amount = (x - self.SA_att_ax) * (1 / math.max(0.1, context.scale))
+				wid.GE_b = math.max(0, self.SA_click_amount + drag_amount)
 
-			elseif seg_edge == "left" then
-				wid.GE_b = math.max(0, self.SA_att_len + (x - self.SA_att_ax))
+			elseif seg_edge == "right" then
+				local drag_amount = (x - self.SA_att_ax) * (1 / math.max(0.1, context.scale))
+				wid.GE_b = math.max(0, self.SA_click_amount - drag_amount)
 
 			elseif seg_edge == "top" then
-				wid.GE_b = math.max(0, self.SA_att_len - (y - self.SA_att_ay))
+				local drag_amount = (y - self.SA_att_ay) * (1 / math.max(0.1, context.scale))
+				wid.GE_b = math.max(0, self.SA_click_amount + drag_amount)
 
 			elseif seg_edge == "bottom" then
-				wid.GE_b = math.max(0, self.SA_att_len + (y - self.SA_att_ay))
+				local drag_amount = (y - self.SA_att_ay) * (1 / math.max(0.1, context.scale))
+				wid.GE_b = math.max(0, self.SA_click_amount - drag_amount)
 
 			else
 				error("invalid segment edge")
@@ -250,6 +250,8 @@ end
 
 
 function lgcContainer.renderSashes(self)
+	local scr_x, scr_y = self.scr_x, self.scr_y
+
 	for i, child in ipairs(self.children) do
 		-- GE_c == seg_sash
 		if child.GE_mode == "segment" and child.GE_c then
@@ -271,10 +273,16 @@ function lgcContainer.renderSashes(self)
 			love.graphics.setColor(res.col_body)
 			local slc = (child.GE_a == "left" or child.GE_a == "right") and res.slc_tb or res.slc_lr
 			local sx, sy, sw, sh = child.GE_d, child.GE_e, child.GE_f, child.GE_g
-			uiGraphics.drawSlice(slc, child.x + sx, child.y + sy, sw, sh)
+			uiGraphics.drawSlice(slc, -scr_x + child.x + sx, -scr_y + child.y + sy, sw, sh)
 
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.rectangle("fill", child.x + sx, child.y + sy, sw, sh)
+			-- Debug stuff
+			--[[
+			love.graphics.setColor(1, 0, 1, 0.25)
+			love.graphics.rectangle("fill", -scr_x + child.x + sx, -scr_y + child.y + sy, sw, sh)
+
+			love.graphics.setColor(1, 1, 1, 1.0)
+			love.graphics.print(sx .. ", " .. sy .. ", " .. sw .. ", " .. sh, -scr_x + child.x + sx, -scr_y + child.y + sy)
+			--]]
 		end
 	end
 end
