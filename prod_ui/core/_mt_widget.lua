@@ -1401,7 +1401,7 @@ end
 
 
 function _mt_widget:geometryGetMode()
-	return self.GE.mode, GE
+	return self.GE.mode, self.GE
 end
 
 
