@@ -93,55 +93,47 @@ _mt_widget.sort_id = 1
 
 
 -- Geometry fields.
+-- For more info, see: core/wid_layout.lua
+
+
+-- Default to "null" geometry mode.
+_mt_widget.GE = widLayout.geo_null
 
 
 --[[
 The sorting order for a widget in a layout. Can be any number (besides NaN).
 
-The default 'GE_order' is the widget's number of siblings plus one at creation time. This default is
-sufficient for the common case of widgets being arranged in the same order in which they were made.
-For more complicated situations, widgets can be ordered at the beginning or end of the list by using
-negative numbers or very big numbers (bigger than the plausible number of siblings), respectively.
+The default 'GE_order' is the widget's number of siblings plus one at its time of creation. This
+default is sufficient for the common case of widgets being arranged in the same order in which they
+were made. For more complicated situations, widgets can be ordered at the beginning or end of the
+list by using negative numbers or very big numbers (bigger than the plausible number of siblings),
+respectively.
 
 If you specify custom 'GE_order' values at all in a layout, you must call 'wid:sortLayout()' in the
-parent container after you are done.
+parent container afterwards.
 
 The sorting order of widgets with the same 'GE_order' values is undefined.
 --]]
 _mt_widget.GE_order = 0
 
 
--- Outer pad for children in a layout.
+-- Outer padding for children in a layout.
 _mt_widget.GE_outpad_x1, _mt_widget.GE_outpad_y1, _mt_widget.GE_outpad_x2, _mt_widget.GE_outpad_y2 = 0, 0, 0, 0
 
 
--- See: core/wid_layout.lua
-_mt_widget.GE_mode = "null"
-
-
--- Layout parameters that depend on the mode. See the 'setMode' methods for more info.
-_mt_widget.GE_a = false
-_mt_widget.GE_b = false
-_mt_widget.GE_c = false
-_mt_widget.GE_d = false
-_mt_widget.GE_e = false
-_mt_widget.GE_f = false
-_mt_widget.GE_g = false
-
-
 --[[
-These commented out fields are set in widLayout.setupLayoutList(). They apply to parents.
+These fields are set in widLayout.setupLayoutList(). They apply to parents.
 
-.lo_list: When a table, this specifies the order in which the widget's children should be laid out.
+.LO_list: When a table, this specifies the order in which the widget's children should be laid out.
 	All entries in this list must be direct children of the widget.
 
-.lo_base: Enum that controls how a parent's layout space is reset.
+.LO_base: Enum that controls how a parent's layout space is reset.
 
-.lo_x, .lo_y, .lo_w, .lo_h: Temporary layout space for parents.
+.LO_x, .LO_y, .LO_w, .LO_h: Temporary layout space for parents.
 
-.lo_margin_x1, .lo_margin_y1, .lo_margin_x2, .lo_margin_y2: Layout margin for parents.
+.LO_margin_x1, .LO_margin_y1, .LO_margin_x2, .LO_margin_y2: Layout margin for parents.
 
-.lo_grid_rows, .lo_grid_cols: The number of columns and rows in a parent's grid.
+.LO_grid_rows, .LO_grid_cols: The number of columns and rows in a parent's grid.
 --]]
 
 
@@ -571,9 +563,9 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 
 	child.GE_order = #children
 
-	local lo_list = self.lo_list
-	if lo_list then
-		lo_list[#lo_list + 1] = child
+	local LO_list = self.LO_list
+	if LO_list then
+		LO_list[#LO_list + 1] = child
 	end
 
 	child:uiCall_initialize(...)
@@ -636,8 +628,8 @@ function _mt_widget:remove()
 			error("widget can't find itself in parent's list of children.")
 		end
 
-		if parent.lo_list then
-			uiTable.removeElement(parent.lo_list, self)
+		if parent.LO_list then
+			uiTable.removeElement(parent.LO_list, self)
 		end
 
 		self.parent = false
@@ -1068,7 +1060,7 @@ function _mt_widget:reshape()
 		return
 	end
 
-	if self.lo_list then
+	if self.LO_list then
 		widLayout.applyLayout(self, 1)
 	end
 
@@ -1409,7 +1401,7 @@ end
 
 
 function _mt_widget:geometryGetMode()
-	return self.GE_mode, self.GE_a, self.GE_b, self.GE_c, self.GE_d, self.GE_e, self.GE_f, self.GE_g
+	return self.GE.mode, GE
 end
 
 

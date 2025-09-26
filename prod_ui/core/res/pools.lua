@@ -39,8 +39,8 @@ end
 -- Small array: 'widget.children'
 pools.children = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
 
--- Small array: 'widget.lo_list'
---pools.lo_list = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
+-- Small array: 'widget.LO_list'
+--pools.LO_list = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
 
 
 -- Small array: 'widget.viewports'
@@ -86,7 +86,7 @@ end
 
 
 -- Struct: static layout nodes
---pools.lo_static = pPool.new(_poppingStaticLayout, _pushingStaticLayout, math.huge)
+--pools.LO_static = pPool.new(_poppingStaticLayout, _pushingStaticLayout, math.huge)
 
 
 -- LÖVE Quads, TextBatches, etc.

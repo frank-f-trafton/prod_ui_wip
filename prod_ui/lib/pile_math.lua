@@ -1,4 +1,4 @@
--- PILE Math v1.201
+-- PILE Math v1.201 (Modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -14,6 +14,11 @@ end
 
 function M.lerp(a, b, v)
 	return (1 - v) * a + v * b
+end
+
+
+function M.round(n)
+	return n < 0 and math.floor(n + 0.5) or math.ceil(n - 0.5)
 end
 
 
@@ -34,6 +39,11 @@ end
 
 function M.wrap1(n, max)
 	return ((n - 1) % max) + 1
+end
+
+
+function M.wrap1Array(t, n)
+	return t[((n - 1) % #t) + 1]
 end
 
 

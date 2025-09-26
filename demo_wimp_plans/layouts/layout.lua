@@ -38,7 +38,7 @@ function plan.make(panel)
 	--]]
 
 	local container_h = panel:addChild("base/container_simple")
-		:geometrySetMode("segment-unit", "left", 0.4)
+		:geometrySetMode("segment", "left", 256)
 		:layoutSetMargin(16, 16, 16, 16)
 		:layoutSetGridDimensions(2, 2)
 
@@ -59,10 +59,9 @@ function plan.make(panel)
 		--:geometrySetPadding(4, 4, 4, 4)
 
 	local we = _makeBox(panel, "lightyellow", "darkyellow", "black", "(E)")
-		:geometrySetMode("segment-unit", "left", 0.2)
+		:geometrySetMode("segment", "left", 128)
 
 	local wf = _makeBox(panel, "darkgrey", "lightgrey", "white", "(F)")
-		--:geometrySetMode("segment-unit", "left", 0.2)
 		:geometrySetMode("segment", "left", 140, "norm")
 
 	local wg = _makeBox(panel, "darkblue", "lightblue", "white", "(G)")
