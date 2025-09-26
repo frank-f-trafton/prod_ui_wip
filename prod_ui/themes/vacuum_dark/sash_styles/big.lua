@@ -1,11 +1,11 @@
 return {
-	breadth_half = 6,
+	breadth_half = 16,
 
-	contract_x = 0,
-	contract_y = 0,
+	contract_x = 2,
+	contract_y = 2,
 
-	expand_x = 2,
-	expand_y = 2,
+	expand_x = 0,
+	expand_y = 0,
 
 	cursor_hover_h = "sizewe",
 	cursor_hover_v = "sizens",

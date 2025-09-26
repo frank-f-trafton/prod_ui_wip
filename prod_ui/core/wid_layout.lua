@@ -154,8 +154,10 @@ widLayout.mode_setters = {
 
 
 local function _calculateSegment(amount, sash_half, length, do_scale)
+	local length = math.max(0, length - sash_half*2)
+	amount = math.max(0, amount - sash_half)
 	local scale = do_scale and context.scale or 1.0
-	local cut = math.floor(math.max(0, math.min(amount * scale, length) - sash_half))
+	local cut = math.floor(math.max(0, math.min(amount * scale, length)))
 	return cut, length - cut
 end
 
@@ -223,15 +225,16 @@ widLayout.handlers = {
 		local seg_edge, seg_sash = nc.GE_a, nc.GE_c
 		local sash_half = _getSashBreadth(seg_sash)
 		-- GE_d, GE_e, GE_f, GE_g == sash bounding box (XYWH)
+		-- NOTE: the sash box is placed on the opposite side of 'seg_edge'.
 
 		if seg_edge == "left" then
 			nc.y, nc.h = np.lo_y, np.lo_h
 			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
 			nc.w, np.lo_w = _calculateSegment(amount, sash_half, np.lo_w, do_scale)
 			nc.x = np.lo_x
-			np.lo_x = np.lo_x + nc.w
+			np.lo_x = np.lo_x + nc.w + sash_half*2
 			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = -sash_half*2, 0, sash_half*2, nc.h
+				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = nc.w, 0, sash_half*2, nc.h
 			else
 				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
 			end
@@ -239,10 +242,11 @@ widLayout.handlers = {
 		elseif seg_edge == "right" then
 			nc.y, nc.h = np.lo_y, np.lo_h
 			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
+			local old_lo_w = np.lo_w
 			nc.w, np.lo_w = _calculateSegment(amount, sash_half, np.lo_w, do_scale)
-			nc.x = np.lo_x + np.lo_w
+			nc.x = np.lo_x + old_lo_w - nc.w
 			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = nc.w + sash_half*2, 0, sash_half*2, nc.h
+				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = -sash_half*2, 0, sash_half*2, nc.h
 			else
 				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
 			end
@@ -252,9 +256,9 @@ widLayout.handlers = {
 			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
 			nc.h, np.lo_h = _calculateSegment(amount, sash_half, np.lo_h, do_scale)
 			nc.y = np.lo_y
-			np.lo_y = np.lo_y + nc.h
+			np.lo_y = np.lo_y + nc.h + sash_half*2
 			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, -sash_half*2, nc.w, sash_half*2
+				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, nc.h, nc.w, sash_half * 2
 			else
 				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
 			end
@@ -262,10 +266,11 @@ widLayout.handlers = {
 		elseif seg_edge == "bottom" then
 			nc.x, nc.w = np.lo_x, np.lo_w
 			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
+			local old_lo_h = np.lo_h
 			nc.h, np.lo_h = _calculateSegment(amount, sash_half, np.lo_h, do_scale)
-			nc.y = np.lo_y + np.lo_h
+			nc.y = np.lo_y + old_lo_h - nc.h
 			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, nc.h + sash_half*2, nc.w, sash_half * 2
+				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, -sash_half*2, nc.w, sash_half*2
 			else
 				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
 			end
