@@ -16,9 +16,10 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"layouts.layout_unit",
 	"layouts.layout_sashes",
 	"layouts.layout",
-	"layouts.layout2",
+	"layouts.layout_static",
 	"widgets.text_box_multi",
 	"widgets.properties_box",
 	"widgets.text_box_single",
@@ -68,8 +69,9 @@ local demo_plan_list = {
 		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
 		{plan_id = "themes_and_scale", label = "Themes and Scale"},
 		{plan_id = "layouts.layout", label = "Layout"},
-		{plan_id = "layouts.layout2", label = "Layout 2"},
+		{plan_id = "layouts.layout_static", label = "Layout (Static)"},
 		{plan_id = "layouts.layout_sashes", label = "Layout (Sashes)"},
+		{plan_id = "layouts.layout_unit", label = "Layout (Unit Segments)"},
 		--[[
 		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
 			{plan_id = "unfinished.drag_box", label = "Drag Box"},
@@ -732,6 +734,16 @@ function love.update(dt)
 	end
 
 	demo_zoom = math.max(1.0, demo_zoom)
+
+	-- debug
+	--[[
+	if context.root then
+		context.root:forEach(function(self)
+			-- etc.
+		end
+		)
+	end
+	--]]
 end
 
 

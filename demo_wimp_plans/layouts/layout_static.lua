@@ -18,6 +18,8 @@ function plan.make(panel)
 	panel:setSashesEnabled(true)
 
 	--[[
+	In both containers, the edges have been shortened by four segments.
+
 	   C1      C2
 	┌──────┐┌──────┐
 	│A┈┈┈┈B││╭┈┈┈┈╮│
@@ -39,11 +41,27 @@ function plan.make(panel)
 	| C, G |   | * |
 	| D, H | * | * |
 	└──────┴───┴───┘
+
+	Note that non-relative mode doesn't ignore the parent's margins, because those are applied
+	before 'widLayout.applyLayout()' calculates the "original" layout space.
 	--]]
 
 	local c1 = panel:addChild("base/container_simple")
 		:geometrySetMode("static", 0, 0, 256, 256, false, false, false)
 		:layoutSetMargin(16, 16, 16, 16)
+
+	-- cut off some of the edges
+	_makeBox(c1, "black", "black", "black")
+		:geometrySetMode("segment", "left", 16)
+
+	_makeBox(c1, "black", "black", "black")
+		:geometrySetMode("segment", "top", 16)
+
+	_makeBox(c1, "black", "black", "black")
+		:geometrySetMode("segment", "right", 16)
+
+	_makeBox(c1, "black", "black", "black")
+		:geometrySetMode("segment", "bottom", 16)
 
 	local c1_box = _makeBox(c1, "lightyellow", "darkyellow", "black", "Not Relative")
 
@@ -65,6 +83,19 @@ function plan.make(panel)
 	local c2 = panel:addChild("base/container_simple")
 		:geometrySetMode("static", 0+256+32, 0, 256, 256, false, false, false)
 		:layoutSetMargin(16, 16, 16, 16)
+
+	-- cut off some of the edges
+	_makeBox(c2, "black", "black", "black")
+		:geometrySetMode("segment", "left", 16)
+
+	_makeBox(c2, "black", "black", "black")
+		:geometrySetMode("segment", "top", 16)
+
+	_makeBox(c2, "black", "black", "black")
+		:geometrySetMode("segment", "right", 16)
+
+	_makeBox(c2, "black", "black", "black")
+		:geometrySetMode("segment", "bottom", 16)
 
 	local c2_box = _makeBox(c2, "darkgrey", "lightgrey", "white", "Relative")
 

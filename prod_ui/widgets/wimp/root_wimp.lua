@@ -108,10 +108,10 @@ function def:uiCall_reshapePost()
 	print("root_wimp: uiCall_reshapePost")
 
 	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
-	self.vp2_x = self.lo_x
-	self.vp2_y = self.lo_y
-	self.vp2_w = self.lo_w
-	self.vp2_h = self.lo_h
+	self.vp2_x = self.LO_x
+	self.vp2_y = self.LO_y
+	self.vp2_w = self.LO_w
+	self.vp2_h = self.LO_h
 
 	-- Handle the current active Workspace.
 	local workspace = self.workspace

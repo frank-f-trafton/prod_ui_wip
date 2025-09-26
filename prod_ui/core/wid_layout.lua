@@ -26,253 +26,267 @@ widLayout._enum_seg_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
 
 --[[
 	"grid":
-	GE_a grid_x: (integer) Tile position, from 0 to len - 1.
-	GE_b grid_y: ^
-	GE_c grid_w: (integer) Number of tiles the widget occupies.
-	GE_d grid_h: ^
+		x: (integer) Tile position, from 0 to len - 1.
+		y: ^
+		w: (integer) Number of tiles the widget occupies.
+		h: ^
 
 	"null":
-	No parameters used.
+		(No parameters.)
 
 	"remaining":
-	No paremeters used.
+		(No paremeters.)
 
 	"segment":
-	GE_a seg_edge: (_enum_seg_edge)
-	GE_b seg_amount: (number) An integer >= 0
-	GE_c seg_sash (string|false/nil) When a string, this segment has a sash on the opposite edge. The
-		string represents the sash style to use.
-	GE_d sash_x (integer) Position and dimensions of the sash bounding box. Internal use.
-	GE_e sash_y ^
-	GE_f sash_w ^
-	GE_g sash_h ^
+		edge: (_enum_seg_edge)
+		len: (integer) The desired length of the segment. The final length may be reduced to make room for a sash.
+		len_min: (integer) The preferred (not guaranteed) minimum and maximum segment length.
+		len_max: ^
+		sash_style (string|false/nil) When a string, this segment has a sash on the opposite edge.
+		sash_x: (integer) Position and dimensions of the sash bounding box. Internal use.
+		sash_y: ^
+		sash_w: ^
+		sash_h: ^
 
 	"segment-unit":
-	GE_a seg_edge: (_enum_seg_edge)
-	GE_b seg_amount: (number) A number between 0.0 and 1.0.
-	GE_c seg_sash (string|false/nil) When a string, this segment has a sash on the opposite edge. The
-		string represents the sash style to use.
+		edge: (_enum_seg_edge)
+		unit: (number) The desired portion of the segment, from 0.0 to 1.0. This is a percentage of the original
+			parent layout space along the segment's axis.
 
 	"static":
-	GE_a static_x: (integer) Position and dimensions. Always scaled.
-	GE_b static_y: ^
-	GE_c static_w: ^
-	GE_d static_h: ^
-	GE_e static_rel: (boolean) Use parent node's remaining layout space (true) or the original space (false).
-	GE_f static_flip_x: (boolean) When true, the position is against the other side of the layout space.
-	GE_g static_flip_y: (boolean)
+		x: (integer) Position and dimensions. Always scaled.
+		y: ^
+		w: ^
+		h: ^
+		relative: (boolean) Use parent node's remaining layout space (true) or the original space (false).
+		flip_x: (boolean) When true, the position is against the other side of the layout space.
+		flip_y: (boolean) ^
 --]]
 
 
+widLayout.geo_null = {mode="null"}
+widLayout.geo_remaining = {mode="remaining"}
+
+
+local function _initGE(self, mode)
+	-- Do not call with the "null" or "remaining" modes.
+
+	local GE = self.GE
+
+	if GE and GE.mode == mode then
+		return GE
+	else
+		GE = {mode=mode}
+		self.GE = GE
+		return GE
+	end
+end
+
+
 widLayout.mode_setters = {
-	grid = function(self, grid_x, grid_y, grid_w, grid_h)
-		uiAssert.numberNotNaN(1, grid_x)
-		uiAssert.numberNotNaN(2, grid_y)
-		grid_w = grid_w or 1
-		uiAssert.numberNotNaN(3, grid_w)
-		grid_h = grid_h or 1
-		uiAssert.numberNotNaN(4, grid_h)
+	grid = function(self, x, y, w, h)
+		uiAssert.numberNotNaN(1, x)
+		uiAssert.numberNotNaN(2, y)
+		uiAssert.numberNotNaNEval(3, w)
+		uiAssert.numberNotNaNEval(4, h)
 
-		self.GE_mode = "grid"
-		self.GE_a = grid_x
-		self.GE_b = grid_y
-		self.GE_c = grid_w
-		self.GE_d = grid_h
+		local GE = _initGE(self, "grid")
 
-		self.GE_e, self.GE_f, self.GE_g = nil
+		GE.x = x
+		GE.y = y
+		GE.w = w and math.max(0, w) or 1
+		GE.h = h and math.max(0, h) or 1
 
 		return self
 	end,
 
 	null = function(self)
-		self.GE_mode = "null"
-
-		self.GE_a, self.GE_b, self.GE_c, self.GE_d, self.GE_e, self.GE_f, self.GE_g = nil
+		self.GE = widLayout.geo_null
 
 		return self
 	end,
 
 	remaining = function(self)
-		self.GE_mode = "remaining"
-
-		self.GE_a, self.GE_b, self.GE_c, self.GE_d, self.GE_e, self.GE_f, self.GE_g = nil
+		self.GE = widLayout.geo_remaining
 
 		return self
 	end,
 
-	segment = function(self, seg_edge, seg_amount, seg_sash)
-		uiAssert.enum(1, seg_edge, "seg_edge", widLayout._enum_seg_edge)
-		uiAssert.numberNotNaN(2, seg_amount)
-		uiAssert.typeEval(3, seg_sash, "string")
+	segment = function(self, edge, len, sash_style, len_min, len_max)
+		uiAssert.enum(1, edge, "edge", widLayout._enum_seg_edge)
+		uiAssert.numberNotNaN(2, len)
+		uiAssert.typeEval(3, sash_style, "string")
+		uiAssert.numberNotNaNEval(4, len_min)
+		uiAssert.numberNotNaNEval(5, len_max)
 
-		self.GE_mode = "segment"
-		self.GE_a = seg_edge
-		self.GE_b = math.max(0, seg_amount)
-		self.GE_c = seg_sash or nil
+		local GE = _initGE(self, "segment")
 
-		self.GE_d, self.GE_e, self.GE_f, self.GE_g = 0, 0, 0, 0 -- internal use
-
-		return self
-	end,
-
-	["segment-unit"] = function(self, seg_edge, seg_amount, seg_sash)
-		uiAssert.enum(1, seg_edge, "seg_edge", widLayout._enum_seg_edge)
-		uiAssert.numberNotNaN(2, seg_amount)
-		uiAssert.typeEval(3, seg_sash, "string")
-
-		self.GE_mode = "segment-unit"
-		self.GE_a = seg_edge
-		self.GE_b = math.max(0, math.min(seg_amount, 1))
-		self.GE_c = seg_sash or nil
-
-		self.GE_d, self.GE_e, self.GE_f, self.GE_g = nil
+		GE.edge = edge
+		GE.len_min = len_min and math.max(0, len_min) or 0
+		GE.len_max = len_max and math.max(0, len_max) or math.huge
+		GE.len = math.max(GE.len_min, math.min(len, GE.len_max))
+		GE.sash_style = sash_style or nil
+		GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, 0, 0, 0 -- internal use
 
 		return self
 	end,
 
-	static = function(self, static_x, static_y, static_w, static_h, static_rel, static_flip_x, static_flip_y)
-		uiAssert.numberNotNaN(1, static_x)
-		uiAssert.numberNotNaN(2, static_y)
-		uiAssert.numberNotNaN(3, static_w)
-		uiAssert.numberNotNaN(4, static_h)
-		-- don't assert 'static_rel', 'static_flip_x' or 'static_flip_y'
+	["segment-unit"] = function(self, edge, unit)
+		uiAssert.enum(1, edge, "edge", widLayout._enum_seg_edge)
+		uiAssert.numberNotNaN(2, unit)
 
-		self.GE_mode = "static"
+		local GE = _initGE(self, "segment-unit")
 
-		self.GE_a = static_x
-		self.GE_b = static_y
-		self.GE_c = math.max(0, static_w)
-		self.GE_d = math.max(0, static_h)
+		GE.edge = edge
+		GE.unit = math.max(0.0, math.min(unit, 1.0))
 
-		self.GE_e = not not static_rel
-		self.GE_f = not not static_flip_x
-		self.GE_g = not not static_flip_y
+		return self
+	end,
+
+	static = function(self, x, y, w, h, relative, flip_x, flip_y)
+		uiAssert.numberNotNaN(1, x)
+		uiAssert.numberNotNaN(2, y)
+		uiAssert.numberNotNaN(3, w)
+		uiAssert.numberNotNaN(4, h)
+		-- don't assert 'relative', 'flip_x' or 'flip_y'
+
+		local GE = _initGE(self, "static")
+
+		GE.x = x
+		GE.y = y
+		GE.w = math.max(0, w)
+		GE.h = math.max(0, h)
+		GE.relative = not not relative
+		GE.flip_x = not not flip_x
+		GE.flip_y = not not flip_y
 
 		return self
 	end
 }
 
 
-local function _calculateSegment(amount, sash_half, length, do_scale)
-	local length = math.max(0, length - sash_half*2)
-	amount = math.max(0, amount - sash_half)
+local function _calculateSegment(len, sash_half, layout_len, do_scale)
+	layout_len = math.max(0, layout_len - sash_half*2)
+	len = math.max(0, len - sash_half)
 	local scale = do_scale and context.scale or 1.0
-	local cut = math.floor(math.max(0, math.min(amount * scale, length)))
-	return cut, length - cut
+	local cut = math.floor(math.max(0, math.min(len * scale, layout_len)))
+	return cut, layout_len - cut
 end
 
 
-local function _calculateSegmentUnit(amount, sash_half, length, orig_length)
-	local norm_sash_half = sash_half > 0 and (1 / sash_half) or 0
-	local cut = math.floor(orig_length * math.max(0, math.min(amount, 1 - norm_sash_half)))
-	return cut, length - cut
-end
-
-
-local function _querySegmentLength(wid, x_axis, cross_length) -- pixel segments only.
+local function _querySegmentLength(wid, GE, x_axis, cross_length)
 	local a, b = wid:uiCall_getSegmentLength(x_axis, cross_length)
 	if a then
 		return a, b
 	end
-	return wid.GE_b, true -- seg_amount, do_scale
+	return GE.len, true -- len, do_scale
 end
 
 
-local function _getSashBreadth(seg_sash)
-	if seg_sash then
-		local sash_style = sash_styles[seg_sash]
-		if not sash_style then
-			error("unprovisioned sash style: " .. seg_sash)
+local function _getSashBreadth(style_id)
+	if style_id then
+		local style = sash_styles[style_id]
+		if not style then
+			error("unprovisioned sash style: " .. style_id)
 		end
-		return sash_style.breadth_half
+		return style.breadth_half
 	end
 	return 0
 end
 
 
 function widLayout.getSashStyleTable(id)
-	local sash_style = sash_styles[id]
-	if not sash_style then
+	local style = sash_styles[id]
+	if not style then
 		error("unprovisioned sash style: " .. id)
 	end
-	return sash_style
+	return style
+end
+
+
+local function _calculateSegmentUnit(unit, layout_len, original_layout_len)
+	unit = math.max(0, math.min(unit, 1))
+	local cut = math.floor(unit * original_layout_len)
+	return cut, layout_len - cut
 end
 
 
 widLayout.handlers = {
-	grid = function(np, nc, orig_x, orig_y, orig_w, orig_h)
-		local grid_x, grid_y, grid_w, grid_h = nc.GE_a, nc.GE_b, nc.GE_c, nc.GE_d
-
-		if np.lo_grid_rows > 0 and np.lo_grid_cols > 0 then
-			nc.x = np.lo_x + math.floor(grid_x * np.lo_w / np.lo_grid_rows)
-			nc.y = np.lo_y + math.floor(grid_y * np.lo_h / np.lo_grid_cols)
-			nc.w = math.floor(np.lo_w / np.lo_grid_rows * grid_w)
-			nc.h = math.floor(np.lo_h / np.lo_grid_cols * grid_h)
+	-- arguments: np (parent), nc (child, to be resized), GE (child's geometry table), orig_x, orig_y, orig_w, orig_h
+	grid = function(np, nc, GE)
+		if np.LO_grid_rows > 0 and np.LO_grid_cols > 0 then
+			nc.x = np.LO_x + math.floor(GE.x * np.LO_w / np.LO_grid_rows)
+			nc.y = np.LO_y + math.floor(GE.y * np.LO_h / np.LO_grid_cols)
+			nc.w = math.floor(np.LO_w / np.LO_grid_rows * GE.w)
+			nc.h = math.floor(np.LO_h / np.LO_grid_cols * GE.h)
 		else
 			nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
 		end
 	end,
 
-	null = function(np, nc, orig_x, orig_y, orig_w, orig_h)
-		-- Do nothing.
+	null = function()
+		-- do nothing
 	end,
 
-	remaining = function(np, nc, orig_x, orig_y, orig_w, orig_h)
-		nc.x, nc.y, nc.w, nc.h = np.lo_x, np.lo_y, np.lo_w, np.lo_h
+	remaining = function(np, nc)
+		nc.x, nc.y, nc.w, nc.h = np.LO_x, np.LO_y, np.LO_w, np.LO_h
 	end,
 
-	segment = function(np, nc, orig_x, orig_y, orig_w, orig_h)
-		local seg_edge, seg_sash = nc.GE_a, nc.GE_c
-		local sash_half = _getSashBreadth(seg_sash)
-		-- GE_d, GE_e, GE_f, GE_g == sash bounding box (XYWH)
-		-- NOTE: the sash box is placed on the opposite side of 'seg_edge'.
+	segment = function(np, nc, GE)
+		local edge, sash_style = GE.edge, GE.sash_style
+		local sash_half = _getSashBreadth(sash_style)
+		-- NOTE: the sash box is placed on the opposite side of 'edge'.
 
-		if seg_edge == "left" then
-			nc.y, nc.h = np.lo_y, np.lo_h
-			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
-			nc.w, np.lo_w = _calculateSegment(amount, sash_half, np.lo_w, do_scale)
-			nc.x = np.lo_x
-			np.lo_x = np.lo_x + nc.w + sash_half*2
-			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = nc.w, 0, sash_half*2, nc.h
+		if edge == "left" then
+			nc.y, nc.h = np.LO_y, np.LO_h
+			local len, do_scale = _querySegmentLength(nc, GE, true, nc.h)
+			len = math.max(GE.len_min, math.min(len, GE.len_max))
+			nc.w, np.LO_w = _calculateSegment(len, sash_half, np.LO_w, do_scale)
+			nc.x = np.LO_x
+			np.LO_x = np.LO_x + nc.w + sash_half*2
+			if sash_style then
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = nc.w, 0, sash_half*2, nc.h
 			else
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, 0, 0, 0
 			end
 
-		elseif seg_edge == "right" then
-			nc.y, nc.h = np.lo_y, np.lo_h
-			local amount, do_scale = _querySegmentLength(nc, true, nc.h)
-			local old_lo_w = np.lo_w
-			nc.w, np.lo_w = _calculateSegment(amount, sash_half, np.lo_w, do_scale)
-			nc.x = np.lo_x + old_lo_w - nc.w
-			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = -sash_half*2, 0, sash_half*2, nc.h
+		elseif edge == "right" then
+			nc.y, nc.h = np.LO_y, np.LO_h
+			local len, do_scale = _querySegmentLength(nc, GE, true, nc.h)
+			len = math.max(GE.len_min, math.min(len, GE.len_max))
+			local old_LO_w = np.LO_w
+			nc.w, np.LO_w = _calculateSegment(len, sash_half, np.LO_w, do_scale)
+			nc.x = np.LO_x + old_LO_w - nc.w
+			if sash_style then
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = -sash_half*2, 0, sash_half*2, nc.h
 			else
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, 0, 0, 0
 			end
 
-		elseif seg_edge == "top" then
-			nc.x, nc.w = np.lo_x, np.lo_w
-			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
-			nc.h, np.lo_h = _calculateSegment(amount, sash_half, np.lo_h, do_scale)
-			nc.y = np.lo_y
-			np.lo_y = np.lo_y + nc.h + sash_half*2
-			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, nc.h, nc.w, sash_half * 2
+		elseif edge == "top" then
+			nc.x, nc.w = np.LO_x, np.LO_w
+			local len, do_scale = _querySegmentLength(nc, GE, false, nc.w)
+			len = math.max(GE.len_min, math.min(len, GE.len_max))
+			nc.h, np.LO_h = _calculateSegment(len, sash_half, np.LO_h, do_scale)
+			nc.y = np.LO_y
+			np.LO_y = np.LO_y + nc.h + sash_half*2
+			if sash_style then
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, nc.h, nc.w, sash_half * 2
 			else
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, 0, 0, 0
 			end
 
-		elseif seg_edge == "bottom" then
-			nc.x, nc.w = np.lo_x, np.lo_w
-			local amount, do_scale = _querySegmentLength(nc, false, nc.w)
-			local old_lo_h = np.lo_h
-			nc.h, np.lo_h = _calculateSegment(amount, sash_half, np.lo_h, do_scale)
-			nc.y = np.lo_y + old_lo_h - nc.h
-			if seg_sash then
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, -sash_half*2, nc.w, sash_half*2
+		elseif edge == "bottom" then
+			nc.x, nc.w = np.LO_x, np.LO_w
+			local len, do_scale = _querySegmentLength(nc, GE, false, nc.w)
+			len = math.max(GE.len_min, math.min(len, GE.len_max))
+			local old_LO_h = np.LO_h
+			nc.h, np.LO_h = _calculateSegment(len, sash_half, np.LO_h, do_scale)
+			nc.y = np.LO_y + old_LO_h - nc.h
+			if sash_style then
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, -sash_half*2, nc.w, sash_half*2
 			else
-				nc.GE_d, nc.GE_e, nc.GE_f, nc.GE_g = 0, 0, 0, 0
+				GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, 0, 0, 0
 			end
 
 		else
@@ -280,59 +294,56 @@ widLayout.handlers = {
 		end
 	end,
 
-	["segment-unit"] = function(np, nc, orig_x, orig_y, orig_w, orig_h)
-		local seg_edge, seg_amount, seg_sash = nc.GE_a, nc.GE_b, nc.GE_c
-		local sash_half = _getSashBreadth(seg_sash)
+	["segment-unit"] = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)
+		local edge = GE.edge
 
-		if seg_edge == "left" then
-			nc.y, nc.h = np.lo_y, np.lo_h
-			nc.w, np.lo_w = _calculateSegmentUnit(seg_amount, sash_half, np.lo_w, orig_w)
-			nc.x = np.lo_x
-			np.lo_x = np.lo_x + nc.w
+		if edge == "left" then
+			nc.y, nc.h = np.LO_y, np.LO_h
+			nc.w, np.LO_w = _calculateSegmentUnit(GE.unit, np.LO_w, orig_w)
+			nc.x = np.LO_x
+			np.LO_x = np.LO_x + nc.w
 
-		elseif seg_edge == "right" then
-			nc.y, nc.h = np.lo_y, np.lo_h
-			nc.w, np.lo_w = _calculateSegmentUnit(seg_amount, sash_half, np.lo_w, orig_w)
-			nc.x = np.lo_x + np.lo_w
+		elseif edge == "right" then
+			nc.y, nc.h = np.LO_y, np.LO_h
+			nc.w, np.LO_w = _calculateSegmentUnit(GE.unit, np.LO_w, orig_w)
+			nc.x = np.LO_x + np.LO_w
 
-		elseif seg_edge == "top" then
-			nc.x, nc.w = np.lo_x, np.lo_w
-			nc.h, np.lo_h = _calculateSegmentUnit(seg_amount, sash_half, np.lo_h, orig_h)
-			nc.y = np.lo_y
-			np.lo_y = np.lo_y + nc.h
+		elseif edge == "top" then
+			nc.x, nc.w = np.LO_x, np.LO_w
+			nc.h, np.LO_h = _calculateSegmentUnit(GE.unit, np.LO_h, orig_h)
+			nc.y = np.LO_y
+			np.LO_y = np.LO_y + nc.h
 
-		elseif seg_edge == "bottom" then
-			nc.x, nc.w = np.lo_x, np.lo_w
-			nc.h, np.lo_h = _calculateSegmentUnit(seg_amount, sash_half, np.lo_h, orig_h)
-			nc.y = np.lo_y + np.lo_h
+		elseif edge == "bottom" then
+			nc.x, nc.w = np.LO_x, np.LO_w
+			nc.h, np.LO_h = _calculateSegmentUnit(GE.unit, np.LO_h, orig_h)
+			nc.y = np.LO_y + np.LO_h
 
 		else
 			error("bad segment edge ID")
 		end
 	end,
 
-	static = function(np, nc, orig_x, orig_y, orig_w, orig_h)
+	static = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)
 		local scale = context.scale
-		local static_x, static_y, static_w, static_h = nc.GE_a, nc.GE_b, nc.GE_c, nc.GE_d
-		local static_rel, static_flip_x, static_flip_y = nc.GE_e, nc.GE_f, nc.GE_g
 
 		local px, py, pw, ph
-		if static_rel then
-			px, py, pw, ph = np.lo_x, np.lo_y, np.lo_w, np.lo_h
+		if GE.relative then
+			px, py, pw, ph = np.LO_x, np.LO_y, np.LO_w, np.LO_h
 		else
 			px, py, pw, ph = orig_x, orig_y, orig_w, orig_h
 		end
 
-		nc.w = math.floor(static_w * scale)
-		nc.x = math.floor(static_x * scale)
-		if static_flip_x then
+		nc.w = math.floor(GE.w * scale)
+		nc.x = math.floor(GE.x * scale)
+		if GE.flip_x then
 			nc.x = pw - nc.w - nc.x
 		end
 		nc.x = nc.x + px
 
-		nc.h = math.floor(static_h * scale)
-		nc.y = math.floor(static_y * scale)
-		if static_flip_y then
+		nc.h = math.floor(GE.h * scale)
+		nc.y = math.floor(GE.y * scale)
+		if GE.flip_y then
 			nc.y = ph - nc.h - nc.y
 		end
 		nc.y = nc.y + py
@@ -343,12 +354,12 @@ widLayout.handlers = {
 local function _layoutSetBase(self, layout_base)
 	uiAssert.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
 
-	self.lo_base = layout_base
+	self.LO_base = layout_base
 end
 
 
 local function _layoutGetBase(self)
-	return self.lo_base
+	return self.LO_base
 end
 
 
@@ -356,15 +367,15 @@ local function _layoutSetGridDimensions(self, rows, cols)
 	uiAssert.numberNotNaN(1, rows)
 	uiAssert.numberNotNaN(2, cols)
 
-	self.lo_grid_rows = rows
-	self.lo_grid_cols = cols
+	self.LO_grid_rows = rows
+	self.LO_grid_cols = cols
 
 	return self
 end
 
 
 local function _layoutGetGridDimensions(self, rows, cols)
-	return self.lo_grid_rows, self.lo_grid_cols
+	return self.LO_grid_rows, self.LO_grid_cols
 end
 
 
@@ -376,15 +387,15 @@ local function _layoutSetMargin(self, x1, y1, x2, y2)
 		uiAssert.numberNotNaN(3, x2)
 		uiAssert.numberNotNaN(4, y2)
 
-		self.lo_margin_x1 = math.max(0, x1)
-		self.lo_margin_y1 = math.max(0, y1)
-		self.lo_margin_x2 = math.max(0, x2)
-		self.lo_margin_y2 = math.max(0, y2)
+		self.LO_margin_x1 = math.max(0, x1)
+		self.LO_margin_y1 = math.max(0, y1)
+		self.LO_margin_x2 = math.max(0, x2)
+		self.LO_margin_y2 = math.max(0, y2)
 	else
-		self.lo_margin_x1 = math.max(0, x1)
-		self.lo_margin_y1 = math.max(0, x1)
-		self.lo_margin_x2 = math.max(0, x1)
-		self.lo_margin_y2 = math.max(0, x1)
+		self.LO_margin_x1 = math.max(0, x1)
+		self.LO_margin_y1 = math.max(0, x1)
+		self.LO_margin_x2 = math.max(0, x1)
+		self.LO_margin_y2 = math.max(0, x1)
 	end
 
 	return self
@@ -392,7 +403,7 @@ end
 
 
 local function _layoutGetMargin(self)
-	return self.lo_margin_x1, self.lo_margin_y1, self.lo_margin_x2, self.lo_margin_y2
+	return self.LO_margin_x1, self.LO_margin_y1, self.LO_margin_x2, self.LO_margin_y2
 end
 
 
@@ -402,7 +413,7 @@ end
 
 
 local function _layoutSort(self)
-	table.sort(self.lo_list, _hof_sortLayoutList)
+	table.sort(self.LO_list, _hof_sortLayoutList)
 end
 
 
@@ -418,37 +429,37 @@ end
 
 
 function widLayout.setupLayoutList(self)
-	self.lo_list = {}
-	self.lo_base = "self"
-	self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, 0, 0
-	self.lo_margin_x1, self.lo_margin_y1, self.lo_margin_x2, self.lo_margin_y2 = 0, 0, 0, 0
-	self.lo_grid_rows, self.lo_grid_cols = 0, 0 -- grid layout mode
+	self.LO_list = {}
+	self.LO_base = "self"
+	self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, 0, 0
+	self.LO_margin_x1, self.LO_margin_y1, self.LO_margin_x2, self.LO_margin_y2 = 0, 0, 0, 0
+	self.LO_grid_rows, self.LO_grid_cols = 0, 0 -- grid layout mode
 end
 
 
 function widLayout.resetLayoutSpace(self)
-	local to = self.lo_base
+	local to = self.LO_base
 
 	if to == "zero" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, 0, 0
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, 0, 0
 
 	elseif to == "self" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, self.w, self.h
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.w, self.h
 
 	elseif to == "viewport" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, self.vp_w, self.vp_h
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.vp_w, self.vp_h
 
 	elseif to == "viewport-full" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
 
 	elseif to == "viewport-width" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, self.vp_w, math.huge
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.vp_w, math.huge
 
 	elseif to == "viewport-height" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, math.huge, self.vp_h
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, math.huge, self.vp_h
 
 	elseif to == "unbounded" then
-		self.lo_x, self.lo_y, self.lo_w, self.lo_h = 0, 0, math.huge, math.huge
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, math.huge, math.huge
 
 	else
 		error("invalid layout base mode.")
@@ -456,34 +467,35 @@ function widLayout.resetLayoutSpace(self)
 end
 
 
-function widLayout.applyLayout(self, _depth)
-	-- check 'self.lo_list' before calling.
+function widLayout.applyLayout(self)
+	-- check 'self.LO_list' before calling.
 
-	--print("_applyLayout() " .. _depth .. ": start")
+	--print("widLayout.applyLayout(): start")
 
 	local scale = context.scale
 
 	-- Margin reduction
-	local mx1 = math.floor(self.lo_margin_x1 * scale)
-	local my1 = math.floor(self.lo_margin_y1 * scale)
-	local mx2 = math.floor(self.lo_margin_x2 * scale)
-	local my2 = math.floor(self.lo_margin_y2 * scale)
+	local mx1 = math.floor(self.LO_margin_x1 * scale)
+	local my1 = math.floor(self.LO_margin_y1 * scale)
+	local mx2 = math.floor(self.LO_margin_x2 * scale)
+	local my2 = math.floor(self.LO_margin_y2 * scale)
 
-	self.lo_x = self.lo_x + mx1
-	self.lo_y = self.lo_y + my1
-	self.lo_w = math.max(0, self.lo_w - mx1 - mx2)
-	self.lo_h = math.max(0, self.lo_h - my1 - my2)
+	self.LO_x = self.LO_x + mx1
+	self.LO_y = self.LO_y + my1
+	self.LO_w = math.max(0, self.LO_w - mx1 - mx2)
+	self.LO_h = math.max(0, self.LO_h - my1 - my2)
 
-	local orig_x, orig_y, orig_w, orig_h = self.lo_x, self.lo_y, self.lo_w, self.lo_h
+	local orig_x, orig_y, orig_w, orig_h = self.LO_x, self.LO_y, self.LO_w, self.LO_h
 
-	for i, child in ipairs(self.lo_list) do
-		local handler = widLayout.handlers[child.GE_mode]
+	for i, child in ipairs(self.LO_list) do
+		local GE = child.GE
+		local handler = widLayout.handlers[GE.mode]
 		if not handler then
-			error("invalid or missing layout handler: " .. tostring(child.GE_mode))
+			error("invalid or missing layout handler: " .. tostring(GE.mode))
 		end
 
 		--print("old self XYWH", self.x, self.y, self.w, self.h)
-		handler(self, child, orig_x, orig_y, orig_w, orig_h)
+		handler(self, child, GE, orig_x, orig_y, orig_w, orig_h)
 		--print("new self XYWH", self.x, self.y, self.w, self.h)
 
 		-- Outpad reduction
@@ -498,7 +510,7 @@ function widLayout.applyLayout(self, _depth)
 		child.h = math.max(0, child.h - oy1 - oy2)
 	end
 
-	--print("_applyLayout() " .. _depth .. ": end")
+	--print("_applyLayout(): end")
 end
 
 

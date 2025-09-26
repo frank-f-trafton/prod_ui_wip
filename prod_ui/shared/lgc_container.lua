@@ -7,6 +7,7 @@ local context = select(1, ...)
 local lgcContainer = {}
 
 
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
@@ -67,8 +68,12 @@ function lgcContainer.setupSashState(self)
 	-- Mouse cursor position (absolute) at start of drag state
 	self.SA_att_ax, self.SA_att_ay = 0, 0
 
-	-- Segment "amount" at start of drag state.
-	self.SA_click_amount = 0
+	-- Segment "len" at start of drag state.
+	self.SA_click_len = 0
+
+	-- Max allowed dragging for this drag event.
+	-- Based on the remaining layout space at click-down time.
+	self.SA_drag_max = 0
 end
 
 
@@ -112,25 +117,25 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 		-- check hover-on
 		local wid, sash_style
 		for i, child in ipairs(self.children) do
-			-- GE_c == seg_sash
-			if child.GE_mode == "segment" and child.GE_c then
-				local style = widLayout.getSashStyleTable(child.GE_c)
+			local GE = child.GE
+			if GE.mode == "segment" and GE.sash_style then
+				local style = widLayout.getSashStyleTable(GE.sash_style)
 				local con_x, con_y = style.contract_x, style.contract_y
-				local sx, sy, sw, sh = child.GE_d, child.GE_e, child.GE_f, child.GE_g -- sash bounding box
+				local sx, sy, sw, sh = GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h
 				if mxs >= child.x + sx + con_x
 				and mxs < child.x + sx + sw - con_x
 				and mys >= child.y + sy + con_y
 				and mys < child.y + sy + sh - con_y
 				then
 					wid, sash_style = child, style
+					break
 				end
 			end
 		end
 
 		if wid then
 			self.SA_hover = wid
-			local seg_edge = wid.GE_a
-			local cursor_id = lgcContainer.getSashCursorID(seg_edge, false)
+			local cursor_id = lgcContainer.getSashCursorID(wid.GE.edge, false)
 			self.cursor_hover = sash_style[cursor_id]
 			return true
 		else
@@ -140,14 +145,15 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 		-- check hover-off
 	else
 		local wid = self.SA_hover
+		local GE = wid.GE
 		-- widget is dead or no longer has a sash?
-		if wid._dead or wid.GE_mode ~= "segment" or not wid.GE_c then
+		if wid._dead or GE.mode ~= "segment" or not GE.sash_style then
 			self.SA_hover = false
 			self.cursor_hover = false
 		else
-			local sash_style = widLayout.getSashStyleTable(wid.GE_c)
+			local sash_style = widLayout.getSashStyleTable(GE.sash_style)
 			local exp_x, exp_y = sash_style.expand_x, sash_style.expand_y
-			local sx, sy, sw, sh = wid.GE_d, wid.GE_e, wid.GE_f, wid.GE_g -- sash bounding box
+			local sx, sy, sw, sh = GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h
 
 			-- no longer hovering?
 			if not (mxs >= wid.x + sx - exp_x
@@ -176,20 +182,26 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 	and self.SA_enabled
 	then
 		local wid = self.SA_hover
-		if wid
-		and not wid._dead
-		and wid.GE_mode == "segment"
-		and wid.GE_c -- seg_sash
-		then
-			self.press_busy = "sash"
-			self.SA_att_ax, self.SA_att_ay = x, y
-			self.SA_click_amount = wid.GE_b
-			local seg_edge = wid.GE_a
-			local cursor_id = lgcContainer.getSashCursorID(seg_edge, true)
-			local sash_style = widLayout.getSashStyleTable(wid.GE_c)
-			self.cursor_press = sash_style[cursor_id]
+		if wid and not wid._dead then
+			local GE = wid.GE
+			if GE.mode == "segment" and GE.sash_style then
+				self.press_busy = "sash"
+				self.SA_att_ax, self.SA_att_ay = x, y
+				self.SA_click_len = GE.len
 
-			return true
+				if GE.edge == "left" or GE.edge == "right" then
+					self.SA_drag_max = self.LO_w
+
+				else -- GE.edge == "top" or GE.edge == "bottom"
+					self.SA_drag_max = self.LO_h
+				end
+
+				local cursor_id = lgcContainer.getSashCursorID(GE.edge, true)
+				local sash_style = widLayout.getSashStyleTable(GE.sash_style)
+				self.cursor_press = sash_style[cursor_id]
+
+				return true
+			end
 		end
 	end
 end
@@ -200,37 +212,39 @@ function lgcContainer.sashDragLogic(self, x, y)
 	and self.press_busy == "sash"
 	then
 		local wid = self.SA_hover
-		if wid
-		and not wid._dead
-		and wid.GE_mode == "segment"
-		and wid.GE_c -- seg_sash
-		then
-			local old_amount = wid.GE_b
-			local seg_edge = wid.GE_a
-			-- wid.GE_b == seg_amount
+		if wid and not wid._dead then
+			local GE = wid.GE
+			if GE.mode == "segment" and GE.sash_style then
+				local old_len = GE.len
+				local edge = GE.edge
 
-			if seg_edge == "left" then
-				local drag_amount = (x - self.SA_att_ax) * (1 / math.max(0.1, context.scale))
-				wid.GE_b = math.max(0, self.SA_click_amount + drag_amount)
+				if edge == "left" then
+					local drag_amount = math.min(self.SA_drag_max, x - self.SA_att_ax) * (1 / math.max(0.1, context.scale))
+					GE.len = math.max(0, self.SA_click_len + drag_amount)
 
-			elseif seg_edge == "right" then
-				local drag_amount = (x - self.SA_att_ax) * (1 / math.max(0.1, context.scale))
-				wid.GE_b = math.max(0, self.SA_click_amount - drag_amount)
+				elseif edge == "right" then
+					local drag_amount = math.max(-self.SA_drag_max, x - self.SA_att_ax) * (1 / math.max(0.1, context.scale))
+					GE.len = math.max(0, self.SA_click_len - drag_amount)
 
-			elseif seg_edge == "top" then
-				local drag_amount = (y - self.SA_att_ay) * (1 / math.max(0.1, context.scale))
-				wid.GE_b = math.max(0, self.SA_click_amount + drag_amount)
+				elseif edge == "top" then
+					local drag_amount = math.min(self.SA_drag_max, y - self.SA_att_ay) * (1 / math.max(0.1, context.scale))
+					GE.len = math.max(0, self.SA_click_len + drag_amount)
 
-			elseif seg_edge == "bottom" then
-				local drag_amount = (y - self.SA_att_ay) * (1 / math.max(0.1, context.scale))
-				wid.GE_b = math.max(0, self.SA_click_amount - drag_amount)
+				elseif edge == "bottom" then
+					local drag_amount = math.max(-self.SA_drag_max, y - self.SA_att_ay) * (1 / math.max(0.1, context.scale))
+					GE.len = math.max(0, self.SA_click_len - drag_amount)
 
-			else
-				error("invalid segment edge")
-			end
+				else
+					error("invalid segment edge")
+				end
 
-			if wid.GE_b ~= old_amount then
-				self:reshape()
+				-- Enforce preferred min+max length
+				GE.len = pMath.round(GE.len)
+				GE.len = math.max(GE.len_min, math.min(GE.len, GE.len_max))
+
+				if GE.len ~= old_len then
+					self:reshape()
+				end
 			end
 		end
 
@@ -253,9 +267,9 @@ function lgcContainer.renderSashes(self)
 	local scr_x, scr_y = self.scr_x, self.scr_y
 
 	for i, child in ipairs(self.children) do
-		-- GE_c == seg_sash
-		if child.GE_mode == "segment" and child.GE_c then
-			local style = widLayout.getSashStyleTable(child.GE_c)
+		local GE = child.GE
+		if GE.mode == "segment" and GE.sash_style then
+			local style = widLayout.getSashStyleTable(GE.sash_style)
 			local res
 			if not self.SA_enabled then
 				res = style.res_disabled
@@ -271,8 +285,8 @@ function lgcContainer.renderSashes(self)
 			end
 
 			love.graphics.setColor(res.col_body)
-			local slc = (child.GE_a == "left" or child.GE_a == "right") and res.slc_tb or res.slc_lr
-			local sx, sy, sw, sh = child.GE_d, child.GE_e, child.GE_f, child.GE_g
+			local slc = (GE.edge == "left" or GE.edge == "right") and res.slc_tb or res.slc_lr
+			local sx, sy, sw, sh = GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h
 			uiGraphics.drawSlice(slc, -scr_x + child.x + sx, -scr_y + child.y + sy, sw, sh)
 
 			-- Debug stuff

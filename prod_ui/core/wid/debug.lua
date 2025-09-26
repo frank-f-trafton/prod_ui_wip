@@ -64,19 +64,19 @@ end
 function debug.debugDrawLayoutNodes(wid)
 	-- Translate to the widget's position and scroll offsets before calling.
 
-	if not wid.lo_list then
+	if not wid.LO_list then
 		return
 	end
 
 	love.graphics.push("all")
 	love.graphics.setScissor()
 
-	if wid.lo_w > 0 and wid.lo_h > 0 then
+	if wid.LO_w > 0 and wid.LO_h > 0 then
 		love.graphics.setColor(0.75, 0.75, 1, 0.5)
 		love.graphics.setLineWidth(2)
 		love.graphics.setLineStyle("smooth")
 		love.graphics.setLineJoin("miter")
-		love.graphics.rectangle("fill", wid.lo_x, wid.lo_y, wid.lo_w, wid.lo_h)
+		love.graphics.rectangle("fill", wid.LO_x, wid.LO_y, wid.LO_w, wid.LO_h)
 	end
 
 	-- TODO: grid stuff in parent
@@ -85,12 +85,13 @@ function debug.debugDrawLayoutNodes(wid)
 	love.graphics.setLineWidth(1)
 
 	for i, child in ipairs(wid.children) do
-		if child.GE_mode ~= "null" then
+		local GE = child.GE
+		if GE.mode ~= "null" then
 			love.graphics.rectangle("line", child.x, child.y, child.w, child.h)
 			love.graphics.setColor(0, 0, 0, 0.5)
-			love.graphics.print(child.GE_mode, child.x + 2, child.y + 2)
+			love.graphics.print(GE.mode, child.x + 2, child.y + 2)
 			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.print(child.GE_mode, child.x, child.y)
+			love.graphics.print(GE.mode, child.x, child.y)
 		end
 	end
 
