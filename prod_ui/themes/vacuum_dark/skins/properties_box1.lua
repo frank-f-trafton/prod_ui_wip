@@ -9,12 +9,15 @@ return {
 	tq_px = "*quads/atlas/pixel",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
+	sash_style = "*sash_styles/norm",
 	font = "*fonts/p",
 
-	cursor_sash = "sizewe",
-	sash_w = 12,
 	item_h = 40,
-	-- TODO: minimum column widths
+	col_1_min_w = 40,
+	col_1_def_w = 175,
+	control_side = "right",
+	sash_margin_1 = 4,
+	sash_margin_2 = 4,
 
 	sl_body = "*slices/atlas/list_box_body",
 
