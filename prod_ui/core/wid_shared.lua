@@ -687,7 +687,7 @@ end
 -- @param self The widget.
 -- @param v Viewport index to modify.
 -- @param e A table with the fields 'x1', 'y1', 'x2' and 'y2'.
-function widShared.carveViewport(self, v, e)
+function widShared.carveViewport(self, v, e) -- TODO: rename to widShared.carveViewportBox()
 	v = vpk[v]
 	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
 
@@ -698,19 +698,40 @@ function widShared.carveViewport(self, v, e)
 end
 
 
---- Reduce or enlarge a viewport in place with relative numbers.
--- untested
---[[
+--- Reduce or enlarge a viewport in place with relative numbers. (All positive values reduce.)
 function widShared.resizeViewportInPlace(self, v, x1, y1, x2, y2)
 	v = vpk[v]
 	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
 
 	self[vx] = self[vx] + x1
 	self[vy] = self[vy] + y1
-	self[vw] = self[vw] + x2 - x1
-	self[vh] = self[vh] + y2 - y1
+	self[vw] = math.max(0, self[vw] - x1 - x2)
+	self[vh] = math.max(0, self[vh] - y1 - y2)
 end
---]]
+
+
+function widShared.resizeViewportSide(self, v, side, amount)
+	v = vpk[v]
+
+	if side == "left" then
+		self[v.x] = self[v.x] + amount
+		self[v.w] = math.max(0, self[v.w] - amount)
+
+	elseif side == "right" then
+		self[v.x] = self[v.x] + amount
+
+	elseif side == "top" then
+		self[v.y] = self[v.y] + amount
+		self[v.h] = math.max(0, self[v.h] - amount)
+
+	elseif side == "bottom" then
+		self[v.y] = self[v.y] + amount
+
+	else
+		error("invalid or unsupported side string")
+	end
+end
+
 
 
 --- Copies the values of one viewport to another.

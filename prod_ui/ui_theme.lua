@@ -604,40 +604,8 @@ end
 
 
 function uiTheme.checkSashStyles(sash_styles)
-	for k, v in pairs(sash_styles) do
-		uiTheme.pushLabel(k)
-
-		check.type(sash_styles, k, "table")
-
-		-- Width of tall sashes; height of wide sashes.
-		check.integer(v, "breadth_half", 0)
-
-		-- Reduces the intersection box when checking for the mouse *entering* a sash.
-		-- NOTE: overly large values will make the sash unclickable.
-		check.integer(v, "contract_x", 0)
-		check.integer(v, "contract_y", 0)
-
-		-- Increases the intersection box when checking for the mouse *leaving* a sash.
-		-- NOTES:
-		-- * Overly large values will prevent the user from clicking on widgets that
-		--   are descendants of the container.
-		-- * The expansion does not go beyond the container's body.
-		check.integer(v, "expand_x", 0)
-		check.integer(v, "expand_y", 0)
-
-		-- To apply a graphical margin to a sash mosaic, please bake the margin into the texture.
-
-		check.type(v, "cursor_hover_h", "nil", "string")
-		check.type(v, "cursor_hover_v", "nil", "string")
-		check.type(v, "cursor_drag_h", "nil", "string")
-		check.type(v, "cursor_drag_v", "nil", "string")
-
-		_checkSashRes(v, "res_idle")
-		_checkSashRes(v, "res_hover")
-		_checkSashRes(v, "res_press")
-		_checkSashRes(v, "res_disabled")
-
-		uiTheme.popLabel()
+	for k in pairs(sash_styles) do
+		check.sashStyle(sash_styles, k)
 	end
 end
 
@@ -668,6 +636,44 @@ function check.thimbleInfo(skin, k)
 
 	uiTheme.popLabel()
 	return thim
+end
+
+
+function check.sashStyle(skin, k)
+	uiTheme.pushLabel(k)
+
+	check.type(skin, k, "table")
+	local style = skin[k]
+
+	-- Width of tall sashes; height of wide sashes.
+	check.integer(style, "breadth_half", 0)
+
+	-- Reduces the intersection box when checking for the mouse *entering* a sash.
+	-- NOTE: overly large values will make the sash unclickable.
+	check.integer(style, "contract_x", 0)
+	check.integer(style, "contract_y", 0)
+
+	-- Increases the intersection box when checking for the mouse *leaving* a sash.
+	-- NOTES:
+	-- * Overly large values will prevent the user from clicking on widgets that
+	--   are descendants of the container.
+	-- * The expansion does not go beyond the container's body.
+	check.integer(style, "expand_x", 0)
+	check.integer(style, "expand_y", 0)
+
+	-- To apply a graphical margin to a sash mosaic, please bake the margin into the texture.
+
+	check.type(style, "cursor_hover_h", "nil", "string")
+	check.type(style, "cursor_hover_v", "nil", "string")
+	check.type(style, "cursor_drag_h", "nil", "string")
+	check.type(style, "cursor_drag_v", "nil", "string")
+
+	_checkSashRes(style, "res_idle")
+	_checkSashRes(style, "res_hover")
+	_checkSashRes(style, "res_press")
+	_checkSashRes(style, "res_disabled")
+
+	uiTheme.popLabel()
 end
 
 

@@ -1,4 +1,4 @@
--- XXX: Under construction.
+--- XXX: Under construction.
 --[[
 A flat list of properties with embedded controls.
 
@@ -17,13 +17,6 @@ Optional icons (bijoux)  │
 │                        |                      ├─┤
 │                        |                      │v│
 └───────────────────────────────────────────────┴─┘
---]]
-
-
---[[
-Stuff to fix:
-
-* Fix how icon resources are loaded.
 --]]
 
 
@@ -293,6 +286,17 @@ function def:setSelectionByIndex(wid_i)
 end
 
 
+local function _setCol1Width(self, n)
+	local skin = self.skin
+	self.col_1_w = math.floor(math.max(skin.col_1_min_w, n * context.scale))
+end
+
+
+local function _defaultCol1Width(self)
+	return math.floor(self.skin.col_1_def_w * context.scale)
+end
+
+
 function def:uiCall_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -308,6 +312,8 @@ function def:uiCall_initialize()
 	self.MN_wrap_selection = false
 
 	self.sash_enabled = true
+	self.sash_hovered = false
+	self.sash_att_x = 0
 
 	-- Column X positions and widths.
 	self.col_icon_x = 0
@@ -324,7 +330,13 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
+
+	self.col_1_w = _defaultCol1Width(self)
+	self.col_1_w_click = 0
 end
+
+
+local _side_oppo = {left="right", right="left"}
 
 
 function def:uiCall_reshapePre()
@@ -336,6 +348,8 @@ function def:uiCall_reshapePre()
 	-- * The sash viewport overlaps and straddles #3 and #4.
 
 	local skin = self.skin
+	local sash_style = skin.sash_style
+	local sm1, sm2 = skin.sash_margin_1, skin.sash_margin_2
 
 	widShared.resetViewport(self, 1)
 
@@ -349,13 +363,13 @@ function def:uiCall_reshapePre()
 	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	-- Label and control areas.
-	widShared.copyViewport(self, 1, 3)
-	widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "right") -- TODO: make the control side configurable.
-
-	-- Sash.
-	self.vp5_w = skin.sash_w
-	widShared.straddleViewport(self, 3, 5, "right", 0.5)
+	-- bite label column + sash area off of control column
+	-- bite sash area off of label column
+	-- apply sash margins
+	widShared.copyViewport(self, 1, 4)
+	widShared.partitionViewport(self, 4, 5, self.col_1_w + sm1 + sash_style.breadth_half*2 + sm2, _side_oppo[skin.control_side])
+	widShared.partitionViewport(self, 5, 3, self.col_1_w + sm1, _side_oppo[skin.control_side])
+	widShared.resizeViewportInPlace(self, 5, sm1, 0, sm2, 0)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
@@ -366,6 +380,9 @@ function def:uiCall_reshapePre()
 	self:arrangeItems()
 
 	self:cacheUpdate(true)
+
+	-- don't allow child widget gfx to spill out of the control column.
+	widShared.setClipScissorToViewport(self, 4)
 end
 
 
@@ -516,32 +533,55 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		lgcScroll.widgetProcessHover(self, mx, my)
 
+		-- Sash hover logic
+		if self.sash_enabled then
+			local sash_style = self.skin.sash_style
+			-- hover on
+			if not self.sash_hovered then
+				local con_x, con_y = sash_style.contract_x, sash_style.contract_y
+				if mx >= self.vp5_x + con_x
+				and mx < self.vp5_x + self.vp5_w - con_x
+				and my >= self.vp5_y + con_y
+				and my < self.vp5_y + self.vp5_h - con_y
+				then
+					self.sash_hovered = true
+					self.cursor_hover = self.skin.sash_style.cursor_hover_h
+				end
+			-- hover off
+			else
+				local exp_x, exp_y = sash_style.expand_x, sash_style.expand_y
+
+				if not (mx >= self.vp5_x - exp_x
+				and mx < self.vp5_x + self.vp5_w + exp_x
+				and my >= self.vp5_y - exp_y
+				and my < self.vp5_y + self.vp5_h + exp_y)
+				then
+					self.sash_hovered = false
+					self.cursor_hover = nil
+				end
+			end
+		else
+			self.sash_hovered = false
+			self.cursor_hover = nil
+		end
+
 		local hover_ok = false
 
-		-- Hovering over an active sash
-		if self.sash_enabled and widShared.pointInViewport(self, 5, mx, my) then
-			self.cursor_hover = self.skin.cursor_sash
+		if not self.sash_hovered then
+			-- Hovering over labels and controls
+			if widShared.pointInViewport(self, 2, mx, my) then
+				local mxs, mys = mx + self.scr_x, my + self.scr_y
 
-		-- Hovering over labels and controls
-		elseif widShared.pointInViewport(self, 2, mx, my) then
-			self.cursor_hover = nil
+				-- Update item hover
+				local i, item = self:getItemAtPoint(mxs, mys, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
-			mx = mx + self.scr_x
-			my = my + self.scr_y
+				if item and item.selectable then
+					-- Un-hover any existing hovered item
+					self.MN_item_hover = item
 
-			-- Update item hover
-			local i, item = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
-
-			if item and item.selectable then
-				-- Un-hover any existing hovered item
-				self.MN_item_hover = item
-
-				hover_ok = true
+					hover_ok = true
+				end
 			end
-
-		else
-			-- Clear the sash cursor
-			self.cursor_hover = nil
 		end
 
 		if self.MN_item_hover and not hover_ok then
@@ -554,6 +594,7 @@ end
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		lgcScroll.widgetClearHover(self)
+		self.sash_hovered = false
 		self.cursor_hover = nil
 		self.MN_item_hover = false
 	end
@@ -571,8 +612,6 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 		end
 
-		-- The user clicked somewhere on the menu, outside of child widgets (or "through"
-		-- an inactive child widget)
 		if self == inst then
 			if button <= 3 then
 				self:tryTakeThimble1()
@@ -580,7 +619,16 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
 				local mx, my = self:getRelativePosition(x, y)
 
-				if widShared.pointInViewport(self, 2, mx, my) then
+				-- Clicked on sash?
+				if self.sash_enabled and self.sash_hovered and not self.press_busy then
+					self.press_busy = "sash"
+					self.sash_att_x = x
+					self.col_1_w_click = self.col_1_w
+					self.cursor_press = self.skin.sash_style.cursor_drag_h
+
+				-- The user clicked somewhere on the menu, outside of child widgets (or "through"
+				-- an inactive child widget)
+				elseif widShared.pointInViewport(self, 2, mx, my) then
 					mx, my = mx + self.scr_x, my + self.scr_y
 
 					local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
@@ -641,8 +689,18 @@ end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst and self.press_busy == "menu-drag" then
-		lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
+	if self == inst then
+		if self.press_busy == "sash" then
+			local x_diff = mouse_x - self.sash_att_x
+			local width_old = self.col_1_w
+			_setCol1Width(self, self.col_1_w_click + x_diff)
+			if self.col_1_w ~= width_old then
+				self:reshape()
+			end
+
+		elseif self.press_busy == "menu-drag" then
+			lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
+		end
 	end
 end
 
@@ -654,6 +712,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	then
 		lgcScroll.widgetClearPress(self)
 		self.press_busy = false
+		self.cursor_press = nil
 	end
 end
 
@@ -770,10 +829,23 @@ def.default_skinner = {
 		check.quad(skin, "tq_px")
 		check.scrollBarData(skin, "data_scroll")
 		check.scrollBarStyle(skin, "scr_style")
+		check.sashStyle(skin, "sash_style")
 		check.loveType(skin, "font", "Font")
-		check.type(skin, "cursor_sash", "nil", "string")
-		check.integer(skin, "sash_w", 0)
+
 		check.integer(skin, "item_h", 0)
+
+		-- The minimum preferred label column width
+		check.integer(skin, "col_1_min_w", 0)
+
+		-- The default label column width
+		check.integer(skin, "col_1_def_w", 0)
+
+		-- Which side to place the label column: "left", "right"
+		check.exact(skin, "control_side", "left", "right")
+
+		check.integer(skin, "sash_margin_1", 0)
+		check.integer(skin, "sash_margin_2", 0)
+
 		check.slice(skin, "sl_body")
 
 		-- Alignment of property name text:
@@ -795,8 +867,12 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
-		change.integerScaled(skin, "sash_w", scale)
 		change.integerScaled(skin, "item_h", scale)
+		change.integerScaled(skin, "col_1_min_w", scale)
+		change.integerScaled(skin, "col_1_def_w", scale)
+		change.integerScaled(skin, "sash_margin_1", scale)
+		change.integerScaled(skin, "sash_margin_2", scale)
+
 		change.integerScaled(skin, "icon_spacing", scale)
 		change.integerScaled(skin, "pad_text_x", scale)
 	end,
@@ -843,6 +919,16 @@ def.default_skinner = {
 
 		lgcScroll.drawScrollBarsHV(self, skin.data_scroll) -- maybe do vertical bars only?
 
+		-- Sash
+		local s_style = skin.sash_style
+		local s_res = not self.sashes_enabled and s_style["res_disabled"]
+			or self.press_busy == "sash" and s_style["res_press"]
+			or self.sash_hovered and s_style["res_hover"]
+			or s_style["res_idle"]
+
+		love.graphics.setColor(s_res.col_body)
+		uiGraphics.drawSlice(s_res.slc_tb, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
+
 		love.graphics.push("all")
 
 		-- Scissor, scroll offsets for content.
@@ -880,6 +966,9 @@ def.default_skinner = {
 			end
 		end
 
+		--local sx, sy, sw, sh = love.graphics.getScissor()
+		uiGraphics.intersectScissor(ox + self.x + self.vp3_x, oy + self.y + self.vp3_y, self.vp3_w, self.vp3_h)
+
 		-- 2: Icons, if enabled
 		love.graphics.setColor(rr, gg, bb, aa)
 		if self.show_icons then
@@ -895,16 +984,6 @@ def.default_skinner = {
 		-- 3: Text labels
 		for i = first, last do
 			local item = items[i]
-			-- ugh
-			--[[
-			love.graphics.push("all")
-			love.graphics.setColor(1, 0, 0, 1)
-			love.graphics.setLineWidth(1)
-			love.graphics.setLineStyle("rough")
-			love.graphics.setLineJoin("miter")
-			love.graphics.rectangle("line", item.x + 0.5, item.y + 0.5, item.w - 1, item.h - 1)
-			love.graphics.pop()
-			--]]
 
 			if item.text then
 				-- Need to align manually to prevent long lines from wrapping.
@@ -926,19 +1005,6 @@ def.default_skinner = {
 				)
 			end
 		end
-
-		love.graphics.pop()
-
-		love.graphics.push("all")
-
-		-- (WIP) Sash
-		--love.graphics.setColor(1.0, 1.0, 1.0, 0.5)
-		--love.graphics.rectangle("fill", self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
-		love.graphics.setColor(1.0, 1.0, 1.0, 0.25)
-		local xx = math.floor(self.vp5_x + self.vp5_w / 2)
-		love.graphics.setLineStyle("smooth")
-		love.graphics.setLineWidth(1.0)
-		love.graphics.line(xx, self.vp5_y, xx, self.vp5_y + self.vp5_h)
 
 		love.graphics.pop()
 	end,
