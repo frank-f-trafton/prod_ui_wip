@@ -49,9 +49,6 @@ function plan.make(panel)
 	end
 
 	tree_box:setScrollBars(false, true)
-
-	tree_box:reshape()
-
 	tree_box:setIconsEnabled(true)
 	tree_box:setExpandersActive(true)
 

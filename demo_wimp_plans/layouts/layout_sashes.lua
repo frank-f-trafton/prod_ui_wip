@@ -55,8 +55,6 @@ function plan.make(panel)
 
 	local we = _makeBox(work_box, "darkblue", "lightblue", "white", "E")
 		:geometrySetMode("remaining")
-
-	panel:reshape()
 end
 
 

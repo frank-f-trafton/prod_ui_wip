@@ -34,8 +34,6 @@ function plan.make(panel)
 	end
 
 	p_bar:setActive(true)
-	p_bar:reshape()
-
 
 	local btn_active = panel:addChild("base/button")
 	btn_active:geometrySetMode("static", 256, 32, 128, 40)
@@ -122,8 +120,6 @@ function plan.make(panel)
 
 	sld_pos.wid_actionSliderChanged = slider_action
 
-	sld_pos:reshape()
-
 
 	local lbl_max = demoShared.makeLabel(panel, 256, 160+32+8+32, 256, 32, "Maximum")
 	lbl_max:setTag("maximum_label")
@@ -138,8 +134,6 @@ function plan.make(panel)
 	sld_max.round_policy = "nearest"
 
 	sld_max.wid_actionSliderChanged = slider_action
-
-	sld_max:reshape()
 end
 
 

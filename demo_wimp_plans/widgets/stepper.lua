@@ -26,8 +26,6 @@ function plan.make(panel)
 
 	stepper_h:removeOption(remove_test_i)
 
-	stepper_h:reshape()
-
 
 	local stepper_v = panel:addChild("base/stepper")
 	stepper_v:geometrySetMode("static", 288, 32, 64, 128)
@@ -36,8 +34,6 @@ function plan.make(panel)
 	stepper_v:insertOption({text = "Dipdop"})
 
 	stepper_v.vertical = true
-
-	stepper_v:reshape()
 end
 
 

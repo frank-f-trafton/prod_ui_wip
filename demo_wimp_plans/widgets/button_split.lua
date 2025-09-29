@@ -195,7 +195,6 @@ function plan.make(panel)
 				btn:reshape()
 			end
 		end
-		sld:reshape()
 	end
 end
 
