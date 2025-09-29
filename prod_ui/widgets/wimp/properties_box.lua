@@ -999,23 +999,15 @@ def.default_skinner = {
 			end
 		end
 
-		print("self.pos_text_x", self.pos_text_x)
 		-- 3: Text labels
 		for i = first, last do
 			local item = items[i]
-
-			print("???", self.pos_text_w, self.vp3_w)
 			local text_x = math.floor(0.5 + _lerp(0, self.pos_text_w - item.text_w, skin.text_align_h))
-			love.graphics.push("all")
-			love.graphics.setScissor()
-
 			love.graphics.print(
 				item.text,
 				self.vp3_x + self.pos_text_x + text_x,
 				item.y + math.floor((item.h - font_h) * 0.5)
 			)
-
-			love.graphics.pop()
 		end
 
 		love.graphics.pop()
