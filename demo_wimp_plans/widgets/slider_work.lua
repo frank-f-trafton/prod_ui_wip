@@ -43,7 +43,6 @@ function plan.make(panel)
 
 	--sliderh1.slider_home = 1
 
-	sliderh1:reshape()
 	--]===]
 
 	xx = xx + h_wid_w + space_w
@@ -71,7 +70,6 @@ function plan.make(panel)
 
 	--sliderh2.slider_home = 1
 
-	sliderh2:reshape()
 	--]===]
 
 	xx = xx + h_wid_w + space_w
@@ -99,7 +97,6 @@ function plan.make(panel)
 
 	--sliderh3.slider_home = 1
 
-	sliderh3:reshape()
 	--]===]
 
 	xx = 0
@@ -122,7 +119,6 @@ function plan.make(panel)
 	--sliderv1:setLabel("Vert")
 	--sliderv1.slider_home = math.floor(0.5 + slider_v.slider_max/2)
 
-	sliderv1:reshape()
 	--]===]
 
 	xx = xx + h_wid_w + space_w
@@ -147,7 +143,6 @@ function plan.make(panel)
 	--sliderv2:setLabel("Vert")
 	--sliderv2.slider_home = math.floor(0.5 + slider_v.slider_max/2)
 
-	sliderv2:reshape()
 	--]===]
 
 	xx = xx + h_wid_w + space_w
@@ -172,7 +167,6 @@ function plan.make(panel)
 	--sliderv3:setLabel("Vert")
 	--sliderv3.slider_home = math.floor(0.5 + slider_v.slider_max/2)
 
-	sliderv3:reshape()
 	--]===]
 
 	xx = xx + h_wid_w + space_w

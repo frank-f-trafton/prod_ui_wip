@@ -26,7 +26,6 @@ function plan.make(panel)
 	local c4 = properties_box:addItem("wimp/number_box", "Number")
 
 	properties_box:setScrollBars(false, true)
-	properties_box:reshape()
 end
 
 

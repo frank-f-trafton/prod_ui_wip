@@ -15,6 +15,7 @@ return {
 	item_h = 40,
 	col_1_min_w = 40,
 	col_1_def_w = 175,
+	col_2_min_w = 40,
 	control_side = "right",
 	sash_margin_1 = 4,
 	sash_margin_2 = 4,

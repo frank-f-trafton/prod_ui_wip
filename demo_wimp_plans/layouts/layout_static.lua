@@ -112,8 +112,6 @@ function plan.make(panel)
 		:geometrySetMode("static", 0, 0, 48, 48, true, true, true)
 
 	c2_box:geometrySetMode("remaining")
-
-	panel:reshape()
 end
 
 

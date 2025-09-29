@@ -286,9 +286,12 @@ function def:setSelectionByIndex(wid_i)
 end
 
 
-local function _setCol1Width(self, n)
+local function _clampCol1Width(self)
+	-- Viewport #1 must be correctly sized before calling.
 	local skin = self.skin
-	self.col_1_w = math.floor(math.max(skin.col_1_min_w, n * context.scale))
+	local sash_total_width = skin.sash_margin_1 + skin.sash_style.breadth_half*2 + skin.sash_margin_2
+	local max_w = self.vp_w - sash_total_width - skin.col_2_min_w
+	self.col_1_w = math.floor(math.min(max_w, math.max(self.col_1_w, skin.col_1_min_w)))
 end
 
 
@@ -345,7 +348,6 @@ function def:uiCall_reshapePre()
 	-- Viewport #3 is the area for item labels.
 	-- Viewport #4 is the area for item controls (child widgets).
 	-- Viewport #5 is a sash that is placed between the labels and controls.
-	-- * The sash viewport overlaps and straddles #3 and #4.
 
 	local skin = self.skin
 	local sash_style = skin.sash_style
@@ -363,12 +365,11 @@ function def:uiCall_reshapePre()
 	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	-- bite label column + sash area off of control column
-	-- bite sash area off of label column
-	-- apply sash margins
+	_clampCol1Width(self)
+
 	widShared.copyViewport(self, 1, 4)
-	widShared.partitionViewport(self, 4, 5, self.col_1_w + sm1 + sash_style.breadth_half*2 + sm2, _side_oppo[skin.control_side])
-	widShared.partitionViewport(self, 5, 3, self.col_1_w + sm1, _side_oppo[skin.control_side])
+	widShared.partitionViewport(self, 4, 3, self.col_1_w, _side_oppo[skin.control_side])
+	widShared.partitionViewport(self, 4, 5, sm1 + sash_style.breadth_half*2 + sm2, _side_oppo[skin.control_side])
 	widShared.resizeViewportInPlace(self, 5, sm1, 0, sm2, 0)
 
 	self:scrollClampViewport()
@@ -693,7 +694,10 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if self.press_busy == "sash" then
 			local x_diff = mouse_x - self.sash_att_x
 			local width_old = self.col_1_w
-			_setCol1Width(self, self.col_1_w_click + x_diff)
+
+			self.col_1_w = (self.col_1_w_click + x_diff) * context.scale
+			_clampCol1Width(self)
+
 			if self.col_1_w ~= width_old then
 				self:reshape()
 			end
@@ -840,6 +844,10 @@ def.default_skinner = {
 		-- The default label column width
 		check.integer(skin, "col_1_def_w", 0)
 
+		-- The minimum preferred control column width.
+		-- Used when clamping the width of the label column.
+		check.integer(skin, "col_2_min_w", 0)
+
 		-- Which side to place the label column: "left", "right"
 		check.exact(skin, "control_side", "left", "right")
 
@@ -870,6 +878,7 @@ def.default_skinner = {
 		change.integerScaled(skin, "item_h", scale)
 		change.integerScaled(skin, "col_1_min_w", scale)
 		change.integerScaled(skin, "col_1_def_w", scale)
+		change.integerScaled(skin, "col_2_min_w", scale)
 		change.integerScaled(skin, "sash_margin_1", scale)
 		change.integerScaled(skin, "sash_margin_2", scale)
 
