@@ -52,23 +52,15 @@ local function columnSortLabels(wid, column)
 end
 
 
-function plan.makeWindowFrame(root)
-	local context = root.context
+function plan.make(panel)
+	panel:layoutSetBase("viewport-width")
+	panel:setScrollRangeMode("auto")
+	panel:setScrollBars(false, true)
 
-	local frame = root:newWindowFrame()
-	frame.w = 640
-	frame.h = 480
-	frame:setFrameTitle("Tabular Menu Test")
+	local context = panel.context
 
-	frame:layoutSetBase("viewport")
-	frame:setScrollRangeMode("zero")
-	frame:setScrollBars(false, false)
-
-	local menu_tab = frame:addChild("wimp/menu_tab")
-		:geometrySetMode("remaining")
-
-	menu_tab.w = 640
-	menu_tab.h = 480
+	local menu_tab = panel:addChild("wimp/menu_tab")
+		:geometrySetMode("static", 0, 0, 640, 480)
 
 	menu_tab.renderThimble = function() end
 
@@ -76,7 +68,6 @@ function plan.makeWindowFrame(root)
 	menu_tab.MN_wrap_selection = false
 
 	menu_tab:setScrollBars(true, true)
-
 
 	local primary_column = menu_tab:addColumn("Column 1", true, columnSortLabels) -- ID #1
 	primary_column.lock_visibility = true
@@ -109,11 +100,6 @@ function plan.makeWindowFrame(root)
 	end
 
 	menu_tab:refreshRows()
-
-	frame:reshape()
-	frame:center(true, true)
-
-	return frame
 end
 
 

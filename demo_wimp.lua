@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.menu_tab",
 	"widgets.properties_box",
 	"layouts.layout_unit",
 	"layouts.layout_sashes",
@@ -39,7 +40,6 @@ local demo_panel_launch = {
 local demo_window_launch = {
 	--"window_frames.frame_unselectable",
 	--"window_frames.wimp_frame",
-	--"window_frames.wimp_menu_tab",
 	--"window_frames.window_frame_selector",
 }
 
@@ -63,6 +63,7 @@ local demo_plan_list = {
 		{plan_id = "widgets.barebones", label = "Barebones Widgets"},
 		{plan_id = "widgets.tree_box", label = "Tree Box"},
 		{plan_id = "widgets.list_box", label = "List Box"},
+		{plan_id = "widgets.menu_tab", label = "Tabular Menu"},
 		{plan_id = "widgets.progress_bar", label = "Progress Bar"},
 		-- TODO: text blocks
 		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
