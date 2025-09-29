@@ -22,7 +22,7 @@ return {
 
 	sl_body = "*slices/atlas/list_box_body",
 
-	text_align_h = "left",
+	text_align_h = 0.0, -- 0: left, 0.5: center, 1.0: right
 
 	icon_spacing = 24,
 	icon_side = "left",
