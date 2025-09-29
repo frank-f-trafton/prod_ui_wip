@@ -286,17 +286,18 @@ function def:setSelectionByIndex(wid_i)
 end
 
 
-local function _clampCol1Width(self)
+local function _enforceMinCol1Width(self)
+	self.col_1_w = math.max(self.col_1_w, self.skin.col_1_min_w)
+end
+
+
+local function _updateCol1Scaled(self) -- col_1_w -> col_1_ws
 	-- Viewport #1 must be correctly sized before calling.
 	local skin = self.skin
 	local sash_total_width = skin.sash_margin_1 + skin.sash_style.breadth_half*2 + skin.sash_margin_2
 	local max_w = self.vp_w - sash_total_width - skin.col_2_min_w
-	self.col_1_w = math.floor(math.min(max_w, math.max(self.col_1_w, skin.col_1_min_w)))
-end
-
-
-local function _defaultCol1Width(self)
-	return math.floor(self.skin.col_1_def_w * context.scale)
+	self.col_1_ws = math.floor(math.min(max_w, self.col_1_w * context.scale))
+	self.col_1_w_max = math.floor(max_w * (1 / math.max(0.1, context.scale)))
 end
 
 
@@ -334,7 +335,15 @@ function def:uiCall_initialize()
 	self:skinSetRefs()
 	self:skinInstall()
 
-	self.col_1_w = _defaultCol1Width(self)
+	-- Width of the label column.
+	self.col_1_w = self.skin.col_1_def_w
+
+	-- Sets:
+	-- * self.col_1_ws: A scaled version of 'col_1_w', to be used when setting viewport #5.
+	-- * self.col_1_w_max: The max allowed column width when dragging
+	_updateCol1Scaled(self)
+
+	-- The value of 'col_1_w' when the sash was clicked.
 	self.col_1_w_click = 0
 end
 
@@ -365,10 +374,11 @@ function def:uiCall_reshapePre()
 	-- Margin.
 	widShared.carveViewport(self, 1, skin.box.margin)
 
-	_clampCol1Width(self)
+	_enforceMinCol1Width(self)
+	_updateCol1Scaled(self)
 
 	widShared.copyViewport(self, 1, 4)
-	widShared.partitionViewport(self, 4, 3, self.col_1_w, _side_oppo[skin.control_side])
+	widShared.partitionViewport(self, 4, 3, self.col_1_ws, _side_oppo[skin.control_side])
 	widShared.partitionViewport(self, 4, 5, sm1 + sash_style.breadth_half*2 + sm2, _side_oppo[skin.control_side])
 	widShared.resizeViewportInPlace(self, 5, sm1, 0, sm2, 0)
 
@@ -695,8 +705,10 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local x_diff = mouse_x - self.sash_att_x
 			local width_old = self.col_1_w
 
-			self.col_1_w = (self.col_1_w_click + x_diff) * context.scale
-			_clampCol1Width(self)
+			self.col_1_w = self.col_1_w_click + x_diff * (1 / math.max(0.1, context.scale))
+			_enforceMinCol1Width(self)
+			self.col_1_w = math.min(self.col_1_w, self.col_1_w_max)
+			_updateCol1Scaled(self)
 
 			if self.col_1_w ~= width_old then
 				self:reshape()
