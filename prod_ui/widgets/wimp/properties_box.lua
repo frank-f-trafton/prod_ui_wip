@@ -25,11 +25,15 @@ local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
+
+
+local _lerp = pMath.lerp
 
 
 local def = {
@@ -189,6 +193,9 @@ local function updateItemDimensions(self, item)
 	item.w = self.vp_w
 	item.h = skin.item_h
 
+	local font = skin.font
+	item.text_w = font:getWidth(item.text)
+
 	local wid = item.wid_ref
 	if wid then
 		wid.w = self.vp4_w
@@ -319,12 +326,13 @@ function def:uiCall_initialize()
 	self.sash_hovered = false
 	self.sash_att_x = 0
 
-	-- Column X positions and widths.
-	self.col_icon_x = 0
-	self.col_icon_w = 0
+	-- Positions of text and icons within the label column.
+	-- (pos_text_w == the width alotted for text, not the width of the text itself.)
+	self.pos_icon_x = 0
+	self.pos_icon_w = 0
 
-	self.col_text_x = 0
-	self.col_text_w = 0
+	self.pos_text_x = 0
+	self.pos_text_w = 0
 
 	-- State flags.
 	self.enabled = true
@@ -406,41 +414,27 @@ function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
 		self.doc_w, self.doc_h = 0, 0
 
-		local children = self.children
-
 		-- Document height is based on the last control in the menu.
+		local children = self.children
 		local last_wid = children[#children]
 		if last_wid then
 			self.doc_h = last_wid.y + last_wid.h
 		end
 
-		-- Calculate column widths.
-		if self.show_icons then
-			self.col_icon_w = skin.icon_spacing
-		else
-			self.col_icon_w = 0
-		end
-
-		self.col_text_w = 0
-		local font = skin.font
-		for i, wid in ipairs(children) do
-			self.col_text_w = math.max(self.col_text_w, wid.x + wid.w)
-		end
-
-		-- Additional text padding.
-		self.col_text_w = self.col_text_w + skin.pad_text_x
-		self.col_text_w = math.max(self.col_text_w, self.vp3_w - self.col_icon_w)
-
-		-- Get column left positions.
+		-- Calculate icon and text positions within the label column.
 		if skin.icon_side == "left" then
-			self.col_icon_x = 0
-			self.col_text_x = self.col_icon_w
-		else
-			self.col_icon_x = self.col_text_w
-			self.col_text_x = 0
+			self.pos_icon_x = 0
+			self.pos_icon_w = self.show_icons and skin.icon_spacing or 0
+			self.pos_text_x = self.pos_icon_x + self.pos_icon_w
+			self.pos_text_w = math.max(0, self.vp3_w - self.pos_text_x)
+		else -- "right"
+			self.pos_text_x = 0
+			self.pos_text_w = math.max(0, self.vp3_w - self.pos_text_x)
+			self.pos_icon_x = self.pos_text_x + self.pos_text_w
+			self.pos_icon_w = self.show_icons and skin.icon_spacing or 0
 		end
 
-		self.doc_w = math.max(self.vp_w, self.col_icon_w + self.col_text_w)
+		self.doc_w = self.vp_w
 	end
 
 	-- Set the draw ranges for controls.
@@ -703,6 +697,9 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.press_busy == "sash" then
 			local x_diff = mouse_x - self.sash_att_x
+			if self.skin.control_side == "left" then
+				x_diff = -x_diff
+			end
 			local width_old = self.col_1_w
 
 			self.col_1_w = self.col_1_w_click + x_diff * (1 / math.max(0.1, context.scale))
@@ -869,7 +866,7 @@ def.default_skinner = {
 		check.slice(skin, "sl_body")
 
 		-- Alignment of property name text:
-		check.exact(skin, "text_align_h", "left", "center", "right")
+		check.number(skin, "text_align_h", 0.0, 1.0)
 		-- Vertical text alignment is centered.
 
 		-- Property name icon column width and positioning, if active.
@@ -997,34 +994,28 @@ def.default_skinner = {
 				local item = items[i]
 				local tq_icon = item.tq_icon
 				if tq_icon then
-					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.col_icon_x, item.y, self.col_icon_w, item.h)
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.pos_icon_x, item.y, self.pos_icon_w, item.h)
 				end
 			end
 		end
 
+		print("self.pos_text_x", self.pos_text_x)
 		-- 3: Text labels
 		for i = first, last do
 			local item = items[i]
 
-			if item.text then
-				-- Need to align manually to prevent long lines from wrapping.
-				local text_x
-				if skin.text_align_h == "left" then
-					text_x = self.col_text_x + skin.pad_text_x
+			print("???", self.pos_text_w, self.vp3_w)
+			local text_x = math.floor(0.5 + _lerp(0, self.pos_text_w - item.text_w, skin.text_align_h))
+			love.graphics.push("all")
+			love.graphics.setScissor()
 
-				elseif skin.text_align_h == "center" then
-					text_x = self.col_text_x + math.floor((self.col_text_w - item.w) * 0.5)
+			love.graphics.print(
+				item.text,
+				self.vp3_x + self.pos_text_x + text_x,
+				item.y + math.floor((item.h - font_h) * 0.5)
+			)
 
-				elseif skin.text_align_h == "right" then
-					text_x = self.col_text_x + math.floor(self.col_text_w - item.w - skin.pad_text_x)
-				end
-
-				love.graphics.print(
-					item.text,
-					text_x,
-					item.y + math.floor((item.h - font_h) * 0.5)
-				)
-			end
+			love.graphics.pop()
 		end
 
 		love.graphics.pop()
