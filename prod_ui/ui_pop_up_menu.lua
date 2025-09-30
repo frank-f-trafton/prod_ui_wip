@@ -126,6 +126,18 @@ local function _getActionable(self)
 end
 
 
+local function _setUserValue(self, v)
+	self.user_value = v
+
+	return self
+end
+
+
+local function _getUserValue(self)
+	return self.user_value
+end
+
+
 local function _setGroupPrototype(self, proto)
 	uiAssert.typeEval1(1, proto, "table")
 	if getmetatable(proto) ~= _mt_proto then
@@ -153,6 +165,7 @@ _mt_command = {
 	callback = false,
 	config = false,
 	actionable = true,
+	user_value = false,
 
 	setText = _setText,
 	getText = _getText,
@@ -169,7 +182,9 @@ _mt_command = {
 	setConfig = _setConfig,
 	getConfig = _getConfig,
 	setActionable = _setActionable,
-	getActionable = _getActionable
+	getActionable = _getActionable,
+	setUserValue = _setUserValue,
+	getUserValue = _getUserValue
 }
 _mt_command.__index = _mt_command
 

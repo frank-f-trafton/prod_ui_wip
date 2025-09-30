@@ -234,6 +234,7 @@ local function _makeCommand(self, info)
 	uiAssert.fieldTypeEval1(info, "info", "callback", "function")
 	uiAssert.fieldTypeEval1(info, "info", "config", "function")
 	uiAssert.fieldTypeEval1(info, "info", "actionable", "boolean")
+	-- don't check 'user_value'
 
 	local item = {
 		x = 0, y = 0, w = 0, h = 0,
@@ -245,7 +246,8 @@ local function _makeCommand(self, info)
 
 		selectable = true,
 		callback = info.callback or false,
-		actionable = not not info.callback
+		actionable = not not info.callback,
+		user_value = info.user_value or false
 	}
 	if item.callback and info.actionable ~= nil then
 		item.actionable = not not info.actionable

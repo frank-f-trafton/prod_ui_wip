@@ -53,7 +53,9 @@ local context = select(1, ...)
 
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
+local lgcWimp = context:getLua("shared/lgc_wimp")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -134,12 +136,9 @@ def.movePageDown = lgcMenu.widgetMovePageDown
 -- * Pop-up menu setup (for columns) *
 
 
--- Needs to be rewritten for every call
-local cat_pop_up_proto = {}
-
-
 local function callback_toggleCategoryVisibility(self, item)
-	local column = self.columns[item.column_index]
+	print("callback_toggleCategoryVisibility()")
+	local column = self.columns[item.user_value]
 	if column then
 		column.visible = not column.visible
 	end
@@ -149,35 +148,33 @@ local function callback_toggleCategoryVisibility(self, item)
 end
 
 
-local function setupCategoryPopUp(self)
-	for i = #cat_pop_up_proto, 1, -1 do
-		cat_pop_up_proto[i] = nil
-	end
+local function _makePopUpPrototype(self)
+	local P = uiPopUpMenu.P
+
+	local proto_menu = P.prototype {}
 
 	for i, column in ipairs(self.columns) do
-		local tbl = {}
+		local command = P.command()
+			:setIconID(column.visible and "check_on" or "check_off")
+			:setText(column.text ~= "" and column.text or "(Column #" .. i .. ")")
+			:setActionable(not column.lock_visibility)
+			:setCallback(callback_toggleCategoryVisibility)
+			:setUserValue(i) -- column index
 
-		tbl.type = "command"
-		tbl.bijou = column.visible and "check_on" or "check_off"
-		tbl.text = column.text ~= "" and column.text or "(Column #" .. i .. ")"
-
-		tbl.callback = callback_toggleCategoryVisibility
-		tbl.selectable = true
-		tbl.actionable = not column.lock_visibility
-		tbl.column_index = i
-
-		table.insert(cat_pop_up_proto, tbl)
+		table.insert(proto_menu, command)
 	end
+
+	uiPopUpMenu.assertPrototypeItems(proto_menu)
+	return proto_menu
 end
 
 
+
 local function invokePopUpMenu(self, x, y)
-	setupCategoryPopUp(self)
+	local proto_menu = _makePopUpPrototype(self)
+	local pop_up = lgcWimp.makePopUpMenu(self, proto_menu, x, y)
 
 	local root = self:getRootWidget()
-
-	local lgcWimp = self.context:getLua("shared/lgc_wimp")
-	local pop_up = lgcWimp.makePopUpMenu(self, cat_pop_up_proto, x, y)
 	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 	pop_up:tryTakeThimble2()
@@ -583,7 +580,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			-- Update item hover
 			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
-			print("i", i, "item", item)
+			--print("i", i, "item", item)
 
 			if item and item.selectable then
 				self.MN_item_hover = item
