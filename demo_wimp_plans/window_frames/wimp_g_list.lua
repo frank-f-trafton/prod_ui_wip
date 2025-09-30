@@ -49,8 +49,6 @@ function plan.makeWindowFrame(root)
 	local menu_tab = frame:addChild("wimp/menu_tab")
 		:geometrySetMode("remaining")
 
-	menu_tab.renderThimble = function() end
-
 	menu_tab.MN_drag_select = true
 	menu_tab.MN_wrap_selection = false
 

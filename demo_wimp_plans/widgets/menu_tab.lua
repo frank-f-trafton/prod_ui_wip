@@ -62,8 +62,6 @@ function plan.make(panel)
 	local menu_tab = panel:addChild("wimp/menu_tab")
 		:geometrySetMode("static", 0, 0, 640, 480)
 
-	menu_tab.renderThimble = function() end
-
 	menu_tab.MN_drag_select = true
 	menu_tab.MN_wrap_selection = false
 
