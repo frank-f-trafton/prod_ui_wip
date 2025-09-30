@@ -1160,6 +1160,8 @@ def.default_skinner = {
 
 		love.graphics.translate(-self.scr_x, -self.scr_y)
 
+		uiGraphics.intersectScissor(ox + self.vp_x, oy + self.vp_y, self.vp_w, self.vp_h)
+
 		-- Draw hover glow, if applicable
 		local item_hover = self.MN_item_hover
 		if item_hover then
