@@ -18,6 +18,7 @@ local context = select(1, ...)
 
 
 local lgcMenu = context:getLua("shared/lgc_menu")
+local lgcWimp = context:getLua("shared/lgc_wimp")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -88,7 +89,7 @@ local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_sele
 		root:sendEvent("rootCall_destroyPopUp", client)
 	end
 
-	local lgcWimp = client.context:getLua("shared/lgc_wimp")
+
 	local pop_up = lgcWimp.makePopUpMenu(client, item.pop_up_proto, p_x, p_y)
 
 	if doctor_press then

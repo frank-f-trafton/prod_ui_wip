@@ -16,7 +16,7 @@ function implTabCell.reshape(cell, widget)
 	local font = skin.cell_font
 
 	cell.tq_icon = lgcMenu.getIconQuad(widget.icon_set_id, cell.icon_id)
-	print("ICON_ID", cell.icon_id, "TQ_ICON", cell.tq_icon)
+	--print("ICON_ID", cell.icon_id, "TQ_ICON", cell.tq_icon)
 
 	local tq_icon = cell.tq_icon
 	if tq_icon then
