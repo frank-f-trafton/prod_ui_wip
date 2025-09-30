@@ -54,6 +54,7 @@ local context = select(1, ...)
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcWimp = context:getLua("shared/lgc_wimp")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -243,9 +244,6 @@ function def:uiCall_initialize()
 	self.col_click_x = 0
 	self.col_click_y = 0
 
-	-- Half square range of where row sorting is permitted by clicking on column squares.
-	self.col_click_threshold = 16 -- XXX config, scale
-
 	-- Reference(s) to the currently-hovered and currently-pressed column header.
 	-- Hovered should only be considered if pressed is false.
 	self.column_hovered = false
@@ -374,9 +372,10 @@ function def:cacheUpdate(refresh_dimensions)
 		end
 
 		-- Document width is based on the rightmost column in the header.
+		-- Add a bit more so that the last column bar's drag sensor is reachable.
 		local last_col = self.columns[#self.columns]
 		if last_col then
-			self.doc_w = last_col.x + last_col.w
+			self.doc_w = last_col.x + last_col.w + self.skin.drag_threshold
 		end
 	end
 
@@ -451,10 +450,12 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		-- Activate the column re-ordering action when the mouse has moved far enough from
 		-- the initial click point.
 		if self.col_click then
-			if mx < self.col_click_x - self.col_click_threshold
-			or mx >= self.col_click_x + self.col_click_threshold
-			or my < self.col_click_y - self.col_click_threshold
-			or my >= self.col_click_y + self.col_click_threshold
+			local col_click_thresh = self.skin.col_click_threshold
+
+			if mx < self.col_click_x - col_click_thresh
+			or mx >= self.col_click_x + col_click_thresh
+			or my < self.col_click_y - col_click_thresh
+			or my >= self.col_click_y + col_click_thresh
 			then
 				self.col_click = false
 			end
@@ -503,8 +504,6 @@ end
 
 
 local function testColumnMouseOverlapWithEdges(self, mx, my)
-	local drag_thresh = 4 -- XXX configurable edge threshold
-
 	-- Broad check
 	if widShared.pointInViewport(self, 3, mx, my) then
 		-- Take horizontal scrolling into account only.
@@ -513,6 +512,7 @@ local function testColumnMouseOverlapWithEdges(self, mx, my)
 			local col_x = self.vp3_x + column.x
 			local col_y = self.vp3_y + column.y
 			if column.visible and my >= col_y and my < col_y + column.h then
+				local drag_thresh = self.skin.drag_threshold
 
 				-- Check the drag-edge first.
 				if mx >= col_x + column.w - drag_thresh - s2x and mx < col_x + column.w + drag_thresh - s2x then
@@ -1041,6 +1041,7 @@ def.default_skinner = {
 		check.colorTuple(skin, "color_item_text")
 		check.colorTuple(skin, "color_select_glow")
 		check.colorTuple(skin, "color_hover_glow")
+		check.colorTuple(skin, "color_active_glow")
 		check.colorTuple(skin, "color_column_sep")
 		check.colorTuple(skin, "color_drag_col_bg")
 
@@ -1053,7 +1054,13 @@ def.default_skinner = {
 		check.loveType(skin, "cell_font", "Font")
 
 		check.integer(skin, "bar_height", 0)
-		check.integer(skin, "col_sep_line_width", 0)
+
+		-- Width of the "drag to resize" sensor on column bars.
+		check.integer(skin, "drag_threshold", 0)
+
+		-- Half square range of where row sorting is permitted by clicking on column squares.
+		check.integer(skin, "col_click_threshold", 0)
+
 		check.integer(skin, "bijou_w", 0)
 		check.integer(skin, "bijou_h", 0)
 
@@ -1075,7 +1082,8 @@ def.default_skinner = {
 		change.integerScaled(skin, "item_h", scale)
 		change.integerScaled(skin, "column_sep_width", scale)
 		change.integerScaled(skin, "bar_height", scale)
-		change.integerScaled(skin, "col_sep_line_width", scale)
+		change.integerScaled(skin, "drag_threshold", scale)
+		change.integerScaled(skin, "col_click_threshold", scale)
 		change.integerScaled(skin, "bijou_w", scale)
 		change.integerScaled(skin, "bijou_h", scale)
 		change.integerScaled(skin, "category_h_pad", scale)
@@ -1152,8 +1160,6 @@ def.default_skinner = {
 
 		love.graphics.translate(-self.scr_x, -self.scr_y)
 
-		uiGraphics.intersectScissor(ox + self.vp_x, oy + self.vp_y, self.vp_w, self.vp_h)
-
 		-- Draw hover glow, if applicable
 		local item_hover = self.MN_item_hover
 		if item_hover then
@@ -1164,7 +1170,8 @@ def.default_skinner = {
 		-- Draw selection glow, if applicable
 		local sel_item = items[self.MN_index]
 		if sel_item then
-			love.graphics.setColor(skin.color_select_glow)
+			local t_color = self == context.thimble1 and skin.color_active_glow or skin.color_select_glow
+			love.graphics.setColor(t_color)
 			uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
 		end
 
@@ -1175,7 +1182,10 @@ def.default_skinner = {
 
 
 	--renderLast = function(self, ox, oy) end,
-	--renderThimble = function(self, ox, oy) end,
+
+
+	-- Don't render thimble focus.
+	renderThimble = uiDummy.func,
 }
 
 

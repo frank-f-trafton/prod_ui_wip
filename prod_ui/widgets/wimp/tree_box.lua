@@ -30,6 +30,7 @@ local lgcTree = context:getLua("shared/lgc_tree")
 local lgcMenu = context:getLua("shared/lgc_menu")
 local structTree = context:getLua("shared/struct_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
@@ -833,7 +834,7 @@ def.default_skinner = {
 	end,
 
 	--renderLast = function(self, ox, oy) end,
-	--renderThimble = function(self, ox, oy) end,
+	renderThimble = uiDummy.func,
 }
 
 

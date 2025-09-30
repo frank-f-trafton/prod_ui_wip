@@ -13,6 +13,7 @@ return {
 	color_item_text = {1.0, 1.0, 1.0, 1.0},
 	color_select_glow = {1.0, 1.0, 1.0, 0.33},
 	color_hover_glow = {1.0, 1.0, 1.0, 0.16},
+	color_active_glow = {0.75, 0.75, 1.0, 0.33},
 	color_column_sep = {1.0, 1.0, 1.0, 0.125},
 	color_drag_col_bg = {0.2, 0.2, 0.2, 0.85},
 
@@ -24,7 +25,9 @@ return {
 	cell_font = "*fonts/p",
 
 	bar_height = 32,
-	col_sep_line_width = 1,
+	drag_threshold = 4,
+	col_click_threshold = 16,
+
 	bijou_w = 12,
 	bijou_h = 12,
 
