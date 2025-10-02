@@ -41,9 +41,9 @@ end
 
 
 local sort_functions = {
-	hof_sortName,
-	hof_sortSize,
-	hof_sortMod,
+	name = hof_sortName,
+	size = hof_sortSize,
+	modtime = hof_sortMod,
 	--hof_sortFileType, -- Reserved
 }
 
@@ -132,7 +132,7 @@ end
 
 
 local function setupMenuItem(self, source)
-	local item = self:addRow()
+	local item = self:newRow()
 
 	-- Maintain a separation between internal values and what is displayed to the end user.
 
@@ -177,25 +177,25 @@ local function setupMenuItem(self, source)
 	-- Reserved
 	--item.file_type = "<missing feature>"
 
-	item.cells[1] = {text = text_name}
-	item.cells[2] = {text = text_size}
-	item.cells[3] = {text = text_mod}
-	--item.cells[<?>] = {text = text_type} -- Reserved
+	local name_icon_id = (source.type == "file") and "file"
+		or (source.type == "directory" or source.type == "symlink") and "folder"
+		or nil
 
-	if source.type == "file" then
-		item.cells[1].icon_id = "file"
+	item:provisionCell("name")
+		:setCellText("name", text_name)
+		:setCellIconID("name", name_icon_id)
 
-	elseif source.type == "directory" or source.type == "symlink" then
-		item.cells[1].icon_id = "folder"
-	end
+	item:provisionCell("size")
+		:setCellText("size", text_size)
 
-	local implTabCell = self.context:getLua("shared/impl_tab_cell")
-	for j, cell in ipairs(item.cells) do
-		cell.render = implTabCell.render
-		cell.reshape = implTabCell.reshape
+	item:provisionCell("modtime")
+		:setCellText("modtime", text_mod)
 
-		cell:reshape(self)
-	end
+	--[[
+	-- reserved
+	item:provisionCell("???")
+		:setCellText("???", text_type)
+	--]]
 
 	return item
 end
@@ -288,20 +288,28 @@ function plan.makeWindowFrame(root)
 
 	enforceDefaultPrimaryColumn(menu_tab)
 
-	local col_name = menu_tab:addColumn("Name", true, columnSortFiles) -- ID #1
-	col_name.lock_visibility = true
+	menu_tab:newColumn("name")
+		:setText("Name")
+		:setLockedVisibility(true)
+		:setSortFunction(columnSortFiles)
 
-	menu_tab:addColumn("Size", true, columnSortFiles) -- ID #2
-	menu_tab:addColumn("ModTime", true, columnSortFiles) -- ID #3
+	menu_tab:newColumn("size")
+		:setText("Size")
+		:setSortFunction(columnSortFiles)
+
+	menu_tab:newColumn("modtime")
+		:setText("ModTime")
+		:setSortFunction(columnSortFiles)
 
 	--[[
 	-- Reserved for future use (determining types beyond just "directory", "file", etc.)
-	menu_tab:addColumn("FileType", true, columnSortFiles) -- ID #?
+	menu_tab:newColumn("filetype")
+		:setText("FileType")
+		:setSortFunction(columnSortFiles)
 	--]]
 
-	menu_tab.reorder_limit = 1
+	menu_tab:setReorderLimit(1)
 
-	menu_tab:refreshColumnBar()
 	menu_tab:sort()
 
 	menu_tab.getDirectoryItems = menu_getDirectoryItems

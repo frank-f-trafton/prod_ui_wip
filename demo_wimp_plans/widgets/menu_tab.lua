@@ -67,37 +67,46 @@ function plan.make(panel)
 
 	menu_tab:setScrollBars(true, true)
 
-	local primary_column = menu_tab:addColumn("Column 1", true, columnSortLabels) -- ID #1
-	primary_column.lock_visibility = true
+	menu_tab:newColumn(1)
+		:setText("Column 1")
+		:setLockedVisibility(true)
+		:setSortFunction(columnSortLabels)
 
-	menu_tab:addColumn("Column 2", true, columnSortLabels) -- ID #2
-	menu_tab:addColumn("Column 3", true, columnSortLabels) -- ID #3
-	menu_tab:addColumn("Column 4", true, columnSortLabels) -- ID #4
+	menu_tab:newColumn(2)
+		:setText("Column 2")
+		:setSortFunction(columnSortLabels)
+
+	menu_tab:newColumn(3)
+		:setText("Column 3")
+		:setSortFunction(columnSortLabels)
+
+	menu_tab:newColumn(4)
+		:setText("Column 4")
+		:setSortFunction(columnSortLabels)
 
 	menu_tab.column_sort_ascending = true
 
 	-- TODO: Word filter? Or just use a known-good random seed.
 	for i = 1, 100 do
-		local item = menu_tab:addRow()
+		local item = menu_tab:newRow()
 
 		item.label1 = tostring(i)
 		item.label2 = rngChr(3)
 		item.label3 = rngChr(5)
 		item.label4 = rngChr(8)
 
-		item.cells[1] = {text = item.label1}
-		item.cells[2] = {text = item.label2}
-		item.cells[3] = {text = item.label3}
-		item.cells[4] = {text = item.label4}
+		item:provisionCell(1)
+			:setCellText(1, item.label1)
 
-		local implTabCell = context:getLua("shared/impl_tab_cell")
-		for j, cell in ipairs(item.cells) do
-			cell.render = implTabCell.render
-			cell.reshape = implTabCell.reshape
-		end
+		item:provisionCell(2)
+			:setCellText(2, item.label2)
+
+		item:provisionCell(3)
+			:setCellText(3, item.label3)
+
+		item:provisionCell(4)
+			:setCellText(4, item.label4)
 	end
-
-	menu_tab:refreshRows()
 end
 
 

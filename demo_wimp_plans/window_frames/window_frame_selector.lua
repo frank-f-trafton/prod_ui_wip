@@ -56,7 +56,6 @@ function plan.makeWindowFrame(root)
 	end
 
 	yy = yy + hh
-	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.wimp_menu_tab", "Tabular Menu", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.wimp_file_select", "File Selector", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.wimp_g_list", "List of Globals", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.test_destroy_frame_from_user_update", "Test: destroy in userUpdate()", xx, yy, ww, hh)
