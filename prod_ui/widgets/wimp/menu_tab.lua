@@ -1,14 +1,14 @@
+-- TODO: def:applySort(id, descending)
+
 
 --[[
-	A tabular menu with resizable column labels.
-	Special menu-items are required with matching column data.
+	A menu with resizable columns.
 
-	* Assumes that all menu-items are in sequential order, from top to bottom
 	* Assumes that all column categories are left-to-right. (TODO: considerations for RTL)
 
 
 	┌──────────┬──────────┬────────────┬─┐
-	│Name    v │Size      │Date        │^│  -- Column header bar -- visibility optional
+	│Name    v │Size      │Date        │^│  -- Column header bar. Right-click to toggle column visibility.
 	├──────────┴──────────┴────────────┼─┤
 	│Foo               100   2023-01-02│ │  -- Menu Items (one for each row)
 	│Bar                11   2018-05-14│ │
@@ -45,6 +45,14 @@
 
 	Right-click on the header-bar to toggle the visibility of categories.
 
+
+Object structure:
+
+Widget
+	Columns
+	Menu Items (rows)
+		Cells
+
 --]]
 
 
@@ -54,11 +62,16 @@ local context = select(1, ...)
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcWimp = context:getLua("shared/lgc_wimp")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
+
+
+local _enum_text_align = {left=0.0, center=0.5, right=1.0}
 
 
 local def = {
@@ -76,53 +89,12 @@ def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-function def:addColumn(label, visible, cb_sort)
-	local column = {}
-	table.insert(self.columns, column)
-
-	-- The column's ID number.
-	-- Important: this ID is used to look up cell tables in rows. Columns can change order
-	-- in `self.columns`, but the ID should remain static. If you remove columns (not just
-	-- make them invisible, but actually delete the column table from the array), then you
-	-- must also delete the associated cells from rows and fix the IDs of the remaining
-	-- columns.
-	column.id = #self.columns
-
-	column.x = 0
-	column.y = 0
-	column.w = 128
-	column.h = self.skin.bar_height
-
-	column.visible = (visible ~= nil) and not not visible or false
-	column.text = label or ""
-	column.cb_sort = cb_sort or false
-
-	return column
-end
-
-
-local _mt_item = {selectable=true}
-_mt_item.__index = _mt_item
-
-
-function def:addRow()
-	local item = setmetatable({x=0, y=0, w=0, h=0}, _mt_item)
-
-	-- Every row in the menu should have as many cells as there are columns (including invisible ones).
-	item.cells = {}
-
-	table.insert(self.MN_items, item)
-
-	return item
-end
-
-
 --def.getInBounds = lgcMenu.getItemInBoundsRect
 def.getInBounds = lgcMenu.getItemInBoundsY
 def.selectionInView = lgcMenu.selectionInView
 
 
-def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.getItemAtPoint = lgcMenu.widgetGetItemAtPointV -- (<self>, px, py, first, last); 'px' is unused.
 def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
@@ -134,18 +106,497 @@ def.movePageUp = lgcMenu.widgetMovePageUp
 def.movePageDown = lgcMenu.widgetMovePageDown
 
 
--- * Pop-up menu setup (for columns) *
+--local column = self.columns_rev[cell.id]
+
+
+local function _getColumnByID(self, id)
+	for i, column in ipairs(self.columns) do
+		if column.id == id then
+			return i, column
+		end
+	end
+
+	error("no column with ID: " .. tostring(id))
+end
+
+
+function def:getColumnByID(id)
+	uiAssert.type(1, id, "string", "number")
+
+	return _getColumnByID(self, id)
+end
+
+
+local function _getColumnIndex(self, col)
+	for i, column in ipairs(self.columns) do
+		if column == col then
+			return i
+		end
+	end
+
+	error("column not found")
+end
+
+
+local function _updateColumnSize(col, skin)
+	col.w = math.floor(col.base_w * context.scale)
+	col.h = math.floor(skin.column_bar_height * context.scale)
+end
+
+
+local function _checkColumnID(self, id, ignore)
+	local col = self.columns_rev[id]
+	if col and ignore ~= col then
+		error("duplicate column ID: " .. tostring(id))
+	end
+end
+
+
+local function _refreshColumnBoxes(self, first_i)
+	local skin = self.skin
+
+	local prev_col = self.columns[first_i - 1]
+	local cx = prev_col and prev_col.x + prev_col.w or 0
+	local column_bar_height = self.skin.column_bar_height
+	local columns = self.columns
+
+	for i = first_i, #columns do
+		local column = columns[i]
+		if column.visible then
+			column.x = cx
+			column.y = 0
+			_updateColumnSize(column, skin) -- column.w, column.h
+			cx = cx + column.w
+		else
+			column.x, column.y, column.w, column.h = 0, 0, 0, 0
+		end
+	end
+end
+
+
+local function _refreshRows(self, first_i)
+	local item_h = self.skin.item_h
+	local items = self.MN_items
+	local prev_item = items[first_i - 1]
+	local yy = prev_item and prev_item.y + prev_item.h or 0
+
+	for i = first_i, #items do
+		local item = items[i]
+
+		item.y = yy
+		item.h = item_h
+
+		yy = item.y + item.h
+	end
+end
+
+
+local function _refreshCell(self, item, cell)
+	cell.text_w = self.skin.cell_font:getWidth(cell.text)
+	cell.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, cell.icon_id)
+end
+
+
+function def:setReorderLimit(limit)
+	uiAssert.numberNotNaNEval(1, limit)
+
+	self.reorder_limit = limit
+end
+
+
+function def:getReorderLimit()
+	return self.reorder_limit
+end
+
+
+function def:setColumnBarVisibility(enabled)
+	self.col_bar_visible = not not enabled
+
+	return self
+end
+
+
+function def:getColumnBarVisibility()
+	return self.col_bar_visible
+end
+
+
+local _mt_column = {}
+_mt_column.__index = _mt_column
+
+
+function def:newColumn(id, pos)
+	uiAssert.type(1, id, "string", "number")
+	uiAssert.numberNotNaNEval(2, pos)
+
+	pos = pos or #self.columns + 1
+	pos = math.floor(pos)
+	if pos < 1 or pos > #self.columns + 1 then
+		error("position is out of range")
+	end
+
+	_checkColumnID(self, id, nil)
+
+	local skin = self.skin
+
+	local column = setmetatable({}, _mt_column)
+	table.insert(self.columns, pos, column)
+	self.columns_rev[id] = column
+
+	column.owner = self
+	column.id = id
+
+	column.base_w = math.max(skin.column_min_w, skin.column_def_w)
+
+	column.x, column.y = 0, 0
+	_updateColumnSize(column, skin) -- column.w, column.h
+
+	column.visible = true
+	column.text = ""
+	column.text_align = skin.col_def_text_align
+	column.content_text_align = skin.content_def_text_align
+	column.icons_enabled = false
+
+	column.cb_sort = false
+
+	return column
+end
+
+
+function def:removeColumn(id)
+	-- The caller is responsible for cleaning up cells associated with this column ID.
+
+	uiAssert.type(1, id, "string", "number")
+
+	local i, col = _getColumnByID(self, id)
+	col.owner = nil
+	table.remove(self.columns, i)
+	self.columns_rev[id] = nil
+
+	return self
+end
+
+
+function _mt_column:setID(id)
+	uiAssert.type(1, id, "string", "number")
+
+	_checkColumnID(self.owner, id, self)
+	if self.id ~= id then
+		self.id = id
+	end
+
+	return self
+end
+
+
+function _mt_column:getID()
+	return self.id
+end
+
+
+function _mt_column:setVisibility(enabled)
+	local old_visible = self.visible
+	self.visible = not not enabled
+
+	if old_visible ~= self.visible then
+		local owner = self.owner
+		_refreshColumnBoxes(owner, 1)
+		owner:cacheUpdate(true)
+	end
+
+	return self
+end
+
+
+function _mt_column:getVisibility()
+	return self.visible
+end
+
+
+function _mt_column:setText(text)
+	uiAssert.typeEval1(1, text, "string")
+
+	self.text = text
+
+	return self
+end
+
+
+function _mt_column:getText()
+	return self.text
+end
+
+
+function _mt_column:setSortFunction(fn)
+	uiAssert.typeEval1(1, fn, "function")
+
+	self.cb_sort = fn
+
+	return self
+end
+
+
+function _mt_column:getSortFunction()
+	return self.cb_sort
+end
+
+
+function _mt_column:setWidth(w, prescaled)
+	uiAssert.numberNotNaN(1, w)
+	-- don't check 'prescaled'
+
+	local old_base_w = self.base_w
+
+	w = math.max(0, w)
+
+	if prescaled then
+		self.base_w = math.floor(w)
+	else
+		self.base_w = math.floor(w * context.scale)
+	end
+
+	if old_base_w ~= col.base_w then
+		_updateColumnSize(self, self.owner.skin)
+	end
+
+	return self
+end
+
+
+function _mt_column:getWidth()
+	return self.base_w, self.w
+end
+
+
+function _mt_column:setLockedVisibility(enabled)
+	self.lock_visibility = not not enabled
+
+	return self
+end
+
+
+function _mt_column:getLockedVisibility()
+	return self.lock_visibility
+end
+
+
+function _mt_column:setHeaderTextAlignment(align)
+	align = align or self.owner.skin.col_def_text_align
+	uiAssert.enum(1, align, "TextAlign", _enum_text_align)
+
+	self.text_align = align
+
+	return self
+end
+
+
+function _mt_column:getHeaderTextAlignment()
+	return self.text_align
+end
+
+
+function _mt_column:setContentTextAlignment(align)
+	align = align or self.owner.skin.content_def_text_align
+	uiAssert.enum(2, align, "TextAlign", _enum_text_align)
+
+	self.content_text_align = align
+
+	return self
+end
+
+
+function _mt_column:getContentTextAlignment()
+	return self.content_text_align
+end
+
+
+function _mt_column:setContentIconsEnabled(enabled)
+	self.icons_enabled = not not enabled
+
+	return self
+end
+
+
+function _mt_column:getContentIconsEnabled()
+	return self.icons_enabled
+end
+
+
+local _mt_item = {selectable=true}
+_mt_item.__index = _mt_item
+
+
+function def:newRow(pos)
+	uiAssert.numberNotNaNEval(1, pos)
+
+	pos = pos and math.floor(pos) or #self.MN_items + 1
+	if pos < 1 or pos > #self.MN_items + 1 then
+		error("position is out of range")
+	end
+
+	local item = setmetatable({owner=self, x=0, y=0, w=0, h=0}, _mt_item)
+
+	-- A cell's key in this table should match a column ID.
+	item.cells = {}
+
+	table.insert(self.MN_items, pos, item)
+
+	_refreshRows(self, pos)
+
+	return item
+end
+
+
+function def:removeRow(row_t) -- TODO: untested
+	uiAssert.type1(1, row_t, "table")
+
+	local row_i = self:menuGetItemIndex(row_t)
+
+	self:removeRowByIndex(row_i)
+
+	return self
+end
+
+
+function def:removeRowByIndex(row_i) -- TODO: untested
+	uiAssert.numberNotNaN(1, row_i)
+
+	local items = self.MN_items
+	local removed_item = items[row_i]
+	if not removed_item then
+		error("no row to remove at index: " .. tostring(row_i))
+	end
+
+	table.remove(items, row_i)
+
+	lgcMenu.removeItemIndexCleanup(self, row_i, "MN_index")
+
+	_refreshRows(self, row_i)
+
+	return self
+end
+
+
+local _mt_cell = {
+	item=false,
+	owner=false,
+	text="",
+	text_w=0,
+	icon_id=false,
+	tq_icon=false,
+	bar_enabled=false,
+	bar_value=0
+}
+_mt_cell.__index = _mt_cell
+
+
+function _mt_item:provisionCell(id)
+	uiAssert.type(1, id, "string", "number")
+
+	local cell = self.cells[id]
+	if not cell then
+		cell = setmetatable({}, _mt_cell)
+		self.cells[id] = cell
+	end
+
+	return self
+end
+
+
+function _mt_item:deleteCell(id)
+	uiAssert.type(1, id, "string", "number")
+
+	self.cells[id] = nil
+
+	return self
+end
+
+
+local function _assertGetCell(item, id)
+	local cell = item.cells[id]
+	if not cell then
+		error("unprovisioned cell. ID: " .. tostring(id), 2)
+	end
+	return cell
+end
+
+
+function _mt_item:setCellText(id, text)
+	local cell = _assertGetCell(self, id)
+	uiAssert.type1(2, text, "string")
+
+	cell.text = text
+	cell.text_w = self.owner.skin.cell_font:getWidth(cell.text) -- ie _refreshCell()
+
+	return self
+end
+
+
+function _mt_item:getCellText(id)
+	local cell = _assertGetCell(self, id)
+
+	return cell.text
+end
+
+
+function _mt_item:setCellIconID(id, icon_id)
+	local cell = _assertGetCell(self, id)
+	uiAssert.typeEval1(2, icon_id, "string")
+
+	cell.icon_id = icon_id or false
+	cell.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, cell.icon_id) -- ie _refreshCell()
+
+	return self
+end
+
+
+function _mt_item:getCellIconID(id)
+	local cell = _assertGetCell(self, id)
+
+	return cell.icon_id
+end
+
+
+function _mt_item:setCellProgressBarEnabled(id, enabled)
+	local cell = _assertGetCell(self, id)
+	-- don't check 'enabled'
+
+	cell.bar_enabled = not not enabled
+
+	return self
+end
+
+
+function _mt_item:getCellProgressBarEnabled(id)
+	local cell = _assertGetCell(self, id)
+
+	return cell.bar_enabled
+end
+
+
+function _mt_item:setCellProgressBarValue(id, unit)
+	local cell = _assertGetCell(self, id)
+	uiAssert.numberNotNaN(2, unit)
+
+	cell.bar_value = math.max(0.0, math.min(unit, 1.0))
+
+	return self
+end
+
+
+function _mt_item:getCellProgressBarValue(id)
+	local cell = _assertGetCell(self, id)
+
+	return self.bar_value
+end
 
 
 local function callback_toggleCategoryVisibility(self, item)
-	print("callback_toggleCategoryVisibility()")
+	--print("callback_toggleCategoryVisibility()")
 	local column = self.columns[item.user_value]
 	if column then
-		column.visible = not column.visible
+		column:setVisibility(not column:getVisibility())
 	end
-
-	self:refreshColumnBar()
-	self:cacheUpdate(true)
 end
 
 
@@ -166,9 +617,9 @@ local function _makePopUpPrototype(self)
 	end
 
 	uiPopUpMenu.assertPrototypeItems(proto_menu)
+
 	return proto_menu
 end
-
 
 
 local function invokePopUpMenu(self, x, y)
@@ -180,9 +631,6 @@ local function invokePopUpMenu(self, x, y)
 
 	pop_up:tryTakeThimble2()
 end
-
-
--- * / Pop-up menu setup (for columns) *
 
 
 local function _findVisibleColumn(columns, first, last, delta)
@@ -208,7 +656,7 @@ local function _moveColumn(self, col, dest_i)
 	end
 
 	if not src_i then
-		error("couldn't locate column table in array.")
+		error("couldn't locate column table in array")
 	end
 
 	table.remove(columns, src_i)
@@ -232,10 +680,10 @@ function def:uiCall_initialize()
 	-- Array of header category columns.
 	self.columns = {}
 
-	-- Column bar visibility.
+	-- Reverse look-up table for columns, using their IDs as keys.
+	self.columns_rev = {}
 
-	-- Column bar rectangle. Column positions are not relative to these XY values, but they do define
-	-- placement and are used in broad intersect tests.
+	-- Column bar visibility.
 	self.col_bar_visible = true
 
 	-- Location of initial click when dragging column headers. Only valid between
@@ -255,17 +703,21 @@ function def:uiCall_initialize()
 	self.column_primary = false
 
 	-- Columns at indices less than or equal to this number cannot be reordered.
-	-- We assume that affected columns never move: that their indices always equal
-	-- their column.id fields (so ID #1 is at index 1, ID #2 is at index 2, and so
-	-- on).
+	-- We assume that affected columns never move.
 	self.reorder_limit = 0
 
 	-- The sorting direction for the primary column. True == ascending (arrow down).
 	self.column_sort_ascending = true
 
+	-- When true, extends the last column to fit any leftover space.
+	self.fit_last_column = false
+
 	self:skinSetRefs()
 	self:skinInstall()
 	self:applyAllSettings()
+
+	self.header_text_y = 0
+	self.cell_text_y = 0
 end
 
 
@@ -289,7 +741,7 @@ function def:uiCall_reshapePre()
 	widShared.carveViewport(self, 1, skin.box.margin)
 
 	if self.col_bar_visible then
-		widShared.partitionViewport(self, 1, 3, skin.bar_height, "top")
+		widShared.partitionViewport(self, 1, 3, skin.column_bar_height, "top")
 	else
 		widShared.resetViewport(self, 3)
 	end
@@ -297,64 +749,13 @@ function def:uiCall_reshapePre()
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
 
-	self:refreshColumnBar()
+	self.header_text_y = math.floor((skin.column_bar_height - skin.font:getHeight()) / 2)
+	self.cell_text_y = math.floor((skin.item_h - skin.cell_font:getHeight()) / 2)
+
+	_refreshColumnBoxes(self, 1)
 	self:cacheUpdate(true)
 
 	return true
-end
-
-
--- Updates the positions of column header boxes
-function def:refreshColumnBar()
-	local cx = 0
-	local bar_height = self.skin.bar_height
-	for i, column in ipairs(self.columns) do
-		if column.visible then
-			column.x = cx
-			column.y = 0
-			column.h = bar_height
-			cx = cx + column.w
-		end
-	end
-
-	self:refreshRows()
-end
-
-
-function def:refreshRows()
-	local skin = self.skin
-
-	local column_bar_x2 = self.vp_w
-
-	local last_vis_column
-	for i = #self.columns, 1, -1 do
-		if self.columns[i].visible then
-			last_vis_column = self.columns[i]
-			break
-		end
-	end
-
-	if last_vis_column then
-		column_bar_x2 = last_vis_column.x + last_vis_column.w
-	end
-
-	local yy = 0
-	for i, item in ipairs(self.MN_items) do
-		item.x = 0
-		item.y = yy
-		item.w = column_bar_x2
-		item.h = skin.item_h
-
-		for j, cell in ipairs(item.cells) do
-			if cell.reshape then
-				cell:reshape(self)
-			else
-				error("no reshape callback?")
-			end
-		end
-
-		yy = item.y + item.h
-	end
 end
 
 
@@ -379,7 +780,6 @@ function def:cacheUpdate(refresh_dimensions)
 		end
 	end
 
-	-- Set the draw ranges for items.
 	lgcMenu.widgetAutoRangeV(self)
 end
 
@@ -463,12 +863,15 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		-- Move the to-be-reordered column.
 		local column_box = self.column_pressed
-		if column_box
-		and column_box.id > self.reorder_limit
-		and self.press_busy == "column-press"
-		and not self.col_click
-		then
-			column_box.x = mx - math.floor(column_box.w/2)
+		if column_box then
+			local col_i = _getColumnIndex(self, column_box)
+
+			if col_i > self.reorder_limit
+			and self.press_busy == "column-press"
+			and not self.col_click
+			then
+				column_box.x = mx - math.floor(column_box.w/2)
+			end
 		end
 
 		-- Implement column resizing by dragging the edge.
@@ -476,10 +879,9 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local mx2 = mx - column_box.x + self.scr_x
 			local my2 = my - column_box.y
 
-			local column_min_w = 4 -- XXX config
-			column_box.w = math.max(column_min_w, mx2)
+			column_box.w = math.max(self.skin.column_min_w, mx2) -- TODO: base_w; scaling
 
-			self:refreshColumnBar()
+			_refreshColumnBoxes(self, 1)
 			self:cacheUpdate(true)
 
 		-- Implement Drag-to-select
@@ -712,7 +1114,7 @@ function def:sort()
 		success = column.cb_sort(self, column)
 	end
 
-	self:refreshRows()
+	_refreshRows(self, 1)
 
 	return success
 end
@@ -730,6 +1132,11 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			local smx, smy = mx + self.scr_x, my + self.scr_y
 
 			local old_col_press = self.column_pressed
+			local old_col_press_id
+			if old_col_press then
+				old_col_press_id = _getColumnIndex(self, old_col_press)
+			end
+
 			self.column_pressed = false
 
 			-- Clamp scrolling if click-releasing after resizing or moving column header boxes.
@@ -749,7 +1156,6 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				-- Handle release event
 				if old_col_press == self.column_primary then
 					self.column_sort_ascending = not self.column_sort_ascending
-
 				else
 					self.column_sort_ascending = true
 				end
@@ -776,7 +1182,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 
 			if old_press_busy == "column-press"
 			and old_col_press
-			and old_col_press.id > self.reorder_limit
+			and old_col_press_id > self.reorder_limit
 			and not self.col_click
 			then
 				local columns = self.columns
@@ -806,7 +1212,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 						end
 					end
 				end
-				self:refreshColumnBar()
+				_refreshColumnBoxes(self, 1)
 				self:cacheUpdate(true)
 			end
 
@@ -927,7 +1333,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 
 	-- Header box text.
 	local text_x = skin.category_h_pad
-	local text_y = math.floor(column.h / 2 - font:getHeight() / 2)
+	local text_y = self.header_text_y
 
 	love.graphics.setColor(res.color_text)
 	love.graphics.setFont(font)
@@ -940,16 +1346,16 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	-- Header box bijou.
 	if bijou_id then
 		local text_w = font:getWidth(column.text)
-		local bx = 0 + math.max(text_w + skin.category_h_pad*2, column.w - skin.bijou_w - skin.category_h_pad)
-		local by = math.floor(0.5 + column.h / 2 - skin.bijou_h / 2)
+		local bx = 0 + math.max(text_w + skin.category_h_pad*2, column.w - skin.header_icon_w - skin.category_h_pad)
+		local by = math.floor(0.5 + column.h / 2 - skin.header_icon_h / 2)
 
 		local bijou_quad = (bijou_id == "ascending") and skin.tq_arrow_up or skin.tq_arrow_down
 		uiGraphics.quadXYWH(
 			bijou_quad,
 			bx + res.offset_x,
 			by + res.offset_y,
-			skin.bijou_w,
-			skin.bijou_h
+			skin.header_icon_w,
+			skin.header_icon_h
 		)
 	end
 
@@ -976,7 +1382,7 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	love.graphics.setColor(skin.color_column_sep)
 	uiGraphics.quadXYWH(tq_px, column.w - skin.column_sep_width, self.scr_y, skin.column_sep_width, self.h)
 
-	-- Draw each menu item in range.
+	-- Draw each cell in range.
 	love.graphics.setColor(skin.color_item_text)
 
 	local items = self.MN_items
@@ -988,7 +1394,27 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 		local item = items[j]
 		local cell = item.cells[column.id]
 		if cell then
-			cell:render(item, column, self, ox, oy)
+			--[[
+			So, at this point in rendering:
+			* The LÖVE coordinate system is translated to 'column.x - x_scroll' and 'vp_y - y_scroll'.
+			* A scissor box is applied to the column contents (header excluded)
+			--]]
+
+			local tq_icon = cell.tq_icon
+			if tq_icon then
+				love.graphics.setColor(skin.color_cell_icon)
+				uiGraphics.quadXYWH(
+					tq_icon,
+					cell.icon_x,
+					item.y + cell.icon_y,
+					cell.icon_w,
+					cell.icon_h
+				)
+			end
+
+			love.graphics.setColor(skin.color_cell_text)
+			love.graphics.setFont(skin.cell_font)
+			love.graphics.print(cell.text, cell.text_x, item.y + self.cell_text_y)
 		end
 	end
 
@@ -1036,24 +1462,14 @@ def.default_skinner = {
 		check.scrollBarStyle(skin, "scr_style")
 		check.loveType(skin, "font", "Font")
 
-		check.colorTuple(skin, "color_header_body")
-		check.colorTuple(skin, "color_background")
-		check.colorTuple(skin, "color_item_text")
-		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_hover_glow")
-		check.colorTuple(skin, "color_active_glow")
-		check.colorTuple(skin, "color_column_sep")
-		check.colorTuple(skin, "color_drag_col_bg")
+		check.integer(skin, "column_min_w", 0)
+		check.integer(skin, "column_def_w", 0)
+		check.integer(skin, "column_bar_height", 0)
+
+		check.exact(skin, "col_def_text_align", "left", "center", "right")
+		check.exact(skin, "content_def_text_align", "left", "center", "right")
 
 		check.integer(skin, "item_h", 0)
-		check.integer(skin, "column_sep_width", 0)
-
-		-- Some default data for cell implementations.
-		check.colorTuple(skin, "color_cell_icon")
-		check.colorTuple(skin, "color_cell_text")
-		check.loveType(skin, "cell_font", "Font")
-
-		check.integer(skin, "bar_height", 0)
 
 		-- Width of the "drag to resize" sensor on column bars.
 		check.integer(skin, "drag_threshold", 0)
@@ -1061,8 +1477,15 @@ def.default_skinner = {
 		-- Half square range of where row sorting is permitted by clicking on column squares.
 		check.integer(skin, "col_click_threshold", 0)
 
-		check.integer(skin, "bijou_w", 0)
-		check.integer(skin, "bijou_h", 0)
+		check.integer(skin, "column_sep_width", 0)
+
+		check.loveType(skin, "cell_font", "Font")
+
+		check.integer(skin, "cell_icon_w", 0)
+		check.integer(skin, "cell_icon_h", 0)
+
+		check.integer(skin, "header_icon_w", 0)
+		check.integer(skin, "header_icon_h", 0)
 
 		check.quad(skin, "tq_arrow_up")
 		check.quad(skin, "tq_arrow_down")
@@ -1072,6 +1495,17 @@ def.default_skinner = {
 		-- * Category panel right and sorting badge
 		check.integer(skin, "category_h_pad")
 
+		check.colorTuple(skin, "color_header_body")
+		check.colorTuple(skin, "color_background")
+		check.colorTuple(skin, "color_item_text")
+		check.colorTuple(skin, "color_select_glow")
+		check.colorTuple(skin, "color_hover_glow")
+		check.colorTuple(skin, "color_active_glow")
+		check.colorTuple(skin, "color_column_sep")
+		check.colorTuple(skin, "color_drag_col_bg")
+		check.colorTuple(skin, "color_cell_icon")
+		check.colorTuple(skin, "color_cell_text")
+
 		_checkRes(skin, "res_column_idle")
 		_checkRes(skin, "res_column_hover")
 		_checkRes(skin, "res_column_press")
@@ -1079,13 +1513,17 @@ def.default_skinner = {
 
 
 	transform = function(skin, scale)
+		change.integerScaled(skin, "column_min_w", scale)
+		change.integerScaled(skin, "column_def_w", scale)
+		change.integerScaled(skin, "column_bar_height", scale)
 		change.integerScaled(skin, "item_h", scale)
-		change.integerScaled(skin, "column_sep_width", scale)
-		change.integerScaled(skin, "bar_height", scale)
 		change.integerScaled(skin, "drag_threshold", scale)
 		change.integerScaled(skin, "col_click_threshold", scale)
-		change.integerScaled(skin, "bijou_w", scale)
-		change.integerScaled(skin, "bijou_h", scale)
+		change.integerScaled(skin, "column_sep_width", scale)
+		change.integerScaled(skin, "cell_icon_w", scale)
+		change.integerScaled(skin, "cell_icon_h", scale)
+		change.integerScaled(skin, "header_icon_w", scale)
+		change.integerScaled(skin, "header_icon_h", scale)
 		change.integerScaled(skin, "category_h_pad", scale)
 
 		_changeRes(skin, "res_column_idle", scale)
@@ -1099,7 +1537,14 @@ def.default_skinner = {
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 
-		self:refreshColumnBar()
+		_refreshColumnBoxes(self, 1)
+		_refreshRows(self, 1)
+		for i, row in ipairs(self.MN_items) do
+			for j, cell in pairs(row.cells) do
+				_refreshCell(self, row, cell)
+			end
+		end
+
 		self:cacheUpdate(true)
 		self:scrollClampViewport()
 	end,
@@ -1166,7 +1611,7 @@ def.default_skinner = {
 		local item_hover = self.MN_item_hover
 		if item_hover then
 			love.graphics.setColor(skin.color_hover_glow)
-			uiGraphics.quadXYWH(tq_px, item_hover.x, item_hover.y, item_hover.w, item_hover.h)
+			uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.vp3_w, item_hover.h)
 		end
 
 		-- Draw selection glow, if applicable
@@ -1174,7 +1619,7 @@ def.default_skinner = {
 		if sel_item then
 			local t_color = self == context.thimble1 and skin.color_active_glow or skin.color_select_glow
 			love.graphics.setColor(t_color)
-			uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
+			uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.vp3_w, sel_item.h)
 		end
 
 		love.graphics.pop()

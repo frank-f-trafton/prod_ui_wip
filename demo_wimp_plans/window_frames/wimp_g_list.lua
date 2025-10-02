@@ -54,30 +54,29 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:setScrollBars(true, true)
 
-	local col_key = menu_tab:addColumn("Key", true, columnSortGlobals) -- ID #1
-	col_key.lock_visibility = true
+	menu_tab:newColumn("key")
+		:setText("Key")
+		:setLockedVisbility(true)
+		:setSortFunction(columnSortGlobals)
 
-	menu_tab:addColumn("Value", true, columnSortGlobals) -- ID #2
+	menu_tab:newColumn("value")
+		:setText("Value")
+		:setSortFunction(columnSortGlobals)
 
 	menu_tab.column_sort_ascending = true
 
 	for k, v in pairs(_G) do
-		local item = menu_tab:addRow()
+		local item = menu_tab:newRow()
 
 		item.g_key = tostring(k)
 		item.g_val = tostring(v)
 
-		item.cells[1] = {text = tostring(k)}
-		item.cells[2] = {text = tostring(v)}
+		item:provisionCell("key")
+			:setCellText("key", tostring(k))
 
-		local implTabCell = context:getLua("shared/impl_tab_cell")
-		for j, cell in ipairs(item.cells) do
-			cell.render = implTabCell.render
-			cell.reshape = implTabCell.reshape
-		end
+		item:provisionCell("value")
+			:setCellText("value", tostring(v))
 	end
-
-	menu_tab:refreshRows()
 
 	frame:reshape()
 	frame:center(true, true)
