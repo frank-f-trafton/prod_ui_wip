@@ -38,6 +38,7 @@ local demo_panel_launch = {
 
 -- Upon starting the demo, all of these Window Frame plans are instantiated.
 local demo_window_launch = {
+	--"window_frames.wimp_file_select",
 	--"window_frames.frame_unselectable",
 	--"window_frames.wimp_frame",
 	--"window_frames.window_frame_selector",

@@ -62,6 +62,8 @@ function plan.make(panel)
 	local menu_tab = panel:addChild("wimp/menu_tab")
 		:geometrySetMode("static", 0, 0, 640, 480)
 
+	--menu_tab:setReorderLimit(1)
+
 	menu_tab.MN_drag_select = true
 	menu_tab.MN_wrap_selection = false
 
@@ -78,6 +80,7 @@ function plan.make(panel)
 
 	menu_tab:newColumn(3)
 		:setText("Column 3")
+		--:setContentTextAlignment("center") -- test
 		:setSortFunction(columnSortLabels)
 
 	menu_tab:newColumn(4)
@@ -95,17 +98,17 @@ function plan.make(panel)
 		item.label3 = rngChr(5)
 		item.label4 = rngChr(8)
 
-		item:provisionCell(1)
-			:setCellText(1, item.label1)
+		local c1 = item:provisionCell(1)
+		c1:setText(item.label1)
 
-		item:provisionCell(2)
-			:setCellText(2, item.label2)
+		local c2 = item:provisionCell(2)
+		c2:setText(item.label2)
 
-		item:provisionCell(3)
-			:setCellText(3, item.label3)
+		local c3 = item:provisionCell(3)
+		c3:setText(item.label3)
 
-		item:provisionCell(4)
-			:setCellText(4, item.label4)
+		local c4 = item:provisionCell(4)
+		c4:setText(item.label4)
 	end
 end
 

@@ -17,18 +17,20 @@ return {
 
 	item_h = 24,
 
-	drag_threshold = 4,
+	drag_threshold = 5,
 	col_click_threshold = 16,
 
 	column_sep_width = 1,
 
 	cell_font = "*fonts/p",
 
-	cell_icon_w = 12,
-	cell_icon_h = 12,
+	cell_icon_w = 16,
+	cell_icon_h = 16,
 
 	header_icon_w = 12,
 	header_icon_h = 12,
+
+	header_icon_side = "right",
 
 	tq_arrow_up = "*quads/atlas/arrow2_up",
 	tq_arrow_down = "*quads/atlas/arrow2_down",
