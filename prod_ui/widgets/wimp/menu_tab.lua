@@ -62,6 +62,7 @@ local context = select(1, ...)
 local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcWimp = context:getLua("shared/lgc_wimp")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -69,6 +70,9 @@ local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
+
+
+local _lerp = pMath.lerp
 
 
 local _enum_text_align = {left=0.0, center=0.5, right=1.0}
@@ -140,7 +144,17 @@ end
 
 local function _updateColumnSize(col, skin)
 	col.w = math.floor(col.base_w * context.scale)
-	col.h = math.floor(skin.column_bar_height * context.scale)
+	col.h = skin.column_bar_height
+
+	local xx = 0
+	if col.icons_enabled then
+		col.cell_icon_x = xx
+		col.cell_icon_y = math.floor((skin.item_h - skin.cell_icon_h) / 2)
+		xx = xx + skin.cell_icon_w
+	end
+
+	col.cell_text_x = xx
+	col.cell_text_y = math.floor((skin.item_h - skin.cell_font:getHeight()) / 2)
 end
 
 
@@ -165,7 +179,7 @@ local function _refreshColumnBoxes(self, first_i)
 		if column.visible then
 			column.x = cx
 			column.y = 0
-			_updateColumnSize(column, skin) -- column.w, column.h
+			_updateColumnSize(column, skin) -- column.w, column.h, etc.
 			cx = cx + column.w
 		else
 			column.x, column.y, column.w, column.h = 0, 0, 0, 0
@@ -249,7 +263,7 @@ function def:newColumn(id, pos)
 	column.base_w = math.max(skin.column_min_w, skin.column_def_w)
 
 	column.x, column.y = 0, 0
-	_updateColumnSize(column, skin) -- column.w, column.h
+	_updateColumnSize(column, skin) -- column.w, column.h, cell_icon_x|y, cell_text_x|y
 
 	column.visible = true
 	column.text = ""
@@ -258,6 +272,11 @@ function def:newColumn(id, pos)
 	column.icons_enabled = false
 
 	column.cb_sort = false
+
+	column.cell_icon_x = 0
+	column.cell_icon_y = 0
+	column.cell_text_x = 0 -- the left side of the text print space, after the icon has been carved out
+	column.cell_text_y = 0
 
 	return column
 end
@@ -380,6 +399,8 @@ function _mt_column:getLockedVisibility()
 end
 
 
+--[====[
+-- TODO: Unfinished.
 function _mt_column:setHeaderTextAlignment(align)
 	align = align or self.owner.skin.col_def_text_align
 	uiAssert.enum(1, align, "TextAlign", _enum_text_align)
@@ -393,6 +414,7 @@ end
 function _mt_column:getHeaderTextAlignment()
 	return self.text_align
 end
+--]====]
 
 
 function _mt_column:setContentTextAlignment(align)
@@ -411,7 +433,13 @@ end
 
 
 function _mt_column:setContentIconsEnabled(enabled)
+	local old_enabled = self.icons_enabled
+
 	self.icons_enabled = not not enabled
+
+	if old_enabled ~= self.icons_enabled then
+		_updateColumnSize(self, self.owner.skin)
+	end
 
 	return self
 end
@@ -478,16 +506,28 @@ end
 
 
 local _mt_cell = {
-	item=false,
-	owner=false,
+	item=false, -- get the widget through 'cell.item.owner'.
 	text="",
 	text_w=0,
 	icon_id=false,
 	tq_icon=false,
-	bar_enabled=false,
-	bar_value=0
 }
 _mt_cell.__index = _mt_cell
+
+
+local function _newCell(item)
+	return setmetatable({item=item}, _mt_cell)
+end
+
+
+function _mt_item:newCell(id)
+	uiAssert.type(1, id, "string", "number")
+
+	local cell = _newCell(self)
+	self.cells[id] = cell
+
+	return cell
+end
 
 
 function _mt_item:provisionCell(id)
@@ -495,16 +535,22 @@ function _mt_item:provisionCell(id)
 
 	local cell = self.cells[id]
 	if not cell then
-		cell = setmetatable({}, _mt_cell)
+		cell = _newCell(self)
 		self.cells[id] = cell
 	end
 
-	return self
+	return cell
 end
 
 
 function _mt_item:deleteCell(id)
 	uiAssert.type(1, id, "string", "number")
+
+	local cell = self.cells[id]
+	if cell then
+		setmetatable(cell, nil)
+		cell.item = nil
+	end
 
 	self.cells[id] = nil
 
@@ -512,82 +558,31 @@ function _mt_item:deleteCell(id)
 end
 
 
-local function _assertGetCell(item, id)
-	local cell = item.cells[id]
-	if not cell then
-		error("unprovisioned cell. ID: " .. tostring(id), 2)
-	end
-	return cell
-end
-
-
-function _mt_item:setCellText(id, text)
-	local cell = _assertGetCell(self, id)
-	uiAssert.type1(2, text, "string")
-
-	cell.text = text
-	cell.text_w = self.owner.skin.cell_font:getWidth(cell.text) -- ie _refreshCell()
+function _mt_cell:setText(text)
+	self.text = text
+	self.text_w = self.item.owner.skin.cell_font:getWidth(self.text) -- ie _refreshCell()
 
 	return self
 end
 
 
-function _mt_item:getCellText(id)
-	local cell = _assertGetCell(self, id)
-
-	return cell.text
+function _mt_cell:getText()
+	return self.text
 end
 
 
-function _mt_item:setCellIconID(id, icon_id)
-	local cell = _assertGetCell(self, id)
+function _mt_cell:setIconID(icon_id)
 	uiAssert.typeEval1(2, icon_id, "string")
 
-	cell.icon_id = icon_id or false
-	cell.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, cell.icon_id) -- ie _refreshCell()
+	self.icon_id = icon_id or false
+	self.tq_icon = lgcMenu.getIconQuad(self.item.owner.icon_set_id, self.icon_id) -- ie _refreshCell()
 
 	return self
 end
 
 
-function _mt_item:getCellIconID(id)
-	local cell = _assertGetCell(self, id)
-
-	return cell.icon_id
-end
-
-
-function _mt_item:setCellProgressBarEnabled(id, enabled)
-	local cell = _assertGetCell(self, id)
-	-- don't check 'enabled'
-
-	cell.bar_enabled = not not enabled
-
-	return self
-end
-
-
-function _mt_item:getCellProgressBarEnabled(id)
-	local cell = _assertGetCell(self, id)
-
-	return cell.bar_enabled
-end
-
-
-function _mt_item:setCellProgressBarValue(id, unit)
-	local cell = _assertGetCell(self, id)
-	uiAssert.numberNotNaN(2, unit)
-
-	cell.bar_value = math.max(0.0, math.min(unit, 1.0))
-
-	return self
-end
-
-
-function _mt_item:getCellProgressBarValue(id)
-	local cell = _assertGetCell(self, id)
-
-	return self.bar_value
+function _mt_cell:getIconID()
+	return self.icon_id
 end
 
 
@@ -773,10 +768,9 @@ function def:cacheUpdate(refresh_dimensions)
 		end
 
 		-- Document width is based on the rightmost column in the header.
-		-- Add a bit more so that the last column bar's drag sensor is reachable.
 		local last_col = self.columns[#self.columns]
 		if last_col then
-			self.doc_w = last_col.x + last_col.w + self.skin.drag_threshold
+			self.doc_w = last_col.x + last_col.w
 		end
 	end
 
@@ -877,9 +871,10 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		-- Implement column resizing by dragging the edge.
 		if column_box and self.press_busy == "column-edge" then
 			local mx2 = mx - column_box.x + self.scr_x
-			local my2 = my - column_box.y
 
-			column_box.w = math.max(self.skin.column_min_w, mx2) -- TODO: base_w; scaling
+			local col_min_w = self.skin.column_min_w
+			column_box.base_w = math.max(col_min_w, mx2 * (1 / math.max(0.1, context.scale)))
+			column_box.w = math.floor(column_box.base_w * context.scale)
 
 			_refreshColumnBoxes(self, 1)
 			self:cacheUpdate(true)
@@ -911,7 +906,7 @@ local function testColumnMouseOverlapWithEdges(self, mx, my)
 		-- Take horizontal scrolling into account only.
 		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
-			local col_x = self.vp3_x + column.x
+			local col_x = column.x
 			local col_y = self.vp3_y + column.y
 			if column.visible and my >= col_y and my < col_y + column.h then
 				local drag_thresh = self.skin.drag_threshold
@@ -1146,7 +1141,9 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			end
 
 			-- Check for click-releasing a column header-box.
+			-- The column must have a sorting callback to proceed.
 			if old_col_press
+			and old_col_press.cb_sort
 			and self.col_click
 			and self.col_bar_visible
 			and old_press_busy == "column-press"
@@ -1304,18 +1301,14 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	local tq_px = skin.tq_px
 	local font = skin.font
 
-	local state = (self.column_pressed == column) and "press"
-		or (self.column_hovered == column) and "hover"
-		or "idle"
+	local res = (self.column_pressed == column and column.cb_sort) and skin.res_column_press
+		or (self.column_hovered == column) and skin.res_column_hover
+		or skin.res_column_idle
 
-	local bijou_id = false
+	local header_icon_id = false
 	if self.column_primary == column then
-		bijou_id = self.column_sort_ascending and "ascending" or "descending"
+		header_icon_id = self.column_sort_ascending and "ascending" or "descending"
 	end
-
-	local res = state == "idle" and skin.res_column_idle
-		or state == "hover" and skin.res_column_hover
-		or state == "press" and skin.res_column_press
 
 	love.graphics.push("all")
 
@@ -1343,15 +1336,15 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 		text_y + res.offset_y
 	)
 
-	-- Header box bijou.
-	if bijou_id then
+	-- Header box icon (indicating sort order).
+	if header_icon_id then
 		local text_w = font:getWidth(column.text)
 		local bx = 0 + math.max(text_w + skin.category_h_pad*2, column.w - skin.header_icon_w - skin.category_h_pad)
 		local by = math.floor(0.5 + column.h / 2 - skin.header_icon_h / 2)
 
-		local bijou_quad = (bijou_id == "ascending") and skin.tq_arrow_up or skin.tq_arrow_down
+		local quad = (header_icon_id == "ascending") and skin.tq_arrow_up or skin.tq_arrow_down
 		uiGraphics.quadXYWH(
-			bijou_quad,
+			quad,
 			bx + res.offset_x,
 			by + res.offset_y,
 			skin.header_icon_w,
@@ -1382,39 +1375,46 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	love.graphics.setColor(skin.color_column_sep)
 	uiGraphics.quadXYWH(tq_px, column.w - skin.column_sep_width, self.scr_y, skin.column_sep_width, self.h)
 
-	-- Draw each cell in range.
-	love.graphics.setColor(skin.color_item_text)
-
+	-- Draw cell contents.
 	local items = self.MN_items
-
 	local first = math.max(self.MN_items_first, 1)
 	local last = math.min(self.MN_items_last, #items)
 
+	-- icons
+	if column.icons_enabled then
+		for j = first, last do
+			local item = items[j]
+			local cell = item.cells[column.id]
+			if cell then
+				local tq_icon = cell.tq_icon
+				if tq_icon then
+					love.graphics.setColor(skin.color_cell_icon)
+					uiGraphics.quadXYWH(
+						tq_icon,
+						column.cell_icon_x,
+						item.y + column.cell_icon_y,
+						skin.cell_icon_w,
+						skin.cell_icon_h
+					)
+				end
+			end
+
+		end
+	end
+
+	-- text
+	love.graphics.setColor(skin.color_item_text)
 	for j = first, last do
 		local item = items[j]
 		local cell = item.cells[column.id]
 		if cell then
-			--[[
-			So, at this point in rendering:
-			* The LÖVE coordinate system is translated to 'column.x - x_scroll' and 'vp_y - y_scroll'.
-			* A scissor box is applied to the column contents (header excluded)
-			--]]
-
-			local tq_icon = cell.tq_icon
-			if tq_icon then
-				love.graphics.setColor(skin.color_cell_icon)
-				uiGraphics.quadXYWH(
-					tq_icon,
-					cell.icon_x,
-					item.y + cell.icon_y,
-					cell.icon_w,
-					cell.icon_h
-				)
-			end
-
 			love.graphics.setColor(skin.color_cell_text)
 			love.graphics.setFont(skin.cell_font)
-			love.graphics.print(cell.text, cell.text_x, item.y + self.cell_text_y)
+
+			local lerp_amount = _enum_text_align[column.content_text_align]
+			local x_offset = math.floor(_lerp(column.cell_text_x, column.cell_text_x + column.w - cell.text_w, lerp_amount))
+
+			love.graphics.print(cell.text, x_offset, item.y + self.cell_text_y)
 		end
 	end
 
@@ -1603,23 +1603,21 @@ def.default_skinner = {
 			drawWholeColumn(self, col_pres, true, ox, oy)
 		end
 
+		-- Hover and selection glow
 		love.graphics.translate(-self.scr_x, -self.scr_y)
+		uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp_y, self.vp2_w, self.vp_h)
 
-		uiGraphics.intersectScissor(ox + self.vp_x, oy + self.vp_y, self.vp_w, self.vp_h)
-
-		-- Draw hover glow, if applicable
 		local item_hover = self.MN_item_hover
 		if item_hover then
 			love.graphics.setColor(skin.color_hover_glow)
-			uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.vp3_w, item_hover.h)
+			uiGraphics.quadXYWH(tq_px, 0, item_hover.y, self.doc_w, item_hover.h)
 		end
 
-		-- Draw selection glow, if applicable
 		local sel_item = items[self.MN_index]
 		if sel_item then
 			local t_color = self == context.thimble1 and skin.color_active_glow or skin.color_select_glow
 			love.graphics.setColor(t_color)
-			uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.vp3_w, sel_item.h)
+			uiGraphics.quadXYWH(tq_px, 0, sel_item.y, self.doc_w, sel_item.h)
 		end
 
 		love.graphics.pop()

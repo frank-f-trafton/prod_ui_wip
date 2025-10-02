@@ -181,20 +181,20 @@ local function setupMenuItem(self, source)
 		or (source.type == "directory" or source.type == "symlink") and "folder"
 		or nil
 
-	item:provisionCell("name")
-		:setCellText("name", text_name)
-		:setCellIconID("name", name_icon_id)
+	local c_name = item:provisionCell("name")
+	c_name:setText(text_name)
+		:setIconID(name_icon_id)
 
-	item:provisionCell("size")
-		:setCellText("size", text_size)
+	local c_size = item:provisionCell("size")
+	c_size:setText(text_size)
 
-	item:provisionCell("modtime")
-		:setCellText("modtime", text_mod)
+	local c_mod = item:provisionCell("modtime")
+	c_mod:setText(text_mod)
 
 	--[[
 	-- reserved
-	item:provisionCell("???")
-		:setCellText("???", text_type)
+	local c_type = item:provisionCell("type")
+	c_type:setText(text_type)
 	--]]
 
 	return item
@@ -290,6 +290,7 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:newColumn("name")
 		:setText("Name")
+		:setContentIconsEnabled(true)
 		:setLockedVisibility(true)
 		:setSortFunction(columnSortFiles)
 

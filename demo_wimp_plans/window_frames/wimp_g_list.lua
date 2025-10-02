@@ -15,8 +15,8 @@ end
 
 
 local sort_functions = {
-	hof_columnSortGlobalsKeyValue,
-	hof_columnSortGlobalsValueKey,
+	key = hof_columnSortGlobalsKeyValue,
+	value = hof_columnSortGlobalsValueKey
 }
 
 
@@ -56,7 +56,7 @@ function plan.makeWindowFrame(root)
 
 	menu_tab:newColumn("key")
 		:setText("Key")
-		:setLockedVisbility(true)
+		:setLockedVisibility(true)
 		:setSortFunction(columnSortGlobals)
 
 	menu_tab:newColumn("value")
@@ -71,11 +71,11 @@ function plan.makeWindowFrame(root)
 		item.g_key = tostring(k)
 		item.g_val = tostring(v)
 
-		item:provisionCell("key")
-			:setCellText("key", tostring(k))
+		local c_key = item:provisionCell("key")
+		c_key:setText(tostring(k))
 
-		item:provisionCell("value")
-			:setCellText("value", tostring(v))
+		local c_value = item:provisionCell("value")
+		c_value:setText(tostring(v))
 	end
 
 	frame:reshape()
