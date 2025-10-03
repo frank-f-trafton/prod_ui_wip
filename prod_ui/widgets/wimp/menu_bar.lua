@@ -140,9 +140,9 @@ local function _shapeItem(self, item)
 	xx = xx + skin.text_pad_x
 	item.text_x = xx
 
-	item.text_y = math.floor(0.5 + item.h/2 - font:getHeight()/2)
+	item.text_y = math.floor(0.5 + (item.h - font:getHeight())/2)
 
-	item.icon_y = math.floor(0.5 + item.h/2 - skin.icon_h/2)
+	item.icon_y = math.floor(0.5 + (item.h - skin.icon_h)/2)
 
 	-- Underline state
 	local temp_str, x, w = textUtil.processUnderline(item.text, font)
@@ -1018,6 +1018,7 @@ def.default_skinner = {
 
 		--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 
+		-- Item text
 		love.graphics.setFont(font)
 		for i = 1, #items do
 			local item = items[i]

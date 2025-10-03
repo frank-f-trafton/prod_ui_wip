@@ -104,9 +104,9 @@ local function tree_userUpdate(self, dt)
 			local selected = self:menuGetSelectedItem()
 			local selected_wid = selected and selected.usr_wid or false
 
-			local outline = context.app.dbg_outline
-			if outline then
-				outline.wid = selected_wid
+			local highlight = context.app.dbg_highlight
+			if highlight then
+				highlight.wid = selected_wid
 			end
 			local dbg_vp = context.app.dbg_vp
 			if dbg_vp then
@@ -122,10 +122,10 @@ end
 
 
 local function tree_userDestroy(self)
-	-- unsets the debug-outline reference
-	local outline = self.context.app.dbg_outline
-	if outline then
-		outline.wid = false
+	-- unsets the debug-highlight reference
+	local highlight = self.context.app.dbg_highlight
+	if highlight then
+		highlight.wid = false
 	end
 	local dbg_vp = self.context.app.dbg_vp
 	if dbg_vp then
@@ -175,11 +175,11 @@ function plan.makeWindowFrame(root)
 		:geometrySetOrder(-2)
 
 	chk_highlight:setLabel("Highlight Selected")
-	chk_highlight:setChecked(context.app.dbg_outline.active)
+	chk_highlight:setChecked(context.app.dbg_highlight.active)
 
 	chk_highlight.wid_buttonAction = function(self)
-		local outline = self.context.app.dbg_outline
-		outline.active = not not self.checked
+		local highlight = self.context.app.dbg_highlight
+		highlight.active = not not self.checked
 	end
 
 

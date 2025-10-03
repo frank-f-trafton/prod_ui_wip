@@ -2,7 +2,7 @@
 QuadSlice: a 9-Slice library for LÖVE.
 See README.md for usage notes.
 
-Version: 1.312 (Modified)
+Version: 1.311
 
 License: MIT
 
@@ -250,7 +250,7 @@ return function()
 	}
 
 	for i = 0, 511 do
-		r[#r + 1] = "\tt[" .. i .. "] = function(texture, quads, x,y, w1,h1, w2,h2, sw1,sh1, sw2,sh2, sw3,sh3)"
+		r[#r + 1] = "\tt[" .. i .. "] = function(texture, quads, x,y, w1,h1, w2,h2, w3,h3, sw1,sh1, sw2,sh2, sw3,sh3)"
 
 		if i % 2 == 1 then r[#r + 1] = "\t\t_lg_draw(texture, quads[1], x, y, 0, sw1, sh1)" end
 		i = math.floor(i / 2)
@@ -354,7 +354,7 @@ function _mt_slice:getDrawParams(w, h)
 	local sw3 = (self.w3 > 0) and w3 / self.w3 or 0
 	local sh3 = (self.h3 > 0) and h3 / self.h3 or 0
 
-	return w1,h1, w2,h2, sw1,sh1, sw2,sh2, sw3,sh3
+	return w1,h1, w2,h2, w3,h3, sw1,sh1, sw2,sh2, sw3,sh3
 end
 local _getDrawParams = _mt_slice.getDrawParams
 
@@ -367,7 +367,7 @@ end
 
 
 -- NOTE: Uses dot notation.
-function _mt_slice.drawFromParams(texture, quads, x,y, w1,h1, w2,h2, sw1,sh1, sw2,sh2, sw3,sh3)
+function _mt_slice.drawFromParams(texture, quads, x,y, w1,h1, w2,h2, w3,h3, sw1,sh1, sw2,sh2, sw3,sh3)
 	_lg_draw(texture, quads[1], x, y, 0, sw1, sh1)
 	_lg_draw(texture, quads[2], x + w1, y, 0, sw2, sh1)
 	_lg_draw(texture, quads[3], x + w1 + w2, y, 0, sw3, sh1)
@@ -389,7 +389,7 @@ function _mt_slice:batchAdd(batch, x, y, w, h)
 end
 
 
-function _mt_slice:batchAddFromParams(batch, quads, x,y, w1,h1, w2,h2, sw1,sh1, sw2,sh2, sw3,sh3)
+function _mt_slice:batchAddFromParams(batch, quads, x,y, w1,h1, w2,h2, w3,h3, sw1,sh1, sw2,sh2, sw3,sh3)
 	-- Top row
 	batch:add(quads[1], x, y, 0, sw1, sh1)
 	batch:add(quads[2], x + w1, y, 0, sw2, sh1)
@@ -416,7 +416,7 @@ function _mt_slice:batchSet(batch, index, x, y, w, h)
 end
 
 
-function _mt_slice:batchSetFromParams(batch, index, quads, x,y, w1,h1, w2,h2, sw1,sh1, sw2,sh2, sw3,sh3)
+function _mt_slice:batchSetFromParams(batch, index, quads, x,y, w1,h1, w2,h2, w3,h3, sw1,sh1, sw2,sh2, sw3,sh3)
 	-- Top row
 	batch:set(index, quads[1], x, y, 0, sw1, sh1)
 	batch:set(index + 1, quads[2], x + w1, y, 0, sw2, sh1)
