@@ -762,7 +762,7 @@ return {
       y = 6
     },
     group_perimeter_b = {
-      draw_fn_id = 448,
+      draw_fn_id = 7,
       h1 = 6,
       h2 = 0,
       h3 = 0,
@@ -773,7 +773,7 @@ return {
       y = 3
     },
     group_perimeter_c = {
-      draw_fn_id = 448,
+      draw_fn_id = 7,
       h1 = 6,
       h2 = 0,
       h3 = 0,
@@ -865,10 +865,10 @@ return {
       y = 0
     },
     menu_bar_body = {
-      draw_fn_id = 18,
+      draw_fn_id = 144,
       h1 = 0,
-      h2 = 27,
-      h3 = 9,
+      h2 = 24,
+      h3 = 12,
       w1 = 0,
       w2 = 12,
       w3 = 0,

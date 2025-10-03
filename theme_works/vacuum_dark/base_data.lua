@@ -37,7 +37,7 @@ return {
 
 	draw_fn_id: Optional number indicating that a particular function from `quadSlice.draw_functions`
 	should be attached when creating the slice def. If not present, use the default draw function. Invalid
-	IDs will raise an error.
+	IDs will raise an error. (In binary notation, the tile order is: 987654321)
 
 	tiles_state: Optional table of booleans indicating which tiles should be enabled at first.
 	The default is for all tiles to be active.
@@ -135,11 +135,11 @@ return {
 			x = 2, y = 2, w1 = 4, h1 = 0, w2 = 12, h2 = 16, w3 = 4, h3 = 4,
 		},
 		["group_perimeter_b"] = {
-			draw_fn_id = 0b111000000,
+			draw_fn_id = 0b000000111,
 			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
 		},
 		["group_perimeter_c"] = {
-			draw_fn_id = 0b111000000,
+			draw_fn_id = 0b000000111,
 			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
 		},
 		["input_box"] = {
@@ -164,8 +164,8 @@ return {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
 		},
 		["menu_bar_body"] = {
-			draw_fn_id = 0b000010010,
-	 		x = 0, y = 0, w1 = 0, h1 = 0, w2 = 4, h2 = 9, w3 = 0, h3 = 3,
+			draw_fn_id = 0b010010000,
+			x = 0, y = 0, w1 = 0, h1 = 0, w2 = 4, h2 = 8, w3 = 0, h3 = 4,
 		},
 		["menu_pop_body"] = {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,

@@ -195,16 +195,12 @@ local function newWimpContext()
 			font = love.graphics.newFont(20)
 		},
 
-		-- outlines one widget's rectangular area in love.draw()
-		dbg_outline = {
+		-- Highlights one widget's bounding rectangle in love.draw().
+		dbg_highlight = {
 			active = false,
 			wid = false,
-			line_w = 2.0,
-			line_style = "rough",
-			-- line
-			r = 0.9, g = 0.1, b = 0.1, a = 1.0,
 			-- fill
-			r2 = 1.0, g2 = 0.0, b2 = 0.0, a2 = 0.125
+			r = 0.9, g = 0.1, b = 0.1, a = 0.5,
 		},
 
 		-- Shows the widget's viewport rectangles in love.draw()
@@ -920,24 +916,20 @@ function love.draw()
 		love.graphics.pop()
 	end
 
-	-- Debug-outline
-	local outline = context.app.dbg_outline
-	if outline.active and outline.wid and not outline.wid._dead then
-		local wid = outline.wid
+	-- Debug-highlight
+	local highlight = context.app.dbg_highlight
+	if highlight.active and highlight.wid and not highlight.wid._dead then
+		local wid = highlight.wid
 
 		love.graphics.push("all")
 
-		love.graphics.setColor(outline.r, outline.g, outline.b, outline.a)
-		love.graphics.setLineStyle(outline.line_style)
-		love.graphics.setLineWidth(outline.line_w)
+		love.graphics.setColor(highlight.r, highlight.g, highlight.b, highlight.a)
 		local wx, wy = wid:getAbsolutePosition()
-		love.graphics.rectangle("line", wx + 0.5, wy + 0.5, wid.w - 1, wid.h - 1)
-		love.graphics.setColor(outline.r2, outline.g2, outline.b2, outline.a2)
 		love.graphics.rectangle("fill", wx, wy, wid.w, wid.h)
 
 		love.graphics.pop()
 	else
-		outline.wid = false
+		highlight.wid = false
 	end
 	local dbg_vp = context.app.dbg_vp
 	if dbg_vp and dbg_vp.active and dbg_vp.wid and not dbg_vp.wid._dead then
