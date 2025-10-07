@@ -75,12 +75,10 @@ local function wid_droppedReorder(self, drop_state)
 			-- Dropped after the last item (if clamping), or on no item (if not clamping): move item to the end
 			elseif not overlap_i or clamped == 1 then
 				self:menuMoveItem(old_i, #self.MN_items)
-				--self:menuSwapItems(old_i, #self.MN_items)
 
 			-- Dropped on an item
 			else
 				self:menuMoveItem(old_i, overlap_i)
-				--self:menuSwapItems(old_i, overlap_i)
 			end
 			self.MN_index = overlap_i
 			self:arrangeItems()
@@ -92,10 +90,11 @@ end
 
 local function wid_droppedTransfer(self, drop_state)
 	-- * Only accept drop events with ID "menu" from demo_listbox3a or demo_listbox3b.
-	-- * For this example, do not allow the ListBoxes to drop onto themselves.
 
+	-- Dropping onto itself:
 	if self == drop_state.from then
 		return wid_droppedReorder(self, drop_state)
+	-- Dropping onto a different ListBox:
 	else
 		local from = drop_state.from
 		local item = drop_state.item

@@ -212,7 +212,7 @@ function def:addItem(text, pos, icon_id)
 
 	table.insert(items, pos, item)
 
-	self:arrangeItems(1, pos, #items)
+	self:arrangeItems(pos, #items)
 
 	return item
 end
@@ -241,7 +241,7 @@ function def:removeItemByIndex(item_i)
 
 	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
-	self:arrangeItems(1, item_i, #items)
+	self:arrangeItems(item_i, #items)
 
 	return removed_item
 end
@@ -689,7 +689,7 @@ def.default_skinner = {
 			_shapeItem(self, item)
 		end
 
-		self:arrangeItems(1)
+		self:arrangeItems()
 
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
