@@ -522,7 +522,7 @@ function lgcScroll.widgetScrollPress(self, x, y, fixed_step)
 				if scr_v.th and scr_v.thumb_valid then
 					scr_v.press = "thumb"
 					self.press_busy = "v"
-					scr_v.drag_offset = math.floor(self.vp2_y + scr_v.th_h / 2)
+					scr_v.drag_offset = math.floor(self.vp2.y + scr_v.th_h / 2)
 					--print("NEW DRAG OFFSET (B)", scr_v.drag_offset)
 				end
 
@@ -567,7 +567,7 @@ function lgcScroll.widgetScrollPress(self, x, y, fixed_step)
 				if scr_h.th and scr_h.thumb_valid then
 					scr_h.press = "thumb"
 					self.press_busy = "h"
-					scr_h.drag_offset = math.floor(self.vp2_x + scr_h.th_w / 2)
+					scr_h.drag_offset = math.floor(self.vp2.x + scr_h.th_w / 2)
 				end
 
 				-- Return positive regardless, to help the client widget with thimble handling.
@@ -691,7 +691,7 @@ function lgcScroll.widgetDragLogic(self, mx, my, button_step)
 	if mode == "v" then
 		local scr_v = self.scr_v
 		if scr_v and scr_v.active then
-			local scroll_y = lgcScroll.getDocumentPosition(self.doc_h, scr_v.tr_h, my - scr_v.tr_y - scr_v.drag_offset, scr_v.th_h, self.vp_h)
+			local scroll_y = lgcScroll.getDocumentPosition(self.doc_h, scr_v.tr_h, my - scr_v.tr_y - scr_v.drag_offset, scr_v.th_h, self.vp.h)
 
 			self:scrollV(scroll_y, true)
 			return true
@@ -700,7 +700,7 @@ function lgcScroll.widgetDragLogic(self, mx, my, button_step)
 	elseif mode == "h" then
 		local scr_h = self.scr_h
 		if scr_h and scr_h.active then
-			local scroll_x = lgcScroll.getDocumentPosition(self.doc_w, scr_h.tr_w, mx - scr_h.tr_x - scr_h.drag_offset, scr_h.th_w, self.vp_w)
+			local scroll_x = lgcScroll.getDocumentPosition(self.doc_w, scr_h.tr_w, mx - scr_h.tr_x - scr_h.drag_offset, scr_h.th_w, self.vp.w)
 
 			self:scrollH(scroll_x, true)
 			return true
@@ -742,6 +742,7 @@ end
 --  be updated.
 -- @param self The widget to modify.
 function lgcScroll.arrangeScrollBars(self)
+	local vp = self.vp
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
 
@@ -751,12 +752,12 @@ function lgcScroll.arrangeScrollBars(self)
 	local asv1, asv2, ash1, ash2
 
 	if scr_v and scr_v.auto_hide then
-		asv1 = (self.doc_h > self.vp_h) and true or false
-		asv2 = (self.doc_h > self.vp_h - scr_v.bar_size) and true or false
+		asv1 = (self.doc_h > vp.h) and true or false
+		asv2 = (self.doc_h > vp.h - scr_v.bar_size) and true or false
 	end
 	if scr_h and scr_h.auto_hide then
-		ash1 = (self.doc_w > self.vp_w) and true or false
-		ash2 = (self.doc_w > self.vp_w - scr_h.bar_size) and true or false
+		ash1 = (self.doc_w > vp.w) and true or false
+		ash2 = (self.doc_w > vp.w - scr_h.bar_size) and true or false
 	end
 
 	if scr_v then
@@ -769,16 +770,16 @@ function lgcScroll.arrangeScrollBars(self)
 		end
 
 		scr_v.w = scr_v.bar_size
-		scr_v.h = self.vp_h
+		scr_v.h = vp.h
 
-		scr_v.x = scr_v.near_side and self.vp_x + self.vp_w - scr_v.w or self.vp_x
-		scr_v.y = self.vp_y
+		scr_v.x = scr_v.near_side and vp.x + vp.w - scr_v.w or vp.x
+		scr_v.y = vp.y
 
 		-- If active, reduce viewport
 		if scr_v.active then
-			self.vp_w = self.vp_w - scr_v.w
+			vp.w = vp.w - scr_v.w
 			if not scr_v.near_side then
-				self.vp_x = self.vp_x + scr_v.w
+				vp.x = vp.x + scr_v.w
 			end
 		end
 	end
@@ -792,17 +793,17 @@ function lgcScroll.arrangeScrollBars(self)
 			end
 		end
 
-		scr_h.w = self.vp_w
+		scr_h.w = vp.w
 		scr_h.h = scr_h.bar_size
 
-		scr_h.x = self.vp_x
-		scr_h.y = scr_h.near_side and self.vp_y + self.vp_h - scr_h.h or self.vp_y
+		scr_h.x = vp.x
+		scr_h.y = scr_h.near_side and vp.y + vp.h - scr_h.h or vp.y
 
 		-- If active, reduce viewport
 		if scr_h.active then
-			self.vp_h = self.vp_h - scr_h.h
+			vp.h = vp.h - scr_h.h
 			if not scr_h.near_side then
-				self.vp_y = self.vp_y + scr_h.h
+				vp.y = vp.y + scr_h.h
 			end
 		end
 	end
@@ -868,10 +869,12 @@ function lgcScroll.updateScrollState(self)
 	local scr_h, scr_v = self.scr_h, self.scr_v
 
 	if scr_v then
-		lgcScroll.updateRegisters(scr_v, math.floor(0.5 + self.vp_y + self.scr_y), self.vp_h, self.doc_h)
+		local vp = self.vp
+		lgcScroll.updateRegisters(scr_v, math.floor(0.5 + vp.y + self.scr_y), vp.h, self.doc_h)
 	end
 	if scr_h then
-		lgcScroll.updateRegisters(scr_h, math.floor(0.5 + self.vp_x + self.scr_x), self.vp_w, self.doc_w)
+		local vp = self.vp
+		lgcScroll.updateRegisters(scr_h, math.floor(0.5 + vp.x + self.scr_x), vp.w, self.doc_w)
 	end
 end
 

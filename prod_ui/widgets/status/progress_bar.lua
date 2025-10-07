@@ -67,6 +67,8 @@ end
 function def:uiCall_initialize()
 	self.visible = true
 
+	widShared.setupViewports(self, 2)
+
 	-- Horizontal or vertical orientation.
 	self.vertical = false
 
@@ -98,14 +100,23 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 is the progress bar drawing rectangle.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.partitionViewport(self, 1, 2, skin.bar_spacing, skin.bar_placement, true)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:splitOrOverlay(vp2, skin.bar_placement, skin.bar_spacing)
+	vp:reduceSideDelta(skin.box.margin)
+
 	lgcLabel.reshapeLabel(self)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
 end
 
 
@@ -185,6 +196,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2 = self.vp2
 		local res = (self.active) and skin.res_active or skin.res_inactive
 
 		-- Progress bar back-panel.
@@ -197,15 +209,15 @@ def.default_skinner = {
 			-- Orientation.
 			local px, py, pw, ph
 			if self.vertical then
-				pw = self.vp2_w
-				px = self.vp2_x
-				ph = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_h))))
-				py = self.far_end and self.vp2_y + self.vp2_h - ph or self.vp2_y
+				pw = vp2.w
+				px = vp2.x
+				ph = math.max(0, math.floor(0.5 + (self.pos / self.max * (vp2.h))))
+				py = self.far_end and vp2.y + vp2.h - ph or vp2.y
 			else
-				pw = math.max(0, math.floor(0.5 + (self.pos / self.max * (self.vp2_w))))
-				px = self.far_end and self.vp2_x + self.vp2_w - pw or self.vp2_x
-				ph = self.vp2_h
-				py = self.vp2_y
+				pw = math.max(0, math.floor(0.5 + (self.pos / self.max * (vp2.w))))
+				px = self.far_end and vp2.x + vp2.w - pw or vp2.x
+				ph = vp2.h
+				py = vp2.y
 			end
 
 			local slc_ichor = skin.slc_ichor

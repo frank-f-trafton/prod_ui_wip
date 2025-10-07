@@ -66,14 +66,24 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 is the graphic drawing rectangle.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement, true)
-	widShared.carveViewport(self, 2, skin.box.margin)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:splitOrOverlay(vp2, skin.graphic_placement, skin.graphic_spacing)
+
+	vp2:reduceSideDelta(skin.box.margin)
+
 	lgcLabel.reshapeLabel(self)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
 end
 
 

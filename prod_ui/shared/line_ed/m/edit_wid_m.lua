@@ -38,7 +38,7 @@ function editWidM.updateVisibleParagraphs(self)
 	local LE = self.LE
 
 	-- Find the first visible display paragraph (or rather, one before it) to cut down on rendering.
-	local y_pos = self.scr_y - self.vp2_y
+	local y_pos = self.scr_y - self.vp2.y
 
 	self.LE_vis_para1 = 1
 	for i, paragraph in ipairs(LE.paragraphs) do
@@ -54,7 +54,7 @@ function editWidM.updateVisibleParagraphs(self)
 	for i = self.LE_vis_para2, #LE.paragraphs do
 		local paragraph = LE.paragraphs[i]
 		local sub_last = paragraph[#paragraph]
-		if sub_last.y + sub_last.h > y_pos + self.vp2_h then
+		if sub_last.y + sub_last.h > y_pos + self.vp2.h then
 			self.LE_vis_para2 = i
 			break
 		end
@@ -65,12 +65,13 @@ end
 
 
 function editWidM.updatePageJumpSteps(self, font)
-	self.LE_page_jump_steps = math.max(1, math.floor(self.vp_h / (font:getHeight() * font:getLineHeight())))
+	self.LE_page_jump_steps = math.max(1, math.floor(self.vp.h / (font:getHeight() * font:getLineHeight())))
 end
 
 
 function editWidM.updateDocumentDimensions(self)
 	local LE = self.LE
+	local vp = self.vp
 
 	-- height (assumes the final sub-line is current)
 	local last_para = LE.paragraphs[#LE.paragraphs]
@@ -79,7 +80,7 @@ function editWidM.updateDocumentDimensions(self)
 	self.doc_h = last_sub.y + last_sub.h
 
 	-- width
-	LE:setWrapWidth(self.vp_w)
+	LE:setWrapWidth(vp.w)
 
 	-- When not wrapping, the document width is the widest sub-line.
 	if not LE.wrap_mode then
@@ -90,7 +91,7 @@ function editWidM.updateDocumentDimensions(self)
 	-- (Reason: to prevent horizontal scrolling when wrapped text contains
 	-- trailing whitespace.)
 	else
-		self.doc_w = self.vp_w
+		self.doc_w = vp.w
 	end
 
 	local align = self.LE.align
@@ -98,10 +99,10 @@ function editWidM.updateDocumentDimensions(self)
 		self.LE_align_ox = 0
 
 	elseif align == "center" then
-		self.LE_align_ox = (self.doc_w < self.vp_w) and math.floor(0.5 + self.vp_w/2) or math.floor(0.5 + self.doc_w/2)
+		self.LE_align_ox = (self.doc_w < vp.w) and math.floor(0.5 + vp.w/2) or math.floor(0.5 + self.doc_w/2)
 
 	else -- align == "right"
-		self.LE_align_ox = (self.doc_w < self.vp_w) and self.vp_w or self.doc_w
+		self.LE_align_ox = (self.doc_w < vp.w) and vp.w or self.doc_w
 	end
 end
 
@@ -145,7 +146,7 @@ end
 function editWidM.updateDuringReshape(self)
 	local LE = self.LE
 
-	local new_wrap = self.vp_w
+	local new_wrap = self.vp.w
 
 	if LE.font ~= self.LE_last_font or LE.wrap_w ~= new_wrap then
 		LE:setWrapWidth(new_wrap)

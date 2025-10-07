@@ -71,17 +71,18 @@ function def:uiCall_reshapePre()
 	print("container: uiCall_reshapePre")
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
 
 	lgcScroll.arrangeScrollBars(self)
 
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
-	widShared.setClipScissorToViewport(self, 2)
-	widShared.setClipHoverToViewport(self, 2)
+	widShared.setClipScissorToViewport(self, vp2)
+	widShared.setClipHoverToViewport(self, vp2)
 
 	widLayout.resetLayoutSpace(self)
 end
@@ -231,6 +232,13 @@ function def:uiCall_update(dt)
 end
 
 
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
+end
+
+
 local check, change = uiTheme.check, uiTheme.change
 
 
@@ -294,6 +302,8 @@ def.default_skinner = {
 
 		-- XXX Debug...
 		--[=[
+		local vp, vp2 = self.vp, self.vp2
+
 		love.graphics.push("all")
 
 		love.graphics.setLineStyle("smooth")
@@ -301,10 +311,10 @@ def.default_skinner = {
 		love.graphics.setLineJoin("miter")
 
 		love.graphics.setColor(1, 0, 0, 1)
-		love.graphics.rectangle("line", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+		love.graphics.rectangle("line", vp.x, vp.y, vp.w, vp.h)
 
 		love.graphics.setColor(0, 1, 0, 1)
-		love.graphics.rectangle("line", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+		love.graphics.rectangle("line", vp2.x, vp2.y, vp2.w, vp2.h)
 
 		love.graphics.setColor(0, 0, 1, 1)
 		love.graphics.rectangle("line", -self.scr_x, -self.scr_y, self.doc_w, self.doc_h)

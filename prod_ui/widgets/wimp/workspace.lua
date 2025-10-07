@@ -72,21 +72,23 @@ Viewport #2 is an outer border.
 function def:uiCall_reshapePre()
 	print("workspace: uiCall_reshapePre")
 
-	local root = self.context.root
-	self.x, self.y, self.w, self.h = root.vp2_x, root.vp2_y, root.vp2_w, root.vp2_h
-
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
+	local root = context.root
+	local rvp2 = root.vp2
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
+	self.x, self.y, self.w, self.h = rvp2.x, rvp2.y, rvp2.w, rvp2.h
+
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
 
 	lgcScroll.arrangeScrollBars(self)
 
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
-	widShared.setClipScissorToViewport(self, 2)
-	widShared.setClipHoverToViewport(self, 2)
+	widShared.setClipScissorToViewport(self, vp2)
+	widShared.setClipHoverToViewport(self, vp2)
 
 	widLayout.resetLayoutSpace(self)
 
@@ -222,6 +224,8 @@ function def:uiCall_destroy(inst)
 		end
 
 		root:sortG2()
+
+		widShared.removeViewports(self, 2)
 	end
 end
 
@@ -304,10 +308,10 @@ def.default_skinner = {
 		love.graphics.setLineJoin("miter")
 
 		love.graphics.setColor(1, 0, 0, 1)
-		love.graphics.rectangle("line", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+		love.graphics.rectangle("line", self.vp.x, self.vp.y, self.vp.w, self.vp.h)
 
 		love.graphics.setColor(0, 1, 0, 1)
-		love.graphics.rectangle("line", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+		love.graphics.rectangle("line", self.vp2.x, self.vp2.y, self.vp2.w, self.vp2.h)
 
 		love.graphics.setColor(0, 0, 1, 1)
 		love.graphics.rectangle("line", -self.scr_x, -self.scr_y, self.doc_w, self.doc_h)

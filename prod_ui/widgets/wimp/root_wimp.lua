@@ -108,10 +108,8 @@ function def:uiCall_reshapePost()
 	print("root_wimp: uiCall_reshapePost")
 
 	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
-	self.vp2_x = self.LO_x
-	self.vp2_y = self.LO_y
-	self.vp2_w = self.LO_w
-	self.vp2_h = self.LO_h
+
+	self.vp2:set(self.LO_x, self.LO_y, self.LO_w, self.LO_h)
 
 	-- Handle the current active Workspace.
 	local workspace = self.workspace
@@ -708,8 +706,10 @@ end
 
 
 function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
 	-- Bubbled events from children
-	if self ~= inst then
+	else
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
 		if inst.frame_type == "window" and self.selected_frame == inst then
 			--_printUIFrames(self)

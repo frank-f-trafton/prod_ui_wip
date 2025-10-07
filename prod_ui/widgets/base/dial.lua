@@ -200,11 +200,12 @@ function def:uiCall_reshapePre()
 	-- Margin applies to viewports: 1
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 2)
-	widShared.carveViewport(self, 2, skin.box.border)
-	widShared.partitionViewport(self, 2, 1, skin.label_spacing, skin.label_placement, true)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:splitOrOverlay(vp2, skin.label_placement, skin.label_spacing)
+	vp:reduceSideDetla(skin.box.margin)
 
 	lgcLabel.reshapeLabel(self)
 
@@ -305,6 +306,13 @@ function def:uiCall_update(dt)
 end
 
 
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
+end
+
+
 local check, change = uiTheme.check, uiTheme.change
 
 
@@ -402,13 +410,14 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp = self.vp
 		local res = uiTheme.pickButtonResource(self, skin)
 
 		love.graphics.setColor(1, 1, 1, 1)
 
-		local cx = self.vp_x + math.floor(self.vp_w / 2)
-		local cy = self.vp_y + math.floor(self.vp_h / 2)
-		local radius = math.floor(self.vp_w/2)
+		local cx = vp.x + math.floor(vp.w / 2)
+		local cy = vp.y + math.floor(vp.h / 2)
+		local radius = math.floor(vp.w/2)
 
 		love.graphics.push("all")
 

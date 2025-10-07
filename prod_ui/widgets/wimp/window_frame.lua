@@ -16,6 +16,7 @@ local widShared = context:getLua("core/wid_shared")
 
 
 local _lerp = pMath.lerp
+local _viewport_keys = context:getLua("core/wid/viewport_keys")
 
 
 local _enum_header_sizes = uiTable.makeLUTV("small", "normal", "large")
@@ -109,12 +110,12 @@ function def:setHeaderSize(size)
 
 	if self.header_size ~= size then
 		local sx, sy = self:scrollGetXY()
-		--local vp_y_old = self.vp_y
+		--local vp_y_old = self.vp.y
 		self:writeSetting("header_size", size)
 		self:reshape()
 		self:scrollHV(sx, sy, true)
-		--print("vp_y_old", vp_y_old, "self.vp_y", self.vp_y)
-		--widShared.scrollDeltaV(self, vp_y_old - self.vp_y, true)
+		--print("vp_y_old", vp_y_old, "self.vp.y", self.vp.y)
+		--widShared.scrollDeltaV(self, vp_y_old - self.vp.y, true)
 	end
 end
 
@@ -260,7 +261,7 @@ function def:setDefaultBounds()
 	-- Allow the Window Frame to be moved partially out of bounds, but not
 	-- so much that the mouse wouldn't be able to drag it back.
 
-	local header_h = self.vp5_h
+	local header_h = self.vp5.h
 
 	-- XXX: theme/scale
 	self.p_bounds_x1 = -48
@@ -326,7 +327,7 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 
 			-- [XXX 14] support scroll bars on left or top side of container
 			if content.scr_h and content.scr_h.active and content.scr_v and content.scr_v.active
-			and mx >= content.vp_x + content.vp_w and my >= content.vp_y + content.vp_h then
+			and mx >= content.vp.x + content.vp.w and my >= content.vp.y + content.vp.h then
 				self:initiateResizeMode(1, 1)
 			end
 		end
@@ -489,10 +490,11 @@ def.trickle.uiCall_pointerHoverOn = lgcUIFrame.logic_tricklePointerHoverOn
 
 
 local function _getCursorAxisInfo(self, mx, my)
+	local vp3 = self.vp3
 	-- Check that (mx,my) is outside of Viewport #3 before calling.
 	local diag = self.skin.sensor_resize_diagonal
-	local axis_x = mx < self.vp3_x + diag and -1 or mx >= self.vp3_x + self.vp3_w - diag and 1 or 0
-	local axis_y = my < self.vp3_y + diag and -1 or my >= self.vp3_y + self.vp3_h - diag and 1 or 0
+	local axis_x = mx < vp3.x + diag and -1 or mx >= vp3.x + vp3.w - diag and 1 or 0
+	local axis_y = my < vp3.y + diag and -1 or my >= vp3.y + vp3.h - diag and 1 or 0
 
 	return axis_x, axis_y
 end
@@ -523,7 +525,7 @@ function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse
 		-- Resize sensors
 		if not self.maximized
 		and self.allow_resize
-		and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
+		and not self.vp3:pointOverlap(mx, my)
 		then
 			local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 			if not (axis_x == 0 and axis_y == 0) then
@@ -596,7 +598,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					self.cseq_header = false
 					handled = true
 
-				elseif not widShared.pointInViewport(self, 5, mx, my) then
+				elseif not self.vp5:pointOverlap(mx, my) then
 					self.cseq_header = false
 
 				else
@@ -640,12 +642,12 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- We did not interact with the header or scroll bars.
 		if not handled then
 			-- If the pointer is within Viewport #2, then have the Window Frame try to take thimble1.
-			if mx >= self.vp2_x and my >= self.vp2_y and mx < self.vp2_x + self.vp2_w and my < self.vp2_y + self.vp2_h then
+			if self.vp2:pointOverlap(mx, my) then
 				self:tryTakeThimble1()
 
 			-- Outside of viewport #3: treat as a resize action.
 			elseif self.allow_resize
-			and not (mx >= self.vp3_x and my >= self.vp3_y and mx < self.vp3_x + self.vp3_w and my < self.vp3_y + self.vp3_h)
+			and not self.vp3:pointOverlap(mx, my)
 			then
 				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 				if not (axis_x == 0 and axis_y == 0) then
@@ -698,7 +700,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				-- Hack: clamp frame to parent. This isn't handled while resizing because the
 				-- width and height can go haywire when resizing against the bounds of the
 				-- screen (see the 'p_bounds_*' fields).
-				widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+				widShared.keepInBoundsExtended(self, self.parent.vp2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 
 			elseif x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h then
 				local mx, my = self:getRelativePosition(x, y)
@@ -761,6 +763,7 @@ function def:uiCall_update(dt)
 
 	if self.needs_update then
 		local skin = self.skin
+		local vp3, vp6 = self.vp3, self.vp6
 		local res = _getHeaderSkinTable(self)
 		local font = res.header_font
 
@@ -772,17 +775,17 @@ function def:uiCall_update(dt)
 		local text_w = font:getWidth(self.header_text_disp)
 		local text_h = font:getHeight()
 
-		self.header_text_ox = math.floor(0.5 + _lerp(self.vp3_x, self.vp3_x + self.vp3_w - text_w, skin.header_text_align_h))
+		self.header_text_ox = math.floor(0.5 + _lerp(vp3.x, vp3.x + vp3.w - text_w, skin.header_text_align_h))
 
-		if self.header_button_side == "right" and self.header_text_ox + text_w >= self.vp6_w then
-			self.header_text_ox = self.vp6_w - text_w
+		if self.header_button_side == "right" and self.header_text_ox + text_w >= vp6.w then
+			self.header_text_ox = vp6.w - text_w
 
-		elseif self.header_button_side == "left" and self.header_text_ox < self.vp6_x then
-			self.header_text_ox = self.vp6_x
+		elseif self.header_button_side == "left" and self.header_text_ox < vp6.x then
+			self.header_text_ox = vp6.x
 		end
 
 		self.header_text_ox = math.max(0, self.header_text_ox)
-		self.header_text_oy = math.floor(0.5 + _lerp(self.vp6_y, self.vp6_y + self.vp6_h - text_h, skin.header_text_align_v))
+		self.header_text_oy = math.floor(0.5 + _lerp(vp6.y, vp6.y + vp6.h - text_h, skin.header_text_align_v))
 
 		self.needs_update = false
 	end
@@ -793,17 +796,18 @@ end
 
 local function _measureButtonShortenPort(self, sensor, skin, res, right, w, h)
 	local bx, by, bw, bh
-	by = math.floor(0.5 + _lerp(self.vp6_y, self.vp6_y + self.vp6_h - h, res.button_align_v))
+	local vp6 = self.vp6
+	by = math.floor(0.5 + _lerp(vp6.y, vp6.y + vp6.h - h, res.button_align_v))
 	bw = w
 	bh = h
 
 	if right then
-		bx = self.vp6_x + self.vp6_w - w
+		bx = vp6.x + vp6.w - w
 	else -- left
-		bx = self.vp6_x
-		self.vp6_x = self.vp6_x + w + res.button_pad_w
+		bx = vp6.x
+		vp6.x = vp6.x + w + res.button_pad_w
 	end
-	self.vp6_w = math.max(0, self.vp6_w - w - res.button_pad_w)
+	vp6.w = math.max(0, vp6.w - w - res.button_pad_w)
 
 	sensor.x, sensor.y, sensor.w, sensor.h = bx, by, bw, bh
 end
@@ -811,6 +815,7 @@ end
 
 function def:uiCall_reshapePre()
 	print("window_frame: uiCall_reshapePre")
+
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars, header bar, etc.) from the content.
 	-- self.w, self.h, excluding viewport #3, is the outer frame border. This area is considered an inward extension
@@ -821,6 +826,7 @@ function def:uiCall_reshapePre()
 	-- Viewport #6 is a subsection of the header area for rendering the frame title.
 
 	local skin = self.skin
+	local vp, vp2, vp3, vp4, vp5, vp6 = self.vp, self.vp2, self.vp3, self.vp4, self.vp5, self.vp6
 	local res = _getHeaderSkinTable(self)
 
 	-- (parent should be the WIMP root widget.)
@@ -828,21 +834,22 @@ function def:uiCall_reshapePre()
 
 	-- Refit if maximized and parent dimensions changed.
 	if self.maximized then
-		self.x = parent.vp2_x
-		self.y = parent.vp2_y
-		if self.w ~= parent.vp2_w or self.h ~= parent.vp2_h then
-			self.w = parent.vp2_w
-			self.h = parent.vp2_h
+		local pvp2 = parent.vp2
+		self.x = pvp2.x
+		self.y = pvp2.y
+		if self.w ~= pvp2.w or self.h ~= pvp2.h then
+			self.w = pvp2.w
+			self.h = pvp2.h
 		end
 	end
 
 	self.w = math.max(self.min_w, math.min(self.w, self.max_w))
 	self.h = math.max(self.min_h, math.min(self.h, self.max_h))
 
-	widShared.resetViewport(self, 3)
-	widShared.carveViewport(self, 3, skin.box.border)
-	widShared.copyViewport(self, 3, 4)
-	widShared.carveViewport(self, 4, skin.box.margin)
+	vp3:set(0, 0, self.w, self.h)
+	vp3:reduceSideDelta(skin.box.border)
+	vp3:copy(vp4)
+	vp4:reduceSideDelta(skin.box.margin)
 
 	-- Update sensor enabled state
 	self.b_close.enabled = self.allow_close
@@ -850,23 +857,25 @@ function def:uiCall_reshapePre()
 
 	-- Header setup
 	if not self.header_visible then
-		self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h = 0, 0, 0, 0
-		self.vp6_x, self.vp6_y, self.vp6_w, self.vp6_h = 0, 0, 0, 0
+		vp5:set(0, 0, 0, 0)
+		vp6:set(0, 0, 0, 0)
 	else
-		self.vp5_h = res.header_h
-		local vx, vy, vw, vh = widShared.getViewportXYWH(self, res.viewport_fit)
-		self.vp5_x, self.vp5_y, self.vp5_w = vx, vy, vw
+		vp5.h = res.header_h
 
-		widShared.copyViewport(self, 5, 6)
+		local vp_fit = widShared.getViewportFromIndex(self, res.viewport_fit)
+		local vx, vy, vw, vh = widShared.getViewportXYWH(self, vp_fit)
+		vp5.x, vp5.y, vp5.w = vx, vy, vw
 
-		local button_h = math.min(res.button_h, self.vp5_h)
+		vp5:copy(vp6)
+
+		local button_h = math.min(res.button_h, vp5.h)
 		local right = self.header_button_side == "right"
 
 		-- The first bit of padding for buttons
 		if self.header_show_close_button or self.header_show_max_button then
-			self.vp6_w = self.vp6_w - res.button_pad_w
+			vp6.w = vp6.w - res.button_pad_w
 			if not right then
-				self.vp6_x = self.vp6_x + res.button_pad_w
+				vp6.x = vp6.x + res.button_pad_w
 			end
 		end
 
@@ -882,26 +891,27 @@ function def:uiCall_reshapePre()
 	self.needs_update = true
 
 	-- The rest
-	widShared.copyViewport(self, 4, 1)
-	self.vp_y = self.vp_y + self.vp5_h
-	self.vp_h = self.vp_h - self.vp5_h
+	vp4:copy(vp)
 
-	widShared.carveViewport(self, 1, skin.box.border2)
+	vp.y = vp.y + vp5.h
+	vp.h = vp.h - vp5.h
+
+	vp:reduceSideDelta(skin.box.border2)
 
 	lgcScroll.arrangeScrollBars(self)
 
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 2, skin.box.margin2)
+	vp:copy(vp2)
+	vp2:reduceSideDelta(skin.box.margin2)
 
-	widShared.setClipScissorToViewport(self, 2)
-	widShared.setClipHoverToViewport(self, 2)
+	widShared.setClipScissorToViewport(self, vp2)
+	widShared.setClipHoverToViewport(self, vp2)
 
 	-- Needs to happen after shaping the header bar, as the header height factors into the default bounds.
 	self:setDefaultBounds()
 
 	-- Hacky way of not interfering with the user resizing the frame. Call keepInBounds* before exiting the resize mode.
 	if self.press_busy ~= "resize" then
-		widShared.keepInBoundsExtended(self, 2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+		widShared.keepInBoundsExtended(self, parent.vp2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
 	widLayout.resetLayoutSpace(self)
@@ -945,6 +955,8 @@ function def:uiCall_destroy(inst)
 		if self == root.modals[#root.modals] then
 			root:sendEvent("rootCall_clearModalFrame", self)
 		end
+
+		widShared.removeViewports(self, 6)
 	end
 end
 
@@ -1170,11 +1182,12 @@ def.default_skinner = {
 
 		-- Window header
 		if self.header_visible then
+			local vp5, vp6 = self.vp5, self.vp6
 			local res = _getHeaderSkinTable(self)
 			local res2 = root.selected_frame == self and res.res_selected or res.res_unselected
 			local slc_header_body = res.header_slc_body
 			love.graphics.setColor(res2.col_header_fill)
-			uiGraphics.drawSlice(slc_header_body, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
+			uiGraphics.drawSlice(slc_header_body, vp5.x, vp5.y, vp5.w, vp5.h)
 
 			if self.header_text then
 				local font = res.header_font
@@ -1183,7 +1196,7 @@ def.default_skinner = {
 				love.graphics.setFont(font)
 
 				local sx, sy, sw, sh = love.graphics.getScissor()
-				uiGraphics.intersectScissor(ox + self.x + self.vp6_x, oy + self.y + self.vp6_y, self.vp6_w, self.vp6_h)
+				uiGraphics.intersectScissor(ox + self.x + vp6.x, oy + self.y + vp6.y, vp6.w, vp6.h)
 
 				love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
 
@@ -1192,7 +1205,7 @@ def.default_skinner = {
 
 			-- Header buttons
 			local sx, sy, sw, sh = love.graphics.getScissor()
-			uiGraphics.intersectScissor(ox + self.x + self.vp5_x, oy + self.y + self.vp5_y, self.vp5_w, self.vp5_h)
+			uiGraphics.intersectScissor(ox + self.x + vp5.x, oy + self.y + vp5.y, vp5.w, vp5.h)
 
 			if self.header_show_close_button then
 				local b_close = self.b_close

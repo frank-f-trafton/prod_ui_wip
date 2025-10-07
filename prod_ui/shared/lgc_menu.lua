@@ -19,9 +19,6 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widShared = context:getLua("core/wid_shared")
 
 
-local viewport_keys = context:getLua("core/viewport_keys")
-
-
 local _signP = pMath.signP
 local _clamp = pMath.clamp
 
@@ -538,10 +535,11 @@ end
 -- @param self The widget.
 function lgcMenu.widgetAutoRangeV(self)
 	local items = self.MN_items
+	local vp2 = self.vp2
 
 	local first, last
-	local r1 = self.vp2_y + self.scr_y
-	local r2 = r1 + self.vp2_h
+	local r1 = vp2.y + self.scr_y
+	local r2 = r1 + vp2.h
 
 	-- First
 	for i = 1, #items do
@@ -573,10 +571,11 @@ end
 -- @param self The widget.
 function lgcMenu.widgetAutoRangeH(self)
 	local items = self.MN_items
+	local vp2 = self.vp2
 
 	local first, last
-	local r1 = self.vp2_x + self.scr_x
-	local r2 = r1 + self.vp2_w
+	local r1 = vp2.x + self.scr_x
+	local r2 = r1 + vp2.w
 
 	-- First
 	for i = 1, #items do
@@ -725,13 +724,13 @@ end
 
 lgcMenu.arrangers = {
 	-- list, top-to-bottom
-	["list-tb"] = function(self, v, rel_zero, i1, i2)
+	["list-tb"] = function(self, vp, rel_zero, i1, i2)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
 			return
 		end
-		local vx, vy = widShared.getViewportXYWH(self, v, rel_zero)
+		local vx, vy = widShared.getViewportXYWH(self, vp, rel_zero)
 		local yy = vy
 		local item_prev = items[i1 - 1]
 		if item_prev then
@@ -750,13 +749,13 @@ lgcMenu.arrangers = {
 	456
 	…
 	--]]
-	["list-lrtb"] = function(self, v, rel_zero, i1, i2)
+	["list-lrtb"] = function(self, vp, rel_zero, i1, i2)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
 			return
 		end
-		local vx, vy, vw = widShared.getViewportXYWH(self, v, rel_zero)
+		local vx, vy, vw = widShared.getViewportXYWH(self, vp, rel_zero)
 		local xx, yy = vx, vy
 		local item_prev = items[i1 - 1]
 		if item_prev then
@@ -773,13 +772,13 @@ lgcMenu.arrangers = {
 	end,
 
 	-- list, left-to-right
-	["list-lr"] = function(self, v, rel_zero, i1, i2)
+	["list-lr"] = function(self, vp, rel_zero, i1, i2)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
 			return
 		end
-		local vx, vy = widShared.getViewportXYWH(self, v, rel_zero)
+		local vx, vy = widShared.getViewportXYWH(self, vp, rel_zero)
 		local xx = vx
 		local item_prev = items[i1 - 1]
 		if item_prev then
@@ -798,13 +797,13 @@ lgcMenu.arrangers = {
 	25
 	36
 	--]]
-	["list-tblr"] = function(self, v, rel_zero, i1, i2)
+	["list-tblr"] = function(self, vp, rel_zero, i1, i2)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
 			return
 		end
-		local vx, vy, vw, vh = widShared.getViewportXYWH(self, v, rel_zero)
+		local vx, vy, vw, vh = widShared.getViewportXYWH(self, vp, rel_zero)
 		local xx, yy = vx, vy
 		local item_prev = items[i1 - 1]
 		if item_prev then
@@ -974,7 +973,7 @@ function lgcMenu.widgetMovePageUp(self, immediate, id)
 		return
 	end
 
-	local dist = self.vp_h * self.context.settings.wimp.navigation.page_viewport_factor
+	local dist = self.vp.h * self.context.settings.wimp.navigation.page_viewport_factor
 	local new_selection = _pageStep(self, self[id], true, -1, dist)
 
 	if new_selection then
@@ -998,7 +997,7 @@ function lgcMenu.widgetMovePageDown(self, immediate, id)
 		return
 	end
 
-	local dist = self.vp_h * self.context.settings.wimp.navigation.page_viewport_factor
+	local dist = self.vp.h * self.context.settings.wimp.navigation.page_viewport_factor
 	local new_selection = _pageStep(self, self[id], true, 1, dist)
 	if new_selection then
 		self:menuSetSelectedItem(new_selection)

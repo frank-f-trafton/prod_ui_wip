@@ -85,16 +85,16 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 includes margins and excludes borders.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
 
-	widShared.carveViewport(self, 1, skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
-
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
@@ -111,7 +111,7 @@ function def:uiCall_pointerHover(inst, mx, my, dx, dy)
 
 		lgcScroll.widgetProcessHover(self, mx, my)
 
-		if widShared.pointInViewport(self, 2, mx, my) then
+		if self.vp2:pointOverlap(mx, my) then
 			self.cursor_hover = self.skin.cursor_on
 		else
 			self.cursor_hover = nil
@@ -153,7 +153,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if handled then
 			self.context:forceClickSequence(false, button, 1)
 
-		elseif widShared.pointInViewport(self, 2, mx, my) then
+		elseif self.vp2:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
 			if lgcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
@@ -285,6 +285,8 @@ function def:uiCall_destroy(inst)
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
 			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end
+
+		widShared.removeViewports(self, 2)
 	end
 end
 
@@ -356,7 +358,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-
+		local vp, vp2 = self.vp, self.vp2
 		local LE = self.LE
 		local lines = LE.lines
 		local font = LE.font
@@ -366,10 +368,10 @@ def.default_skinner = {
 
 		local scx, scy, scw, sch = love.graphics.getScissor()
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		-- Draw background body
@@ -378,7 +380,7 @@ def.default_skinner = {
 		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
 
 		-- ^ Variant with less overdraw?
-		--love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+		--love.graphics.rectangle("fill", vp2.x, vp2.y, vp2.w, vp2.h)
 
 		-- Draw current paragraph illumination, if applicable.
 		if self.illuminate_current_line then
@@ -389,7 +391,7 @@ def.default_skinner = {
 			local last_sub = paragraph[#paragraph]
 			local para_h = last_sub.y + last_sub.h - para_y
 
-			love.graphics.rectangle("fill", self.vp2_x, self.vp_y - self.scr_y + para_y, self.vp2_w, para_h)
+			love.graphics.rectangle("fill", vp2.x, vp.y - self.scr_y + para_y, vp2.w, para_h)
 		end
 
 		love.graphics.push()

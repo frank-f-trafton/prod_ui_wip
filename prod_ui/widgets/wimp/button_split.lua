@@ -59,7 +59,7 @@ function def:uiCall_pointerHover(inst, x, y, dx, dy)
 					self.cursor_hover = self.skin.cursor_on
 				else
 					local mx, my = self:getRelativePosition(x, y)
-					if widShared.pointInViewport(self, 3, mx, my) then
+					if self.vp3:pointOverlap(mx, my) then
 						self.cursor_hover = nil
 					else
 						self.cursor_hover = self.skin.cursor_on
@@ -93,7 +93,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					if not self.aux_pressed then
 						local mx, my = self:getRelativePosition(x, y)
 						-- main button part
-						if not widShared.pointInViewport(self, 3, mx, my) then
+						if not self.vp3:pointOverlap(mx, my) then
 							self.pressed = true
 							self.cursor_press = self.skin.cursor_press
 
@@ -152,7 +152,7 @@ function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 				if button == 1 then
 					local mx, my = self:getRelativePosition(x, y)
 					-- main button part
-					if not self.aux_pressed and not widShared.pointInViewport(self, 3, mx, my) then
+					if not self.aux_pressed and not self.vp3:pointOverlap(mx, my) then
 						self:wid_buttonAction()
 					end
 				end
@@ -200,26 +200,36 @@ function def:uiCall_reshapePre()
 	-- Viewport #3 is the aux bounding box.
 
 	local skin = self.skin
+	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
+
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:splitOrOverlay(vp2, skin.graphic_placement, skin.graphic_spacing)
+	vp2:reduceSideDelta(skin.box.margin)
 
 	local aux_sz
 	if skin.aux_size == "auto" then
 		if skin.aux_placement == "right" or skin.aux_placement == "left" then
-			aux_sz = self.vp2_h
+			aux_sz = vp2.h
 		else -- "top", "bottom"
-			aux_sz = self.vp2_w
+			aux_sz = vp2.w
 		end
 	else
 		aux_sz = skin.aux_size
 	end
 
-	widShared.resetViewport(self, 1)
-	widShared.partitionViewport(self, 1, 3, aux_sz, skin.aux_placement, false) -- no "overlay"
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.partitionViewport(self, 1, 2, skin.graphic_spacing, skin.graphic_placement, true)
-	widShared.carveViewport(self, 2, skin.box.margin)
+	vp:split(vp3, skin.aux_placement, aux_sz)
+
 	lgcLabel.reshapeLabel(self)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 3)
+	end
 end
 
 
@@ -323,6 +333,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp3 = self.vp3
 		local res = uiTheme.pickButtonResource(self, skin)
 
 		local slc_body = res.slice
@@ -337,10 +348,10 @@ def.default_skinner = {
 		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
 		-- (get coordinates for the line)
 		local vx, vy, vw, vh
-		if     skin.aux_placement == "left"   then vx, vy, vw, vh = self.vp3_x + self.vp3_w - 1, self.vp3_y, 1, self.vp3_h - 1
-		elseif skin.aux_placement == "right"  then vx, vy, vw, vh = self.vp3_x, self.vp3_y, 1, self.vp3_h
-		elseif skin.aux_placement == "top"    then vx, vy, vw, vh = self.vp3_x, self.vp3_y + self.vp3_h - 1, self.vp3_w - 1, 1
-		elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = self.vp3_x, self.vp3_y, self.vp3_w - 1, 1 end
+		if     skin.aux_placement == "left"   then vx, vy, vw, vh = vp3.x + vp3.w - 1, vp3.y, 1, vp3.h - 1
+		elseif skin.aux_placement == "right"  then vx, vy, vw, vh = vp3.x, vp3.y, 1, vp3.h
+		elseif skin.aux_placement == "top"    then vx, vy, vw, vh = vp3.x, vp3.y + vp3.h - 1, vp3.w - 1, 1
+		elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = vp3.x, vp3.y, vp3.w - 1, 1 end
 		uiGraphics.quadXYWH(tq_px, vx + res.label_ox, vy + res.label_oy, vw, vh)
 
 		-- aux part icon
@@ -348,10 +359,10 @@ def.default_skinner = {
 		love.graphics.setColor(aux_color)
 		uiGraphics.quadShrinkOrCenterXYWH(
 			skin.tq_aux_glyph,
-			self.vp3_x + res.label_ox,
-			self.vp3_y + res.label_oy,
-			self.vp3_w,
-			self.vp3_h
+			vp3.x + res.label_ox,
+			vp3.y + res.label_oy,
+			vp3.w,
+			vp3.h
 		)
 
 		love.graphics.pop()

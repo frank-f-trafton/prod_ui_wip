@@ -1,4 +1,4 @@
--- PILE Pool v1.201 (beta)
+-- PILE Pool v1.202 (Beta)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -53,7 +53,7 @@ end
 
 function _mt_pool:pop()
 	local stack, len, r = self.stack, self.c
-	r, stack[len] = stack[len], false
+	r, stack[len] = stack[len], nil
 	if self.c > 0 then
 		self.c = len - 1
 	end

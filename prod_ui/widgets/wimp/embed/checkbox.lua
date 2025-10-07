@@ -66,8 +66,18 @@ end
 
 function def:uiCall_reshapePre()
 	-- Viewport #1 is the checkbox rectangle.
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, self.skin.box.border)
+
+	local vp = self.vp
+
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(self.skin.box.border)
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 1)
+	end
 end
 
 
@@ -132,12 +142,13 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp = self.vp
 		local res = uiTheme.pickButtonResource(self, skin)
 		local tex_quad = self.checked and res.quad_checked or res.quad_unchecked
 
 		-- bijou drawing coordinates
-		local box_x = math.floor(0.5 + _lerp(self.vp_x, self.vp_x + self.vp_w - skin.bijou_w, skin.bijou_align_h))
-		local box_y = math.floor(0.5 + _lerp(self.vp_y, self.vp_y + self.vp_h - skin.bijou_h, skin.bijou_align_v))
+		local box_x = math.floor(0.5 + _lerp(vp.x, vp.x + vp.w - skin.bijou_w, skin.bijou_align_h))
+		local box_y = math.floor(0.5 + _lerp(vp.y, vp.y + vp.h - skin.bijou_h, skin.bijou_align_v))
 
 		-- draw bijou
 		-- XXX: Scissor to Viewport #1?

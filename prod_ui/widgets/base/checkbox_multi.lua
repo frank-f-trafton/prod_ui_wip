@@ -80,18 +80,28 @@ end
 
 
 function def:uiCall_reshapePre()
-	local skin = self.skin
-
 	-- Viewport #1 is the text bounding box.
-	-- Viewport #2 is the bijou drawing rectangle.
+	-- Viewport #2 is the graphic drawing rectangle.
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side_h == "right"))
-	widShared.carveViewport(self, 2, skin.box.margin)
+	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
+
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:split(vp2, skin.bijou_side_h, skin.bijou_spacing)
+
+	vp2:reduceSideDelta(skin.box.margin)
+
 	lgcLabel.reshapeLabel(self)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
 end
 
 
@@ -193,12 +203,13 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2 = self.vp2
 		local res = uiTheme.pickButtonResource(self, skin)
 		local tex_quad = res.quads_state[self.value]
 
 		-- bijou drawing coordinates
-		local box_x = math.floor(0.5 + _lerp(self.vp2_x, self.vp2_x + self.vp2_w - skin.bijou_w, skin.bijou_align_h))
-		local box_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - skin.bijou_h, skin.bijou_align_v))
+		local box_x = math.floor(0.5 + _lerp(vp2.x, vp2.x + vp2.w - skin.bijou_w, skin.bijou_align_h))
+		local box_y = math.floor(0.5 + _lerp(vp2.y, vp2.y + vp2.h - skin.bijou_h, skin.bijou_align_v))
 
 		-- Draw the bijou.
 		-- XXX: Scissor to Viewport #2?

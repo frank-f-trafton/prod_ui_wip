@@ -1,4 +1,4 @@
--- PILE Math v1.201 (Modified)
+-- PILE Math v1.202 (Beta)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -7,8 +7,11 @@
 local M = {}
 
 
+local _ceil, _floor, _max, _min = math.ceil, math.floor, math.max, math.min
+
+
 function M.clamp(n, a, b)
-	return math.max(a, math.min(n, b))
+	return _max(a, _min(n, b))
 end
 
 
@@ -18,7 +21,7 @@ end
 
 
 function M.round(n)
-	return n < 0 and math.floor(n + 0.5) or math.ceil(n - 0.5)
+	return n > 0 and _floor(n + .5) or _ceil(n - .5)
 end
 
 

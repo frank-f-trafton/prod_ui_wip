@@ -16,6 +16,10 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.button_work",
+	"widgets.number_box",
+	"widgets.list_box",
+	"ui_frames.workspaces",
 	"widgets.menu_tab",
 	"widgets.properties_box",
 	"layouts.layout_unit",
@@ -24,15 +28,12 @@ local demo_panel_launch = {
 	"layouts.layout_static",
 	"widgets.text_box_multi",
 	"widgets.text_box_single",
-	"widgets.number_box",
-	"widgets.button_work",
 	"widgets.button_split",
 	"themes_and_scale",
 	"demo_welcome",
 	"widgets.progress_bar",
 	"widgets.slider_work",
 	"widgets.dropdown_box",
-	"widgets.list_box",
 }
 
 
@@ -938,11 +939,12 @@ function love.draw()
 		local widShared = context:getLua("core/wid_shared")
 		local wid = dbg_vp.wid
 		love.graphics.translate(wid:getAbsolutePosition())
-		if dbg_vp.wid.vp_x then
+		if dbg_vp.wid.vp then
 			widShared.debug.debugDrawViewport(dbg_vp.wid, 1)
 		end
 		for i = 2, 8 do
-			if dbg_vp.wid["vp" .. i .. "_x"] then
+			local key = "vp" .. i
+			if dbg_vp.wid[key] then
 				widShared.debug.debugDrawViewport(dbg_vp.wid, i)
 			end
 		end
