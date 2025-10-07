@@ -100,12 +100,13 @@ return {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2 = self.vp2
 		local res = uiTheme.pickButtonResource(self, skin)
 		local tex_quad = self.checked and res.quad_checked or res.quad_unchecked
 
 		-- bijou drawing coordinates
-		local box_x = math.floor(0.5 + _lerp(self.vp2_x, self.vp2_x + self.vp2_w - skin.bijou_w, skin.bijou_align_h))
-		local box_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h - skin.bijou_h, skin.bijou_align_v))
+		local box_x = math.floor(0.5 + _lerp(vp2.x, vp2.x + vp2.w - skin.bijou_w, skin.bijou_align_h))
+		local box_y = math.floor(0.5 + _lerp(vp2.y, vp2.y + vp2.h - skin.bijou_h, skin.bijou_align_v))
 
 		-- draw bijou
 		-- XXX: Scissor to Viewport #2?

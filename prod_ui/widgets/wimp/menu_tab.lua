@@ -722,23 +722,24 @@ function def:uiCall_reshapePre()
 	-- Viewport #3 is the column header.
 
 	local skin = self.skin
+	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 
-	widShared.resetViewport(self, 1)
+	vp:set(0, 0, self.w, self.h)
 
 	-- Border and scroll bars.
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:reduceSideDelta(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
+	vp:copy(vp2)
 
 	-- Margin.
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:reduceSideDelta(skin.box.margin)
 
 	if self.col_bar_visible then
-		widShared.partitionViewport(self, 1, 3, skin.column_bar_height, "top")
+		vp:split(vp3, "top", skin.column_bar_height)
 	else
-		widShared.resetViewport(self, 3)
+		vp3:set(0, 0, 0, 0)
 	end
 
 	self:scrollClampViewport()
@@ -902,12 +903,13 @@ end
 
 local function testColumnMouseOverlapWithEdges(self, mx, my)
 	-- Broad check
-	if widShared.pointInViewport(self, 3, mx, my) then
+	local vp3 = self.vp3
+	if vp3:pointOverlap(mx, my) then
 		-- Take horizontal scrolling into account only.
 		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
 			local col_x = column.x
-			local col_y = self.vp3_y + column.y
+			local col_y = vp3.y + column.y
 			if column.visible and my >= col_y and my < col_y + column.h then
 				local drag_thresh = self.skin.drag_threshold
 
@@ -929,12 +931,13 @@ local function testColumnMouseOverlap(self, mx, my)
 	-- Assumes mx and my are relative to widget top-left.
 
 	-- Broad check
-	if widShared.pointInViewport(self, 3, mx, my) then
+	local vp3 = self.vp3
+	if vp3:pointOverlap(mx, my) then
 		-- Take horizontal scrolling into account only.
 		local s2x = self.scr_x
 		for i, column in ipairs(self.columns) do
-			local col_x = self.vp3_x + column.x
-			local col_y = self.vp3_y + column.y
+			local col_x = vp3.x + column.x
+			local col_y = vp3.y + column.y
 			if column.visible and mx >= col_x - s2x and mx < col_x + column.w - s2x
 			and my >= col_y and my < col_y + column.h
 			then
@@ -973,7 +976,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		local hover_ok = false
 
-		if widShared.pointInViewport(self, 1, mx, my) then
+		if self.vp:pointOverlap(mx, my) then
 			-- Update item hover
 			--print("self.MN_items_first", self.MN_items_first, "self.MN_items_last", self.MN_items_last)
 			local i, item = self:getItemAtPoint(smx, smy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
@@ -1036,7 +1039,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self.context:forceClickSequence(false, button, 1)
 
 		-- Header bar
-		elseif self.col_bar_visible and widShared.pointInViewport(self, 3, mx, my) then
+		elseif self.col_bar_visible and self.vp3:pointOverlap(mx, my) then
 			-- Main column interactions
 			if button == 1 then
 				local press_code, _, column = testColumnMouseOverlapWithEdges(self, mx, my)
@@ -1063,7 +1066,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 
 		-- Item content
-		elseif widShared.pointInViewport(self, 1, mx, my) then
+		elseif self.vp:pointOverlap(mx, my) then
 			if button == 1 then
 				local smx, smy = mx + self.scr_x, my + self.scr_y
 
@@ -1293,11 +1296,16 @@ function def:uiCall_update(dt)
 end
 
 
---function def:uiCall_destroy(inst)
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 3)
+	end
+end
 
 
 local function drawWholeColumn(self, column, backfill, ox, oy)
 	local skin = self.skin
+	local vp3 = self.vp3
 	local tq_px = skin.tq_px
 	local font = skin.font
 
@@ -1314,11 +1322,11 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 
 	uiGraphics.intersectScissor(
 		ox + column.x - self.scr_x,
-		oy + self.vp3_y + column.y,
+		oy + vp3.y + column.y,
 		column.w,
 		column.h
 	)
-	love.graphics.translate(column.x - self.scr_x, self.vp3_y + column.y)
+	love.graphics.translate(column.x - self.scr_x, vp3.y + column.y)
 
 	-- Header box body.
 	love.graphics.setColor(res.color_body)
@@ -1358,16 +1366,16 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 
 	uiGraphics.intersectScissor(
 		ox + column.x - self.scr_x,
-		oy + self.vp_y,
+		oy + self.vp.y,
 		column.w,
-		self.vp_h
+		self.vp.h
 	)
 	love.graphics.translate(column.x - self.scr_x, -self.scr_y)
 
 	-- Optional backfill. Used to indicate a dragged column.
 	if backfill then
 		love.graphics.setColor(skin.color_drag_col_bg)
-		uiGraphics.quadXYWH(tq_px, 0, 0, column.w, self.vp2_h)
+		uiGraphics.quadXYWH(tq_px, 0, 0, column.w, self.vp2.h)
 	end
 
 	-- Thin vertical separators between columns
@@ -1561,6 +1569,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 		local font = skin.font
 		local tq_px = skin.tq_px
 
@@ -1576,13 +1585,13 @@ def.default_skinner = {
 
 		-- Column bar body (spanning the top of the widget).
 		love.graphics.setColor(skin.color_header_body)
-		uiGraphics.quadXYWH(tq_px, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
+		uiGraphics.quadXYWH(tq_px, vp3.x, vp3.y, vp3.w, vp3.h)
 
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		-- Draw columns.
@@ -1591,8 +1600,8 @@ def.default_skinner = {
 		for i, column in ipairs(self.columns) do
 			if column.visible
 			and col_pres ~= column
-			and self.vp3_x + column.x - self.scr_x < self.vp2_x + self.vp2_w
-			and self.vp3_x + column.x + column.w - self.scr_x >= self.vp2_x
+			and vp3.x + column.x - self.scr_x < vp2.x + vp2.w
+			and vp3.x + column.x + column.w - self.scr_x >= vp2.x
 			then
 				drawWholeColumn(self, column, false, ox, oy)
 			end
@@ -1605,7 +1614,7 @@ def.default_skinner = {
 
 		-- Hover and selection glow
 		love.graphics.translate(-self.scr_x, -self.scr_y)
-		uiGraphics.intersectScissor(ox + self.vp2_x, oy + self.vp_y, self.vp2_w, self.vp_h)
+		uiGraphics.intersectScissor(ox + vp2.x, oy + vp.y, vp2.w, vp.h)
 
 		local item_hover = self.MN_item_hover
 		if item_hover then

@@ -180,17 +180,6 @@ function def:uiCall_initialize()
 end
 
 
--- Viewport #1 is the text bounding box. It may exceed the widget's dimensions, depending on the text
--- and auto_size mode.
--- Viewport #2 is the border.
-
-
-function def:uiCall_reshapePre()
-	widShared.resetViewport(self, 1)
-	self.text_w, self.text_h = false, false
-end
-
-
 local function _determineTextDimensions(self, wrap_limit)
 	--[[
 	The text dimensions may be requested at multiple points during reshaping. Stuff the work
@@ -224,24 +213,38 @@ function def:uiCall_getSegmentLength(x_axis, cross_length)
 end
 
 
-function def:uiCall_reshapePost()
-	local skin = self.skin
+function def:uiCall_reshapePre()
+	-- Viewport #1 is the text bounding box. It may exceed the widget's dimensions, depending on the text
+	-- and auto_size mode.
+	-- Viewport #2 is the border.
 
-	widShared.resetViewport(self, 2)
-	widShared.carveViewport(self, 2, skin.box.border)
+	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
+
+	self.text_w, self.text_h = false, false
+
+	vp2:set(0, 0, self.w, self.h)
+	vp2:reduceSideDelta(skin.box.border)
 
 	if not self.text_w then
 		_determineTextDimensions(self, self.w)
 	end
 
-	self.vp_w, self.vp_h = self.text_w, self.text_h
+	vp.w, vp.h = self.text_w, self.text_h
 
-	self.vp_x = self.vp2_x
-	self.vp_y = math.floor(0.5 + _lerp(self.vp2_y, self.vp2_y + self.vp2_h, self.align_v))
+	vp.x = vp2.x
+	vp.y = math.floor(0.5 + _lerp(vp2.y, vp2.y + vp2.h, self.align_v))
 
 	--print("TextBlock dimensions: ", self.w, self.h)
 	--print("TextBlock parent dimensions: ", self.parent.w, self.parent.h)
 	--print(self.parent.id)
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
 end
 
 
@@ -267,6 +270,7 @@ def.default_skinner = {
 		love.graphics.push("all")
 
 		local skin = self.skin
+		local vp, vp2 = self.vp, self.vp2
 		local font = skin.fonts[self.font_id]
 		local color = skin.color
 
@@ -274,23 +278,23 @@ def.default_skinner = {
 		love.graphics.setColor(color)
 
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		if self.wrap then
-			love.graphics.printf(self.text, self.vp_x, self.vp_y, self.vp_w, self.align)
+			love.graphics.printf(self.text, vp.x, vp.y, vp.w, self.align)
 
 		elseif self.align == "left" then
-			love.graphics.print(self.text, self.vp_x, self.vp_y)
+			love.graphics.print(self.text, vp.x, vp.y)
 
 		elseif self.align == "center" then
-			love.graphics.print(self.text, self.vp_x + math.floor((self.vp2_w - self.vp_w) * 0.5), self.vp_y)
+			love.graphics.print(self.text, vp.x + math.floor((vp2.w - vp.w) * 0.5), vp.y)
 
 		else -- self.align == "right"
-			love.graphics.print(self.text, self.vp_x + self.vp2_w - self.vp_w, self.vp_y)
+			love.graphics.print(self.text, vp.x + vp2.w - vp.w, vp.y)
 		end
 
 		love.graphics.pop()

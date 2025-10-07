@@ -38,11 +38,21 @@ end
 
 
 function def:uiCall_reshapePre()
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, self.skin.box.border)
+	local vp = self.vp
+
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(self.skin.box.border)
+
 	lgcLabel.reshapeLabel(self)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 1)
+	end
 end
 
 

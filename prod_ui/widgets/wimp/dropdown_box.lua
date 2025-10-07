@@ -68,7 +68,7 @@ lgcMenu.attachMenuMethods(def)
 
 local _arrange_tb = lgcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
-	_arrange_tb(self, 1, true, first, last)
+	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
@@ -197,7 +197,7 @@ function def:uiCall_initialize()
 	self.allow_hover = true
 	self.thimble_mode = 1
 
-	widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 5)
 
 	lgcMenu.setup(self)
 	self.MN_page_jump_size = 4
@@ -225,22 +225,24 @@ function def:uiCall_reshapePre()
 	-- Viewport #5 is the decorative button which indicates that this widget is clickable.
 
 	local skin = self.skin
+	local vp, vp2, vp3, vp4, vp5 = self.vp, self.vp2, self.vp3, self.vp4, self.vp5
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.copyViewport(self, 1, 2)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:copy(vp2)
 
-	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
+	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
 
-	widShared.partitionViewport(self, 2, 5, button_spacing, skin.button_placement, true)
+	vp:splitOrOverlay(vp5, skin.button_placement, button_spacing)
 
-	widShared.copyViewport(self, 2, 3)
+	vp2:copy(vp3)
 
 	local icon_spacing = self.show_icons and skin.icon_spacing or 0
-	widShared.partitionViewport(self, 3, 4, icon_spacing, skin.icon_side, true)
+
+	vp3:splitOrOverlay(vp4, skin.icon_side, icon_spacing)
 
 	-- Additional text padding
-	widShared.carveViewport(self, 3, skin.box.margin)
+	vp3:reduceSideDelta(skin.box.margin)
 
 	_updateTextWidth(self)
 
@@ -369,6 +371,8 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		self:_closePopUpMenu(false)
+
+		widShared.removeViewports(self, 5)
 	end
 end
 
@@ -566,6 +570,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2, vp3, vp4, vp5 = self.vp2, self.vp3, self.vp4, self.vp5
 		local font = skin.font
 
 		local res
@@ -584,22 +589,22 @@ def.default_skinner = {
 
 		-- Decorative button.
 		love.graphics.setColor(rr, gg, bb, aa)
-		uiGraphics.drawSlice(res.slc_deco_button, self.vp5_x, self.vp5_y, self.vp5_w, self.vp5_h)
-		uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, self.vp5_x + res.deco_ox, self.vp5_y + res.deco_oy, self.vp5_w, self.vp5_h)
+		uiGraphics.drawSlice(res.slc_deco_button, vp5.x, vp5.y, vp5.w, vp5.h)
+		uiGraphics.quadShrinkOrCenterXYWH(skin.tq_deco_glyph, vp5.x + res.deco_ox, vp5.y + res.deco_oy, vp5.w, vp5.h)
 
 		-- Crop item text + icon.
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
 		if not self.wid_drawer and self.context.thimble1 == self then
 			love.graphics.setColor(res.color_highlight)
 			love.graphics.setScissor()
-			love.graphics.rectangle("fill", self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
+			love.graphics.rectangle("fill", vp2.x, vp2.y, vp2.w, vp2.h)
 		end
 
 		local chosen = self.MN_items[self.MN_index]
@@ -609,15 +614,15 @@ def.default_skinner = {
 				local tq_icon = chosen.tq_icon
 				if tq_icon then
 					love.graphics.setColor(res.color_icon)
-					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, vp4.x, vp4.y, vp4.w, vp4.h)
 				end
 			end
 
 			-- Chosen item text.
 			love.graphics.setFont(font)
 			love.graphics.setColor(res.color_text)
-			local xx = self.vp3_x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, self.vp3_w)
-			local yy = math.floor(0.5 + self.vp3_y + (self.vp3_h - font:getHeight()) / 2)
+			local xx = vp3.x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, vp3.w)
+			local yy = math.floor(0.5 + vp3.y + (vp3.h - font:getHeight()) / 2)
 			love.graphics.print(chosen.text, xx, yy)
 		end
 

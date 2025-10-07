@@ -110,13 +110,14 @@ function def:uiCall_reshapePre()
 	-- Margin applies to viewports: 1
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 2)
-	widShared.carveViewport(self, 2, skin.box.border)
-	widShared.partitionViewport(self, 2, 1, skin.label_spacing, skin.label_placement, true)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp2:set(0, 0, self.w, self.h)
+	vp2:reduceSideDelta(skin.box.border)
+	vp2:splitOrOverlay(vp, skin.label_placement, skin.label_spacing)
+	vp:reduceSideDelta(skin.box.margin)
 
-	lgcSlider.reshapeSliderComponent(self, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h, skin.thumb_w, skin.thumb_h)
+	lgcSlider.reshapeSliderComponent(self, vp2.x, vp2.y, vp2.w, vp2.h, skin.thumb_w, skin.thumb_h)
 
 	local slider_pos_old = self.slider_pos
 	lgcSlider.processMovedSliderPos(self)
@@ -189,6 +190,13 @@ function def:uiCall_pointerWheel(inst, x, y)
 		if self.enabled then
 			return lgcSlider.mouseWheelLogic(self, x, y)
 		end
+	end
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
 	end
 end
 

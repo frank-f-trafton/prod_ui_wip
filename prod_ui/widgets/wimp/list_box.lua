@@ -53,7 +53,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 local _arrange_tb = lgcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
-	_arrange_tb(self, 1, true, first, last)
+	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
@@ -301,21 +301,20 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePost()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
-
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
-
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
@@ -331,6 +330,7 @@ function def:cacheUpdate(refresh_dimensions)
 	local skin = self.skin
 
 	if refresh_dimensions then
+		local vp = self.vp
 		self.doc_w, self.doc_h = 0, 0
 
 		-- Document height is based on the last item in the menu.
@@ -351,7 +351,7 @@ function def:cacheUpdate(refresh_dimensions)
 		-- Additional text padding.
 		self.col_text_w = self.col_text_w + skin.pad_text_x
 
-		self.col_text_w = math.max(self.col_text_w, self.vp_w - self.col_icon_w)
+		self.col_text_w = math.max(self.col_text_w, vp.w - self.col_icon_w)
 
 		-- Get column left positions.
 		if self.icon_side == "left" then
@@ -362,7 +362,7 @@ function def:cacheUpdate(refresh_dimensions)
 			self.col_text_x = 0
 		end
 
-		self.doc_w = math.max(self.vp_w, self.col_icon_w + self.col_text_w)
+		self.doc_w = math.max(vp.w, self.col_icon_w + self.col_text_w)
 	end
 
 	-- Set the draw ranges for items.
@@ -415,7 +415,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		local hover_ok = false
 
-		if widShared.pointInViewport(self, 2, mx, my) then
+		if self.vp2:pointOverlap(mx, my) then
 			mx, my = mx + self.scr_x, my + self.scr_y
 
 			-- Update item hover
@@ -456,7 +456,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
 			local mx, my = self:getRelativePosition(x, y)
 
-			if widShared.pointInViewport(self, 2, mx, my) then
+			if self.vp2:pointOverlap(mx, my) then
 				mx = mx + self.scr_x
 				my = my + self.scr_y
 
@@ -623,6 +623,13 @@ function def:uiCall_update(dt)
 end
 
 
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
+end
+
+
 local check, change = uiTheme.check, uiTheme.change
 
 
@@ -700,6 +707,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2 = self.vp2
 
 		local tq_px = skin.tq_px
 		local sl_body = skin.sl_body
@@ -720,7 +728,7 @@ def.default_skinner = {
 		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
 
 		-- Scissor, scroll offsets for content.
-		uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+		uiGraphics.intersectScissor(ox + self.x + vp2.x, oy + self.y + vp2.y, vp2.w, vp2.h)
 		love.graphics.translate(-self.scr_x, -self.scr_y)
 
 		-- Hover glow.

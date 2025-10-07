@@ -192,23 +192,24 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePost()
+function def:uiCall_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
+	vp:set(0, 0, self.w, self.h)
 
 	-- Border and scroll bars.
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:reduceSideDelta(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
+	vp:copy(vp2)
 
 	-- Margin.
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:reduceSideDelta(skin.box.margin)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
@@ -238,7 +239,7 @@ function def:cacheUpdate(refresh_dimensions)
 		for i, item in ipairs(self.MN_items) do
 			self.doc_w = math.max(self.doc_w, item.x + item.w)
 		end
-		self.doc_w = math.max(self.doc_w, self.vp_w)
+		self.doc_w = math.max(self.doc_w, self.vp.w)
 
 		-- Get component widths.
 		self.TR_expander_w = self.TR_expanders_active and skin.first_col_spacing or 0
@@ -306,7 +307,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		local hover_ok = false
 
-		if widShared.pointInViewport(self, 2, mx, my) then
+		if self.vp2:pointOverlap(mx, my) then
 			mx = mx + self.scr_x
 			my = my + self.scr_y
 
@@ -348,7 +349,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
 			local mx, my = self:getRelativePosition(x, y)
 
-			if widShared.pointInViewport(self, 2, mx, my) then
+			if self.vp2:pointOverlap(mx, my) then
 				mx = mx + self.scr_x
 				my = my + self.scr_y
 
@@ -538,6 +539,13 @@ function def:uiCall_update(dt)
 end
 
 
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
+end
+
+
 local check, change = uiTheme.check, uiTheme.change
 
 
@@ -641,6 +649,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp, vp2 = self.vp, self.vp2
 		local data_icon = skin.data_icon
 
 		local tq_px = skin.tq_px
@@ -667,7 +676,7 @@ def.default_skinner = {
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 
 		-- Scissor, scroll offsets for content.
-		uiGraphics.intersectScissor(ox + self.x + self.vp2_x, oy + self.y + self.vp2_y, self.vp2_w, self.vp2_h)
+		uiGraphics.intersectScissor(ox + self.x + vp2.x, oy + self.y + vp2.y, vp2.w, vp2.h)
 		love.graphics.translate(-self.scr_x, -self.scr_y)
 
 		-- Vertical pipes.
@@ -715,15 +724,15 @@ def.default_skinner = {
 					tq_px,
 					item_hover.x + skin.first_col_spacing,
 					item_hover.y,
-					math.max(self.vp_w, self.doc_w) - item_hover.x,
+					math.max(vp.w, self.doc_w) - item_hover.x,
 					item_hover.h
 				)
 			else -- "right"
 				uiGraphics.quadXYWH(
 					tq_px,
-					self.vp_x,
+					vp.x,
 					item_hover.y,
-					-self.vp_x + item_hover.x + item_hover.w - skin.first_col_spacing,
+					-vp.x + item_hover.x + item_hover.w - skin.first_col_spacing,
 					item_hover.h
 				)
 			end
@@ -741,14 +750,14 @@ def.default_skinner = {
 					tq_px,
 					sel_item.x + skin.first_col_spacing,
 					sel_item.y,
-					math.max(self.vp_w, self.doc_w) - sel_item.x, sel_item.h
+					math.max(vp.w, self.doc_w) - sel_item.x, sel_item.h
 				)
 			else -- "right"
 				uiGraphics.quadXYWH(
 					tq_px,
-					self.vp_x,
+					vp.x,
 					sel_item.y,
-					-self.vp_x + sel_item.x + sel_item.w - skin.first_col_spacing,
+					-vp.x + sel_item.x + sel_item.w - skin.first_col_spacing,
 					sel_item.h
 				)
 			end
@@ -762,7 +771,7 @@ def.default_skinner = {
 		for i = first, last do
 			local item = items[i]
 			if item.marked then
-				uiGraphics.quadXYWH(tq_px, item.x, item.y, math.max(self.vp_w, self.doc_w) - item.x, item.h)
+				uiGraphics.quadXYWH(tq_px, item.x, item.y, math.max(vp.w, self.doc_w) - item.x, item.h)
 			end
 		end
 

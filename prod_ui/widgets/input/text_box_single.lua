@@ -83,11 +83,12 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 is the text scissor-box boundary.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
 	self:scrollClampViewport()
 
@@ -129,7 +130,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		local mx, my = self:getRelativePosition(x, y)
 
-		if widShared.pointInViewport(self, 2, mx, my) then
+		if self.vp2:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
 			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
@@ -230,6 +231,8 @@ function def:uiCall_destroy(inst)
 	if self == inst then
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		lgcWimp.checkDestroyPopUp(self)
+
+		widShared.removeViewports(self, 2)
 	end
 end
 
@@ -295,6 +298,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2 = self.vp2
 		local res = uiTheme.pickButtonResource(self, skin)
 		local LE = self.LE
 
@@ -306,10 +310,10 @@ def.default_skinner = {
 		uiGraphics.drawSlice(slc_body, 0, 0, self.w, self.h)
 
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		-- Translate into core region, with scrolling offsets applied.
@@ -357,11 +361,13 @@ def.default_skinner = {
 			yy = yy + hh
 		end
 
+		local vp = self.vp
+
 		love.graphics.print(
 			"LE_click_byte: " .. self.LE_click_byte
 			.. "\nLE_align_ox: " .. self.LE_align_ox
 			.. "\nscr: " .. self.scr_x .. ", " .. self.scr_y
-			.. "\nvp #1: " .. self.vp_x .. ", " .. self.vp_y .. ", " .. self.vp_w .. ", " .. self.vp_h
+			.. "\nvp #1: " .. vp.x .. ", " .. vp.y .. ", " .. vp.w .. ", " .. vp.h
 			.. "\ndoc: " .. self.doc_w .. ", " .. self.doc_h
 			,
 			0, 448

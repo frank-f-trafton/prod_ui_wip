@@ -49,7 +49,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 local _arrange_tb = lgcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
-	_arrange_tb(self, 1, true, first, last)
+	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
@@ -251,7 +251,7 @@ end
 function def:centerSelectedItem(immediate)
 	local selected = self.MN_items[self.MN_index]
 	if selected then
-		self:scrollV(math.floor(0.5 + selected.y + selected.h / 2 - self.vp_h / 2), immediate)
+		self:scrollV(math.floor(0.5 + selected.y + selected.h / 2 - self.vp.h / 2), immediate)
 		self:cacheUpdate()
 	end
 end
@@ -278,7 +278,7 @@ function def:uiCall_initialize(wid_ref)
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
-	widShared.setupViewports(self, 4)
+	widShared.setupViewports(self, 5)
 
 	self.widest_width = 0
 
@@ -302,6 +302,7 @@ function def:uiCall_reshapePre()
 	-- Viewport #5 is the area for icons.
 
 	local skin = self.skin
+	local vp, vp2, vp3, vp4, vp5 = self.vp, self.vp2, self.vp3, self.vp4, self.vp5
 	local wid_ref = self.wid_ref
 	local root = self:getRootWidget()
 
@@ -316,30 +317,30 @@ function def:uiCall_reshapePre()
 
 	self:keepInBounds()
 
-	widShared.resetViewport(self, 1)
+	vp:set(0, 0, self.w, self.h)
 
 	-- Border and scroll bars.
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:reduceSideDelta(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
+	vp:copy(vp2)
 
 	-- Margin.
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:reduceSideDelta(skin.box.margin)
 
 	-- Dimensions and horizontal position for one menu item.
-	widShared.setViewport(self, 3, self.vp_x, 0, self.vp_w, skin.item_height)
+	vp3:set(vp.x, 0, vp.w, skin.item_height)
 
 	-- Area for text
-	widShared.copyViewport(self, 3, 4)
+	vp3:copy(vp4)
 
 	-- Area for the icon
 	local icon_spacing = self.show_icons and skin.icon_spacing or 0
-	widShared.partitionViewport(self, 4, 5, icon_spacing, skin.icon_side, true)
+	vp4:splitOrOverlay(vp5, skin.icon_side, icon_spacing)
 
 	-- Additional text padding
-	widShared.carveViewport(self, 4, skin.box.margin)
+	vp4:reduceSideDelta(skin.box.margin)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
@@ -392,6 +393,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local rolled = false
 
 		if self.press_busy == "menu-drag" then
+			local vp = self.vp
 
 			-- Implement Drag-to-select.
 			-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
@@ -401,8 +403,8 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 			-- test: Only update the selection via dragging if the mouse is within range horizontally.
 			--if mx >= 0 and mx < self.w then
-				mx = mx - self.vp_x
-				my = my - self.vp_y
+				mx = mx - vp.x
+				my = my - vp.y
 
 				local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.MN_items)
 				if item_i and item_t.selectable then
@@ -419,14 +421,15 @@ end
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
+		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
 		lgcScroll.widgetProcessHover(self, mx, my)
 
-		local xx = mx + self.scr_x - self.vp_x
-		local yy = my + self.scr_y - self.vp_y
+		local xx = mx + self.scr_x - vp.x
+		local yy = my + self.scr_y - vp.y
 
-		if widShared.pointInViewport(self, 2, mx, my) then
+		if self.vp2:pointOverlap(mx, my) then
 			-- Update item hover
 			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
@@ -479,10 +482,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if handled_scroll_bars then
 			context:clearClickSequence()
 		else
-			if widShared.pointInViewport(self, 2, mx, my) then
+			local vp, vp2 = self.vp, self.vp2
 
-				x = x - ax + self.scr_x - self.vp_x
-				y = y - ay + self.scr_y - self.vp_y
+			if vp2:pointOverlap(mx, my) then
+				x = x - ax + self.scr_x - vp.x
+				y = y - ay + self.scr_y - vp.y
 
 				-- Check for click-able items.
 				if not self.press_busy then
@@ -589,6 +593,8 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		self:_closeSelf(false)
+
+		widShared.removeViewports(self, 5)
 	end
 end
 
@@ -650,6 +656,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp, vp3, vp4, vp5 = self.vp, self.vp3, self.vp4, self.vp5
 		local font = skin.font
 		local items = self.MN_items
 
@@ -666,9 +673,9 @@ def.default_skinner = {
 		lgcScroll.drawScrollBarsV(self, self.skin.data_scroll)
 
 		-- Scroll offsets.
-		--love.graphics.translate(-self.scr_x + self.vp_x, -self.scr_y + self.vp_y)
+		--love.graphics.translate(-self.scr_x + vp.x, -self.scr_y + vp.y)
 		love.graphics.translate(-self.scr_x, -self.scr_y)
-		uiGraphics.intersectScissor(ox + self.x + self.vp_x, oy + self.y + self.vp_y, self.vp_w, self.vp_h)
+		uiGraphics.intersectScissor(ox + self.x + vp.x, oy + self.y + vp.y, vp.w, vp.h)
 
 		-- Dropdown drawers do not render hover-glow.
 
@@ -676,20 +683,20 @@ def.default_skinner = {
 		local selected_item = self.MN_items[self.MN_index]
 		if selected_item then
 			love.graphics.setColor(skin.color_selected)
-			love.graphics.rectangle("fill", 0, selected_item.y, self.vp3_w, selected_item.h)
+			love.graphics.rectangle("fill", 0, selected_item.y, vp3.w, selected_item.h)
 		end
 
 
 		local i_min, i_max = math.max(1, self.MN_items_first), math.min(#items, self.MN_items_last)
 
 		-- Item icons.
-		if self.vp5_w > 0 then
+		if vp5.w > 0 then
 			love.graphics.setColor(old_r, old_g, old_b, old_a)
 			for i = i_min, i_max do
 				local item = items[i]
 				local tq_icon = item.tq_icon
 				if tq_icon then
-					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.vp5_x, item.y + self.vp5_y, self.vp5_w, self.vp5_h)
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, vp5.x, item.y + vp5.y, vp5.w, vp5.h)
 				end
 			end
 		end
@@ -700,7 +707,7 @@ def.default_skinner = {
 
 		for i = i_min, i_max do
 			local item = items[i]
-			local xx = self.vp4_x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, self.vp4_w)
+			local xx = vp4.x + textUtil.getAlignmentOffset(item.text, font, skin.text_align, vp4.w)
 			love.graphics.print(item.text, xx, item.y)
 		end
 

@@ -10,6 +10,8 @@ local pools = {}
 
 
 local pPool = require(context.conf.prod_ui_req .. "lib.pile_pool")
+local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
 local function _poppingArraySmall(r)
@@ -43,10 +45,6 @@ pools.children = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) --
 --pools.LO_list = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
 
 
--- Small array: 'widget.viewports'
---pools.viewports = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
-
-
 local function _poppingViewport(vp)
 	if not vp then
 		return {x=0, y=0, w=0, h=0}
@@ -64,8 +62,34 @@ local function _pushingViewport(vp)
 end
 
 
--- Struct: 'widget.viewports[*]'
---pools.vp = pPool.new(_poppingViewport, _pushingViewport, math.huge)
+local _mt_rect = {}
+_mt_rect.__index = _mt_rect
+_mt_rect.__newindex = uiTable.mt_restrict.__newindex
+for k, v in pairs(pRect) do
+	_mt_rect[k] = v
+end
+
+
+local function _poppingRectangle(o)
+	if not o then
+		return setmetatable({x=0, y=0, w=0, h=0}, _mt_rect)
+	end
+	return o
+end
+
+
+local function _pushingRectangle(o)
+	if type(o) ~= "table" or getmetatable(o) ~= _mt_rect then
+		error("expected table (Rectangle)")
+	end
+	o.x, o.y, o.w, o.h = 0, 0, 0, 0
+
+	return o
+end
+
+
+-- Struct: generic rectangles (x, y, w, h)
+pools.rect = pPool.new(_poppingRectangle, _pushingRectangle, 256)
 
 
 local function _poppingStaticLayout(lo)

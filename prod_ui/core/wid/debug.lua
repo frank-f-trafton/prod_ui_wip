@@ -9,7 +9,7 @@ local context = select(1, ...)
 local debug = {} -- widShared.debug
 
 
-local viewport_keys = context:getLua("core/viewport_keys")
+local viewport_keys = context:getLua("core/wid/viewport_keys")
 
 
 local vp_colors = {
@@ -48,13 +48,13 @@ function debug.debugDrawViewport(self, v, r, g, b, a)
 		love.graphics.setColor(vp_colors[v])
 	end
 
-	v = viewport_keys[v]
+	local viewport = self[viewport_keys[v]]
 
-	if isNum(self[v.x]) and isNum(self[v.y]) and isNum(self[v.w]) and isNum(self[v.h]) then
+	if viewport then
 		love.graphics.setLineWidth(1)
 		love.graphics.setLineStyle("smooth")
 		love.graphics.setLineJoin("miter")
-		love.graphics.rectangle("line", 0.5 + self[v.x], 0.5 + self[v.y], self[v.w] - 1, self[v.h] - 1)
+		love.graphics.rectangle("line", 0.5 + viewport.x, 0.5 + viewport.y, viewport.w - 1, viewport.h - 1)
 	end
 
 	love.graphics.pop()

@@ -296,7 +296,7 @@ function def:uiCall_initialize()
 
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupDoc(self)
-	widShared.setupViewports(self, 3)
+	widShared.setupViewports(self, 4)
 
 	-- Settings for the input value.
 	-- 'self.value' is cached whenever there is a change to the text (via 'fn_check').
@@ -348,20 +348,21 @@ function def:uiCall_reshapePre()
 	-- Viewport #4 is the decrement button.
 
 	local skin = self.skin
+	local vp, vp2, vp3, vp4 = self.vp, self.vp2, self.vp3, self.vp4
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
 
-	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
-	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, false)
+	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
+	vp:split(vp3, skin.button_placement, button_spacing)
 	if skin.button_alignment == "vertical" then
-		widShared.partitionViewport(self, 3, 4, self.vp3_h / 2, "bottom", false)
+		vp3:split(vp4, "bottom", math.floor(vp3.h / 2))
 	else
-		widShared.partitionViewport(self, 3, 4, self.vp3_w / 2, "left", false)
+		vp3:split(vp4, "left", math.floor(vp3.w / 2))
 	end
 
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
 	editWidS.updateDocumentDimensions(self)
 	self:scrollClampViewport()
@@ -437,6 +438,8 @@ function def:uiCall_destroy(inst)
 	if self == inst then
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")
 		lgcWimp.checkDestroyPopUp(self)
+
+		widShared.removeViewports(self, 4)
 	end
 end
 
@@ -503,14 +506,14 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	and self.enabled
 	then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		if widShared.pointInViewport(self, 1, mx, my) then
+		if self.vp:pointOverlap(mx, my) then
 			self.cursor_hover = self.skin.cursor_on
 		else
 			self.cursor_hover = nil
 		end
 
-		self.btn_hov = widShared.pointInViewport(self, 3, mx, my) and 1
-			or widShared.pointInViewport(self, 4, mx, my) and 2
+		self.btn_hov = self.vp3:pointOverlap(mx, my) and 1
+			or self.vp4:pointOverlap(mx, my) and 2
 			or false
 	end
 end
@@ -541,7 +544,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		local mx, my = self:getRelativePosition(x, y)
 
 		-- Clicking the text area:
-		if widShared.pointInViewport(self, 1, mx, my) then
+		if self.vp:pointOverlap(mx, my) then
 			self.btn_rep = false
 			self.btn_hov = false
 			-- Propagation is halted when a context menu is created.
@@ -550,7 +553,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 
 		-- Clicked on increment button:
-		elseif widShared.pointInViewport(self, 3, mx, my) then
+		elseif self.vp3:pointOverlap(mx, my) then
 			if button == 1 then
 				self.btn_rep = 1
 				self.btn_hov = 1
@@ -559,7 +562,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			end
 
 		-- Clicking on decrement button:
-		elseif widShared.pointInViewport(self, 4, mx, my) then
+		elseif self.vp4:pointOverlap(mx, my) then
 			if button == 1 then
 				self.btn_rep = 2
 				self.btn_hov = 2
@@ -703,6 +706,7 @@ def.default_skinner = {
 	render = function(self, ox, oy)
 		local skin = self.skin
 		local LE = self.LE
+		local vp2, vp3, vp4 = self.vp2, self.vp3, self.vp4
 
 		-- b1: increment sensor, b2: decrement sensor
 		local res, res_b1, res_b2
@@ -724,17 +728,17 @@ def.default_skinner = {
 
 		-- Increment and decrement buttons.
 		love.graphics.setColor(1, 1, 1, 1)
-		uiGraphics.drawSlice(res_b1.slc_button_inc, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-		uiGraphics.drawSlice(res_b2.slc_button_dec, self.vp4_x, self.vp4_y, self.vp4_w, self.vp4_h)
-		uiGraphics.quadShrinkOrCenterXYWH(res_b1.tq_inc, self.vp3_x + res_b1.deco_ox, self.vp3_y + res_b1.deco_oy, self.vp3_w, self.vp3_h)
-		uiGraphics.quadShrinkOrCenterXYWH(res_b2.tq_dec, self.vp4_x + res_b2.deco_ox, self.vp4_y + res_b2.deco_oy, self.vp4_w, self.vp4_h)
+		uiGraphics.drawSlice(res_b1.slc_button_inc, vp3.x, vp3.y, vp3.w, vp3.h)
+		uiGraphics.drawSlice(res_b2.slc_button_dec, vp4.x, vp4.y, vp4.w, vp4.h)
+		uiGraphics.quadShrinkOrCenterXYWH(res_b1.tq_inc, vp3.x + res_b1.deco_ox, vp3.y + res_b1.deco_oy, vp3.w, vp3.h)
+		uiGraphics.quadShrinkOrCenterXYWH(res_b2.tq_dec, vp4.x + res_b2.deco_ox, vp4.y + res_b2.deco_oy, vp4.w, vp4.h)
 
 		-- Crop text and caret
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		-- Translate into core region, with scrolling offsets applied.

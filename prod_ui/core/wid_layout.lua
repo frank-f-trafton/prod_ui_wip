@@ -447,16 +447,18 @@ function widLayout.resetLayoutSpace(self)
 		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.w, self.h
 
 	elseif to == "viewport" then
-		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.vp_w, self.vp_h
+		local vp = self.vp
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, vp.w, vp.h
 
 	elseif to == "viewport-full" then
-		self.LO_x, self.LO_y, self.LO_w, self.LO_h = self.vp_x, self.vp_y, self.vp_w, self.vp_h
+		local vp = self.vp
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = vp.x, vp.y, vp.w, vp.h
 
 	elseif to == "viewport-width" then
-		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.vp_w, math.huge
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, self.vp.w, math.huge
 
 	elseif to == "viewport-height" then
-		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, math.huge, self.vp_h
+		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, math.huge, self.vp.h
 
 	elseif to == "unbounded" then
 		self.LO_x, self.LO_y, self.LO_w, self.LO_h = 0, 0, math.huge, math.huge

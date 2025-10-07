@@ -28,7 +28,7 @@ skin.label_style.ul_h: Underline height (thickness).
 
 Required widget fields:
 
-Viewport #1: vp_x, vp_y, vp_w, vp_h
+Viewport #1: self.vp
 
 --]]
 
@@ -52,10 +52,10 @@ local _enum_modes = uiTable.makeLUTV("single", "single-ul", "multi")
 local align_h_num = {left=0.0, center=0.5, right=1.0, justify=0.0}
 
 
-local function multiLineWrap(self, font)
-	local _, lines = font:getWrap(self.label, self.vp_w)
+local function _multiLineWrap(self, vp, font)
+	local _, lines = font:getWrap(self.label, vp.w)
 	self.label_h = math.floor(0.5 + font:getHeight() * font:getLineHeight() * #lines)
-	self.label_w_old = self.vp_w
+	self.label_w_old = vp.w
 end
 
 
@@ -115,10 +115,10 @@ function lgcLabel.remove(self)
 end
 
 
-local function _calculateUnderlineOffset(self, font)
+local function _calculateUnderlineOffset(self, vp, font)
 	-- Valid only for "single-ul" mode.
 	local align_h = self.skin.label_align_h
-	self.label_ul_ox = math.floor((self.vp_w - font:getWidth(self.label)) * align_h_num[align_h])
+	self.label_ul_ox = math.floor((vp.w - font:getWidth(self.label)) * align_h_num[align_h])
 end
 
 
@@ -145,12 +145,12 @@ function lgcLabel.widSetLabel(self, text, mode)
 		local temp_str
 		temp_str, self.label_ul_x, self.label_ul_w = textUtil.processUnderline(self.label, font)
 
-		_calculateUnderlineOffset(self, font)
+		_calculateUnderlineOffset(self, self.vp, font)
 
 		self.label = temp_str or self.label
 
 	elseif self.label_mode == "multi" then
-		multiLineWrap(self, self.skin.label_style.font)
+		_multiLineWrap(self, self.vp, self.skin.label_style.font)
 	end
 end
 
@@ -158,12 +158,13 @@ end
 --- Update a label during widget reshaping, if necessary.
 function lgcLabel.reshapeLabel(self)
 	if self.label_mode == "single-ul" then
-		_calculateUnderlineOffset(self, self.skin.label_style.font)
+		_calculateUnderlineOffset(self, self.vp, self.skin.label_style.font)
 
 	elseif self.label_mode == "multi" then
 		-- Need to refresh wrapped dimensions?
-		if self.vp_w ~= self.label_w_old then
-			multiLineWrap(self, self.skin.label_style.font)
+		local vp = self.vp
+		if vp.w ~= self.label_w_old then
+			_multiLineWrap(self, vp, self.skin.label_style.font)
 		end
 	end
 
@@ -182,14 +183,15 @@ end
 function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox, oy)
 	love.graphics.push("all")
 
+	local vp = self.vp
 	local label_style = skin.label_style
 
 	-- Prevent text from spilling out of its allotted region (Viewport #1).
 	uiGraphics.intersectScissor(
-		ox + self.x + self.vp_x,
-		oy + self.y + self.vp_y,
-		self.vp_w,
-		self.vp_h
+		ox + self.x + vp.x,
+		oy + self.y + vp.y,
+		vp.w,
+		vp.h
 	)
 
 	local font_height = font:getHeight()
@@ -198,13 +200,13 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 	local height = self.label_h or math.floor(0.5 + font_height * font_line_height)
 	local text_y
 	if skin.label_align_v == "top" then
-		text_y = math.floor(self.vp_y)
+		text_y = math.floor(vp.y)
 
 	elseif skin.label_align_v == "bottom" then
-		text_y = math.floor(self.vp_y + self.vp_h - height)
+		text_y = math.floor(vp.y + vp.h - height)
 
 	else -- "middle"
-		text_y = math.floor(self.vp_y + ((self.vp_h - height) * 0.5))
+		text_y = math.floor(vp.y + ((vp.h - height) * 0.5))
 	end
 
 	-- Draw shortcut key underline, if applicable.
@@ -213,7 +215,7 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 		love.graphics.setColor(c_ul or c_text)
 		uiGraphics.quadXYWH(
 			tq_px,
-			self.vp_x + label_ox + self.label_ul_x + self.label_ul_ox,
+			vp.x + label_ox + self.label_ul_x + self.label_ul_ox,
 			text_y + font_height + label_oy,
 			self.label_ul_w,
 			label_style.ul_h
@@ -225,9 +227,9 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 	love.graphics.setColor(c_text)
 	love.graphics.printf(
 		self.label,
-		self.vp_x + label_ox,
+		vp.x + label_ox,
 		text_y + label_oy,
-		self.vp_w,
+		vp.w,
 		skin.label_align_h
 	)
 

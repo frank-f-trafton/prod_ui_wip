@@ -223,8 +223,9 @@ function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_sca
 	if scancode == "application" or (shift_down and scancode == "f10") then
 		-- Locate caret in UI space
 		local ax, ay = self:getAbsolutePosition()
-		local caret_x = ax + self.vp_x - self.scr_x + LE.caret_box_x + self.LE_align_ox
-		local caret_y = ay + self.vp_y - self.scr_y + LE.caret_box_y + LE.caret_box_h
+		local vp = self.vp
+		local caret_x = ax + vp.x - self.scr_x + LE.caret_box_x + self.LE_align_ox
+		local caret_y = ay + vp.y - self.scr_y + LE.caret_box_y + LE.caret_box_h
 
 		self.pop_up_proto:configure(self)
 
@@ -467,7 +468,7 @@ function lgcInputM.draw(self, color_highlight, font_ghost, color_text, font, col
 		end
 
 		if LE.wrap_mode then
-			love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp_w, align)
+			love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp.w, align)
 		else
 			love.graphics.print(self.LE_ghost_text, gx, gy)
 		end

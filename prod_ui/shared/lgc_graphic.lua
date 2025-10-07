@@ -15,9 +15,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
 
 function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, ox, oy)
-	--[[
-	Expects: self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h
-	--]]
+	local vp2 = self.vp2
 
 	love.graphics.setColor(color)
 
@@ -28,10 +26,10 @@ function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, o
 		tx = 0
 
 	elseif skin.quad_align_h == "right" then
-		tx = math.floor(0.5 + self.vp2_w - qw)
+		tx = math.floor(0.5 + vp2.w - qw)
 
 	else -- "center"
-		tx = math.floor(0.5 + (self.vp2_w - qw) * 0.5)
+		tx = math.floor(0.5 + (vp2.w - qw) * 0.5)
 	end
 
 	local ty
@@ -39,15 +37,15 @@ function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, o
 		ty = 0
 
 	elseif skin.quad_align_v == "bottom" then
-		ty = math.floor(0.5 + self.vp2_h - qh)
+		ty = math.floor(0.5 + vp2.h - qh)
 
 	else -- "middle"
-		ty = math.floor(0.5 + (self.vp2_h - qh) * 0.5)
+		ty = math.floor(0.5 + (vp2.h - qh) * 0.5)
 	end
 
 	-- XXX: Scissor to Viewport?
 
-	uiGraphics.quadXYWH(graphic, self.vp2_x + tx + graphic_ox, self.vp2_y + ty + graphic_oy, qw, qh)
+	uiGraphics.quadXYWH(graphic, vp2.x + tx + graphic_ox, vp2.y + ty + graphic_oy, qw, qh)
 end
 
 

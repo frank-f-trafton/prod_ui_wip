@@ -21,8 +21,6 @@ local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
-
-local viewport_keys = context:getLua("core/viewport_keys")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -610,7 +608,6 @@ function _mt_widget:remove()
 			self.children = pools.children:push(children)
 		end
 		--]]
-
 	end
 
 	if context.captured_focus == self then

@@ -87,15 +87,23 @@ function def:uiCall_reshapePre()
 	-- Viewport #2 is the bijou drawing rectangle.
 
 	local skin = self.skin
+	local vp, vp2 = self.vp, self.vp2
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.splitViewport(self, 1, 2, false, skin.bijou_spacing, (skin.bijou_side == "right"))
-	widShared.carveViewport(self, 2, skin.box.margin)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
+	vp:split(vp2, skin.bijou_side_h, skin.bijou_spacing)
+	vp2:reduceSideDelta(skin.box.margin)
 
 	lgcLabel.reshapeLabel(self)
 
 	return true
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 2)
+	end
 end
 
 

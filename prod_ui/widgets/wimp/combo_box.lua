@@ -76,7 +76,7 @@ def.pop_up_proto = lgcInputS.pop_up_proto
 
 local _arrange_tb = lgcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
-	_arrange_tb(self, 1, true, first, last)
+	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
@@ -240,15 +240,16 @@ function def:uiCall_reshapePre()
 	-- Viewport #3 is the "open menu" button.
 
 	local skin = self.skin
+	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, skin.box.border)
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(skin.box.border)
 
-	local button_spacing = (skin.button_spacing == "auto") and self.vp_h or skin.button_spacing
-	widShared.partitionViewport(self, 1, 3, button_spacing, skin.button_placement, true)
+	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
 
-	widShared.copyViewport(self, 1, 2)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:splitOrOverlay(vp3, skin.button_placement, button_spacing)
+	vp:copy(vp2)
+	vp:reduceSideDelta(skin.box.margin)
 
 	self:scrollClampViewport()
 
@@ -428,6 +429,8 @@ function def:uiCall_destroy(inst)
 		lgcWimp.checkDestroyPopUp(self)
 		--self:_closePopUpMenu(false)
 		-- XXX: test the above change.
+
+		widShared.removeViewports(self, 3)
 	end
 end
 
@@ -492,7 +495,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		if widShared.pointInViewport(self, 1, mx, my) then
+		if self.vp:pointOverlap(mx, my) then
 			self.cursor_hover = self.skin.cursor_on
 		else
 			self.cursor_hover = nil
@@ -531,7 +534,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		local mx, my = self:getRelativePosition(x, y)
 
 		-- Clicking the text area:
-		if widShared.pointInViewport(self, 1, mx, my) then
+		if self.vp:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
 			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
@@ -541,7 +544,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- if we didn't just close it.
 		elseif button == 1
 		and not closed_drawer
-		and widShared.pointInViewport(self, 3, mx, my)
+		and self.vp3:pointOverlap(mx, my)
 		then
 			self:_openPopUpMenu()
 			return true
@@ -702,6 +705,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2, vp3 = self.vp2, self.vp3
 		local LE = self.LE
 
 		local res
@@ -719,15 +723,15 @@ def.default_skinner = {
 
 		-- "Open menu" button.
 		love.graphics.setColor(1, 1, 1, 1)
-		uiGraphics.drawSlice(res.slc_deco_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-		uiGraphics.quadShrinkOrCenterXYWH(res.tq_deco_glyph, self.vp3_x + res.deco_ox, self.vp3_y + res.deco_oy, self.vp3_w, self.vp3_h)
+		uiGraphics.drawSlice(res.slc_deco_button, vp3.x, vp3.y, vp3.w, vp3.h)
+		uiGraphics.quadShrinkOrCenterXYWH(res.tq_deco_glyph, vp3.x + res.deco_ox, vp3.y + res.deco_oy, vp3.w, vp3.h)
 
 		-- Crop item text.
 		uiGraphics.intersectScissor(
-			ox + self.x + self.vp2_x,
-			oy + self.y + self.vp2_y,
-			self.vp2_w,
-			self.vp2_h
+			ox + self.x + vp2.x,
+			oy + self.y + vp2.y,
+			vp2.w,
+			vp2.h
 		)
 
 		-- Translate into core region, with scrolling offsets applied.

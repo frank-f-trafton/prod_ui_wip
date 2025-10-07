@@ -275,19 +275,21 @@ function def:uiCall_reshapePre()
 	-- Viewport #3 is the "next" button component.
 
 	local skin = self.skin
+	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 
-	widShared.resetViewport(self, 1)
+	vp:set(0, 0, self.w, self.h)
 
 	if self.vertical then
-		widShared.partitionViewport(self, 1, 2, skin.prev_spacing, "top")
-		widShared.partitionViewport(self, 1, 3, skin.next_spacing, "bottom")
+		vp:split(vp2, "top", skin.prev_spacing)
+		vp:split(vp3, "bottom", skin.next_spacing)
 	else
-		widShared.partitionViewport(self, 1, 2, skin.prev_spacing, "left")
-		widShared.partitionViewport(self, 1, 3, skin.next_spacing, "right")
+		vp:split(vp2, "left", skin.prev_spacing)
+		vp:split(vp3, "right", skin.next_spacing)
 	end
 
-	widShared.carveViewport(self, 1, skin.box.border)
-	widShared.carveViewport(self, 1, skin.box.margin)
+	vp:reduceSideDelta(skin.box.border)
+	vp:reduceSideDelta(skin.box.margin)
+
 	lgcLabel.reshapeLabel(self)
 
 	return true
@@ -307,11 +309,11 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					x, y = self:getRelativePosition(x, y)
 
-					if self.b_prev_enabled and widShared.pointInViewport(self, 2, x, y) then
+					if self.b_prev_enabled and self.vp2:pointOverlap(x, y) then
 						self.b_pressing = "prev"
 						self:stepIndex(-1)
 
-					elseif self.b_next_enabled and widShared.pointInViewport(self, 3, x, y) then
+					elseif self.b_next_enabled and self.vp3:pointOverlap(x, y) then
 
 						self.b_pressing = "next"
 						self:stepIndex(1)
@@ -338,10 +340,10 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 				if button == 1 then
 					x, y = self:getRelativePosition(x, y)
 
-					if self.b_pressing == "prev" and widShared.pointInViewport(self, 2, x, y) then
+					if self.b_pressing == "prev" and self.vp2:pointOverlap(x, y) then
 						self:stepIndex(-1)
 
-					elseif self.b_pressing == "next" and widShared.pointInViewport(self, 3, x, y) then
+					elseif self.b_pressing == "next" and self.vp3:pointOverlap(x, y) then
 						self:stepIndex(1)
 					end
 				end
@@ -397,6 +399,13 @@ function def:uiCall_pointerWheel(inst, x, y)
 				self:stepIndex(1)
 			end
 		end
+	end
+end
+
+
+function def:uiCall_destroy(inst)
+	if self == inst then
+		widShared.removeViewports(self, 3)
 	end
 end
 
@@ -503,6 +512,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
+		local vp2, vp3 = self.vp2, self.vp3
 		local res = uiTheme.pickButtonResource(self, skin)
 
 		local sl_body = res.sl_body
@@ -527,9 +537,8 @@ def.default_skinner = {
 			button_ox, button_oy = 0, 0
 			sl_button = res.sl_button_up
 		end
-		uiGraphics.drawSlice(sl_button, self.vp2_x, self.vp2_y, self.vp2_w, self.vp2_h)
-		uiGraphics.quadShrinkOrCenterXYWH(tq_prev, self.vp2_x + button_ox, self.vp2_y + button_oy, self.vp2_w, self.vp2_h)
-
+		uiGraphics.drawSlice(sl_button, vp2.x, vp2.y, vp2.w, vp2.h)
+		uiGraphics.quadShrinkOrCenterXYWH(tq_prev, vp2.x + button_ox, vp2.y + button_oy, vp2.w, vp2.h)
 
 		if self.b_pressing == "next" then
 			button_ox, button_oy = res.button_ox, res.button_oy
@@ -538,8 +547,8 @@ def.default_skinner = {
 			button_ox, button_oy = 0, 0
 			sl_button = res.sl_button_up
 		end
-		uiGraphics.drawSlice(sl_button, self.vp3_x, self.vp3_y, self.vp3_w, self.vp3_h)
-		uiGraphics.quadShrinkOrCenterXYWH(tq_next, self.vp3_x + button_ox, self.vp3_y + button_oy, self.vp3_w, self.vp3_h)
+		uiGraphics.drawSlice(sl_button, vp3.x, vp3.y, vp3.w, vp3.h)
+		uiGraphics.quadShrinkOrCenterXYWH(tq_next, vp3.x + button_ox, vp3.y + button_oy, vp3.w, vp3.h)
 
 		if self.label_mode then
 			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, 0, 0, ox, oy)

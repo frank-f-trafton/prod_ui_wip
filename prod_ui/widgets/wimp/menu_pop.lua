@@ -100,7 +100,7 @@ widShared.scrollSetMethods(def)
 
 local _arrange_tb = lgcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
-	_arrange_tb(self, 1, true, first, last)
+	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
@@ -144,7 +144,8 @@ local function assignSubMenu(item, client, set_selection)
 			client_sub:updateDimensions()
 			client_sub:menuChangeCleanup()
 
-			client_sub.x = client.x + client.vp_x + client.vp_w -- XXX WIP
+			local vp = client.vp
+			client_sub.x = client.x + vp.x + vp.w -- XXX WIP
 			client_sub.y = client.y + item.y
 
 			client_sub:keepInBounds()
@@ -425,8 +426,9 @@ function def:updateDimensions()
 	self:reshape()
 
 	-- Update item widths and then reshape their internals
+	local vp_w = self.vp.w
 	for i, item in ipairs(self.MN_items) do
-		item.w = self.vp_w
+		item.w = vp_w
 	end
 
 	-- Refresh document size
@@ -509,20 +511,20 @@ end
 
 
 function def:uiCall_reshapePre()
-	--[[
-	vp1 - viewport area
-	vp2 - reserved for separating scroll bars (etc.) from content
-	--]]
+	-- vp - viewport area
+	-- vp2 - reserved for separating scroll bars (etc.) from content
 
-	widShared.resetViewport(self, 1)
+	local vp, vp2 = self.vp, self.vp2
+
+	vp:set(0, 0, self.w, self.h)
 
 	-- Apply edge padding.
-	widShared.carveViewport(self, 1, self.skin.box.margin)
+	vp:reduceSideDelta(self.skin.box.margin)
 
 	-- 'Okay-to-click' rectangle.
 	-- (Reserved in case any kind of scroll bar or other UI control is added around
 	-- the edges.)
-	widShared.copyViewport(self, 1, 2)
+	vp:copy(vp2)
 
 	self:cacheUpdate()
 
@@ -782,9 +784,10 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 	-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
 	-- Mouse position relative to viewport #1
+	local vp = self.vp
 	local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-	mx = mx - self.vp_x
-	my = my - self.vp_y
+	mx = mx - vp.x
+	my = my - vp.y
 
 	local item_i, item_t = self:getItemAtPoint(mx + self.scr_x, my + self.scr_y, 1, #self.MN_items)
 	if item_i and item_t.selectable then
@@ -810,13 +813,14 @@ end
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
+		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		local xx = mx + self.scr_x - self.vp_x
-		local yy = my + self.scr_y - self.vp_y
+		local xx = mx + self.scr_x - vp.x
+		local yy = my + self.scr_y - vp.y
 
 		local hover_ok = false
 
-		if widShared.pointInViewport(self, 2, mx, my) then
+		if self.vp2:pointOverlap(mx, my) then
 			-- Update item hover
 			local i, item = self:getItemAtPoint(xx, yy, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
@@ -880,10 +884,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble2()
 		end
 
-		if widShared.pointInViewport(self, 2, mx, my) then
-
-			x = x - ax + self.scr_x - self.vp_x
-			y = y - ay + self.scr_y - self.vp_y
+		if self.vp2:pointOverlap(mx, my) then
+			local vp = self.vp
+			x = x - ax + self.scr_x - vp.x
+			y = y - ay + self.scr_y - vp.y
 
 			-- Check for click-able items.
 			if not self.press_busy then
@@ -920,14 +924,14 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			if button == 1 then
 				local item_selected = self.MN_items[self.MN_index]
 				if item_selected and item_selected.selectable and item_selected.actionable then
-
+					local vp = self.vp
 					local ax, ay = self:getAbsolutePosition()
 					local mouse_x = x - ax
 					local mouse_y = y - ay
 
 					-- Apply scroll and viewport offsets
-					local xx = mouse_x + self.scr_x - self.vp_x
-					local yy = mouse_y + self.scr_y - self.vp_y
+					local xx = mouse_x + self.scr_x - vp.x
+					local yy = mouse_y + self.scr_y - vp.y
 
 					-- XXX safety precaution: ensure mouse position is within widget viewport #2?
 					if xx >= item_selected.x and xx < item_selected.x + item_selected.w
@@ -1005,8 +1009,9 @@ function def:uiCall_update(dt)
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
 	if self.context.mouse_focus then
+		local vp = self.vp
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
-		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - self.vp_x, my + self.scr_y - self.vp_y, 1, #self.MN_items)
+		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - vp.x, my + self.scr_y - vp.y, 1, #self.MN_items)
 	end
 
 	--print("item_t", item_t, "selected", selected, "sel==itm", selected == item_t, "sel.type", selected and selected.type or "n/a", "last_open", self.last_open_group, "open_time", self.open_time)
@@ -1043,6 +1048,8 @@ function def:uiCall_destroy(inst)
 		end
 
 		widShared.chainUnlink(self)
+
+		widShared.removeViewports(self, 2)
 	end
 end
 

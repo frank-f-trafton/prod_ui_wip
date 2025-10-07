@@ -40,6 +40,7 @@ end
 function editWidS.updateDocumentDimensions(self)
 	local LE = self.LE
 	local font = LE.font
+	local vp = self.vp
 
 	self.doc_w = LE.disp_text_w
 	self.doc_h = math.floor(font:getHeight() * font:getLineHeight())
@@ -49,15 +50,15 @@ function editWidS.updateDocumentDimensions(self)
 		self.LE_align_ox = 0
 
 	elseif align == "center" then
-		self.LE_align_ox = math.max(0, math.floor((self.vp_w - self.doc_w) / 2))
+		self.LE_align_ox = math.max(0, math.floor((vp.w - self.doc_w) / 2))
 
 	else -- align == "right"
-		self.LE_align_ox = math.max(0, self.vp_w - self.doc_w)
+		self.LE_align_ox = math.max(0, vp.w - self.doc_w)
 	end
 
 	local align_v = math.max(0, math.min(self.skin.text_align_v, 1.0))
 
-	self.LE_align_oy = _lerp(0, self.doc_h - self.vp_h, align_v)
+	self.LE_align_oy = _lerp(0, self.doc_h - vp.h, align_v)
 end
 
 

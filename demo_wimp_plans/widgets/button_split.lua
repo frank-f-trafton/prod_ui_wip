@@ -57,7 +57,7 @@ local function _createPopUpMenu(self)
 		if self.skin.aux_placement == "left" then
 			menu_x = ax
 		else
-			menu_x = ax + self.w - self.vp3_w
+			menu_x = ax + self.w - self.vp3.w
 		end
 
 		local lgcWimp = self.context:getLua("shared/lgc_wimp")

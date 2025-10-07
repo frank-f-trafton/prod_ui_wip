@@ -7,36 +7,41 @@ local context = select(1, ...)
 local widShared = {}
 
 
-local viewport_keys = context:getLua("core/viewport_keys")
-local vpk = viewport_keys
-
-
 widShared.debug = context:getLua("core/wid/debug")
+
+
+local pools = context:getLua("core/res/pools")
+local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
+
+
+local _viewport_keys = context:getLua("core/wid/viewport_keys")
+widShared.viewport_keys = _viewport_keys
 
 
 function widShared.dummy() end
 
 
---- Gets the table keys for a widget viewport. (ie index 2 will return 'vp2_x', 'vp2_y', 'vp2_w' and 'vp2_h'.)
-function widShared.getViewportKeys(self, v)
-	assert(vpk[v], "invalid viewport index.")
-	return vpk[v].x, vpk[v].y, vpk[v].w, vpk[v].h
+function widShared.getViewportFromIndex(self, n)
+	local name = _viewport_keys[n]
+	if not name then
+		error("invalid viewport index: " .. tostring(n))
+	end
+	return self[name] -- can be nil
 end
 
 
 --- Gets the XYWH values of a widget viewport, or (0, 0) and the widget's dimensions if no viewport index is specified.
 -- @param self The widget.
--- @param v The viewport index, or nil.
+-- @param vp The viewport table, or nil.
 -- @param rel_zero When true, reports the viewport's position as (0, 0). This is desirable in some cases involving
---	Viewport #1 and scrolling. This argument has no effect when 'v' is nil.
+--	Viewport #1 and scrolling. This argument has no effect when 'vp' is nil.
 -- @return The viewport / widget position and dimensions.
-function widShared.getViewportXYWH(self, v, rel_zero)
-	if v then
-		v = vpk[v]
+function widShared.getViewportXYWH(self, vp, rel_zero)
+	if vp then
 		if rel_zero then
-			return 0, 0, self[v.w], self[v.h]
+			return 0, 0, vp.w, vp.h
 		else
-			return self[v.x], self[v.y], self[v.w], self[v.h]
+			return vp.x, vp.y, vp.w, vp.h
 		end
 	else
 		return 0, 0, self.w, self.h
@@ -64,8 +69,10 @@ function widShared.keepInBoundsPort2(self)
 		return
 	end
 
-	self.x = math.max(-self.w - self.p_bounds_x1 + parent.vp2_x, math.min(self.x, parent.vp2_w + self.p_bounds_x2))
-	self.y = math.max(-self.h - self.p_bounds_y1 + parent.vp2_y, math.min(self.y, parent.vp2_h + self.p_bounds_y2))
+	local pvp2 = parent.vp2
+
+	self.x = math.max(-self.w - self.p_bounds_x1 + pvp2.x, math.min(self.x, pvp2.w + self.p_bounds_x2))
+	self.y = math.max(-self.h - self.p_bounds_y1 + pvp2.y, math.min(self.y, pvp2.h + self.p_bounds_y2))
 end
 --]]
 
@@ -73,14 +80,14 @@ end
 -- Use to keep a widget within the bounds of its parent.
 -- TODO: document spill-out behavior.
 -- @param self The widget.
--- @param v The viewport box to use. Leave `nil` to use the parent's width and height.
-function widShared.keepInBoundsOfParent(self, v)
+-- @param vp The viewport to use. Leave `nil` to use the parent's width and height.
+function widShared.keepInBoundsOfParent(self, vp)
 	local parent = self.parent
 	if not parent then
 		return
 	end
 
-	local px, py, pw, ph = widShared.getViewportXYWH(parent, v) -- TODO: rel_zero?
+	local px, py, pw, ph = widShared.getViewportXYWH(parent, vp) -- TODO: rel_zero?
 
 	self.x = math.max(px, math.min(self.x, pw - self.w))
 	self.y = math.max(py, math.min(self.y, ph - self.h))
@@ -90,15 +97,17 @@ end
 -- Use to keep a widget partially within the bounds of a parent (ie window frames).
 -- TODO: document spill-out behavior.
 -- @param self The widget.
--- @param v The viewport box to use. Leave `nil` to use the parent's width and height.
+-- @param vp The viewport to use. Leave `nil` to use the parent's width and height.
 -- @param x1, x2, y1, y2 How much of the widget must remain within the parent's boundaries on each side.
-function widShared.keepInBoundsExtended(self, v, x1, x2, y1, y2)
+function widShared.keepInBoundsExtended(self, vp, x1, x2, y1, y2)
 	local parent = self.parent
 	if not parent then
 		return
 	end
 
-	local px, py, pw, ph = widShared.getViewportXYWH(parent, v) -- TODO: rel_zero?
+	local px, py, pw, ph = widShared.getViewportXYWH(parent, vp) -- TODO: rel_zero?
+
+	print("px", px, "py", py, "pw", pw, "ph", ph)
 
 	self.x = math.max(-self.w - x1 + px, math.min(self.x, pw + x2))
 	self.y = math.max(-self.h - y1 + py, math.min(self.y, ph + y2))
@@ -129,11 +138,12 @@ function widShared.wid_maximize(self)
 	self.maxim_h = self.h
 
 	local parent = self.parent
+	local pvp2 = parent.vp2
 
-	self.x = parent.vp2_x
-	self.y = parent.vp2_y
-	self.w = parent.vp2_w
-	self.h = parent.vp2_h
+	self.x = pvp2.x
+	self.y = pvp2.y
+	self.w = pvp2.w
+	self.h = pvp2.h
 
 	self.maximized = true
 
@@ -151,11 +161,12 @@ end
 function widShared.wid_unmaximize(self)
 	-- The widget must have a parent.
 	local parent = self.parent
+	local pvp2 = parent.vp2
 
 	self.x = self.maxim_x or 64
 	self.y = self.maxim_y or 64
-	self.w = self.maxim_w or parent.vp2_w - 64
-	self.h = self.maxim_h or parent.vp2_h - 64
+	self.w = self.maxim_w or pvp2.w - 64
+	self.h = self.maxim_h or pvp2.h - 64
 
 	-- Clamp unmaximized position + dimensions to parent contact box.
 	--[[
@@ -167,23 +178,23 @@ function widShared.wid_unmaximize(self)
 	* Unmaximizes the prodUI container -- which would be larger than the LÖVE window without this adjustment.
 	--]]
 	-- [[
-	if self.x < parent.vp2_x then
-		self.x = parent.vp2_x
+	if self.x < pvp2.x then
+		self.x = pvp2.x
 	end
-	if self.y < parent.vp2_y then
-		self.y = parent.vp2_y
+	if self.y < pvp2.y then
+		self.y = pvp2.y
 	end
-	if self.x + self.w > parent.vp2_x + parent.vp2_w then
-		self.x = parent.vp2_x + parent.vp2_w - self.w
+	if self.x + self.w > pvp2.x + pvp2.w then
+		self.x = pvp2.x + pvp2.w - self.w
 	end
-	if self.y + self.h > parent.vp2_y + parent.vp2_h then
-		self.y = parent.vp2_y + parent.vp2_h - self.h
+	if self.y + self.h > pvp2.y + pvp2.h then
+		self.y = pvp2.y + pvp2.h - self.h
 	end
-	if self.w > parent.vp2_w then
-		self.w = parent.vp2_w
+	if self.w > pvp2.w then
+		self.w = pvp2.w
 	end
-	if self.h > parent.vp2_h then
-		self.h = parent.vp2_h
+	if self.h > pvp2.h then
+		self.h = pvp2.h
 	end
 	--]]
 
@@ -239,14 +250,15 @@ end
 
 --- Viewport scroll clamping for containers and other widgets which have embedded scroll bars.
 function widShared.scrollClampViewport(self)
-	self.scr_fx = math.max(-self.vp_x, math.min(self.scr_fx, -self.vp_x + self.doc_w - self.vp_w))
-	self.scr_fy = math.max(-self.vp_y, math.min(self.scr_fy, -self.vp_y + self.doc_h - self.vp_h))
+	local vp = self.vp
+	self.scr_fx = math.max(-vp.x, math.min(self.scr_fx, -vp.x + self.doc_w - vp.w))
+	self.scr_fy = math.max(-vp.y, math.min(self.scr_fy, -vp.y + self.doc_h - vp.h))
 
 	self.scr_x = math.floor(0.5 + self.scr_fx)
 	self.scr_y = math.floor(0.5 + self.scr_fy)
 
-	self.scr_tx = math.max(-self.vp_x, math.min(self.scr_tx, -self.vp_x + self.doc_w - self.vp_w))
-	self.scr_ty = math.max(-self.vp_y, math.min(self.scr_ty, -self.vp_y + self.doc_h - self.vp_h))
+	self.scr_tx = math.max(-vp.x, math.min(self.scr_tx, -vp.x + self.doc_w - vp.w))
+	self.scr_ty = math.max(-vp.y, math.min(self.scr_ty, -vp.y + self.doc_h - vp.h))
 end
 
 
@@ -262,8 +274,10 @@ end
 
 
 function widShared.scrollXInBounds(self, x1, x2, immediate)
+	local vp = self.vp
+
 	-- Clamp the scroll target.
-	self.scr_tx = math.max(x2 - self.vp_x - self.vp_w, math.min(self.scr_tx, x1 - self.vp_x))
+	self.scr_tx = math.max(x2 - vp.x - vp.w, math.min(self.scr_tx, x1 - vp.x))
 
 	if immediate then
 		self.scr_fx = self.scr_tx
@@ -274,8 +288,10 @@ end
 
 
 function widShared.scrollYInBounds(self, y1, y2, immediate)
+	local vp = self.vp
+
 	-- Clamp the scroll target.
-	self.scr_ty = math.max(y2 - self.vp_y - self.vp_h, math.min(self.scr_ty, y1 - self.vp_y))
+	self.scr_ty = math.max(y2 - vp.y - vp.h, math.min(self.scr_ty, y1 - vp.y))
 
 	if immediate then
 		self.scr_fy = self.scr_ty
@@ -286,9 +302,11 @@ end
 
 
 function widShared.scrollRectInBounds(self, x1, y1, x2, y2, immediate)
+	local vp = self.vp
+
 	-- Clamp the scroll target.
-	self.scr_tx = math.max(x2 - self.vp_x - self.vp_w, math.min(self.scr_tx, x1 - self.vp_x))
-	self.scr_ty = math.max(y2 - self.vp_y - self.vp_h, math.min(self.scr_ty, y1 - self.vp_y))
+	self.scr_tx = math.max(x2 - vp.x - vp.w, math.min(self.scr_tx, x1 - vp.x))
+	self.scr_ty = math.max(y2 - vp.y - vp.h, math.min(self.scr_ty, y1 - vp.y))
 
 	if immediate then
 		self.scr_fx = self.scr_tx
@@ -300,7 +318,7 @@ end
 
 
 function widShared.scrollH(self, x, immediate)
-	self.scr_tx = -self.vp_x + x
+	self.scr_tx = -self.vp.x + x
 	if immediate then
 		self.scr_fx = self.scr_tx
 	end
@@ -320,7 +338,7 @@ end
 
 
 function widShared.scrollV(self, y, immediate)
-	self.scr_ty = -self.vp_y + y
+	self.scr_ty = -self.vp.y + y
 	if immediate then
 		self.scr_fy = self.scr_ty
 	end
@@ -340,8 +358,10 @@ end
 
 
 function widShared.scrollHV(self, x, y, immediate)
-	self.scr_tx = -self.vp_x + x
-	self.scr_ty = -self.vp_y + y
+	local vp = self.vp
+
+	self.scr_tx = -vp.x + x
+	self.scr_ty = -vp.y + y
 	if immediate then
 		self.scr_fx = self.scr_tx
 		self.scr_fy = self.scr_ty
@@ -364,17 +384,19 @@ end
 
 
 function widShared.scrollGetXY(self)
-	return self.scr_x + self.vp_x, self.scr_y + self.vp_y
+	local vp = self.vp
+
+	return self.scr_x + vp.x, self.scr_y + vp.y
 end
 
 
 function widShared.scrollGetX(self)
-	return self.scr_x + self.vp_x
+	return self.scr_x + self.vp.x
 end
 
 
 function widShared.scrollGetY(self)
-	return self.scr_y + self.vp_y
+	return self.scr_y + self.vp.y
 end
 
 
@@ -562,6 +584,7 @@ end
 -- @self The widget whose children will be scanned.
 -- @return Combined width and height of children.
 function widShared.getCombinedChildrenDimensions(self)
+	-- TODO --return pRectangle.getCombinedDimensions(self.children)
 	local dw, dh = 0, 0
 
 	for i, child in ipairs(self.children) do
@@ -576,26 +599,22 @@ end
 --- Common setup code for setting a widget's hover-clip to match a viewport.
 -- @param self The widget to modify.
 -- @param v The viewport index.
-function widShared.setClipHoverToViewport(self, v)
-	v = vpk[v]
-
+function widShared.setClipHoverToViewport(self, vp)
 	self.clip_hover = "manual"
-	self.clip_hover_x = self[v.x]
-	self.clip_hover_y = self[v.y]
-	self.clip_hover_w = self[v.w]
-	self.clip_hover_h = self[v.h]
+	self.clip_hover_x = vp.x
+	self.clip_hover_y = vp.y
+	self.clip_hover_w = vp.w
+	self.clip_hover_h = vp.h
 end
 
 
 --- Common setup code for setting a widget's scissor-box to match a viewport.
-function widShared.setClipScissorToViewport(self, v)
-	v = vpk[v]
-
+function widShared.setClipScissorToViewport(self, vp)
 	self.clip_scissor = "manual"
-	self.clip_scissor_x = self[v.x]
-	self.clip_scissor_y = self[v.y]
-	self.clip_scissor_w = self[v.w]
-	self.clip_scissor_h = self[v.h]
+	self.clip_scissor_x = vp.x
+	self.clip_scissor_y = vp.y
+	self.clip_scissor_w = vp.w
+	self.clip_scissor_h = vp.h
 end
 
 
@@ -604,15 +623,16 @@ end
 -- @param dt The frame's delta time.
 -- @return true if the widget was scrolled, otherwise nil.
 function widShared.dragToScroll(self, dt)
+	local vp = self.vp
 	local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 
 	-- Mouse position relative to viewport #1.
-	mx = mx - self.vp_x
-	my = my - self.vp_y
+	mx = mx - vp.x
+	my = my - vp.y
 
 	-- Drag-to-scroll
-	local mouse_drag_x = (mx < 0) and mx or (mx >= self.vp_w) and mx - self.vp_w or 0
-	local mouse_drag_y = (my < 0) and my or (my >= self.vp_h) and my - self.vp_h or 0
+	local mouse_drag_x = (mx < 0) and mx or (mx >= vp.w) and mx - vp.w or 0
+	local mouse_drag_y = (my < 0) and my or (my >= vp.h) and my - vp.h or 0
 
 	if mouse_drag_x ~= 0 or mouse_drag_y ~= 0 then
 		-- XXX style/config
@@ -671,100 +691,19 @@ end
 
 --- Assigns viewport fields to a widget.
 -- @param self The widget.
--- @param n The number of viewports to assign, from 1 to `n`, up to `#widShared.vpk`.
+-- @param n The number of viewports to assign.
 function widShared.setupViewports(self, n)
-	if n > #vpk then
-		error("attempted to set too many viewports (max " .. #vpk .. ")")
-	end
 	for i = 1, n do
-		local v = vpk[i]
-		self[v.x], self[v.y], self[v.w], self[v.h] = 0, 0, 0, 0
+		self[_viewport_keys[i]] = pools.rect:pop()
 	end
 end
 
 
---- Carve an edge out of a viewport.
--- @param self The widget.
--- @param v Viewport index to modify.
--- @param e A table with the fields 'x1', 'y1', 'x2' and 'y2'.
-function widShared.carveViewport(self, v, e) -- TODO: rename to widShared.carveViewportBox()
-	v = vpk[v]
-	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
-
-	self[vx] = self[vx] + e.x1
-	self[vy] = self[vy] + e.y1
-	self[vw] = math.max(0, self[vw] - e.x1 - e.x2)
-	self[vh] = math.max(0, self[vh] - e.y1 - e.y2)
-end
-
-
---- Reduce or enlarge a viewport in place with relative numbers. (All positive values reduce.)
-function widShared.resizeViewportInPlace(self, v, x1, y1, x2, y2)
-	v = vpk[v]
-	local vx, vy, vw, vh = v.x, v.y, v.w, v.h
-
-	self[vx] = self[vx] + x1
-	self[vy] = self[vy] + y1
-	self[vw] = math.max(0, self[vw] - x1 - x2)
-	self[vh] = math.max(0, self[vh] - y1 - y2)
-end
-
-
-function widShared.resizeViewportSide(self, v, side, amount)
-	v = vpk[v]
-
-	if side == "left" then
-		self[v.x] = self[v.x] + amount
-		self[v.w] = math.max(0, self[v.w] - amount)
-
-	elseif side == "right" then
-		self[v.x] = self[v.x] + amount
-
-	elseif side == "top" then
-		self[v.y] = self[v.y] + amount
-		self[v.h] = math.max(0, self[v.h] - amount)
-
-	elseif side == "bottom" then
-		self[v.y] = self[v.y] + amount
-
-	else
-		error("invalid or unsupported side string")
+function widShared.removeViewports(self, n)
+	for i = n, 1, -1 do
+		local k = _viewport_keys[i]
+		self[k] = pools.rect:push(self[k])
 	end
-end
-
-
-
---- Copies the values of one viewport to another.
--- @param self The widget to modify.
--- @param a Index of the viewport to copy from.
--- @param b Indext of the viewport to overwrite.
-function widShared.copyViewport(self, a, b)
-	a, b = vpk[a], vpk[b]
-
-	self[b.x] = self[a.x]
-	self[b.y] = self[a.y]
-	self[b.w] = self[a.w]
-	self[b.h] = self[a.h]
-end
-
-
-function widShared.resetViewport(self, v)
-	v = vpk[v]
-
-	self[v.x] = 0
-	self[v.y] = 0
-	self[v.w] = math.max(0, self.w)
-	self[v.h] = math.max(0, self.h)
-end
-
-
-function widShared.setViewport(self, v, x, y, w, h)
-	v = vpk[v]
-
-	self[v.x] = x
-	self[v.y] = y
-	self[v.w] = math.max(0, w)
-	self[v.h] = math.max(0, h)
 end
 
 
@@ -783,8 +722,10 @@ XXX support horizontal wheels
 function widShared.checkScrollWheelScroll(self, x, y)
 	-- TODO: properly handle horizontal scrolling.
 
-	if (y > 0 and self.scr_y > -self.vp_y)
-	or (y < 0 and self.scr_y < self.doc_h - self.vp_y - self.vp_h)
+	local vp = self.vp
+
+	if (y > 0 and self.scr_y > -vp.y)
+	or (y < 0 and self.scr_y < self.doc_h - vp.y - vp.h)
 	then
 		local old_scr_tx, old_scr_ty = self.scr_tx, self.scr_ty
 
@@ -793,114 +734,6 @@ function widShared.checkScrollWheelScroll(self, x, y)
 
 		return self.scr_ty ~= self.scr_y or old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty
 	end
-end
-
-
---- Splits a viewport on one axis, overwriting a second viewport with the removed part.
--- @param self The widget.
--- @param a Index of the viewport to split.
--- @param b Index of the viewport to assign the remainder to.
--- @param vertical `true` to split the viewport vertically, `false` to split horizontally.
--- @param amount The desired length of the first viewport.
--- @param far `true` to place Viewport B on the "far" end (right for horizontal, bottom for vertical).
-function widShared.splitViewport(self, a, b, vertical, amount, far)
-	a, b = vpk[a], vpk[b]
-	local v1x, v1y, v1w, v1h, v2x, v2y, v2w, v2h
-
-	if vertical then
-		v1x, v1y, v1w, v1h = a.y, a.x, a.h, a.w
-		v2x, v2y, v2w, v2h = b.y, b.x, b.h, b.w
-	else
-		v1x, v1y, v1w, v1h = a.x, a.y, a.w, a.h
-		v2x, v2y, v2w, v2h = b.x, b.y, b.w, b.h
-	end
-
-	self[v1w] = math.max(0, self[v1w] - amount)
-	self[v2y] = self[v1y]
-
-	self[v2w] = math.max(0, amount)
-	self[v2h] = self[v1h]
-
-	if far then
-		self[v2x] = self[v1x] + self[v1w]
-	else
-		self[v2x] = self[v1x]
-		self[v1x] = self[v2x] + self[v2w]
-	end
-end
-
-
---- Higher-level wrapper for splitViewport.
--- @param self The widget.
--- @param a Index of the Viewport to split.
--- @param b Index of the Viewport which will be assigned the remainder.
--- @param space How much space to allot to viewport B.
--- @param place Where Viewport B should be placed. "left", "right", "top", "bottom", or "overlay" (default).
--- @param allow_overlay When true, invalid values for 'place' become "overlay". When false, "overlay" and invalid
---	values for 'place' raise an error.
-function widShared.partitionViewport(self, a, b, space, place, allow_overlay)
-	if place == "left" or place == "right" then
-		widShared.splitViewport(self, a, b, false, space, (place == "right"))
-
-	elseif place == "top" or place == "bottom" then
-		widShared.splitViewport(self, a, b, true, space, (place == "bottom"))
-
-	-- Default:
-	elseif allow_overlay then -- "overlay" -- viewports occupy the same area
-		-- NOTE: 'space' is not used in this path.
-		widShared.copyViewport(self, a, b)
-
-	elseif place == "overlay" then
-		error("'overlay' placement is not allowed in this codepath")
-
-	else
-		error("invalid placement string")
-	end
-end
-
-
---- Places a viewport onto the edge of another viewport.
--- @param self The widget.
--- @param a Index of the reference viewport.
--- @param b Index of the viewport to move.
--- @param side Where Viewport B should be placed. "left", "right", "top" or "bottom".
--- @param coverage A number from 0.0 to 1.0 which controls how far in or out Viewport B is placed,
---	0.0 is behind the edge, 0.5 is in the middle, and 1.0 is ahead of it. Default: 0.5
-function widShared.straddleViewport(self, a, b, side, coverage)
-	a, b = vpk[a], vpk[b]
-	coverage = coverage or 0.5
-
-	if side == "left" then
-		self[b.x] = self[a.x] - math.floor(self[b.w] * coverage)
-		self[b.y] = self[a.y]
-		self[b.h] = self[a.h]
-
-	elseif side == "right" then
-		self[b.x] = self[a.x] + self[a.w] - math.floor(self[b.w] * coverage)
-		self[b.y] = self[a.y]
-		self[b.h] = self[a.h]
-
-	elseif side == "top" then
-		self[b.y] = self[a.y] - math.floor(self[b.h] * coverage)
-		self[b.x] = self[a.x]
-		self[b.w] = self[a.w]
-
-	elseif side == "bottom" then
-		self[b.y] = self[a.y] + self[a.h] - math.floor(self[b.h] * coverage)
-		self[b.x] = self[a.x]
-		self[b.w] = self[a.w]
-
-	else
-		error("invalid side string")
-	end
-end
-
-
-function widShared.pointInViewport(self, v, x, y)
-	v = vpk[v]
-	local vx, vy, vw, vh = self[v.x], self[v.y], self[v.w], self[v.h]
-
-	return x >= vx and x < vx + vw and y >= vy and y < vy + vh
 end
 
 

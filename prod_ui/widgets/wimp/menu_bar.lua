@@ -127,7 +127,7 @@ local function _shapeItem(self, item)
 	local skin = self.skin
 	local font = skin.font_item
 
-	item.h = self.vp_h
+	item.h = self.vp.h
 
 	local xx = 0
 	item.text_x = xx
@@ -394,12 +394,14 @@ function def:uiCall_getSegmentLength(x_axis, cross_length)
 end
 
 
-function def:uiCall_reshapePost()
-	widShared.resetViewport(self, 1)
-	widShared.carveViewport(self, 1, self.skin.box.border)
+function def:uiCall_reshapePre()
+	local vp, vp2 = self.vp, self.vp2
+
+	vp:set(0, 0, self.w, self.h)
+	vp:reduceSideDelta(self.skin.box.border)
 
 	-- 'Okay-to-click' rectangle.
-	widShared.copyViewport(self, 1, 2)
+	vp:copy(vp2)
 
 	for i, item in ipairs(self.MN_items) do
 		_shapeItem(self, item)
@@ -652,9 +654,11 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 	-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
 
 	if self.state == "opened" then
+		local vp = self.vp
+
 		-- Mouse position relative to viewport #1
-		local mx = mouse_x - self.vp_x
-		local my = mouse_y - self.vp_y
+		local mx = mouse_x - vp.x
+		local my = mouse_y - vp.y
 
 		-- And with scroll offsets
 		local s_mx = mx + self.scr_x
@@ -687,18 +691,19 @@ end
 
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
+		local vp, vp2 = self.vp, self.vp2
 		local ax, ay = self:getAbsolutePosition()
 		mouse_x = mouse_x - ax
 		mouse_y = mouse_y - ay
 
-		local xx = mouse_x + self.scr_x - self.vp_x
-		local yy = mouse_y + self.scr_y - self.vp_y
+		local xx = mouse_x + self.scr_x - vp.x
+		local yy = mouse_y + self.scr_y - vp.y
 
 		-- Inside of viewport #2
-		if mouse_x >= self.vp2_x
-		and mouse_x < self.vp2_x + self.vp2_w
-		and mouse_y >= self.vp2_y
-		and mouse_y < self.vp2_y + self.vp2_h
+		if mouse_x >= vp2.x
+		and mouse_x < vp2.x + vp2.w
+		and mouse_y >= vp2.y
+		and mouse_y < vp2.y + vp2.h
 		and (mouse_dx ~= 0 or mouse_dy ~= 0)
 		then
 			local hover_ok = false
@@ -751,13 +756,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	--print("menu bar pointerPress", self, inst, x, y, button)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
+			local vp, vp2 = self.vp, self.vp2
 			local ax, ay = self:getAbsolutePosition()
 			local ms_x = x - ax
 			local ms_y = y - ay
 
 			-- Check if pointer was inside of viewport #2
-			if ms_x >= self.vp2_x and ms_x < self.vp2_x + self.vp2_w
-			and ms_y >= self.vp2_y and ms_y < self.vp2_y + self.vp2_h
+			if ms_x >= vp2.x and ms_x < vp2.x + vp2.w
+			and ms_y >= vp2.y and ms_y < vp2.y + vp2.h
 			then
 				-- Menu's already opened: close it
 				if self.state == "opened" then
@@ -767,8 +773,8 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					self:cacheUpdate(true)
 				else
-					x = x - ax + self.scr_x - self.vp_x
-					y = y - ay + self.scr_y - self.vp_y
+					x = x - ax + self.scr_x - vp.x
+					y = y - ay + self.scr_y - vp.y
 
 					--print("self.press_busy", self.press_busy)
 
@@ -837,7 +843,7 @@ end
 
 function def:uiCall_update(dt)
 	--print(self.w, self.h, self.doc_w, self.doc_h, self.scr_x, self.scr_y)
-	--print("vp1", self.vp_x, self.vp_y, self.vp_w, self.vp_h)
+	--print("vp1", self.vp.x, self.vp.y, self.vp.w, self.vp.h)
 
 	dt = math.min(dt, 1.0)
 
@@ -884,6 +890,8 @@ function def:uiCall_destroy(inst)
 			_destroyPopUpMenu(self, "concluded")
 		end
 		widShared.chainUnlink(self)
+
+		widShared.removeViewports(self, 2)
 	end
 end
 
