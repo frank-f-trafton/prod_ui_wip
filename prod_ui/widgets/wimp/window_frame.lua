@@ -700,7 +700,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				-- Hack: clamp frame to parent. This isn't handled while resizing because the
 				-- width and height can go haywire when resizing against the bounds of the
 				-- screen (see the 'p_bounds_*' fields).
-				widShared.keepInBoundsExtended(self, self.parent.vp2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+				widShared.keepInBoundsExtended(self, self.parent.vp, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 
 			elseif x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h then
 				local mx, my = self:getRelativePosition(x, y)
@@ -834,7 +834,7 @@ function def:uiCall_reshapePre()
 
 	-- Refit if maximized and parent dimensions changed.
 	if self.maximized then
-		local pvp2 = parent.vp2
+		local pvp = parent.vp
 		self.x = pvp2.x
 		self.y = pvp2.y
 		if self.w ~= pvp2.w or self.h ~= pvp2.h then
@@ -911,7 +911,7 @@ function def:uiCall_reshapePre()
 
 	-- Hacky way of not interfering with the user resizing the frame. Call keepInBounds* before exiting the resize mode.
 	if self.press_busy ~= "resize" then
-		widShared.keepInBoundsExtended(self, parent.vp2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+		widShared.keepInBoundsExtended(self, parent.vp, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
 	widLayout.resetLayoutSpace(self)
