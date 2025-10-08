@@ -376,7 +376,7 @@ function def:closeFrame(force)
 	-- XXX fortify against calls during update-lock
 	--print("self.allow_close", self.allow_close, "force", force)
 	if self.allow_close or force then
-		self:remove()
+		self:destroy()
 		return true
 	end
 
@@ -705,7 +705,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			elseif x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h then
 				local mx, my = self:getRelativePosition(x, y)
 				if self.press_busy == "button-close" and _pointInSensor(self.b_close, mx, my) then
-					self:remove()
+					self:destroy()
 
 				elseif self.press_busy == "button-size"
 				and self.allow_resize

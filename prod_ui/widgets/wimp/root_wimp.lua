@@ -138,9 +138,9 @@ local function clearPopUp(self, reason_code)
 
 	local wid_ref = self.pop_up_menu.wid_ref
 
-	-- Remove nested pop-ups, then the base pop-up, then clear the root's reference to it.
-	widShared.chainRemovePost(self.pop_up_menu)
-	self.pop_up_menu:remove()
+	-- Destroy nested pop-ups, then the base pop-up, then clear the root's reference to it.
+	widShared.chainDestroyPost(self.pop_up_menu)
+	self.pop_up_menu:destroy()
 	self.pop_up_menu = false
 
 	-- Some widgets need to perform additional cleanup when the menu disappears.

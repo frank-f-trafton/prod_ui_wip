@@ -1,7 +1,7 @@
 -- ProdUI: Widget implementation.
 
 
--- TODO: remove '_depth' debug fields in layout code
+--- TODO: remove '_depth' debug fields in layout code
 
 
 local context = select(1, ...)
@@ -573,30 +573,30 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 end
 
 
---- Remove a widget instance and all of its children from the context tree. This is an immediate action, so calling
+--- Removes a widget instance and all of its children from the context tree. This is an immediate action, so calling
 --	it while iterating through the tree may mess up the loop. The deepest descendants are removed first. If applicable,
 --	the widget is removed from the parent's layout list.
 --  Locked during update: yes (parent)
 --	Callbacks:
 --	* Bubble: uiCall_destroy()
-function _mt_widget:remove()
+function _mt_widget:destroy()
 	local parent = self.parent
 
 	self._dead = "dying"
 
 	local locks = context.locks
 	if locks[parent] then
-		coreErr.errLockedParent("remove")
+		coreErr.errLockedParent("destroy")
 
 	elseif locks[self] then
-		coreErr.errLocked("remove")
+		coreErr.errLocked("destroy")
 	end
 
 	-- Handle children, grandchildren, etc.
 	local children = self.children
 	if children then
 		for i = #children, 1, -1 do
-			children[i]:remove()
+			children[i]:destroy()
 			-- Removal from 'children' list is handled below.
 		end
 
@@ -612,14 +612,14 @@ function _mt_widget:remove()
 
 	if context.captured_focus == self then
 		-- XXX not sure if this should be an error or handled implicitly.
-		--error("cannot remove a widget that currently has the context focus captured.")
+		--error("cannot destroy a widget that currently has the context focus captured.")
 		self:uncaptureFocus()
 	end
 
 	self:_runUserEvent("userDestroy")
 	self:bubbleEvent("uiCall_destroy", self)
 
-	-- If parent exists, find and remove self from parent's 1) children and 2) layout
+	-- If parent exists, find and destroy self from parent's 1) children and 2) layout
 	if parent then
 		if uiTable.removeElement(parent.children, self) == 0 then
 			error("widget can't find itself in parent's list of children.")
@@ -674,11 +674,11 @@ end
 
 
 --[[
-local function _removeAsync(self)
-	self:remove()
+local function _destroyAsync(self)
+	self:destroy()
 end
-function _mt_widget:removeAsync()
-	context:appendAsyncAction(self, _removeAsync)
+function _mt_widget:destroyAsync()
+	context:appendAsyncAction(self, _destroyAsync)
 	return self
 end
 --]]

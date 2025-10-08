@@ -109,7 +109,7 @@ def.setBlocking = lgcPopUps.setBlocking
 
 local function destroySubMenus(self)
 	if self.chain_next then
-		widShared.chainRemovePost(self)
+		widShared.chainDestroyPost(self)
 		self.last_open_group = false
 	end
 end
@@ -586,7 +586,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			else
 				local temp_chain_prev = self.chain_prev
 
-				self:remove()
+				self:destroy()
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false
@@ -601,7 +601,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 				destroySubMenus(self)
 				local temp_chain_prev = self.chain_prev
 
-				self:remove()
+				self:destroy()
 
 				temp_chain_prev.chain_next = false
 				temp_chain_prev.last_open_group = false

@@ -10,8 +10,8 @@ local lgcWimp = {}
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 
 
-function lgcWimp.async_widget_remove(self)
-	self:remove()
+function lgcWimp.async_widget_destroy(self)
+	self:destroy()
 end
 
 
@@ -23,9 +23,9 @@ function lgcWimp.closeFrame(self)
 	while wid do
 		if wid.frame_type then
 			if not self.context:isLocked() then
-				wid:remove()
+				wid:destroy()
 			else
-				self.context:appendAsyncAction(wid, lgcWimp.async_widget_remove, false)
+				self.context:appendAsyncAction(wid, lgcWimp.async_widget_destroy, false)
 			end
 
 			return

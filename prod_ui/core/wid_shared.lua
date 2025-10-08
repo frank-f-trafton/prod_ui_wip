@@ -487,8 +487,8 @@ function widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 end
 
 
---- Given a widget in a chain, remove all widgets after this one.
-function widShared.chainRemovePost(self)
+--- Given a widget in a chain, destroy all widgets after this one.
+function widShared.chainDestroyPost(self)
 	local wid = self
 
 	while wid.chain_next do
@@ -497,7 +497,7 @@ function widShared.chainRemovePost(self)
 
 	while wid ~= self do
 		local wid_prev = wid.chain_prev
-		wid:remove()
+		wid:destroy()
 		wid = wid_prev
 	end
 
