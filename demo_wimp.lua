@@ -628,7 +628,7 @@ do
 			repeat
 				wid = context.root:findTag("plan_container")
 				if wid then
-					wid:remove()
+					wid:destroy()
 				end
 			until not wid
 

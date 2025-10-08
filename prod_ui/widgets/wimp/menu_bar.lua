@@ -835,9 +835,9 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-local function async_remove(self, _reserved, dt)
-	-- Tests async removal and pop-up menu cleanup.
-	self:remove()
+local function async_destroy(self, _reserved, dt)
+	-- Tests async destruction and pop-up menu cleanup.
+	self:destroy()
 end
 
 

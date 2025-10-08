@@ -268,7 +268,7 @@ function def:removeItemByIndex(item_i)
 	-- clean up the control widget
 	local wid_ref = item_t.wid_ref
 	if wid_ref then
-		wid_ref:remove()
+		wid_ref:destroy()
 	end
 	item_t.wid_ref = false
 

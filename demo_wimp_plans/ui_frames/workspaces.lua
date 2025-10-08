@@ -190,7 +190,7 @@ function plan.make(panel)
 				if self.context.root.workspace == ws2 then
 					self.context.root:setActiveWorkspace(ws1 or false)
 				end
-				ws2:remove()
+				ws2:destroy()
 				self.context.root:sortG2()
 				_refreshButtonState(self)
 			end

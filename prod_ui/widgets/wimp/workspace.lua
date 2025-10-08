@@ -215,11 +215,11 @@ end
 
 function def:uiCall_destroy(inst)
 	if self == inst then
-		-- Remove any Window Frames that are associated with this Workspace.
+		-- Destroy any Window Frames that are associated with this Workspace.
 		local root = self.context.root
 		for i, wid_g2 in ipairs(root.children) do
 			if wid_g2.frame_type == "window" and wid_g2.workspace == self then
-				wid_g2:remove()
+				wid_g2:destroy()
 			end
 		end
 

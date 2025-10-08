@@ -553,7 +553,7 @@ function def:uiCall_update(dt)
 	-- This widget cannot operate if the owner that it extends is gone.
 	local wid_ref = self.wid_ref
 	if not wid_ref then
-		self:remove()
+		self:destroy()
 		return
 	end
 
