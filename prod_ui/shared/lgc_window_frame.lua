@@ -111,7 +111,7 @@ function lgcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 			self.y = self.context.mouse_y - pa_y + self.drag_oy
 		end
 
-		widShared.keepInBoundsExtended(self, parent.vp2, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+		widShared.keepInBoundsExtended(self, parent.vp, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
 	end
 
 	-- Tweak to fix accidental maximizes from double-clicks.

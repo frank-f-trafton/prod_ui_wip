@@ -51,7 +51,7 @@ function def:uiCall_initialize()
 
 	self.sort_max = 7
 
-	widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 1)
 
 	widLayout.setupLayoutList(self)
 
@@ -107,9 +107,9 @@ end
 function def:uiCall_reshapePost()
 	print("root_wimp: uiCall_reshapePost")
 
-	-- Viewport #2 is the area for Workspaces and maximized Window Frames.
+	-- Viewport #1 is the area for Workspaces and maximized Window Frames.
 
-	self.vp2:set(self.LO_x, self.LO_y, self.LO_w, self.LO_h)
+	self.vp:set(self.LO_x, self.LO_y, self.LO_w, self.LO_h)
 
 	-- Handle the current active Workspace.
 	local workspace = self.workspace
@@ -707,7 +707,7 @@ end
 
 function def:uiCall_destroy(inst)
 	if self == inst then
-		widShared.removeViewports(self, 2)
+		widShared.removeViewports(self, 1)
 	-- Bubbled events from children
 	else
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.

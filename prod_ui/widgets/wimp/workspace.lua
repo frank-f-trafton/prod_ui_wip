@@ -75,9 +75,9 @@ function def:uiCall_reshapePre()
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
 	local root = context.root
-	local rvp2 = root.vp2
+	local rvp = root.vp
 
-	self.x, self.y, self.w, self.h = rvp2.x, rvp2.y, rvp2.w, rvp2.h
+	self.x, self.y, self.w, self.h = rvp.x, rvp.y, rvp.w, rvp.h
 
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceSideDelta(skin.box.border)
