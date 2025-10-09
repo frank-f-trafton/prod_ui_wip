@@ -84,6 +84,9 @@ local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
 
+local L = uiAssert.L
+
+
 local def = {
 	skin_id = "menu_pop1",
 
@@ -227,14 +230,15 @@ end
 local function _makeCommand(self, info)
 	uiAssert.type1(2, info, "table")
 
-	uiAssert.fieldType1(info, "info", "text", "string")
-	uiAssert.fieldTypeEval1(info, "info", "text_shortcut", "string")
-	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiAssert.fieldTypeEval1(info, "info", "key_shortcut", "string")
-	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiAssert.fieldTypeEval1(info, "info", "callback", "function")
-	uiAssert.fieldTypeEval1(info, "info", "config", "function")
-	uiAssert.fieldTypeEval1(info, "info", "actionable", "boolean")
+	L[1] = "info"
+	L[2] = "text"; uiAssert.type1(L, info.text, "string")
+	L[2] = "text_shortcut"; uiAssert.typeEval1(L, info.text_shortcut, "string")
+	L[2] = "key_mnemonic"; uiAssert.typeEval1(L, info.key_mnemonic, "string")
+	L[2] = "key_shortcut"; uiAssert.typeEval1(L, info.key_shortcut, "string")
+	L[2] = "icon_id"; uiAssert.typeEval1(L, info.icon_id, "string")
+	L[2] = "callback"; uiAssert.typeEval1(L, info.callback, "function")
+	L[2] = "config"; uiAssert.typeEval1(L, info.config, "function")
+	L[2] = "actionable"; uiAssert.typeEval1(L, info.actionable, "boolean")
 	-- don't check 'user_value'
 
 	local item = {
@@ -261,11 +265,12 @@ end
 local function _makeGroup(self, info)
 	uiAssert.type1(2, info, "table")
 
-	uiAssert.fieldType1(info, "info", "text", "string")
-	uiAssert.fieldTypeEval1(info, "info", "key_mnemonic", "string")
-	uiAssert.fieldTypeEval1(info, "info", "icon_id", "string")
-	uiAssert.fieldTypeEval1(info, "info", "group_prototype", "table")
-	uiAssert.fieldTypeEval1(info, "info", "config", "function")
+	L[1] = "info"
+	L[2] = "text"; uiAssert.type1(L, info.text, "string")
+	L[2] = "key_mnemonic"; uiAssert.typeEval1(L, info.key_mnemonic, "string")
+	L[2] = "icon_id"; uiAssert.typeEval1(L, info.icon_id, "string")
+	L[2] = "group_prototype"; uiAssert.typeEval1(L, info.group_prototype, "table")
+	L[2] = "config"; uiAssert.typeEval1(L, info.config, "function")
 
 	local item = {
 		x = 0, y = 0, w = 0, h = 0,
@@ -519,7 +524,7 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 
 	-- Apply edge padding.
-	vp:reduceSideDelta(self.skin.box.margin)
+	vp:reduceT(self.skin.box.margin)
 
 	-- 'Okay-to-click' rectangle.
 	-- (Reserved in case any kind of scroll bar or other UI control is added around

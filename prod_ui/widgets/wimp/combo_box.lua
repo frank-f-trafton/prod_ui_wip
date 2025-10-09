@@ -243,13 +243,13 @@ function def:uiCall_reshapePre()
 	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
 
 	vp:splitOrOverlay(vp3, skin.button_placement, button_spacing)
 	vp:copy(vp2)
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	self:scrollClampViewport()
 

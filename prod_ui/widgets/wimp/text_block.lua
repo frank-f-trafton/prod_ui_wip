@@ -224,7 +224,7 @@ function def:uiCall_reshapePre()
 	self.text_w, self.text_h = false, false
 
 	vp2:set(0, 0, self.w, self.h)
-	vp2:reduceSideDelta(skin.box.border)
+	vp2:reduceT(skin.box.border)
 
 	if not self.text_w then
 		_determineTextDimensions(self, self.w)

@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local pMath = require("prod_ui.lib.pile_math")
+local uiTable = require("prod_ui.ui_table")
 
 
 local function _makeBox(self, fill, outline, text_color, text)
@@ -41,10 +41,10 @@ function plan.make(panel)
 	local unit_mult = 0.99
 	for i = 1, 128 do
 		_makeBox(panel,
-			pMath.wrap1Array(carousel_colors, i),
+			uiTable.wrap1Array(carousel_colors, i),
 			"black",
 			"white"
-		):geometrySetMode("segment-unit", pMath.wrap1Array(carousel_sides, i), unit)
+		):geometrySetMode("segment-unit", uiTable.wrap1Array(carousel_sides, i), unit)
 		unit = unit * unit_mult
 	end
 

@@ -351,7 +351,7 @@ function def:uiCall_reshapePre()
 	local vp, vp2, vp3, vp4 = self.vp, self.vp2, self.vp3, self.vp4
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
 	vp:split(vp3, skin.button_placement, button_spacing)
@@ -362,7 +362,7 @@ function def:uiCall_reshapePre()
 	end
 
 	vp:copy(vp2)
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	editWidS.updateDocumentDimensions(self)
 	self:scrollClampViewport()

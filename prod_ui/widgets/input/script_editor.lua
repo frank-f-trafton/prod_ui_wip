@@ -88,13 +88,13 @@ function def:uiCall_reshapePre()
 	local vp, vp2 = self.vp, self.vp2
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)

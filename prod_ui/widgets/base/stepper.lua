@@ -287,8 +287,8 @@ function def:uiCall_reshapePre()
 		vp:split(vp3, "right", skin.next_spacing)
 	end
 
-	vp:reduceSideDelta(skin.box.border)
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.border)
+	vp:reduceT(skin.box.margin)
 
 	lgcLabel.reshapeLabel(self)
 

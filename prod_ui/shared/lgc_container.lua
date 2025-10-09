@@ -239,7 +239,7 @@ function lgcContainer.sashDragLogic(self, x, y)
 				end
 
 				-- Enforce preferred min+max length
-				GE.len = pMath.round(GE.len)
+				GE.len = pMath.roundInf(GE.len)
 				GE.len = math.max(GE.len_min, math.min(GE.len, GE.len_max))
 
 				if GE.len ~= old_len then

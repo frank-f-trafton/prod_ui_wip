@@ -90,9 +90,9 @@ function def:uiCall_reshapePre()
 	local vp, vp2 = self.vp, self.vp2
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	vp:split(vp2, skin.bijou_side_h, skin.bijou_spacing)
-	vp2:reduceSideDelta(skin.box.margin)
+	vp2:reduceT(skin.box.margin)
 
 	lgcLabel.reshapeLabel(self)
 

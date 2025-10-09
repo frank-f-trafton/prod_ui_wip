@@ -727,14 +727,14 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 
 	-- Border and scroll bars.
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 
 	-- Margin.
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	if self.col_bar_visible then
 		vp:split(vp3, "top", skin.column_bar_height)

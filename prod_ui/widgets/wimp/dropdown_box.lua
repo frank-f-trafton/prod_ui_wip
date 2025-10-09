@@ -228,7 +228,7 @@ function def:uiCall_reshapePre()
 	local vp, vp2, vp3, vp4, vp5 = self.vp, self.vp2, self.vp3, self.vp4, self.vp5
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	vp:copy(vp2)
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
@@ -242,7 +242,7 @@ function def:uiCall_reshapePre()
 	vp3:splitOrOverlay(vp4, skin.icon_side, icon_spacing)
 
 	-- Additional text padding
-	vp3:reduceSideDelta(skin.box.margin)
+	vp3:reduceT(skin.box.margin)
 
 	_updateTextWidth(self)
 

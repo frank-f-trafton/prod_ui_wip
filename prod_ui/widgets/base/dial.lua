@@ -203,7 +203,7 @@ function def:uiCall_reshapePre()
 	local vp, vp2 = self.vp, self.vp2
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	vp:splitOrOverlay(vp2, skin.label_placement, skin.label_spacing)
 	vp:reduceSideDetla(skin.box.margin)
 

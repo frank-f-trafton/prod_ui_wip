@@ -240,9 +240,14 @@ _mt_proto.__index = _mt_proto
 uiPopUpMenu._mt_proto = _mt_proto
 
 
+local L = uiAssert.L
+
+
 function uiPopUpMenu.assertPrototypeItems(proto)
 	for i, item in ipairs(proto) do
-		uiAssert.fieldType1(proto, "proto", i, "table")
+		L[1] = "proto"
+		L[2] = i; uiAssert.type1(L, proto[i], "table")
+
 		local mt = getmetatable(item)
 		if mt ~= _mt_command and mt ~= _mt_group and mt ~= _mt_separator then
 			error("prototype item #" .. i .. ": invalid item (wrong metatable)")

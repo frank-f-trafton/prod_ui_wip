@@ -847,9 +847,9 @@ function def:uiCall_reshapePre()
 	self.h = math.max(self.min_h, math.min(self.h, self.max_h))
 
 	vp3:set(0, 0, self.w, self.h)
-	vp3:reduceSideDelta(skin.box.border)
+	vp3:reduceT(skin.box.border)
 	vp3:copy(vp4)
-	vp4:reduceSideDelta(skin.box.margin)
+	vp4:reduceT(skin.box.margin)
 
 	-- Update sensor enabled state
 	self.b_close.enabled = self.allow_close
@@ -896,12 +896,12 @@ function def:uiCall_reshapePre()
 	vp.y = vp.y + vp5.h
 	vp.h = vp.h - vp5.h
 
-	vp:reduceSideDelta(skin.box.border2)
+	vp:reduceT(skin.box.border2)
 
 	lgcScroll.arrangeScrollBars(self)
 
 	vp:copy(vp2)
-	vp2:reduceSideDelta(skin.box.margin2)
+	vp2:reduceT(skin.box.margin2)
 
 	widShared.setClipScissorToViewport(self, vp2)
 	widShared.setClipHoverToViewport(self, vp2)

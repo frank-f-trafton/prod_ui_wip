@@ -320,14 +320,14 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 
 	-- Border and scroll bars.
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 
 	-- Margin.
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	-- Dimensions and horizontal position for one menu item.
 	vp3:set(vp.x, 0, vp.w, skin.item_height)
@@ -340,7 +340,7 @@ function def:uiCall_reshapePre()
 	vp4:splitOrOverlay(vp5, skin.icon_side, icon_spacing)
 
 	-- Additional text padding
-	vp4:reduceSideDelta(skin.box.margin)
+	vp4:reduceT(skin.box.margin)
 
 	self:scrollClampViewport()
 	lgcScroll.updateScrollState(self)
