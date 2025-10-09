@@ -1,22 +1,7 @@
--- PILE Pool v1.202 (Beta)
+-- PILE Pool v1.202
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
-
-
---[[
-This module is experimental. Testing is required to determine if pooling tables and LÖVE C++ objects
-would be worthwhile.
-
-Initial benchmarks with Lua 5.1 suggest that in most cases, one would be better off just creating new
-tables. (Can I remove some more overhead here?)
-
-LuaJIT with compilation is promising, but simple tests can be deceptive due to how the JIT
-process works. A real test will require integration with a more complete ProdUI.
-
-Of course, there is also the trade-off of potentially introducing manual memory management troubles to
-a LÖVE game/app...
---]]
 
 
 local M = {}

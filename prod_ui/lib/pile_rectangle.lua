@@ -1,4 +1,4 @@
--- PILE Rectangle Functions v1.202 (Beta)
+-- PILE Rectangle Functions v1.202
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -14,26 +14,31 @@ local pMath = require(PATH .. "pile_math")
 local pArg = require(PATH .. "pile_arg_check")
 
 
-local _lerp, _round = pMath.lerp, pMath.round
+local _lerp, _roundInf = pMath.lerp, pMath.roundInf
 local _min, _max = math.min, math.max
 
 
 --[[ASSERT
+local L = pArg.L
+
+
 local function _checkRectangle(r, name)
 	pArg.type1(nil, r, "table")
-	pArg.fieldNumberNotNaN(r, name, "x")
-	pArg.fieldNumberNotNaN(r, name, "y")
-	pArg.fieldNumberNotNaN(r, name, "w")
-	pArg.fieldNumberNotNaN(r, name, "h")
+	L[1] = name
+	L[2] = "x"; pArg.numberNotNaN(L, r.x)
+	L[2] = "y"; pArg.numberNotNaN(L, r.y)
+	L[2] = "w"; pArg.numberNotNaN(L, r.w)
+	L[2] = "h"; pArg.numberNotNaN(L, r.h)
 end
 
 
 local function _checkSideDelta(sd, name)
 	pArg.type1(nil, sd, "table")
-	pArg.fieldNumberNotNaN(sd, name, "x1")
-	pArg.fieldNumberNotNaN(sd, name, "y1")
-	pArg.fieldNumberNotNaN(sd, name, "x2")
-	pArg.fieldNumberNotNaN(sd, name, "y2")
+	L[1] = name
+	L[2] = "x1"; pArg.numberNotNaN(L, sd.x1)
+	L[2] = "y1"; pArg.numberNotNaN(L, sd.y1)
+	L[2] = "x2"; pArg.numberNotNaN(L, sd.x2)
+	L[2] = "y2"; pArg.numberNotNaN(L, sd.y2)
 end
 --]]
 
@@ -127,7 +132,7 @@ function M.reduce(r, x1, y1, x2, y2)
 end
 
 
-function M.expandSideDelta(r, sd)
+function M.expandT(r, sd)
 	--[[ASSERT
 	_checkRectangle(r, "r")
 	_checkSideDelta(sd, "sd")
@@ -142,7 +147,7 @@ function M.expandSideDelta(r, sd)
 end
 
 
-function M.reduceSideDelta(r, sd)
+function M.reduceT(r, sd)
 	--[[ASSERT
 	_checkRectangle(r, "r")
 	_checkSideDelta(sd, "sd")
@@ -447,8 +452,8 @@ function M.placeInner(a, b, ux, uy)
 	pArg.numberNotNaN(4, uy)
 	--]]
 
-	b.x = _round(_lerp(a.x, a.x + a.w - b.w, ux))
-	b.y = _round(_lerp(a.y, a.y + a.h - b.h, uy))
+	b.x = _roundInf(_lerp(a.x, a.x + a.w - b.w, ux))
+	b.y = _roundInf(_lerp(a.y, a.y + a.h - b.h, uy))
 
 	return a
 end
@@ -461,7 +466,7 @@ function M.placeInnerHorizontal(a, b, ux)
 	pArg.numberNotNaN(3, ux)
 	--]]
 
-	b.x = _round(_lerp(a.x, a.x + a.w - b.w, ux))
+	b.x = _roundInf(_lerp(a.x, a.x + a.w - b.w, ux))
 
 	return a
 end
@@ -474,7 +479,7 @@ function M.placeInnerVertical(a, b, uy)
 	pArg.numberNotNaN(4, uy)
 	--]]
 
-	b.y = _round(_lerp(a.y, a.y + a.h - b.h, uy))
+	b.y = _roundInf(_lerp(a.y, a.y + a.h - b.h, uy))
 
 	return a
 end
@@ -488,8 +493,8 @@ function M.placeMidpoint(a, b, ux, uy)
 	pArg.numberNotNaN(4, uy)
 	--]]
 
-	b.x = _round(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
-	b.y = _round(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
+	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
+	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
 
 	return a
 end
@@ -502,7 +507,7 @@ function M.placeMidpointHorizontal(a, b, ux)
 	pArg.numberNotNaN(3, ux)
 	--]]
 
-	b.x = _round(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
+	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
 
 	return a
 end
@@ -515,7 +520,7 @@ function M.placeMidpointVertical(a, b, uy)
 	pArg.numberNotNaN(4, uy)
 	--]]
 
-	b.y = _round(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
+	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
 
 	return a
 end
@@ -529,8 +534,8 @@ function M.placeOuter(a, b, ux, uy)
 	pArg.numberNotNaN(4, uy)
 	--]]
 
-	b.x = _round(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
-	b.y = _round(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
+	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
+	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
 
 	return a
 end
@@ -543,7 +548,7 @@ function M.placeOuterHorizontal(a, b, ux)
 	pArg.numberNotNaN(3, ux)
 	--]]
 
-	b.x = _round(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
+	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
 
 	return a
 end
@@ -556,7 +561,7 @@ function M.placeOuterVertical(a, b, uy)
 	pArg.numberNotNaN(4, uy)
 	--]]
 
-	b.y = _round(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
+	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
 
 	return a
 end
@@ -568,8 +573,8 @@ function M.center(a, b)
 	_checkRectangle(b, "b")
 	--]]
 
-	b.x = _round(a.x + (a.w - b.w)*.5)
-	b.y = _round(a.y + (a.h - b.h)*.5)
+	b.x = _roundInf(a.x + (a.w - b.w)*.5)
+	b.y = _roundInf(a.y + (a.h - b.h)*.5)
 
 	return a
 end
@@ -581,7 +586,7 @@ function M.centerHorizontal(a, b)
 	_checkRectangle(b, "b")
 	--]]
 
-	b.x = _round(a.x + (a.w - b.w)*.5)
+	b.x = _roundInf(a.x + (a.w - b.w)*.5)
 
 	return a
 end
@@ -593,7 +598,7 @@ function M.centerVertical(a, b)
 	_checkRectangle(b, "b")
 	--]]
 
-	b.y = _round(a.y + (a.h - b.h)*.5)
+	b.y = _roundInf(a.y + (a.h - b.h)*.5)
 
 	return a
 end

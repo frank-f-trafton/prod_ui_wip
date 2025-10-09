@@ -376,14 +376,14 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 
 	-- Border and scroll bars.
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	lgcScroll.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 
 	-- Margin.
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	_enforceMinCol1Width(self)
 	_updateCol1Scaled(self)

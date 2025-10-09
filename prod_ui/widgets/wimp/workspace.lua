@@ -80,12 +80,12 @@ function def:uiCall_reshapePre()
 	self.x, self.y, self.w, self.h = rvp.x, rvp.y, rvp.w, rvp.h
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 
 	lgcScroll.arrangeScrollBars(self)
 
 	vp:copy(vp2)
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	widShared.setClipScissorToViewport(self, vp2)
 	widShared.setClipHoverToViewport(self, vp2)

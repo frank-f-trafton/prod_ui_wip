@@ -70,7 +70,7 @@ function def:uiCall_reshapePre()
 	local vp = self.vp
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(self.skin.box.border)
+	vp:reduceT(self.skin.box.border)
 end
 
 

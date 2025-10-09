@@ -1,4 +1,4 @@
--- PILE Table v1.201
+-- PILE Table v1.202
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -416,6 +416,11 @@ function M.assertResolve(t, str, raw)
 		error(interp(lang.err_res_assert, str, count))
 	end
 	return ret, count
+end
+
+
+function M.wrap1Array(t, n)
+	return t[((n - 1) % #t) + 1]
 end
 
 

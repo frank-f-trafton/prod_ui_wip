@@ -113,9 +113,9 @@ function def:uiCall_reshapePre()
 	local vp, vp2 = self.vp, self.vp2
 
 	vp2:set(0, 0, self.w, self.h)
-	vp2:reduceSideDelta(skin.box.border)
+	vp2:reduceT(skin.box.border)
 	vp2:splitOrOverlay(vp, skin.label_placement, skin.label_spacing)
-	vp:reduceSideDelta(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	lgcSlider.reshapeSliderComponent(self, vp2.x, vp2.y, vp2.w, vp2.h, skin.thumb_w, skin.thumb_h)
 

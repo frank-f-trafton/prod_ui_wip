@@ -203,9 +203,9 @@ function def:uiCall_reshapePre()
 	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceSideDelta(skin.box.border)
+	vp:reduceT(skin.box.border)
 	vp:splitOrOverlay(vp2, skin.graphic_placement, skin.graphic_spacing)
-	vp2:reduceSideDelta(skin.box.margin)
+	vp2:reduceT(skin.box.margin)
 
 	local aux_sz
 	if skin.aux_size == "auto" then
