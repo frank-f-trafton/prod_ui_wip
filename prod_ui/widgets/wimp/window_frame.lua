@@ -19,7 +19,7 @@ local _lerp = pMath.lerp
 local _viewport_keys = context:getLua("core/wid/viewport_keys")
 
 
-local _enum_header_sizes = uiTable.makeLUTV("small", "normal", "large")
+local _enum_header_sizes = uiTable.newEnumV("HeaderSize", "small", "normal", "large")
 
 
 local def = {
@@ -106,7 +106,7 @@ end
 
 function def:setHeaderSize(size)
 	size = size and size
-	uiAssert.enumEval(1, size, "HeaderSize", _enum_header_sizes)
+	uiAssert.enumEval(1, size, _enum_header_sizes)
 
 	if self.header_size ~= size then
 		local sx, sy = self:scrollGetXY()

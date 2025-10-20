@@ -29,6 +29,7 @@ local lgcInputS = context:getLua("shared/lgc_input_s")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -73,11 +74,11 @@ function def:wid_incrementPageKey(v, radix, reps) return v + radix end
 function def:wid_decrementPageKey(v, radix, reps) return v - radix end
 
 
-local _enum_value_mode = {
+local _enum_value_mode = uiTable.newEnum("ValueMode", {
 	octal = 8,
 	decimal = 10,
 	hexadecimal = 16
-}
+})
 
 
 local _specifiers = {
@@ -257,7 +258,7 @@ end
 
 
 function def:setValueMode(mode)
-	uiAssert.enum(1, mode, "ValueMode", _enum_value_mode)
+	uiAssert.enum(1, mode, _enum_value_mode)
 
 	self.value_mode = mode
 end

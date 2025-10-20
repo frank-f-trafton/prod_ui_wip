@@ -10,8 +10,8 @@ local editWid = {}
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
-editWid._enum_align = uiTable.makeLUTV("left", "center", "right")
-editWid._enum_bad_input = uiTable.makeLUTV("trim", "replacement_char")
+editWid._enum_align = uiTable.newEnumV("EditAlignMode", "left", "center", "right")
+editWid._enum_bad_input = uiTable.newEnumV("EditBadInputRule", "trim", "replacement_char")
 
 
 function editWid.updateCaretShape(self)

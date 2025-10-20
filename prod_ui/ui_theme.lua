@@ -8,14 +8,11 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 -- ProdUI
-local pTable = require(REQ_PATH .. "lib.pile_table")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 local uiAssert = require(REQ_PATH .. "ui_assert")
 local uiGraphics = require(REQ_PATH .. "ui_graphics")
 local uiRes = require(REQ_PATH .. "ui_res")
-
-
-local _makeLUTV = pTable.makeLUTV
+local uiTable = require(REQ_PATH .. "ui_table")
 
 
 uiTheme.settings = {
@@ -49,7 +46,7 @@ end
 function uiTheme.setLabel(s)
 	uiAssert.typeEval(1, s, "string")
 
-	pTable.clearArray(err_label)
+	uiTable.clearArray(err_label)
 	if s then
 		uiTheme.pushLabel(s)
 	end
@@ -83,23 +80,22 @@ end
 
 uiTheme.enums = {
 	-- LÖVE enums
-	BlendAlphaMode = _makeLUTV("alphamultiply", "premultiplied"),
-	BlendMode = _makeLUTV("alpha", "replace", "screen", "add", "subtract", "multiply", "lighten", "darken"),
-	DrawMode = _makeLUTV("fill", "line"),
-	LineJoin = _makeLUTV("bevel", "miter", "none"),
-	LineStyle = _makeLUTV("rough", "smooth"),
+	BlendAlphaMode = uiTable.newEnumV("BlendAlphaMode", "alphamultiply", "premultiplied"),
+	BlendMode = uiTable.newEnumV("BlendMode", "alpha", "replace", "screen", "add", "subtract", "multiply", "lighten", "darken"),
+	DrawMode = uiTable.newEnumV("DrawMode", "fill", "line"),
+	LineJoin = uiTable.newEnumV("LineJoin", "bevel", "miter", "none"),
+	LineStyle = uiTable.newEnumV("LineStyle", "rough", "smooth"),
 
 	-- ProdUI Theme enums
-	font_type = {[".ttf"]="vector", [".otf"]="vector", [".fnt"]="bmfont", [".png"]="imagefont"},
+	font_type = uiTable.newEnum("FontExtensionType", {[".ttf"]="vector", [".otf"]="vector", [".fnt"]="bmfont", [".png"]="imagefont"}),
 
 	-- ProdUI skin enums
-	bijou_side_h = _makeLUTV("left", "right"),
-	graphic_placement = _makeLUTV("left", "right", "top", "bottom", "overlay"),
-	label_align_h = _makeLUTV("left", "center", "right", "justify"),
-	label_align_v = _makeLUTV("top", "middle", "bottom"),
-	quad_align_h = _makeLUTV("left", "center", "right"),
-	quad_align_v = _makeLUTV("top", "middle", "bottom"),
-	text_align_OLD = _makeLUTV("left", "center", "right"),
+	bijou_side_h = uiTable.newEnumV("BijouSideHorizontal", "left", "right"),
+	graphic_placement = uiTable.newEnumV("GraphicPlacement", "left", "right", "top", "bottom", "overlay"),
+	label_align_h = uiTable.newEnumV("LabelAlignHorizontal", "left", "center", "right", "justify"),
+	label_align_v = uiTable.newEnumV("LabelAlignVertical", "top", "middle", "bottom"),
+	quad_align_h = uiTable.newEnumV("QuadAlignHorizontal", "left", "center", "right"),
+	quad_align_v = uiTable.newEnumV("QuadAlignVertical", "top", "middle", "bottom"),
 }
 local enums = uiTheme.enums
 
@@ -287,7 +283,7 @@ end
 
 
 local function _concatFromHash(t)
-	return table.concat(pTable.arrayOfHashKeys(t), ", ")
+	return table.concat(uiTable.arrayOfHashKeys(t), ", ")
 end
 
 

@@ -1,4 +1,4 @@
--- PILE Rectangle Functions v1.202
+-- PILE Rectangle Functions v1.300
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -612,16 +612,6 @@ function M.pointOverlap(r, x, y)
 	--]]
 
 	return x >= r.x and x < r.x + r.w and y >= r.y and y < r.y + r.h
-end
-
-
-function M.toString(r)
-	--[[ASSERT
-	pArg.type1(1, r, "table")
-	--]]
-
-	local ts = tostring
-	return "{x=" .. ts(r.x) .. ", y=" .. ts(r.y) .. ", w=" .. ts(r.w) .. ", h=" .. ts(r.h) .. "}"
 end
 
 

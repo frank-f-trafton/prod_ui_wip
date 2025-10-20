@@ -75,7 +75,7 @@ local widShared = context:getLua("core/wid_shared")
 local _lerp = pMath.lerp
 
 
-local _enum_text_align = {left=0.0, center=0.5, right=1.0}
+local _enum_text_align = uiTable.newEnum("TextAlign", {left=0.0, center=0.5, right=1.0})
 
 
 local def = {
@@ -403,7 +403,7 @@ end
 -- TODO: Unfinished.
 function _mt_column:setHeaderTextAlignment(align)
 	align = align or self.owner.skin.col_def_text_align
-	uiAssert.enum(1, align, "TextAlign", _enum_text_align)
+	uiAssert.enum(1, align, _enum_text_align)
 
 	self.text_align = align
 
@@ -419,7 +419,7 @@ end
 
 function _mt_column:setContentTextAlignment(align)
 	align = align or self.owner.skin.content_def_text_align
-	uiAssert.enum(2, align, "TextAlign", _enum_text_align)
+	uiAssert.enum(2, align, _enum_text_align)
 
 	self.content_text_align = align
 

@@ -11,7 +11,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local sash_styles = context.resources.sash_styles
 
 
-widLayout._enum_layout_base = uiTable.makeLUTV(
+widLayout._enum_layout_base = uiTable.newEnumV("LayoutBase",
 	"zero",
 	"self",
 	"viewport",
@@ -21,7 +21,7 @@ widLayout._enum_layout_base = uiTable.makeLUTV(
 )
 
 
-widLayout._enum_seg_edge = uiTable.makeLUTV("left", "right", "top", "bottom")
+widLayout._enum_seg_edge = uiTable.newEnumV("SegmentEdge", "left", "right", "top", "bottom")
 
 
 --[[
@@ -113,7 +113,7 @@ widLayout.mode_setters = {
 	end,
 
 	segment = function(self, edge, len, sash_style, len_min, len_max)
-		uiAssert.enum(1, edge, "edge", widLayout._enum_seg_edge)
+		uiAssert.enum(1, edge, widLayout._enum_seg_edge)
 		uiAssert.numberNotNaN(2, len)
 		uiAssert.typeEval(3, sash_style, "string")
 		uiAssert.numberNotNaNEval(4, len_min)
@@ -132,7 +132,7 @@ widLayout.mode_setters = {
 	end,
 
 	["segment-unit"] = function(self, edge, unit)
-		uiAssert.enum(1, edge, "edge", widLayout._enum_seg_edge)
+		uiAssert.enum(1, edge, widLayout._enum_seg_edge)
 		uiAssert.numberNotNaN(2, unit)
 
 		local GE = _initGE(self, "segment-unit")
@@ -352,7 +352,7 @@ widLayout.handlers = {
 
 
 local function _layoutSetBase(self, layout_base)
-	uiAssert.enum(1, layout_base, "LayoutBase", widLayout._enum_layout_base)
+	uiAssert.enum(1, layout_base, widLayout._enum_layout_base)
 
 	self.LO_base = layout_base
 end
