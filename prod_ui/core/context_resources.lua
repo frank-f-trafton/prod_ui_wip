@@ -10,18 +10,18 @@ local context = select(1, ...)
 local fontCache = context:getLua("core/res/font_cache")
 local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
 local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
-local _assertResolve = pTable.assertResolve
+local _assertResolve = uiTable.assertResolve
 
 
-local _lut_font_ext = pTable.makeLUTV(".ttf", ".otf", ".fnt", ".png")
-local _lut_font_ext_vec = pTable.makeLUTV(".ttf", ".otf")
+local _lut_font_ext = uiTable.newEnumV("FontFileExtension", ".ttf", ".otf", ".fnt", ".png")
+local _lut_font_ext_vec = uiTable.newEnumV("VectorFontFileExtension", ".ttf", ".otf")
 
 
 local _info = {} -- for love.filesystem.getInfo()
@@ -42,7 +42,7 @@ end
 function methods:resetResources()
 	for k, v in pairs(self.resources) do
 		if type(v) == "table" then
-			pTable.clear(v)
+			uiTable.clear(v)
 		end
 	end
 end
@@ -62,7 +62,7 @@ local function _deepCopyFields(ta, tb)
 	end
 	if type(ta) == "table" then
 		for k, v in pairs(ta) do
-			tb[k] = pTable.deepCopy(v)
+			tb[k] = uiTable.deepCopy(v)
 		end
 	end
 end
@@ -79,12 +79,12 @@ local function _initTexture(texture, metadata)
 		end
 	end
 
-	pTable.assignIfNil(tex_info, "alpha_mode", "alphamultiply")
-	pTable.assignIfNil(tex_info, "blend_mode", "alpha")
-	pTable.assignIfNil(tex_info, "filter_mag", "linear")
-	pTable.assignIfNil(tex_info, "filter_min", "linear")
-	pTable.assignIfNil(tex_info, "wrap_h", "clamp")
-	pTable.assignIfNil(tex_info, "wrap_v", "clamp")
+	uiTable.assignIfNil(tex_info, "alpha_mode", "alphamultiply")
+	uiTable.assignIfNil(tex_info, "blend_mode", "alpha")
+	uiTable.assignIfNil(tex_info, "filter_mag", "linear")
+	uiTable.assignIfNil(tex_info, "filter_min", "linear")
+	uiTable.assignIfNil(tex_info, "wrap_h", "clamp")
+	uiTable.assignIfNil(tex_info, "wrap_v", "clamp")
 
 	texture:setFilter(tex_info.filter_min, tex_info.filter_mag)
 	texture:setWrap(tex_info.wrap_h, tex_info.wrap_v)
@@ -299,11 +299,11 @@ function methods:loadTheme(id)
 
 		local path_theme2 = context.conf.prod_ui_path .. "themes/" .. id
 		local theme2 = uiRes.loadLuaFileOrDirectoryAsTable(path_theme2, _blank_env, uiRes.dir_handler_lua_blank_env)
-		local theme_info = pTable.assertResolve(theme2, "info/theme_info")
+		local theme_info = uiTable.assertResolve(theme2, "info/theme_info")
 		local next_id = theme_info.patches
 
 		if theme then
-			pTable.deepPatch(theme2, theme, true)
+			uiTable.deepPatch(theme2, theme, true)
 		end
 		theme = theme2
 
@@ -464,7 +464,7 @@ function methods:applyTheme(theme)
 
 	if theme.skins then
 		for k, v in pairs(theme.skins) do
-			resources.skins[k] = pTable.deepCopy(v)
+			resources.skins[k] = uiTable.deepCopy(v)
 		end
 	end
 

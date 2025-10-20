@@ -18,7 +18,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widShared = context:getLua("core/wid_shared")
 
 
-lgcUIFrame._enum_types = uiTable.makeLUTV("workspace", "window")
+lgcUIFrame._enum_types = uiTable.newEnumV("FrameType", "workspace", "window")
 
 
 -- View levels for Window Frames. Both Window Frames and the WIMP Root need access to this.

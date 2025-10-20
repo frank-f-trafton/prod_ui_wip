@@ -21,12 +21,13 @@ local lgcSlider = {}
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
 local _lerp = pMath.lerp
 
 
-local _slider_axes = {horizontal = true, vertical = true}
+local _slider_axes = uiTable.newEnumV("SliderAxis", "horizontal", "vertical")
 
 
 local slider_keys = {
@@ -410,7 +411,7 @@ end
 
 
 function lgcSlider.widSetSliderAxis(self, axis)
-	uiAssert.enum(1, axis, "sliderAxis", _slider_axes)
+	uiAssert.enum(1, axis, _slider_axes)
 
 	self.trough_vertical = (axis == "vertical") and true or false
 	self:reshape()

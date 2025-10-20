@@ -218,7 +218,7 @@ end
 
 
 function client:setTextAlignment(align)
-	uiAssert.enum(1, align, "AlignMode", editWid._enum_align)
+	uiAssert.enum(1, align, editWid._enum_align)
 
 	editWidS.wrapAction(self, editCommandS.setTextAlignment, align)
 end
@@ -304,7 +304,7 @@ end
 -- * "replacement_char": Replace every unrecognized byte with the Unicode replacement code point.
 -- * false/nil: return an empty string on bad unput.
 function client:setBadInputRule(rule)
-	uiAssert.enumEval(1, rule, "BadInputRule", editWid._enum_bad_input)
+	uiAssert.enumEval(1, rule, editWid._enum_bad_input)
 
 	self.LE_bad_input_rule = rule or false
 end

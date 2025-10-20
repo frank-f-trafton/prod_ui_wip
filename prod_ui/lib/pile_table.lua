@@ -1,4 +1,4 @@
--- PILE Table v1.202
+-- PILE Table v1.300
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -249,7 +249,7 @@ function M.isArrayOnlyZero(t)
 end
 
 
-function M.makeLUT(t)
+function M.newLUT(t)
 	local lut = {}
 	for i, v in ipairs(t) do
 		lut[v] = true
@@ -258,7 +258,7 @@ function M.makeLUT(t)
 end
 
 
-function M.makeLUTV(...)
+function M.newLUTV(...)
 	local lut = {}
 	for i = 1, select("#", ...) do
 		lut[select(i, ...)] = true
@@ -421,6 +421,68 @@ end
 
 function M.wrap1Array(t, n)
 	return t[((n - 1) % #t) + 1]
+end
+
+
+function M.safeTableConcat(t, sep, i, j)
+	pArg.type1(1, t, "table")
+	pArg.typeEval1(2, sep, "string")
+	pArg.typeEval1(3, i, "number")
+	pArg.typeEval1(4, j, "number")
+
+	local t2, len = {}, 1
+	for x = i or 1, j or #t do
+		t2[len] = tostring(t[x])
+		len = len + 1
+	end
+	return table.concat(t2, sep or "")
+end
+
+
+M.enum_names = setmetatable({}, {__mode="kv"})
+
+
+local _mt_enum = {}
+_mt_enum.__index = _mt_enum
+M.mt_enum = _mt_enum
+
+
+function M.newEnum(name, t)
+	pArg.typeEval1(1, name, "string")
+	pArg.typeEval1(2, t, "table")
+
+	local e = setmetatable(t or {}, _mt_enum)
+	M.enum_names[e] = name or "Enum"
+	return e
+end
+
+
+function M.newEnumV(name, ...)
+	return M.newEnum(name, M.newLUTV(...))
+end
+
+
+function _mt_enum:setName(name)
+	pArg.typeEval1(1, name, "string")
+
+	M.enum_names[self] = name or "Enum"
+end
+
+
+function _mt_enum:getName()
+	return M.enum_names[self] or "(Unknown)"
+end
+
+
+function M.safeGetEnumName(enum)
+	pArg.typeEval1(1, enum, "table")
+
+	local mt = getmetatable(enum)
+	if mt and mt.getName then
+		return enum:getName()
+	else
+		return "Enum"
+	end
 end
 
 

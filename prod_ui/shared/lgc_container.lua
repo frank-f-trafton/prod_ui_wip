@@ -17,7 +17,7 @@ local widLayout = context:getLua("core/wid_layout")
 local sash_styles = context.resources.sash_styles
 
 
-local _enum_scr_rng = uiTable.makeLUTV("zero", "auto", "manual")
+local _enum_scr_rng = uiTable.newEnumV("ScrollRangeMode", "zero", "auto", "manual")
 
 
 lgcContainer.methods = {}
@@ -30,7 +30,7 @@ end
 
 
 function _methods:setScrollRangeMode(mode)
-	uiAssert.enum(1, mode, "scrollRangeMode", _enum_scr_rng)
+	uiAssert.enum(1, mode, _enum_scr_rng)
 
 	self.scroll_range_mode = mode
 

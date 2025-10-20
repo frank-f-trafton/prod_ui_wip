@@ -1,4 +1,4 @@
--- PILE argCheck v1.202
+-- PILE argCheck v1.300
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -63,7 +63,7 @@ end
 lang.type1 = "bad type (expected $1, got $2)"
 function M.type1(n, v, e)
 	if type(v) ~= e then
-		error(_n(n) .. interp(lang.type1, n, e, type(v)), 2)
+		error(_n(n) .. interp(lang.type1, e, type(v)), 2)
 	end
 end
 
@@ -71,14 +71,14 @@ end
 lang.type_eval1 = "bad type (expected false/nil or $1, got $2)"
 function M.typeEval1(n, v, e)
 	if v and type(v) ~= e then
-		error(_n(n) .. interp(lang.type_eval1, n, e, type(v)), 2)
+		error(_n(n) .. interp(lang.type_eval1, e, type(v)), 2)
 	end
 end
 
 
 lang.int = "expected integer"
 function M.int(n, v)
-	if type(v) ~= "number" or math.floor(v) ~= v or v ~= v then
+	if type(v) ~= "number" or math.floor(v) ~= v then
 		error(_n(n) .. lang.int, 2)
 	end
 end
@@ -86,7 +86,7 @@ end
 
 lang.int_eval = "expected false/nil or integer"
 function M.intEval(n, v)
-	if v and (type(v) ~= "number" or math.floor(v) ~= v or v ~= v) then
+	if v and (type(v) ~= "number" or math.floor(v) ~= v) then
 		error(_n(n) .. lang.int_eval, 2)
 	end
 end
@@ -94,7 +94,7 @@ end
 
 lang.int_ge = "expected integer greater or equal to $1"
 function M.intGE(n, v, min)
-	if type(v) ~= "number" or math.floor(v) ~= v or v < min or v ~= v then
+	if type(v) ~= "number" or math.floor(v) ~= v or v < min then
 		error(_n(n) .. interp(lang.int_ge, min), 2)
 	end
 end
@@ -102,7 +102,7 @@ end
 
 lang.int_ge_eval = "expected false/nil or integer greater or equal to $1"
 function M.intGEEval(n, v, min)
-	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min or v ~= v) then
+	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min) then
 		error(_n(n) .. interp(lang.int_ge_eval, min), 2)
 	end
 end
@@ -114,7 +114,7 @@ lang.int_range_c = "integer is out of range"
 function M.intRange(n, v, min, max)
 	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_a, type(v)), 2)
 	elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_b, 2)
-	elseif v < min or v > max or v ~= v then error(_n(n) .. lang.int_range_c, 2) end
+	elseif v < min or v > max then error(_n(n) .. lang.int_range_c, 2) end
 end
 
 
@@ -125,29 +125,7 @@ function M.intRangeEval(n, v, min, max)
 	if v then
 		if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_eval_a, type(v)), 2)
 		elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_eval_b, 2)
-		elseif v < min or v > max or v ~= v then error(_n(n) .. lang.int_range_eval_c, 2) end
-	end
-end
-
-
-lang.int_range_static_a = "expected integer, got $1"
-lang.int_range_static_b = "got non-integer number"
-lang.int_range_static_c = "integer is out of range ($1 - $2)"
-function M.intRangeStatic(n, v, min, max)
-	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_static_a, type(v)), 2)
-	elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_static_b, 2)
-	elseif v < min or v > max or v ~= v then error(_n(n) .. interp(lang.int_range_static_c, min, max), 2) end
-end
-
-
-lang.int_range_static_eval_a = "expected false/nil or integer, got $1"
-lang.int_range_static_eval_b = "got non-integer number"
-lang.int_range_static_eval_c = "integer is out of range ($1 - $2)"
-function M.intRangeStaticEval(n, v, min, max)
-	if v then
-		if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_static_eval_a, type(v)), 2)
-		elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_static_eval_b, 2)
-		elseif v < min or v > max or v ~= v then error(_n(n) .. interp(lang.int_range_static_eval_c, min, max), 2) end
+		elseif v < min or v > max then error(_n(n) .. lang.int_range_eval_c, 2) end
 	end
 end
 
@@ -178,18 +156,29 @@ function M.numberNotNaNEval(n, v)
 end
 
 
-lang.enum_a = "invalid $1 (got '$2')"
-lang.enum_b = "invalid $1 (got non-number, non-string value)"
-local function _enumErr(v) return (type(v) == "string" or type(v) == "number") and lang.enum_a or lang.enum_b end
-function M.enum(n, v, id, e)
+lang.bad_enum = "invalid $1"
+function M.enum(n, v, e)
 	if not e[v] then
-		error(_n(n) .. interp(_enumErr(v), id, v), 2)
+		error(_n(n) .. interp(lang.bad_enum, e:getName()), 2)
 	end
 end
-function M.enumEval(n, v, id, e)
+
+
+function M.enumEval(n, v, e)
 	if v and not e[v] then
-		error(_n(n) .. interp(_enumErr(v), id, v), 2)
+		error(_n(n) .. interp(lang.bad_enum, e:getName()), 2)
 	end
+end
+
+
+lang.bad_one_of = "invalid $1"
+function M.oneOf(n, v, id, ...)
+	for i = 1, select("#", ...) do
+		if v == select(i, ...) then
+			return
+		end
+	end
+	error(_n(n) .. interp(lang.bad_one_of, id), 2)
 end
 
 
