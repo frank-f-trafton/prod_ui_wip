@@ -12,7 +12,7 @@ local _mt_loader = {}
 
 function uiLoad.new(owner, fn_load)
 	-- 'owner' is presumably a table, but can be of any type.
-	uiAssert.type1(1, fn_load, "function")
+	uiAssert.type(1, fn_load, "function")
 
 	local self, mt = {}, {}
 	mt.__index = _mt_loader
@@ -26,7 +26,7 @@ end
 
 
 function _mt_loader:try(path)
-	uiAssert.type1(1, path, "string")
+	uiAssert.type(1, path, "string")
 
 	local loaded = self[path]
 	if loaded then
@@ -44,7 +44,7 @@ end
 
 
 function _mt_loader:get(path)
-	uiAssert.type1(1, path, "string")
+	uiAssert.type(1, path, "string")
 
 	local res, err = self:try(path)
 	if not res then

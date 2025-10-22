@@ -1,4 +1,4 @@
--- PILE argCheck v1.300
+-- PILE argCheck v1.310
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -34,20 +34,36 @@ local function _n(n)
 end
 
 
-lang.type = "bad type (expected [$1], got $2)"
-function M.type(n, v, ...)
+lang.type = "bad type (expected $1, got $2)"
+function M.type(n, v, e)
+	if type(v) ~= e then
+		error(_n(n) .. interp(lang.type, e, type(v)), 2)
+	end
+end
+
+
+lang.type_eval = "bad type (expected false/nil or $1, got $2)"
+function M.typeEval(n, v, e)
+	if v and type(v) ~= e then
+		error(_n(n) .. interp(lang.type_eval, e, type(v)), 2)
+	end
+end
+
+
+lang.types = "bad type (expected [$1], got $2)"
+function M.types(n, v, ...)
 	local typ = type(v)
 	for i = 1, select("#", ...) do
 		if typ == select(i, ...) then
 			return
 		end
 	end
-	error(_n(n) .. interp(lang.type, table.concat({...}, ", "), typ), 2)
+	error(_n(n) .. interp(lang.types, table.concat({...}, ", "), typ), 2)
 end
 
 
-lang.type_eval = "bad type (expected false/nil or [$1], got $2)"
-function M.typeEval(n, v, ...)
+lang.types_eval = "bad type (expected false/nil or [$1], got $2)"
+function M.typesEval(n, v, ...)
 	if v then
 		local typ = type(v)
 		for i = 1, select("#", ...) do
@@ -55,23 +71,7 @@ function M.typeEval(n, v, ...)
 				return
 			end
 		end
-		error(_n(n) .. interp(lang.type_eval, table.concat({...}, ", "), typ), 2)
-	end
-end
-
-
-lang.type1 = "bad type (expected $1, got $2)"
-function M.type1(n, v, e)
-	if type(v) ~= e then
-		error(_n(n) .. interp(lang.type1, e, type(v)), 2)
-	end
-end
-
-
-lang.type_eval1 = "bad type (expected false/nil or $1, got $2)"
-function M.typeEval1(n, v, e)
-	if v and type(v) ~= e then
-		error(_n(n) .. interp(lang.type_eval1, e, type(v)), 2)
+		error(_n(n) .. interp(lang.types_eval, table.concat({...}, ", "), typ), 2)
 	end
 end
 

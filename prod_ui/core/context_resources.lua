@@ -49,7 +49,7 @@ end
 
 
 function methods:interpolatePath(path)
-	uiAssert.type1(1, path, "string")
+	uiAssert.type(1, path, "string")
 
 	return (path:gsub(pString.ptn_percent, self.path_symbols))
 end
@@ -279,7 +279,7 @@ local themes_max = 100
 
 
 function methods:loadTheme(id)
-	uiAssert.type1(1, id, "string")
+	uiAssert.type(1, id, "string")
 
 	local id_orig = id
 	local theme_hash, theme_ids = {}, {}
@@ -324,7 +324,7 @@ end
 
 
 function methods:applyTheme(theme)
-	uiAssert.type1(1, theme, "table")
+	uiAssert.type(1, theme, "table")
 
 	local resources = self.resources
 	local scale = self.scale

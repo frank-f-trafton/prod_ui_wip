@@ -798,11 +798,11 @@ end
 
 
 function change.numberScaled(skin, k, scale, min, max)
-	uiAssert.type1(1, skin, "table")
+	uiAssert.type(1, skin, "table")
 	uiAssert.notNilNotNaN(2, k)
-	uiAssert.type1(3, scale, "number")
-	uiAssert.typeEval1(4, min, "number")
-	uiAssert.typeEval1(5, max, "number")
+	uiAssert.type(3, scale, "number")
+	uiAssert.typeEval(4, min, "number")
+	uiAssert.typeEval(5, max, "number")
 
 	min = min or -math.huge
 	max = max or math.huge
@@ -812,11 +812,11 @@ end
 
 
 function change.integerScaled(skin, k, scale, min, max)
-	uiAssert.type1(1, skin, "table")
+	uiAssert.type(1, skin, "table")
 	uiAssert.notNilNotNaN(2, k)
-	uiAssert.type1(3, scale, "number")
-	uiAssert.typeEval1(4, min, "number")
-	uiAssert.typeEval1(5, max, "number")
+	uiAssert.type(3, scale, "number")
+	uiAssert.typeEval(4, min, "number")
+	uiAssert.typeEval(5, max, "number")
 
 	min = min or -math.huge
 	max = max or math.huge

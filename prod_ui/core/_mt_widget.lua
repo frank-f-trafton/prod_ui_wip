@@ -540,7 +540,7 @@ end
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, skin_id, pos, ...)
 	uiAssert.notNilNotFalseNotNaN(1, id)
-	uiAssert.typeEval1(2, skin_id, "string")
+	uiAssert.typeEval(2, skin_id, "string")
 	uiAssert.numberNotNaNEval(3, pos)
 
 	local children = self.children
@@ -934,7 +934,7 @@ end
 -- @param tag (string) The tag to assign.
 -- @return self (for chaining).
 function _mt_widget:setTag(tag)
-	uiAssert.type1(1, tag, "string")
+	uiAssert.type(1, tag, "string")
 
 	self.tag = tag
 

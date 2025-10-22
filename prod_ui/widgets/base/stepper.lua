@@ -111,7 +111,7 @@ end
 -- @param i (#options + 1) where to insert the option in the array. Must be between 1 and #options + 1. If not specified, the option will be added to the end of the array.
 -- @return The index of the newly-added option.
 function def:insertOption(option, i)
-	uiAssert.type(1, option, "string", "table")
+	uiAssert.types(1, option, "string", "table")
 	uiAssert.intRangeEval(2, i, 1, #self.options + 1)
 
 	i = i or #self.options + 1

@@ -73,7 +73,7 @@ end
 
 
 function def:setText(text)
-	uiAssert.typeEval(1, text, "string", "table")
+	uiAssert.typesEval(1, text, "string", "table")
 
 	self.text = text or false
 

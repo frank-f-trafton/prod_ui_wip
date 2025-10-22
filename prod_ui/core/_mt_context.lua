@@ -813,7 +813,7 @@ end
 -- @return The def table. Raises a Lua error if there's an issue with file handling, or parsing and executing the Lua
 --	chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
-	uiAssert.type1(1, chunk, "function")
+	uiAssert.type(1, chunk, "function")
 	uiAssert.notNilNotFalseNotNaN(2, id)
 
 	if self.widget_defs[id] then
@@ -855,7 +855,7 @@ end
 -- @param def_conf An arbitrary config table for the chunk function.
 -- @return The def table or fab function. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDef(file_path, id, def_conf)
-	uiAssert.type1(1, file_path, "string")
+	uiAssert.type(1, file_path, "string")
 	uiAssert.notNilNotFalseNotNaN(2, id)
 
 	local chunk = uiRes.assertLoad(file_path)
@@ -964,7 +964,7 @@ end
 -- @return A reference to the new root instance.
 function _mt_context:addRoot(id, skin_id, ...)
 	uiAssert.notNilNotFalseNotNaN(1, id)
-	uiAssert.typeEval1(2, skin_id, "string")
+	uiAssert.typeEval(2, skin_id, "string")
 
 	if self.locked then
 		coreErr.errLockedContext("add root widget")
@@ -994,8 +994,8 @@ end
 -- @param skinner The skinner table.
 -- @param id The skinner's ID. Can be a string or a number.
 function _mt_context:registerSkinnerTable(skinner, id)
-	uiAssert.type1(1, skinner, "table")
-	uiAssert.type1(2, id, "string", "number")
+	uiAssert.type(1, skinner, "table")
+	uiAssert.type(2, id, "string", "number")
 
 	uiRes.assertNotRegistered("skinner", self.skinners, id)
 
@@ -1007,8 +1007,8 @@ end
 -- @param file_path The path to the Lua file.
 -- @param id The skinner's ID. Can be a string or a number.
 function _mt_context:loadSkinner(file_path, id)
-	uiAssert.type1(1, file_path, "string")
-	uiAssert.type1(2, id, "string", "number")
+	uiAssert.type(1, file_path, "string")
+	uiAssert.type(2, id, "string", "number")
 
 	uiRes.assertNotRegistered("skinner", self.skinners, id)
 

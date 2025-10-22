@@ -24,29 +24,29 @@ local widShared = context:getLua("core/wid_shared")
 
 
 function client:writeText(text, suppress_replace)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.writeText, text, suppress_replace)
 end
 
 
 function client:replaceText(text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.replaceText, text)
 end
 
 
 function client:setText(text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.setText, text)
 end
 
 
 function client:getText(l1, l2)
-	uiAssert.typeEval1(1, l1, "number")
-	uiAssert.typeEval1(2, l2, "number")
+	uiAssert.typeEval(1, l1, "number")
+	uiAssert.typeEval(2, l2, "number")
 
 	return editFuncM.getText(self, l1, l2)
 end
@@ -249,7 +249,7 @@ end
 -- @param n_u_chars The number of code points to delete.
 -- @return The deleted characters in string form, or nil if nothing was deleted.
 function client:deleteUChar(n_u_chars)
-	uiAssert.type1(1, n_u_chars, "number")
+	uiAssert.type(1, n_u_chars, "number")
 
 	editWidM.wrapAction(self, editCommandM.deleteUChar, n_u_chars)
 end

@@ -125,7 +125,7 @@ end
 
 
 function def:getColumnByID(id)
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 
 	return _getColumnByID(self, id)
 end
@@ -240,7 +240,7 @@ _mt_column.__index = _mt_column
 
 
 function def:newColumn(id, pos)
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 	uiAssert.numberNotNaNEval(2, pos)
 
 	pos = pos or #self.columns + 1
@@ -285,7 +285,7 @@ end
 function def:removeColumn(id)
 	-- The caller is responsible for cleaning up cells associated with this column ID.
 
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 
 	local i, col = _getColumnByID(self, id)
 	col.owner = nil
@@ -297,7 +297,7 @@ end
 
 
 function _mt_column:setID(id)
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 
 	_checkColumnID(self.owner, id, self)
 	if self.id ~= id then
@@ -333,7 +333,7 @@ end
 
 
 function _mt_column:setText(text)
-	uiAssert.typeEval1(1, text, "string")
+	uiAssert.typeEval(1, text, "string")
 
 	self.text = text
 
@@ -347,7 +347,7 @@ end
 
 
 function _mt_column:setSortFunction(fn)
-	uiAssert.typeEval1(1, fn, "function")
+	uiAssert.typeEval(1, fn, "function")
 
 	self.cb_sort = fn
 
@@ -476,7 +476,7 @@ end
 
 
 function def:removeRow(row_t) -- TODO: untested
-	uiAssert.type1(1, row_t, "table")
+	uiAssert.type(1, row_t, "table")
 
 	local row_i = self:menuGetItemIndex(row_t)
 
@@ -521,7 +521,7 @@ end
 
 
 function _mt_item:newCell(id)
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 
 	local cell = _newCell(self)
 	self.cells[id] = cell
@@ -531,7 +531,7 @@ end
 
 
 function _mt_item:provisionCell(id)
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 
 	local cell = self.cells[id]
 	if not cell then
@@ -544,7 +544,7 @@ end
 
 
 function _mt_item:deleteCell(id)
-	uiAssert.type(1, id, "string", "number")
+	uiAssert.types(1, id, "string", "number")
 
 	local cell = self.cells[id]
 	if cell then
@@ -572,7 +572,7 @@ end
 
 
 function _mt_cell:setIconID(icon_id)
-	uiAssert.typeEval1(2, icon_id, "string")
+	uiAssert.typeEval(2, icon_id, "string")
 
 	self.icon_id = icon_id or false
 	self.tq_icon = lgcMenu.getIconQuad(self.item.owner.icon_set_id, self.icon_id) -- ie _refreshCell()

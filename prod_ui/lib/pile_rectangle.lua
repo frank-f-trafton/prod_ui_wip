@@ -1,4 +1,4 @@
--- PILE Rectangle Functions v1.300
+-- PILE Rectangle Functions v1.310
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -23,7 +23,7 @@ local L = pArg.L
 
 
 local function _checkRectangle(r, name)
-	pArg.type1(nil, r, "table")
+	pArg.type(nil, r, "table")
 	L[1] = name
 	L[2] = "x"; pArg.numberNotNaN(L, r.x)
 	L[2] = "y"; pArg.numberNotNaN(L, r.y)
@@ -33,7 +33,7 @@ end
 
 
 local function _checkSideDelta(sd, name)
-	pArg.type1(nil, sd, "table")
+	pArg.type(nil, sd, "table")
 	L[1] = name
 	L[2] = "x1"; pArg.numberNotNaN(L, sd.x1)
 	L[2] = "y1"; pArg.numberNotNaN(L, sd.y1)
@@ -45,7 +45,7 @@ end
 
 function M.set(r, x, y, w, h)
 	--[[ASSERT
-	pArg.type1(1, r, "table")
+	pArg.type(1, r, "table")
 	pArg.numberNotNaN(2, x)
 	pArg.numberNotNaN(3, y)
 	pArg.numberNotNaN(4, w)
@@ -60,7 +60,7 @@ end
 
 function M.setPosition(r, x, y)
 	--[[ASSERT
-	pArg.type1(1, r, "table")
+	pArg.type(1, r, "table")
 	pArg.numberNotNaN(2, x)
 	pArg.numberNotNaN(3, y)
 	--]]
@@ -73,7 +73,7 @@ end
 
 function M.setDimensions(r, w, h)
 	--[[ASSERT
-	pArg.type1(1, r, "table")
+	pArg.type(1, r, "table")
 	pArg.numberNotNaN(2, w)
 	pArg.numberNotNaN(3, h)
 	--]]
@@ -87,7 +87,7 @@ end
 function M.copy(a, b)
 	--[[ASSERT
 	_checkRectangle(a, "a")
-	pArg.type1(2, b, "table")
+	pArg.type(2, b, "table")
 	--]]
 
 	b.x, b.y, b.w, b.h = a.x, a.y, a.w, a.h
@@ -606,7 +606,7 @@ end
 
 function M.pointOverlap(r, x, y)
 	--[[ASSERT
-	pArg.type1(1, r, "table")
+	pArg.type(1, r, "table")
 	pArg.numberNotNaN(2, x)
 	pArg.numberNotNaN(3, y)
 	--]]

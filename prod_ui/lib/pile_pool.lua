@@ -1,4 +1,4 @@
--- PILE Pool v1.300
+-- PILE Pool v1.310
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -22,8 +22,8 @@ local table = table
 
 
 function M.new(popping, pushing, threshold)
-	pArg.typeEval1(1, popping, "function")
-	pArg.typeEval1(2, pushing, "function")
+	pArg.typeEval(1, popping, "function")
+	pArg.typeEval(2, pushing, "function")
 	pArg.numberNotNaNEval(3, threshold)
 
 	return setmetatable({

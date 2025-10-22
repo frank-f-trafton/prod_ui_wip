@@ -62,7 +62,7 @@ end
 
 
 function def:setText(text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	self.text = text
 end
@@ -74,7 +74,7 @@ end
 
 
 function def:setURL(url)
-	uiAssert.type1(1, url, "string")
+	uiAssert.type(1, url, "string")
 
 	self.url = url or false
 
@@ -115,7 +115,7 @@ end
 
 
 function def:setVerticalAlign(v)
-	uiAssert.type1(1, v, "number")
+	uiAssert.type(1, v, "number")
 
 	self.align_v = math.max(0, math.min(v, 1))
 end

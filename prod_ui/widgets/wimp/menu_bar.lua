@@ -204,11 +204,11 @@ end
 
 
 function def:updateCategory(item, text, key_mnemonic, icon_id, pop_up_proto, selectable)
-	uiAssert.type1(1, item, "table")
-	uiAssert.typeEval1(2, text, "string")
-	uiAssert.typeEval1(3, key_mnemonic, "string")
-	uiAssert.typeEval1(4, icon_id, "string")
-	uiAssert.typeEval1(5, pop_up_proto, "table")
+	uiAssert.type(1, item, "table")
+	uiAssert.typeEval(2, text, "string")
+	uiAssert.typeEval(3, key_mnemonic, "string")
+	uiAssert.typeEval(4, icon_id, "string")
+	uiAssert.typeEval(5, pop_up_proto, "table")
 	-- don't assert 'selectable'
 
 	if text ~= nil then
@@ -238,7 +238,7 @@ end
 
 
 function def:removeCategory(item_t)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 

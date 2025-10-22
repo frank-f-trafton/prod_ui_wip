@@ -228,17 +228,17 @@ end
 
 
 local function _makeCommand(self, info)
-	uiAssert.type1(2, info, "table")
+	uiAssert.type(2, info, "table")
 
 	L[1] = "info"
-	L[2] = "text"; uiAssert.type1(L, info.text, "string")
-	L[2] = "text_shortcut"; uiAssert.typeEval1(L, info.text_shortcut, "string")
-	L[2] = "key_mnemonic"; uiAssert.typeEval1(L, info.key_mnemonic, "string")
-	L[2] = "key_shortcut"; uiAssert.typeEval1(L, info.key_shortcut, "string")
-	L[2] = "icon_id"; uiAssert.typeEval1(L, info.icon_id, "string")
-	L[2] = "callback"; uiAssert.typeEval1(L, info.callback, "function")
-	L[2] = "config"; uiAssert.typeEval1(L, info.config, "function")
-	L[2] = "actionable"; uiAssert.typeEval1(L, info.actionable, "boolean")
+	L[2] = "text"; uiAssert.type(L, info.text, "string")
+	L[2] = "text_shortcut"; uiAssert.typeEval(L, info.text_shortcut, "string")
+	L[2] = "key_mnemonic"; uiAssert.typeEval(L, info.key_mnemonic, "string")
+	L[2] = "key_shortcut"; uiAssert.typeEval(L, info.key_shortcut, "string")
+	L[2] = "icon_id"; uiAssert.typeEval(L, info.icon_id, "string")
+	L[2] = "callback"; uiAssert.typeEval(L, info.callback, "function")
+	L[2] = "config"; uiAssert.typeEval(L, info.config, "function")
+	L[2] = "actionable"; uiAssert.typeEval(L, info.actionable, "boolean")
 	-- don't check 'user_value'
 
 	local item = {
@@ -263,14 +263,14 @@ end
 
 
 local function _makeGroup(self, info)
-	uiAssert.type1(2, info, "table")
+	uiAssert.type(2, info, "table")
 
 	L[1] = "info"
-	L[2] = "text"; uiAssert.type1(L, info.text, "string")
-	L[2] = "key_mnemonic"; uiAssert.typeEval1(L, info.key_mnemonic, "string")
-	L[2] = "icon_id"; uiAssert.typeEval1(L, info.icon_id, "string")
-	L[2] = "group_prototype"; uiAssert.typeEval1(L, info.group_prototype, "table")
-	L[2] = "config"; uiAssert.typeEval1(L, info.config, "function")
+	L[2] = "text"; uiAssert.type(L, info.text, "string")
+	L[2] = "key_mnemonic"; uiAssert.typeEval(L, info.key_mnemonic, "string")
+	L[2] = "icon_id"; uiAssert.typeEval(L, info.icon_id, "string")
+	L[2] = "group_prototype"; uiAssert.typeEval(L, info.group_prototype, "table")
+	L[2] = "config"; uiAssert.typeEval(L, info.config, "function")
 
 	local item = {
 		x = 0, y = 0, w = 0, h = 0,
@@ -301,7 +301,7 @@ end
 
 
 function def:applyMenuPrototype(menu_prototype)
-	uiAssert.type1(1, menu_prototype, "table")
+	uiAssert.type(1, menu_prototype, "table")
 
 	if #self.MN_items > 0 then
 		error("this menu already contains items.")
