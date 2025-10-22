@@ -207,9 +207,9 @@ end
 
 
 function def:addItem(wid_id, text, pos, icon_id)
-	uiAssert.type1(2, text, "string")
+	uiAssert.type(2, text, "string")
 	uiAssert.intEval(3, pos, "number")
-	uiAssert.typeEval1(4, icon_id, "string")
+	uiAssert.typeEval(4, icon_id, "string")
 
 	local items = self.MN_items
 
@@ -245,7 +245,7 @@ end
 
 
 function def:removeItem(item_t)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 
@@ -281,7 +281,7 @@ end
 
 
 function def:setSelection(wid)
-	uiAssert.type1(1, wid, "table")
+	uiAssert.type(1, wid, "table")
 
 	local wid_i = self:menuGetItemIndex(wid)
 	self:setSelectionByIndex(wid_i)

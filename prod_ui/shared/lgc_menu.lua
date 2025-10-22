@@ -345,21 +345,21 @@ end
 
 
 function menuMethods:menuSetMarkedItem(item_t, marked)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	item_t.marked = not not marked
 end
 
 
 function menuMethods:menuToggleMarkedItem(item_t)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	item_t.marked = not item_t.marked
 end
 
 
 function menuMethods:menuSetMarkedItemByIndex(item_i, marked)
-	uiAssert.type1(1, item_i, "number")
+	uiAssert.type(1, item_i, "number")
 
 	local item_t = self.MN_items[item_i]
 
@@ -1346,7 +1346,7 @@ end
 
 
 function lgcMenu.setIconSetID(self, icon_set_id) -- TODO: untested
-	uiAssert.type1(1, icon_set_id, "string")
+	uiAssert.type(1, icon_set_id, "string")
 
 	self:writeSetting("icon_set_id", icon_set_id)
 end

@@ -144,7 +144,7 @@ def.removeNode = lgcTree.removeNode
 
 
 function def:setSelection(item_t)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 	self:setSelectionByIndex(item_i)

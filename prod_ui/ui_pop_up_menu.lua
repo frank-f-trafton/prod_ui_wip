@@ -15,7 +15,7 @@ local _mt_proto, _mt_command, _mt_group, _mt_separator
 
 
 local function _setText(self, text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	self.text = text
 
@@ -29,7 +29,7 @@ end
 
 
 local function _setTextShortcut(self, text)
-	uiAssert.typeEval1(1, text, "string")
+	uiAssert.typeEval(1, text, "string")
 
 	self.text_shortcut = text or nil
 
@@ -43,7 +43,7 @@ end
 
 
 local function _setKeyMnemonic(self, text)
-	uiAssert.typeEval1(1, text, "string")
+	uiAssert.typeEval(1, text, "string")
 
 	self.key_mnemonic = text or nil
 
@@ -57,7 +57,7 @@ end
 
 
 local function _setKeyShortcut(self, text)
-	uiAssert.typeEval1(1, text, "string")
+	uiAssert.typeEval(1, text, "string")
 
 	self.key_shortcut = text or nil
 
@@ -71,7 +71,7 @@ end
 
 
 local function _setIconID(self, text)
-	uiAssert.typeEval1(1, text, "string")
+	uiAssert.typeEval(1, text, "string")
 
 	self.icon_id = text or nil
 
@@ -85,7 +85,7 @@ end
 
 
 local function _setCallback(self, fn)
-	uiAssert.typeEval1(1, fn, "function")
+	uiAssert.typeEval(1, fn, "function")
 
 	self.callback = fn or nil
 
@@ -99,7 +99,7 @@ end
 
 
 local function _setConfig(self, config)
-	uiAssert.typeEval1(1, config, "function")
+	uiAssert.typeEval(1, config, "function")
 
 	self.config = config
 
@@ -113,7 +113,7 @@ end
 
 
 local function _setActionable(self, enabled)
-	uiAssert.typeEval1(1, enabled, "boolean")
+	uiAssert.typeEval(1, enabled, "boolean")
 
 	self.actionable = enabled
 
@@ -139,7 +139,7 @@ end
 
 
 local function _setGroupPrototype(self, proto)
-	uiAssert.typeEval1(1, proto, "table")
+	uiAssert.typeEval(1, proto, "table")
 	if getmetatable(proto) ~= _mt_proto then
 		error("expected a pop up menu prototype (wrong metatable)")
 	end
@@ -246,7 +246,7 @@ local L = uiAssert.L
 function uiPopUpMenu.assertPrototypeItems(proto)
 	for i, item in ipairs(proto) do
 		L[1] = "proto"
-		L[2] = i; uiAssert.type1(L, proto[i], "table")
+		L[2] = i; uiAssert.type(L, proto[i], "table")
 
 		local mt = getmetatable(item)
 		if mt ~= _mt_command and mt ~= _mt_group and mt ~= _mt_separator then
@@ -257,7 +257,7 @@ end
 
 
 function uiPopUpMenu.newMenuPrototype(proto)
-	uiAssert.typeEval1(1, proto, "table")
+	uiAssert.typeEval(1, proto, "table")
 
 	proto = proto or {}
 

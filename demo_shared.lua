@@ -145,11 +145,11 @@ end
 
 
 function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
-	uiAssert.type1(2, title, "string")
-	uiAssert.type1(3, text, "string")
-	uiAssert.typeEval1(4, b1, "string")
-	uiAssert.typeEval1(5, b2, "string")
-	uiAssert.typeEval1(6, b3, "string")
+	uiAssert.type(2, title, "string")
+	uiAssert.type(3, text, "string")
+	uiAssert.typeEval(4, b1, "string")
+	uiAssert.typeEval(5, b2, "string")
+	uiAssert.typeEval(6, b3, "string")
 
 	local root = context.root
 

@@ -61,7 +61,7 @@ end
 
 local _path_stack = {}
 local function _loader_lua(self, file_path)
-	uiAssert.type1(2, file_path, "string")
+	uiAssert.type(2, file_path, "string")
 
 	for i, v in ipairs(_path_stack) do
 		if v == file_path then
@@ -113,8 +113,8 @@ end
 --	table will be provisioned.
 -- @return The UI context.
 function uiContext.newContext(prod_ui_path, settings)
-	uiAssert.type1(1, prod_ui_path, "string")
-	uiAssert.typeEval1(2, settings, "table")
+	uiAssert.type(1, prod_ui_path, "string")
+	uiAssert.typeEval(2, settings, "table")
 
 	-- Ensure that 'prod_ui_path' ends in a slash so that it doesn't need to be
 	-- appended upon later use.

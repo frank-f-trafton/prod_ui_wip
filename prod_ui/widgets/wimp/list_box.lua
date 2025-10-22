@@ -183,9 +183,9 @@ end
 
 
 function def:addItem(text, pos, icon_id)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 	uiAssert.intEval(2, pos, "number")
-	uiAssert.typeEval1(3, icon_id, "string")
+	uiAssert.typeEval(3, icon_id, "string")
 
 	local skin = self.skin
 	local font = skin.font
@@ -219,7 +219,7 @@ end
 
 
 function def:removeItem(item_t)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 
@@ -248,7 +248,7 @@ end
 
 
 function def:setSelection(item_t)
-	uiAssert.type1(1, item_t, "table")
+	uiAssert.type(1, item_t, "table")
 
 	local item_i = self:menuGetItemIndex(item_t)
 	self:setSelectionByIndex(item_i)

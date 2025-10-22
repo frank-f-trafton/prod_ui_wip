@@ -585,7 +585,7 @@ end
 
 
 function def:rootCall_setModalFrame(inst)
-	uiAssert.type1(1, inst, "table")
+	uiAssert.type(1, inst, "table")
 
 	if inst.frame_type ~= "window" then
 		error("only Window Frames can be assigned as modal.")
@@ -606,7 +606,7 @@ end
 
 
 function def:rootCall_clearModalFrame(inst)
-	uiAssert.type1(1, inst, "table")
+	uiAssert.type(1, inst, "table")
 
 	if self.modals[#self.modals] ~= inst then
 		error("tried to clear the modal status of a frame that is not at the top of the 'modals' stack.")
@@ -618,8 +618,8 @@ end
 
 
 function def:rootCall_setDragAndDropState(inst, drop_state)
-	uiAssert.type1(1, inst, "table")
-	uiAssert.type1(2, drop_state, "table")
+	uiAssert.type(1, inst, "table")
+	uiAssert.type(2, drop_state, "table")
 
 	self.drop_state = drop_state
 end

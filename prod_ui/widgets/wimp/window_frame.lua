@@ -208,7 +208,7 @@ end
 
 
 function def:setFrameTitle(text)
-	uiAssert.type1(1, text, "string", "nil")
+	uiAssert.type(1, text, "string", "nil")
 
 	self:writeSetting("header_text", text)
 end
@@ -337,7 +337,7 @@ end
 
 
 function def:setFrameBlock(target)
-	uiAssert.type1(1, target, "table")
+	uiAssert.type(1, target, "table")
 
 	if not target.frame_type or (target.frame_type ~= "window" and target.frame_type ~= "workspace") then
 		error("target must be a UI Frame of type 'window' or 'workspace'.")

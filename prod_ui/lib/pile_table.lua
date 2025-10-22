@@ -1,4 +1,4 @@
--- PILE Table v1.300
+-- PILE Table v1.310
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -77,7 +77,7 @@ end
 
 
 function M.deepCopy(t)
-	pArg.type1(1, t, "table")
+	pArg.type(1, t, "table")
 
 	return _deepCopy1({}, t)
 end
@@ -119,8 +119,8 @@ end
 
 lang.err_dp_dupes = "duplicate table references in destination and patch"
 function M.deepPatch(a, b, overwrite)
-	pArg.type1(1, a, "table")
-	pArg.type1(2, b, "table")
+	pArg.type(1, a, "table")
+	pArg.type(2, b, "table")
 
 	if M.hasAnyDuplicateTables(a, b) then
 		error(lang.err_dp_dupes)
@@ -166,7 +166,7 @@ function M.hasAnyDuplicateTables(...)
 	end
 	for i = 1, select("#", ...) do
 		local t = select(i, ...)
-		pArg.type1(i, t, "table")
+		pArg.type(i, t, "table")
 		if _hash[t] then
 			M.clear(_hash)
 			return t
@@ -192,8 +192,8 @@ end
 
 
 function M.patch(a, b, overwrite)
-	pArg.type1(1, a, "table")
-	pArg.type1(2, b, "table")
+	pArg.type(1, a, "table")
+	pArg.type(2, b, "table")
 
 	local c = 0
 	for i, v in ipairs(b) do
@@ -380,7 +380,7 @@ end
 lang.err_res_bad_s = "argument #$1: expected a non-empty string"
 lang.err_res_field_empty = "cannot resolve an empty field"
 function M.resolve(t, str, raw)
-	pArg.type1(1, t, "table")
+	pArg.type(1, t, "table")
 	if type(str) ~= "string" or #str == 0 then
 		error(interp(lang.err_res_bad_s, 2))
 	end
@@ -425,10 +425,10 @@ end
 
 
 function M.safeTableConcat(t, sep, i, j)
-	pArg.type1(1, t, "table")
-	pArg.typeEval1(2, sep, "string")
-	pArg.typeEval1(3, i, "number")
-	pArg.typeEval1(4, j, "number")
+	pArg.type(1, t, "table")
+	pArg.typeEval(2, sep, "string")
+	pArg.typeEval(3, i, "number")
+	pArg.typeEval(4, j, "number")
 
 	local t2, len = {}, 1
 	for x = i or 1, j or #t do
@@ -448,8 +448,8 @@ M.mt_enum = _mt_enum
 
 
 function M.newEnum(name, t)
-	pArg.typeEval1(1, name, "string")
-	pArg.typeEval1(2, t, "table")
+	pArg.typeEval(1, name, "string")
+	pArg.typeEval(2, t, "table")
 
 	local e = setmetatable(t or {}, _mt_enum)
 	M.enum_names[e] = name or "Enum"
@@ -463,7 +463,7 @@ end
 
 
 function _mt_enum:setName(name)
-	pArg.typeEval1(1, name, "string")
+	pArg.typeEval(1, name, "string")
 
 	M.enum_names[self] = name or "Enum"
 end
@@ -475,7 +475,7 @@ end
 
 
 function M.safeGetEnumName(enum)
-	pArg.typeEval1(1, enum, "table")
+	pArg.typeEval(1, enum, "table")
 
 	local mt = getmetatable(enum)
 	if mt and mt.getName then

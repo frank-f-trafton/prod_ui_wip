@@ -44,7 +44,7 @@ end
 
 
 function def:setText(text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	if self.max_code_points then
 		-- Trim text if it exceeds the max code point count.

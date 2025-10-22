@@ -87,8 +87,8 @@ end
 
 
 function uiRes.extractIDFromLuaFile(base_path, file_path)
-	uiAssert.type1(1, base_path, "string")
-	uiAssert.type1(2, file_path, "string")
+	uiAssert.type(1, base_path, "string")
+	uiAssert.type(2, file_path, "string")
 
 	if not file_path:find("%.lua$") then
 		error("file_path string doesn't end in '.lua'.")
@@ -137,8 +137,8 @@ end
 -- @param depth (1000) The maximum recursion depth permitted. Raises an error if exceeded. Must be at least 1.
 -- @return A table of enumerated files. If the path does not point to a directory, then an empty table is returned.
 function uiRes.enumerate(path, ext, recursive, depth)
-	uiAssert.type1(1, path, "string")
-	uiAssert.typeEval(2, ext, "string", "table")
+	uiAssert.type(1, path, "string")
+	uiAssert.typesEval(2, ext, "string", "table")
 	-- don't assert 'recursive'
 	uiAssert.intGEEval(4, depth, 1)
 
@@ -210,10 +210,10 @@ end
 -- @param [max_items] (16384) How many items to check before raising an error.
 -- @return The table.
 function uiRes.loadDirectoryAsTable(path, handlers, depth, max_items)
-	uiAssert.type1(1, path, "string")
-	uiAssert.typeEval1(2, handlers, "table")
-	uiAssert.typeEval1(3, depth, "number")
-	uiAssert.typeEval1(4, max_items, "number")
+	uiAssert.type(1, path, "string")
+	uiAssert.typeEval(2, handlers, "table")
+	uiAssert.typeEval(3, depth, "number")
+	uiAssert.typeEval(4, max_items, "number")
 
 	handlers = handlers or uiRes.dir_handlers
 	depth = depth or 1000
@@ -316,7 +316,7 @@ uiRes.dir_handler_lua_blank_env = {
 -- @param [handlers] A table of extension handler functions. If not provided, a set of defaults will be substituted.
 -- @return A table based on the file or directory of files.
 function uiRes.loadLuaFileOrDirectoryAsTable(path, env, handlers)
-	uiAssert.type1(1, path, "string")
+	uiAssert.type(1, path, "string")
 
 	local lua_path = path .. ".lua"
 	local info = love.filesystem.getInfo(lua_path, _info)

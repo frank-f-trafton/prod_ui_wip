@@ -1,4 +1,4 @@
--- PILE UTF-8 v1.300
+-- PILE UTF-8 v1.310
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -30,7 +30,7 @@ local interp = require(PATH .. "pile_interp")
 local pArg = require(PATH .. "pile_arg_check")
 
 
-local _argType1, _argInt, _argIntRange = pArg.type, pArg.int, pArg.intRange
+local _argType, _argInt, _argIntRange = pArg.type, pArg.int, pArg.intRange
 
 
 local check_surrogates = true
@@ -72,7 +72,7 @@ end
 
 
 local function step(s, i)
-	_argType1(1, s, "string")
+	_argType(1, s, "string")
 	_argIntRange(2, i, 0, #s)
 
 	while i < #s do
@@ -85,7 +85,7 @@ end
 
 
 local function stepBack(s, i)
-	_argType1(1, s, "string")
+	_argType(1, s, "string")
 	_argIntRange(2, i, 1, #s + 1)
 
 	while i > 1 do
@@ -156,7 +156,7 @@ end
 
 
 local function check(s, i, j)
-	_argType1(1, s, "string")
+	_argType(1, s, "string")
 	i = i or (#s > 0 and 1 or 0)
 	j = j or #s
 
@@ -184,8 +184,8 @@ end
 
 
 local function scrub(s, repl)
-	_argType1(1, s, "string")
-	_argType1(2, repl, "string")
+	_argType(1, s, "string")
+	_argType(2, repl, "string")
 
 	local t, i = {}, 1
 
@@ -206,7 +206,7 @@ end
 
 
 local function codeFromString(s, i)
-	_argType1(1, s, "string")
+	_argType(1, s, "string")
 	i = i == nil and 1 or i
 	_argInt(2, i, "number")
 	if i < 1 or i > #s then error(interp(lang.str_i_oob)) end
@@ -268,7 +268,7 @@ end
 
 
 local function codes(s)
-	_argType1(1, s, "string")
+	_argType(1, s, "string")
 
 	return _codes, s, 1
 end

@@ -1,4 +1,4 @@
--- PILE Schema v1.300
+-- PILE Schema v1.310
 -- (C) 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -16,7 +16,7 @@ local pTable = require(PATH .. "pile_table")
 
 
 local ipairs, pairs, type = ipairs, pairs, type
-local _pArg_type1, _pArg_typeEval1 = pArg.type1, pArg.typeEval1
+local _pArg_type, _pArg_typeEval = pArg.type, pArg.typeEval
 
 
 M.lang = {
@@ -133,7 +133,7 @@ end
 
 
 local function _modelCheckKeys(keys)
-	_pArg_type1("(Keys table)", keys, "table")
+	_pArg_type("(Keys table)", keys, "table")
 
 	for k, v in pairs(keys) do
 		_unpackRef(k, v)
@@ -144,9 +144,9 @@ end
 local function _modelCheckArray(self)
 	local L = pArg.L
 	L[1] = "(Array)"
-	L[2] = "len"; _pArg_typeEval1(L, self.len, "number")
-	L[2] = "min"; _pArg_typeEval1(L, self.min, "number")
-	L[2] = "max"; _pArg_typeEval1(L, self.max, "number")
+	L[2] = "len"; _pArg_typeEval(L, self.len, "number")
+	L[2] = "min"; _pArg_typeEval(L, self.min, "number")
+	L[2] = "max"; _pArg_typeEval(L, self.max, "number")
 
 	_unpackRef("(Array)", self.ref)
 end
@@ -414,7 +414,7 @@ end
 
 
 local function _bindMT(t, id)
-	_pArg_type1(1, t, "table")
+	_pArg_type(1, t, "table")
 
 	local mt = _mt_md[id]
 
@@ -448,7 +448,7 @@ M.models = {
 
 
 M.handlers = {
-	type = function(k, v, opts)
+	types = function(k, v, opts)
 		M.assertOpts(opts)
 
 		for i = 2, #opts do
@@ -538,49 +538,19 @@ M.handlers = {
 		return true
 	end,
 
-	table = function(k, v)
-		return M.simpleTypeCheck("table", v)
-	end,
-
-	tableEval = function(k, v)
-		return M.simpleTypeCheck("table", v, true)
-	end,
-
-	["function"] = function(k, v)
-		return M.simpleTypeCheck("function", v)
-	end,
-
-	functionEval = function(k, v)
-		return M.simpleTypeCheck("function", v, true)
-	end,
-
-	userdata = function(k, v)
-		return M.simpleTypeCheck("userdata", v)
-	end,
-
-	userdataEval = function(k, v)
-		return M.simpleTypeCheck("userdata", v, true)
-	end,
-
-	thread = function(k, v)
-		return M.simpleTypeCheck("thread", v)
-	end,
-
-	threadEval = function(k, v)
-		return M.simpleTypeCheck("thread", v, true)
-	end,
-
-	boolean = function(k, v)
-		return M.simpleTypeCheck("boolean", v)
-	end,
-
-	booleanEval = function(k, v)
-		return M.simpleTypeCheck("boolean", v, true)
-	end,
-
-	["nil"] = function(k, v)
-		return M.simpleTypeCheck("nil", v)
-	end,
+	table = function(k, v) return M.simpleTypeCheck("table", v) end,
+	tableEval = function(k, v) return M.simpleTypeCheck("table", v, true) end,
+	["function"] = function(k, v) return M.simpleTypeCheck("function", v) end,
+	functionEval = function(k, v) return M.simpleTypeCheck("function", v, true) end,
+	userdata = function(k, v) return M.simpleTypeCheck("userdata", v) end,
+	userdataEval = function(k, v) return M.simpleTypeCheck("userdata", v, true) end,
+	cdata = function(k, v) return M.simpleTypeCheck("cdata", v) end, -- LuaJIT
+	cdataEval = function(k, v) return M.simpleTypeCheck("cdata", v, true) end, -- LuaJIT
+	thread = function(k, v) return M.simpleTypeCheck("thread", v) end,
+	threadEval = function(k, v) return M.simpleTypeCheck("thread", v, true) end,
+	boolean = function(k, v) return M.simpleTypeCheck("boolean", v) end,
+	booleanEval = function(k, v) return M.simpleTypeCheck("boolean", v, true) end,
+	["nil"] = function(k, v) return M.simpleTypeCheck("nil", v) end,
 
 	notNil = function(k, v)
 		if v == nil then
@@ -668,13 +638,8 @@ M.handlers = {
 		return false, "multi-choice failed. Errors: " .. pTable.safeTableConcat(errors, "; ")
 	end,
 
-	pass = function()
-		return true
-	end,
-
-	fail = function(k)
-		return false, "rejected key"
-	end,
+	pass = function() return true end,
+	fail = function(k) return false, "rejected key" end,
 }
 
 
@@ -683,8 +648,8 @@ _mt_vd.__index = _mt_vd
 
 
 function M.newValidator(name, models)
-	_pArg_typeEval1(1, name, "string")
-	_pArg_typeEval1(2, models, "table")
+	_pArg_typeEval(1, name, "string")
+	_pArg_typeEval(2, models, "table")
 
 	return setmetatable({
 		models = models or {},
@@ -724,7 +689,7 @@ end
 
 
 function _mt_vd:setName(name)
-	_pArg_type1(1, name, "string")
+	_pArg_type(1, name, "string")
 
 	self.name = name
 
@@ -738,8 +703,8 @@ end
 
 
 function _mt_vd:setModel(id, md)
-	_pArg_type1(1, id, "string")
-	_pArg_typeEval1(2, md, "table")
+	_pArg_type(1, id, "string")
+	_pArg_typeEval(2, md, "table")
 
 	if md then
 		md:check()
@@ -758,7 +723,7 @@ end
 
 
 function _mt_vd:setUserTable(user)
-	_pArg_typeEval1(1, user, "table")
+	_pArg_typeEval(1, user, "table")
 
 	self.user = user or false
 
@@ -772,8 +737,8 @@ end
 
 
 function _mt_vd:validate(tbl, model_id, fatal)
-	_pArg_type1(1, tbl, "table")
-	_pArg_typeEval1(2, model_id, "string")
+	_pArg_type(1, tbl, "table")
+	_pArg_typeEval(2, model_id, "string")
 
 	model_id = model_id or "main"
 

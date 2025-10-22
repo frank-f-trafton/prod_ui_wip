@@ -24,21 +24,21 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
 function client:writeText(text, suppress_replace)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.writeText, text, suppress_replace)
 end
 
 
 function client:replaceText(text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.replaceText, text)
 end
 
 
 function client:setText(text)
-	uiAssert.type1(1, text, "string")
+	uiAssert.type(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.setText, text)
 end
@@ -155,7 +155,7 @@ end
 
 
 function client:deleteUChar(n_u_chars)
-	uiAssert.type1(1, n_u_chars, "number")
+	uiAssert.type(1, n_u_chars, "number")
 
 	editWidS.wrapAction(self, editCommandS.deleteUChar, n_u_chars)
 end
