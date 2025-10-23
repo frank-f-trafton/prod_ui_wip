@@ -8,6 +8,7 @@ local context = select(1, ...)
 
 
 local fontCache = context:getLua("core/res/font_cache")
+local pName = require(context.conf.prod_ui_req .. "lib.pile_name")
 local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
 local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
@@ -17,11 +18,14 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
+pName.set(quadSlice._mt_slice, "QuadSlice")
+
+
 local _assertResolve = uiTable.assertResolve
 
 
-local _lut_font_ext = uiTable.newEnumV("FontFileExtension", ".ttf", ".otf", ".fnt", ".png")
-local _lut_font_ext_vec = uiTable.newEnumV("VectorFontFileExtension", ".ttf", ".otf")
+local _lut_font_ext = uiTable.newNamedMapV("FontFileExtension", ".ttf", ".otf", ".fnt", ".png")
+local _lut_font_ext_vec = uiTable.newNamedMapV("VectorFontFileExtension", ".ttf", ".otf")
 
 
 local _info = {} -- for love.filesystem.getInfo()
@@ -485,7 +489,13 @@ function methods:applyTheme(theme)
 		end
 
 		uiTheme.setLabel("(" .. tostring(v.skinner_id) .. ", " .. tostring(k) .. ")")
-		if skinner.validate then
+		if skinner.validateNEW then -- WIP
+			local ok, err_t = skinner.validateNEW:validate(v)
+			if not ok then
+				error("Skinner validation failed:\n" .. uiTable.safeTableConcat(err_t, "\n"))
+			end
+
+		elseif skinner.validate then -- Remove once uiSchema is fully operational
 			skinner.validate(v)
 		end
 		if skinner.transform then

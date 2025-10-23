@@ -23,6 +23,7 @@ local lgcButton = context:getLua("shared/lgc_button")
 local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -262,7 +263,63 @@ local function _changeRes(skin, k, scale)
 end
 
 
+local models, handlers = uiSchema.models, uiSchema.handlers
 def.default_skinner = {
+	--[=[
+	validateNEW = uiSchema.newValidator(def.skin_id, {
+		main = models.keysX {
+			-- box box
+			-- labelStyle label_style
+			-- quad tq_px
+
+			-- Cursor IDs for hover and press states.
+			cursor_on = handlers.stringEval,
+			cursor_press = handlers.stringEval,
+
+			-- Alignment of label text in Viewport #1.
+			-- namedMap label_align_h
+			-- namedMap label_align_v
+
+			-- A default graphic to use if the widget doesn't provide one.
+			-- TODO
+			-- graphic
+
+			-- Icon to show in the aux part of the button.
+			-- quad tq_aux_glyph
+			aux_placement = {handlers.oneOf, "left", "right", "top", "bottom"},
+
+			-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
+			-- "auto": size is based on Viewport #2
+			-- "auto": size is based on Viewport #2
+			--check.numberOrExact(skin, "aux_size", 0, nil, "auto") -- TODO
+
+			-- Quad (graphic) alignment within Viewport #2.
+			-- namedMap quad_align_h
+			-- namedMap quad_align_v
+
+			-- Placement of graphic in relation to text labels.
+			-- namedMap graphic_placement
+
+			-- How much space to assign the graphic when not using "overlay" placement.
+			graphic_spacing = {handlers.number, min=0},
+
+			res_idle = "res",
+			res_hover = "res",
+			res_pressed = "res",
+			res_disabled = "res"
+		},
+
+		res = models.keysX {
+			-- slice slice
+			color_body = handlers.loveColorTuple,
+			color_label = handlers.loveColorTuple,
+			color_aux_icon = handlers.loveColorTuple,
+			label_ox = handlers.integer,
+			label_oy = handlers.integer
+		}
+	}),
+	--]=]
+
 	validate = function(skin)
 		check.box(skin, "box")
 		check.labelStyle(skin, "label_style")
@@ -273,8 +330,8 @@ def.default_skinner = {
 		check.type(skin, "cursor_press", "nil", "string")
 
 		-- Alignment of label text in Viewport #1.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		-- A default graphic to use if the widget doesn't provide one.
 		-- TODO
@@ -290,11 +347,11 @@ def.default_skinner = {
 		check.numberOrExact(skin, "aux_size", 0, nil, "auto")
 
 		-- Quad (graphic) alignment within Viewport #2.
-		check.enum(skin, "quad_align_h")
-		check.enum(skin, "quad_align_v")
+		check.namedMap(skin, "quad_align_h")
+		check.namedMap(skin, "quad_align_v")
 
 		-- Placement of graphic in relation to text labels.
-		check.enum(skin, "graphic_placement")
+		check.namedMap(skin, "graphic_placement")
 
 		-- How much space to assign the graphic when not using "overlay" placement.
 		check.number(skin, "graphic_spacing", 0, nil, nil)

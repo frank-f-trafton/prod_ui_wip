@@ -1,4 +1,4 @@
--- PILE Table v1.310
+-- PILE Table v1.315
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -16,6 +16,7 @@ local lang = M.lang
 
 local interp = require(PATH .. "pile_interp")
 local pArg = require(PATH .. "pile_arg_check")
+local pName = require(PATH .. "pile_name")
 
 
 local ipairs, math, pairs, rawget, rawset, select, table, type = ipairs, math, pairs, rawget, rawset, select, table, type
@@ -439,50 +440,18 @@ function M.safeTableConcat(t, sep, i, j)
 end
 
 
-M.enum_names = setmetatable({}, {__mode="kv"})
-
-
-local _mt_enum = {}
-_mt_enum.__index = _mt_enum
-M.mt_enum = _mt_enum
-
-
-function M.newEnum(name, t)
+function M.newNamedMap(name, t)
 	pArg.typeEval(1, name, "string")
 	pArg.typeEval(2, t, "table")
 
-	local e = setmetatable(t or {}, _mt_enum)
-	M.enum_names[e] = name or "Enum"
-	return e
+	t = t or {}
+	pName.set(t, name)
+	return t
 end
 
 
-function M.newEnumV(name, ...)
-	return M.newEnum(name, M.newLUTV(...))
-end
-
-
-function _mt_enum:setName(name)
-	pArg.typeEval(1, name, "string")
-
-	M.enum_names[self] = name or "Enum"
-end
-
-
-function _mt_enum:getName()
-	return M.enum_names[self] or "(Unknown)"
-end
-
-
-function M.safeGetEnumName(enum)
-	pArg.typeEval(1, enum, "table")
-
-	local mt = getmetatable(enum)
-	if mt and mt.getName then
-		return enum:getName()
-	else
-		return "Enum"
-	end
+function M.newNamedMapV(name, ...)
+	return M.newNamedMap(name, M.newLUTV(...))
 end
 
 

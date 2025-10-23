@@ -265,8 +265,8 @@ def.default_skinner = {
 		check.type(skin, "cursor_press", "nil", "string")
 
 		-- Label config.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		--[[
 		TODO: an old WIP note:

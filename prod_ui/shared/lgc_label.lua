@@ -45,10 +45,10 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
-local _enum_modes = uiTable.newEnumV("LabelMode", "single", "single-ul", "multi")
+local _nm_modes = uiTable.newNamedMapV("LabelMode", "single", "single-ul", "multi")
 
 
--- Numeric values from 0-1 that correspond to font rendering alignment enums.
+-- Numeric values from 0-1 that correspond to font rendering alignment constants.
 local align_h_num = {left=0.0, center=0.5, right=1.0, justify=0.0}
 
 
@@ -65,7 +65,7 @@ end
 function lgcLabel.setup(self, mode)
 	mode = mode or "single"
 
-	uiAssert.enum(2, mode, _enum_modes)
+	uiAssert.namedMap(2, mode, _nm_modes)
 
 	-- The label text to draw.
 	self.label = ""
@@ -129,8 +129,8 @@ end
 function lgcLabel.widSetLabel(self, text, mode)
 	mode = mode or self.label_mode
 
-	uiAssert.assertText(2, text)
-	uiAssert.enum(3, mode, _enum_modes)
+	uiAssert.stringOrColoredText(2, text)
+	uiAssert.namedMap(3, mode, _nm_modes)
 
 	-- Check for mode update.
 	if mode ~= self.label_mode then

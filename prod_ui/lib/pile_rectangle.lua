@@ -1,4 +1,4 @@
--- PILE Rectangle Functions v1.310
+-- PILE Rectangle Functions v1.315
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -410,7 +410,7 @@ function M.split(a, b, placement, len)
 
 	local fn = _split_sides[placement]
 	if not fn then
-		error("invalid placement enum: " .. tostring(placement))
+		error("invalid placement: " .. tostring(placement))
 	else
 		fn(a, b, len)
 	end
@@ -434,7 +434,7 @@ function M.splitOrOverlay(a, b, placement, len)
 	else
 		local fn = _split_sides[placement]
 		if not fn then
-			error("invalid placement enum: " .. tostring(placement))
+			error("invalid placement: " .. tostring(placement))
 		else
 			fn(a, b, len)
 		end

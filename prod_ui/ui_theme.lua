@@ -78,26 +78,26 @@ function uiTheme.error(s, l)
 end
 
 
-uiTheme.enums = {
+uiTheme.named_maps = {
 	-- LÖVE enums
-	BlendAlphaMode = uiTable.newEnumV("BlendAlphaMode", "alphamultiply", "premultiplied"),
-	BlendMode = uiTable.newEnumV("BlendMode", "alpha", "replace", "screen", "add", "subtract", "multiply", "lighten", "darken"),
-	DrawMode = uiTable.newEnumV("DrawMode", "fill", "line"),
-	LineJoin = uiTable.newEnumV("LineJoin", "bevel", "miter", "none"),
-	LineStyle = uiTable.newEnumV("LineStyle", "rough", "smooth"),
+	BlendAlphaMode = uiTable.newNamedMapV("BlendAlphaMode", "alphamultiply", "premultiplied"),
+	BlendMode = uiTable.newNamedMapV("BlendMode", "alpha", "replace", "screen", "add", "subtract", "multiply", "lighten", "darken"),
+	DrawMode = uiTable.newNamedMapV("DrawMode", "fill", "line"),
+	LineJoin = uiTable.newNamedMapV("LineJoin", "bevel", "miter", "none"),
+	LineStyle = uiTable.newNamedMapV("LineStyle", "rough", "smooth"),
 
-	-- ProdUI Theme enums
-	font_type = uiTable.newEnum("FontExtensionType", {[".ttf"]="vector", [".otf"]="vector", [".fnt"]="bmfont", [".png"]="imagefont"}),
+	-- ProdUI theme
+	font_type = uiTable.newNamedMap("FontExtensionType", {[".ttf"]="vector", [".otf"]="vector", [".fnt"]="bmfont", [".png"]="imagefont"}),
 
-	-- ProdUI skin enums
-	bijou_side_h = uiTable.newEnumV("BijouSideHorizontal", "left", "right"),
-	graphic_placement = uiTable.newEnumV("GraphicPlacement", "left", "right", "top", "bottom", "overlay"),
-	label_align_h = uiTable.newEnumV("LabelAlignHorizontal", "left", "center", "right", "justify"),
-	label_align_v = uiTable.newEnumV("LabelAlignVertical", "top", "middle", "bottom"),
-	quad_align_h = uiTable.newEnumV("QuadAlignHorizontal", "left", "center", "right"),
-	quad_align_v = uiTable.newEnumV("QuadAlignVertical", "top", "middle", "bottom"),
+	-- ProdUI skin
+	bijou_side_h = uiTable.newNamedMapV("BijouSideHorizontal", "left", "right"),
+	graphic_placement = uiTable.newNamedMapV("GraphicPlacement", "left", "right", "top", "bottom", "overlay"),
+	label_align_h = uiTable.newNamedMapV("LabelAlignHorizontal", "left", "center", "right", "justify"),
+	label_align_v = uiTable.newNamedMapV("LabelAlignVertical", "top", "middle", "bottom"),
+	quad_align_h = uiTable.newNamedMapV("QuadAlignHorizontal", "left", "center", "right"),
+	quad_align_v = uiTable.newNamedMapV("QuadAlignVertical", "top", "middle", "bottom"),
 }
-local enums = uiTheme.enums
+local named_maps = uiTheme.named_maps
 
 
 --- Pick a resource table in a skin based on three common widget state flags: self.enabled, self.pressed and self.hovered.
@@ -173,7 +173,7 @@ local function _getFontTypeFromPath(path)
 		return "vector"
 	end
 
-	local ext = enums.font_type[path:sub(-4)]
+	local ext = named_maps.font_type[path:sub(-4)]
 	local font_type = ext
 	if not font_type then
 		uiTheme.pushLabel(ext)
@@ -364,25 +364,25 @@ function check.loveTypeOf(skin, k, ...)
 end
 
 
--- @param [enum_id] The enum table's ID. When omitted, it is assumed to be the same as 'k'.
-function check.enum(skin, k, enum_id)
-	enum_id = enum_id or k
-	if enum_id == k then
+-- @param [nm_id] The NamedMap's ID. When omitted, it is assumed to be the same as 'k'.
+function check.namedMap(skin, k, nm_id)
+	nm_id = nm_id or k
+	if nm_id == k then
 		uiTheme.pushLabel(k)
 	else
-		uiTheme.pushLabel(k .. " (enum: " .. enum_id .. ")")
+		uiTheme.pushLabel(k .. " (NamedMap: " .. nm_id .. ")")
 	end
 
-	local enum = enums[enum_id]
-	if not enum then
-		uiTheme.error("invalid enum table")
+	local n_map = named_maps[nm_id]
+	if not n_map then
+		uiTheme.error("invalid NamedMap")
 
-	elseif not enum[skin[k]] then
-		uiTheme.error("invalid value '" .. tostring(skin[k]) .. "' for enum: " .. tostring(enum_id))
+	elseif not n_map[skin[k]] then
+		uiTheme.error("invalid value '" .. tostring(skin[k]) .. "' for NamedMap: " .. tostring(nm_id))
 	end
 
 	uiTheme.popLabel()
-	return enum[skin[k]]
+	return n_map[skin[k]]
 end
 
 
@@ -437,11 +437,11 @@ function check.unitInterval(skin, k)
 end
 
 
-function check.numberOrEnum(skin, k, enum_t, min, max)
+function check.numberOrNamedMap(skin, k, n_map, min, max)
 	if type(skin[k]) == "number" then
 		return check.number(skin, k, min, max)
 	else
-		return check.enum(skin, k, enum_t)
+		return check.namedMap(skin, k, n_map)
 	end
 end
 
@@ -590,7 +590,6 @@ local function _checkSashRes(skin, k)
 
 	local res = check.getRes(skin, k)
 
-	print("???", res.slc_lr)
 	check.slice(res, "slc_lr")
 	check.slice(res, "slc_tb")
 	check.colorTuple(res, "col_body")
@@ -614,11 +613,11 @@ function check.thimbleInfo(skin, k)
 		uiTheme.error("expected thimbleInfo table")
 	end
 	-- Common details for drawing a rectangular thimble glow.
-	check.enum(thim, "mode", "DrawMode")
+	check.namedMap(thim, "mode", "DrawMode")
 	check.colorTuple(thim, "color")
-	check.enum(thim, "line_style", "LineStyle")
+	check.namedMap(thim, "line_style", "LineStyle")
 	check.integer(thim, "line_width", 0)
-	check.enum(thim, "line_join", "LineJoin")
+	check.namedMap(thim, "line_join", "LineJoin")
 	check.number(thim, "corner_rx", 0)
 	check.number(thim, "corner_ry", 0)
 
@@ -687,8 +686,8 @@ function check.quad(skin, k)
 	check.number(quad, "h")
 	check.loveType(quad, "texture", "Canvas", "Image", "Texture")
 	check.loveType(quad, "quad", "Quad")
-	check.enum(quad, "blend_mode", "BlendMode")
-	check.enum(quad, "alpha_mode", "BlendAlphaMode")
+	check.namedMap(quad, "blend_mode", "BlendMode")
+	check.namedMap(quad, "alpha_mode", "BlendAlphaMode")
 
 	uiTheme.popLabel()
 	return quad
@@ -723,8 +722,8 @@ function check.slice(skin, k)
 	end
 	check.quad(slice, "tex_quad")
 	check.loveType(slice, "texture", "Canvas", "Image", "Texture")
-	check.enum(slice, "blend_mode", "BlendMode")
-	check.enum(slice, "alpha_mode", "BlendAlphaMode")
+	check.namedMap(slice, "blend_mode", "BlendMode")
+	check.namedMap(slice, "alpha_mode", "BlendAlphaMode")
 
 	check.type(slice, "slice", "table")
 	check.metatableAsType(slice, "slice", "QuadSlice", quadSlice._mt_slice)
@@ -825,5 +824,68 @@ function change.integerScaled(skin, k, scale, min, max)
 	skin[k] = math.floor(math.max(min, math.min(skin[k] * scale, max)))
 end
 
+
+uiTheme.asserts = {}
+
+
+function uiTheme.asserts.quad(quad)
+	uiAssert.type(1, quad, "table")
+
+	uiAssert.numberNotNaN("x", quad.x)
+	uiAssert.numberNotNaN("y", quad.y)
+	uiAssert.numberNotNaN("w", quad.w)
+	uiAssert.numberNotNaN("h", quad.h)
+
+	uiAssert.loveTypes("texture", quad.texture, "Canvas", "Image", "Texture")
+	uiAssert.loveType("quad", quad.quad, "Quad")
+	uiAssert.namedMap("blend_mode", quad.blend_mode, uiTheme.named_maps.BlendMode)
+	uiAssert.namedMap("alpha_mode", quad.alpha_mode, uiTheme.named_maps.BlendAlphaMode)
+end
+
+
+function uiTheme.asserts.slice(slice)
+	uiAssert.type(1, slice, "table")
+
+	uiTheme.asserts.quad(slice.tex_quad)
+
+	uiAssert.loveTypes("texture", slice.texture, "Canvas", "Image", "Texture")
+	uiAssert.namedMap("blend_mode", slice.blend_mode, uiTheme.named_maps.BlendMode)
+	uiAssert.namedMap("alpha_mode", slice.alpha_mode, uiTheme.named_maps.BlendAlphaMode)
+
+	uiAssert.type("slice", slice.slice, "table")
+	uiAssert.tableHasThisMetatable("slice", slice.slice, quadSlice._mt_slice)
+
+	uiTheme.asserts.sliceInternal(slice.slice)
+end
+
+
+function uiTheme.asserts.sliceInternal(slc)
+	uiAssert.numberNotNaN("slc.x", slc.x)
+	uiAssert.numberNotNaN("slc.y", slc.y)
+	uiAssert.numberNotNaN("slc.w", slc.w)
+	uiAssert.numberNotNaN("slc.h", slc.h)
+	uiAssert.numberNotNaN("slc.w1", slc.w1)
+	uiAssert.numberNotNaN("slc.h1", slc.h1)
+	uiAssert.numberNotNaN("slc.w2", slc.w2)
+	uiAssert.numberNotNaN("slc.h2", slc.h2)
+	uiAssert.numberNotNaN("slc.w3", slc.w3)
+	uiAssert.numberNotNaN("slc.h3", slc.h3)
+	uiAssert.numberNotNaN("slc.iw", slc.iw)
+	uiAssert.numberNotNaN("slc.ih", slc.ih)
+
+	uiAssert.type("slc.mirror_h", slc.mirror_h, "boolean")
+	uiAssert.type("slc.mirror_v", slc.mirror_v, "boolean")
+
+	uiTheme.asserts.sliceInternalQuads(slc.quads)
+end
+
+
+function uiTheme.asserts.sliceInternalQuads(quads) -- slice.slice.quads
+	uiAssert.type("quads", slc.quads, "table")
+
+	for n = 1, 9 do
+		check.loveType("slc.quads[" .. n .. "]", quads[n], "Quad")
+	end
+end
 
 return uiTheme

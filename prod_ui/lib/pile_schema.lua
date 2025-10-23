@@ -1,4 +1,4 @@
--- PILE Schema v1.310
+-- PILE Schema v1.315
 -- (C) 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -12,6 +12,7 @@ local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 local interp = require(PATH .. "pile_interp")
 local pArg = require(PATH .. "pile_arg_check")
+local pName = require(PATH .. "pile_name")
 local pTable = require(PATH .. "pile_table")
 
 
@@ -588,6 +589,40 @@ M.handlers = {
 		return false, "expected: " .. tostring(here)
 	end,
 
+	hasThisName = function(k, v, opts)
+		M.assertOpts(opts)
+
+		if not M.allowed[type(v)] then
+			return false, "type '" .. type(v) .. "' is not allowed in the name registry"
+		end
+
+		local here = opts[2]
+		if pName.get(v) == here then
+			return true
+		end
+
+		return false, "expected name: " .. tostring(here)
+	end,
+
+	metatableHasThisName = function(k, v, opts)
+		M.assertOpts(opts)
+
+		if type(v) ~= "table" then
+			return false, "expected table"
+		end
+		local mt = getmetatable(v)
+		if not mt then
+			return false, "expected table to have an attached metatable"
+		end
+
+		local here = opts[2]
+		if pName.get(mt) == here then
+			return true
+		end
+
+		return false, "expected metatable to have this name: " .. tostring(here)
+	end,
+
 	oneOf = function(k, v, opts)
 		M.assertOpts(opts)
 
@@ -600,26 +635,43 @@ M.handlers = {
 		return false, "expected one of: " .. pTable.safeTableConcat(opts, ", ", 2)
 	end,
 
-	enum = function(k, v, opts)
+	oneOfThisName = function(k, v, opts)
 		M.assertOpts(opts)
-		local enum = M.assertOptsSub(opts, 2)
 
-		if enum[v] then
-			return true
+		if not M.allowed[type(v)] then
+			return false, "type '" .. type(v) .. "' is not allowed in the name registry"
 		end
 
-		return false, "invalid " .. pTable.safeGetEnumName(enum)
+		local v_name = pName.get(v)
+		for i = 2, #opts do
+			if v_name == opts[i] then
+				return true
+			end
+		end
+
+		return false, "expected name to be one of: " .. pTable.safeTableConcat(opts, ", ", 2)
 	end,
 
-	enumEval = function(k, v, opts)
+	namedMap = function(k, v, opts)
 		M.assertOpts(opts)
-		local enum = M.assertOptsSub(opts, 2)
+		local n_map = M.assertOptsSub(opts, 2)
 
-		if v or enum[v] then
+		if n_map[v] then
 			return true
 		end
 
-		return false, "expected false/nil or " .. pTable.safeGetEnumName(enum)
+		return false, "invalid " .. pName.safeGet(n_map)
+	end,
+
+	namedMapEval = function(k, v, opts)
+		M.assertOpts(opts)
+		local n_map = M.assertOptsSub(opts, 2)
+
+		if v or n_map[v] then
+			return true
+		end
+
+		return false, "expected false/nil or " .. pName.safeGet(n_map)
 	end,
 
 	choice = function(k, v, opts, user)

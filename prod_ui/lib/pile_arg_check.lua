@@ -1,4 +1,4 @@
--- PILE argCheck v1.310
+-- PILE argCheck v1.315
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -11,6 +11,7 @@ local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local interp = require(PATH .. "pile_interp")
+local pName = require(PATH .. "pile_name")
 
 
 local select, table, type = select, table, type
@@ -156,17 +157,17 @@ function M.numberNotNaNEval(n, v)
 end
 
 
-lang.bad_enum = "invalid $1"
-function M.enum(n, v, e)
+lang.bad_named_map = "invalid $1"
+function M.namedMap(n, v, e)
 	if not e[v] then
-		error(_n(n) .. interp(lang.bad_enum, e:getName()), 2)
+		error(_n(n) .. interp(lang.bad_named_map, pName.safeGet(e, "NamedMap")), 2)
 	end
 end
 
 
-function M.enumEval(n, v, e)
+function M.namedMapEval(n, v, e)
 	if v and not e[v] then
-		error(_n(n) .. interp(lang.bad_enum, e:getName()), 2)
+		error(_n(n) .. interp(lang.bad_named_map, pName.safeGet(e, "NamedMap")), 2)
 	end
 end
 
@@ -226,6 +227,23 @@ lang.not_nan = "expected non-NaN value"
 function M.notNaN(n, v)
 	if v ~= v then
 		error(_n(n) .. lang.not_nan, 2)
+	end
+end
+
+
+lang.mt_bad_t = "expected table"
+lang.mt_bad_mt = "expected table to have a metatable"
+lang.mt_bad_match = "expected metatable for: $1"
+function M.tableHasThisMetatable(n, v, mt)
+	if type(v) ~= "table" then
+		error(_n(n) .. lang.mt_bad_t, 2)
+	end
+	local this_mt = getmetatable(v)
+	if not this_mt then
+		error(_n(n) .. lang.mt_bad_mt, 2)
+	end
+	if this_mt ~= mt then
+		error(_n(n) .. interp(lang.mt_bad_match, pName.safeGet(mt)), 2)
 	end
 end
 

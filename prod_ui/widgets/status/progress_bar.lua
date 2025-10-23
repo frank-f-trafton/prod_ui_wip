@@ -155,8 +155,8 @@ def.default_skinner = {
 		check.quad(skin, "tq_px")
 
 		-- Alignment of label text in Viewport #1.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		-- Placement of the progress bar in relation to text labels.
 		check.exact(skin, "bar_placement", "left", "right", "top", "bottom", "overlay")

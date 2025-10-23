@@ -158,14 +158,14 @@ def.default_skinner = {
 		check.integer(skin, "bijou_spacing", 0)
 
 		-- Checkbox horizontal placement.
-		check.enum(skin, "bijou_side_h")
+		check.namedMap(skin, "bijou_side_h")
 
 		-- Alignment of bijou within Viewport #2.
 		check.unitInterval(skin, "bijou_align_h")
 		check.unitInterval(skin, "bijou_align_v")
 
 		-- Alignment of label text within Viewport #1.
-		check.enum(skin, "label_align_h")
+		check.namedMap(skin, "label_align_h")
 		check.unitInterval(skin, "label_align_v")
 
 		_checkRes(skin, "res_idle")

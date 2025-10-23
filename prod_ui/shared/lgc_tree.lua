@@ -10,7 +10,7 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcTree = {}
 
 
-local _enum_align = {left=true, center=true, right=true}
+local _nm_align = {left=true, center=true, right=true}
 
 
 function lgcTree.instanceSetup(self)
@@ -176,7 +176,7 @@ end
 
 
 function lgcTree.setItemAlignment(self, align)
-	if not _enum_align[align] then
+	if not _nm_align[align] then
 		error("invalid alignment setting.")
 	end
 	self:writeSetting("TR_item_align_h", align)

@@ -14,8 +14,8 @@ local widShared = context:getLua("core/wid_shared")
 local _lerp = pMath.lerp
 
 
-local _enum_align = uiTable.newEnumV("TextAlign", "left", "center", "right", "justify")
-local _enum_size_mode = uiTable.newEnumV("SizeMode", "h", "v")
+local _nm_align = uiTable.newNamedMapV("TextAlign", "left", "center", "right", "justify")
+local _nm_size_mode = uiTable.newNamedMapV("SizeMode", "h", "v")
 
 
 local def = {
@@ -103,7 +103,7 @@ end
 
 
 function def:setAlign(align)
-	uiAssert.enum(1, align, _enum_align)
+	uiAssert.namedMap(1, align, _nm_align)
 
 	self.align = align
 end
@@ -127,7 +127,7 @@ end
 
 
 function def:setAutoSize(mode)
-	uiAssert.enumEval(1, mode, _enum_size_mode)
+	uiAssert.namedMapEval(1, mode, _nm_size_mode)
 
 	self.auto_size = mode
 end

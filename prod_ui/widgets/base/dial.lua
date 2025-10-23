@@ -348,7 +348,7 @@ def.default_skinner = {
 		-- Label placement and spacing.
 		-- Note that this default skin isn't really designed to accommodate labels.
 		check.number(skin, "label_spacing", 0)
-		check.exact(skin, "label_placement", "left", "right", "top", "bottom", "overlay") -- TODO: merge with graphic_placement enum?
+		check.exact(skin, "label_placement", "left", "right", "top", "bottom", "overlay") -- TODO: merge with graphic_placement NamedMap?
 
 		-- For the empty part.
 		check.integer(skin, "trough_breadth", 0)
@@ -364,8 +364,8 @@ def.default_skinner = {
 		check.type(skin, "cursor_press", "nil", "string")
 
 		-- Label config.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		--[[
 		TODO: An old WIP note:

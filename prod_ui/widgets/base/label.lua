@@ -98,8 +98,8 @@ def.default_skinner = {
 		check.quad(skin, "tq_px")
 
 		-- Alignment of label text in Viewport #1.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		_checkRes(skin, "res_idle")
 		_checkRes(skin, "res_disabled")
