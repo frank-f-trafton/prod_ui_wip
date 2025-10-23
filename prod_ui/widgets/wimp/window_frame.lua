@@ -19,7 +19,7 @@ local _lerp = pMath.lerp
 local _viewport_keys = context:getLua("core/wid/viewport_keys")
 
 
-local _enum_header_sizes = uiTable.newEnumV("HeaderSize", "small", "normal", "large")
+local _nm_header_sizes = uiTable.newNamedMapV("HeaderSize", "small", "normal", "large")
 
 
 local def = {
@@ -36,7 +36,7 @@ local def = {
 		header_show_close_button = true,
 		header_show_max_button = true,
 		header_text = "",
-		header_size = "normal" -- _enum_header_sizes
+		header_size = "normal" -- _nm_header_sizes
 	}
 }
 
@@ -106,7 +106,7 @@ end
 
 function def:setHeaderSize(size)
 	size = size and size
-	uiAssert.enumEval(1, size, _enum_header_sizes)
+	uiAssert.namedMapEval(1, size, _nm_header_sizes)
 
 	if self.header_size ~= size then
 		local sx, sy = self:scrollGetXY()

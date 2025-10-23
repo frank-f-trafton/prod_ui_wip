@@ -74,7 +74,7 @@ function def:wid_incrementPageKey(v, radix, reps) return v + radix end
 function def:wid_decrementPageKey(v, radix, reps) return v - radix end
 
 
-local _enum_value_mode = uiTable.newEnum("ValueMode", {
+local _nm_value_mode = uiTable.newNamedMap("ValueMode", {
 	octal = 8,
 	decimal = 10,
 	hexadecimal = 16
@@ -94,7 +94,7 @@ end
 
 
 local function _valueFromText(s, value_mode)
-	return tonumber(s, _enum_value_mode[value_mode]) or false
+	return tonumber(s, _nm_value_mode[value_mode]) or false
 end
 
 
@@ -247,7 +247,7 @@ local function _callback(self, cb, reps)
 	--print("_callback(): start")
 	--print("_callback(): self.value", self.value)
 	if self.value then
-		_setTextFromValue(self, cb(self, self.value, _enum_value_mode[self.value_mode], reps), true, false)
+		_setTextFromValue(self, cb(self, self.value, _nm_value_mode[self.value_mode], reps), true, false)
 	else
 		_setTextFromValue(self, self.value_default, true, false)
 	end
@@ -258,7 +258,7 @@ end
 
 
 function def:setValueMode(mode)
-	uiAssert.enum(1, mode, _enum_value_mode)
+	uiAssert.namedMap(1, mode, _nm_value_mode)
 
 	self.value_mode = mode
 end

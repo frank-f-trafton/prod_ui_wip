@@ -52,11 +52,11 @@ return {
 		-- graphic
 
 		-- Quad (graphic) alignment within Viewport #1.
-		check.enum(skin, "quad_align_h")
-		check.enum(skin, "quad_align_v")
+		check.namedMap(skin, "quad_align_h")
+		check.namedMap(skin, "quad_align_v")
 
 		-- Placement of graphic in relation to text labels.
-		check.enum(skin, "graphic_placement")
+		check.namedMap(skin, "graphic_placement")
 
 		-- Additional spacing between graphic and label.
 		check.number(skin, "graphic_spacing", 0, nil, nil)

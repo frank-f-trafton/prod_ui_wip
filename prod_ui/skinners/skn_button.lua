@@ -46,19 +46,19 @@ return {
 		check.type(skin, "cursor_press", "nil", "string")
 
 		-- Alignment of label text in Viewport #1.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		-- A default graphic to use if the widget doesn't provide one.
 		-- TODO
 		-- graphic
 
 		-- Quad (graphic) alignment within Viewport #2.
-		check.enum(skin, "quad_align_h")
-		check.enum(skin, "quad_align_v")
+		check.namedMap(skin, "quad_align_h")
+		check.namedMap(skin, "quad_align_v")
 
 		-- Placement of graphic in relation to text labels.
-		check.enum(skin, "graphic_placement")
+		check.namedMap(skin, "graphic_placement")
 
 		-- How much space to assign the graphic when not using "overlay" placement.
 		check.number(skin, "graphic_spacing", 0)

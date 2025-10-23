@@ -56,7 +56,7 @@ function def:uiCall_initialize()
 end
 
 
-local err_str_col = "invalid color enum."
+local err_str_col = "invalid color ID."
 
 
 function def:setColor(fill, outline, text_color)

@@ -27,7 +27,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local _lerp = pMath.lerp
 
 
-local _slider_axes = uiTable.newEnumV("SliderAxis", "horizontal", "vertical")
+local _slider_axes = uiTable.newNamedMapV("SliderAxis", "horizontal", "vertical")
 
 
 local slider_keys = {
@@ -411,7 +411,7 @@ end
 
 
 function lgcSlider.widSetSliderAxis(self, axis)
-	uiAssert.enum(1, axis, _slider_axes)
+	uiAssert.namedMap(1, axis, _slider_axes)
 
 	self.trough_vertical = (axis == "vertical") and true or false
 	self:reshape()

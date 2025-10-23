@@ -458,8 +458,8 @@ def.default_skinner = {
 		check.type(skin, "cursor_press", "nil", "string")
 
 		-- Alignment of label text in Viewport #1.
-		check.enum(skin, "label_align_h")
-		check.enum(skin, "label_align_v")
+		check.namedMap(skin, "label_align_h")
+		check.namedMap(skin, "label_align_v")
 
 		-- Alignment of the 'prev' and 'next' arrow (or plus/minus, etc.) graphics within Viewports #2 and #3.
 		check.exact(skin, "gfx_prev_align_h", "left", "center", "right")
