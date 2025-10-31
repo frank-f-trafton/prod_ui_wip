@@ -80,6 +80,8 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -1059,104 +1061,100 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-
-	check.colorTuple(res, "col_icon")
-	check.colorTuple(res, "col_label")
-	check.colorTuple(res, "col_shortcut")
-	check.colorTuple(res, "col_arrow")
-
-	uiTheme.popLabel()
-end
+local md_res = uiSchema.newKeysX {
+	col_icon = uiAssert.loveColorTuple,
+	col_label = uiAssert.loveColorTuple,
+	col_shortcut = uiAssert.loveColorTuple,
+	col_arrow = uiAssert.loveColorTuple
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.type(skin, "icon_set_id", "nil", "string")
-		check.loveType(skin, "font_item", "Font")
-		check.slice(skin, "slc_body")
-		check.quad(skin, "tq_px")
-		check.quad(skin, "tq_arrow")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		icon_set_id = {uiAssert.types, "nil", "string"},
+		font_item = themeAssert.font,
+		slc_body = themeAssert.slice,
+		tq_px = themeAssert.quad,
+		tq_arrow = themeAssert.quad,
 
 		-- Height of horizontal separator items.
-		check.integer(skin, "separator_item_height", 0)
+		separator_item_height = {uiAssert.intGE, 0},
 
 		-- Height of the line graphic within separators.
-		check.integer(skin, "separator_graphic_height", 0)
+		separator_graphic_height = {uiAssert.intGE, 0},
 
 		-- Used when underlining shortcut key letters in menu items.
-		check.integer(skin, "underline_width", 0)
+		underline_width = {uiAssert.intGE, 0},
 
 		-- (Pop up menus do not render hover-glow.)
 
 		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
 
 		-- Padding values.
-		check.integer(skin, "pad_x1", 0)
-		check.integer(skin, "pad_x2", 0)
+		pad_x1 = {uiAssert.intGE, 0},
+		pad_x2 = {uiAssert.intGE, 0},
 
-		check.integer(skin, "pad_icon_x1", 0)
-		check.integer(skin, "pad_icon_x2", 0)
-		check.integer(skin, "pad_icon_y1", 0)
-		check.integer(skin, "pad_icon_y2", 0)
+		pad_icon_x1 = {uiAssert.intGE, 0},
+		pad_icon_x2 = {uiAssert.intGE, 0},
+		pad_icon_y1 = {uiAssert.intGE, 0},
+		pad_icon_y2 = {uiAssert.intGE, 0},
 
 		-- Drawing offsets and size for icon quads.
-		check.integer(skin, "icon_draw_w", 0)
-		check.integer(skin, "icon_draw_h", 0)
+		icon_draw_w = {uiAssert.intGE, 0},
+		icon_draw_h = {uiAssert.intGE, 0},
 
 		-- Padding above and below text and icons in items.
 		-- The tallest of the two components determines the item's height.
-		check.integer(skin, "pad_text_x1", 0)
-		check.integer(skin, "pad_text_x2", 0)
-		check.integer(skin, "pad_text_y1", 0)
-		check.integer(skin, "pad_text_y2", 0)
+		pad_text_x1 = {uiAssert.intGE, 0},
+		pad_text_x2 = {uiAssert.intGE, 0},
+		pad_text_y1 = {uiAssert.intGE, 0},
+		pad_text_y2 = {uiAssert.intGE, 0},
 
-		check.integer(skin, "arrow_draw_w", 0)
-		check.integer(skin, "arrow_draw_h", 0)
+		arrow_draw_w = {uiAssert.intGE, 0},
+		arrow_draw_h = {uiAssert.intGE, 0},
 
 		-- NOTE: Group arrows share padding with shortcuts.
-		check.integer(skin, "pad_shortcut_x1", 0)
-		check.integer(skin, "pad_shortcut_x2", 0)
+		pad_shortcut_x1 = {uiAssert.intGE, 0},
+		pad_shortcut_x2 = {uiAssert.intGE, 0},
 
-		check.colorTuple(skin, "color_separator")
-		check.colorTuple(skin, "color_select_glow")
+		color_separator = uiAssert.loveColorTuple,
+		color_select_glow = uiAssert.loveColorTuple,
 
-		_checkRes(skin, "res_actionable_selected")
-		_checkRes(skin, "res_actionable_unselected")
-		_checkRes(skin, "res_inactionable_selected")
-		_checkRes(skin, "res_inactionable_unselected")
-	end,
+		res_actionable_selected = md_res,
+		res_actionable_unselected = md_res,
+		res_inactionable_selected = md_res,
+		res_inactionable_unselected = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "separator_item_height", scale)
-		change.integerScaled(skin, "separator_graphic_height", scale)
-		change.integerScaled(skin, "underline_width", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "separator_item_height")
+		uiScale.fieldInteger(scale, skin, "separator_graphic_height")
+		uiScale.fieldInteger(scale, skin, "underline_width")
 
-		change.integerScaled(skin, "pad_x1", scale)
-		change.integerScaled(skin, "pad_x2", scale)
-		change.integerScaled(skin, "pad_icon_x1", scale)
-		change.integerScaled(skin, "pad_icon_x2", scale)
-		change.integerScaled(skin, "pad_icon_y1", scale)
-		change.integerScaled(skin, "pad_icon_y2", scale)
+		uiScale.fieldInteger(scale, skin, "pad_x1")
+		uiScale.fieldInteger(scale, skin, "pad_x2")
+		uiScale.fieldInteger(scale, skin, "pad_icon_x1")
+		uiScale.fieldInteger(scale, skin, "pad_icon_x2")
+		uiScale.fieldInteger(scale, skin, "pad_icon_y1")
+		uiScale.fieldInteger(scale, skin, "pad_icon_y2")
 
-		change.integerScaled(skin, "icon_draw_w", scale)
-		change.integerScaled(skin, "icon_draw_h", scale)
+		uiScale.fieldInteger(scale, skin, "icon_draw_w")
+		uiScale.fieldInteger(scale, skin, "icon_draw_h")
 
-		change.integerScaled(skin, "pad_text_x1", scale)
-		change.integerScaled(skin, "pad_text_x2", scale)
-		change.integerScaled(skin, "pad_text_y1", scale)
-		change.integerScaled(skin, "pad_text_y2", scale)
+		uiScale.fieldInteger(scale, skin, "pad_text_x1")
+		uiScale.fieldInteger(scale, skin, "pad_text_x2")
+		uiScale.fieldInteger(scale, skin, "pad_text_y1")
+		uiScale.fieldInteger(scale, skin, "pad_text_y2")
 
-		change.integerScaled(skin, "arrow_draw_w", scale)
-		change.integerScaled(skin, "arrow_draw_h", scale)
+		uiScale.fieldInteger(scale, skin, "arrow_draw_w")
+		uiScale.fieldInteger(scale, skin, "arrow_draw_h")
 	end,
 
 

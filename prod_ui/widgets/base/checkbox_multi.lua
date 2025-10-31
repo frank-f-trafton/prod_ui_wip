@@ -18,7 +18,10 @@ local lgcButton = context:getLua("shared/lgc_button")
 local lgcLabel = context:getLua("shared/lgc_label")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -105,85 +108,76 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-
-	check.type(res, "quads_state", "table")
-	uiTheme.pushLabel("quads_state")
-	for i in ipairs(res.quads_state) do
-		check.quad(res.quads_state, i)
-	end
-	uiTheme.popLabel()
-
-	check.colorTuple(res, "color_bijou")
-	check.colorTuple(res, "color_label")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
-
-	uiTheme.popLabel()
-end
+local md_res_quads_state = uiSchema.newModel {
+	array = themeAssert.quad
+}
 
 
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	quads_state = md_res_quads_state,
 
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
+	color_bijou = uiAssert.loveColorTuple,
+	color_label = uiAssert.loveColorTuple,
 
-	uiTheme.popLabel()
-end
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Cursor IDs for hover and press states.
-		check.type(skin, "cursor_on", "nil", "string")
-		check.type(skin, "cursor_press", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Checkbox (quad) render size.
-		check.integer(skin, "bijou_w", 0)
-		check.integer(skin, "bijou_h", 0)
+		bijou_w = {uiAssert.numberGE, 0},
+		bijou_h = {uiAssert.numberGE, 0},
 
 		-- Horizontal spacing between checkbox area and text label.
-		check.integer(skin, "bijou_spacing", 0)
+		bijou_spacing = {uiAssert.numberGE, 0},
 
 		-- Checkbox horizontal placement.
-		check.namedMap(skin, "bijou_side_h")
+		bijou_side_h = {uiAssert.namedMap, uiTheme.named_maps.bijou_side_h},
 
 		-- Alignment of bijou within Viewport #2.
-		check.unitInterval(skin, "bijou_align_h")
-		check.unitInterval(skin, "bijou_align_v")
+		bijou_align_h = {uiAssert.numberRange, 0.0, 1.0},
+		bijou_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
 		-- Alignment of label text within Viewport #1.
-		check.namedMap(skin, "label_align_h")
-		check.unitInterval(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_hover = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "bijou_w", scale)
-		change.integerScaled(skin, "bijou_h", scale)
-		change.integerScaled(skin, "bijou_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "bijou_w")
+		uiScale.fieldInteger(scale, skin, "bijou_h")
+		uiScale.fieldInteger(scale, skin, "bijou_spacing")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_hover", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_hover)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

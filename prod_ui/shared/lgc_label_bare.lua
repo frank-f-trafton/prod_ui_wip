@@ -27,7 +27,7 @@ end
 function lgcLabelBare.widSetLabel(self, text)
 	-- Assertions
 	-- [[
-	uiAssert.stringOrColoredText(2, text)
+	uiAssert.loveStringOrColoredText(2, text)
 	--]]
 
 	self.label = text

@@ -21,6 +21,7 @@ local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 
 _mt_context.draw = contextDraw.draw
@@ -1141,7 +1142,7 @@ function _mt_context:assertWidget(wid)
 end
 
 
-contextResources.attachMethods(_mt_context)
+uiTable.patch(_mt_context, contextResources.methods, true)
 
 
 return _mt_context

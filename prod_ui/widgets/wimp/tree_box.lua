@@ -32,6 +32,8 @@ local structTree = context:getLua("shared/struct_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -546,83 +548,83 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- settings
-		if skin.TR_item_align_h ~= nil then
-			check.exact(skin, "TR_item_align_h", "left", "right")
-		end
-		check.type(skin, "TR_expanders_active", "nil", "boolean")
-		check.type(skin, "TR_show_icons", "nil", "boolean")
-		check.type(skin, "icon_set_id", "nil", "string")
+		TR_item_align_h = {uiAssert.oneOfEval, "left", "right"},
+		TR_expanders_active = {uiAssert.types, "nil", "boolean"},
+		TR_show_icons = {uiAssert.types, "nil", "boolean"},
+		icon_set_id = {uiAssert.types, "nil", "string"},
 		-- /settings
 
-		check.box(skin, "box")
-		check.quad(skin, "tq_px")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
-		check.loveType(skin, "font", "Font")
+		box = themeAssert.box,
+		tq_px = themeAssert.quad,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
+		font = themeAssert.font,
 
-		check.quad(skin, "tq_px")
+		tq_px = themeAssert.quad,
 
-		check.quad(skin, "tq_expander_up")
-		check.quad(skin, "tq_expander_down")
-		check.quad(skin, "tq_expander_left")
-		check.quad(skin, "tq_expander_right")
+		tq_expander_up = themeAssert.quad,
+		tq_expander_down = themeAssert.quad,
+		tq_expander_left = themeAssert.quad,
+		tq_expander_right = themeAssert.quad,
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-		check.integer(skin, "item_pad_v", 0)
+		item_pad_v = {uiAssert.intGE, 0},
 
-		check.slice(skin, "sl_body")
+		sl_body = themeAssert.slice,
 
 		-- Vertical text alignment is centered.
 
 		-- Spacing for expanders, and half the initial width for the first pipe indentation.
-		check.integer(skin, "first_col_spacing", 0)
+		first_col_spacing = {uiAssert.intGE, 0},
 
 		-- The amount to indent child nodes.
-		check.integer(skin, "indent", 0)
+		indent = {uiAssert.intGE, 0},
 
 		-- Draw vertical pipes that show the indentation of each node.
-		check.type(skin, "draw_pipes", "nil", "boolean")
-		check.integer(skin, "pipe_width", 0)
+		draw_pipes = {uiAssert.types, "nil", "boolean"},
+		pipe_width = {uiAssert.intGE, 0},
 
 		-- Icon column width and positioning, if active.
-		check.integer(skin, "icon_spacing", 0)
+		icon_spacing = {uiAssert.intGE, 0},
 
 		-- Item components are always placed in these orders:
 		-- Left alignment: pipe decoration, expander, icon, text.
 		-- Right alignment: text, icon, expander, pipe decoration
 
 		-- Additional padding for icons.
-		check.integer(skin, "pad_icon_x", 0)
+		pad_icon_x = {uiAssert.intGE, 0},
 
 		-- Additional padding for text.
-		check.integer(skin, "pad_text_x", 0)
+		pad_text_x = {uiAssert.intGE, 0},
 
-		check.colorTuple(skin, "color_body")
-		check.colorTuple(skin, "color_item_text")
-		check.colorTuple(skin, "color_item_icon")
-		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_hover_glow")
-		check.colorTuple(skin, "color_active_glow")
-		check.colorTuple(skin, "color_item_marked")
-		check.colorTuple(skin, "color_pipe")
-		check.colorTuple(skin, "color_expander")
-	end,
+		color_body = uiAssert.loveColorTuple,
+		color_item_text = uiAssert.loveColorTuple,
+		color_item_icon = uiAssert.loveColorTuple,
+		color_select_glow = uiAssert.loveColorTuple,
+		color_hover_glow = uiAssert.loveColorTuple,
+		color_active_glow = uiAssert.loveColorTuple,
+		color_item_marked = uiAssert.loveColorTuple,
+		color_pipe = uiAssert.loveColorTuple,
+		color_expander = uiAssert.loveColorTuple
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "item_pad_v", scale)
-		change.integerScaled(skin, "first_col_spacing", scale)
-		change.integerScaled(skin, "indent", scale)
-		change.integerScaled(skin, "pipe_width", scale)
-		change.integerScaled(skin, "icon_spacing", scale)
-		change.integerScaled(skin, "pad_icon_x", scale)
-		change.integerScaled(skin, "pad_text_x", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "item_pad_v")
+		uiScale.fieldInteger(scale, skin, "first_col_spacing")
+		uiScale.fieldInteger(scale, skin, "indent")
+		uiScale.fieldInteger(scale, skin, "pipe_width")
+		uiScale.fieldInteger(scale, skin, "icon_spacing")
+		uiScale.fieldInteger(scale, skin, "pad_icon_x")
+		uiScale.fieldInteger(scale, skin, "pad_text_x")
 	end,
 
 

@@ -7,7 +7,10 @@ local context = select(1, ...)
 
 
 local lgcLabel = context:getLua("shared/lgc_label")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -56,59 +59,46 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-
+local md_res = uiSchema.newKeysX {
 	-- Optional body slice and color
-	if res.sl_body ~= nil then
-		check.slice(res, "sl_body")
-	end
-	if res.color_body ~= nil then
-		check.colorTuple(res, "color_body")
-	end
+	sl_body = themeAssert.sliceEval,
+	color_body = uiAssert.loveColorTupleEval,
 
-	check.colorTuple(res, "color_label")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
+	color_label = uiAssert.loveColorTuple,
 
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Alignment of label text in Viewport #1.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_disabled", scale)
+	transform = function(scale, skin)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

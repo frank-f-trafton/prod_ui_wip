@@ -6,8 +6,8 @@ return {
 	-- /settings
 
 	box = "*boxes/menu_bar",
-	tq_px = "*quads/atlas/pixel",
-	sl_body = "*slices/atlas/menu_bar_body",
+	tq_px = "*quads/pixel",
+	sl_body = "*slices/menu_bar_body",
 	font_item = "*fonts/p",
 
 	color_cat_enabled = {1.0, 1.0, 1.0, 1.0},

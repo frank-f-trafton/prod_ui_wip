@@ -316,8 +316,8 @@ function uiContext.newContext(prod_ui_path, settings)
 	local _mt_context = self:getLua("core/_mt_context")
 	setmetatable(self, _mt_context)
 
-	-- Resources. See context_resources.lua for more info.
-	self.resources = self:_initResourcesTable()
+	-- context_resources.lua creates and attaches the following tables:
+	-- self.resources
 
 	self._mt_widget = self:getLua("core/_mt_widget")
 

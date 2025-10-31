@@ -20,6 +20,8 @@ local lgcScroll = context:getLua("shared/lgc_scroll")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -599,39 +601,42 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.loveType(skin, "font", "Font")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
 
-		check.exact(skin, "text_align", "left", "center", "right")
+		box = themeAssert.box,
+		font = themeAssert.font,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
 
-		check.exact(skin, "icon_side", "left", "right")
-		check.integer(skin, "icon_spacing", 0)
+		text_align = {uiAssert.oneOf, "left", "center", "right"},
 
-		check.integer(skin, "item_height", 0)
-		check.integer(skin, "item_pad_v", 0)
+		icon_side = {uiAssert.oneOf, "left", "right"},
+		icon_spacing = {uiAssert.intGE, 0},
+
+		item_height = {uiAssert.intGE, 0},
+		item_pad_v = {uiAssert.intGE, 0},
 
 		-- The drawer's maximum height, as measured by the number of visible items (plus margins).
 		-- Drawer height is limited by the size of the application window.
-		check.integer(skin, "max_visible_items")
+		max_visible_items = uiAssert.int,
 
-		check.slice(skin, "slice")
-		check.colorTuple(skin, "color_body")
-		check.colorTuple(skin, "color_text")
-		check.colorTuple(skin, "color_selected")
-	end,
+		slice = themeAssert.slice,
+
+		color_body = uiAssert.loveColorTuple,
+		color_text = uiAssert.loveColorTuple,
+		color_selected = uiAssert.loveColorTuple
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "icon_spacing", scale)
-		change.integerScaled(skin, "item_height", scale)
-		change.integerScaled(skin, "item_pad_v", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "icon_spacing")
+		uiScale.fieldInteger(scale, skin, "item_height")
+		uiScale.fieldInteger(scale, skin, "item_pad_v")
 	end,
 
 

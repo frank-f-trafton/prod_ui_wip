@@ -67,6 +67,8 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
@@ -1430,113 +1432,106 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	sl_body = themeAssert.slice,
 
-	local res = check.getRes(skin, k)
-	check.slice(res, "sl_body")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_text")
-	check.integer(res, "offset_x")
-	check.integer(res, "offset_y")
+	color_body = uiAssert.loveColorTuple,
+	color_text = uiAssert.loveColorTuple,
 
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "offset_x", scale)
-	change.integerScaled(res, "offset_y", scale)
-
-	uiTheme.popLabel()
-end
+	offset_x = uiAssert.int,
+	offset_y = uiAssert.int,
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- settings
-		check.type(skin, "icon_set_id", "nil", "string")
+		icon_set_id = {uiAssert.types, "nil", "string"},
 		-- /settings
 
-		check.box(skin, "box")
-		check.quad(skin, "tq_px")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
-		check.loveType(skin, "font", "Font")
+		box = themeAssert.box,
+		tq_px = themeAssert.quad,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
+		font = themeAssert.font,
 
-		check.integer(skin, "column_min_w", 0)
-		check.integer(skin, "column_def_w", 0)
-		check.integer(skin, "column_bar_height", 0)
+		column_min_w = {uiAssert.intGE, 0},
+		column_def_w = {uiAssert.intGE, 0},
+		column_bar_height = {uiAssert.intGE, 0},
 
-		check.exact(skin, "col_def_text_align", "left", "center", "right")
-		check.exact(skin, "content_def_text_align", "left", "center", "right")
+		col_def_text_align = {uiAssert.oneOf, "left", "center", "right"},
+		content_def_text_align = {uiAssert.oneOf, "left", "center", "right"},
 
-		check.integer(skin, "item_h", 0)
+		item_h = {uiAssert.intGE, 0},
 
 		-- Width of the "drag to resize" sensor on column bars.
-		check.integer(skin, "drag_threshold", 0)
+		drag_threshold = {uiAssert.intGE, 0},
 
 		-- Half square range of where row sorting is permitted by clicking on column squares.
-		check.integer(skin, "col_click_threshold", 0)
+		col_click_threshold = {uiAssert.intGE, 0},
 
-		check.integer(skin, "column_sep_width", 0)
+		column_sep_width = {uiAssert.intGE, 0},
 
-		check.loveType(skin, "cell_font", "Font")
+		cell_font = themeAssert.font,
 
-		check.integer(skin, "cell_icon_w", 0)
-		check.integer(skin, "cell_icon_h", 0)
+		cell_icon_w = {uiAssert.intGE, 0},
+		cell_icon_h = {uiAssert.intGE, 0},
 
-		check.integer(skin, "header_icon_w", 0)
-		check.integer(skin, "header_icon_h", 0)
+		header_icon_w = {uiAssert.intGE, 0},
+		header_icon_h = {uiAssert.intGE, 0},
 
-		check.quad(skin, "tq_arrow_up")
-		check.quad(skin, "tq_arrow_down")
+		tq_arrow_up = themeAssert.quad,
+		tq_arrow_down = themeAssert.quad,
 
 		-- Padding between:
 		-- * Category panel left and label text
 		-- * Category panel right and sorting badge
-		check.integer(skin, "category_h_pad")
+		category_h_pad = uiAssert.int,
 
-		check.colorTuple(skin, "color_header_body")
-		check.colorTuple(skin, "color_background")
-		check.colorTuple(skin, "color_item_text")
-		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_hover_glow")
-		check.colorTuple(skin, "color_active_glow")
-		check.colorTuple(skin, "color_column_sep")
-		check.colorTuple(skin, "color_drag_col_bg")
-		check.colorTuple(skin, "color_cell_icon")
-		check.colorTuple(skin, "color_cell_text")
+		color_header_body = uiAssert.loveColorTuple,
+		color_background = uiAssert.loveColorTuple,
+		color_item_text = uiAssert.loveColorTuple,
+		color_select_glow = uiAssert.loveColorTuple,
+		color_hover_glow = uiAssert.loveColorTuple,
+		color_active_glow = uiAssert.loveColorTuple,
+		color_column_sep = uiAssert.loveColorTuple,
+		color_drag_col_bg = uiAssert.loveColorTuple,
+		color_cell_icon = uiAssert.loveColorTuple,
+		color_cell_text = uiAssert.loveColorTuple,
 
-		_checkRes(skin, "res_column_idle")
-		_checkRes(skin, "res_column_hover")
-		_checkRes(skin, "res_column_press")
-	end,
+		res_column_idle = md_res,
+		res_column_hover = md_res,
+		res_column_press = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "column_min_w", scale)
-		change.integerScaled(skin, "column_def_w", scale)
-		change.integerScaled(skin, "column_bar_height", scale)
-		change.integerScaled(skin, "item_h", scale)
-		change.integerScaled(skin, "drag_threshold", scale)
-		change.integerScaled(skin, "col_click_threshold", scale)
-		change.integerScaled(skin, "column_sep_width", scale)
-		change.integerScaled(skin, "cell_icon_w", scale)
-		change.integerScaled(skin, "cell_icon_h", scale)
-		change.integerScaled(skin, "header_icon_w", scale)
-		change.integerScaled(skin, "header_icon_h", scale)
-		change.integerScaled(skin, "category_h_pad", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "column_min_w")
+		uiScale.fieldInteger(scale, skin, "column_def_w")
+		uiScale.fieldInteger(scale, skin, "column_bar_height")
+		uiScale.fieldInteger(scale, skin, "item_h")
+		uiScale.fieldInteger(scale, skin, "drag_threshold")
+		uiScale.fieldInteger(scale, skin, "col_click_threshold")
+		uiScale.fieldInteger(scale, skin, "column_sep_width")
+		uiScale.fieldInteger(scale, skin, "cell_icon_w")
+		uiScale.fieldInteger(scale, skin, "cell_icon_h")
+		uiScale.fieldInteger(scale, skin, "header_icon_w")
+		uiScale.fieldInteger(scale, skin, "header_icon_h")
+		uiScale.fieldInteger(scale, skin, "category_h_pad")
 
-		_changeRes(skin, "res_column_idle", scale)
-		_changeRes(skin, "res_column_hover", scale)
-		_changeRes(skin, "res_column_press", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "offset_x")
+			uiScale.fieldInteger(scale, res, "offset_y")
+		end
+
+		_changeRes(scale, skin.res_column_idle)
+		_changeRes(scale, skin.res_column_hover)
+		_changeRes(scale, skin.res_column_press)
 	end,
 
 

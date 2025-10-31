@@ -9,14 +9,14 @@ return {
 	-- /settings
 
 	box = "*boxes/panel",
-	tq_px = "*quads/atlas/pixel",
+	tq_px = "*quads/pixel",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 
 	item_pad_v = 2,
 
-	sl_body = "*slices/atlas/list_box_body",
+	sl_body = "*slices/list_box_body",
 
 	icon_spacing = 24,
 

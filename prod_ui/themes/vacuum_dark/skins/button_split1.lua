@@ -3,7 +3,7 @@ return {
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
-	tq_px = "*quads/atlas/pixel",
+	tq_px = "*quads/pixel",
 
 	cursor_on = "hand",
 	cursor_press = "hand",
@@ -13,7 +13,7 @@ return {
 
 	-- graphic =
 
-	tq_aux_glyph = "*quads/atlas/arrow_down",
+	tq_aux_glyph = "*quads/arrow_down",
 
 	aux_placement = "right",
 	aux_size = 28,
@@ -25,7 +25,7 @@ return {
 	graphic_spacing = 0,
 
 	res_idle = {
-		slice = "*slices/atlas/button",
+		slice = "*slices/button",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
@@ -34,7 +34,7 @@ return {
 	},
 
 	res_hover = {
-		slice = "*slices/atlas/button_hover",
+		slice = "*slices/button_hover",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
@@ -43,7 +43,7 @@ return {
 	},
 
 	res_pressed = {
-		slice = "*slices/atlas/button_press",
+		slice = "*slices/button_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.9, 0.9, 0.9, 1.0},
 		color_aux_icon = {1.0, 1.0, 1.0, 1.0},
@@ -52,7 +52,7 @@ return {
 	},
 
 	res_disabled = {
-		slice = "*slices/atlas/button_disabled",
+		slice = "*slices/button_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_label = {0.5, 0.5, 0.5, 1.0},
 		color_aux_icon = {0.5, 0.5, 0.5, 1.0},

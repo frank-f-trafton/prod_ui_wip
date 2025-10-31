@@ -22,8 +22,11 @@ local context = select(1, ...)
 local lgcButton = context:getLua("shared/lgc_button")
 local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -234,143 +237,79 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	slice = themeAssert.slice,
 
-	local res = check.getRes(skin, k)
-	check.slice(res, "slice")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_label")
-	check.colorTuple(res, "color_aux_icon")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
+	color_body = uiAssert.loveColorTuple,
+	color_label = uiAssert.loveColorTuple,
+	color_aux_icon = uiAssert.loveColorTuple,
 
-	uiTheme.popLabel()
-end
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
-
-
-local models, handlers = uiSchema.models, uiSchema.handlers
 def.default_skinner = {
-	--[=[
-	validateNEW = uiSchema.newValidator(def.skin_id, {
-		main = models.keysX {
-			-- box box
-			-- labelStyle label_style
-			-- quad tq_px
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
 
-			-- Cursor IDs for hover and press states.
-			cursor_on = handlers.stringEval,
-			cursor_press = handlers.stringEval,
-
-			-- Alignment of label text in Viewport #1.
-			-- namedMap label_align_h
-			-- namedMap label_align_v
-
-			-- A default graphic to use if the widget doesn't provide one.
-			-- TODO
-			-- graphic
-
-			-- Icon to show in the aux part of the button.
-			-- quad tq_aux_glyph
-			aux_placement = {handlers.oneOf, "left", "right", "top", "bottom"},
-
-			-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
-			-- "auto": size is based on Viewport #2
-			-- "auto": size is based on Viewport #2
-			--check.numberOrExact(skin, "aux_size", 0, nil, "auto") -- TODO
-
-			-- Quad (graphic) alignment within Viewport #2.
-			-- namedMap quad_align_h
-			-- namedMap quad_align_v
-
-			-- Placement of graphic in relation to text labels.
-			-- namedMap graphic_placement
-
-			-- How much space to assign the graphic when not using "overlay" placement.
-			graphic_spacing = {handlers.number, min=0},
-
-			res_idle = "res",
-			res_hover = "res",
-			res_pressed = "res",
-			res_disabled = "res"
-		},
-
-		res = models.keysX {
-			-- slice slice
-			color_body = handlers.loveColorTuple,
-			color_label = handlers.loveColorTuple,
-			color_aux_icon = handlers.loveColorTuple,
-			label_ox = handlers.integer,
-			label_oy = handlers.integer
-		}
-	}),
-	--]=]
-
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Cursor IDs for hover and press states.
-		check.type(skin, "cursor_on", "nil", "string")
-		check.type(skin, "cursor_press", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Alignment of label text in Viewport #1.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
 		-- A default graphic to use if the widget doesn't provide one.
 		-- TODO
 		-- graphic
 
 		-- Icon to show in the aux part of the button.
-		check.quad(skin, "tq_aux_glyph")
-		check.exact(skin, "aux_placement", "left", "right", "top", "bottom")
+		tq_aux_glyph = themeAssert.quad,
+		aux_placement = {uiAssert.oneOf, "left", "right", "top", "bottom"},
 
 		-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
 		-- "auto": size is based on Viewport #2
-		-- "auto": size is based on Viewport #2
-		check.numberOrExact(skin, "aux_size", 0, nil, "auto")
+		aux_size = {uiAssert.numberGEOrOneOf, 0, "auto"},
 
 		-- Quad (graphic) alignment within Viewport #2.
-		check.namedMap(skin, "quad_align_h")
-		check.namedMap(skin, "quad_align_v")
+		quad_align_h = {uiAssert.namedMap, uiTheme.named_maps.quad_align_h},
+		quad_align_v = {uiAssert.namedMap, uiTheme.named_maps.quad_align_v},
 
 		-- Placement of graphic in relation to text labels.
-		check.namedMap(skin, "graphic_placement")
+		graphic_placement = {uiAssert.namedMap, uiTheme.named_maps.graphic_placement},
 
 		-- How much space to assign the graphic when not using "overlay" placement.
-		check.number(skin, "graphic_spacing", 0, nil, nil)
+		graphic_spacing = {uiAssert.numberGE, 0},
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_hover = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "aux_size", scale)
-		change.integerScaled(skin, "graphic_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "aux_size")
+		uiScale.fieldInteger(scale, skin, "graphic_spacing")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_hover", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_hover)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

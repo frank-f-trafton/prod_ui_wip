@@ -18,11 +18,11 @@ return {
 
 	text_align = "left",
 
-	tq_deco_glyph = "*quads/atlas/arrow_down",
+	tq_deco_glyph = "*quads/arrow_down",
 
 	res_idle = {
-		slice = "*slices/atlas/list_box_body", -- XXX: replace with a dedicated resource.
-		slc_deco_button = "*slices/atlas/button_minor",
+		slice = "*slices/list_box_body", -- XXX: replace with a dedicated resource.
+		slc_deco_button = "*slices/button_minor",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_icon = {1.0, 1.0, 1.0, 1.0},
@@ -32,8 +32,8 @@ return {
 	},
 
 	res_pressed = {
-		slice = "*slices/atlas/list_box_body", -- XXX: replace with a dedicated resource.
-		slc_deco_button = "*slices/atlas/button_minor_press",
+		slice = "*slices/list_box_body", -- XXX: replace with a dedicated resource.
+		slc_deco_button = "*slices/button_minor_press",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.9, 0.9, 0.9, 1.0},
 		color_icon = {1.0, 1.0, 1.0, 1.0},
@@ -43,8 +43,8 @@ return {
 	},
 
 	res_disabled = {
-		slice = "*slices/atlas/list_box_body", -- XXX: replace with a dedicated resource.
-		slc_deco_button = "*slices/atlas/button_minor_disabled",
+		slice = "*slices/list_box_body", -- XXX: replace with a dedicated resource.
+		slc_deco_button = "*slices/button_minor_disabled",
 		color_body = {1.0, 1.0, 1.0, 1.0},
 		color_text = {0.5, 0.5, 0.5, 1.0},
 		color_icon = {1.0, 1.0, 1.0, 1.0},
