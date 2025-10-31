@@ -3,7 +3,7 @@ return {
 
 	box = "*boxes/button",
 	label_style = "*labels/norm",
-	tq_px = "*quads/atlas/pixel",
+	tq_px = "*quads/pixel",
 
 	label_spacing = 0,
 	label_placement = "overlay",

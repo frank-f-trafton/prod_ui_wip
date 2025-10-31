@@ -129,7 +129,7 @@ end
 function lgcLabel.widSetLabel(self, text, mode)
 	mode = mode or self.label_mode
 
-	uiAssert.stringOrColoredText(2, text)
+	uiAssert.loveStringOrColoredText(2, text)
 	uiAssert.namedMap(3, mode, _nm_modes)
 
 	-- Check for mode update.

@@ -1,4 +1,4 @@
--- PILE argCheck v1.315
+-- PILE argCheck v1.315 (Modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -27,11 +27,21 @@ local lang = M.lang
 M.L = setmetatable({}, {__mode="kv"})
 
 
-local function _n(n)
+function M._n(n)
 	return type(n) == "number" and interp(lang.argument, n)
 		or type(n) == "string" and n .. ": "
 		or type(n) == "table" and interp(lang.field, n[1], n[2])
 		or ""
+end
+local _n = M._n
+
+
+local function _safeConcat(t, sep, i, j)
+	local t2 = {}
+	for i, v in ipairs(t) do
+		t2[i] = tostring(v)
+	end
+	return table.concat(t2, sep or "", i or 1, j or #t2)
 end
 
 
@@ -73,6 +83,81 @@ function M.typesEval(n, v, ...)
 			end
 		end
 		error(_n(n) .. interp(lang.types_eval, table.concat({...}, ", "), typ), 2)
+	end
+end
+
+
+lang.bad_one_of = "expected one of: $1"
+function M.oneOf(n, v, ...)
+	for i = 1, select("#", ...) do
+		if v == select(i, ...) then
+			return
+		end
+	end
+	error(_n(n) .. interp(lang.bad_one_of, _safeConcat({...}, ", ")), 2)
+end
+
+
+lang.bad_one_of_eval = "expected false/nil or one of: $1"
+function M.oneOfEval(n, v, ...)
+	if v then
+		for i = 1, select("#", ...) do
+			if v == select(i, ...) then
+				return
+			end
+		end
+		error(_n(n) .. interp(lang.bad_one_of_eval, _safeConcat({...}, ", ")), 2)
+	end
+end
+
+
+lang.num_ge = "expected number greater or equal to $1"
+function M.numberGE(n, v, min)
+	if type(v) ~= "number" or v < min then
+		error(_n(n) .. interp(lang.num_ge, min), 2)
+	end
+end
+
+
+lang.num_ge_eval = "expected false/nil or number greater or equal to $1"
+function M.numberGEEval(n, v, min)
+	if v and (type(v) ~= "number" or v < min) then
+		error(_n(n) .. interp(lang.num_ge_eval, min), 2)
+	end
+end
+
+
+lang.bad_num_or_one_of = "expected number >= $1 or one of: $2"
+function M.numberGEOrOneOf(n, v, min, ...)
+	if type(v) == "number" then
+		if not min or v >= min then
+			return
+		end
+	else
+		for i = 1, select("#", ...) do
+			if v == select(i, ...) then
+				return
+			end
+		end
+	end
+	error(_n(n) .. interp(lang.bad_num_or_one_of, min, _safeConcat({...}, ", ")), 2)
+end
+
+
+lang.num_range_a = "expected number, got $1"
+lang.num_range_b = "number is out of range"
+function M.numberRange(n, v, min, max)
+	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_a, type(v)), 2)
+	elseif v < min or v > max then error(_n(n) .. lang.int_range_b, 2) end
+end
+
+
+lang.num_range_eval_a = "expected false/nil or number, got $1"
+lang.num_range_eval_b = "number is out of range"
+function M.numberRangeEval(n, v, min, max)
+	if v then
+		if type(v) ~= "number" then error(_n(n) .. interp(lang.num_range_eval_a, type(v)), 2)
+		elseif v < min or v > max then error(_n(n) .. lang.num_range_eval_b, 2) end
 	end
 end
 
@@ -172,17 +257,6 @@ function M.namedMapEval(n, v, e)
 end
 
 
-lang.bad_one_of = "invalid $1"
-function M.oneOf(n, v, id, ...)
-	for i = 1, select("#", ...) do
-		if v == select(i, ...) then
-			return
-		end
-	end
-	error(_n(n) .. interp(lang.bad_one_of, id), 2)
-end
-
-
 lang.not_nil = "expected non-nil value"
 function M.notNil(n, v)
 	if v == nil then
@@ -244,6 +318,32 @@ function M.tableHasThisMetatable(n, v, mt)
 	end
 	if this_mt ~= mt then
 		error(_n(n) .. interp(lang.mt_bad_match, pName.safeGet(mt)), 2)
+	end
+end
+
+
+lang.expect_no_mt = "expected a table without an assigned metatable"
+function M.tableWithoutMetatable(n, v)
+	if type(v) ~= "table" or getmetatable(v) then
+		error(_n(n) .. lang.expect_no_mt, 2)
+	end
+end
+
+
+lang.fail_default = "error!"
+function M.fail(n, v, err)
+	error(_n(n) .. tostring(err) or lang.fail_default, 2)
+end
+
+
+function M.pass()
+	-- n/a
+end
+
+
+function M.assert(n, v, err)
+	if not v then
+		error(_n(n) .. tostring(err) or lang.fail_default, 2)
 	end
 end
 

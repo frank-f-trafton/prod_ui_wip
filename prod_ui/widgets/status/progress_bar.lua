@@ -16,6 +16,8 @@ local context = select(1, ...)
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -120,63 +122,55 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	color_back = uiAssert.loveColorTuple,
+	color_ichor = uiAssert.loveColorTuple,
+	color_label = uiAssert.loveColorTuple,
 
-	local res = check.getRes(skin, k)
-	check.colorTuple(res, "color_back")
-	check.colorTuple(res, "color_ichor")
-	check.colorTuple(res, "color_label")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Alignment of label text in Viewport #1.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
 		-- Placement of the progress bar in relation to text labels.
-		check.exact(skin, "bar_placement", "left", "right", "top", "bottom", "overlay")
+		bar_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"},
 
 		-- How much space to assign the progress bar when not using "overlay" placement.
-		check.integer(skin, "bar_spacing")
+		bar_spacing = uiAssert.int,
 
-		check.slice(skin, "slc_back")
-		check.slice(skin, "slc_ichor")
+		slc_back = themeAssert.slice,
+		slc_ichor = themeAssert.slice,
 
-		_checkRes(skin, "res_active")
-		_checkRes(skin, "res_inactive")
-	end,
+		res_active = md_res,
+		res_inactive = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "bar_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "bar_spacing")
 
-		_changeRes(skin, "res_active", scale)
-		_changeRes(skin, "res_inactive", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_active)
+		_changeRes(scale, skin.res_inactive)
 	end,
 
 

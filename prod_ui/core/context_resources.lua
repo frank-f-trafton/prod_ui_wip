@@ -12,8 +12,11 @@ local pName = require(context.conf.prod_ui_req .. "lib.pile_name")
 local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
 local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
+local themeAssert = context:getLua("core/res/theme_assert")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
@@ -32,15 +35,342 @@ local _info = {} -- for love.filesystem.getInfo()
 local _blank_env = {} -- For setfenv()
 
 
-local methods = {}
-function contextResources.attachMethods(mt)
-	for k, v in pairs(methods) do
-		if mt[k] then
-			error("attempted to overwrite key: " .. tostring(k))
+-- More context setup
+
+
+--[[
+Important: the first-gen resource tables (boxes, fonts, etc.) must not be overwritten with new tables.
+By not overwriting them, far-flung source files may hold direct references without having to perform
+repeated lookups through context.resources.
+--]]
+
+
+context.resources = {
+	boxes = pName.set({}, "boxes"),
+	fonts = pName.set({}, "fonts"),
+	icons = pName.set({}, "icons"),
+	info = pName.set({}, "info"),
+	labels = pName.set({}, "labels"),
+	sash_styles = pName.set({}, "sash_syles"),
+	scroll_bar_data = pName.set({}, "scroll_bar_data"),
+	scroll_bar_styles = pName.set({}, "scroll_bar_styles"),
+
+	textures = pName.set({}, "textures"),
+	quads = pName.set({}, "quads"),
+	slices = pName.set({}, "slices"),
+
+	skins = pName.set({}, "skins")
+}
+
+
+local models = {}
+
+
+models.box = uiSchema.newModel {
+	remaining = uiSchema.newKeysX {
+		x1 = {uiAssert.type, "number"},
+		x2 = {uiAssert.type, "number"},
+		y1 = {uiAssert.type, "number"},
+		y2 = {uiAssert.type, "number"}
+	}
+}
+
+
+models.labelStyle = uiSchema.newKeysX {
+	font = themeAssert.font,
+	ul_color = uiAssert.loveColorTupleEval,
+	ul_h = {uiAssert.numberGE, 0}
+}
+
+
+models.quad = uiSchema.newKeysX {
+	x = uiAssert.numberNotNaN,
+	y = uiAssert.numberNotNaN,
+	w = uiAssert.numberNotNaN,
+	h = uiAssert.numberNotNaN,
+
+	texture = {uiAssert.loveTypes, "Canvas", "Image", "Texture"},
+	quad = {uiAssert.loveType, "Quad"},
+	blend_mode = {uiAssert.namedMap, uiTheme.named_maps.BlendMode},
+	alpha_mode = {uiAssert.namedMap, uiTheme.named_maps.BlendAlphaMode}
+}
+
+
+models.quadSlice = uiSchema.newModel {
+	reject_unhandled = true,
+
+	metatable = {uiAssert.tableHasThisMetatable, quadSlice._mt_slice},
+
+	keys = {
+		x = uiAssert.numberNotNaN,
+		y = uiAssert.numberNotNaN,
+		w = uiAssert.numberNotNaN,
+		h = uiAssert.numberNotNaN,
+		w1 = uiAssert.numberNotNaN,
+		h1 = uiAssert.numberNotNaN,
+		w2 = uiAssert.numberNotNaN,
+		h2 = uiAssert.numberNotNaN,
+		w3 = uiAssert.numberNotNaN,
+		h3 = uiAssert.numberNotNaN,
+		iw = uiAssert.numberNotNaN,
+		ih = uiAssert.numberNotNaN,
+
+		mirror_h = {uiAssert.type, "boolean"},
+		mirror_v = {uiAssert.type, "boolean"},
+
+		quads =	uiSchema.newModel {
+			array_len = 9,
+			array = {uiAssert.loveType, "Quad"}
+		}
+	}
+}
+
+
+models.slice = uiSchema.newKeysX {
+	tex_quad = themeAssert.quad,
+	texture = {uiAssert.loveTypes, "Canvas", "Image", "Texture"},
+	blend_mode = {uiAssert.namedMap, uiTheme.named_maps.BlendMode},
+	alpha_mode = {uiAssert.namedMap, uiTheme.named_maps.BlendAlphaMode},
+
+	slice = models.quadSlice
+}
+
+
+models.scrollBarDataSharedRes = uiSchema.newKeysX {
+	slice = themeAssert.slice,
+	col_body = uiAssert.loveColorTuple,
+	col_symbol = uiAssert.loveColorTuple
+}
+
+
+models.scrollBarDataShared = uiSchema.newKeysX {
+	idle = models.scrollBarDataSharedRes,
+	hover = models.scrollBarDataSharedRes,
+	press = models.scrollBarDataSharedRes,
+	disabled = models.scrollBarDataSharedRes
+}
+
+
+models.scrollBarData = uiSchema.newKeysX {
+	tquad_pixel = models.quad,
+	tq_arrow_down = models.quad,
+	tq_arrow_up = models.quad,
+	tq_arrow_left = models.quad,
+	tq_arrow_right = models.quad,
+
+	-- This might be helpful if the buttons and trough do not fit snugly into the scroll bar's rectangular body.
+	render_body = {uiAssert.typeEval, "boolean"},
+
+	body_color = uiAssert.loveColorTuple,
+	col_trough = uiAssert.loveColorTuple,
+
+	-- In this implementation, the thumb and buttons share slices and colors for idle, hover and press states.
+	shared = models.scrollBarDataShared
+}
+
+
+models.scrollBarStyle = uiSchema.newKeysX {
+	has_buttons = {uiAssert.typeEval, "boolean"},
+	trough_enabled = {uiAssert.typeEval, "boolean"},
+	thumb_enabled = {uiAssert.typeEval, "boolean"},
+
+	bar_size = {uiAssert.intGEEval, 0},
+	button_size = {uiAssert.intGEEval, 0},
+	thumb_size_min = {uiAssert.intGEEval, 0},
+	thumb_size_max = {uiAssert.intGEEval, 0},
+
+	v_near_side = {uiAssert.typeEval, "boolean"},
+	v_auto_hide = {uiAssert.typeEval, "boolean"},
+
+	v_button1_enabled = {uiAssert.typeEval, "boolean"},
+	v_button1_mode = {uiAssert.oneOf, "pend-pend", "pend-cont", "cont"}, -- TODO: make a NamedMap: ScrollButtonMode
+	v_button2_enabled = {uiAssert.typeEval, "boolean"},
+	v_button2_mode = {uiAssert.oneOf, "pend-pend", "pend-cont", "cont"}, -- TODO: make a NamedMap: ScrollButtonMode
+
+	h_near_side = {uiAssert.typeEval, "boolean"},
+	h_auto_side = {uiAssert.typeEval, "boolean"},
+
+	h_button1_enabled = {uiAssert.typeEval, "boolean"},
+	h_button1_mode = {uiAssert.oneOf, "pend-pend", "pend-cont", "cont"}, -- TODO: make a NamedMap: ScrollButtonMode
+	h_button2_enabled = {uiAssert.typeEval, "boolean"},
+	h_button2_mode = {uiAssert.oneOf, "pend-pend", "pend-cont", "cont"} -- TODO: make a NamedMap: ScrollButtonMode
+}
+
+
+models.thimbleInfo = uiSchema.newKeysX {
+	-- Common details for drawing a rectangular thimble glow.
+	mode = {uiAssert.namedMap, uiTheme.named_maps.DrawMode},
+	color = uiAssert.colorTuple,
+	line_style = {uiAssert.namedMap, uiTheme.named_maps.LineStyle},
+	line_width = {uiAssert.intGE, 0},
+	line_join = {uiAssert.namedMap, uiTheme.named_maps.LineJoin},
+	corner_rx = {uiAssert.numberGE, 0},
+	corner_ry = {uiAssert.numberGE, 0},
+
+	-- Pushes the thimble outline out from the widget rectangle.
+	-- This is overridden if the widget contains 'self.thimble_x(|y|w|h)'.
+	outline_pad = {uiAssert.intGE, 0},
+
+	segments = {uiAssert.numberGEEval, 0}
+}
+
+
+models.sashStyleRes = uiSchema.newKeysX {
+	slc_lr = themeAssert.slice,
+	slc_tb = themeAssert.slice,
+
+	col_body = uiAssert.loveColorTuple
+}
+
+
+models.sashStyle = uiSchema.newKeysX {
+	-- Width of tall sashes; height of wide sashes.
+	breadth_half = {uiAssert.intGE, 0},
+
+	-- Reduces the intersection box when checking for the mouse *entering* a sash.
+	-- NOTE: overly large values will make the sash unclickable.
+	contract_x = {uiAssert.intGE, 0},
+	contract_y = {uiAssert.intGE, 0},
+
+	-- Increases the intersection box when checking for the mouse *leaving* a sash.
+	-- NOTES:
+	-- * Overly large values will prevent the user from clicking on widgets that
+	--   are descendants of the container.
+	-- * The expansion does not go beyond the container's body.
+	expand_x = {uiAssert.intGE, 0},
+	expand_y = {uiAssert.intGE, 0},
+
+	-- To apply a graphical margin to a sash mosaic, please bake the margin into the texture.
+
+	cursor_hover_h = {uiAssert.typeEval, "string"},
+	cursor_hover_v = {uiAssert.typeEval, "string"},
+	cursor_drag_h = {uiAssert.typeEval, "string"},
+	cursor_drag_v = {uiAssert.typeEval, "string"},
+
+	res_idle = models.sashStyleRes,
+	res_hover = models.sashStyleRes,
+	res_press = models.sashStyleRes,
+	res_disabled = models.sashStyleRes
+}
+
+
+models.boxes_collection = uiSchema.newModel {
+	remaining = models.box
+}
+
+
+models.icons_collection = uiSchema.newModel {
+	remaining = themeAssert.quad
+}
+
+
+models.sash_styles_collection = uiSchema.newModel {
+	remaining = models.sashStyle
+}
+
+
+local function _scaleBox(box, scale)
+	for k, v in pairs(box) do
+		for k2, v2 in pairs(v) do
+			if type(v2) == "number" then
+				v[k2] = math.max(0, math.floor(v2 * scale))
+			end
 		end
-		mt[k] = v
 	end
 end
+
+
+local function _scaleScrollBarStyle(sbs, scale)
+	uiScale.fieldInteger(scale, sbs, "bar_size", 0)
+	uiScale.fieldInteger(scale, sbs, "button_size", 0)
+	uiScale.fieldInteger(scale, sbs, "thumb_size_min", 0)
+	uiScale.fieldInteger(scale, sbs, "thumb_size_max", 0)
+end
+
+
+local function _scaleSashStyle(s, scale)
+	uiScale.fieldInteger(scale, s, "breadth_half", 0)
+	uiScale.fieldInteger(scale, s, "contract_x", 0)
+	uiScale.fieldInteger(scale, s, "contract_y", 0)
+	uiScale.fieldInteger(scale, s, "expand_x", 0)
+	uiScale.fieldInteger(scale, s, "expand_y", 0)
+end
+
+
+local function _getFontTypeFromPath(path)
+	if path == "default" then
+		return "vector"
+	end
+
+	local ext = uiTheme.named_maps.font_type[path:sub(-4)]
+	local font_type = ext
+	if not font_type then
+		error("invalid font extension: " .. tostring(ext))
+	end
+
+	return font_type
+end
+
+
+local function _getFontInfoTable(tbl, k)
+	local font_info = tbl[k]
+	if not font_info then
+		error("expected font-info table")
+	end
+	return font_info
+end
+
+
+local function _checkFontInfo(theme_fonts, k)
+	local font_info = _getFontInfoTable(theme_fonts, k)
+	uiAssert.type(nil, font_info.path, "string")
+
+	local font_type = _getFontTypeFromPath(font_info.path)
+	if font_type == "vector" then
+		uiAssert.type(nil, font_info.size, "number")
+
+	elseif font_type == "bmfont" then
+		uiAssert.types(nil, font_info.image_path, "nil", "string")
+
+	elseif font_type == "imagefont" then
+		uiAssert.type(nil, font_info.glyphs, "string")
+		uiAssert.types(nil, font_info.extraspacing, "nil", "number")
+	end
+
+	uiAssert.types(nil, font_info.fallbacks, "nil", "table")
+	if font_info.fallbacks then
+		for i, fb in ipairs(font_info.fallbacks) do
+
+			uiAssert.type(nil, fb.path, "string")
+			if font_type == "vector" then
+				uiAssert.type(nil, fb.size, "number")
+			end
+		end
+	end
+end
+
+
+local function _scaleFontInfo(theme_fonts, k, scale)
+	local font_info = _getFontInfoTable(theme_fonts, k)
+
+	local font_type = _getFontTypeFromPath(font_info.path)
+	if font_type == "vector" then
+		uiScale.fieldInteger(scale, font_info, "size", 0, uiTheme.settings.max_font_size)
+	end
+	-- Do not scale ImageFont extraspacing.
+
+	if font_info.fallbacks then
+		for i, fb in ipairs(font_info.fallbacks) do
+			if font_type == "vector" then
+				uiScale.fieldInteger(scale, fb, "size", 0, uiTheme.settings.max_font_size)
+			end
+		end
+	end
+end
+
+
+local methods = {}
+contextResources.methods = methods
 
 
 function methods:resetResources()
@@ -164,7 +494,7 @@ local function _initTexture(texture, metadata)
 end
 
 
---- Loads a PNG and an optional accompanying .lua file of metadata.
+--- Loads a PNG, and an optional .lua metadata file of the same name.
 local function _loadTextureFiles(path)
 	path = context:interpolatePath(path)
 
@@ -182,36 +512,6 @@ local function _loadTextureFiles(path)
 	-- TODO: check config fields
 
 	return tex, metadata
-end
-
-
---[[
-Important: the first-gen resource tables (boxes, fonts, etc.) must not be overwritten with new tables.
-By not overwriting them, far-flung source files may hold direct references without having to perform
-repeated lookups through context.resources.
---]]
-function methods:_initResourcesTable()
-	if self.resources then
-		error("'self.resources' is already populated. This method should only be called once.")
-	end
-
-	-- ie 'self.resources = self:_initResourcesTable()'
-	return {
-		boxes = {},
-		fonts = {},
-		icons = {},
-		info = {},
-		labels = {},
-		sash_styles = {},
-		scroll_bar_data = {},
-		scroll_bar_styles = {},
-
-		textures = {},
-		quads = {},
-		slices = {},
-
-		skins = {}
-	}
 end
 
 
@@ -336,7 +636,6 @@ function methods:applyTheme(theme)
 	self:resetResources()
 	self.theme_id = false
 	fontCache.clear()
-	uiTheme.setLabel()
 
 	if not theme then
 		return
@@ -344,30 +643,45 @@ function methods:applyTheme(theme)
 
 	self.theme_id = theme.info.theme_ids[1]
 	if type(self.theme_id) ~= "string" then
-		error("invalid Theme ID.")
+		error("invalid Theme ID")
 	end
 
-	if theme.boxes then
-		uiTheme.pushLabel("boxes")
+	-- TODO: support loading a directory of images as one group (like an uncompiled atlas).
 
-		_deepCopyFields(theme.boxes, resources.boxes)
-		for k, box in pairs(resources.boxes) do
-			uiTheme.check.box(resources.boxes, k)
-			uiTheme.scaleBox(box, scale)
+	-- textures, quads, slices
+	if theme.textures then
+		for k, tex_info in pairs(theme.textures) do
+			local tex, meta = _loadTextureFiles(tex_info.path)
+			local tex_tbl = _initTexture(tex, meta)
+
+			resources.textures[k] = tex_tbl
+
+			-- Directly add quads, QuadSlices to the resource tables.
+			-- Duplicate names are an error.
+			if tex_tbl.quads then
+				for k2, v in pairs(tex_tbl.quads) do
+					if resources.quads[k2] then
+						error("duplicate quad name: " .. k2)
+					end
+					resources.quads[k2] = v
+				end
+			end
+
+			if tex_tbl.slices then
+				for k2, v in pairs(tex_tbl.slices) do
+					if resources.slices[k2] then
+						error("duplicate QuadSlice name: " .. k2)
+					end
+					resources.slices[k2] = v
+				end
+			end
 		end
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
 
 	if theme.fonts then
-		uiTheme.pushLabel("fonts")
-
 		for k in pairs(theme.fonts) do
-			uiTheme.pushLabel(k)
-			uiTheme.checkFontInfo(theme.fonts, k)
-			uiTheme.scaleFontInfo(theme.fonts, k, scale)
-			uiTheme.popLabel()
+			_checkFontInfo(theme.fonts, k)
+			_scaleFontInfo(theme.fonts, k, scale)
 		end
 
 		for k, font_info in pairs(theme.fonts) do
@@ -378,92 +692,49 @@ function methods:applyTheme(theme)
 			fontCache.setFallbacks(font_info)
 			resources.fonts[k] = fontCache.getFont(font_info)
 		end
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
 	fontCache.clear()
+
+	if theme.boxes then
+		_deepCopyFields(theme.boxes, resources.boxes)
+		uiSchema.validate(models.boxes_collection, resources.boxes, "resources.boxes")
+		for k, box in pairs(resources.boxes) do
+			_scaleBox(box, scale)
+		end
+	end
 
 	if theme.icons then
 		_deepCopyFields(theme.icons, resources.icons)
 	end
 
 	if theme.info then
-		uiTheme.pushLabel("info")
-
 		_deepCopyFields(theme.info, resources.info)
 
 		-- TODO
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
 
 	if theme.labels then
-		uiTheme.pushLabel("labels")
-
 		_deepCopyFields(theme.labels, resources.labels)
 
 		-- TODO
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
 
 	if theme.sash_styles then
-		uiTheme.pushLabel("sash_styles")
-
 		_deepCopyFields(theme.sash_styles, resources.sash_styles)
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
 
 	if theme.scroll_bar_data then
-		uiTheme.pushLabel("scroll_bar_data")
-
 		_deepCopyFields(theme.scroll_bar_data, resources.scroll_bar_data)
 
 		-- TODO
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
 
 	if theme.scroll_bar_styles then
-		uiTheme.pushLabel("scroll_bar_styles")
-
 		_deepCopyFields(theme.scroll_bar_styles, resources.scroll_bar_styles)
 
 		for k, v in pairs(resources.scroll_bar_styles) do
-			uiTheme.scaleScrollBarStyle(v, scale)
+			_scaleScrollBarStyle(v, scale)
 		end
-
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
-	end
-
-	-- TODO: support loading a directory of images as one group (like an uncompiled atlas).
-
-	if theme.textures then
-		uiTheme.pushLabel("textures")
-
-		for k, tex_info in pairs(theme.textures) do
-			local tex, meta = _loadTextureFiles(tex_info.path)
-			local tex_tbl = _initTexture(tex, meta)
-
-			resources.textures[k] = tex_tbl
-
-			if tex_tbl.quads then
-				resources.quads[k] = tex_tbl.quads
-			end
-
-			if tex_tbl.slices then
-				resources.slices[k] = tex_tbl.slices
-			end
-		end
-
-		uiTheme.popLabel()
 	end
 
 	if theme.skins then
@@ -472,15 +743,14 @@ function methods:applyTheme(theme)
 		end
 	end
 
-	_applyReferences(resources, resources)
+	uiSchema.validate(models.icons_collection, resources.icons, "resources.icons")
 
-	uiTheme.checkIconSets(resources.icons)
-	uiTheme.assertLabelLevel(0)
-
-	uiTheme.checkSashStyles(resources.sash_styles)
+	uiSchema.validate(models.sash_styles_collection, resources.sash_styles, "resources.sash_styles")
 	for k, v in pairs(resources.sash_styles) do
-		uiTheme.scaleSashStyle(v, scale)
+		_scaleSashStyle(v, scale)
 	end
+
+	local skin_errors = {}
 
 	for k, v in pairs(resources.skins) do
 		local skinner = context.skinners[v.skinner_id]
@@ -488,23 +758,22 @@ function methods:applyTheme(theme)
 			error("no skinner with ID: " .. tostring(v.skinner_id))
 		end
 
-		uiTheme.setLabel("(" .. tostring(v.skinner_id) .. ", " .. tostring(k) .. ")")
-		if skinner.validateNEW then -- WIP
-			local ok, err_t = skinner.validateNEW:validate(v)
+		if skinner.validate then
+			local ok, err = uiSchema.validate(skinner.validate, v, tostring(k))
 			if not ok then
-				error("Skinner validation failed:\n" .. uiTable.safeTableConcat(err_t, "\n"))
-			end
+				table.insert(skin_errors, err)
 
-		elseif skinner.validate then -- Remove once uiSchema is fully operational
-			skinner.validate(v)
+			elseif skinner.transform then
+				skinner.transform(scale, v)
+			end
 		end
-		if skinner.transform then
-			skinner.transform(v, scale)
-		end
-		uiTheme.popLabel()
-		uiTheme.assertLabelLevel(0)
 	end
-	uiTheme.assertLabelLevel(0)
+
+	if #skin_errors > 0 then
+		error("failed to validate skin data:\n" .. table.concat(skin_errors, "\n…\n"))
+	end
+
+	_applyReferences(resources, resources)
 
 	collectgarbage("collect")
 	collectgarbage("collect")

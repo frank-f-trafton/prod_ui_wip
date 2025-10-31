@@ -9,6 +9,8 @@ local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widLayout = context:getLua("core/wid_layout")
@@ -969,178 +971,142 @@ local function _getHeaderSensorResource(self, btn, res)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkResSelection(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	check.colorTuple(res, "col_header_fill")
-	check.colorTuple(res, "col_header_text")
-
-	uiTheme.popLabel()
-end
+local md_res_selection = uiSchema.newKeysX {
+	col_header_fill = uiAssert.loveColorTuple,
+	col_header_text = uiAssert.loveColorTuple
+}
 
 
-local function _checkResBtnClose(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	check.quad(res, "graphic")
-
-	uiTheme.popLabel()
-end
+local md_res_btn_close = uiSchema.newKeysX {
+	graphic = themeAssert.quad
+}
 
 
-local function _checkResBtnSize(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	check.quad(res, "graphic")
-	check.quad(res, "graphic_max")
-	check.quad(res, "graphic_unmax")
-
-	uiTheme.popLabel()
-end
+local md_res_btn_size = uiSchema.newKeysX {
+	graphic = themeAssert.quad,
+	graphic_max = themeAssert.quad,
+	graphic_unmax = themeAssert.quad
+}
 
 
-local function _checkResBtnState(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	check.slice(res, "slice")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_quad")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
-
-	uiTheme.popLabel()
-end
+local md_res_btn_state = uiSchema.newKeysX {
+	slice = themeAssert.slice,
+	color_body = uiAssert.loveColorTuple,
+	color_quad = uiAssert.loveColorTuple,
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
-local function _checkResTopLevel(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-
+local md_res = uiSchema.newKeysX {
 	-- Which rectangle to use for fitting the header.
 	-- false: 'self.w', 'self.h'
 	-- number: a corresponding viewport.
-	check.integerOrExact(res, "viewport_fit", 1, nil, nil, false)
+	viewport_fit = {uiAssert.oneOf, false, 1, 2, 3, 4, 5, 6, 7, 8},
 
-	check.box(res, "header_box")
-	check.slice(res, "header_slc_body")
-	check.loveType(res, "header_font", "Font")
-	check.integer(res, "header_h", 0)
-	check.integer(res, "button_pad_w", 0)
-	check.integer(res, "button_w", 0)
-	check.integer(res, "button_h", 0)
+	header_box = themeAssert.box,
+	header_slc_body = themeAssert.slice,
+	header_font = themeAssert.font,
+	header_h = {uiAssert.intGE, 0},
+	button_pad_w = {uiAssert.intGE, 0},
+	button_w = {uiAssert.intGE, 0},
+	button_h = {uiAssert.intGE, 0},
 
 	-- From 0 (top) to 1 (bottom)
-	check.unitInterval(res, "button_align_v")
+	button_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
-	_checkResSelection(res, "res_selected")
-	_checkResSelection(res, "res_unselected")
+	res_selected = md_res_selection,
+	res_unselected = md_res_selection,
 
-	_checkResBtnClose(res, "btn_close")
-	_checkResBtnSize(res, "btn_size")
+	btn_close = md_res_btn_close,
+	btn_size = md_res_btn_size,
 
-	_checkResBtnState(res, "res_btn_idle")
-	_checkResBtnState(res, "res_btn_hover")
-	_checkResBtnState(res, "res_btn_pressed")
-	_checkResBtnState(res, "res_btn_disabled")
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeResBtnState(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeResTopLevel(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "header_h", scale)
-	change.integerScaled(res, "button_pad_w", scale)
-	change.integerScaled(res, "button_w", scale)
-	change.integerScaled(res, "button_h", scale)
-
-	_changeResBtnState(res, "res_btn_idle", scale)
-	_changeResBtnState(res, "res_btn_hover", scale)
-	_changeResBtnState(res, "res_btn_pressed", scale)
-	_changeResBtnState(res, "res_btn_disabled", scale)
-
-	uiTheme.popLabel()
-end
+	res_btn_idle = md_res_btn_state,
+	res_btn_hover = md_res_btn_state,
+	res_btn_pressed = md_res_btn_state,
+	res_btn_disabled = md_res_btn_state
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- settings
 		-- TODO
 		-- /settings
 
-		check.box(skin, "box")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
+		box = themeAssert.box,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
 
 		-- Padding when scrolling to put a widget into view.
-		check.integer(skin, "in_view_pad_x", 0)
-		check.integer(skin, "in_view_pad_y", 0)
+		in_view_pad_x = {uiAssert.intGE, 0},
+		in_view_pad_y = {uiAssert.intGE, 0},
 
-		check.slice(skin, "slc_body")
-		check.slice(skin, "slc_shadow")
+		slc_body = themeAssert.slice,
+		slc_shadow = themeAssert.slice,
 
-		check.unitInterval(skin, "header_text_align_h")
-		check.unitInterval(skin, "header_text_align_v")
+		header_text_align_h = {uiAssert.numberRange, 0.0, 1.0},
+		header_text_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
 		-- How many pixels to extend / pad resize sensors.
-		check.integer(skin, "sensor_resize_pad", 0)
+		sensor_resize_pad = {uiAssert.intGE, 0},
 
 		-- How much to extend the diagonal parts of the resize area.
-		check.integer(skin, "sensor_resize_diagonal", 0)
+		sensor_resize_diagonal = {uiAssert.intGE, 0},
 
 		-- How far to allow resizing a widget outside the bounds of its parent.
 		-- Used to prevent stretching frames too far outside the LÖVE application window.
-		check.integer(skin, "frame_outbound_limit", 1)
+		frame_outbound_limit = {uiAssert.intGE, 0},
 
-		check.integer(skin, "shadow_extrude", 0)
+		shadow_extrude = {uiAssert.intGE, 0},
 
 		-- Alignment of textures within control sensors
 		-- 0.0: left, 0.5: middle, 1.0: right
-		check.unitInterval(skin, "sensor_tex_align_h")
+		sensor_tex_align_h = {uiAssert.numberRange, 0.0, 1.0},
 
 		-- 0.0: top, 0.5: middle, 1.0: bottom
-		check.unitInterval(skin, "sensor_tex_align_v")
+		sensor_tex_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
-		check.colorTuple(skin, "color_body")
-		check.colorTuple(skin, "color_shadow")
+		color_body = uiAssert.loveColorTuple,
+		color_shadow = uiAssert.loveColorTuple,
 
-		_checkResTopLevel(skin, "res_normal")
-		_checkResTopLevel(skin, "res_small")
-		_checkResTopLevel(skin, "res_large")
-	end,
+		res_normal = md_res,
+		res_small = md_res,
+		res_large = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "in_view_pad_x", scale)
-		change.integerScaled(skin, "in_view_pad_y", scale)
-		change.integerScaled(skin, "sensor_resize_pad", scale)
-		--change.integerScaled(skin, "shadow_extrude", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "in_view_pad_x")
+		uiScale.fieldInteger(scale, skin, "in_view_pad_y")
+		uiScale.fieldInteger(scale, skin, "sensor_resize_pad")
+		--uiScale.fieldInteger(scale, skin, "shadow_extrude")
 
-		_changeResTopLevel(skin, "res_normal", scale)
-		_changeResTopLevel(skin, "res_small", scale)
-		_changeResTopLevel(skin, "res_large", scale)
+		local function _changeResBtnState(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		local function _changeResTopLevel(scale, res)
+			uiScale.fieldInteger(scale, res, "header_h")
+			uiScale.fieldInteger(scale, res, "button_pad_w")
+			uiScale.fieldInteger(scale, res, "button_w")
+			uiScale.fieldInteger(scale, res, "button_h")
+
+			_changeResBtnState(scale, res.res_btn_idle)
+			_changeResBtnState(scale, res.res_btn_hover)
+			_changeResBtnState(scale, res.res_btn_pressed)
+			_changeResBtnState(scale, res.res_btn_disabled)
+		end
+
+		_changeResTopLevel(scale, skin.res_normal)
+		_changeResTopLevel(scale, skin.res_small)
+		_changeResTopLevel(scale, skin.res_large)
 	end,
 
 

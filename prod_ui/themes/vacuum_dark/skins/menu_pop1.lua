@@ -4,9 +4,9 @@ return {
 	box = "*boxes/panel",
 	icon_set_id = "bureau",
 	font_item = "*fonts/p",
-	slc_body = "*slices/atlas/menu_pop_body",
-	tq_px = "*quads/atlas/pixel",
-	tq_arrow = "*quads/atlas/arrow_right",
+	slc_body = "*slices/menu_pop_body",
+	tq_px = "*quads/pixel",
+	tq_arrow = "*quads/arrow_right",
 
 	separator_item_height = 4,
 	separator_graphic_height = 1,

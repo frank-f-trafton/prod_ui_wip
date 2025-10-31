@@ -40,6 +40,8 @@ local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -410,66 +412,52 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	sl_body = themeAssert.slice,
+	sl_button = themeAssert.slice,
+	sl_button_up = themeAssert.slice,
 
-	local res = check.getRes(skin, k)
-	check.slice(res, "sl_body")
-	check.slice(res, "sl_button_up")
-	check.slice(res, "sl_button")
+	tq_left = themeAssert.quad,
+	tq_right = themeAssert.quad,
+	tq_up = themeAssert.quad,
+	tq_down = themeAssert.quad,
 
-	check.quad(res, "tq_left")
-	check.quad(res, "tq_right")
-	check.quad(res, "tq_up")
-	check.quad(res, "tq_down")
+	color_body = uiAssert.loveColorTuple,
+	color_label = uiAssert.loveColorTuple,
 
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_label")
-
-	check.integer(res, "button_ox")
-	check.integer(res, "button_oy")
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "button_ox", scale)
-	change.integerScaled(res, "button_oy", scale)
-
-	uiTheme.popLabel()
-end
+	button_ox = uiAssert.int,
+	button_oy = uiAssert.int,
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Cursor IDs for hover and press states.
-		check.type(skin, "cursor_on", "nil", "string")
-		check.type(skin, "cursor_press", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Alignment of label text in Viewport #1.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
 		-- Alignment of the 'prev' and 'next' arrow (or plus/minus, etc.) graphics within Viewports #2 and #3.
-		check.exact(skin, "gfx_prev_align_h", "left", "center", "right")
-		check.exact(skin, "gfx_prev_align_v", "top", "middle", "bottom")
-		check.exact(skin, "gfx_next_align_h", "left", "center", "right")
-		check.exact(skin, "gfx_next_align_v", "top", "middle", "bottom")
+		gfx_prev_align_h = {uiAssert.oneOf, "left", "center", "right"},
+		gfx_prev_align_v = {uiAssert.oneOf, "top", "middle", "bottom"},
+		gfx_next_align_h = {uiAssert.oneOf, "left", "center", "right"},
+		gfx_next_align_v = {uiAssert.oneOf, "top", "middle", "bottom"},
 
 		-- How much space to assign the next+prev buttons when not using "overlay" placement.
-		check.integer(skin, "prev_spacing", 0)
-		check.integer(skin, "next_spacing", 0)
+		prev_spacing = {uiAssert.intGE, 0},
+		next_spacing = {uiAssert.intGE, 0},
 
 		-- Arrow quad mappings:
 		--
@@ -478,21 +466,26 @@ def.default_skinner = {
 		-- Horizontal     left   right
 		-- Vertical       up     down
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_hover = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "prev_spacing", scale)
-		change.integerScaled(skin, "next_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "prev_spacing")
+		uiScale.fieldInteger(scale, skin, "next_spacing")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_hover", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "button_ox")
+			uiScale.fieldInteger(scale, res, "button_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_hover)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

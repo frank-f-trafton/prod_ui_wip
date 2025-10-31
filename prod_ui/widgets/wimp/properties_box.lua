@@ -29,6 +29,8 @@ local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -840,70 +842,72 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- Settings
-		check.type(skin, "icon_set_id", "nil", "string")
+		icon_set_id = {uiAssert.types, "nil", "string"},
 		-- / Settings
 
-		check.box(skin, "box")
-		check.quad(skin, "tq_px")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
-		check.sashStyle(skin, "sash_style")
-		check.loveType(skin, "font", "Font")
+		box = themeAssert.box,
+		tq_px = themeAssert.quad,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
+		sash_style = themeAssert.sashStyle,
+		font = themeAssert.font,
 
-		check.integer(skin, "item_h", 0)
+		item_h = {uiAssert.intGE, 0},
 
 		-- The minimum preferred label column width
-		check.integer(skin, "col_1_min_w", 0)
+		col_1_min_w = {uiAssert.intGE, 0},
 
 		-- The default label column width
-		check.integer(skin, "col_1_def_w", 0)
+		col_1_def_w = {uiAssert.intGE, 0},
 
 		-- The minimum preferred control column width.
 		-- Used when clamping the width of the label column.
-		check.integer(skin, "col_2_min_w", 0)
+		col_2_min_w = {uiAssert.intGE, 0},
 
 		-- Which side to place the label column: "left", "right"
-		check.exact(skin, "control_side", "left", "right")
+		control_side = {uiAssert.oneOf, "left", "right"},
 
-		check.integer(skin, "sash_margin_1", 0)
-		check.integer(skin, "sash_margin_2", 0)
+		sash_margin_1 = {uiAssert.intGE, 0},
+		sash_margin_2 = {uiAssert.intGE, 0},
 
-		check.slice(skin, "sl_body")
+		sl_body = themeAssert.slice,
 
 		-- Alignment of property name text:
-		check.number(skin, "text_align_h", 0.0, 1.0)
+		text_align_h = {uiAssert.numberRange, 0.0, 1.0},
 		-- Vertical text alignment is centered.
 
 		-- Property name icon column width and positioning, if active.
-		check.integer(skin, "icon_spacing", 0)
-		check.exact(skin, "icon_side", "left", "right")
+		icon_spacing = {uiAssert.intGE, 0},
+		icon_side = {uiAssert.oneOf, "left", "right"},
 
 		-- Additional padding for left or right-aligned text. No effect with center alignment.
-		check.integer(skin, "pad_text_x", 0)
+		pad_text_x = {uiAssert.intGE, 0},
 
-		check.colorTuple(skin, "color_item_text")
-		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_active_glow")
-		check.colorTuple(skin, "color_item_marked")
-	end,
+		color_item_text = uiAssert.loveColorTuple,
+		color_select_glow = uiAssert.loveColorTuple,
+		color_active_glow = uiAssert.loveColorTuple,
+		color_item_marked = uiAssert.loveColorTuple
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "item_h", scale)
-		change.integerScaled(skin, "col_1_min_w", scale)
-		change.integerScaled(skin, "col_1_def_w", scale)
-		change.integerScaled(skin, "col_2_min_w", scale)
-		change.integerScaled(skin, "sash_margin_1", scale)
-		change.integerScaled(skin, "sash_margin_2", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "item_h")
+		uiScale.fieldInteger(scale, skin, "col_1_min_w")
+		uiScale.fieldInteger(scale, skin, "col_1_def_w")
+		uiScale.fieldInteger(scale, skin, "col_2_min_w")
+		uiScale.fieldInteger(scale, skin, "sash_margin_1")
+		uiScale.fieldInteger(scale, skin, "sash_margin_2")
 
-		change.integerScaled(skin, "icon_spacing", scale)
-		change.integerScaled(skin, "pad_text_x", scale)
+		uiScale.fieldInteger(scale, skin, "icon_spacing")
+		uiScale.fieldInteger(scale, skin, "pad_text_x")
 	end,
 
 

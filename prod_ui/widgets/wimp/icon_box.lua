@@ -102,8 +102,8 @@ end
 
 
 def.default_skinner = {
-	--validate = function(skin) -- TODO
-	--transform = function(skin, scale) -- TODO
+	--validate = uiSchema.newKeysX {} -- TODO
+	--transform = function(scale, skin) -- TODO
 
 
 	install = function(self, skinner, skin)

@@ -42,7 +42,10 @@ local context = select(1, ...)
 local lgcButton = context:getLua("shared/lgc_button")
 local lgcLabel = context:getLua("shared/lgc_label")
 local lgcSlider = context:getLua("shared/lgc_slider")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -201,72 +204,58 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	check.quad(res, "tq_thumb")
-	check.slice(res, "sl_trough_active")
-	check.slice(res, "sl_trough_empty")
-	check.colorTuple(res, "color_label")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
+local md_res = uiSchema.newKeysX {
+	tq_thumb = themeAssert.quad,
+	sl_trough_active = themeAssert.slice,
+	sl_trough_empty = themeAssert.slice,
+	color_label = uiAssert.loveColorTuple,
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Label placement and spacing.
-		check.integer(skin, "label_spacing", 0)
-		check.exact(skin, "label_placement", "left", "right", "top", "bottom", "overlay")
+		label_spacing = {uiAssert.intGE, 0},
+		label_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"},
 
 		-- For the empty part.
-		check.integer(skin, "trough_breadth", 0)
+		trough_breadth = {uiAssert.intGE, 0},
 
 		-- For the in-use part.
-		check.integer(skin, "trough_breadth2", 0)
+		trough_breadth2 = {uiAssert.intGE, 0},
 
 		-- When true, engage thumb-moving state even if the user clicked outside of the trough area.
-		check.type(skin, "trough_click_anywhere", "nil", "boolean")
+		trough_click_anywhere = {uiAssert.types, "nil", "boolean"},
 
 		-- Thumb visual dimensions. The size may be reduced if it does not fit into the trough.
-		check.integer(skin, "thumb_w", 0)
-		check.integer(skin, "thumb_h", 0)
+		thumb_w = {uiAssert.intGE, 0},
+		thumb_h = {uiAssert.intGE, 0},
 
 		-- Thumb visual offsets.
-		check.integer(skin, "thumb_ox", 0)
-		check.integer(skin, "thumb_oy", 0)
+		thumb_ox = uiAssert.int,
+		thumb_oy = uiAssert.int,
 
 		-- Adjusts the visual length of the trough line. Positive extends, negative reduces.
-		check.integer(skin, "trough_ext")
+		trough_ext = uiAssert.int,
 
 		-- Cursor IDs for hover and press states (when over the trough area).
-		check.type(skin, "cursor_on", "nil", "string")
-		check.type(skin, "cursor_press", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Label config.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
 		--[[
 		TODO: an old WIP note:
@@ -276,27 +265,32 @@ def.default_skinner = {
 		slider_trough_tick_major
 		--]]
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_hover = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "label_spacing", scale)
-		change.integerScaled(skin, "trough_breadth", scale)
-		change.integerScaled(skin, "trough_breadth2", scale)
-		change.integerScaled(skin, "thumb_w", scale)
-		change.integerScaled(skin, "thumb_h", scale)
-		change.integerScaled(skin, "thumb_ox", scale)
-		change.integerScaled(skin, "thumb_oy", scale)
-		change.integerScaled(skin, "trough_ext", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "label_spacing")
+		uiScale.fieldInteger(scale, skin, "trough_breadth")
+		uiScale.fieldInteger(scale, skin, "trough_breadth2")
+		uiScale.fieldInteger(scale, skin, "thumb_w")
+		uiScale.fieldInteger(scale, skin, "thumb_h")
+		uiScale.fieldInteger(scale, skin, "thumb_ox")
+		uiScale.fieldInteger(scale, skin, "thumb_oy")
+		uiScale.fieldInteger(scale, skin, "trough_ext")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_hover", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_hover)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

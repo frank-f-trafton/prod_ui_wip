@@ -36,8 +36,11 @@ local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
 local lgcInputM = context:getLua("shared/lgc_input_m")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -291,47 +294,43 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_current_line_illuminate")
-	check.colorTuple(res, "color_highlight")
-	check.colorTuple(res, "color_highlight_active")
-	check.colorTuple(res, "color_text")
-	check.colorTuple(res, "color_readonly")
-	check.colorTuple(res, "color_ghost_text")
-	check.colorTuple(res, "color_insert")
-	check.colorTuple(res, "color_replace")
-	check.colorTuple(res, "color_margin")
-	check.colorTuple(res, "color_margin_line_numbers")
-
-	uiTheme.popLabel()
-end
+local md_res = uiSchema.newKeysX {
+	color_body = uiAssert.loveColorTuple,
+	color_current_line_illuminate = uiAssert.loveColorTuple,
+	color_highlight = uiAssert.loveColorTuple,
+	color_highlight_active = uiAssert.loveColorTuple,
+	color_text = uiAssert.loveColorTuple,
+	color_readonly = uiAssert.loveColorTuple,
+	color_ghost_text = uiAssert.loveColorTuple,
+	color_insert = uiAssert.loveColorTuple,
+	color_replace = uiAssert.loveColorTuple,
+	color_margin = uiAssert.loveColorTuple,
+	color_margin_line_numbers = uiAssert.loveColorTuple
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
-		check.loveType(skin, "font", "Font")
-		check.loveType(skin, "font_ghost", "Font")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
 
-		check.type(skin, "cursor_on", "nil", "string")
-		check.integer(skin, "paragraph_pad", 0, nil)
+		box = themeAssert.box,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
+		font = themeAssert.font,
+		font_ghost = themeAssert.font,
 
-		_checkRes(skin, "res_readwrite")
-		_checkRes(skin, "res_readonly")
-	end,
+		cursor_on = {uiAssert.types, "nil", "string"},
+		paragraph_pad = {uiAssert.intGE, 0},
+
+		res_readwrite = md_res,
+		res_readonly = md_res
+	},
 
 
-	--transform = function(skin, scale)
+	--transform = function(scale, skin)
 
 
 	install = function(self, skinner, skin)

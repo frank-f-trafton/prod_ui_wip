@@ -9,19 +9,19 @@ return {
 	-- /settings
 
 	box = "*boxes/panel",
-	tq_px = "*quads/atlas/pixel",
+	tq_px = "*quads/pixel",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 
-	tq_expander_up = "*quads/atlas/arrow2_up",
-	tq_expander_down = "*quads/atlas/arrow2_down",
-	tq_expander_left = "*quads/atlas/arrow2_left",
-	tq_expander_right = "*quads/atlas/arrow2_right",
+	tq_expander_up = "*quads/arrow2_up",
+	tq_expander_down = "*quads/arrow2_down",
+	tq_expander_left = "*quads/arrow2_left",
+	tq_expander_right = "*quads/arrow2_right",
 
 	item_pad_v = 2,
 
-	sl_body = "*slices/atlas/list_box_body",
+	sl_body = "*slices/list_box_body",
 
 	first_col_spacing = 24,
 

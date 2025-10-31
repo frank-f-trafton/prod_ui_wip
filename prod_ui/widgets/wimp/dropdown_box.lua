@@ -47,6 +47,8 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -477,75 +479,70 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	slice = themeAssert.slice,
+	slc_deco_button = themeAssert.slice,
 
-	local res = check.getRes(skin, k)
-	check.slice(res, "slice")
-	check.slice(res, "slc_deco_button")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_text")
-	check.colorTuple(res, "color_icon")
-	check.colorTuple(res, "color_highlight")
-	check.integer(res, "deco_ox")
-	check.integer(res, "deco_oy")
+	color_body = uiAssert.loveColorTuple,
+	color_text = uiAssert.loveColorTuple,
+	color_icon = uiAssert.loveColorTuple,
+	color_highlight = uiAssert.loveColorTuple,
 
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "deco_ox", scale)
-	change.integerScaled(res, "deco_oy", scale)
-	uiTheme.popLabel()
-end
+	deco_ox = uiAssert.int,
+	deco_oy = uiAssert.int
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- settings
-		check.type(skin, "icon_set_id", "nil", "string")
+		icon_set_id = {uiAssert.types, "nil", "string"},
+		show_icons = {uiAssert.types, "nil", "boolean"},
 		-- /settings
 
 		-- The SkinDef ID for pop-ups made by this widget.
-		check.type(skin, "skin_id_pop", "string")
+		skin_id_pop = {uiAssert.type, "string"},
 
-		check.box(skin, "box")
-		check.loveType(skin, "font", "Font")
+		box = themeAssert.box,
+		font = themeAssert.font,
 
 		-- Horizontal size of the decorative button.
 		-- "auto": use Viewport #2's height.
-		check.numberOrExact(skin, "button_spacing", nil, nil, "auto")
+		button_spacing = {uiAssert.numberGEOrOneOf, 0, "auto"},
 
 		-- Placement of the decorative button.
-		check.exact(skin, "button_placement", "left", "right")
+		button_placement = {uiAssert.oneOf, "left", "right"},
 
-		check.exact(skin, "icon_side", "left", "right")
-		check.number(skin, "icon_spacing", 0)
+		icon_side = {uiAssert.oneOf, "left", "right"},
+		icon_spacing = {uiAssert.numberGE, 0},
 
-		check.exact(skin, "text_align", "left", "center", "right")
+		text_align = {uiAssert.oneOf, "left", "center", "right"},
 
-		check.quad(skin, "tq_deco_glyph")
+		tq_deco_glyph = themeAssert.quad,
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "button_spacing", scale)
-		change.integerScaled(skin, "icon_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "button_spacing")
+		uiScale.fieldInteger(scale, skin, "icon_spacing")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "deco_ox")
+			uiScale.fieldInteger(scale, res, "deco_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

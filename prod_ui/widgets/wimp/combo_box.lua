@@ -52,6 +52,8 @@ local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -612,74 +614,71 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	slice = themeAssert.slice,
+	slc_deco_button = themeAssert.slice,
 
-	local res = check.getRes(skin, k)
-	check.slice(res, "slice")
-	check.slice(res, "slc_deco_button")
-	check.quad(res, "tq_deco_glyph")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_text")
-	check.colorTuple(res, "color_highlight")
-	check.colorTuple(res, "color_highlight_active")
-	check.colorTuple(res, "color_caret_insert")
-	check.colorTuple(res, "color_caret_replace")
-	check.number(res, "deco_ox")
-	check.number(res, "deco_oy")
+	tq_deco_glyph = themeAssert.quad,
 
-	uiTheme.popLabel()
-end
+	color_body = uiAssert.loveColorTuple,
+	color_text = uiAssert.loveColorTuple,
+	color_highlight = uiAssert.loveColorTuple,
+	color_highlight_active = uiAssert.loveColorTuple,
+	color_caret_insert = uiAssert.loveColorTuple,
+	color_caret_replace = uiAssert.loveColorTuple,
 
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.numberScaled(res, "deco_ox", scale)
-	change.numberScaled(res, "deco_oy", scale)
-
-	uiTheme.popLabel()
-end
+	deco_ox = {uiAssert.type, "number"},
+	deco_oy = {uiAssert.type, "number"}
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- The SkinDef ID for pop-ups made by this widget.
-		check.type(skin, "skin_id_pop", "string")
+		skin_id_pop = {uiAssert.type, "string"},
 
-		check.box(skin, "box")
+		box = themeAssert.box,
 
-		check.loveType(skin, "font", "Font")
-		check.loveType(skin, "font_ghost", "Font")
+		font = themeAssert.font,
+		font_ghost = themeAssert.font,
 
-		check.type(skin, "cursor_on", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+
+		text_align = {uiAssert.oneOf, "left", "center", "right"},
+		text_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
 		-- Horizontal size of the expander button.
 		-- "auto": use Viewport #2's height.
-		check.numberOrExact(skin, "button_spacing", nil, nil, "auto")
+		button_spacing = {uiAssert.numberGEOrOneOf, 0, "auto"},
 
 		-- Placement of the expander button.
-		check.exact(skin, "button_placement", "left", "right")
+		button_placement = {uiAssert.oneOf, "left", "right"},
 
-		check.integer(skin, "item_pad_v", 0)
+		item_pad_v = {uiAssert.intGE, 0},
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "item_pad_v", scale)
-		change.numberScaled(skin, "button_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "item_pad_v")
+		uiScale.fieldNumber(scale, skin, "button_spacing")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldNumber(scale, res, "deco_ox")
+			uiScale.fieldNumber(scale, res, "deco_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

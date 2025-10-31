@@ -24,6 +24,8 @@ local lgcLabel = context:getLua("shared/lgc_label")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -313,59 +315,46 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	color_label = uiAssert.loveColorTuple,
 
-	local res = check.getRes(skin, k)
-	check.colorTuple(res, "color_label")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Label placement and spacing.
 		-- Note that this default skin isn't really designed to accommodate labels.
-		check.number(skin, "label_spacing", 0)
-		check.exact(skin, "label_placement", "left", "right", "top", "bottom", "overlay") -- TODO: merge with graphic_placement NamedMap?
+		label_spacing = {uiAssert.numberGE, 0},
+		label_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"}, -- TODO: merge with graphic_placement NamedMap?
 
 		-- For the empty part.
-		check.integer(skin, "trough_breadth", 0)
+		trough_breadth = {uiAssert.intGE, 0},
 
 		-- For the in-use part.
-		check.integer(skin, "trough_breadth2", 0)
+		trough_breadth2 = {uiAssert.intGE, 0},
 
 		-- When true, engage thumb-moving state even if the user clicked outside of the trough area.
-		check.type(skin, "trough_click_anywhere", "nil", "boolean")
+		trough_click_anywhere = {uiAssert.types, "nil", "boolean"},
 
 		-- Cursor IDs for hover and press states (when over the trough area).
-		check.type(skin, "cursor_on", "nil", "string")
-		check.type(skin, "cursor_press", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Label config.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
 		--[[
 		TODO: An old WIP note:
@@ -375,22 +364,27 @@ def.default_skinner = {
 		slider_trough_tick_major
 		--]]
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_hover = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "label_spacing", scale)
-		change.integerScaled(skin, "trough_breadth", scale)
-		change.integerScaled(skin, "trough_breadth2", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "label_spacing")
+		uiScale.fieldInteger(scale, skin, "trough_breadth")
+		uiScale.fieldInteger(scale, skin, "trough_breadth2")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_hover", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_hover)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 

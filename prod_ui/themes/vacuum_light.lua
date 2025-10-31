@@ -212,12 +212,12 @@ return {
 		icon_box1 = {}, -- TODO: unfinished widget
 		label1 = {
 			res_idle = {
-				-- [[optional]] sl_body = "*slices/atlas/label",
+				-- [[optional]] sl_body = "*slices/label",
 				-- [[optional]] color_body = {1.0, 1.0, 1.0, 1.0},
 				color_label = {0.1, 0.1, 0.1, 1.0}
 			},
 			res_disabled = {
-				-- [[optional]] sl_body = "*slices/atlas/label_disabled",
+				-- [[optional]] sl_body = "*slices/label_disabled",
 				-- [[optional]] color_body = {1.0, 1.0, 1.0, 1.0},
 				color_label = {0.5, 0.5, 0.5, 1.0}
 			}

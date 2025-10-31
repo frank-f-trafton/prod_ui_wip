@@ -22,6 +22,8 @@ local lgcWimp = context:getLua("shared/lgc_wimp")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -900,43 +902,49 @@ end
 --function def:renderThimble(os_x, os_y)
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		-- settings
+		icon_set_id = {uiAssert.type, "string"},
+		-- /settings
+
 		-- NOTE: Very large box borders will interfere with clicking on menu items.
-		check.box(skin, "box")
-		check.quad(skin, "tq_px")
-		check.slice(skin, "sl_body")
-		check.loveType(skin, "font_item", "Font")
-		check.colorTuple(skin, "color_cat_enabled")
-		check.colorTuple(skin, "color_cat_selected")
-		check.colorTuple(skin, "color_cat_disabled")
-		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_hover_glow")
-		check.colorTuple(skin, "color_item_icon")
+		box = themeAssert.box,
+		tq_px = themeAssert.quad,
+		sl_body = themeAssert.slice,
+		font_item = themeAssert.font,
+		color_cat_enabled = uiAssert.loveColorTuple,
+		color_cat_selected = uiAssert.loveColorTuple,
+		color_cat_disabled = uiAssert.loveColorTuple,
+		color_select_glow = uiAssert.loveColorTuple,
+		color_hover_glow = uiAssert.loveColorTuple,
+		color_item_icon = uiAssert.loveColorTuple,
 
-		check.numberOrExact(skin, "base_height", 0, nil, "auto")
-		check.integer(skin, "underline_width", 1)
-		check.number(skin, "height_mult", 1.0)
+		base_height = {uiAssert.numberGEOrOneOf, 0, "auto"},
+		underline_width = {uiAssert.intGE, 1},
+		height_mult = {uiAssert.numberGE, 1.0},
 
-		check.integer(skin, "icon_pad_x", 0)
-		check.integer(skin, "icon_w", 0)
-		check.integer(skin, "icon_h", 0)
-		check.integer(skin, "text_pad_x", 0)
-	end,
+		icon_pad_x = {uiAssert.intGE, 0},
+		icon_w = {uiAssert.intGE, 0},
+		icon_h = {uiAssert.intGE, 0},
+		text_pad_x = {uiAssert.intGE, 0}
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "underline_width", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "underline_width")
 		if type(skin.base_height) == "number" then
-			change.integerScaled(skin, "base_height", scale)
+			uiScale.fieldInteger(scale, skin, "base_height")
 		end
 
-		change.integerScaled(skin, "icon_pad_x", scale)
-		change.integerScaled(skin, "icon_w", scale)
-		change.integerScaled(skin, "text_pad_x", scale)
+		uiScale.fieldInteger(scale, skin, "icon_pad_x")
+		uiScale.fieldInteger(scale, skin, "icon_w")
+		uiScale.fieldInteger(scale, skin, "text_pad_x")
 	end,
 
 

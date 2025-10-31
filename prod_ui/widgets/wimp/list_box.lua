@@ -29,6 +29,8 @@ local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -630,53 +632,55 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
 def.default_skinner = {
-	validate = function(skin)
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
 		-- Settings
-		check.exact(skin, "icon_side", nil, "left", "right")
-		check.type(skin, "show_icons", "nil", "boolean")
-		check.exact(skin, "text_align_h", nil, "left", "center", "right")
-		check.type(skin, "icon_set_id", "nil", "string")
+		icon_side = {uiAssert.oneOfEval, "left", "right"},
+		show_icons = {uiAssert.types, "nil", "boolean"},
+		text_align_h = {uiAssert.oneOfEval, "left", "center", "right"},
+		icon_set_id = {uiAssert.types, "nil", "string"},
 		-- / Settings
 
-		check.box(skin, "box")
-		check.quad(skin, "tq_px")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
+		box = themeAssert.box,
+		tq_px = themeAssert.quad,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
 
-		check.loveType(skin, "font", "Font")
+		font = themeAssert.font,
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-		check.integer(skin, "item_pad_v")
+		item_pad_v = uiAssert.int,
 
-		check.slice(skin, "sl_body")
+		sl_body = themeAssert.slice,
 
 		-- Vertical text alignment is centered.
 
 		-- Icon column width and positioning, if active.
-		check.integer(skin, "icon_spacing")
+		icon_spacing = uiAssert.int,
 
 		-- Additional padding for left or right-aligned text. No effect with center alignment.
 
-		check.integer(skin, "pad_text_x")
+		pad_text_x = uiAssert.int,
 
-		check.colorTuple(skin, "color_body")
-		check.colorTuple(skin, "color_item_text")
-		check.colorTuple(skin, "color_item_icon")
-		check.colorTuple(skin, "color_select_glow")
-		check.colorTuple(skin, "color_hover_glow")
-		check.colorTuple(skin, "color_active_glow")
-		check.colorTuple(skin, "color_item_marked")
-	end,
+		color_body = uiAssert.loveColorTuple,
+		color_item_text = uiAssert.loveColorTuple,
+		color_item_icon = uiAssert.loveColorTuple,
+		color_select_glow = uiAssert.loveColorTuple,
+		color_hover_glow = uiAssert.loveColorTuple,
+		color_active_glow = uiAssert.loveColorTuple,
+		color_item_marked = uiAssert.loveColorTuple
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "item_pad_v", scale)
-		change.integerScaled(skin, "icon_spacing", scale)
-		change.integerScaled(skin, "pad_text_x", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "item_pad_v")
+		uiScale.fieldInteger(scale, skin, "icon_spacing")
+		uiScale.fieldInteger(scale, skin, "pad_text_x")
 	end,
 
 

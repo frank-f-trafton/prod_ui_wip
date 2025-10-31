@@ -31,6 +31,8 @@ function M.set(o, name)
 	end
 
 	names[o] = name or nil
+
+	return o
 end
 
 

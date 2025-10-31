@@ -6,7 +6,7 @@ return {
 	scr_style = "*scroll_bar_styles/norm",
 
 	color_body = {1.0, 1.0, 1.0, 1.0},
-	slc_body = "*slices/atlas/container_body1",
+	slc_body = "*slices/container_body1",
 
 	in_view_pad_x = 0,
 	in_view_pad_y = 0

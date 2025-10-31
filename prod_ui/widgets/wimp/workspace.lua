@@ -5,9 +5,12 @@ local debug = context:getLua("core/wid/debug")
 local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcScroll = context:getLua("shared/lgc_scroll")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -230,28 +233,28 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.scrollBarData(skin, "data_scroll")
-		check.scrollBarStyle(skin, "scr_style")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
 
-		if skin.background_color then
-			check.colorTuple(skin, "background_color")
-		end
+		box = themeAssert.box,
+		data_scroll = themeAssert.scrollBarData,
+		scr_style = themeAssert.scrollBarStyle,
+
+		background_color = uiAssert.loveColorTupleEval,
 
 		-- Padding when scrolling to put a widget into view.
-		check.integer(skin, "in_view_pad_x", 0)
-		check.integer(skin, "in_view_pad_y", 0)
-	end,
+		in_view_pad_x = {uiAssert.intGE, 0},
+		in_view_pad_y = {uiAssert.intGE, 0}
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "in_view_pad_x", scale)
-		change.integerScaled(skin, "in_view_pad_y", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "in_view_pad_x")
+		uiScale.fieldInteger(scale, skin, "in_view_pad_y")
 	end,
 
 

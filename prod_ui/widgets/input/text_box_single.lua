@@ -25,8 +25,11 @@ local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lgcInputS = context:getLua("shared/lgc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -237,43 +240,40 @@ function def:uiCall_destroy(inst)
 end
 
 
-local check, change = uiTheme.check, uiTheme.change
+local themeAssert = context:getLua("core/res/theme_assert")
 
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
+local md_res = uiSchema.newKeysX {
+	slice = themeAssert.slice,
 
-	local res = check.getRes(skin, k)
-
-	check.slice(res, "slice")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_text")
-	check.colorTuple(res, "color_highlight")
-	check.colorTuple(res, "color_highlight_active")
-	check.colorTuple(res, "color_caret_insert")
-	check.colorTuple(res, "color_caret_replace")
-
-	uiTheme.popLabel()
-end
+	color_body = uiAssert.loveColorTuple,
+	color_text = uiAssert.loveColorTuple,
+	color_highlight = uiAssert.loveColorTuple,
+	color_highlight_active = uiAssert.loveColorTuple,
+	color_caret_insert = uiAssert.loveColorTuple,
+	color_caret_replace = uiAssert.loveColorTuple,
+}
 
 
 def.default_skinner = {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.loveType(skin, "font", "Font")
-		check.loveType(skin, "font_ghost", "Font")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
 
-		check.type(skin, "cursor_on", "nil", "string")
-		check.exact(skin, "text_align", "left", "center", "right")
-		check.unitInterval(skin, "text_align_v")
+		box = themeAssert.box,
+		font = themeAssert.font,
+		font_ghost = themeAssert.font,
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_disabled")
-	end,
+		cursor_on = {uiAssert.types, "nil", "string"},
+		text_align = {uiAssert.oneOf, "left", "center", "right"},
+		text_align_v = {uiAssert.numberRange, 0.0, 1.0},
+
+		res_idle = md_res,
+		res_hover = md_res,
+		res_disabled = md_res
+	},
 
 
-	--transform = function(skin, scale)
+	--transform = function(scale, skin)
 
 
 	install = function(self, skinner, skin)

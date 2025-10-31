@@ -3,80 +3,73 @@ local context = select(1, ...)
 
 local lgcGraphic = context:getLua("shared/lgc_graphic")
 local lgcLabel = context:getLua("shared/lgc_label")
+local themeAssert = context:getLua("core/res/theme_assert")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
+local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 
 
-local check, change = uiTheme.check, uiTheme.change
+local md_res = uiSchema.newKeysX {
+	slice = themeAssert.slice,
 
+	color_body = uiAssert.loveColorTuple,
+	color_label = uiAssert.loveColorTuple,
 
-local function _checkRes(skin, k)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	check.slice(res, "slice")
-	check.colorTuple(res, "color_body")
-	check.colorTuple(res, "color_label")
-	check.integer(res, "label_ox")
-	check.integer(res, "label_oy")
-
-	uiTheme.popLabel()
-end
-
-
-local function _changeRes(skin, k, scale)
-	uiTheme.pushLabel(k)
-
-	local res = check.getRes(skin, k)
-	change.integerScaled(res, "label_ox", scale)
-	change.integerScaled(res, "label_oy", scale)
-
-	uiTheme.popLabel()
-end
+	label_ox = uiAssert.int,
+	label_oy = uiAssert.int
+}
 
 
 return {
-	validate = function(skin)
-		check.box(skin, "box")
-		check.labelStyle(skin, "label_style")
-		check.quad(skin, "tq_px")
+	validate = uiSchema.newKeysX {
+		skinner_id = {uiAssert.type, "string"},
+
+		box = themeAssert.box,
+		label_style = themeAssert.labelStyle,
+		tq_px = themeAssert.quad,
 
 		-- Cursor IDs for hover and press states.
-		check.type(skin, "cursor_on", "nil", "string")
-		check.type(skin, "cursor_press", "nil", "string")
+		cursor_on = {uiAssert.types, "nil", "string"},
+		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Alignment of label text in Viewport #1.
-		check.namedMap(skin, "label_align_h")
-		check.namedMap(skin, "label_align_v")
+		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},
+		label_align_v = {uiAssert.namedMap, uiTheme.named_maps.label_align_v},
 
 		-- A default graphic to use if the widget doesn't provide one.
 		-- TODO
 		-- graphic
 
-		-- Quad (graphic) alignment within Viewport #2.
-		check.namedMap(skin, "quad_align_h")
-		check.namedMap(skin, "quad_align_v")
+		quad_align_h = {uiAssert.namedMap, uiTheme.named_maps.quad_align_h},
+		quad_align_v = {uiAssert.namedMap, uiTheme.named_maps.quad_align_v},
 
 		-- Placement of graphic in relation to text labels.
-		check.namedMap(skin, "graphic_placement")
+		graphic_placement = {uiAssert.namedMap, uiTheme.named_maps.graphic_placement},
 
 		-- How much space to assign the graphic when not using "overlay" placement.
-		check.number(skin, "graphic_spacing", 0)
+		graphic_spacing = {uiAssert.numberGE, 0},
 
-		_checkRes(skin, "res_idle")
-		_checkRes(skin, "res_hover")
-		_checkRes(skin, "res_pressed")
-		_checkRes(skin, "res_disabled")
-	end,
+		res_idle = md_res,
+		res_hover = md_res,
+		res_pressed = md_res,
+		res_disabled = md_res
+	},
 
 
-	transform = function(skin, scale)
-		change.integerScaled(skin, "graphic_spacing", scale)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "graphic_spacing")
 
-		_changeRes(skin, "res_idle", scale)
-		_changeRes(skin, "res_hover", scale)
-		_changeRes(skin, "res_pressed", scale)
-		_changeRes(skin, "res_disabled", scale)
+		local function _changeRes(scale, res)
+			uiScale.fieldInteger(scale, res, "label_ox")
+			uiScale.fieldInteger(scale, res, "label_oy")
+		end
+
+		_changeRes(scale, skin.res_idle)
+		_changeRes(scale, skin.res_hover)
+		_changeRes(scale, skin.res_pressed)
+		_changeRes(scale, skin.res_disabled)
 	end,
 
 
