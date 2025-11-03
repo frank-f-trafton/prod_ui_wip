@@ -130,7 +130,7 @@ end
 
 
 function widShared.wid_maximize(self)
-	-- Widget must have a parent.
+	-- Widget's parent must be the root.
 
 	self.maxim_x = self.x
 	self.maxim_y = self.y
@@ -138,12 +138,12 @@ function widShared.wid_maximize(self)
 	self.maxim_h = self.h
 
 	local parent = self.parent
-	local pvp2 = parent.vp2
+	local pvp = parent.vp
 
-	self.x = pvp2.x
-	self.y = pvp2.y
-	self.w = pvp2.w
-	self.h = pvp2.h
+	self.x = pvp.x
+	self.y = pvp.y
+	self.w = pvp.w
+	self.h = pvp.h
 
 	self.maximized = true
 
@@ -159,14 +159,14 @@ end
 
 
 function widShared.wid_unmaximize(self)
-	-- The widget must have a parent.
+	-- Widget's parent must be the root.
 	local parent = self.parent
-	local pvp2 = parent.vp2
+	local pvp = parent.vp
 
 	self.x = self.maxim_x or 64
 	self.y = self.maxim_y or 64
-	self.w = self.maxim_w or pvp2.w - 64
-	self.h = self.maxim_h or pvp2.h - 64
+	self.w = self.maxim_w or pvp.w - 64
+	self.h = self.maxim_h or pvp.h - 64
 
 	-- Clamp unmaximized position + dimensions to parent contact box.
 	--[[
@@ -178,23 +178,23 @@ function widShared.wid_unmaximize(self)
 	* Unmaximizes the prodUI container -- which would be larger than the LÖVE window without this adjustment.
 	--]]
 	-- [[
-	if self.x < pvp2.x then
-		self.x = pvp2.x
+	if self.x < pvp.x then
+		self.x = pvp.x
 	end
-	if self.y < pvp2.y then
-		self.y = pvp2.y
+	if self.y < pvp.y then
+		self.y = pvp.y
 	end
-	if self.x + self.w > pvp2.x + pvp2.w then
-		self.x = pvp2.x + pvp2.w - self.w
+	if self.x + self.w > pvp.x + pvp.w then
+		self.x = pvp.x + pvp.w - self.w
 	end
-	if self.y + self.h > pvp2.y + pvp2.h then
-		self.y = pvp2.y + pvp2.h - self.h
+	if self.y + self.h > pvp.y + pvp.h then
+		self.y = pvp.y + pvp.h - self.h
 	end
-	if self.w > pvp2.w then
-		self.w = pvp2.w
+	if self.w > pvp.w then
+		self.w = pvp.w
 	end
-	if self.h > pvp2.h then
-		self.h = pvp2.h
+	if self.h > pvp.h then
+		self.h = pvp.h
 	end
 	--]]
 

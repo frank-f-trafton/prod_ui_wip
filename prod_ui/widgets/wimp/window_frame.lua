@@ -837,11 +837,11 @@ function def:uiCall_reshapePre()
 	-- Refit if maximized and parent dimensions changed.
 	if self.maximized then
 		local pvp = parent.vp
-		self.x = pvp2.x
-		self.y = pvp2.y
-		if self.w ~= pvp2.w or self.h ~= pvp2.h then
-			self.w = pvp2.w
-			self.h = pvp2.h
+		self.x = pvp.x
+		self.y = pvp.y
+		if self.w ~= pvp.w or self.h ~= pvp.h then
+			self.w = pvp.w
+			self.h = pvp.h
 		end
 	end
 
