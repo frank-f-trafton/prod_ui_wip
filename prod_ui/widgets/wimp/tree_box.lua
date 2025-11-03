@@ -154,7 +154,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)
@@ -576,34 +576,34 @@ def.default_skinner = {
 		tq_expander_right = themeAssert.quad,
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-		item_pad_v = {uiAssert.intGE, 0},
+		item_pad_v = {uiAssert.integerGE, 0},
 
 		sl_body = themeAssert.slice,
 
 		-- Vertical text alignment is centered.
 
 		-- Spacing for expanders, and half the initial width for the first pipe indentation.
-		first_col_spacing = {uiAssert.intGE, 0},
+		first_col_spacing = {uiAssert.integerGE, 0},
 
 		-- The amount to indent child nodes.
-		indent = {uiAssert.intGE, 0},
+		indent = {uiAssert.integerGE, 0},
 
 		-- Draw vertical pipes that show the indentation of each node.
 		draw_pipes = {uiAssert.types, "nil", "boolean"},
-		pipe_width = {uiAssert.intGE, 0},
+		pipe_width = {uiAssert.integerGE, 0},
 
 		-- Icon column width and positioning, if active.
-		icon_spacing = {uiAssert.intGE, 0},
+		icon_spacing = {uiAssert.integerGE, 0},
 
 		-- Item components are always placed in these orders:
 		-- Left alignment: pipe decoration, expander, icon, text.
 		-- Right alignment: text, icon, expander, pipe decoration
 
 		-- Additional padding for icons.
-		pad_icon_x = {uiAssert.intGE, 0},
+		pad_icon_x = {uiAssert.integerGE, 0},
 
 		-- Additional padding for text.
-		pad_text_x = {uiAssert.intGE, 0},
+		pad_text_x = {uiAssert.integerGE, 0},
 
 		color_body = uiAssert.loveColorTuple,
 		color_item_text = uiAssert.loveColorTuple,

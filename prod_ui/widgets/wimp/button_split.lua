@@ -247,8 +247,8 @@ local md_res = uiSchema.newKeysX {
 	color_label = uiAssert.loveColorTuple,
 	color_aux_icon = uiAssert.loveColorTuple,
 
-	label_ox = uiAssert.int,
-	label_oy = uiAssert.int
+	label_ox = uiAssert.integer,
+	label_oy = uiAssert.integer
 }
 
 

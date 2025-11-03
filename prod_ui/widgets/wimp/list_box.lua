@@ -186,7 +186,7 @@ end
 
 function def:addItem(text, pos, icon_id)
 	uiAssert.type(1, text, "string")
-	uiAssert.intEval(2, pos, "number")
+	uiAssert.integerEval(2, pos, "number")
 	uiAssert.typeEval(3, icon_id, "string")
 
 	local skin = self.skin
@@ -258,7 +258,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)
@@ -654,18 +654,18 @@ def.default_skinner = {
 		font = themeAssert.font,
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-		item_pad_v = uiAssert.int,
+		item_pad_v = uiAssert.integer,
 
 		sl_body = themeAssert.slice,
 
 		-- Vertical text alignment is centered.
 
 		-- Icon column width and positioning, if active.
-		icon_spacing = uiAssert.int,
+		icon_spacing = uiAssert.integer,
 
 		-- Additional padding for left or right-aligned text. No effect with center alignment.
 
-		pad_text_x = uiAssert.int,
+		pad_text_x = uiAssert.integer,
 
 		color_body = uiAssert.loveColorTuple,
 		color_item_text = uiAssert.loveColorTuple,

@@ -83,7 +83,7 @@ return {
 			}
 		},
 		button_tq1 = {
-			res_slice = {
+			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_quad = {1.0, 1.0, 1.0, 1.0}
 			},
@@ -400,7 +400,6 @@ return {
 		text_box_m1 = {
 			res_readwrite = {
 				color_body = {0.9, 0.9, 0.9, 1.0},
-				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},
 				color_highlight = {0.5, 0.5, 0.5, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
@@ -409,11 +408,9 @@ return {
 				color_insert = {0.1, 0.1, 0.1, 1.0},
 				color_replace = {0.25, 0.25, 0.25, 1.0},
 				color_margin = {0.8, 0.8, 0.8, 1.0},
-				color_margin_line_numbers = {0.5, 0.5, 0.5, 1.0}
 			},
 			res_readonly = {
 				color_body = {0.8, 0.8, 0.8, 1.0},
-				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},
 				color_highlight = {0.5, 0.5, 0.5, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
@@ -422,7 +419,6 @@ return {
 				color_insert = {0.1, 0.1, 0.1, 1.0},
 				color_replace = {0.25, 0.25, 0.25, 1.0},
 				color_margin = {0.8, 0.8, 0.8, 1.0},
-				color_margin_line_numbers = {0.5, 0.5, 0.5, 1.0}
 			},
 		},
 		text_box_s1 = {

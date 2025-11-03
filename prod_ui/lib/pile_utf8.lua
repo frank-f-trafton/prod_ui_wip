@@ -27,10 +27,10 @@ local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local interp = require(PATH .. "pile_interp")
-local pArg = require(PATH .. "pile_arg_check")
+local pAssert = require(PATH .. "pile_assert")
 
 
-local _argType, _argInt, _argIntRange = pArg.type, pArg.int, pArg.intRange
+local _argType, _argInt, _argIntRange = pAssert.type, pAssert.integer, pAssert.integerRange
 
 
 local check_surrogates = true

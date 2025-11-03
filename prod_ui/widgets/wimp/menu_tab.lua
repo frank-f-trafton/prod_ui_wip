@@ -1441,8 +1441,8 @@ local md_res = uiSchema.newKeysX {
 	color_body = uiAssert.loveColorTuple,
 	color_text = uiAssert.loveColorTuple,
 
-	offset_x = uiAssert.int,
-	offset_y = uiAssert.int,
+	offset_x = uiAssert.integer,
+	offset_y = uiAssert.integer,
 }
 
 
@@ -1460,30 +1460,30 @@ def.default_skinner = {
 		scr_style = themeAssert.scrollBarStyle,
 		font = themeAssert.font,
 
-		column_min_w = {uiAssert.intGE, 0},
-		column_def_w = {uiAssert.intGE, 0},
-		column_bar_height = {uiAssert.intGE, 0},
+		column_min_w = {uiAssert.integerGE, 0},
+		column_def_w = {uiAssert.integerGE, 0},
+		column_bar_height = {uiAssert.integerGE, 0},
 
 		col_def_text_align = {uiAssert.oneOf, "left", "center", "right"},
 		content_def_text_align = {uiAssert.oneOf, "left", "center", "right"},
 
-		item_h = {uiAssert.intGE, 0},
+		item_h = {uiAssert.integerGE, 0},
 
 		-- Width of the "drag to resize" sensor on column bars.
-		drag_threshold = {uiAssert.intGE, 0},
+		drag_threshold = {uiAssert.integerGE, 0},
 
 		-- Half square range of where row sorting is permitted by clicking on column squares.
-		col_click_threshold = {uiAssert.intGE, 0},
+		col_click_threshold = {uiAssert.integerGE, 0},
 
-		column_sep_width = {uiAssert.intGE, 0},
+		column_sep_width = {uiAssert.integerGE, 0},
 
 		cell_font = themeAssert.font,
 
-		cell_icon_w = {uiAssert.intGE, 0},
-		cell_icon_h = {uiAssert.intGE, 0},
+		cell_icon_w = {uiAssert.integerGE, 0},
+		cell_icon_h = {uiAssert.integerGE, 0},
 
-		header_icon_w = {uiAssert.intGE, 0},
-		header_icon_h = {uiAssert.intGE, 0},
+		header_icon_w = {uiAssert.integerGE, 0},
+		header_icon_h = {uiAssert.integerGE, 0},
 
 		tq_arrow_up = themeAssert.quad,
 		tq_arrow_down = themeAssert.quad,
@@ -1491,7 +1491,7 @@ def.default_skinner = {
 		-- Padding between:
 		-- * Category panel left and label text
 		-- * Category panel right and sorting badge
-		category_h_pad = uiAssert.int,
+		category_h_pad = uiAssert.integer,
 
 		color_header_body = uiAssert.loveColorTuple,
 		color_background = uiAssert.loveColorTuple,

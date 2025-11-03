@@ -632,8 +632,8 @@ local md_res = uiSchema.newKeysX {
 	color_caret_insert = uiAssert.loveColorTuple,
 	color_caret_replace = uiAssert.loveColorTuple,
 
-	deco_ox = uiAssert.int,
-	deco_oy = uiAssert.int
+	deco_ox = uiAssert.integer,
+	deco_oy = uiAssert.integer
 }
 
 

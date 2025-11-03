@@ -1,4 +1,4 @@
--- PILE: Name Registry v1.315
+-- PILE Name Registry v1.315
 -- (C) 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -18,7 +18,7 @@ M.allowed = {["function"]=true, table=true, thread=true, userdata=true}
 local _allowed = M.allowed
 
 
-M.names = setmetatable({}, {__mode="kv"})
+M.names = setmetatable({}, {__mode="v"})
 local names = M.names
 
 

@@ -130,8 +130,8 @@ local md_res = uiSchema.newKeysX {
 	color_ichor = uiAssert.loveColorTuple,
 	color_label = uiAssert.loveColorTuple,
 
-	label_ox = uiAssert.int,
-	label_oy = uiAssert.int
+	label_ox = uiAssert.integer,
+	label_oy = uiAssert.integer
 }
 
 
@@ -151,7 +151,7 @@ def.default_skinner = {
 		bar_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"},
 
 		-- How much space to assign the progress bar when not using "overlay" placement.
-		bar_spacing = uiAssert.int,
+		bar_spacing = uiAssert.integer,
 
 		slc_back = themeAssert.slice,
 		slc_ichor = themeAssert.slice,

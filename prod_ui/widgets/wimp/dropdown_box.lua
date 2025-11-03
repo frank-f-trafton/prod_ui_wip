@@ -119,7 +119,7 @@ function def:addItem(text, pos, icon_id)
 	local items = self.MN_items
 
 	uiAssert.type(1, text, "string")
-	uiAssert.intRangeEval(2, pos, 1, #items + 1)
+	uiAssert.integerRangeEval(2, pos, 1, #items + 1)
 	uiAssert.typeEval(3, icon_id, "string")
 
 	pos = pos or #items + 1
@@ -150,7 +150,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -176,7 +176,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local index_old = self.MN_index
 
@@ -491,8 +491,8 @@ local md_res = uiSchema.newKeysX {
 	color_icon = uiAssert.loveColorTuple,
 	color_highlight = uiAssert.loveColorTuple,
 
-	deco_ox = uiAssert.int,
-	deco_oy = uiAssert.int
+	deco_ox = uiAssert.integer,
+	deco_oy = uiAssert.integer
 }
 
 

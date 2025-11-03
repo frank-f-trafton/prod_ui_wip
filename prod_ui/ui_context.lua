@@ -9,11 +9,11 @@ local _mcursors_supported = love.mouse.isCursorSupported()
 
 -- ProdUI
 local cursorMgr = _mcursors_supported and require(REQ_PATH .. "lib.cursor_mgr") or false
-local pTable = require(REQ_PATH .. "lib.pile_table")
 local uiAssert = require(REQ_PATH .. "ui_assert")
 local uiKeyboard = require(REQ_PATH .. "ui_keyboard")
 local uiLoad = require(REQ_PATH .. "ui_load")
 local uiRes = require(REQ_PATH .. "ui_res")
+local uiTable = require(REQ_PATH .. "ui_table")
 
 
 -- (Key-down and key-up handling is fed through callbacks in a keyboard manager table.)
@@ -65,9 +65,9 @@ local function _loader_lua(self, file_path)
 
 	for i, v in ipairs(_path_stack) do
 		if v == file_path then
-			local temp = pTable.copyArray(_path_stack)
-			pTable.clearArray(_path_stack)
-			pTable.reverseArray(temp)
+			local temp = uiTable.copyArray(_path_stack)
+			uiTable.clearAll(_path_stack)
+			uiTable.reverseArray(temp)
 			error("circular file dependency. This path: " .. tostring(file_path) .. "\n\nPath stack:\n\t" .. table.concat(temp, "\n\t"))
 		end
 	end

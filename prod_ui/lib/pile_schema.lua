@@ -1,4 +1,4 @@
--- PILE Schema v1.315 (Modified)
+-- PILE Schema v1.315
 -- (C) 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -11,10 +11,11 @@ local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
 local interp = require(PATH .. "pile_interp")
-local pArg = require(PATH .. "pile_arg_check")
+local pAssert = require(PATH .. "pile_assert")
 
 
 local ipairs, pairs, type = ipairs, pairs, type
+local unpack = rawget(_G, "unpack") or table.unpack or error("couldn't find 'unpack' function")
 
 
 M.lang = {
@@ -186,7 +187,7 @@ end
 
 
 function M.setMaxMessages(n)
-	pArg.intGEEval(1, n, 1)
+	pAssert.integerGEEval(1, n, 1)
 
 	M.max_messages = n or _default_max_msg
 end
@@ -198,18 +199,18 @@ end
 
 
 function M.checkModel(md)
-	pArg.type(1, md, "table")
+	pAssert.type(1, md, "table")
 
-	pArg.typeEval("(Model).reject_unhandled", md.reject_unhandled, "boolean")
-	pArg.typeEval("(Model).array_len", md.array_len, "number")
-	pArg.typeEval("(Model).array_min", md.array_min, "number")
-	pArg.typeEval("(Model).array_max", md.array_max, "number")
+	pAssert.typeEval("(Model).reject_unhandled", md.reject_unhandled, "boolean")
+	pAssert.typeEval("(Model).array_len", md.array_len, "number")
+	pAssert.typeEval("(Model).array_min", md.array_min, "number")
+	pAssert.typeEval("(Model).array_max", md.array_max, "number")
 
 	if getmetatable(md) ~= _mt_md then
 		error("wrong or missing 'model' metatable")
 	end
 
-	pArg.typeEval("(Model).keys", md.keys, "table")
+	pAssert.typeEval("(Model).keys", md.keys, "table")
 
 	if md.metatable then
 		_unpackRef("(Model).metatable", md.metatable)
@@ -232,7 +233,7 @@ end
 
 
 function M.newModel(md)
-	pArg.tableWithoutMetatable(1, md)
+	pAssert.tableWithoutMetatable(1, md)
 
 	setmetatable(md, _mt_md)
 	M.checkModel(md)
@@ -250,10 +251,10 @@ end
 
 
 function M.validate(model, tbl, name, fatal)
-	pArg.typeEval(1, model, "table")
+	pAssert.typeEval(1, model, "table")
 	_assertModel(model)
-	pArg.type(2, tbl, "table")
-	pArg.typeEval(3, name, "string")
+	pAssert.type(2, tbl, "table")
+	pAssert.typeEval(3, name, "string")
 	-- don't check 'fatal'
 
 	local state = {

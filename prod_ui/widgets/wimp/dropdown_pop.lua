@@ -147,7 +147,7 @@ function def:addItem(text, pos, icon_id, suppress_select)
 	local items = self.MN_items
 
 	uiAssert.type(1, text, "string")
-	uiAssert.intRangeEval(2, pos, 1, #items + 1)
+	uiAssert.integerRangeEval(2, pos, 1, #items + 1)
 	uiAssert.typeEval(3, icon_id, "string")
 
 	pos = pos or #items + 1
@@ -185,7 +185,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -213,7 +213,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local index_old = self.MN_index
 
@@ -616,14 +616,14 @@ def.default_skinner = {
 		text_align = {uiAssert.oneOf, "left", "center", "right"},
 
 		icon_side = {uiAssert.oneOf, "left", "right"},
-		icon_spacing = {uiAssert.intGE, 0},
+		icon_spacing = {uiAssert.integerGE, 0},
 
-		item_height = {uiAssert.intGE, 0},
-		item_pad_v = {uiAssert.intGE, 0},
+		item_height = {uiAssert.integerGE, 0},
+		item_pad_v = {uiAssert.integerGE, 0},
 
 		-- The drawer's maximum height, as measured by the number of visible items (plus margins).
 		-- Drawer height is limited by the size of the application window.
-		max_visible_items = uiAssert.int,
+		max_visible_items = uiAssert.integer,
 
 		slice = themeAssert.slice,
 

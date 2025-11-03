@@ -1,4 +1,4 @@
--- PILE argCheck v1.315 (Modified)
+-- PILE Assert v1.315
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -28,9 +28,11 @@ M.L = setmetatable({}, {__mode="kv"})
 
 
 function M._n(n)
-	return type(n) == "number" and interp(lang.argument, n)
-		or type(n) == "string" and n .. ": "
-		or type(n) == "table" and interp(lang.field, n[1], n[2])
+	local typ = type(n)
+	return typ == "number" and interp(lang.argument, n)
+		or typ == "string" and n .. ": "
+		or typ == "table" and interp(lang.field, n[1], n[2])
+		or typ == "function" and n() .. ": "
 		or ""
 end
 local _n = M._n
@@ -163,7 +165,7 @@ end
 
 
 lang.int = "expected integer"
-function M.int(n, v)
+function M.integer(n, v)
 	if type(v) ~= "number" or math.floor(v) ~= v then
 		error(_n(n) .. lang.int, 2)
 	end
@@ -171,7 +173,7 @@ end
 
 
 lang.int_eval = "expected false/nil or integer"
-function M.intEval(n, v)
+function M.integerEval(n, v)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v) then
 		error(_n(n) .. lang.int_eval, 2)
 	end
@@ -179,7 +181,7 @@ end
 
 
 lang.int_ge = "expected integer greater or equal to $1"
-function M.intGE(n, v, min)
+function M.integerGE(n, v, min)
 	if type(v) ~= "number" or math.floor(v) ~= v or v < min then
 		error(_n(n) .. interp(lang.int_ge, min), 2)
 	end
@@ -187,7 +189,7 @@ end
 
 
 lang.int_ge_eval = "expected false/nil or integer greater or equal to $1"
-function M.intGEEval(n, v, min)
+function M.integerGEEval(n, v, min)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min) then
 		error(_n(n) .. interp(lang.int_ge_eval, min), 2)
 	end
@@ -197,7 +199,7 @@ end
 lang.int_range_a = "expected integer, got $1"
 lang.int_range_b = "got non-integer number"
 lang.int_range_c = "integer is out of range"
-function M.intRange(n, v, min, max)
+function M.integerRange(n, v, min, max)
 	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_a, type(v)), 2)
 	elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_b, 2)
 	elseif v < min or v > max then error(_n(n) .. lang.int_range_c, 2) end
@@ -207,7 +209,7 @@ end
 lang.int_range_eval_a = "expected false/nil or integer, got $1"
 lang.int_range_eval_b = "got non-integer number"
 lang.int_range_eval_c = "integer is out of range"
-function M.intRangeEval(n, v, min, max)
+function M.integerRangeEval(n, v, min, max)
 	if v then
 		if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_eval_a, type(v)), 2)
 		elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_eval_b, 2)

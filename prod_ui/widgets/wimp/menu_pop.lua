@@ -1084,44 +1084,44 @@ def.default_skinner = {
 		tq_arrow = themeAssert.quad,
 
 		-- Height of horizontal separator items.
-		separator_item_height = {uiAssert.intGE, 0},
+		separator_item_height = {uiAssert.integerGE, 0},
 
 		-- Height of the line graphic within separators.
-		separator_graphic_height = {uiAssert.intGE, 0},
+		separator_graphic_height = {uiAssert.integerGE, 0},
 
 		-- Used when underlining shortcut key letters in menu items.
-		underline_width = {uiAssert.intGE, 0},
+		underline_width = {uiAssert.integerGE, 0},
 
 		-- (Pop up menus do not render hover-glow.)
 
 		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
 
 		-- Padding values.
-		pad_x1 = {uiAssert.intGE, 0},
-		pad_x2 = {uiAssert.intGE, 0},
+		pad_x1 = {uiAssert.integerGE, 0},
+		pad_x2 = {uiAssert.integerGE, 0},
 
-		pad_icon_x1 = {uiAssert.intGE, 0},
-		pad_icon_x2 = {uiAssert.intGE, 0},
-		pad_icon_y1 = {uiAssert.intGE, 0},
-		pad_icon_y2 = {uiAssert.intGE, 0},
+		pad_icon_x1 = {uiAssert.integerGE, 0},
+		pad_icon_x2 = {uiAssert.integerGE, 0},
+		pad_icon_y1 = {uiAssert.integerGE, 0},
+		pad_icon_y2 = {uiAssert.integerGE, 0},
 
 		-- Drawing offsets and size for icon quads.
-		icon_draw_w = {uiAssert.intGE, 0},
-		icon_draw_h = {uiAssert.intGE, 0},
+		icon_draw_w = {uiAssert.integerGE, 0},
+		icon_draw_h = {uiAssert.integerGE, 0},
 
 		-- Padding above and below text and icons in items.
 		-- The tallest of the two components determines the item's height.
-		pad_text_x1 = {uiAssert.intGE, 0},
-		pad_text_x2 = {uiAssert.intGE, 0},
-		pad_text_y1 = {uiAssert.intGE, 0},
-		pad_text_y2 = {uiAssert.intGE, 0},
+		pad_text_x1 = {uiAssert.integerGE, 0},
+		pad_text_x2 = {uiAssert.integerGE, 0},
+		pad_text_y1 = {uiAssert.integerGE, 0},
+		pad_text_y2 = {uiAssert.integerGE, 0},
 
-		arrow_draw_w = {uiAssert.intGE, 0},
-		arrow_draw_h = {uiAssert.intGE, 0},
+		arrow_draw_w = {uiAssert.integerGE, 0},
+		arrow_draw_h = {uiAssert.integerGE, 0},
 
 		-- NOTE: Group arrows share padding with shortcuts.
-		pad_shortcut_x1 = {uiAssert.intGE, 0},
-		pad_shortcut_x2 = {uiAssert.intGE, 0},
+		pad_shortcut_x1 = {uiAssert.integerGE, 0},
+		pad_shortcut_x2 = {uiAssert.integerGE, 0},
 
 		color_separator = uiAssert.loveColorTuple,
 		color_select_glow = uiAssert.loveColorTuple,

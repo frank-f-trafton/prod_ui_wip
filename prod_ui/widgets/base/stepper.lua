@@ -114,7 +114,7 @@ end
 -- @return The index of the newly-added option.
 function def:insertOption(option, i)
 	uiAssert.types(1, option, "string", "table")
-	uiAssert.intRangeEval(2, i, 1, #self.options + 1)
+	uiAssert.integerRangeEval(2, i, 1, #self.options + 1)
 
 	i = i or #self.options + 1
 
@@ -139,7 +139,7 @@ end
 -- @param i *(#options)* Index of the option to remove in the array. Must be between 1 and #options. If not specified, the last option in the array will be removed.
 -- @return The removed option value.
 function def:removeOption(i)
-	uiAssert.intRangeEval(1, i, 1, #self.options)
+	uiAssert.integerRangeEval(1, i, 1, #self.options)
 
 	i = i or #self.options
 
@@ -428,8 +428,8 @@ local md_res = uiSchema.newKeysX {
 	color_body = uiAssert.loveColorTuple,
 	color_label = uiAssert.loveColorTuple,
 
-	button_ox = uiAssert.int,
-	button_oy = uiAssert.int,
+	button_ox = uiAssert.integer,
+	button_oy = uiAssert.integer,
 }
 
 
@@ -456,8 +456,8 @@ def.default_skinner = {
 		gfx_next_align_v = {uiAssert.oneOf, "top", "middle", "bottom"},
 
 		-- How much space to assign the next+prev buttons when not using "overlay" placement.
-		prev_spacing = {uiAssert.intGE, 0},
-		next_spacing = {uiAssert.intGE, 0},
+		prev_spacing = {uiAssert.integerGE, 0},
+		next_spacing = {uiAssert.integerGE, 0},
 
 		-- Arrow quad mappings:
 		--

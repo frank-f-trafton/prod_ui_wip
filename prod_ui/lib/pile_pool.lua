@@ -10,7 +10,7 @@ local M = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pArg = require(PATH .. "pile_arg_check")
+local pAssert = require(PATH .. "pile_assert")
 
 
 local _mt_pool = {}
@@ -22,9 +22,9 @@ local table = table
 
 
 function M.new(popping, pushing, threshold)
-	pArg.typeEval(1, popping, "function")
-	pArg.typeEval(2, pushing, "function")
-	pArg.numberNotNaNEval(3, threshold)
+	pAssert.typeEval(1, popping, "function")
+	pAssert.typeEval(2, pushing, "function")
+	pAssert.numberNotNaNEval(3, threshold)
 
 	return setmetatable({
 		popping = popping or nil,
@@ -64,7 +64,7 @@ end
 
 
 function _mt_pool:setThreshold(threshold)
-	pArg.numberNotNaNEval(1, threshold)
+	pAssert.numberNotNaNEval(1, threshold)
 
 	self.threshold = threshold
 	self:reduceStack(threshold)
@@ -77,7 +77,7 @@ end
 
 
 function _mt_pool:reduceStack(n)
-	pArg.numberNotNaNEval(1, n)
+	pAssert.numberNotNaNEval(1, n)
 
 	n = n and math.max(0, n) or 0
 	for i = #self.stack, n + 1, -1 do

@@ -140,7 +140,7 @@ function uiRes.enumerate(path, ext, recursive, depth)
 	uiAssert.type(1, path, "string")
 	uiAssert.typesEval(2, ext, "string", "table")
 	-- don't assert 'recursive'
-	uiAssert.intGEEval(4, depth, 1)
+	uiAssert.integerGEEval(4, depth, 1)
 
 	depth = depth or 1000
 

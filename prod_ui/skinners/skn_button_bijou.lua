@@ -21,8 +21,8 @@ local md_res = uiSchema.newKeysX {
 	color_bijou = uiAssert.loveColorTuple,
 	color_label = uiAssert.loveColorTuple,
 
-	label_ox = uiAssert.int,
-	label_oy = uiAssert.int
+	label_ox = uiAssert.integer,
+	label_oy = uiAssert.integer
 }
 
 
@@ -39,11 +39,11 @@ return {
 		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Checkbox (quad) render size.
-		bijou_w = uiAssert.int,
-		bijou_h = uiAssert.int,
+		bijou_w = uiAssert.integer,
+		bijou_h = uiAssert.integer,
 
 		-- Horizontal spacing between checkbox area and text label.
-		bijou_spacing = uiAssert.int,
+		bijou_spacing = uiAssert.integer,
 
 		-- Checkbox horizontal placement.
 		bijou_side_h = {uiAssert.namedMap, uiTheme.named_maps.bijou_side_h},

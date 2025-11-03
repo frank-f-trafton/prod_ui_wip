@@ -210,7 +210,7 @@ end
 
 function def:addItem(wid_id, text, pos, icon_id)
 	uiAssert.type(2, text, "string")
-	uiAssert.intEval(3, pos, "number")
+	uiAssert.integerEval(3, pos, "number")
 	uiAssert.typeEval(4, icon_id, "string")
 
 	local items = self.MN_items
@@ -291,7 +291,7 @@ end
 
 
 function def:setSelectionByIndex(wid_i)
-	uiAssert.intGE(1, wid_i, 0)
+	uiAssert.integerGE(1, wid_i, 0)
 
 	self:menuSetSelectedIndex(wid_i)
 end
@@ -860,23 +860,23 @@ def.default_skinner = {
 		sash_style = themeAssert.sashStyle,
 		font = themeAssert.font,
 
-		item_h = {uiAssert.intGE, 0},
+		item_h = {uiAssert.integerGE, 0},
 
 		-- The minimum preferred label column width
-		col_1_min_w = {uiAssert.intGE, 0},
+		col_1_min_w = {uiAssert.integerGE, 0},
 
 		-- The default label column width
-		col_1_def_w = {uiAssert.intGE, 0},
+		col_1_def_w = {uiAssert.integerGE, 0},
 
 		-- The minimum preferred control column width.
 		-- Used when clamping the width of the label column.
-		col_2_min_w = {uiAssert.intGE, 0},
+		col_2_min_w = {uiAssert.integerGE, 0},
 
 		-- Which side to place the label column: "left", "right"
 		control_side = {uiAssert.oneOf, "left", "right"},
 
-		sash_margin_1 = {uiAssert.intGE, 0},
-		sash_margin_2 = {uiAssert.intGE, 0},
+		sash_margin_1 = {uiAssert.integerGE, 0},
+		sash_margin_2 = {uiAssert.integerGE, 0},
 
 		sl_body = themeAssert.slice,
 
@@ -885,11 +885,11 @@ def.default_skinner = {
 		-- Vertical text alignment is centered.
 
 		-- Property name icon column width and positioning, if active.
-		icon_spacing = {uiAssert.intGE, 0},
+		icon_spacing = {uiAssert.integerGE, 0},
 		icon_side = {uiAssert.oneOf, "left", "right"},
 
 		-- Additional padding for left or right-aligned text. No effect with center alignment.
-		pad_text_x = {uiAssert.intGE, 0},
+		pad_text_x = {uiAssert.integerGE, 0},
 
 		color_item_text = uiAssert.loveColorTuple,
 		color_select_glow = uiAssert.loveColorTuple,

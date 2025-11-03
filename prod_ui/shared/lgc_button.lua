@@ -75,7 +75,7 @@ end
 
 --- Sets the value of a multi-state checkbox.
 function lgcButton.setValue(self, value)
-	uiAssert.intRange(2, value, 1, self.value_max)
+	uiAssert.integerRange(2, value, 1, self.value_max)
 
 	self.value = value
 end
@@ -91,7 +91,7 @@ end
 
 --- Sets the maximum value for multi-state checkboxes.
 function lgcButton.setMaxValue(self, max)
-	uiAssert.intGE(1, max, 1)
+	uiAssert.integerGE(1, max, 1)
 
 	self.value_max = max
 end

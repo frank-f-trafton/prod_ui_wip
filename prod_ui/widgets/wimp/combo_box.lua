@@ -140,7 +140,7 @@ function def:addItem(text, pos)
 	local items = self.MN_items
 
 	uiAssert.type(1, text, "string")
-	uiAssert.intRangeEval(2, pos, 1, #items + 1)
+	uiAssert.integerRangeEval(2, pos, 1, #items + 1)
 
 	pos = pos or #items + 1
 
@@ -167,7 +167,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -192,7 +192,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.intGE(1, item_i, 0)
+	uiAssert.integerGE(1, item_i, 0)
 
 	local index_old = self.MN_index
 
@@ -659,7 +659,7 @@ def.default_skinner = {
 		-- Placement of the expander button.
 		button_placement = {uiAssert.oneOf, "left", "right"},
 
-		item_pad_v = {uiAssert.intGE, 0},
+		item_pad_v = {uiAssert.integerGE, 0},
 
 		res_idle = md_res,
 		res_pressed = md_res,
