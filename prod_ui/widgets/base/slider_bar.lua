@@ -212,8 +212,8 @@ local md_res = uiSchema.newKeysX {
 	sl_trough_active = themeAssert.slice,
 	sl_trough_empty = themeAssert.slice,
 	color_label = uiAssert.loveColorTuple,
-	label_ox = uiAssert.int,
-	label_oy = uiAssert.int
+	label_ox = uiAssert.integer,
+	label_oy = uiAssert.integer
 }
 
 
@@ -226,28 +226,28 @@ def.default_skinner = {
 		tq_px = themeAssert.quad,
 
 		-- Label placement and spacing.
-		label_spacing = {uiAssert.intGE, 0},
+		label_spacing = {uiAssert.integerGE, 0},
 		label_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"},
 
 		-- For the empty part.
-		trough_breadth = {uiAssert.intGE, 0},
+		trough_breadth = {uiAssert.integerGE, 0},
 
 		-- For the in-use part.
-		trough_breadth2 = {uiAssert.intGE, 0},
+		trough_breadth2 = {uiAssert.integerGE, 0},
 
 		-- When true, engage thumb-moving state even if the user clicked outside of the trough area.
 		trough_click_anywhere = {uiAssert.types, "nil", "boolean"},
 
 		-- Thumb visual dimensions. The size may be reduced if it does not fit into the trough.
-		thumb_w = {uiAssert.intGE, 0},
-		thumb_h = {uiAssert.intGE, 0},
+		thumb_w = {uiAssert.integerGE, 0},
+		thumb_h = {uiAssert.integerGE, 0},
 
 		-- Thumb visual offsets.
-		thumb_ox = uiAssert.int,
-		thumb_oy = uiAssert.int,
+		thumb_ox = uiAssert.integer,
+		thumb_oy = uiAssert.integer,
 
 		-- Adjusts the visual length of the trough line. Positive extends, negative reduces.
-		trough_ext = uiAssert.int,
+		trough_ext = uiAssert.integer,
 
 		-- Cursor IDs for hover and press states (when over the trough area).
 		cursor_on = {uiAssert.types, "nil", "string"},

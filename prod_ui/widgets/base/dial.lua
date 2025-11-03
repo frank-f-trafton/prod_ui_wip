@@ -321,8 +321,8 @@ local themeAssert = context:getLua("core/res/theme_assert")
 local md_res = uiSchema.newKeysX {
 	color_label = uiAssert.loveColorTuple,
 
-	label_ox = uiAssert.int,
-	label_oy = uiAssert.int
+	label_ox = uiAssert.integer,
+	label_oy = uiAssert.integer
 }
 
 
@@ -340,10 +340,10 @@ def.default_skinner = {
 		label_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"}, -- TODO: merge with graphic_placement NamedMap?
 
 		-- For the empty part.
-		trough_breadth = {uiAssert.intGE, 0},
+		trough_breadth = {uiAssert.integerGE, 0},
 
 		-- For the in-use part.
-		trough_breadth2 = {uiAssert.intGE, 0},
+		trough_breadth2 = {uiAssert.integerGE, 0},
 
 		-- When true, engage thumb-moving state even if the user clicked outside of the trough area.
 		trough_click_anywhere = {uiAssert.types, "nil", "boolean"},

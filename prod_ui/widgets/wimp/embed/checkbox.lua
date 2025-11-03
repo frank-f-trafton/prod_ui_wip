@@ -107,8 +107,8 @@ def.default_skinner = {
 		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Checkbox (quad) render size.
-		bijou_w = {uiAssert.int, 0},
-		bijou_h = {uiAssert.int, 0},
+		bijou_w = {uiAssert.integer, 0},
+		bijou_h = {uiAssert.integer, 0},
 
 		-- Alignment of bijou within Viewport #1.
 		bijou_align_h = {uiAssert.numberRange, 0.0, 1.0},

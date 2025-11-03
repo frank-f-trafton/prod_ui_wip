@@ -171,7 +171,7 @@ _mt_category.__index = _mt_category
 
 function def:addCategory(text, key_mnemonic, icon_id, pop_up_proto, selectable, pos)
 	-- args 1-5 are checked in item:setParameters()
-	uiAssert.intEval(6, pos, "number")
+	uiAssert.integerEval(6, pos, "number")
 
 	local items = self.MN_items
 	pos = pos or #items + 1
@@ -926,13 +926,13 @@ def.default_skinner = {
 		color_item_icon = uiAssert.loveColorTuple,
 
 		base_height = {uiAssert.numberGEOrOneOf, 0, "auto"},
-		underline_width = {uiAssert.intGE, 1},
+		underline_width = {uiAssert.integerGE, 1},
 		height_mult = {uiAssert.numberGE, 1.0},
 
-		icon_pad_x = {uiAssert.intGE, 0},
-		icon_w = {uiAssert.intGE, 0},
-		icon_h = {uiAssert.intGE, 0},
-		text_pad_x = {uiAssert.intGE, 0}
+		icon_pad_x = {uiAssert.integerGE, 0},
+		icon_w = {uiAssert.integerGE, 0},
+		icon_h = {uiAssert.integerGE, 0},
+		text_pad_x = {uiAssert.integerGE, 0}
 	},
 
 

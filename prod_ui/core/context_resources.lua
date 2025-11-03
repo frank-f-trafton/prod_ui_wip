@@ -174,10 +174,10 @@ models.scrollBarStyle = uiSchema.newKeysX {
 	trough_enabled = {uiAssert.typeEval, "boolean"},
 	thumb_enabled = {uiAssert.typeEval, "boolean"},
 
-	bar_size = {uiAssert.intGEEval, 0},
-	button_size = {uiAssert.intGEEval, 0},
-	thumb_size_min = {uiAssert.intGEEval, 0},
-	thumb_size_max = {uiAssert.intGEEval, 0},
+	bar_size = {uiAssert.integerGEEval, 0},
+	button_size = {uiAssert.integerGEEval, 0},
+	thumb_size_min = {uiAssert.integerGEEval, 0},
+	thumb_size_max = {uiAssert.integerGEEval, 0},
 
 	v_near_side = {uiAssert.typeEval, "boolean"},
 	v_auto_hide = {uiAssert.typeEval, "boolean"},
@@ -202,14 +202,14 @@ models.thimbleInfo = uiSchema.newKeysX {
 	mode = {uiAssert.namedMap, uiTheme.named_maps.DrawMode},
 	color = uiAssert.colorTuple,
 	line_style = {uiAssert.namedMap, uiTheme.named_maps.LineStyle},
-	line_width = {uiAssert.intGE, 0},
+	line_width = {uiAssert.integerGE, 0},
 	line_join = {uiAssert.namedMap, uiTheme.named_maps.LineJoin},
 	corner_rx = {uiAssert.numberGE, 0},
 	corner_ry = {uiAssert.numberGE, 0},
 
 	-- Pushes the thimble outline out from the widget rectangle.
 	-- This is overridden if the widget contains 'self.thimble_x(|y|w|h)'.
-	outline_pad = {uiAssert.intGE, 0},
+	outline_pad = {uiAssert.integerGE, 0},
 
 	segments = {uiAssert.numberGEEval, 0}
 }
@@ -225,20 +225,20 @@ models.sashStyleRes = uiSchema.newKeysX {
 
 models.sashStyle = uiSchema.newKeysX {
 	-- Width of tall sashes; height of wide sashes.
-	breadth_half = {uiAssert.intGE, 0},
+	breadth_half = {uiAssert.integerGE, 0},
 
 	-- Reduces the intersection box when checking for the mouse *entering* a sash.
 	-- NOTE: overly large values will make the sash unclickable.
-	contract_x = {uiAssert.intGE, 0},
-	contract_y = {uiAssert.intGE, 0},
+	contract_x = {uiAssert.integerGE, 0},
+	contract_y = {uiAssert.integerGE, 0},
 
 	-- Increases the intersection box when checking for the mouse *leaving* a sash.
 	-- NOTES:
 	-- * Overly large values will prevent the user from clicking on widgets that
 	--   are descendants of the container.
 	-- * The expansion does not go beyond the container's body.
-	expand_x = {uiAssert.intGE, 0},
-	expand_y = {uiAssert.intGE, 0},
+	expand_x = {uiAssert.integerGE, 0},
+	expand_y = {uiAssert.integerGE, 0},
 
 	-- To apply a graphical margin to a sash mosaic, please bake the margin into the texture.
 
@@ -376,7 +376,7 @@ contextResources.methods = methods
 function methods:resetResources()
 	for k, v in pairs(self.resources) do
 		if type(v) == "table" then
-			uiTable.clear(v)
+			uiTable.clearAll(v)
 		end
 	end
 end

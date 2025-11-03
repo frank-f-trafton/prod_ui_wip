@@ -319,7 +319,7 @@ def.default_skinner = {
 		font_ghost = themeAssert.font,
 
 		cursor_on = {uiAssert.types, "nil", "string"},
-		paragraph_pad = {uiAssert.intGE, 0},
+		paragraph_pad = {uiAssert.integerGE, 0},
 
 		res_readwrite = md_res,
 		res_readonly = md_res

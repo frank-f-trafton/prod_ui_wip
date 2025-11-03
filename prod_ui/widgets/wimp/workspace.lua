@@ -247,8 +247,8 @@ def.default_skinner = {
 		background_color = uiAssert.loveColorTupleEval,
 
 		-- Padding when scrolling to put a widget into view.
-		in_view_pad_x = {uiAssert.intGE, 0},
-		in_view_pad_y = {uiAssert.intGE, 0}
+		in_view_pad_x = {uiAssert.integerGE, 0},
+		in_view_pad_y = {uiAssert.integerGE, 0}
 	},
 
 

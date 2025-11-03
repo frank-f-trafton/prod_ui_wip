@@ -46,7 +46,7 @@ end
 -- @param index The item index to check. Must be an integer (or else the method throws an error).
 -- @param return true if selectable, false plus string if not.
 function menuMethods:menuCanSelect(index)
-	uiAssert.int(1, index)
+	uiAssert.integer(1, index)
 
 	-- Permit deselection
 	if index == 0 then
@@ -390,8 +390,8 @@ end
 
 function menuMethods:menuSetMarkedItemRange(marked, first, last)
 	local items = self.MN_items
-	uiAssert.intRange(2, first, 1, #items)
-	uiAssert.intRange(3, last, 1, #items)
+	uiAssert.integerRange(2, first, 1, #items)
+	uiAssert.integerRange(3, last, 1, #items)
 	marked = not not marked
 
 	for i = first, last do

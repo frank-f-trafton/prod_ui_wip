@@ -4,12 +4,12 @@ local uiAssert = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pArgCheck = require(PATH .. "lib.pile_arg_check")
+local pAssert = require(PATH .. "lib.pile_assert")
 local pName = require(PATH .. "lib.pile_name")
 local uiTable = require(PATH .. "ui_table")
 
 
-uiTable.patch(uiAssert, pArgCheck)
+uiTable.patch(uiAssert, pAssert)
 
 
 local _n = uiAssert._n

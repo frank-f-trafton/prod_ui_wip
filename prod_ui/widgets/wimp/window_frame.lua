@@ -996,8 +996,8 @@ local md_res_btn_state = uiSchema.newKeysX {
 	slice = themeAssert.slice,
 	color_body = uiAssert.loveColorTuple,
 	color_quad = uiAssert.loveColorTuple,
-	label_ox = uiAssert.int,
-	label_oy = uiAssert.int
+	label_ox = uiAssert.integer,
+	label_oy = uiAssert.integer
 }
 
 
@@ -1010,10 +1010,10 @@ local md_res = uiSchema.newKeysX {
 	header_box = themeAssert.box,
 	header_slc_body = themeAssert.slice,
 	header_font = themeAssert.font,
-	header_h = {uiAssert.intGE, 0},
-	button_pad_w = {uiAssert.intGE, 0},
-	button_w = {uiAssert.intGE, 0},
-	button_h = {uiAssert.intGE, 0},
+	header_h = {uiAssert.integerGE, 0},
+	button_pad_w = {uiAssert.integerGE, 0},
+	button_w = {uiAssert.integerGE, 0},
+	button_h = {uiAssert.integerGE, 0},
 
 	-- From 0 (top) to 1 (bottom)
 	button_align_v = {uiAssert.numberRange, 0.0, 1.0},
@@ -1044,8 +1044,8 @@ def.default_skinner = {
 		scr_style = themeAssert.scrollBarStyle,
 
 		-- Padding when scrolling to put a widget into view.
-		in_view_pad_x = {uiAssert.intGE, 0},
-		in_view_pad_y = {uiAssert.intGE, 0},
+		in_view_pad_x = {uiAssert.integerGE, 0},
+		in_view_pad_y = {uiAssert.integerGE, 0},
 
 		slc_body = themeAssert.slice,
 		slc_shadow = themeAssert.slice,
@@ -1054,16 +1054,16 @@ def.default_skinner = {
 		header_text_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
 		-- How many pixels to extend / pad resize sensors.
-		sensor_resize_pad = {uiAssert.intGE, 0},
+		sensor_resize_pad = {uiAssert.integerGE, 0},
 
 		-- How much to extend the diagonal parts of the resize area.
-		sensor_resize_diagonal = {uiAssert.intGE, 0},
+		sensor_resize_diagonal = {uiAssert.integerGE, 0},
 
 		-- How far to allow resizing a widget outside the bounds of its parent.
 		-- Used to prevent stretching frames too far outside the LÖVE application window.
-		frame_outbound_limit = {uiAssert.intGE, 0},
+		frame_outbound_limit = {uiAssert.integerGE, 0},
 
-		shadow_extrude = {uiAssert.intGE, 0},
+		shadow_extrude = {uiAssert.integerGE, 0},
 
 		-- Alignment of textures within control sensors
 		-- 0.0: left, 0.5: middle, 1.0: right
