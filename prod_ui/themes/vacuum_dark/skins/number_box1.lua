@@ -7,6 +7,7 @@ return {
 
 	cursor_on = "ibeam",
 	text_align = "right",
+	text_align_v = 0.5,
 
 	button_spacing = 24,
 

@@ -647,6 +647,7 @@ def.default_skinner = {
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 		text_align = {uiAssert.oneOf, "left", "center", "right"},
+		text_align_v = {uiAssert.numberRange, 0.0, 1.0}, -- used by text input code
 
 		-- Horizontal size of the increment and decrement buttons.
 		-- "auto": use Viewport #1's height.
