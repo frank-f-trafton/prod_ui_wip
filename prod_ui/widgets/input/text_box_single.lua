@@ -265,7 +265,7 @@ def.default_skinner = {
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 		text_align = {uiAssert.oneOf, "left", "center", "right"},
-		text_align_v = {uiAssert.numberRange, 0.0, 1.0},
+		text_align_v = {uiAssert.numberRange, 0.0, 1.0}, -- used by text input code
 
 		res_idle = md_res,
 		res_hover = md_res,
