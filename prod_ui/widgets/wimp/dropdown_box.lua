@@ -235,7 +235,7 @@ function def:uiCall_reshapePre()
 
 	local button_spacing = (skin.button_spacing == "auto") and self.vp.h or skin.button_spacing
 
-	vp:splitOrOverlay(vp5, skin.button_placement, button_spacing)
+	vp2:splitOrOverlay(vp5, skin.button_placement, button_spacing)
 
 	vp2:copy(vp3)
 
