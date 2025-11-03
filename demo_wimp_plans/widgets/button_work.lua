@@ -54,7 +54,7 @@ function plan.make(panel)
 
 	-- Button with a quad graphic
 	local btn_q = panel:addChild("base/button", "button_tq1")
-	btn_q.graphic = context.resources.quads["atlas"]["checkbox_on"] -- TODO: fix
+	btn_q.graphic = context.resources.quads["checkbox_on"] -- TODO: fix
 	btn_q:geometrySetMode("static", 64, 64, 64, 64)
 	btn_q:setLabel("!?") -- XXX: was it intentional that this does not display?
 
