@@ -169,9 +169,6 @@ function plan.make(panel)
 		rdo.usr_placement = "bottom"
 		rdo:setLabel("Bottom")
 		rdo.wid_buttonAction = _radioPlacement
-		for k, v in pairs(btn_spl.skin) do
-			print("", k, v)
-		end
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
 		end

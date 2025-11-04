@@ -310,16 +310,7 @@ function def:applyMenuPrototype(menu_prototype)
 	end
 
 	for i, info in ipairs(menu_prototype) do
-		for k, v in pairs(info) do
-			print("i", i, k, v)
-		end
 		local mt = getmetatable(info)
-		if mt then
-			for kk, vv in pairs(mt) do
-				print("mt", kk, vv)
-			end
-		end
-
 		local typ = info.type
 		local item
 		if typ == "command" then

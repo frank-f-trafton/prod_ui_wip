@@ -71,7 +71,7 @@ end
 
 
 function def:uiCall_reshapePre()
-	print("container: uiCall_reshapePre")
+	--print("container: uiCall_reshapePre")
 
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
@@ -92,7 +92,7 @@ end
 
 
 function def:uiCall_reshapePost()
-	print("container: uiCall_reshapePost")
+	--print("container: uiCall_reshapePost")
 
 	widShared.updateDoc(self)
 

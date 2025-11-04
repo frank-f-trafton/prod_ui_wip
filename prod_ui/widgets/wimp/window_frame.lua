@@ -816,7 +816,7 @@ end
 
 
 function def:uiCall_reshapePre()
-	print("window_frame: uiCall_reshapePre")
+	--print("window_frame: uiCall_reshapePre")
 
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars, header bar, etc.) from the content.
@@ -923,7 +923,7 @@ end
 
 
 function def:uiCall_reshapePost()
-	print("window_frame: uiCall_reshapePost")
+	--print("window_frame: uiCall_reshapePost")
 
 	widShared.updateDoc(self)
 

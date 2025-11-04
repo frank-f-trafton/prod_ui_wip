@@ -109,8 +109,8 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 			elseif fs_type == "file" then
 			-- Test opening a text file
 			-- [[
-				print("path", self.usr_path .. "/" .. fs_name)
-				print(string.sub(fs_name, #fs_name - 3))
+				--print("path", self.usr_path .. "/" .. fs_name)
+				--print(string.sub(fs_name, #fs_name - 3))
 				if string.sub(fs_name, #fs_name - 3) == ".txt" then
 					love.system.openURL(self.usr_path .. "/" .. fs_name)
 				end
@@ -121,7 +121,7 @@ local function fileSelectorKeyNav(self, key, scancode, isrepeat)
 	elseif scancode == "backspace" then
 		-- Go up one directory
 		local up = string.match(self.usr_path, "^(.+)/.*$") or ""
-		print("up", up)
+		--print("up", up)
 		if up then
 			self:trySetPath(up)
 			self:reshape()
@@ -220,8 +220,8 @@ local function menu_trySetPath(self, path)
 
 	self:reshape()
 
-	print("path: |" .. path .. "|")
-	print("self.usr_path: |" .. self.usr_path .. "|")
+	--print("path: |" .. path .. "|")
+	--print("self.usr_path: |" .. self.usr_path .. "|")
 end
 
 
@@ -242,13 +242,13 @@ local function menu_getDirectoryItems(self, filter_type)
 
 	self:menuSetDefaultSelection()
 
-	print("self.usr_path", self.usr_path, "filter_type", filter_type)
+	--print("self.usr_path", self.usr_path, "filter_type", filter_type)
 	local items = love.filesystem.getDirectoryItems(self.usr_path)
 	local base_path = #self.usr_path > 0 and (self.usr_path .. "/") or ""
 
 	for i, fs_path in ipairs(items) do
 		local v = love.filesystem.getInfo(base_path .. fs_path)
-		print("i", base_path .. fs_path, v)
+		--print("i", base_path .. fs_path, v)
 		if v then
 			v.name = fs_path
 			local item = setupMenuItem(self, v)
