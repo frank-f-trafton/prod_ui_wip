@@ -219,12 +219,12 @@ function def:updateCategory(item, text, key_mnemonic, icon_id, pop_up_proto, sel
 	if key_mnemonic ~= nil then
 		item.key_mnemonic = key_mnemonic or false
 	end
-	print("icon_id", icon_id)
+	--print("icon_id", icon_id)
 	if icon_id ~= nil then
 		item.icon_id = icon_id or false
 		item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
-		print("self.icon_set_id", self.icon_set_id)
-		print("new tq_icon", item.tq_icon)
+		--print("self.icon_set_id", self.icon_set_id)
+		--print("new tq_icon", item.tq_icon)
 	end
 	if pop_up_proto ~= nil then
 		item.pop_up_proto = pop_up_proto or false

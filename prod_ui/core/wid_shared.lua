@@ -107,8 +107,6 @@ function widShared.keepInBoundsExtended(self, vp, x1, x2, y1, y2)
 
 	local px, py, pw, ph = widShared.getViewportXYWH(parent, vp) -- TODO: rel_zero?
 
-	print("px", px, "py", py, "pw", pw, "ph", ph)
-
 	self.x = math.max(-self.w - x1 + px, math.min(self.x, pw + x2))
 	self.y = math.max(-self.h - y1 + py, math.min(self.y, ph + y2))
 end

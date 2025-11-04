@@ -20,12 +20,12 @@ local function cb_refresh(self)
 		self:setEnabled(not not ws2)
 	end
 
-	print("cb_refresh: tag", self.tag, "enabled", self.enabled)
+	--print("cb_refresh: tag", self.tag, "enabled", self.enabled)
 end
 
 
 local function _refreshButtonState(self)
-	print("_refreshButtonState()")
+	--print("_refreshButtonState()")
 	local panel = self.tag == "plan_container" and self or self:findAscendingKeyValue("tag", "plan_container")
 	if not panel then
 		error("couldn't find this widget's container.")

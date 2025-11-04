@@ -96,7 +96,7 @@ end
 
 
 function def:uiCall_reshapePre()
-	print("root_wimp: uiCall_reshapePre")
+	--print("root_wimp: uiCall_reshapePre")
 
 	widLayout.resetLayoutSpace(self)
 
@@ -105,7 +105,7 @@ end
 
 
 function def:uiCall_reshapePost()
-	print("root_wimp: uiCall_reshapePost")
+	--print("root_wimp: uiCall_reshapePost")
 
 	-- Viewport #1 is the area for Workspaces and maximized Window Frames.
 
@@ -252,7 +252,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 						dest_cur = hndStep.intergenerationalNext(wid_cur)
 					end
 
-					print("dest_cur", dest_cur)
+					--print("dest_cur", dest_cur)
 
 					if dest_cur then
 						dest_cur:takeThimble1("widget_in_view")
@@ -407,7 +407,7 @@ end
 --	UI Frame is in the process of being destroyed. (Modal/frame-blocking state should have been cleaned up before this
 --	point.)
 function def:selectTopFrame(exclude)
-	print("selectTopFrame: start")
+	--print("selectTopFrame: start")
 	if #self.modals > 0 then
 		--print("modals > 0")
 		self:setSelectedFrame(self.modals[#self.modals], false)

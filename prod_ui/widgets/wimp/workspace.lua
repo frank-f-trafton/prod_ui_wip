@@ -73,7 +73,7 @@ Viewport #2 is an outer border.
 
 
 function def:uiCall_reshapePre()
-	print("workspace: uiCall_reshapePre")
+	--print("workspace: uiCall_reshapePre")
 
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
@@ -100,7 +100,7 @@ end
 
 
 function def:uiCall_reshapePost()
-	print("workspace: uiCall_reshapePost")
+	--print("workspace: uiCall_reshapePost")
 
 	widShared.updateDoc(self)
 

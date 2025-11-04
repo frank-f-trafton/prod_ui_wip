@@ -95,7 +95,7 @@ love.keyboard.setTextInput(false)
 local love_major = love.getVersion()
 
 
---[[
+-- [[
 -- Finds the origin of printed console text.
 local oldPrint = print
 print = function(...)

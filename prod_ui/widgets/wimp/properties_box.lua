@@ -240,7 +240,7 @@ function def:addItem(wid_id, text, pos, icon_id)
 	self:arrangeItems(1, pos, #items)
 	wid:reshape()
 
-	print("addItem text:", item.text, "y: ", item.y)
+	--print("addItem text:", item.text, "y: ", item.y)
 
 	return item
 end
