@@ -1,4 +1,4 @@
--- PILE Table v1.315
+-- PILE Table v1.316
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -22,18 +22,19 @@ local pName = require(PATH .. "pile_name")
 local ipairs, math, pairs, rawget, rawset, select, table, type = ipairs, math, pairs, rawget, rawset, select, table, type
 
 
-local jit = rawget(_G, "jit")
+do
+	local jit = rawget(_G, "jit")
 
-
-if jit then
-	M.clearAll = require("table.clear")
-else
-	function M.clearAll(t)
-		for i = #t, 1, -1 do
-			t[i] = nil
-		end
-		for k in pairs(t) do
-			t[k] = nil
+	if jit then
+		M.clearAll = require("table.clear")
+	else
+		function M.clearAll(t)
+			for i = #t, 1, -1 do
+				t[i] = nil
+			end
+			for k in pairs(t) do
+				t[k] = nil
+			end
 		end
 	end
 end

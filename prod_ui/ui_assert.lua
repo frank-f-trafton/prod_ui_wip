@@ -115,6 +115,23 @@ function uiAssert.loveStringOrColoredText(n, v)
 end
 
 
+-- TODO: replace instances of this.
+function uiAssert.numberGEOrOneOf(n, v, min, ...)
+	if type(v) == "number" then
+		if not min or v >= min then
+			return
+		end
+	else
+		for i = 1, select("#", ...) do
+			if v == select(i, ...) then
+				return
+			end
+		end
+	end
+	error(_n(n) .. interp("expected number >= $1 or one of: $2", min, _safeConcat({...}, ", ")), 2)
+end
+
+
 -- Checking widgets: use 'context:assertWidget(wid)'
 
 
