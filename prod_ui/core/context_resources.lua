@@ -99,7 +99,7 @@ models.quad = uiSchema.newKeysX {
 models.quadSlice = uiSchema.newModel {
 	reject_unhandled = true,
 
-	metatable = {uiAssert.tableHasThisMetatable, quadSlice._mt_slice},
+	metatable = {uiAssert.tableWithMetatable, quadSlice._mt_slice},
 
 	keys = {
 		x = uiAssert.numberNotNaN,

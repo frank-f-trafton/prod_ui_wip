@@ -1,4 +1,4 @@
--- PILE Assert v1.315
+-- PILE Assert v1.316
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT or MIT-0
 -- https://github.com/frank-f-trafton/pile_base
@@ -14,7 +14,7 @@ local interp = require(PATH .. "pile_interp")
 local pName = require(PATH .. "pile_name")
 
 
-local select, table, type = select, table, type
+local error, ipairs, select, table, tostring, type = error, ipairs, select, table, tostring, type
 
 
 M.lang = {
@@ -113,9 +113,35 @@ function M.oneOfEval(n, v, ...)
 end
 
 
+lang.nan_a = "expected non-NaN number, got $1"
+lang.nan_b = "expected non-NaN number, got NaN"
+function M.numberNotNaN(n, v)
+	if type(v) ~= "number" then
+		error(_n(n) .. interp(lang.nan_a, type(v)), 2)
+
+	elseif v ~= v then
+		error(_n(n) .. lang.nan_b, 2)
+	end
+end
+
+
+lang.nan_eval_a = "expected false/nil or non-NaN number, got $1"
+lang.nan_eval_b = "expected false/nil or non-NaN number, got NaN"
+function M.numberNotNaNEval(n, v)
+	if v then
+		if type(v) ~= "number" then
+			error(_n(n) .. interp(lang.nan_eval_a, type(v)), 2)
+
+		elseif v ~= v then
+			error(_n(n) .. lang.nan_eval_b, 2)
+		end
+	end
+end
+
+
 lang.num_ge = "expected number greater or equal to $1"
 function M.numberGE(n, v, min)
-	if type(v) ~= "number" or v < min then
+	if type(v) ~= "number" or v ~= v or v < min then
 		error(_n(n) .. interp(lang.num_ge, min), 2)
 	end
 end
@@ -123,26 +149,9 @@ end
 
 lang.num_ge_eval = "expected false/nil or number greater or equal to $1"
 function M.numberGEEval(n, v, min)
-	if v and (type(v) ~= "number" or v < min) then
+	if v and (type(v) ~= "number" or v ~= v or v < min) then
 		error(_n(n) .. interp(lang.num_ge_eval, min), 2)
 	end
-end
-
-
-lang.bad_num_or_one_of = "expected number >= $1 or one of: $2"
-function M.numberGEOrOneOf(n, v, min, ...)
-	if type(v) == "number" then
-		if not min or v >= min then
-			return
-		end
-	else
-		for i = 1, select("#", ...) do
-			if v == select(i, ...) then
-				return
-			end
-		end
-	end
-	error(_n(n) .. interp(lang.bad_num_or_one_of, min, _safeConcat({...}, ", ")), 2)
 end
 
 
@@ -150,7 +159,7 @@ lang.num_range_a = "expected number, got $1"
 lang.num_range_b = "number is out of range"
 function M.numberRange(n, v, min, max)
 	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_a, type(v)), 2)
-	elseif v < min or v > max then error(_n(n) .. lang.int_range_b, 2) end
+	elseif v ~= v or v < min or v > max then error(_n(n) .. lang.int_range_b, 2) end
 end
 
 
@@ -159,7 +168,7 @@ lang.num_range_eval_b = "number is out of range"
 function M.numberRangeEval(n, v, min, max)
 	if v then
 		if type(v) ~= "number" then error(_n(n) .. interp(lang.num_range_eval_a, type(v)), 2)
-		elseif v < min or v > max then error(_n(n) .. lang.num_range_eval_b, 2) end
+		elseif v ~= v or v < min or v > max then error(_n(n) .. lang.num_range_eval_b, 2) end
 	end
 end
 
@@ -218,42 +227,16 @@ function M.integerRangeEval(n, v, min, max)
 end
 
 
-lang.nan_a = "expected non-NaN number, got $1"
-lang.nan_b = "expected non-NaN number, got NaN"
-function M.numberNotNaN(n, v)
-	if type(v) ~= "number" then
-		error(_n(n) .. interp(lang.nan_a, type(v)), 2)
-
-	elseif v ~= v then
-		error(_n(n) .. lang.nan_b, 2)
-	end
-end
-
-
-lang.nan_eval_a = "expected false/nil or non-NaN number, got $1"
-lang.nan_eval_b = "expected false/nil or non-NaN number, got NaN"
-function M.numberNotNaNEval(n, v)
-	if v then
-		if type(v) ~= "number" then
-			error(_n(n) .. interp(lang.nan_eval_a, type(v)), 2)
-
-		elseif v ~= v then
-			error(_n(n) .. lang.nan_eval_b, 2)
-		end
-	end
-end
-
-
 lang.bad_named_map = "invalid $1"
-function M.namedMap(n, v, e)
-	if not e[v] then
+function M.namedMap(n, v, map)
+	if not map[v] then
 		error(_n(n) .. interp(lang.bad_named_map, pName.safeGet(e, "NamedMap")), 2)
 	end
 end
 
 
-function M.namedMapEval(n, v, e)
-	if v and not e[v] then
+function M.namedMapEval(n, v, map)
+	if v and not map[v] then
 		error(_n(n) .. interp(lang.bad_named_map, pName.safeGet(e, "NamedMap")), 2)
 	end
 end
@@ -310,7 +293,7 @@ end
 lang.mt_bad_t = "expected table"
 lang.mt_bad_mt = "expected table to have a metatable"
 lang.mt_bad_match = "expected metatable for: $1"
-function M.tableHasThisMetatable(n, v, mt)
+function M.tableWithMetatable(n, v, mt)
 	if type(v) ~= "table" then
 		error(_n(n) .. lang.mt_bad_t, 2)
 	end
@@ -333,14 +316,12 @@ end
 
 
 lang.fail_default = "error!"
-function M.fail(n, v, err)
+function M.fail(n, _, err)
 	error(_n(n) .. tostring(err) or lang.fail_default, 2)
 end
 
 
-function M.pass()
-	-- n/a
-end
+function M.pass() end
 
 
 function M.assert(n, v, err)
