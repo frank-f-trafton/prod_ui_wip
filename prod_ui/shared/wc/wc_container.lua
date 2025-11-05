@@ -1,10 +1,18 @@
--- Shared container logic.
+--[[
+Widget Component: Container
+
+Usage:
+
+* Run 'wcContainer.setupMethods()' on the widget definition.
+
+* For containers that support sashes, run 'wcContainer.setupSashState()' on the widget instance.
+--]]
 
 
 local context = select(1, ...)
 
 
-local lgcContainer = {}
+local wcContainer = {}
 
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
@@ -20,12 +28,12 @@ local sash_styles = context.resources.sash_styles
 local _nm_scr_rng = uiTable.newNamedMapV("ScrollRangeMode", "zero", "auto", "manual")
 
 
-lgcContainer.methods = {}
-local _methods = lgcContainer.methods
+wcContainer.methods = {}
+local _methods = wcContainer.methods
 
 
-function lgcContainer.setupMethods(self)
-	uiTable.patch(self, lgcContainer.methods, false)
+function wcContainer.setupMethods(self)
+	uiTable.patch(self, wcContainer.methods, false)
 end
 
 
@@ -43,7 +51,7 @@ function _methods:getScrollRangeMode()
 end
 
 
-function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
+function wcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
 	-- Get widget position relative to this container.
 	local x, y = wid:getPositionInAncestor(self)
 	local w, h = wid.w, wid.h
@@ -61,7 +69,7 @@ function lgcContainer.keepWidgetInView(self, wid, pad_x, pad_y)
 end
 
 
-function lgcContainer.setupSashState(self)
+function wcContainer.setupSashState(self)
 	self.SA_enabled = false
 	self.SA_hover = false
 
@@ -96,7 +104,7 @@ function _methods:getSashesEnabled()
 end
 
 
-function lgcContainer.getSashCursorID(edge, is_drag)
+function wcContainer.getSashCursorID(edge, is_drag)
 	if is_drag then
 		return (edge == "left" or edge == "right") and "cursor_drag_h" or "cursor_drag_v"
 	else
@@ -107,7 +115,7 @@ end
 
 -- For widgets that support dragging sashes. Call in def.trickle:uiCall_pointerHover().
 -- @return true if a sash hover action occurred.
-function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
+function wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	if not self.SA_enabled then
 		return
 	end
@@ -135,7 +143,7 @@ function lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 
 		if wid then
 			self.SA_hover = wid
-			local cursor_id = lgcContainer.getSashCursorID(wid.GE.edge, false)
+			local cursor_id = wcContainer.getSashCursorID(wid.GE.edge, false)
 			self.cursor_hover = sash_style[cursor_id]
 			return true
 		else
@@ -170,13 +178,13 @@ end
 
 
 -- For containers that support draggable sashes. Call in def.trickle:uiCall_pointerHoverOff().
-function lgcContainer.sashHoverOffLogic(self)
+function wcContainer.sashHoverOffLogic(self)
 	self.SA_hover = false
 	self.cursor_hover = false
 end
 
 
-function lgcContainer.sashPressLogic(self, x, y, button)
+function wcContainer.sashPressLogic(self, x, y, button)
 	if button == 1
 	and self.context.mouse_pressed_button == button
 	and self.SA_enabled
@@ -196,7 +204,7 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 					self.SA_drag_max = self.LO_h
 				end
 
-				local cursor_id = lgcContainer.getSashCursorID(GE.edge, true)
+				local cursor_id = wcContainer.getSashCursorID(GE.edge, true)
 				local sash_style = widLayout.getSashStyleTable(GE.sash_style)
 				self.cursor_press = sash_style[cursor_id]
 
@@ -207,7 +215,7 @@ function lgcContainer.sashPressLogic(self, x, y, button)
 end
 
 
-function lgcContainer.sashDragLogic(self, x, y)
+function wcContainer.sashDragLogic(self, x, y)
 	if self.SA_enabled
 	and self.press_busy == "sash"
 	then
@@ -253,7 +261,7 @@ function lgcContainer.sashDragLogic(self, x, y)
 end
 
 
-function lgcContainer.sashUnpressLogic(self)
+function wcContainer.sashUnpressLogic(self)
 	if self.press_busy == "sash" then
 		self.press_busy = false
 		self.cursor_press = false
@@ -263,7 +271,7 @@ function lgcContainer.sashUnpressLogic(self)
 end
 
 
-function lgcContainer.renderSashes(self)
+function wcContainer.renderSashes(self)
 	local scr_x, scr_y = self.scr_x, self.scr_y
 
 	for i, child in ipairs(self.children) do
@@ -302,4 +310,4 @@ function lgcContainer.renderSashes(self)
 end
 
 
-return lgcContainer
+return wcContainer

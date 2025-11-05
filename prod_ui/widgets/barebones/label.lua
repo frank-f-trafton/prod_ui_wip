@@ -6,19 +6,19 @@
 local context = select(1, ...)
 
 
-local lgcLabelBare = context:getLua("shared/lgc_label_bare")
+local wcLabelBare = context:getLua("shared/wc/wc_label_bare")
 
 
 local def = {}
 
 
-def.setLabel = lgcLabelBare.widSetLabel
+def.setLabel = wcLabelBare.widSetLabel
 
 
 function def:uiCall_initialize()
 	self.visible = true
 
-	lgcLabelBare.setup(self)
+	wcLabelBare.setup(self)
 
 	-- "enabled" affects the rendered color.
 	self.enabled = true

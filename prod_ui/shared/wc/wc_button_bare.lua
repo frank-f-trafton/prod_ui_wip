@@ -3,25 +3,25 @@
 --[[
 Shared (barebones) button logic.
 
-This roughly follows the behavior of `shared/lgc_button.lua`. See that file for additional comments.
+This roughly follows the behavior of `shared/wc/wc_button.lua`. See that file for additional comments.
 --]]
 
 
 local context = select(1, ...)
 
 
-local lgcButtonBare = {}
+local wcButtonBare = {}
 
 
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 
 
-lgcButtonBare.wid_buttonAction = uiDummy.func
-lgcButtonBare.wid_buttonAction2 = uiDummy.func
-lgcButtonBare.wid_buttonAction3 = uiDummy.func
+wcButtonBare.wid_buttonAction = uiDummy.func
+wcButtonBare.wid_buttonAction2 = uiDummy.func
+wcButtonBare.wid_buttonAction3 = uiDummy.func
 
 
-function lgcButtonBare.setEnabled(self, enabled)
+function wcButtonBare.setEnabled(self, enabled)
 	self.enabled = not not enabled
 
 	if not self.enabled then
@@ -33,7 +33,7 @@ function lgcButtonBare.setEnabled(self, enabled)
 end
 
 
-function lgcButtonBare.setEnabledSticky(self, enabled)
+function wcButtonBare.setEnabledSticky(self, enabled)
 	self.enabled = not not enabled
 
 	if not self.enabled then
@@ -45,21 +45,21 @@ function lgcButtonBare.setEnabledSticky(self, enabled)
 end
 
 
-function lgcButtonBare.setPressedSticky(self, pressed)
+function wcButtonBare.setPressedSticky(self, pressed)
 	self.pressed = not not pressed
 
 	return self
 end
 
 
-function lgcButtonBare.setChecked(self, checked)
+function wcButtonBare.setChecked(self, checked)
 	self.checked = not not checked
 
 	return self
 end
 
 
-function lgcButtonBare.uncheckAllRadioSiblings(self)
+function wcButtonBare.uncheckAllRadioSiblings(self)
 	local parent = self.parent
 
 	-- No parent (this is the root, or the widget data is corrupt): just uncheck self.
@@ -77,15 +77,15 @@ function lgcButtonBare.uncheckAllRadioSiblings(self)
 end
 
 
-function lgcButtonBare.setCheckedRadio(self, checked)
-	lgcButtonBare.uncheckAllRadioSiblings(self)
+function wcButtonBare.setCheckedRadio(self, checked)
+	wcButtonBare.uncheckAllRadioSiblings(self)
 	self.checked = not not checked
 
 	return self
 end
 
 
-function lgcButtonBare.setCheckedRadioConditional(self, key, value)
+function wcButtonBare.setCheckedRadioConditional(self, key, value)
 	local parent = self:getParent()
 	local siblings = parent.children
 
@@ -100,7 +100,7 @@ function lgcButtonBare.setCheckedRadioConditional(self, key, value)
 end
 
 
-function lgcButtonBare.uiCall_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcButtonBare.uiCall_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -109,7 +109,7 @@ function lgcButtonBare.uiCall_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse
 end
 
 
-function lgcButtonBare.uiCall_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcButtonBare.uiCall_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			if not self.pressed then
@@ -120,7 +120,7 @@ function lgcButtonBare.uiCall_pointerHoverOnSticky(self, inst, mouse_x, mouse_y,
 end
 
 
-function lgcButtonBare.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcButtonBare.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -129,7 +129,7 @@ function lgcButtonBare.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mous
 end
 
 
-function lgcButtonBare.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -154,7 +154,7 @@ function lgcButtonBare.uiCall_pointerPress(self, inst, x, y, button, istouch, pr
 end
 
 
-function lgcButtonBare.uiCall_pointerPressActivate(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerPressActivate(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -182,7 +182,7 @@ function lgcButtonBare.uiCall_pointerPressActivate(self, inst, x, y, button, ist
 end
 
 
-function lgcButtonBare.uiCall_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
+function wcButtonBare.uiCall_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -199,7 +199,7 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon first click-down, but which do not have a repeat-held action.
-function lgcButtonBare.uiCall_pointerPressSticky(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerPressSticky(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -232,7 +232,7 @@ function lgcButtonBare.uiCall_pointerPressSticky(self, inst, x, y, button, istou
 end
 
 
-function lgcButtonBare.uiCall_pointerReleaseActivate(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerReleaseActivate(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -246,7 +246,7 @@ function lgcButtonBare.uiCall_pointerReleaseActivate(self, inst, x, y, button, i
 end
 
 
-function lgcButtonBare.uiCall_pointerRelease(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerRelease(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -259,7 +259,7 @@ function lgcButtonBare.uiCall_pointerRelease(self, inst, x, y, button, istouch, 
 end
 
 
-function lgcButtonBare.uiCall_pointerReleaseCheck(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerReleaseCheck(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -274,7 +274,7 @@ function lgcButtonBare.uiCall_pointerReleaseCheck(self, inst, x, y, button, isto
 end
 
 
-function lgcButtonBare.uiCall_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -292,7 +292,7 @@ end
 -- (Sticky buttons do not have a pointerRelease callback.)
 
 
-function lgcButtonBare.uiCall_pointerUnpress(self, inst, x, y, button, istouch, presses)
+function wcButtonBare.uiCall_pointerUnpress(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -305,7 +305,7 @@ function lgcButtonBare.uiCall_pointerUnpress(self, inst, x, y, button, istouch, 
 end
 
 
-function lgcButtonBare.uiCall_thimbleAction(self, inst, key, scancode, isrepeat)
+function wcButtonBare.uiCall_thimbleAction(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:wid_buttonAction()
@@ -314,7 +314,7 @@ function lgcButtonBare.uiCall_thimbleAction(self, inst, key, scancode, isrepeat)
 end
 
 
-function lgcButtonBare.uiCall_thimbleAction2(self, inst, key, scancode, isrepeat)
+function wcButtonBare.uiCall_thimbleAction2(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:wid_buttonAction2()
@@ -326,7 +326,7 @@ end
 -- (There is no built-in keyboard handling for tertiary actions.)
 
 
-function lgcButtonBare.uiCall_thimbleActionCheck(self, inst, key, scancode, isrepeat)
+function wcButtonBare.uiCall_thimbleActionCheck(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:setChecked(not self.checked)
@@ -336,7 +336,7 @@ function lgcButtonBare.uiCall_thimbleActionCheck(self, inst, key, scancode, isre
 end
 
 
-function lgcButtonBare.uiCall_thimbleActionRadio(self, inst, key, scancode, isrepeat)
+function wcButtonBare.uiCall_thimbleActionRadio(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:setChecked(true)
@@ -346,7 +346,7 @@ function lgcButtonBare.uiCall_thimbleActionRadio(self, inst, key, scancode, isre
 end
 
 
-function lgcButtonBare.uiCall_thimbleActionSticky(self, inst, key, scancode, isrepeat)
+function wcButtonBare.uiCall_thimbleActionSticky(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			if not self.pressed then
@@ -358,4 +358,4 @@ function lgcButtonBare.uiCall_thimbleActionSticky(self, inst, key, scancode, isr
 end
 
 
-return lgcButtonBare
+return wcButtonBare

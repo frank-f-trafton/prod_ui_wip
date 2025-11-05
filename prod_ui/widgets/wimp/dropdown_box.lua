@@ -41,8 +41,6 @@ should still work when clicking on the body, however.
 local context = select(1, ...)
 
 
-local lgcMenu = context:getLua("shared/lgc_menu")
-local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -50,6 +48,8 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -65,21 +65,21 @@ local def = {
 }
 
 
-lgcMenu.attachMenuMethods(def)
+wcMenu.attachMenuMethods(def)
 
 
-local _arrange_tb = lgcMenu.arrangers["list-tb"]
+local _arrange_tb = wcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
 	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
-def.moveFirst = lgcMenu.widgetMoveFirst
-def.moveLast = lgcMenu.widgetMoveLast
-def.movePageUp = lgcMenu.widgetMovePageUp
-def.movePageDown = lgcMenu.widgetMovePageDown
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+def.moveFirst = wcMenu.widgetMoveFirst
+def.moveLast = wcMenu.widgetMoveLast
+def.movePageUp = wcMenu.widgetMovePageUp
+def.movePageDown = wcMenu.widgetMovePageDown
 
 
 def.wid_buttonAction = uiDummy.func
@@ -128,11 +128,11 @@ function def:addItem(text, pos, icon_id)
 
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 	table.insert(items, pos, item)
 
-	lgcMenu.trySelectIfNothingSelected(self)
+	wcMenu.trySelectIfNothingSelected(self)
 
 	-- TODO: maybe destroy any open drawer, as a precaution, when this menu changes?
 
@@ -160,7 +160,7 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 	_updateTextWidth(self)
 
 	return removed_item
@@ -190,8 +190,8 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setIconSetID = lgcMenu.setIconSetID
-def.getIconSetID = lgcMenu.getIconSetID
+def.setIconSetID = wcMenu.setIconSetID
+def.getIconSetID = wcMenu.getIconSetID
 
 
 function def:uiCall_initialize()
@@ -201,7 +201,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 5)
 
-	lgcMenu.setup(self)
+	wcMenu.setup(self)
 	self.MN_page_jump_size = 4
 	self.MN_wrap_selection = false
 
@@ -281,7 +281,7 @@ function def:_openPopUpMenu()
 		drawer:reshape()
 		drawer:centerSelectedItem(true)
 
-		lgcPopUps.checkBlocking(drawer)
+		wcPopUp.checkBlocking(drawer)
 
 		drawer:tryTakeThimble2()
 	end
@@ -551,7 +551,7 @@ def.default_skinner = {
 
 		-- Update the icons of any existing items.
 		for i, item in ipairs(self.MN_items) do
-			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+			item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 		end
 	end,
 

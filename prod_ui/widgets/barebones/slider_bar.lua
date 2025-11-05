@@ -6,10 +6,10 @@
 local context = select(1, ...)
 
 
-local lgcButtonBare = context:getLua("shared/lgc_button_bare")
-local lgcLabelBare = context:getLua("shared/lgc_label_bare")
 local lgcSlider = context:getLua("shared/lgc_slider")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+local wcButtonBare = context:getLua("shared/wc/wc_button_bare")
+local wcLabelBare = context:getLua("shared/wc/wc_label_bare")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -22,16 +22,16 @@ function def:wid_actionSliderChanged()
 end
 
 
-def.setEnabled = lgcButtonBare.setEnabled
-def.setLabel = lgcLabelBare.widSetLabel
+def.setEnabled = wcButtonBare.setEnabled
+def.setLabel = wcLabelBare.widSetLabel
 
 
 lgcSlider.setupMethods(def)
 
 
-def.uiCall_pointerHoverOn = lgcButtonBare.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = lgcButtonBare.uiCall_pointerHoverOff
-def.uiCall_pointerUnpress = lgcButtonBare.uiCall_pointerUnpress
+def.uiCall_pointerHoverOn = wcButtonBare.uiCall_pointerHoverOn
+def.uiCall_pointerHoverOff = wcButtonBare.uiCall_pointerHoverOff
+def.uiCall_pointerUnpress = wcButtonBare.uiCall_pointerUnpress
 
 
 function def:uiCall_initialize()
@@ -39,7 +39,7 @@ function def:uiCall_initialize()
 	self.allow_hover = true
 	self.thimble_mode = 1
 
-	lgcLabelBare.setup(self)
+	wcLabelBare.setup(self)
 	lgcSlider.setup(self)
 
 	-- State flags

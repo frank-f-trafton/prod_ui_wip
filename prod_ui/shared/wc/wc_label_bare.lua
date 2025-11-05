@@ -1,30 +1,30 @@
 -- To load: local lib = context:getLua("shared/lib")
 
 --[[
-Barebones version of lgcLabel. Supports only single-line text (no underlines) with one default font.
+Barebones version of wcLabel. Supports only single-line text (no underlines) with one default font.
 --]]
 
 
 local context = select(1, ...)
 
 
-local lgcLabelBare = {}
+local wcLabelBare = {}
 
 
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
-function lgcLabelBare.setup(self)
+function wcLabelBare.setup(self)
 	self.label = ""
 end
 
 
-function lgcLabelBare.remove(self)
+function wcLabelBare.remove(self)
 	self.label = nil
 end
 
 
-function lgcLabelBare.widSetLabel(self, text)
+function wcLabelBare.widSetLabel(self, text)
 	-- Assertions
 	-- [[
 	uiAssert.loveStringOrColoredText(2, text)
@@ -35,7 +35,7 @@ end
 
 
 --- Draws a widget's label text.
-function lgcLabelBare.render(self, font, r, g, b, a)
+function wcLabelBare.render(self, font, r, g, b, a)
 	love.graphics.push("all")
 
 	if self.label then
@@ -54,4 +54,4 @@ function lgcLabelBare.render(self, font, r, g, b, a)
 end
 
 
-return lgcLabelBare
+return wcLabelBare

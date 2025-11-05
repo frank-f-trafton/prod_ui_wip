@@ -1,7 +1,6 @@
 local context = select(1, ...)
 
 
-local lgcLabel = context:getLua("shared/lgc_label")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local themeAssert = context:getLua("core/res/theme_assert")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -9,6 +8,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcLabel = context:getLua("shared/wc/wc_label")
 
 
 local _lerp = pMath.lerp
@@ -111,7 +111,7 @@ return {
 
 		-- Draw the text label.
 		if self.label_mode then
-			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+			wcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
 		end
 	end
 }

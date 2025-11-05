@@ -59,7 +59,6 @@ Widget
 local context = select(1, ...)
 
 
-local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcWimp = context:getLua("shared/lgc_wimp")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
@@ -71,6 +70,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcMenu = context:getLua("shared/wc/wc_menu")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -89,27 +89,27 @@ local def = {
 }
 
 
-lgcMenu.attachMenuMethods(def)
+wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
---def.getInBounds = lgcMenu.getItemInBoundsRect
-def.getInBounds = lgcMenu.getItemInBoundsY
-def.selectionInView = lgcMenu.selectionInView
+--def.getInBounds = wcMenu.getItemInBoundsRect
+def.getInBounds = wcMenu.getItemInBoundsY
+def.selectionInView = wcMenu.selectionInView
 
 
-def.getItemAtPoint = lgcMenu.widgetGetItemAtPointV -- (<self>, px, py, first, last); 'px' is unused.
-def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.getItemAtPoint = wcMenu.widgetGetItemAtPointV -- (<self>, px, py, first, last); 'px' is unused.
+def.trySelectItemAtPoint = wcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
-def.moveFirst = lgcMenu.widgetMoveFirst
-def.moveLast = lgcMenu.widgetMoveLast
-def.movePageUp = lgcMenu.widgetMovePageUp
-def.movePageDown = lgcMenu.widgetMovePageDown
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+def.moveFirst = wcMenu.widgetMoveFirst
+def.moveLast = wcMenu.widgetMoveLast
+def.movePageUp = wcMenu.widgetMovePageUp
+def.movePageDown = wcMenu.widgetMovePageDown
 
 
 --local column = self.columns_rev[cell.id]
@@ -209,7 +209,7 @@ end
 
 local function _refreshCell(self, item, cell)
 	cell.text_w = self.skin.cell_font:getWidth(cell.text)
-	cell.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, cell.icon_id)
+	cell.tq_icon = wcMenu.getIconQuad(self.icon_set_id, cell.icon_id)
 end
 
 
@@ -499,7 +499,7 @@ function def:removeRowByIndex(row_i) -- TODO: untested
 
 	table.remove(items, row_i)
 
-	lgcMenu.removeItemIndexCleanup(self, row_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, row_i, "MN_index")
 
 	_refreshRows(self, row_i)
 
@@ -577,7 +577,7 @@ function _mt_cell:setIconID(icon_id)
 	uiAssert.typeEval(2, icon_id, "string")
 
 	self.icon_id = icon_id or false
-	self.tq_icon = lgcMenu.getIconQuad(self.item.owner.icon_set_id, self.icon_id) -- ie _refreshCell()
+	self.tq_icon = wcMenu.getIconQuad(self.item.owner.icon_set_id, self.icon_id) -- ie _refreshCell()
 
 	return self
 end
@@ -672,7 +672,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.setup(self)
+	wcMenu.setup(self)
 
 	-- Array of header category columns.
 	self.columns = {}
@@ -777,7 +777,7 @@ function def:cacheUpdate(refresh_dimensions)
 		end
 	end
 
-	lgcMenu.widgetAutoRangeV(self)
+	wcMenu.widgetAutoRangeV(self)
 end
 
 
@@ -1036,7 +1036,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		local mx, my = self:getRelativePosition(x, y)
 
-		if lgcMenu.pointerPressScrollBars(self, x, y, button) then
+		if wcMenu.pointerPressScrollBars(self, x, y, button) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 			self.context:forceClickSequence(false, button, 1)
 
@@ -1101,7 +1101,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		if not self.MN_mouse_clicked_item then
 			-- Repeat-press events for scroll bar buttons
-			lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
+			wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 		end
 	end
 end

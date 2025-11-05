@@ -1,5 +1,3 @@
--- To load: local lib = context:getLua("shared/lib")
-
 --[[
 Shared code for handling "label text" in widgets.
 
@@ -29,14 +27,13 @@ skin.label_style.ul_h: Underline height (thickness).
 Required widget fields:
 
 Viewport #1: self.vp
-
 --]]
 
 
 local context = select(1, ...)
 
 
-local lgcLabel = {}
+local wcLabel = {}
 
 
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -62,7 +59,7 @@ end
 --- Setup or change a widget's label state. The label text is reset to an empty string.
 -- @param self The widget to update.
 -- @param mode ("single") The label mode to use.
-function lgcLabel.setup(self, mode)
+function wcLabel.setup(self, mode)
 	mode = mode or "single"
 
 	uiAssert.namedMap(2, mode, _nm_modes)
@@ -104,7 +101,7 @@ end
 
 --- Removes all label fields from the widget.
 -- @param self The widget to modify.
-function lgcLabel.remove(self)
+function wcLabel.remove(self)
 	self.label_mode = nil
 	self.label = nil
 	self.label_w_old = nil
@@ -126,7 +123,7 @@ end
 --@param self The widget to update.
 --@param text The text to assign to the label.
 --@param mode (current) Optionally change the label mode.
-function lgcLabel.widSetLabel(self, text, mode)
+function wcLabel.widSetLabel(self, text, mode)
 	mode = mode or self.label_mode
 
 	uiAssert.loveStringOrColoredText(2, text)
@@ -134,7 +131,7 @@ function lgcLabel.widSetLabel(self, text, mode)
 
 	-- Check for mode update.
 	if mode ~= self.label_mode then
-		lgcLabel.setup(self, mode)
+		wcLabel.setup(self, mode)
 	end
 
 	self.label = text
@@ -156,7 +153,7 @@ end
 
 
 --- Update a label during widget reshaping, if necessary.
-function lgcLabel.reshapeLabel(self)
+function wcLabel.reshapeLabel(self)
 	if self.label_mode == "single-ul" then
 		_calculateUnderlineOffset(self, self.vp, self.skin.label_style.font)
 
@@ -180,7 +177,7 @@ end
 -- @param label_oy Text Y offset. (ie for inset button states)
 -- @param ox Scissor X offset.
 -- @param oy Scissor Y offset.
-function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox, oy)
+function wcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox, oy)
 	love.graphics.push("all")
 
 	local vp = self.vp
@@ -237,4 +234,4 @@ function lgcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox,
 end
 
 
-return lgcLabel
+return wcLabel

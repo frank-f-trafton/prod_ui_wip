@@ -35,14 +35,14 @@ Vertical layout:
 local context = select(1, ...)
 
 
-local lgcButton = context:getLua("shared/lgc_button")
 local lgcGraphic = context:getLua("shared/lgc_graphic")
-local lgcLabel = context:getLua("shared/lgc_label")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcButton = context:getLua("shared/wc/wc_button")
+local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -60,13 +60,13 @@ end
 
 -- NOTE: The primary button action is activated by keyboard input only. Click-activated
 -- secondary and tertiary actions do not consider the location of the mouse cursor.
-def.wid_buttonAction = lgcButton.wid_buttonAction
-def.wid_buttonAction2 = lgcButton.wid_buttonAction2
-def.wid_buttonAction3 = lgcButton.wid_buttonAction3
+def.wid_buttonAction = wcButton.wid_buttonAction
+def.wid_buttonAction2 = wcButton.wid_buttonAction2
+def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 
-def.setEnabled = lgcButton.setEnabled
-def.setLabel = lgcLabel.widSetLabel
+def.setEnabled = wcButton.setEnabled
+def.setLabel = wcLabel.widSetLabel
 
 
 function def:setOrientation(orientation)
@@ -88,10 +88,10 @@ function def:setOrientation(orientation)
 end
 
 
-def.uiCall_pointerHoverOn = lgcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = lgcButton.uiCall_pointerHoverOff
-def.uiCall_thimbleAction = lgcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
+def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 local function wrapSetLabel(self)
@@ -238,7 +238,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 3)
 
-	lgcLabel.setup(self)
+	wcLabel.setup(self)
 
 	-- State flags
 	self.enabled = true
@@ -292,7 +292,7 @@ function def:uiCall_reshapePre()
 	vp:reduceT(skin.box.border)
 	vp:reduceT(skin.box.margin)
 
-	lgcLabel.reshapeLabel(self)
+	wcLabel.reshapeLabel(self)
 
 	return true
 end
@@ -544,7 +544,7 @@ def.default_skinner = {
 		uiGraphics.quadShrinkOrCenterXYWH(tq_next, vp3.x + button_ox, vp3.y + button_oy, vp3.w, vp3.h)
 
 		if self.label_mode then
-			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, 0, 0, ox, oy)
+			wcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, 0, 0, ox, oy)
 		end
 	end,
 

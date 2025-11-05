@@ -46,15 +46,15 @@ local context = select(1, ...)
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
-local lgcInputS = context:getLua("shared/lgc_input_s")
-local lgcMenu = context:getLua("shared/lgc_menu")
-local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcInputS = context:getLua("shared/wc/wc_input_s")
+local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -64,30 +64,30 @@ local def = {
 }
 
 
-lgcMenu.attachMenuMethods(def)
+wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 -- No integrated scroll bars for single-line text inputs.
 
 
-lgcInputS.setupDef(def)
+wcInputS.setupDef(def)
 
 
-def.updateAlignOffset = lgcInputS.method_updateAlignOffset
-def.pop_up_proto = lgcInputS.pop_up_proto
+def.updateAlignOffset = wcInputS.method_updateAlignOffset
+def.pop_up_proto = wcInputS.pop_up_proto
 
 
-local _arrange_tb = lgcMenu.arrangers["list-tb"]
+local _arrange_tb = wcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
 	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
-def.moveFirst = lgcMenu.widgetMoveFirst
-def.moveLast = lgcMenu.widgetMoveLast
-def.movePageUp = lgcMenu.widgetMovePageUp
-def.movePageDown = lgcMenu.widgetMovePageDown
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+def.moveFirst = wcMenu.widgetMoveFirst
+def.moveLast = wcMenu.widgetMoveLast
+def.movePageUp = wcMenu.widgetMovePageUp
+def.movePageDown = wcMenu.widgetMovePageDown
 
 
 local function refreshLineEdText(self)
@@ -177,7 +177,7 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
 	return removed_item
 end
@@ -217,7 +217,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.setup(self)
+	wcMenu.setup(self)
 	self.MN_page_jump_size = 4
 	self.MN_wrap_selection = false
 
@@ -228,7 +228,7 @@ function def:uiCall_initialize()
 	-- When opened, this holds a reference to the pop-up widget.
 	self.wid_drawer = false
 
-	lgcInputS.setupInstance(self, "single")
+	wcInputS.setupInstance(self, "single")
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -269,7 +269,7 @@ function def:uiCall_update(dt)
 
 	-- Handle update-time drag-scroll.
 	if self.press_busy == "text-drag" then
-		if lgcInputS.mouseDragLogic(self) then
+		if wcInputS.mouseDragLogic(self) then
 			do_update = true
 		end
 		if widShared.dragToScroll(self, dt) then
@@ -318,7 +318,7 @@ function def:_openPopUpMenu()
 		drawer:reshape()
 		drawer:centerSelectedItem(true)
 
-		lgcPopUps.checkBlocking(drawer)
+		wcPopUp.checkBlocking(drawer)
 
 		drawer:tryTakeThimble2()
 	end
@@ -405,14 +405,14 @@ end
 
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
-		lgcInputS.thimble1Take(self)
+		wcInputS.thimble1Take(self)
 	end
 end
 
 
 function def:uiCall_thimble1Release(inst)
 	if self == inst then
-		lgcInputS.thimble1Release(self)
+		wcInputS.thimble1Release(self)
 
 		if self.wid_drawer then
 			-- The drawer should not exist if the dropdown body does not have thimble1.
@@ -459,7 +459,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 			-- Standard text box controls (caret navigation, etc.)
 			else
 				local old_line = self.LE.line
-				local rv = lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
+				local rv = wcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 				if old_line ~= self.LE.line then
 					self:wid_inputChanged(self.LE.line)
 				end
@@ -473,7 +473,7 @@ end
 function def:uiCall_textInput(inst, text)
 	if self == inst then
 		local old_line = self.LE.line
-		local rv = lgcInputS.textInputLogic(self, text)
+		local rv = wcInputS.textInputLogic(self, text)
 		if old_line ~= self.LE.line then
 			self:wid_inputChanged(self.LE.line)
 		end
@@ -538,7 +538,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Clicking the text area:
 		if self.vp:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
-			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
+			if wcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
 			end
 
@@ -740,7 +740,7 @@ def.default_skinner = {
 		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 		local is_active = self == self.context.thimble1
 		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
-		lgcInputS.draw(
+		wcInputS.draw(
 			self,
 			col_highlight,
 			skin.font_ghost,

@@ -6,12 +6,12 @@ A plain skinned label with an optional 9-slice body.
 local context = select(1, ...)
 
 
-local lgcLabel = context:getLua("shared/lgc_label")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -20,7 +20,7 @@ local def = {
 }
 
 
-def.setLabel = lgcLabel.widSetLabel
+def.setLabel = wcLabel.widSetLabel
 
 
 function def:uiCall_initialize()
@@ -28,7 +28,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 1)
 
-	lgcLabel.setup(self)
+	wcLabel.setup(self)
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -46,7 +46,7 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(self.skin.box.border)
 
-	lgcLabel.reshapeLabel(self)
+	wcLabel.reshapeLabel(self)
 
 	return true
 end
@@ -127,7 +127,7 @@ def.default_skinner = {
 		end
 
 		if self.label_mode then
-			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+			wcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
 		end
 	end,
 

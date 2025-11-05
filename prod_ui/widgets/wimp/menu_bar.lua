@@ -17,7 +17,6 @@ The menu bar may act strangely if it becomes too narrow to display all categorie
 local context = select(1, ...)
 
 
-local lgcMenu = context:getLua("shared/lgc_menu")
 local lgcWimp = context:getLua("shared/lgc_wimp")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -25,6 +24,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcMenu = context:getLua("shared/wc/wc_menu")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -37,18 +37,18 @@ local def = {
 }
 
 
-lgcMenu.attachMenuMethods(def)
+wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 
 
-def.getInBounds = lgcMenu.getItemInBoundsRect
-def.selectionInView = lgcMenu.selectionInView
-def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
---def.moveFirst = lgcMenu.widgetMoveFirst
---def.moveLast = lgcMenu.widgetMoveLast
+def.getInBounds = wcMenu.getItemInBoundsRect
+def.selectionInView = wcMenu.selectionInView
+def.getItemAtPoint = wcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.trySelectItemAtPoint = wcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+--def.moveFirst = wcMenu.widgetMoveFirst
+--def.moveLast = wcMenu.widgetMoveLast
 
 
 --[[
@@ -222,7 +222,7 @@ function def:updateCategory(item, text, key_mnemonic, icon_id, pop_up_proto, sel
 	--print("icon_id", icon_id)
 	if icon_id ~= nil then
 		item.icon_id = icon_id or false
-		item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
+		item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
 		--print("self.icon_set_id", self.icon_set_id)
 		--print("new tq_icon", item.tq_icon)
 	end
@@ -260,7 +260,7 @@ function def:removeCategoryByIndex(item_i)
 
 	table.remove(items, item_i)
 
-	lgcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
 	self:arrangeItems()
 
@@ -352,7 +352,7 @@ function def:uiCall_initialize()
 	-- Used to determine if a new pop-up menu needs to be invoked.
 	self.last_open = false
 
-	lgcMenu.setup(self) -- XXX clean up assignments below.
+	wcMenu.setup(self) -- XXX clean up assignments below.
 
 	-- Ref to currently-hovered item, or false if not hovering over any items.
 	self.MN_item_hover = false
@@ -420,7 +420,7 @@ end
 --- Updates cached display state.
 function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.MN_items)
+		self.doc_w, self.doc_h = wcMenu.getCombinedItemDimensions(self.MN_items)
 	end
 end
 

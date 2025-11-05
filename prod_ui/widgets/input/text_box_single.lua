@@ -23,7 +23,7 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
-local lgcInputS = context:getLua("shared/lgc_input_s")
+local wcInputS = context:getLua("shared/wc/wc_input_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -49,11 +49,11 @@ widShared.scrollSetMethods(def)
 -- No integrated scroll bars for single-line text boxes.
 
 
-lgcInputS.setupDef(def)
+wcInputS.setupDef(def)
 
 
-def.updateAlignOffset = lgcInputS.method_updateAlignOffset -- XXX: method doesn't exist.
-def.pop_up_proto = lgcInputS.pop_up_proto
+def.updateAlignOffset = wcInputS.method_updateAlignOffset -- XXX: method doesn't exist.
+def.pop_up_proto = wcInputS.pop_up_proto
 
 
 function def:uiCall_initialize()
@@ -72,7 +72,7 @@ function def:uiCall_initialize()
 	self.enabled = true
 	self.hovered = false
 
-	lgcInputS.setupInstance(self, "single")
+	wcInputS.setupInstance(self, "single")
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -135,7 +135,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if self.vp2:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
-			if lgcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
+			if wcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
 			end
 		end
@@ -170,21 +170,21 @@ end
 
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
-		lgcInputS.thimble1Take(self)
+		wcInputS.thimble1Take(self)
 	end
 end
 
 
 function def:uiCall_thimble1Release(inst)
 	if self == inst then
-		lgcInputS.thimble1Release(self)
+		wcInputS.thimble1Release(self)
 	end
 end
 
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		return lgcInputS.textInputLogic(self, text)
+		return wcInputS.textInputLogic(self, text)
 	end
 end
 
@@ -195,7 +195,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 			if (scancode == "return" or scancode == "kpenter") and self:wid_action() then
 				return true
 			else
-				return lgcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
+				return wcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 			end
 		end
 	end
@@ -209,7 +209,7 @@ function def:uiCall_update(dt)
 	local do_update
 
 	if self.press_busy == "text-drag" then
-		if lgcInputS.mouseDragLogic(self) then
+		if wcInputS.mouseDragLogic(self) then
 			do_update = true
 		end
 		if widShared.dragToScroll(self, dt) then
@@ -325,7 +325,7 @@ def.default_skinner = {
 		local is_active = self == self.context.thimble1
 		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
 
-		lgcInputS.draw(
+		wcInputS.draw(
 			self,
 			col_highlight,
 			skin.font_ghost,

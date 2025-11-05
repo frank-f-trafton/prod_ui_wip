@@ -19,15 +19,15 @@ A button with a main part and a secondary part which performs a different action
 local context = select(1, ...)
 
 
-local lgcButton = context:getLua("shared/lgc_button")
 local lgcGraphic = context:getLua("shared/lgc_graphic")
-local lgcLabel = context:getLua("shared/lgc_label")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcButton = context:getLua("shared/wc/wc_button")
+local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -36,14 +36,14 @@ local def = {
 }
 
 
-def.wid_buttonAction = lgcButton.wid_buttonAction
-def.wid_buttonAction2 = lgcButton.wid_buttonAction2
-def.wid_buttonAction3 = lgcButton.wid_buttonAction3
+def.wid_buttonAction = wcButton.wid_buttonAction
+def.wid_buttonAction2 = wcButton.wid_buttonAction2
+def.wid_buttonAction3 = wcButton.wid_buttonAction3
 def.wid_buttonActionAux = function(self) end
 
 
-def.setEnabled = lgcButton.setEnabled
-def.setLabel = lgcLabel.widSetLabel
+def.setEnabled = wcButton.setEnabled
+def.setLabel = wcLabel.widSetLabel
 
 
 function def:setAuxEnabled(enabled)
@@ -166,8 +166,8 @@ function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 end
 
 
-def.uiCall_thimbleAction = lgcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
+def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_initialize()
@@ -177,7 +177,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 3)
 
-	lgcLabel.setup(self)
+	wcLabel.setup(self)
 
 	-- [XXX 8] (Optional) graphic associated with the button.
 	--self.graphic = <tq>
@@ -224,7 +224,7 @@ function def:uiCall_reshapePre()
 
 	vp:split(vp3, skin.aux_placement, aux_sz)
 
-	lgcLabel.reshapeLabel(self)
+	wcLabel.reshapeLabel(self)
 
 	return true
 end
@@ -369,7 +369,7 @@ def.default_skinner = {
 		end
 
 		if self.label_mode then
-			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+			wcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
 		end
 	end,
 

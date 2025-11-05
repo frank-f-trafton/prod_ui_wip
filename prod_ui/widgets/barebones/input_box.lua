@@ -18,13 +18,12 @@ Ctrl + V: Paste text
 local context = select(1, ...)
 
 
-local lgcButtonBare = context:getLua("shared/lgc_button_bare")
+local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
-local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 
 
 -- LÖVE Supplemental

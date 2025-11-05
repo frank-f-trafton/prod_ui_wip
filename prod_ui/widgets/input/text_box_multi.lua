@@ -33,7 +33,6 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
-local lgcInputM = context:getLua("shared/lgc_input_m")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -42,6 +41,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcInputM = context:getLua("shared/wc/wc_input_m")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -51,13 +51,13 @@ local def = {
 }
 
 
-lgcInputM.setupDef(def)
+wcInputM.setupDef(def)
 
 
 widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
-def.pop_up_proto = lgcInputM.pop_up_proto
+def.pop_up_proto = wcInputM.pop_up_proto
 
 
 function def:uiCall_initialize()
@@ -74,7 +74,7 @@ function def:uiCall_initialize()
 	-- State flags (WIP)
 	self.enabled = true
 
-	lgcInputM.setupInstance(self, "multi")
+	wcInputM.setupInstance(self, "multi")
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -156,7 +156,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		elseif self.vp2:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
-			if lgcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before) then
+			if wcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before) then
 				return true
 			end
 		end
@@ -213,28 +213,28 @@ end
 
 function def:uiCall_thimble1Take(inst)
 	if self == inst then
-		lgcInputM.thimble1Take(self)
+		wcInputM.thimble1Take(self)
 	end
 end
 
 
 function def:uiCall_thimble1Release(inst)
 	if self == inst then
-		lgcInputM.thimble1Release(self)
+		wcInputM.thimble1Release(self)
 	end
 end
 
 
 function def:uiCall_textInput(inst, text)
 	if self == inst then
-		lgcInputM.textInputLogic(self, text)
+		wcInputM.textInputLogic(self, text)
 	end
 end
 
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
-		return lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
+		return wcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	end
 end
 
@@ -246,7 +246,7 @@ function def:uiCall_update(dt)
 	local do_update
 
 	if self.press_busy == "text-drag" then
-		if lgcInputM.mouseDragLogic(self) then
+		if wcInputM.mouseDragLogic(self) then
 			do_update = true
 		end
 		if widShared.dragToScroll(self, dt) then
@@ -397,7 +397,7 @@ def.default_skinner = {
 
 		local col_highlight = self:hasAnyThimble() and res.color_highlight_active or res.color_highlight
 		local color_caret = self.context.window_focus and res.color_insert -- XXX and color_replace
-		lgcInputM.draw(self, col_highlight, skin.font_ghost, res.color_text, skin.font, color_caret)
+		wcInputM.draw(self, col_highlight, skin.font_ghost, res.color_text, skin.font, color_caret)
 
 		love.graphics.setScissor(scx, scy, scw, sch)
 

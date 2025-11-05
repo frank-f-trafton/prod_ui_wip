@@ -1,15 +1,18 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
 --[[
-	Shared widget logic for menus.
+Widget Component: Menu
+
+Usage:
+
+* Run 'wcMenu.attachMenuMethods()' on the widget definition.
+
+* Run 'wcMenu.setup()' on the widget instance during creation.
 --]]
 
 
 local context = select(1, ...)
 
 
-local lgcMenu = {}
+local wcMenu = {}
 
 
 local lgcScroll = context:getLua("shared/lgc_scroll")
@@ -26,7 +29,7 @@ local _clamp = pMath.clamp
 local menuMethods = {}
 
 
-function lgcMenu.attachMenuMethods(self)
+function wcMenu.attachMenuMethods(self)
 	uiTable.patch(self, menuMethods, false)
 end
 
@@ -443,9 +446,8 @@ end
 -- @param items An existing table of items, if applicable. When not provided, a fresh items table is created.
 -- @param setup_mark When true, setup marking state (for multiple selections).
 -- @param setup_drag When true, setup drag-and-drop state.
-function lgcMenu.setup(self, items, setup_mark, setup_drag_drop)
+function wcMenu.setup(self, items, setup_mark, setup_drag_drop)
 	-- Requires: scroll registers, viewport #1, viewport #2, document dimensions.
-	-- Run lgcMenu.attachMenuMethods() on the widget definition.
 
 	self.MN_items = items or {}
 
@@ -533,7 +535,7 @@ end
 
 --- Automatically set a widget's items_first and items_last values by checking their vertical positions.
 -- @param self The widget.
-function lgcMenu.widgetAutoRangeV(self)
+function wcMenu.widgetAutoRangeV(self)
 	local items = self.MN_items
 	local vp2 = self.vp2
 
@@ -569,7 +571,7 @@ end
 
 --- Automatically set a widget's items_first and items_last values by checking their horizontal positions.
 -- @param self The widget.
-function lgcMenu.widgetAutoRangeH(self)
+function wcMenu.widgetAutoRangeH(self)
 	local items = self.MN_items
 	local vp2 = self.vp2
 
@@ -622,7 +624,7 @@ The functions do not check the item's 'selectable' state, and they assume that s
 -- @return If successful: the item index and table, and a number indicating if clamping occurred (-1, 1 or nil).
 --	If not successful: nil.
 --]]
-function lgcMenu.widgetGetItemAtPoint(self, px, py, first, last)
+function wcMenu.widgetGetItemAtPoint(self, px, py, first, last)
 	local items = self.MN_items
 	for i = first, last do
 		local item = items[i]
@@ -633,7 +635,7 @@ function lgcMenu.widgetGetItemAtPoint(self, px, py, first, last)
 end
 
 
-function lgcMenu.widgetGetItemAtPointV(self, px, py, first, last)
+function wcMenu.widgetGetItemAtPointV(self, px, py, first, last)
 	local items = self.MN_items
 	for i = first, last do
 		local item = items[i]
@@ -644,7 +646,7 @@ function lgcMenu.widgetGetItemAtPointV(self, px, py, first, last)
 end
 
 
-function lgcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
+function wcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
 	local items = self.MN_items
 	local i1, i2 = items[1], items[#items]
 
@@ -664,7 +666,7 @@ function lgcMenu.widgetGetItemAtPointVClamp(self, px, py, first, last)
 end
 
 
-function lgcMenu.widgetGetItemAtPointH(self, px, py, first, last)
+function wcMenu.widgetGetItemAtPointH(self, px, py, first, last)
 	local items = self.MN_items
 	for i = first, last do
 		local item = items[i]
@@ -679,7 +681,7 @@ end
 -- @param x, y The position (relative to widget, with scroll offset).
 -- @param first, last The first and last widgets to check.
 -- @return The index and item table, or nil if no item was found.
-function lgcMenu.widgetTrySelectItemAtPoint(self, x, y, first, last)
+function wcMenu.widgetTrySelectItemAtPoint(self, x, y, first, last)
 	-- Prerequisites: widget must have a 'getItemAtPoint()' method assigned.
 
 	local i, item = self:getItemAtPoint(x, y, first, last)
@@ -696,7 +698,7 @@ end
 
 
 --- Use when you've already located an item and confirmed that it is selectable.
-function lgcMenu.widgetSelectItemByIndex(self, item_i)
+function wcMenu.widgetSelectItemByIndex(self, item_i)
 	self:menuSetSelectedIndex(item_i)
 
 	if self.selectionInView then
@@ -722,7 +724,7 @@ end
 --]]
 
 
-lgcMenu.arrangers = {
+wcMenu.arrangers = {
 	-- list, top-to-bottom
 	["list-tb"] = function(self, vp, rel_zero, i1, i2)
 		local items = self.MN_items
@@ -851,7 +853,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param is_repeat True if the source event is considered a repeating action (like holding down a keyboard key).
 -- @param id ("MN_index") Optional alternative index key to change.
-function lgcMenu.widgetMovePrev(self, n, immediate, is_repeat, id)
+function wcMenu.widgetMovePrev(self, n, immediate, is_repeat, id)
 	self:menuSetPrev(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection), id)
 
 	if self.selectionInView then
@@ -870,7 +872,7 @@ end
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param is_repeat True if the source event is considered a repeating action (like holding down a keyboard key).
 -- @param id ("MN_index") Optional alternative index key to change.
-function lgcMenu.widgetMoveNext(self, n, immediate, is_repeat, id)
+function wcMenu.widgetMoveNext(self, n, immediate, is_repeat, id)
 	self:menuSetNext(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection), id)
 
 	if self.selectionInView then
@@ -887,7 +889,7 @@ end
 -- @param self The widget hosting the menu table.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("MN_index") Optional alternative index key to change.
-function lgcMenu.widgetMoveFirst(self, immediate, id)
+function wcMenu.widgetMoveFirst(self, immediate, id)
 	self:menuSetFirstSelectableIndex(id)
 
 	if self.selectionInView then
@@ -904,7 +906,7 @@ end
 -- @param self The widget hosting the menu table.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param id ("MN_index") Optional alternative index key to change.
-function lgcMenu.widgetMoveLast(self, immediate, id)
+function wcMenu.widgetMoveLast(self, immediate, id)
 	self:menuSetLastSelectableIndex(id)
 
 	if self.selectionInView then
@@ -966,10 +968,10 @@ end
 
 --- Move the widget menu selection up, preferring an item that is the distance of one "page" from the current
 --	selection. Viewport #1's height is used for the page size.
-function lgcMenu.widgetMovePageUp(self, immediate, id)
+function wcMenu.widgetMovePageUp(self, immediate, id)
 	id = id or "MN_index"
 	if self[id] == 0 then
-		lgcMenu.widgetMoveFirst(self, immediate, id)
+		wcMenu.widgetMoveFirst(self, immediate, id)
 		return
 	end
 
@@ -990,10 +992,10 @@ end
 
 --- Move the widget menu selection down, preferring an item that is the distance of one "page" from the current
 --	selection. Viewport #1's height is used for the page size.
-function lgcMenu.widgetMovePageDown(self, immediate, id)
+function wcMenu.widgetMovePageDown(self, immediate, id)
 	id = id or "MN_index"
 	if self[id] == 0 then
-		lgcMenu.widgetMoveFirst(self, immediate, id)
+		wcMenu.widgetMoveFirst(self, immediate, id)
 		return
 	end
 
@@ -1024,7 +1026,7 @@ end
 -- @param key, scancode, isrepeat Values from the LÖVE event.
 -- @param id ("MN_index") Optional alternative index key to change.
 -- @param the isrepeat
-function lgcMenu.keyNavTB(self, key, scancode, isrepeat, id)
+function wcMenu.keyNavTB(self, key, scancode, isrepeat, id)
 	if scancode == "up" then
 		self:movePrev(1, nil, isrepeat, id)
 		return true
@@ -1053,7 +1055,7 @@ end
 
 
 --- Default key navigation for left-to-right menus.
-function lgcMenu.keyNavLR(self, key, scancode, isrepeat, id)
+function wcMenu.keyNavLR(self, key, scancode, isrepeat, id)
 	if scancode == "left" then
 		self:movePrev(1, nil, isrepeat, id)
 		return true
@@ -1084,7 +1086,7 @@ end
 --- Get the combined dimensions of all items in the menu. Assumes that all items have X and Y positions >= 0.
 -- @param items The table of menu-items to scan.
 -- @return The bounding width and height of all items.
-function lgcMenu.getCombinedItemDimensions(items)
+function wcMenu.getCombinedItemDimensions(items)
 	local dw, dh = 0, 0
 	for i, item in ipairs(items) do
 		dw = math.max(dw, item.x + item.w)
@@ -1099,7 +1101,7 @@ end
 -- @param self The menu widget.
 -- @param item The item within the menu to get in view.
 -- @param immediate Skip scrolling animation when true.
-function lgcMenu.getItemInBoundsRect(self, item, immediate)
+function wcMenu.getItemInBoundsRect(self, item, immediate)
 	--[[
 	Widget must have 'MN_selection_extend_x' and 'MN_selection_extend_y' set.
 	--]]
@@ -1118,7 +1120,7 @@ end
 -- @param self The menu widget.
 -- @param item The item within the menu to get in view.
 -- @param immediate Skip scrolling animation when true.
-function lgcMenu.getItemInBoundsX(self, item, immediate)
+function wcMenu.getItemInBoundsX(self, item, immediate)
 	--[[
 	Widget must have 'MN_selection_extend_x' set.
 	--]]
@@ -1135,7 +1137,7 @@ end
 -- @param self The menu widget.
 -- @param item The item within the menu to get in view.
 -- @param immediate Skip scrolling animation when true.
-function lgcMenu.getItemInBoundsY(self, item, immediate)
+function wcMenu.getItemInBoundsY(self, item, immediate)
 	--[[
 	Widget must have 'MN_selection_extend_y' set.
 	--]]
@@ -1151,7 +1153,7 @@ end
 --- If there is a current selection and it is not within view, scroll to it.
 -- @param self The menu widget with a current selection (or none).
 -- @param immediate When true, skip scrolling animation.
-function lgcMenu.selectionInView(self, immediate)
+function wcMenu.selectionInView(self, immediate)
 	--[[
 	Widget must have a 'getInBounds' method assigned. These methods usually require 'MN_selection_extend_[x|y]' to be set.
 	--]]
@@ -1175,7 +1177,7 @@ end
 
 
 
-function lgcMenu.markItemsCursorMode(self, old_index)
+function wcMenu.markItemsCursorMode(self, old_index)
 	if not self.MN_mark_index then
 		self.MN_mark_index = old_index
 	end
@@ -1190,7 +1192,7 @@ end
 
 
 -- For uiCall_pointerPress().
-function lgcMenu.checkItemIntersect(self, mx, my, button)
+function wcMenu.checkItemIntersect(self, mx, my, button)
 	-- Check for the cursor intersecting with a clickable item.
 	local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
 
@@ -1203,7 +1205,7 @@ end
 
 
 -- For uiCall_pointerPress().
-function lgcMenu.pointerPressButton1(self, item_t, old_index)
+function wcMenu.pointerPressButton1(self, item_t, old_index)
 	if self.MN_mark_mode == "toggle" then
 		item_t.marked = not item_t.marked
 		self.MN_mark_state = item_t.marked
@@ -1214,7 +1216,7 @@ function lgcMenu.pointerPressButton1(self, item_t, old_index)
 		if mods["shift"] then
 			-- Unmark all items, then mark the range between the previous and current selections.
 			self:menuClearAllMarkedItems()
-			lgcMenu.markItemsCursorMode(self, old_index)
+			wcMenu.markItemsCursorMode(self, old_index)
 
 		elseif mods["ctrl"] then
 			item_t.marked = not item_t.marked
@@ -1229,7 +1231,7 @@ function lgcMenu.pointerPressButton1(self, item_t, old_index)
 end
 
 
-function lgcMenu.pointerPressScrollBars(self, x, y, button)
+function wcMenu.pointerPressScrollBars(self, x, y, button)
 	-- Check for pressing on scroll bar components.
 	if button == 1 then
 		local fixed_step = 24 -- XXX style/config
@@ -1242,7 +1244,7 @@ function lgcMenu.pointerPressScrollBars(self, x, y, button)
 end
 
 
-function lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
+function wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	-- Repeat-press events for scroll bar buttons
 	if lgcScroll.press_busy_codes[self.press_busy]
 	and button == 1
@@ -1254,7 +1256,7 @@ function lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 end
 
 
-function lgcMenu.dragDropReleaseLogic(self)
+function wcMenu.dragDropReleaseLogic(self)
 	local root = self:getRootWidget()
 	local drop_state = root.drop_state
 
@@ -1269,7 +1271,7 @@ end
 
 
 -- Implements click-and-drag behavior for uiCall_pointerDrag().
-function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
+function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	-- Confirm 'self.press_busy == "menu-drag"' before calling.
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
 	-- "cursor" mark mode overrides MN_drag_drop_mode when active (hold shift while clicking and dragging).
@@ -1316,7 +1318,7 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 					local mods = self.context.key_mgr.mod
 					if self.MN_mark_mode == "cursor" and self.MN_mark_index then
 						self:menuClearAllMarkedItems()
-						lgcMenu.markItemsCursorMode(self, old_index)
+						wcMenu.markItemsCursorMode(self, old_index)
 
 					elseif self.MN_mark_mode == "toggle" then
 						local first, last = math.min(old_index, item_i), math.max(old_index, item_i)
@@ -1335,7 +1337,7 @@ function lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 end
 
 
-function lgcMenu.getIconQuad(icon_set_id, icon_id)
+function wcMenu.getIconQuad(icon_set_id, icon_id)
 	if icon_id then
 		local icon_set = context.resources.icons[icon_set_id]
 		if icon_set then
@@ -1345,19 +1347,19 @@ function lgcMenu.getIconQuad(icon_set_id, icon_id)
 end
 
 
-function lgcMenu.setIconSetID(self, icon_set_id) -- TODO: untested
+function wcMenu.setIconSetID(self, icon_set_id) -- TODO: untested
 	uiAssert.type(1, icon_set_id, "string")
 
 	self:writeSetting("icon_set_id", icon_set_id)
 end
 
 
-function lgcMenu.getIconSetID(self) -- TODO: untested
+function wcMenu.getIconSetID(self) -- TODO: untested
 	return self.icon_set_id
 end
 
 
-function lgcMenu.removeItemIndexCleanup(self, item_i, id)
+function wcMenu.removeItemIndexCleanup(self, item_i, id)
 	-- Removed item was the last in the list, and was selected:
 	if self[id] > #self.MN_items then
 		local landing_i = self:menuFindSelectableLanding(#self.MN_items, -1)
@@ -1378,7 +1380,7 @@ end
 
 --- Picks the first selectable item, but only if there is currently no selection.
 -- The widget must have the method 'setSelectionByIndex'.
-function lgcMenu.trySelectIfNothingSelected(self)
+function wcMenu.trySelectIfNothingSelected(self)
 	if self.MN_index == 0 then
 		local i, tbl = self:menuHasAnySelectableItems()
 		if i then
@@ -1388,4 +1390,4 @@ function lgcMenu.trySelectIfNothingSelected(self)
 end
 
 
-return lgcMenu
+return wcMenu

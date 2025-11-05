@@ -13,12 +13,12 @@ local def = {
 local context = select(1, ...)
 
 
-local lgcLabel = context:getLua("shared/lgc_label")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -36,7 +36,7 @@ function def:setActive(active)
 end
 
 
-def.setLabel = lgcLabel.widSetLabel
+def.setLabel = wcLabel.widSetLabel
 
 
 --- Sets the progress bar's current position, and optionally the maximum value.
@@ -77,7 +77,7 @@ function def:uiCall_initialize()
 	-- true: start from the right/bottom side.
 	self.far_end = false
 
-	lgcLabel.setup(self)
+	wcLabel.setup(self)
 
 	-- Should appear greyed out when not active.
 	self.active = false
@@ -109,7 +109,7 @@ function def:uiCall_reshapePre()
 	vp:splitOrOverlay(vp2, skin.bar_placement, skin.bar_spacing)
 	vp:reduceT(skin.box.margin)
 
-	lgcLabel.reshapeLabel(self)
+	wcLabel.reshapeLabel(self)
 
 	return true
 end
@@ -220,7 +220,7 @@ def.default_skinner = {
 		end
 
 		if self.label_mode then
-			lgcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
+			wcLabel.render(self, skin, skin.label_style.font, res.color_label, res.color_label_ul, res.label_ox, res.label_oy, ox, oy)
 		end
 	end,
 }
