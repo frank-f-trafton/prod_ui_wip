@@ -1,12 +1,18 @@
 --[[
-Shared widget logic for multi-line text input.
+Widget Component: Text Input (Multi-Line)
+
+Usage:
+
+* Run 'wcInputM.setupDef()' on the widget definition.
+
+* Run 'wcInputM.setupInstance()' on the widget instance during creation.
 --]]
 
 
 local context = select(1, ...)
 
 
-local lgcInputM = {}
+local wcInputM = {}
 
 
 local edCom = context:getLua("shared/line_ed/ed_com")
@@ -33,12 +39,12 @@ local love_major, love_minor = love.getVersion()
 
 
 -- Widget def configuration.
-function lgcInputM.setupDef(def)
+function wcInputM.setupDef(def)
 	pTable.patch(def, editMethodsM, true)
 end
 
 
-function lgcInputM.setupInstance(self, commands)
+function wcInputM.setupInstance(self, commands)
 	self.LE_commands = editAct[commands]
 	if not self.LE_commands then
 		error("invalid 'commands' ID")
@@ -153,7 +159,7 @@ function lgcInputM.setupInstance(self, commands)
 end
 
 
-function lgcInputM.textInputLogic(self, text)
+function wcInputM.textInputLogic(self, text)
 	local LE = self.LE
 
 	if self.LE_allow_input then
@@ -212,7 +218,7 @@ function lgcInputM.textInputLogic(self, text)
 end
 
 
-function lgcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
+function wcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	local LE = self.LE
 
 	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
@@ -304,7 +310,7 @@ local function _clickDragByLine(self, x, y, origin_line, origin_byte)
 end
 
 
-function lgcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before)
+function wcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before)
 	local LE = self.LE
 
 	editWid.resetCaretBlink(self)
@@ -373,7 +379,7 @@ end
 
 
 --- Updates selection based on the position of the mouse and the number of repeat mouse-clicks.
-function lgcInputM.mouseDragLogic(self)
+function wcInputM.mouseDragLogic(self)
 	local context = self.context
 	local LE = self.LE
 
@@ -408,7 +414,7 @@ function lgcInputM.mouseDragLogic(self)
 end
 
 
-function lgcInputM.thimble1Take(self)
+function wcInputM.thimble1Take(self)
 	editWid.resetCaretBlink(self)
 
 	if self.LE_select_all_on_thimble1_take then
@@ -417,7 +423,7 @@ function lgcInputM.thimble1Take(self)
 end
 
 
-function lgcInputM.thimble1Release(self)
+function wcInputM.thimble1Release(self)
 	love.keyboard.setTextInput(false)
 	if self.LE_deselect_all_on_thimble1_release then
 		self:caretFirst(true)
@@ -431,7 +437,7 @@ function lgcInputM.thimble1Release(self)
 end
 
 
-function lgcInputM.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
+function wcInputM.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
 	local LE = self.LE
 	local lines = LE.lines
 
@@ -498,7 +504,7 @@ function lgcInputM.draw(self, color_highlight, font_ghost, color_text, font, col
 end
 
 
-function lgcInputM.cb_action(self, command_id)
+function wcInputM.cb_action(self, command_id)
 	local command = self.LE_commands[command_id]
 	if command then
 		return editWidM.wrapAction(self, command)
@@ -509,34 +515,34 @@ end
 -- Configuration functions for pop-up menu items.
 
 
-function lgcInputM.configProto_undo(client)
+function wcInputM.configProto_undo(client)
 	local hist = client.LE_hist
 	return client.LE_allow_input and hist.enabled and hist.pos > 1
 end
 
 
-function lgcInputM.configProto_redo(client)
+function wcInputM.configProto_redo(client)
 	local hist = client.LE_hist
 	return client.LE_allow_input and hist.enabled and hist.pos < #hist.ledger
 end
 
 
-function lgcInputM.configProto_cut(client)
+function wcInputM.configProto_cut(client)
 	return client.LE_allow_input and client.LE_allow_cut and client.LE:isHighlighted()
 end
 
 
-function lgcInputM.configProto_copy(client)
+function wcInputM.configProto_copy(client)
 	return client.LE_allow_input and client.LE_allow_copy and client.LE:isHighlighted()
 end
 
 
-function lgcInputM.configProto_delete(client)
+function wcInputM.configProto_delete(client)
 	return client.LE_allow_input and client.LE:isHighlighted()
 end
 
 
-function lgcInputM.configProto_paste(client)
+function wcInputM.configProto_paste(client)
 	-- TODO: There is an SDL function to check if the clipboard has text: https://wiki.libsdl.org/SDL_HasClipboardText
 	-- I tested it here: https://github.com/rabbitboots/love/tree/12.0-development-clipboard/src/modules/system
 	-- (Search 'hasclipboard' in src/modules/system.)
@@ -550,7 +556,7 @@ function lgcInputM.configProto_paste(client)
 end
 
 
-function lgcInputM.configProto_selectAll(client)
+function wcInputM.configProto_selectAll(client)
 	return not client.LE.lines:isEmpty()
 end
 
@@ -560,47 +566,47 @@ end
 do
 	local P = uiPopUpMenu.P
 
-	lgcInputM.pop_up_proto = P.prototype {
+	wcInputM.pop_up_proto = P.prototype {
 		P.command()
 			:setText("Undo")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "undo") end)
-			:setConfig(lgcInputM.configProto_undo),
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "undo") end)
+			:setConfig(wcInputM.configProto_undo),
 
 		P.command()
 			:setText("Redo")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "redo") end)
-			:setConfig(lgcInputM.configProto_redo),
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "redo") end)
+			:setConfig(wcInputM.configProto_redo),
 
 		P.separator(),
 
 		P.command()
 			:setText("Cut")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "cut") end)
-			:setConfig(lgcInputM.configProto_cut),
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "cut") end)
+			:setConfig(wcInputM.configProto_cut),
 
 		P.command()
 			:setText("Copy")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "copy") end)
-			:setConfig(lgcInputM.configProto_copy),
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "copy") end)
+			:setConfig(wcInputM.configProto_copy),
 
 		P.command()
 			:setText("Paste")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "paste") end)
-			:setConfig(lgcInputM.configProto_paste),
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "paste") end)
+			:setConfig(wcInputM.configProto_paste),
 
 		P.command()
 			:setText("Delete")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "delete-highlighted") end)
-			:setConfig(lgcInputM.configProto_delete),
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "delete-highlighted") end)
+			:setConfig(wcInputM.configProto_delete),
 
 		P.separator(),
 
 		P.command()
 			:setText("Select All")
-			:setCallback(function(client, item) return lgcInputM.cb_action(client, "select-all") end)
-			:setConfig(lgcInputM.configProto_selectAll)
+			:setCallback(function(client, item) return wcInputM.cb_action(client, "select-all") end)
+			:setConfig(wcInputM.configProto_selectAll)
 	}
 end
 
 
-return lgcInputM
+return wcInputM

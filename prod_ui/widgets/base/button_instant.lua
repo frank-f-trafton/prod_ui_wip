@@ -6,10 +6,10 @@ A skinned button which activates on click-down (without repeat events).
 local context = select(1, ...)
 
 
-local lgcButton = context:getLua("shared/lgc_button")
-local lgcLabel = context:getLua("shared/lgc_label")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcButton = context:getLua("shared/wc/wc_button")
+local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -18,22 +18,22 @@ local def = {
 }
 
 
-def.wid_buttonAction = lgcButton.wid_buttonAction
-def.wid_buttonAction2 = lgcButton.wid_buttonAction2
-def.wid_buttonAction3 = lgcButton.wid_buttonAction3
+def.wid_buttonAction = wcButton.wid_buttonAction
+def.wid_buttonAction2 = wcButton.wid_buttonAction2
+def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 
-def.setEnabled = lgcButton.setEnabled
-def.setLabel = lgcLabel.widSetLabel
+def.setEnabled = wcButton.setEnabled
+def.setLabel = wcLabel.widSetLabel
 
 
-def.uiCall_pointerHoverOn = lgcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = lgcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = lgcButton.uiCall_pointerPressActivate
-def.uiCall_pointerRelease = lgcButton.uiCall_pointerRelease
-def.uiCall_pointerUnpress = lgcButton.uiCall_pointerUnpress
-def.uiCall_thimbleAction = lgcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
+def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+def.uiCall_pointerPress = wcButton.uiCall_pointerPressActivate
+def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
+def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_initialize()
@@ -43,7 +43,7 @@ function def:uiCall_initialize()
 
 	widShared.setupViewports(self, 2)
 
-	lgcLabel.setup(self)
+	wcLabel.setup(self)
 
 	-- [XXX 8] (Optional) image associated with the button.
 	--self.graphic = <tq>
@@ -73,7 +73,7 @@ function def:uiCall_reshapePre()
 
 	vp2:reduceT(skin.box.margin)
 
-	lgcLabel.reshapeLabel(self)
+	wcLabel.reshapeLabel(self)
 
 	return true
 end

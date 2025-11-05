@@ -4,7 +4,7 @@
 local context = select(1, ...)
 
 
-local lgcMenu = context:getLua("shared/lgc_menu")
+local wcMenu = context:getLua("shared/wc/wc_menu")
 
 
 local lgcTree = {}
@@ -35,7 +35,7 @@ function lgcTree.setExpanded(self, item, exp)
 
 	--[[
 	Calling cacheUpdate() again. We need to set the item ranges after clamping. The function that we want
-	is lgcMenu.widgetAutoRangeV(), but it's not accessible (without debug shenanigans) from this source
+	is wcMenu.widgetAutoRangeV(), but it's not accessible (without debug shenanigans) from this source
 	file. Either it needs to be attached to widgets as a method, or this source file needs to be loaded
 	through the context.
 	TODO: this file is now loaded through the context.
@@ -153,7 +153,7 @@ end
 
 function lgcTree.updateAllIconReferences(self, skin, node)
 	for i, item in ipairs(node.nodes) do
-		item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+		item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 		if #item.nodes > 0 then
 			lgcTree.updateAllIconReferences(self, skin, item)
 		end
@@ -210,7 +210,7 @@ function lgcTree.addNode(self, text, parent_node, tree_pos, icon_id)
 	item.text = text
 	item.icon_id = icon_id
 	item.tq_icon = false
-	item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 	item.x, item.y = 0, 0
 	lgcTree.updateItemDimensions(self, skin, item)

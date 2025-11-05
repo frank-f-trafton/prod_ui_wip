@@ -1,13 +1,13 @@
 local context = select(1, ...)
 
 
-local lgcButton = context:getLua("shared/lgc_button")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcButton = context:getLua("shared/wc/wc_button")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -29,20 +29,20 @@ end
 
 
 def.wid_buttonAction = _openURL
-def.wid_buttonAction2 = lgcButton.wid_buttonAction2
+def.wid_buttonAction2 = wcButton.wid_buttonAction2
 def.wid_buttonAction3 = _openURL
 
 
-def.setEnabled = lgcButton.setEnabled
+def.setEnabled = wcButton.setEnabled
 
 
-def.uiCall_pointerHoverOn = lgcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = lgcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = lgcButton.uiCall_pointerPress
-def.uiCall_pointerRelease = lgcButton.uiCall_pointerReleaseActivate
-def.uiCall_pointerUnpress = lgcButton.uiCall_pointerUnpress
-def.uiCall_thimbleAction = lgcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
+def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+def.uiCall_pointerPress = wcButton.uiCall_pointerPress
+def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseActivate
+def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 function def:setFontID(id)

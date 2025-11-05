@@ -2,7 +2,6 @@ local context = select(1, ...)
 
 
 local debug = context:getLua("core/wid/debug")
-local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -11,6 +10,7 @@ local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local wcContainer = context:getLua("shared/wc/wc_container")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -28,7 +28,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 widLayout.setupContainerDef(def)
 widShared.scrollSetMethods(def)
 lgcUIFrame.definitionSetup(def)
-lgcContainer.setupMethods(def)
+wcContainer.setupMethods(def)
 
 
 function def:uiCall_initialize(unselectable)
@@ -50,7 +50,7 @@ function def:uiCall_initialize(unselectable)
 	widLayout.setupLayoutList(self)
 	self:layoutSetBase("viewport")
 
-	lgcContainer.setupSashState(self)
+	wcContainer.setupSashState(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.press_busy = false
@@ -115,7 +115,7 @@ def.trickle.uiCall_pointerHoverOn = lgcUIFrame.logic_tricklePointerHoverOn
 
 function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	local skin = self.skin
-	return lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
+	return wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 end
 
 
@@ -128,7 +128,7 @@ end
 
 
 function def.trickle:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	lgcContainer.sashHoverOffLogic(self)
+	wcContainer.sashHoverOffLogic(self)
 end
 
 
@@ -140,14 +140,14 @@ end
 
 
 function def.trickle:uiCall_pointerDrag(inst, x, y, dx, dy)
-	if lgcContainer.sashDragLogic(self, x, y) then
+	if wcContainer.sashDragLogic(self, x, y) then
 		return true
 	end
 end
 
 
 function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
-	if lgcContainer.sashUnpressLogic(self) then
+	if wcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end
@@ -296,7 +296,7 @@ def.default_skinner = {
 
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-		lgcContainer.renderSashes(self)
+		wcContainer.renderSashes(self)
 
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 

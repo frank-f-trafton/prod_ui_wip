@@ -9,7 +9,7 @@ local context = select(1, ...)
 local renderers = {}
 
 
-local lgcLabelBare = context:getLua("shared/lgc_label_bare")
+local wcLabelBare = context:getLua("shared/wc/wc_label_bare")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
@@ -65,7 +65,7 @@ function renderers.buttons(self, ox, oy)
 	love.graphics.rectangle("line", line_width/2, line_width/2, self.w - line_width, self.h - line_width)
 
 	-- Label text -- single-line only, no underlines.
-	lgcLabelBare.render(self, self.context.resources.fonts.internal, col_main[1], col_main[2], col_main[3], col_main[4])
+	wcLabelBare.render(self, self.context.resources.fonts.internal, col_main[1], col_main[2], col_main[3], col_main[4])
 
 	love.graphics.pop()
 end
@@ -116,7 +116,7 @@ function renderers.label(self, ox, oy)
 	local c = self.enabled and inf.col_edge_enabled or inf.col_edge_disabled
 	local r, g, b, a = c[1], c[2], c[3], c[4]
 
-	lgcLabelBare.render(self, self.context.resources.fonts.internal, r, g, b, a)
+	wcLabelBare.render(self, self.context.resources.fonts.internal, r, g, b, a)
 end
 
 
@@ -148,7 +148,7 @@ function renderers.slider(self, ox, oy)
 
 	-- Label text -- single-line only, no underlines.
 	love.graphics.setColor(col_main)
-	lgcLabelBare.render(self, self.context.resources.fonts.internal, col_main[1], col_main[2], col_main[3], col_main[4])
+	wcLabelBare.render(self, self.context.resources.fonts.internal, col_main[1], col_main[2], col_main[3], col_main[4])
 
 	love.graphics.pop()
 end

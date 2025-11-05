@@ -12,9 +12,9 @@ local context = select(1, ...)
 local lgcUIFrame = {}
 
 
-local lgcContainer = context:getLua("shared/lgc_container")
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+local wcContainer = context:getLua("shared/wc/wc_container")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -165,7 +165,7 @@ function lgcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
 	if inst ~= self then -- don't try to center the UI Frame itself
 		if keep_in_view == "widget_in_view" then
 			local skin = self.skin
-			lgcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
+			wcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
 			lgcScroll.updateScrollBarShapes(self)
 		end
 	end
@@ -242,7 +242,7 @@ function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch,
 		return true
 	end
 
-	if lgcContainer.sashPressLogic(self, x, y, button) then
+	if wcContainer.sashPressLogic(self, x, y, button) then
 		return true
 	end
 end

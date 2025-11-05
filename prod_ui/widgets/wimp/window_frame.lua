@@ -2,7 +2,6 @@ local context = select(1, ...)
 
 
 local lgcScroll = context:getLua("shared/lgc_scroll")
-local lgcContainer = context:getLua("shared/lgc_container")
 local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
 local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
@@ -13,6 +12,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcContainer = context:getLua("shared/wc/wc_container")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -50,7 +50,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 widLayout.setupContainerDef(def)
 widShared.scrollSetMethods(def)
 lgcUIFrame.definitionSetup(def)
-lgcContainer.setupMethods(def)
+wcContainer.setupMethods(def)
 
 
 def.center = widShared.centerInParent
@@ -415,7 +415,7 @@ function def:uiCall_initialize(unselectable, view_level)
 	widLayout.setupLayoutList(self)
 	self:layoutSetBase("viewport")
 
-	lgcContainer.setupSashState(self)
+	wcContainer.setupSashState(self)
 	lgcKeyHooks.setupInstance(self)
 
 	self.hover_zone = false -- false, "button-close", "button-size"
@@ -544,7 +544,7 @@ function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse
 
 	if not self.mouse_in_resize_zone
 	and not self.hover_zone
-	and lgcContainer.sashHoverLogic(self, mouse_x, mouse_y)
+	and wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	then
 		return true
 	end
@@ -689,7 +689,7 @@ function def.trickle:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_
 		end
 	end
 
-	if lgcContainer.sashDragLogic(self, mouse_x, mouse_y) then
+	if wcContainer.sashDragLogic(self, mouse_x, mouse_y) then
 		return true
 	end
 end
@@ -733,7 +733,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 		end
 	end
 
-	if lgcContainer.sashUnpressLogic(self) then
+	if wcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end
@@ -1244,7 +1244,7 @@ def.default_skinner = {
 
 		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 
-		lgcContainer.renderSashes(self)
+		wcContainer.renderSashes(self)
 
 		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
 		love.graphics.pop()

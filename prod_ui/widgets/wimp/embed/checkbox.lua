@@ -8,7 +8,6 @@
 local context = select(1, ...)
 
 
-local lgcButton = context:getLua("shared/lgc_button")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -16,6 +15,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcButton = context:getLua("shared/wc/wc_button")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -27,22 +27,22 @@ local def = {
 }
 
 
-def.wid_buttonAction = lgcButton.wid_buttonAction
-def.wid_buttonAction2 = lgcButton.wid_buttonAction2
-def.wid_buttonAction3 = lgcButton.wid_buttonAction3
+def.wid_buttonAction = wcButton.wid_buttonAction
+def.wid_buttonAction2 = wcButton.wid_buttonAction2
+def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 
-def.setEnabled = lgcButton.setEnabled
-def.setChecked = lgcButton.setChecked
+def.setEnabled = wcButton.setEnabled
+def.setChecked = wcButton.setChecked
 
 
-def.uiCall_pointerHoverOn = lgcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = lgcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = lgcButton.uiCall_pointerPress
-def.uiCall_pointerRelease = lgcButton.uiCall_pointerReleaseCheck
-def.uiCall_pointerUnpress = lgcButton.uiCall_pointerUnpress
-def.uiCall_thimbleAction = lgcButton.uiCall_thimbleActionCheck
-def.uiCall_thimbleAction2 = lgcButton.uiCall_thimbleAction2
+def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+def.uiCall_pointerPress = wcButton.uiCall_pointerPress
+def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseCheck
+def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionCheck
+def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_initialize()

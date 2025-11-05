@@ -74,8 +74,6 @@ Horizontal item padding (not including widget margins):
 local context = select(1, ...)
 
 
-local lgcMenu = context:getLua("shared/lgc_menu")
-local lgcPopUps = context:getLua("shared/lgc_pop_ups")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -83,6 +81,8 @@ local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -99,17 +99,17 @@ local def = {
 }
 
 
-lgcMenu.attachMenuMethods(def)
+wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 
 
-local _arrange_tb = lgcMenu.arrangers["list-tb"]
+local _arrange_tb = wcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
 	_arrange_tb(self, self.vp, true, first, last)
 end
 
 
-def.setBlocking = lgcPopUps.setBlocking
+def.setBlocking = wcPopUp.setBlocking
 
 
 local function destroySubMenus(self)
@@ -358,7 +358,7 @@ function def:updateDimensions()
 		end
 
 		if item.type ~= "separator" then
-			item.tq_icon = lgcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+			item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 			-- Underline state
 			local temp_str, x, w = textUtil.processUnderline(item.text, font)
@@ -430,25 +430,25 @@ function def:updateDimensions()
 	end
 
 	-- Refresh document size
-	self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.MN_items)
+	self.doc_w, self.doc_h = wcMenu.getCombinedItemDimensions(self.MN_items)
 end
 
 
 def.keepInBounds = widShared.keepInBoundsOfParent
 
 
-def.getInBounds = lgcMenu.getItemInBoundsRect
-def.selectionInView = lgcMenu.selectionInView
+def.getInBounds = wcMenu.getItemInBoundsRect
+def.selectionInView = wcMenu.selectionInView
 
 
-def.getItemAtPoint = lgcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
-def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
+def.getItemAtPoint = wcMenu.widgetGetItemAtPoint -- (<self>, px, py, first, last)
+def.trySelectItemAtPoint = wcMenu.widgetTrySelectItemAtPoint -- (<self>, x, y, first, last)
 
 
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
-def.moveFirst = lgcMenu.widgetMoveFirst
-def.moveLast = lgcMenu.widgetMoveLast
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+def.moveFirst = wcMenu.widgetMoveFirst
+def.moveLast = wcMenu.widgetMoveLast
 
 
 function def:menuChangeCleanup()
@@ -467,7 +467,7 @@ function def:uiCall_initialize()
 
 	self.sort_id = 7
 
-	lgcPopUps.setupInstance(self)
+	wcPopUp.setupInstance(self)
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
@@ -475,7 +475,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.setup(self)
+	wcMenu.setup(self)
 	self.MN_default_deselect = true
 
 	self.icon_x = 0
@@ -535,11 +535,11 @@ end
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = lgcMenu.getCombinedItemDimensions(self.MN_items)
+		self.doc_w, self.doc_h = wcMenu.getCombinedItemDimensions(self.MN_items)
 	end
 
 	-- Set the draw ranges for items.
-	lgcMenu.widgetAutoRangeV(self)
+	wcMenu.widgetAutoRangeV(self)
 end
 
 

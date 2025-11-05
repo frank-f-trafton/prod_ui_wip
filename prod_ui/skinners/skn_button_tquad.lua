@@ -5,7 +5,6 @@ local context = select(1, ...)
 
 
 local lgcGraphic = context:getLua("shared/lgc_graphic")
-local lgcLabel = context:getLua("shared/lgc_label")
 local themeAssert = context:getLua("core/res/theme_assert")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -20,8 +19,8 @@ local md_res = uiSchema.newKeysX {
 	color_body = uiAssert.loveColorTuple,
 	color_quad = uiAssert.loveColorTuple,
 
-	label_ox = uiAssert.integer,
-	label_oy = uiAssert.integer
+	graphic_ox = uiAssert.integer,
+	graphic_oy = uiAssert.integer
 }
 
 
@@ -30,7 +29,6 @@ return {
 		skinner_id = {uiAssert.type, "string"},
 
 		box = themeAssert.box,
-		label_style = themeAssert.labelStyle,
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},
@@ -44,10 +42,7 @@ return {
 		quad_align_h = {uiAssert.namedMap, uiTheme.named_maps.quad_align_h},
 		quad_align_v = {uiAssert.namedMap, uiTheme.named_maps.quad_align_v},
 
-		-- Placement of graphic in relation to text labels.
 		graphic_placement = {uiAssert.namedMap, uiTheme.named_maps.graphic_placement},
-
-		-- Additional spacing between graphic and label.
 		graphic_spacing = {uiAssert.numberGE, 0},
 
 		res_idle = md_res,
@@ -61,8 +56,8 @@ return {
 		uiScale.fieldInteger(scale, skin, "graphic_spacing")
 
 		local function _changeRes(scale, res)
-			uiScale.fieldInteger(scale, res, "label_ox")
-			uiScale.fieldInteger(scale, res, "label_oy")
+			uiScale.fieldInteger(scale, res, "graphic_ox")
+			uiScale.fieldInteger(scale, res, "graphic_oy")
 		end
 
 		_changeRes(scale, skin.res_idle)
@@ -95,7 +90,7 @@ return {
 
 		local graphic = self.graphic or skin.graphic
 		if graphic then
-			lgcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
+			lgcGraphic.render(self, graphic, skin, res.color_quad, res.graphic_ox, res.graphic_oy, ox, oy)
 		end
 	end,
 

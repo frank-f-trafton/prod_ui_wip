@@ -27,7 +27,6 @@ local context = select(1, ...)
 
 local lgcScroll = context:getLua("shared/lgc_scroll")
 local lgcTree = context:getLua("shared/lgc_tree")
-local lgcMenu = context:getLua("shared/lgc_menu")
 local structTree = context:getLua("shared/struct_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -35,6 +34,7 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcMenu = context:getLua("shared/wc/wc_menu")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -50,7 +50,7 @@ local def = {
 }
 
 
-lgcMenu.attachMenuMethods(def)
+wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = lgcScroll.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
@@ -62,26 +62,26 @@ def.arrangeItems = lgcTree.arrangeItems
 -- * Scroll helpers *
 
 
-def.getInBounds = lgcMenu.getItemInBoundsY
-def.selectionInView = lgcMenu.selectionInView
+def.getInBounds = wcMenu.getItemInBoundsY
+def.selectionInView = wcMenu.selectionInView
 
 
 -- * Spatial selection *
 
 
-def.getItemAtPoint = lgcMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
-def.trySelectItemAtPoint = lgcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
+def.getItemAtPoint = wcMenu.widgetGetItemAtPointV -- (self, px, py, first, last)
+def.trySelectItemAtPoint = wcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
 
 
 -- * Selection movement *
 
 
-def.movePrev = lgcMenu.widgetMovePrev
-def.moveNext = lgcMenu.widgetMoveNext
-def.moveFirst = lgcMenu.widgetMoveFirst
-def.moveLast = lgcMenu.widgetMoveLast
-def.movePageUp = lgcMenu.widgetMovePageUp
-def.movePageDown = lgcMenu.widgetMovePageDown
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+def.moveFirst = wcMenu.widgetMoveFirst
+def.moveLast = wcMenu.widgetMoveLast
+def.movePageUp = wcMenu.widgetMovePageUp
+def.movePageDown = wcMenu.widgetMovePageDown
 
 
 --- Called when user double-clicks on the widget or presses "return" or "kpenter".
@@ -164,8 +164,8 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setIconSetID = lgcMenu.setIconSetID
-def.getIconSetID = lgcMenu.getIconSetID
+def.setIconSetID = wcMenu.setIconSetID
+def.getIconSetID = wcMenu.getIconSetID
 
 
 function def:uiCall_initialize()
@@ -179,7 +179,7 @@ function def:uiCall_initialize()
 
 	self.press_busy = false
 
-	lgcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
+	wcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
 	self.MN_wrap_selection = false
 
 	lgcTree.instanceSetup(self)
@@ -260,7 +260,7 @@ function def:cacheUpdate(refresh_dimensions)
 	end
 
 	-- Set the draw ranges for items.
-	lgcMenu.widgetAutoRangeV(self)
+	wcMenu.widgetAutoRangeV(self)
 end
 
 
@@ -286,7 +286,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 					local mods = self.context.key_mgr.mod
 					if mods["shift"] then
 						self:menuClearAllMarkedItems()
-						lgcMenu.markItemsCursorMode(self, old_index)
+						wcMenu.markItemsCursorMode(self, old_index)
 					else
 						self.MN_mark_index = false
 						self:menuClearAllMarkedItems()
@@ -348,14 +348,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			self:tryTakeThimble1()
 		end
 
-		if not lgcMenu.pointerPressScrollBars(self, x, y, button) then
+		if not wcMenu.pointerPressScrollBars(self, x, y, button) then
 			local mx, my = self:getRelativePosition(x, y)
 
 			if self.vp2:pointOverlap(mx, my) then
 				mx = mx + self.scr_x
 				my = my + self.scr_y
 
-				local item_i, item_t = lgcMenu.checkItemIntersect(self, mx, my, button)
+				local item_i, item_t = wcMenu.checkItemIntersect(self, mx, my, button)
 
 				if item_t and item_t.selectable then
 					local old_index = self.MN_index
@@ -385,10 +385,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 					if button <= 3 then
 						if not clicked_expander then
-							lgcMenu.widgetSelectItemByIndex(self, item_i)
+							wcMenu.widgetSelectItemByIndex(self, item_i)
 							self.MN_mouse_clicked_item = item_t
 							if button == 1 then
-								lgcMenu.pointerPressButton1(self, item_t, old_index)
+								wcMenu.pointerPressButton1(self, item_t, old_index)
 							end
 						end
 
@@ -428,14 +428,14 @@ end
 
 function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
-		lgcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
+		wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
 
 function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst and self.press_busy == "menu-drag" then
-		lgcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
+		wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	end
 end
 
@@ -464,7 +464,7 @@ end
 
 function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 	if self == inst then
-		return lgcMenu.dragDropReleaseLogic(self)
+		return wcMenu.dragDropReleaseLogic(self)
 	end
 end
 
