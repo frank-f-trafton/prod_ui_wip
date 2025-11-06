@@ -1,36 +1,31 @@
--- To load: local lib = context:getLua("shared/lib")
-
-
---[[
-Shared UI Frame logic.
---]]
+-- Shared UI Frame logic.
 
 
 local context = select(1, ...)
 
 
-local lgcUIFrame = {}
+local wcUIFrame = {}
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcContainer = context:getLua("shared/wc/wc_container")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
 
 
-lgcUIFrame._nm_types = uiTable.newNamedMapV("FrameType", "workspace", "window")
+wcUIFrame._nm_types = uiTable.newNamedMapV("FrameType", "workspace", "window")
 
 
 -- View levels for Window Frames. Both Window Frames and the WIMP Root need access to this.
-lgcUIFrame.view_levels = {low=3, normal=4, high=5}
+wcUIFrame.view_levels = {low=3, normal=4, high=5}
 
 
-lgcUIFrame.methods = {}
-local _methods = lgcUIFrame.methods
+wcUIFrame.methods = {}
+local _methods = wcUIFrame.methods
 
 
-function lgcUIFrame.definitionSetup(def)
-	uiTable.patch(def, lgcUIFrame.methods, false)
+function wcUIFrame.definitionSetup(def)
+	uiTable.patch(def, wcUIFrame.methods, false)
 end
 
 
@@ -77,7 +72,7 @@ function _methods:getFrameHidden()
 end
 
 
-function lgcUIFrame.instanceSetup(self, unselectable)
+function wcUIFrame.instanceSetup(self, unselectable)
 	-- When false:
 	-- * No widget in the frame should be capable of taking the thimble.
 	--   (Otherwise, why not just make it selectable?)
@@ -105,7 +100,7 @@ end
 
 
 --[====[
-function lgcUIFrame.assertModalNoWorkspace(self)
+function wcUIFrame.assertModalNoWorkspace(self)
 	local modals = self.context.root.modals
 	for i, g2 in ipairs(modals) do
 		if g2 == self then
@@ -116,7 +111,7 @@ end
 --]====]
 
 
-function lgcUIFrame.assertFrameBlockWorkspaces(self)
+function wcUIFrame.assertFrameBlockWorkspaces(self)
 	local workspace = self.workspace
 	local wid = self
 
@@ -134,7 +129,7 @@ function lgcUIFrame.assertFrameBlockWorkspaces(self)
 end
 
 
-function lgcUIFrame.getLastBlockingFrame(self)
+function wcUIFrame.getLastBlockingFrame(self)
 	if not self.ref_block_next then
 		return
 	end
@@ -146,7 +141,7 @@ function lgcUIFrame.getLastBlockingFrame(self)
 end
 
 
-function lgcUIFrame.tryUnbankingThimble1(self)
+function wcUIFrame.tryUnbankingThimble1(self)
 	-- Check modal/frame-blocking state before calling.
 
 	local wid_banked = self.banked_thimble1
@@ -158,7 +153,7 @@ end
 
 
 -- @param keep_in_view When true, the container scrolls to ensure that the widget is visible within the viewport.
-function lgcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
+function wcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
 	--print("thimbleTake", self.id, inst.id)
 	self.banked_thimble1 = inst
 
@@ -166,64 +161,64 @@ function lgcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
 		if keep_in_view == "widget_in_view" then
 			local skin = self.skin
 			wcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
-			lgcScroll.updateScrollBarShapes(self)
+			wcScrollBar.updateScrollBarShapes(self)
 		end
 	end
 end
 
 
-function lgcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
+function wcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
 	if self.ref_block_next then
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
+	if widShared.evaluateKeyhooks(self, self.KH_key_pressed, key, scancode, isrepeat) then
 		return true
 	end
 end
 
 
-function lgcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
+function wcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
 	if self.ref_block_next then
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
+	if widShared.evaluateKeyhooks(self, self.KH_trickle_key_pressed, key, scancode, isrepeat) then
 		return true
 	end
 end
 
 
-function lgcUIFrame.logic_keyReleased(self, inst, key, scancode)
+function wcUIFrame.logic_keyReleased(self, inst, key, scancode)
 	if self.ref_block_next then
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
+	if widShared.evaluateKeyhooks(self, self.KH_key_released, key, scancode) then
 		return true
 	end
 end
 
 
-function lgcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
+function wcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
 	if self.ref_block_next then
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_released, key, scancode) then
+	if widShared.evaluateKeyhooks(self, self.KH_trickle_key_released, key, scancode) then
 		return true
 	end
 end
 
 
-function lgcUIFrame.logic_trickleTextInput(self, inst, text)
+function wcUIFrame.logic_trickleTextInput(self, inst, text)
 	if self.ref_block_next then
 		return
 	end
 end
 
 
-function lgcUIFrame.logic_tricklePointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcUIFrame.logic_tricklePointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self.ref_block_next then
 		self.context.current_hover = false
 		return true
@@ -231,9 +226,9 @@ function lgcUIFrame.logic_tricklePointerHoverOn(self, inst, mouse_x, mouse_y, mo
 end
 
 
-function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch, presses)
+function wcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch, presses)
 	if self.ref_block_next then
-		local block_last = lgcUIFrame.getLastBlockingFrame(self)
+		local block_last = wcUIFrame.getLastBlockingFrame(self)
 
 		if block_last then
 			self.context.root:setSelectedFrame(block_last, true)
@@ -248,7 +243,7 @@ function lgcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch,
 end
 
 
-function lgcUIFrame.pointerPressLogicFirst(self)
+function wcUIFrame.pointerPressLogicFirst(self)
 	-- Press events that create a pop-up menu should block propagation (return truthy)
 	-- so that this and the WIMP root do not cause interference.
 
@@ -260,42 +255,42 @@ function lgcUIFrame.pointerPressLogicFirst(self)
 		-- If thimble1 is not in this widget tree, move it to the Window Frame.
 		local thimble1 = self.context.thimble1
 		if not thimble1 or not thimble1:isInLineage(self) then
-			lgcUIFrame.tryUnbankingThimble1(self)
+			wcUIFrame.tryUnbankingThimble1(self)
 		end
 	end
 end
 
 
-function lgcUIFrame.logic_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
+function wcUIFrame.logic_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
 
-			lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 		end
 	end
 end
 
 
-function lgcUIFrame.logic_tricklePointerWheel(self, inst, x, y)
+function wcUIFrame.logic_tricklePointerWheel(self, inst, x, y)
 	if self.ref_block_next then
 		return
 	end
 end
 
 
-function lgcUIFrame.logic_pointerWheel(self, inst, x, y)
+function wcUIFrame.logic_pointerWheel(self, inst, x, y)
 	if self.ref_block_next then
 		return
 	end
 
 	-- Catch wheel events from descendants that did not block it.
 	local caught = widShared.checkScrollWheelScroll(self, x, y)
-	lgcScroll.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollBarShapes(self)
 
 	-- Stop bubbling if the view scrolled.
 	return caught
 end
 
 
-return lgcUIFrame
+return wcUIFrame

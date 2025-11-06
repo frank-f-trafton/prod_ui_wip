@@ -48,6 +48,8 @@ function wcButton.setEnabled(self, enabled)
 		self.cursor_hover = nil
 		self.cursor_press = nil
 	end
+
+	return self
 end
 
 
@@ -59,18 +61,24 @@ function wcButton.setEnabledSticky(self, enabled)
 		self.hovered = false
 		-- Do not reset 'pressed' state when disabling sticky buttons.
 	end
+
+	return self
 end
 
 
 --- Sets the 'pressed' state of a sticky button.
 function wcButton.setPressedSticky(self, pressed)
 	self.pressed = not not pressed
+
+	return self
 end
 
 
 --- Sets or unsets a checkbox.
 function wcButton.setChecked(self, checked)
 	self.checked = not not checked
+
+	return self
 end
 
 
@@ -79,6 +87,8 @@ function wcButton.setValue(self, value)
 	uiAssert.integerRange(2, value, 1, self.value_max)
 
 	self.value = value
+
+	return self
 end
 
 
@@ -87,6 +97,8 @@ function wcButton.rollValue(self, dir)
 	dir = dir or 1
 	if dir ~= -1 and dir ~= 1 then error("invalid roll direction") end
 	self.value = ((self.value-1 + dir) % self.value_max) + 1
+
+	return self
 end
 
 
@@ -95,6 +107,8 @@ function wcButton.setMaxValue(self, max)
 	uiAssert.integerGE(1, max, 1)
 
 	self.value_max = max
+
+	return self
 end
 
 
@@ -112,6 +126,8 @@ function wcButton.uncheckAllRadioSiblings(self)
 			end
 		end
 	end
+
+	return self
 end
 
 
@@ -119,6 +135,8 @@ end
 function wcButton.setCheckedRadio(self, checked)
 	wcButton.uncheckAllRadioSiblings(self)
 	self.checked = not not checked
+
+	return self
 end
 
 

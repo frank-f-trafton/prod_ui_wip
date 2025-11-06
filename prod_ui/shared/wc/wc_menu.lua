@@ -15,10 +15,10 @@ local context = select(1, ...)
 local wcMenu = {}
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -82,7 +82,7 @@ function menuMethods:menuFindSelectableLanding(i, dir)
 		i = i + dir
 	until not item
 
-	-- Nothing is selectable.
+	-- nothing is selectable
 end
 
 
@@ -109,7 +109,7 @@ function menuMethods:menuGetDefaultSelection()
 		end
 	end
 
-	-- Nothing is selectable.
+	-- nothing is selectable
 	return 0
 end
 
@@ -285,6 +285,8 @@ function menuMethods:menuSetSelectedIndex(index, id)
 	end
 
 	self[id] = index
+
+	return self
 end
 
 
@@ -294,6 +296,8 @@ end
 function menuMethods:menuSetSelectedItem(item_t, id)
 	local item_i = self:menuGetItemIndex(item_t)
 	self:menuSetSelectedIndex(item_i, id)
+
+	return self
 end
 
 
@@ -301,6 +305,8 @@ end
 function menuMethods:menuSetDefaultSelection(id)
 	local i, tbl = self:menuGetDefaultSelection()
 	self:menuSetSelectedIndex(i, id)
+
+	return self
 end
 
 
@@ -312,6 +318,8 @@ function menuMethods:menuSetSelectionStep(delta, wrap, id)
 	id = id or "MN_index"
 
 	self[id] = self:menuGetSelectionStep(self[id], delta, wrap)
+
+	return self
 end
 
 
@@ -319,6 +327,8 @@ function menuMethods:menuSetFirstSelectableIndex(id)
 	id = id or "MN_index"
 
 	self[id] = self:menuGetFirstSelectableIndex()
+
+	return self
 end
 
 
@@ -326,6 +336,8 @@ function menuMethods:menuSetLastSelectableIndex(id)
 	id = id or "MN_index"
 
 	self[id] = self:menuGetLastSelectableIndex()
+
+	return self
 end
 
 
@@ -335,6 +347,8 @@ function menuMethods:menuSetPrev(n, wrap, id)
 
 	n = n and math.max(math.floor(n), 1) or 1
 	self:menuSetSelectionStep(-n, wrap, id)
+
+	return self
 end
 
 
@@ -344,6 +358,8 @@ function menuMethods:menuSetNext(n, wrap, id)
 
 	n = n and math.max(math.floor(n), 1) or 1
 	self:menuSetSelectionStep(n, wrap, id)
+
+	return self
 end
 
 
@@ -351,6 +367,8 @@ function menuMethods:menuSetMarkedItem(item_t, marked)
 	uiAssert.type(1, item_t, "table")
 
 	item_t.marked = not not marked
+
+	return self
 end
 
 
@@ -358,6 +376,8 @@ function menuMethods:menuToggleMarkedItem(item_t)
 	uiAssert.type(1, item_t, "table")
 
 	item_t.marked = not item_t.marked
+
+	return self
 end
 
 
@@ -367,6 +387,8 @@ function menuMethods:menuSetMarkedItemByIndex(item_i, marked)
 	local item_t = self.MN_items[item_i]
 
 	self:menuSetMarkedItem(item_t, marked)
+
+	return self
 end
 
 
@@ -388,6 +410,8 @@ function menuMethods:menuClearAllMarkedItems()
 	for i, item in ipairs(self.MN_items) do
 		item.marked = false
 	end
+
+	return self
 end
 
 
@@ -400,6 +424,8 @@ function menuMethods:menuSetMarkedItemRange(marked, first, last)
 	for i = first, last do
 		items[i].marked = marked
 	end
+
+	return self
 end
 
 
@@ -429,15 +455,16 @@ end
 
 function menuMethods:menuMoveItem(i, j)
 	uiTable.moveElement(self.MN_items, i, j)
+
+	return self
 end
 
 
 function menuMethods:menuSwapItems(i, j)
 	uiTable.swapElements(self.MN_items, i, j)
+
+	return self
 end
-
-
--- * Plug-in methods *
 
 
 --- Sets up a widget to act as a menu. Note that not all widgets support all of the features
@@ -704,6 +731,8 @@ function wcMenu.widgetSelectItemByIndex(self, item_i)
 	if self.selectionInView then
 		self:selectionInView()
 	end
+
+	return self
 end
 
 
@@ -862,6 +891,8 @@ function wcMenu.widgetMovePrev(self, n, immediate, is_repeat, id)
 	if self.cacheUpdate then
 		self:cacheUpdate(false)
 	end
+
+	return self
 end
 
 
@@ -881,6 +912,8 @@ function wcMenu.widgetMoveNext(self, n, immediate, is_repeat, id)
 	if self.cacheUpdate then
 		self:cacheUpdate(false)
 	end
+
+	return self
 end
 
 
@@ -898,6 +931,8 @@ function wcMenu.widgetMoveFirst(self, immediate, id)
 	if self.cacheUpdate then
 		self:cacheUpdate(false)
 	end
+
+	return self
 end
 
 
@@ -915,6 +950,8 @@ function wcMenu.widgetMoveLast(self, immediate, id)
 	if self.cacheUpdate then
 		self:cacheUpdate(false)
 	end
+
+	return self
 end
 
 
@@ -987,6 +1024,8 @@ function wcMenu.widgetMovePageUp(self, immediate, id)
 			self:cacheUpdate(false)
 		end
 	end
+
+	return self
 end
 
 
@@ -1010,6 +1049,8 @@ function wcMenu.widgetMovePageDown(self, immediate, id)
 			self:cacheUpdate(false)
 		end
 	end
+
+	return self
 end
 
 
@@ -1113,6 +1154,8 @@ function wcMenu.getItemInBoundsRect(self, item, immediate)
 		item.y + item.h + self.MN_selection_extend_y,
 		immediate
 	)
+
+	return self
 end
 
 
@@ -1130,6 +1173,8 @@ function wcMenu.getItemInBoundsX(self, item, immediate)
 		item.x + item.w + self.MN_selection_extend_x,
 		immediate
 	)
+
+	return self
 end
 
 
@@ -1147,6 +1192,8 @@ function wcMenu.getItemInBoundsY(self, item, immediate)
 		item.y + item.h + self.MN_selection_extend_y,
 		immediate
 	)
+
+	return self
 end
 
 
@@ -1173,8 +1220,9 @@ function wcMenu.selectionInView(self, immediate)
 	if immediate and self.cacheUpdate then
 		self:cacheUpdate(false)
 	end
-end
 
+	return self
+end
 
 
 function wcMenu.markItemsCursorMode(self, old_index)
@@ -1235,7 +1283,7 @@ function wcMenu.pointerPressScrollBars(self, x, y, button)
 	-- Check for pressing on scroll bar components.
 	if button == 1 then
 		local fixed_step = 24 -- XXX style/config
-		if lgcScroll.widgetScrollPress(self, x, y, fixed_step) then
+		if wcScrollBar.widgetScrollPress(self, x, y, fixed_step) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 			self.context:clearClickSequence()
 			return true
@@ -1246,12 +1294,12 @@ end
 
 function wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	-- Repeat-press events for scroll bar buttons
-	if lgcScroll.press_busy_codes[self.press_busy]
+	if wcScrollBar.press_busy_codes[self.press_busy]
 	and button == 1
 	and button == self.context.mouse_pressed_button
 	then
 		local fixed_step = 24 -- XXX style/config
-		lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+		wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 	end
 end
 

@@ -26,8 +26,8 @@ local function columnSortGlobals(wid, column)
 	table.sort(items, sort_functions[column.id])
 
 	if not wid.column_sort_ascending then
-		local lgcTab = wid.context:getLua("shared/lgc_tab")
-		lgcTab.reverseSequence(items)
+		local wcTab = wid.context:getLua("shared/wc/wc_tab")
+		wcTab.reverseSequence(items)
 	end
 
 	return true
@@ -43,7 +43,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Snapshot of '_G'")
 
 	frame:layoutSetBase("viewport")
-	frame:setScrollRangeMode("zero")
+	frame:containerSetScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")

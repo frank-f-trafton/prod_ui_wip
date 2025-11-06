@@ -5,9 +5,6 @@ TODO:
 --]]
 
 
--- To load: local lib = context:getLua("shared/lib")
-
-
 --[[
 Shared widget code for slider bar functionality.
 --]]
@@ -16,7 +13,7 @@ Shared widget code for slider bar functionality.
 local context = select(1, ...)
 
 
-local lgcSlider = {}
+local wcSlider = {}
 
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
@@ -44,7 +41,7 @@ local slider_keys = {
 }
 
 
-function lgcSlider.setup(self)
+function wcSlider.setup(self)
 	-- When false, the slider control should not respond to user input.
 	-- This field does not prevent API calls from modifying the slider state. Nor does it affect
 	-- the status of the parent widget as a whole (as in, it may still be capable of holding
@@ -87,7 +84,7 @@ function lgcSlider.setup(self)
 end
 
 
-function lgcSlider.reshapeSliderComponent(self, x, y, w, h, thumb_w, thumb_h)
+function wcSlider.reshapeSliderComponent(self, x, y, w, h, thumb_w, thumb_h)
 	if self.trough_vertical then
 		-- On the active axis, trim half of the thumb length from the trough length.
 		self.trough_x = math.floor(x)
@@ -109,12 +106,12 @@ function lgcSlider.reshapeSliderComponent(self, x, y, w, h, thumb_w, thumb_h)
 	self.thumb_w = math.min(thumb_w, self.trough_w)
 	self.thumb_h = math.min(thumb_h, self.trough_h)
 
-	--print("lgcSlider.reshapeSliderComponent(): Trough: ", self.trough_x, self.trough_y, self.trough_w, self.trough_h)
-	--print("lgcSlider.reshapeSliderComponent(): Thumb: ", self.thumb_x, self.thumb_y, self.thumb_w, self.thumb_h)
+	--print("wcSlider.reshapeSliderComponent(): Trough: ", self.trough_x, self.trough_y, self.trough_w, self.trough_h)
+	--print("wcSlider.reshapeSliderComponent(): Thumb: ", self.thumb_x, self.thumb_y, self.thumb_w, self.thumb_h)
 end
 
 
-function lgcSlider.roundPos(self)
+function wcSlider.roundPos(self)
 	local mode = self.round_policy
 
 	if mode == "none" then
@@ -135,12 +132,12 @@ function lgcSlider.roundPos(self)
 end
 
 
-function lgcSlider.clampPos(self)
+function wcSlider.clampPos(self)
 	self.slider_pos = math.max(0, math.min(self.slider_pos, self.slider_max))
 end
 
 
-function lgcSlider.updateTroughHome(self)
+function wcSlider.updateTroughHome(self)
 	local trough_ext = self.skin.trough_ext
 
 	-- If the home position is the first or last value, add the trough extension to the trough home point.
@@ -174,7 +171,7 @@ function lgcSlider.updateTroughHome(self)
 end
 
 
-function lgcSlider.updateSlider(self, vertical)
+function wcSlider.updateSlider(self, vertical)
 	local unit_pos = (vertical) and (self.thumb_y / self.trough_h) or (self.thumb_x / self.trough_w)
 
 	-- Reverse flipping
@@ -182,12 +179,12 @@ function lgcSlider.updateSlider(self, vertical)
 
 	self.slider_pos = unit_pos * self.slider_max
 
-	lgcSlider.roundPos(self)
-	lgcSlider.clampPos(self)
+	wcSlider.roundPos(self)
+	wcSlider.clampPos(self)
 end
 
 
-function lgcSlider.updateThumb(self, vertical)
+function wcSlider.updateThumb(self, vertical)
 	local resolved_pos = self.slider_pos
 	if self.count_reverse then
 		resolved_pos = self.slider_max - resolved_pos
@@ -209,26 +206,26 @@ end
 
 
 -- Update after having moved the thumb.
-function lgcSlider.processMovedThumb(self)
+function wcSlider.processMovedThumb(self)
 	local slider_pos_old = self.slider_pos
 
 	-- Update internal slider position based on the thumbs's location within the trough.
 	-- Then reposition the thumb based on the new internal slider position.
 	local vert = not not self.trough_vertical
-	lgcSlider.updateSlider(self, vert)
-	lgcSlider.updateThumb(self, vert)
+	wcSlider.updateSlider(self, vert)
+	wcSlider.updateThumb(self, vert)
 end
 
 
 -- Update after having changed the internal slider position.
-function lgcSlider.processMovedSliderPos(self)
-	lgcSlider.roundPos(self)
-	lgcSlider.clampPos(self)
-	lgcSlider.updateThumb(self, not not self.trough_vertical)
+function wcSlider.processMovedSliderPos(self)
+	wcSlider.roundPos(self)
+	wcSlider.clampPos(self)
+	wcSlider.updateThumb(self, not not self.trough_vertical)
 end
 
 
-function lgcSlider.troughIntersect(self, x, y)
+function wcSlider.troughIntersect(self, x, y)
 	-- NOTE: Assumes X and Y are relative to the trough top-left.
 	local tw, th = self.trough_w, self.trough_h
 
@@ -237,12 +234,12 @@ end
 
 
 
-function lgcSlider.checkMousePress(self, x, y, click_anywhere)
+function wcSlider.checkMousePress(self, x, y, click_anywhere)
 	x = x - self.trough_x
 	y = y - self.trough_y
 
 	if self.slider_allow_changes then
-		if click_anywhere or lgcSlider.troughIntersect(self, x, y) then
+		if click_anywhere or wcSlider.troughIntersect(self, x, y) then
 			if self.trough_vertical then
 				self.thumb_y = y
 			else
@@ -250,7 +247,7 @@ function lgcSlider.checkMousePress(self, x, y, click_anywhere)
 			end
 
 			local slider_pos_old = self.slider_pos
-			lgcSlider.processMovedThumb(self)
+			wcSlider.processMovedThumb(self)
 			if self.slider_pos ~= slider_pos_old then
 				self:wid_actionSliderChanged()
 			end
@@ -261,7 +258,7 @@ function lgcSlider.checkMousePress(self, x, y, click_anywhere)
 end
 
 
-function lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
+function wcSlider.checkKeyPress(self, key, scancode, isrepeat)
 	if self.slider_allow_changes then
 		local additive = self.trough_rate_focus or 1 -- XXX expose in config?
 		local dir
@@ -309,7 +306,7 @@ function lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
 
 		if dir then
 			self.slider_pos = self.slider_pos + additive * dir
-			lgcSlider.processMovedSliderPos(self)
+			wcSlider.processMovedSliderPos(self)
 
 			if self.slider_pos ~= slider_pos_old then
 				self:wid_actionSliderChanged()
@@ -321,7 +318,7 @@ function lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
 end
 
 
-function lgcSlider.getTroughAdditive(self)
+function wcSlider.getTroughAdditive(self)
 	-- Additive value for when clicking on the trough body or using the mouse wheel.
 	-- Wheel may need a separate value depending on how different operating systems handle wheel actions.
 	-- (ie do Windows wheelmoved events contain larger XY values than those on Linux?)
@@ -334,7 +331,7 @@ function lgcSlider.getTroughAdditive(self)
 end
 
 
-function lgcSlider.mouseWheelLogic(self, x, y)
+function wcSlider.mouseWheelLogic(self, x, y)
 	if self.slider_allow_changes then
 		local slider_pos_old = self.slider_pos
 
@@ -349,10 +346,10 @@ function lgcSlider.mouseWheelLogic(self, x, y)
 		if dir then
 			dir = dir * self.wheel_dir
 
-			local additive = lgcSlider.getTroughAdditive(self)
+			local additive = wcSlider.getTroughAdditive(self)
 			self.slider_pos = math.max(0, math.min(self.slider_pos + additive * dir, self.slider_max))
 
-			lgcSlider.processMovedSliderPos(self)
+			wcSlider.processMovedSliderPos(self)
 
 			if self.slider_pos ~= slider_pos_old then
 				self:wid_actionSliderChanged()
@@ -376,7 +373,7 @@ function lgcSlider.mouseWheelLogic(self, x, y)
 end
 
 
-function lgcSlider.widSetSliderPosition(self, pos)
+function wcSlider.widSetSliderPosition(self, pos)
 	uiAssert.numberNotNaN(1, pos)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
@@ -385,15 +382,17 @@ function lgcSlider.widSetSliderPosition(self, pos)
 
 	self.slider_pos = math.max(0, math.min(pos, self.slider_max))
 
-	lgcSlider.processMovedSliderPos(self)
+	wcSlider.processMovedSliderPos(self)
 
 	if self.slider_pos ~= slider_pos_old then
 		self:wid_actionSliderChanged()
 	end
+
+	return self
 end
 
 
-function lgcSlider.widSetSliderMax(self, max)
+function wcSlider.widSetSliderMax(self, max)
 	uiAssert.numberNotNaN(1, max)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
@@ -402,35 +401,41 @@ function lgcSlider.widSetSliderMax(self, max)
 
 	self.slider_max = math.max(0, max)
 
-	lgcSlider.processMovedSliderPos(self)
+	wcSlider.processMovedSliderPos(self)
 
 	if self.slider_pos ~= slider_pos_old then
 		self:wid_actionSliderChanged()
 	end
+
+	return self
 end
 
 
-function lgcSlider.widSetSliderAxis(self, axis)
+function wcSlider.widSetSliderAxis(self, axis)
 	uiAssert.namedMap(1, axis, _slider_axes)
 
 	self.trough_vertical = (axis == "vertical") and true or false
 	self:reshape()
+
+	return self
 end
 
 
-function lgcSlider.widSetSliderAllowChanges(self, enabled)
+function wcSlider.widSetSliderAllowChanges(self, enabled)
 	self.slider_allow_changes = not not enabled
+
+	return self
 end
 
 
 --- Apply Slider Bar methods to a widget definition or instance.
 -- @param self The widget def or instance (usually the former).
-function lgcSlider.setupMethods(self)
-	self.setSliderPosition = lgcSlider.widSetSliderPosition
-	self.setSliderMax = lgcSlider.widSetSliderMax
-	self.setSliderAxis = lgcSlider.widSetSliderAxis
-	self.setSliderAllowChanges = lgcSlider.widSetSliderAllowChanges
+function wcSlider.setupMethods(self)
+	self.setSliderPosition = wcSlider.widSetSliderPosition
+	self.setSliderMax = wcSlider.widSetSliderMax
+	self.setSliderAxis = wcSlider.widSetSliderAxis
+	self.setSliderAllowChanges = wcSlider.widSetSliderAllowChanges
 end
 
 
-return lgcSlider
+return wcSlider

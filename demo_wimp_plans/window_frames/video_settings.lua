@@ -13,7 +13,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Video Settings")
 
 	frame:layoutSetBase("viewport-width")
-	frame:setScrollRangeMode("auto")
+	frame:containerSetScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
 	do

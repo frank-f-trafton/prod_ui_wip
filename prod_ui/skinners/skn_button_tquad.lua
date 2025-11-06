@@ -4,13 +4,13 @@
 local context = select(1, ...)
 
 
-local lgcGraphic = context:getLua("shared/lgc_graphic")
 local themeAssert = context:getLua("core/res/theme_assert")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcGraphic = context:getLua("shared/wc/wc_graphic")
 
 
 local md_res = uiSchema.newKeysX {
@@ -90,7 +90,7 @@ return {
 
 		local graphic = self.graphic or skin.graphic
 		if graphic then
-			lgcGraphic.render(self, graphic, skin, res.color_quad, res.graphic_ox, res.graphic_oy, ox, oy)
+			wcGraphic.render(self, graphic, skin, res.color_quad, res.graphic_ox, res.graphic_oy, ox, oy)
 		end
 	end,
 

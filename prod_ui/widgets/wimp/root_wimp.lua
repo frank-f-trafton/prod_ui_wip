@@ -2,11 +2,11 @@ local context = select(1, ...)
 
 
 local hndStep = context:getLua("shared/hnd_step")
-local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
-local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
+local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
+local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -91,7 +91,7 @@ function def:uiCall_initialize()
 	-- table: a DropState object.
 	self.drop_state = false
 
-	lgcKeyHooks.setupInstance(self)
+	wcKeyHook.setupInstance(self)
 end
 
 
@@ -201,7 +201,7 @@ end
 
 function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_pressed, key, scancode, isrepeat) then
+		if widShared.evaluateKeyhooks(self, self.KH_trickle_key_pressed, key, scancode, isrepeat) then
 			return true
 		end
 	end
@@ -210,7 +210,7 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat) then
+		if widShared.evaluateKeyhooks(self, self.KH_key_pressed, key, scancode, isrepeat) then
 			return true
 		end
 	end
@@ -280,7 +280,7 @@ end
 
 function def:uiCall_keyReleased(inst, key, scancode)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode) then
+		if widShared.evaluateKeyhooks(self, self.KH_key_released, key, scancode) then
 			return true
 		end
 	end
@@ -289,7 +289,7 @@ end
 
 function def.trickle:uiCall_keyReleased(inst, key, scancode)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.hooks_trickle_key_released, key, scancode) then
+		if widShared.evaluateKeyhooks(self, self.KH_trickle_key_released, key, scancode) then
 			return true
 		end
 	end
@@ -392,7 +392,7 @@ function def:setSelectedFrame(inst, set_new_order)
 		end
 
 		if old_selected ~= inst then
-			lgcUIFrame.tryUnbankingThimble1(inst)
+			wcUIFrame.tryUnbankingThimble1(inst)
 
 			if set_new_order then
 				inst.order_id = self:rootCall_getFrameOrderID()
@@ -639,7 +639,7 @@ Use this instead of root:addChild("wimp/window_frame").
 function def:newWindowFrame(skin_id, unselectable, view_level)
 	view_level = view_level or "normal"
 
-	local lane = lgcUIFrame.view_levels[view_level]
+	local lane = wcUIFrame.view_levels[view_level]
 	local pos = widShared.getSortLaneEdge(self.children, lane, "last")
 	local w_frame = self:addChild("wimp/window_frame", skin_id, pos, unselectable, view_level)
 	return w_frame

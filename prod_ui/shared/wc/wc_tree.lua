@@ -7,13 +7,13 @@ local context = select(1, ...)
 local wcMenu = context:getLua("shared/wc/wc_menu")
 
 
-local lgcTree = {}
+local wcTree = {}
 
 
 local _nm_align = {left=true, center=true, right=true}
 
 
-function lgcTree.instanceSetup(self)
+function wcTree.instanceSetup(self)
 	-- X positions and widths of components within menu items.
 	-- The X positions are reversed when right alignment is used.
 	self.TR_expander_x = 0
@@ -26,7 +26,7 @@ function lgcTree.instanceSetup(self)
 end
 
 
-function lgcTree.setExpanded(self, item, exp)
+function wcTree.setExpanded(self, item, exp)
 	item.expanded = exp
 	self:orderItems()
 	self:arrangeItems()
@@ -44,14 +44,14 @@ function lgcTree.setExpanded(self, item, exp)
 end
 
 
-function lgcTree.keyForward(self, dir)
+function wcTree.keyForward(self, dir)
 	local item = self.MN_items[self.MN_index]
 	if item
 	and self.TR_expanders_active
 	and #item.nodes > 0
 	and not item.expanded
 	then
-		lgcTree.setExpanded(self, item, true)
+		wcTree.setExpanded(self, item, true)
 
 	elseif item and #item.nodes > 0 and item.expanded then
 		self:menuSetSelectedIndex(self:menuGetItemIndex(item.nodes[1]))
@@ -65,7 +65,7 @@ function lgcTree.keyForward(self, dir)
 end
 
 
-function lgcTree.keyBackward(self, dir)
+function wcTree.keyBackward(self, dir)
 	local item = self.MN_items[self.MN_index]
 
 	if item
@@ -73,7 +73,7 @@ function lgcTree.keyBackward(self, dir)
 	and #item.nodes > 0
 	and item.expanded
 	then
-		lgcTree.setExpanded(self, item, false)
+		wcTree.setExpanded(self, item, false)
 
 	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
 		self:menuSetSelectedIndex(self:menuGetItemIndex(item.parent))
@@ -92,7 +92,7 @@ end
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
-function lgcTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
+function wcTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 	if scancode == "up" then
 		self:movePrev(1, true, isrepeat)
 		return true
@@ -118,17 +118,17 @@ function lgcTree.wid_defaultKeyNav(self, key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		return self.TR_item_align_h == "left" and lgcTree.keyBackward(self, -1)
-			or self.TR_item_align_h == "right" and lgcTree.keyForward(self, -1)
+		return self.TR_item_align_h == "left" and wcTree.keyBackward(self, -1)
+			or self.TR_item_align_h == "right" and wcTree.keyForward(self, -1)
 
 	elseif scancode == "right" then
-		return self.TR_item_align_h == "left" and lgcTree.keyForward(self, 1)
-			or self.TR_item_align_h == "right" and lgcTree.keyBackward(self, 1)
+		return self.TR_item_align_h == "left" and wcTree.keyForward(self, 1)
+			or self.TR_item_align_h == "right" and wcTree.keyBackward(self, 1)
 	end
 end
 
 
-function lgcTree.updateItemDimensions(self, skin, item)
+function wcTree.updateItemDimensions(self, skin, item)
 	-- Do not try to update the root node.
 	if not item.parent then
 		return
@@ -141,51 +141,57 @@ function lgcTree.updateItemDimensions(self, skin, item)
 end
 
 
-function lgcTree.updateAllItemDimensions(self, skin, node)
+function wcTree.updateAllItemDimensions(self, skin, node)
 	for i, item in ipairs(node.nodes) do
-		lgcTree.updateItemDimensions(self, skin, item)
+		wcTree.updateItemDimensions(self, skin, item)
 		if #item.nodes > 0 then
-			lgcTree.updateAllItemDimensions(self, skin, item)
+			wcTree.updateAllItemDimensions(self, skin, item)
 		end
 	end
 end
 
 
-function lgcTree.updateAllIconReferences(self, skin, node)
+function wcTree.updateAllIconReferences(self, skin, node)
 	for i, item in ipairs(node.nodes) do
 		item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 		if #item.nodes > 0 then
-			lgcTree.updateAllIconReferences(self, skin, item)
+			wcTree.updateAllIconReferences(self, skin, item)
 		end
 	end
 end
 
 
-function lgcTree.setIconsEnabled(self, enabled)
+function wcTree.setIconsEnabled(self, enabled)
 	self:writeSetting("TR_show_icons", not not enabled)
 	self:cacheUpdate(true)
-	lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	return self
 end
 
 
-function lgcTree.setExpandersActive(self, active)
+function wcTree.setExpandersActive(self, active)
 	self:writeSetting("TR_expanders_active", not not active)
 	self:cacheUpdate(true)
-	lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	return self
 end
 
 
-function lgcTree.setItemAlignment(self, align)
+function wcTree.setItemAlignment(self, align)
 	if not _nm_align[align] then
 		error("invalid alignment setting.")
 	end
 	self:writeSetting("TR_item_align_h", align)
 	self:cacheUpdate(true)
-	lgcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	return self
 end
 
 
-function lgcTree.addNode(self, text, parent_node, tree_pos, icon_id)
+function wcTree.addNode(self, text, parent_node, tree_pos, icon_id)
 	--print("add node", text, parent_node, tree_pos, icon_id)
 	-- XXX: Assertions.
 
@@ -213,7 +219,7 @@ function lgcTree.addNode(self, text, parent_node, tree_pos, icon_id)
 	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 	item.x, item.y = 0, 0
-	lgcTree.updateItemDimensions(self, skin, item)
+	wcTree.updateItemDimensions(self, skin, item)
 
 	return item
 end
@@ -255,7 +261,7 @@ local function _selectionLoop(self, node)
 end
 
 
-function lgcTree.orderItems(self)
+function wcTree.orderItems(self)
 	local items = self.MN_items
 
 	-- Note the current selected item, if any.
@@ -283,6 +289,8 @@ function lgcTree.orderItems(self)
 			_selectionLoop(self, item_sel)
 		end
 	end
+
+	return self
 end
 
 
@@ -307,17 +315,19 @@ local function _removeNode(self, node, depth)
 end
 
 
-function lgcTree.removeNode(self, node)
+function wcTree.removeNode(self, node)
 	-- XXX: Assertions (?)
 
 	_removeNode(self, node, 1)
 
 	self:orderItems()
 	self:arrangeItems()
+
+	return self
 end
 
 
-function lgcTree.arrangeItems(self)
+function wcTree.arrangeItems(self)
 	local skin, items = self.skin, self.MN_items
 	local font = skin.font
 
@@ -334,7 +344,9 @@ function lgcTree.arrangeItems(self)
 		item.y = yy
 		yy = item.y + item.h
 	end
+
+	return self
 end
 
 
-return lgcTree
+return wcTree

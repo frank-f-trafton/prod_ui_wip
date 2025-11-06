@@ -25,12 +25,11 @@ end
 
 
 function wcLabelBare.widSetLabel(self, text)
-	-- Assertions
-	-- [[
 	uiAssert.loveStringOrColoredText(2, text)
-	--]]
 
 	self.label = text
+
+	return self
 end
 
 

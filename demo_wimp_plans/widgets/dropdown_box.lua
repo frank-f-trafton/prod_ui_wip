@@ -10,7 +10,7 @@ function plan.make(panel)
 	--title("Dropdown Boxes")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	--demoShared.makeLabel(panel, 32, 0, 512, 32, "...", "single")

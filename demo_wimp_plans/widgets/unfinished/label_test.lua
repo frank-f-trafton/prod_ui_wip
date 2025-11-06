@@ -5,7 +5,7 @@ function plan.make(panel)
 	--title("Label Tests")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	-- Single-Line.

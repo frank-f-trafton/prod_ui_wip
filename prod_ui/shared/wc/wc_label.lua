@@ -149,6 +149,8 @@ function wcLabel.widSetLabel(self, text, mode)
 	elseif self.label_mode == "multi" then
 		_multiLineWrap(self, self.vp, self.skin.label_style.font)
 	end
+
+	return self
 end
 
 

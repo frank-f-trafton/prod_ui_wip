@@ -39,7 +39,6 @@ Trough
 
 local context = select(1, ...)
 
-local lgcSlider = context:getLua("shared/lgc_slider")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
@@ -47,6 +46,7 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")
 local wcLabel = context:getLua("shared/wc/wc_label")
+local wcSlider = context:getLua("shared/wc/wc_slider")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -76,7 +76,7 @@ def.setEnabled = wcButton.setEnabled
 def.setLabel = wcLabel.widSetLabel
 
 
-lgcSlider.setupMethods(def)
+wcSlider.setupMethods(def)
 
 
 def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
@@ -94,7 +94,7 @@ function def:uiCall_initialize()
 	widShared.setupViewports(self, 2)
 
 	wcLabel.setup(self)
-	lgcSlider.setup(self)
+	wcSlider.setup(self)
 
 	-- State flags
 	self.enabled = true
@@ -120,14 +120,14 @@ function def:uiCall_reshapePre()
 	vp2:splitOrOverlay(vp, skin.label_placement, skin.label_spacing)
 	vp:reduceT(skin.box.margin)
 
-	lgcSlider.reshapeSliderComponent(self, vp2.x, vp2.y, vp2.w, vp2.h, skin.thumb_w, skin.thumb_h)
+	wcSlider.reshapeSliderComponent(self, vp2.x, vp2.y, vp2.w, vp2.h, skin.thumb_w, skin.thumb_h)
 
 	local slider_pos_old = self.slider_pos
-	lgcSlider.processMovedSliderPos(self)
+	wcSlider.processMovedSliderPos(self)
 	if self.slider_pos ~= slider_pos_old then
 		self:wid_actionSliderChanged()
 	end
-	lgcSlider.updateTroughHome(self)
+	wcSlider.updateTroughHome(self)
 
 	wcLabel.reshapeLabel(self)
 
@@ -145,7 +145,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 				if button == 1 then
 					local mx, my = self:getRelativePosition(x, y)
-					if lgcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere) then
+					if wcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere) then
 						self.pressed = true
 					end
 
@@ -171,7 +171,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			if self.pressed then
 				if self.context.mouse_pressed_button == 1 then
 					local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-					lgcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere)
+					wcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere)
 				end
 			end
 		end
@@ -182,7 +182,7 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
-			return lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
+			return wcSlider.checkKeyPress(self, key, scancode, isrepeat)
 		end
 	end
 end
@@ -191,7 +191,7 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
 		if self.enabled then
-			return lgcSlider.mouseWheelLogic(self, x, y)
+			return wcSlider.mouseWheelLogic(self, x, y)
 		end
 	end
 end

@@ -14,7 +14,7 @@ function plan.make(panel)
 	--title("Stepper")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local stepper_h = panel:addChild("base/stepper")

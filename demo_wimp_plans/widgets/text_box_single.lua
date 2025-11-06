@@ -10,7 +10,7 @@ local plan = {}
 
 function plan.make(panel)
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 
@@ -82,11 +82,11 @@ function plan.make(panel)
 
 	local ui_frame = assert(demoShared.getUIFrame(panel), "no UI Frame to hook into.")
 
-	table.insert(ui_frame.hooks_trickle_key_pressed, hook_pressed)
+	table.insert(ui_frame.KH_trickle_key_pressed, hook_pressed)
 	panel.userDestroy = function(self)
 		local ui_frame = demoShared.getUIFrame(panel)
 		if ui_frame then
-			pTable.removeElement(ui_frame.hooks_trickle_key_pressed, hook_pressed)
+			pTable.removeElement(ui_frame.KH_trickle_key_pressed, hook_pressed)
 		end
 	end
 

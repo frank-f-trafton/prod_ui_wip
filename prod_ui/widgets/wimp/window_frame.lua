@@ -1,10 +1,6 @@
 local context = select(1, ...)
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
-local lgcKeyHooks = context:getLua("shared/lgc_key_hooks")
-local lgcUIFrame = context:getLua("shared/lgc_ui_frame")
-local lgcWindowFrame = context:getLua("shared/lgc_window_frame")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -13,6 +9,10 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
+local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
+local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
+local wcWindowFrame = context:getLua("shared/wc/wc_window_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -43,13 +43,13 @@ local def = {
 }
 
 
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
 widLayout.setupContainerDef(def)
 widShared.scrollSetMethods(def)
-lgcUIFrame.definitionSetup(def)
+wcUIFrame.definitionSetup(def)
 wcContainer.setupMethods(def)
 
 
@@ -194,12 +194,12 @@ end
 
 
 function def:setWindowViewLevel(view_level)
-	if not lgcUIFrame.view_levels[view_level] then
+	if not wcUIFrame.view_levels[view_level] then
 		error("invalid view level.")
 	end
 
 	self.view_level = view_level
-	self.sort_id = lgcUIFrame.view_levels[view_level]
+	self.sort_id = wcUIFrame.view_levels[view_level]
 	self.context.root:sortG2()
 end
 
@@ -233,7 +233,7 @@ function def:_refreshWorkspaceState()
 		local assign = not self.frame_hidden
 		self.visible = assign
 		self.allow_hover = assign
-		self.sort_id = lgcUIFrame.view_levels[self.view_level]
+		self.sort_id = wcUIFrame.view_levels[self.view_level]
 	-- Become inactive
 	else
 		self.visible = false
@@ -252,7 +252,7 @@ function def:setFrameWorkspace(workspace)
 
 	self.workspace = workspace
 
-	lgcUIFrame.assertFrameBlockWorkspaces(self)
+	wcUIFrame.assertFrameBlockWorkspaces(self)
 
 	self:_refreshWorkspaceState()
 	self.context.root:sortG2()
@@ -389,9 +389,9 @@ end
 function def:uiCall_initialize(unselectable, view_level)
 	-- UI Frame
 	self.frame_type = "window"
-	lgcUIFrame.instanceSetup(self, unselectable)
+	wcUIFrame.instanceSetup(self, unselectable)
 	self.view_level = view_level or "normal"
-	self.sort_id = lgcUIFrame.view_levels[self.view_level]
+	self.sort_id = wcUIFrame.view_levels[self.view_level]
 
 	-- If associated with a Workspace, a Window Frame is only active if that Workspace is also active.
 	-- Window Frames associated with the root are always active.
@@ -416,7 +416,7 @@ function def:uiCall_initialize(unselectable, view_level)
 	self:layoutSetBase("viewport")
 
 	wcContainer.setupSashState(self)
-	lgcKeyHooks.setupInstance(self)
+	wcKeyHook.setupInstance(self)
 
 	self.hover_zone = false -- false, "button-close", "button-size"
 	self.mouse_in_resize_zone = false
@@ -488,7 +488,7 @@ function def:frameCall_close(force)
 end
 
 
-def.trickle.uiCall_pointerHoverOn = lgcUIFrame.logic_tricklePointerHoverOn
+def.trickle.uiCall_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
 
 
 local function _getCursorAxisInfo(self, mx, my)
@@ -513,7 +513,7 @@ function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse
 		-- Because this widget accepts hover events outside of its boundaries (for resizing), we need to confirm
 		-- that the mouse cursor actually is within the Window Frame area before checking scroll bar hover.
 		if mx >= self.x and my >= self.y and mx < self.x + self.w and my < self.y + self.h then
-			lgcScroll.widgetProcessHover(self, mx, my)
+			wcScrollBar.widgetProcessHover(self, mx, my)
 		end
 
 		if mx >= 0 and mx < self.w and my >= 0 and my < self.h then
@@ -553,7 +553,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 
 		self.hover_zone = false
 		self.mouse_in_resize_zone = false
@@ -562,17 +562,17 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-def.uiCall_thimble1Take = lgcUIFrame.logic_thimble1Take
-def.trickle.uiCall_keyPressed = lgcUIFrame.logic_trickleKeyPressed
-def.uiCall_keyPressed = lgcUIFrame.logic_keyPressed
-def.trickle.uiCall_keyReleased = lgcUIFrame.logic_trickleKeyReleased
-def.uiCall_keyReleased = lgcUIFrame.logic_keyReleased
-def.trickle.uiCall_textInput = lgcUIFrame.logic_trickleTextInput
-def.trickle.uiCall_pointerPress = lgcUIFrame.logic_tricklePointerPress
+def.uiCall_thimble1Take = wcUIFrame.logic_thimble1Take
+def.trickle.uiCall_keyPressed = wcUIFrame.logic_trickleKeyPressed
+def.uiCall_keyPressed = wcUIFrame.logic_keyPressed
+def.trickle.uiCall_keyReleased = wcUIFrame.logic_trickleKeyReleased
+def.uiCall_keyReleased = wcUIFrame.logic_keyReleased
+def.trickle.uiCall_textInput = wcUIFrame.logic_trickleTextInput
+def.trickle.uiCall_pointerPress = wcUIFrame.logic_tricklePointerPress
 
 
 function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
-	if lgcUIFrame.pointerPressLogicFirst(self) then
+	if wcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
@@ -586,7 +586,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 			-- perform an additional intersection check.
 			if mx >= 0 and my >= 0 and mx < self.w and my < self.h then
 				local fixed_step = 24 -- [XXX 2] style/config
-				handled = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
+				handled = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 			end
 
 			if not handled and self.header_visible then
@@ -676,16 +676,16 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-def.uiCall_pointerPressRepeat = lgcUIFrame.logic_pointerPressRepeat
+def.uiCall_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
 
 
 function def.trickle:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.press_busy == "resize" then
-			lgcWindowFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
+			wcWindowFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 		elseif self.press_busy == "drag" then
-			lgcWindowFrame.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
+			wcWindowFrame.mouseMovedDrag(self, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		end
 	end
 
@@ -728,7 +728,7 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 				end
 			end
 
-			lgcScroll.widgetClearPress(self)
+			wcScrollBar.widgetClearPress(self)
 			self.press_busy = false
 		end
 	end
@@ -739,8 +739,8 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-def.trickle.uiCall_pointerWheel = lgcUIFrame.logic_tricklePointerWheel
-def.uiCall_pointerWheel = lgcUIFrame.logic_pointerWheel
+def.trickle.uiCall_pointerWheel = wcUIFrame.logic_tricklePointerWheel
+def.uiCall_pointerWheel = wcUIFrame.logic_pointerWheel
 
 
 local function _getHeaderSkinTable(self)
@@ -753,15 +753,15 @@ end
 function def:uiCall_update(dt)
 	dt = math.min(dt, 1.0)
 
-	if lgcScroll.press_busy_codes[self.press_busy] then
+	if wcScrollBar.press_busy_codes[self.press_busy] then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
-		lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
+		wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 	end
 
 	self:scrollUpdate(dt)
-	lgcScroll.updateScrollState(self)
-	lgcScroll.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
 
 	if self.needs_update then
 		local skin = self.skin
@@ -900,7 +900,7 @@ function def:uiCall_reshapePre()
 
 	vp:reduceT(skin.box.border2)
 
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	vp:copy(vp2)
 	vp2:reduceT(skin.box.margin2)
@@ -928,8 +928,8 @@ function def:uiCall_reshapePost()
 	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 end
 
 
@@ -948,7 +948,7 @@ function def:uiCall_destroy(inst)
 			target:reorder(math.huge)
 			target.parent:sortChildren()
 
-			lgcUIFrame.tryUnbankingThimble1(target)
+			wcUIFrame.tryUnbankingThimble1(target)
 			--]]
 		end
 
@@ -1246,7 +1246,7 @@ def.default_skinner = {
 
 		wcContainer.renderSashes(self)
 
-		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+		wcScrollBar.drawScrollBarsHV(self, self.skin.data_scroll)
 		love.graphics.pop()
 	end,
 

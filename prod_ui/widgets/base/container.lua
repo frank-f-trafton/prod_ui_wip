@@ -23,13 +23,13 @@
 local context = select(1, ...)
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -40,7 +40,7 @@ local def = {
 }
 
 
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -79,7 +79,7 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(skin.box.border)
 
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	vp:copy(vp2)
 	vp:reduceT(skin.box.margin)
@@ -97,8 +97,8 @@ function def:uiCall_reshapePost()
 	widShared.updateDoc(self)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 end
 
 
@@ -110,7 +110,7 @@ end
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		lgcScroll.widgetProcessHover(self, mx, my)
+		wcScrollBar.widgetProcessHover(self, mx, my)
 	end
 end
 
@@ -122,7 +122,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 	end
 end
 
@@ -155,7 +155,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Check for pressing on scroll bar components.
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
-			handled = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
+			handled = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 		end
 
 		-- Scroll bars were not activated: try directing thimble1 to the
@@ -181,7 +181,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
 
-			lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 		end
 	end
 end
@@ -190,7 +190,7 @@ end
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 then
-			lgcScroll.widgetClearPress(self)
+			wcScrollBar.widgetClearPress(self)
 
 			self.press_busy = false
 		end
@@ -201,7 +201,7 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 	-- Catch wheel events from descendants that did not block it.
 	local caught = widShared.checkScrollWheelScroll(self, x, y)
-	lgcScroll.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollBarShapes(self)
 
 	-- Stop bubbling if the view scrolled.
 	return caught
@@ -215,7 +215,7 @@ function def:uiCall_thimble1Take(inst, keep_in_view)
 		if keep_in_view == "widget_in_view" then
 			local skin = self.skin
 			wcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
-			lgcScroll.updateScrollBarShapes(self)
+			wcScrollBar.updateScrollBarShapes(self)
 		end
 	end
 end
@@ -223,15 +223,15 @@ end
 
 function def:uiCall_update(dt)
 	dt = math.min(dt, 1.0)
-	if lgcScroll.press_busy_codes[self.press_busy] then
+	if wcScrollBar.press_busy_codes[self.press_busy] then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
-		lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
+		wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 	end
 
 	self:scrollUpdate(dt)
-	lgcScroll.updateScrollState(self)
-	lgcScroll.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
 end
 
 
@@ -301,7 +301,7 @@ def.default_skinner = {
 
 		wcContainer.renderSashes(self)
 
-		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+		wcScrollBar.drawScrollBarsHV(self, self.skin.data_scroll)
 
 		love.graphics.pop()
 

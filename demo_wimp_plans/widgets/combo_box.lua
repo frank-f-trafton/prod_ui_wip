@@ -10,7 +10,7 @@ function plan.make(panel)
 	--title("Combo Boxes")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local combo_box = panel:addChild("wimp/combo_box")

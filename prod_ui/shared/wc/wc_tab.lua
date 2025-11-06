@@ -21,14 +21,14 @@ Column fields:
 
 	cb_sort: A sorting function to use when the user clicks on the column box. When false/nil,
 		sorting will not be performed, though the "order" triangle bijou will still be adjusted.
-		The function 'lgcTab.columnSortGeneric' can be used here.
+		The function 'wcTab.columnSortGeneric' can be used here.
 --]]
 
 
-local lgcTab = {}
+local wcTab = {}
 
 
-function lgcTab._sortTempItemsAscending(a, b)
+function wcTab._sortTempItemsAscending(a, b)
 	for i = 2, math.max(#a, #b) do
 		if a[i] ~= b[i] then
 			return a[i] < b[i]
@@ -39,7 +39,7 @@ function lgcTab._sortTempItemsAscending(a, b)
 end
 
 
-function lgcTab._sortTempItemsDescending(a, b)
+function wcTab._sortTempItemsDescending(a, b)
 	for i = 2, math.max(#a, #b) do
 		if a[i] ~= b[i] then
 			return a[i] > b[i]
@@ -50,7 +50,7 @@ function lgcTab._sortTempItemsDescending(a, b)
 end
 
 
-function lgcTab.columnSortGeneric(wid, column)
+function wcTab.columnSortGeneric(wid, column)
 	local items = wid.MN_items
 	local sort_order = column.sort_order
 
@@ -69,7 +69,7 @@ function lgcTab.columnSortGeneric(wid, column)
 		temp[i] = entry
 	end
 
-	local sort_func = (wid.column_sort_ascending) and lgcTab._sortTempItemsAscending or lgcTab._sortTempItemsDescending
+	local sort_func = (wid.column_sort_ascending) and wcTab._sortTempItemsAscending or wcTab._sortTempItemsDescending
 	table.sort(temp, sort_func)
 
 	for i, tbl in ipairs(temp) do
@@ -80,7 +80,7 @@ function lgcTab.columnSortGeneric(wid, column)
 end
 
 
-function lgcTab.getWidestColumnText(self, column_id)
+function wcTab.getWidestColumnText(self, column_id)
 	local font = self.skin.cell_font
 	local w = 0
 	local index
@@ -98,7 +98,7 @@ function lgcTab.getWidestColumnText(self, column_id)
 end
 
 
-function lgcTab.reverseSequence(seq)
+function wcTab.reverseSequence(seq)
 	local last = #seq
 	local i, j = 1, last
 	while i <= math.floor(last/2) do
@@ -108,4 +108,4 @@ function lgcTab.reverseSequence(seq)
 end
 
 
-return lgcTab
+return wcTab

@@ -24,7 +24,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Unselectable Frame")
 
 	frame:layoutSetBase("viewport-width")
-	frame:setScrollRangeMode("auto")
+	frame:containerSetScrollRangeMode("auto")
 	frame:setScrollBars(false, false)
 
 	frame.userUpdate = function(self, dt)

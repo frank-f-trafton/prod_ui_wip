@@ -10,7 +10,7 @@ function plan.make(panel)
 	--title("Properties Box Test")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local properties_box = panel:addChild("wimp/properties_box")

@@ -9,7 +9,7 @@ function plan.make(panel)
 	--title("Barebones widgets")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local xx, yy = 0, 0

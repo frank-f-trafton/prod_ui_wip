@@ -14,7 +14,7 @@ function plan.make(panel)
 	--title("Layout")
 
 	panel:layoutSetBase("viewport")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setSashesEnabled(true)
 
 	--[[

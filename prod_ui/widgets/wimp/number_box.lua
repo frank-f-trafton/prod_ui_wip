@@ -33,6 +33,7 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcInputS = context:getLua("shared/wc/wc_input_s")
+local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -439,8 +440,7 @@ end
 
 function def:uiCall_destroy(inst)
 	if self == inst then
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		lgcWimp.checkDestroyPopUp(self)
+		wcWimp.checkDestroyPopUp(self)
 
 		widShared.removeViewports(self, 4)
 	end

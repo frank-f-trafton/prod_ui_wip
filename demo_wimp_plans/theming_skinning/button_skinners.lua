@@ -10,7 +10,7 @@ function plan.make(panel)
 	--title("Button skin tests")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local wid_id = "base/button"

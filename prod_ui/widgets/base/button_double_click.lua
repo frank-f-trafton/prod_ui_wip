@@ -6,7 +6,6 @@ A skinned button that activates on double-click.
 local context = select(1, ...)
 
 
-local lgcGraphic = context:getLua("shared/lgc_graphic")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")

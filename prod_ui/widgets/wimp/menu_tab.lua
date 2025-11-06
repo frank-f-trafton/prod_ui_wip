@@ -59,8 +59,6 @@ Widget
 local context = select(1, ...)
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
-local lgcWimp = context:getLua("shared/lgc_wimp")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -71,6 +69,8 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
+local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -91,7 +91,7 @@ local def = {
 
 wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -621,7 +621,7 @@ end
 
 local function invokePopUpMenu(self, x, y)
 	local proto_menu = _makePopUpPrototype(self)
-	local pop_up = lgcWimp.makePopUpMenu(self, proto_menu, x, y)
+	local pop_up = wcWimp.makePopUpMenu(self, proto_menu, x, y)
 
 	local root = self:getRootWidget()
 	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
@@ -730,7 +730,7 @@ function def:uiCall_reshapePre()
 
 	-- Border and scroll bars.
 	vp:reduceT(skin.box.border)
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
@@ -745,7 +745,7 @@ function def:uiCall_reshapePre()
 	end
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollState(self)
 
 	self.header_text_y = math.floor((skin.column_bar_height - skin.font:getHeight()) / 2)
 	self.cell_text_y = math.floor((skin.item_h - skin.cell_font:getHeight()) / 2)
@@ -953,7 +953,7 @@ end
 function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
-		lgcScroll.widgetProcessHover(self, mx, my)
+		wcScrollBar.widgetProcessHover(self, mx, my)
 
 		-- Test for hover over column header boxes
 		local header_box_hovered = false
@@ -1012,7 +1012,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 
 		self.column_hovered = false
 		self.cursor_hover = nil
@@ -1123,7 +1123,7 @@ end
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
-			lgcScroll.widgetClearPress(self)
+			wcScrollBar.widgetClearPress(self)
 
 			local old_press_busy = self.press_busy
 			self.press_busy = false
@@ -1267,12 +1267,12 @@ function def:uiCall_update(dt)
 	if self.press_busy == "menu-drag" and widShared.dragToScroll(self, dt) then
 		needs_update = true
 
-	elseif lgcScroll.press_busy_codes[self.press_busy] then
+	elseif wcScrollBar.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self.context.mouse_x, self.context.mouse_y
 			local ax, ay = self:getAbsolutePosition()
 			local button_step = 350 -- XXX style/config
-			lgcScroll.widgetDragLogic(self, mx - ax, my - ay, button_step*dt)
+			wcScrollBar.widgetDragLogic(self, mx - ax, my - ay, button_step*dt)
 		end
 	end
 
@@ -1284,8 +1284,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- Update scroll bar registers and thumb position
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 
 	-- Per-widget and per-selected-item update callbacks.
 	if self.wid_update then
@@ -1626,7 +1626,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		lgcScroll.drawScrollBarsHV(self, self.skin.data_scroll)
+		wcScrollBar.drawScrollBarsHV(self, self.skin.data_scroll)
 	end,
 
 

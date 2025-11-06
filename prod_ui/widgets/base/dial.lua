@@ -156,7 +156,7 @@ function def:uiCall_initialize()
 
 	wcLabel.setup(self)
 
-	-- Stuff copied from lgcSlider.setup().
+	-- Stuff copied from wcSlider.setup().
 
 	-- When false, the dial control should not respond to user input.
 	-- This field does not prevent API calls from modifying the dial state. Nor does it affect

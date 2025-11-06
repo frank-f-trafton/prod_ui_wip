@@ -1,7 +1,5 @@
--- To load: local lib = context:getLua("shared/lib")
-
 --[[
-Shared (barebones) button logic.
+Widget Component: Barebones button.
 
 This roughly follows the behavior of `shared/wc/wc_button.lua`. See that file for additional comments.
 --]]

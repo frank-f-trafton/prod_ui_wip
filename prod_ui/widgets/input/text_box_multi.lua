@@ -33,7 +33,6 @@ local utf8 = require("utf8") -- (Lua 5.3+)
 local editFuncM = context:getLua("shared/line_ed/m/edit_func_m")
 local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidM = context:getLua("shared/line_ed/m/edit_wid_m")
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local lineEdM = context:getLua("shared/line_ed/m/line_ed_m")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -42,6 +41,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcInputM = context:getLua("shared/wc/wc_input_m")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -55,7 +55,7 @@ wcInputM.setupDef(def)
 
 
 widShared.scrollSetMethods(def)
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 def.pop_up_proto = wcInputM.pop_up_proto
 
@@ -91,14 +91,14 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(skin.box.border)
 
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 	vp:reduceT(skin.box.margin)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollState(self)
 
 	editWidM.updateDuringReshape(self)
 
@@ -110,7 +110,7 @@ function def:uiCall_pointerHover(inst, mx, my, dx, dy)
 	if self == inst then
 		mx, my = self:getRelativePosition(mx, my)
 
-		lgcScroll.widgetProcessHover(self, mx, my)
+		wcScrollBar.widgetProcessHover(self, mx, my)
 
 		if self.vp2:pointOverlap(mx, my) then
 			self.cursor_hover = self.skin.cursor_on
@@ -123,7 +123,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mx, my, dx, dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 
 		self.cursor_hover = nil
 	end
@@ -147,7 +147,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if button == 1 then
 			local fixed_step = 24 -- XXX style/config
 
-			handled = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
+			handled = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 		end
 
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
@@ -171,7 +171,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- XXX style/config
 
-			lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 		end
 	end
 end
@@ -180,7 +180,7 @@ end
 function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
-			lgcScroll.widgetClearPress(self)
+			wcScrollBar.widgetClearPress(self)
 
 			self.press_busy = false
 		end
@@ -254,11 +254,11 @@ function def:uiCall_update(dt)
 		end
 	end
 
-	if lgcScroll.press_busy_codes[self.press_busy] then
+	if wcScrollBar.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 			local button_step = 350 -- XXX style/config
-			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
+			wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 		end
 	end
 
@@ -270,8 +270,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- update scroll bar registers and thumb position
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 
 	if do_update then
 		editWidM.generalUpdate(self, true, false, false, true, true)
@@ -403,7 +403,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
+		wcScrollBar.drawScrollBarsHV(self, skin.data_scroll)
 
 		-- Debug: document dimensions
 		--[[

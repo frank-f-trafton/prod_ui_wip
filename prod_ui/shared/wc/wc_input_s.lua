@@ -51,6 +51,7 @@ local structHistory = context:getLua("shared/struct_history")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
+local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -243,8 +244,7 @@ function wcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan
 
 		self.pop_up_proto:configure(self)
 
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_proto, caret_x, caret_y)
+		local pop_up = wcWimp.makePopUpMenu(self, self.pop_up_proto, caret_x, caret_y)
 		pop_up:tryTakeThimble2()
 
 		-- Halt propagation
@@ -356,8 +356,7 @@ function wcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
 
 		local ax, ay = self:getAbsolutePosition()
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, self.pop_up_proto, ax + mx, ay + my)
+		local pop_up = wcWimp.makePopUpMenu(self, self.pop_up_proto, ax + mx, ay + my)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
