@@ -14,7 +14,6 @@ See `wimp/dropdown_box.lua` for more notes.
 local context = select(1, ...)
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -23,6 +22,7 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -40,12 +40,9 @@ local def = {
 }
 
 
-def.setBlocking = wcPopUp.setBlocking
-
-
 wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -323,7 +320,7 @@ function def:uiCall_reshapePre()
 
 	-- Border and scroll bars.
 	vp:reduceT(skin.box.border)
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
@@ -345,7 +342,7 @@ function def:uiCall_reshapePre()
 	vp4:reduceT(skin.box.margin)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollState(self)
 
 	self:cacheUpdate()
 
@@ -426,7 +423,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		lgcScroll.widgetProcessHover(self, mx, my)
+		wcScrollBar.widgetProcessHover(self, mx, my)
 
 		local xx = mx + self.scr_x - vp.x
 		local yy = my + self.scr_y - vp.y
@@ -455,7 +452,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 	end
 end
 
@@ -477,7 +474,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		-- Check for pressing on scroll bar components.
 		if button == 1 then
 			local fixed_step = 24 -- XXX style/config
-			handled_scroll_bars = lgcScroll.widgetScrollPress(self, x, y, fixed_step)
+			handled_scroll_bars = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 		end
 
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
@@ -514,7 +511,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and button == context.mouse_pressed_button
 	then
-		lgcScroll.widgetClearPress(self)
+		wcScrollBar.widgetClearPress(self)
 
 		local old_press_busy = self.press_busy
 		self.press_busy = false
@@ -567,11 +564,11 @@ function def:uiCall_update(dt)
 	if self.press_busy == "menu-drag" and widShared.dragToScroll(self, dt) then
 		needs_update = true
 
-	elseif lgcScroll.press_busy_codes[self.press_busy] then
+	elseif wcScrollBar.press_busy_codes[self.press_busy] then
 		if context.mouse_pressed_ticks > 1 then
 			local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 			local button_step = 350 -- XXX style/config
-			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
+			wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 		end
 	end
 
@@ -583,8 +580,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- Update scroll bar registers and thumb position.
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 
 	if needs_update then
 		self:cacheUpdate()
@@ -675,7 +672,7 @@ def.default_skinner = {
 		love.graphics.setColor(skin.color_body)
 		uiGraphics.drawSlice(skin.slice, 0, 0, self.w, self.h)
 
-		lgcScroll.drawScrollBarsV(self, self.skin.data_scroll)
+		wcScrollBar.drawScrollBarsV(self, self.skin.data_scroll)
 
 		-- Scroll offsets.
 		--love.graphics.translate(-self.scr_x + vp.x, -self.scr_y + vp.y)

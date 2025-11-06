@@ -9,7 +9,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Canvas Layering Test")
 
 	frame:layoutSetBase("viewport-width")
-	frame:setScrollRangeMode("zero")
+	frame:containerSetScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 	frame.ly_enabled = true

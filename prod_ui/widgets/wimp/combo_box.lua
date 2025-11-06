@@ -55,6 +55,7 @@ local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcInputS = context:getLua("shared/wc/wc_input_s")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
+local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -310,8 +311,7 @@ function def:_openPopUpMenu()
 			new_item.source_item = item
 		end
 
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		lgcWimp.assignPopUp(self, drawer)
+		wcWimp.assignPopUp(self, drawer)
 
 		drawer:setSelectionByIndex(self.MN_index)
 
@@ -427,8 +427,7 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		-- Destroy pop-up menu (either kind) if it exists in reference to this widget.
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		lgcWimp.checkDestroyPopUp(self)
+		wcWimp.checkDestroyPopUp(self)
 		--self:_closePopUpMenu(false)
 		-- XXX: test the above change.
 

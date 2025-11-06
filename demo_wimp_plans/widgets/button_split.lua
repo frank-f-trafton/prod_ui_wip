@@ -59,8 +59,8 @@ local function _createPopUpMenu(self)
 			menu_x = ax + self.w - self.vp3.w
 		end
 
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		local pop_up = lgcWimp.makePopUpMenu(self, _pop_up_proto, menu_x, menu_y)
+		local wcWimp = self.context:getLua("shared/wc/wc_wimp")
+		local pop_up = wcWimp.makePopUpMenu(self, _pop_up_proto, menu_x, menu_y)
 		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
@@ -86,7 +86,7 @@ function plan.make(panel)
 	--title("Split Button")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	-- Split Button

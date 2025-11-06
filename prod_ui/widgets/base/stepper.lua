@@ -35,7 +35,6 @@ Vertical layout:
 local context = select(1, ...)
 
 
-local lgcGraphic = context:getLua("shared/lgc_graphic")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")

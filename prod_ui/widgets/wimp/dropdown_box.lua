@@ -273,8 +273,8 @@ function def:_openPopUpMenu()
 			new_item.source_item = item
 		end
 
-		local lgcWimp = self.context:getLua("shared/lgc_wimp")
-		lgcWimp.assignPopUp(self, drawer)
+		local wcWimp = context:getLua("shared/wc/wc_wimp")
+		wcWimp.assignPopUp(self, drawer)
 
 		drawer:setSelectionByIndex(self.MN_index)
 

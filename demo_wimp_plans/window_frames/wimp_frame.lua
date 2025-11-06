@@ -17,7 +17,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("WIMP Window Frame")
 
 	frame:layoutSetBase("viewport-width")
-	frame:setScrollRangeMode("auto")
+	frame:containerSetScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
 	local xx, yy, ww, hh = 16, 16, 192, 32

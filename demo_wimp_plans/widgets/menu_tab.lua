@@ -44,8 +44,8 @@ local function columnSortLabels(wid, column)
 	table.sort(items, sort_functions[column.id])
 
 	if not wid.column_sort_ascending then
-		local lgcTab = wid.context:getLua("shared/lgc_tab")
-		lgcTab.reverseSequence(items)
+		local wcTab = wid.context:getLua("shared/wc/wc_tab")
+		wcTab.reverseSequence(items)
 	end
 
 	return true
@@ -54,7 +54,7 @@ end
 
 function plan.make(panel)
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local context = panel.context

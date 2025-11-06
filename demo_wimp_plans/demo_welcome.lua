@@ -6,7 +6,7 @@ local demoShared = require("demo_shared")
 
 function plan.make(panel)
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	demoShared.makeTitle(panel, nil, "Welcome")

@@ -494,7 +494,7 @@ function plan.make(panel)
 	--title("ListBox Test")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	makeListBox1(panel, 0, 0)

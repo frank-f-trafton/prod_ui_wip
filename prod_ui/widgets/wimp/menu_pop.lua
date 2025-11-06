@@ -109,9 +109,6 @@ function def:arrangeItems(first, last)
 end
 
 
-def.setBlocking = wcPopUp.setBlocking
-
-
 local function destroySubMenus(self)
 	if self.chain_next then
 		widShared.chainDestroyPost(self)

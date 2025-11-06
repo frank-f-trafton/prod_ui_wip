@@ -25,13 +25,13 @@ Optional           Optional scroll bars
 local context = select(1, ...)
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -49,7 +49,7 @@ local def = {
 
 wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -312,14 +312,14 @@ function def:uiCall_reshapePre()
 
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(skin.box.border)
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 	vp:reduceT(skin.box.margin)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollState(self)
 
 	self:cacheUpdate(true)
 end
@@ -413,7 +413,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		lgcScroll.widgetProcessHover(self, mx, my)
+		wcScrollBar.widgetProcessHover(self, mx, my)
 
 		local hover_ok = false
 
@@ -440,7 +440,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 		self.MN_item_hover = false
 	end
 end
@@ -530,7 +530,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
-		lgcScroll.widgetClearPress(self)
+		wcScrollBar.widgetClearPress(self)
 		self.press_busy = false
 	end
 end
@@ -600,11 +600,11 @@ function def:uiCall_update(dt)
 	then
 		needs_update = true
 
-	elseif lgcScroll.press_busy_codes[self.press_busy] then
+	elseif wcScrollBar.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 			local button_step = 350 -- XXX style/config
-			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
+			wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 		end
 	end
 
@@ -616,8 +616,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- Update scroll bar registers and thumb position.
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 
 	if needs_update then
 		self:cacheUpdate(false)
@@ -729,7 +729,7 @@ def.default_skinner = {
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
 		love.graphics.setColor(rr, gg, bb, aa)
-		lgcScroll.drawScrollBarsHV(self, skin.data_scroll)
+		wcScrollBar.drawScrollBarsHV(self, skin.data_scroll)
 
 		-- Scissor, scroll offsets for content.
 		uiGraphics.intersectScissor(ox + self.x + vp2.x, oy + self.y + vp2.y, vp2.w, vp2.h)

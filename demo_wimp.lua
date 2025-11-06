@@ -563,13 +563,13 @@ do
 				end
 			end
 
-			table.insert(wimp_root.hooks_trickle_key_pressed, hook_pressed)
+			table.insert(wimp_root.KH_trickle_key_pressed, hook_pressed)
 		end
 
 		-- Hook menu bar key commands to WIMP root
 		do
-			table.insert(wimp_root.hooks_key_pressed, menu_bar.widHook_pressed)
-			table.insert(wimp_root.hooks_key_released, menu_bar.widHook_released)
+			table.insert(wimp_root.KH_key_pressed, menu_bar.widHook_pressed)
+			table.insert(wimp_root.KH_key_released, menu_bar.widHook_released)
 		end
 	end
 
@@ -578,7 +578,7 @@ do
 		local ws1 = wimp_root:newWorkspace()
 
 		ws1:layoutSetBase("viewport")
-		ws1:setScrollRangeMode("zero")
+		ws1:containerSetScrollRangeMode("zero")
 		ws1:setSashesEnabled(true)
 
 		-- NOTE: Do not register Workspaces to the root layout. Internally, the root takes care of positioning and

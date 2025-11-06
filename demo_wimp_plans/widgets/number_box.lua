@@ -10,7 +10,7 @@ function plan.make(panel)
 	--title("Number Box")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	local num_box = panel:addChild("wimp/number_box")

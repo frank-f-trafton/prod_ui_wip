@@ -11,7 +11,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Frame Destroy Test")
 
 	frame:layoutSetBase("viewport-width")
-	frame:setScrollRangeMode("zero")
+	frame:containerSetScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 	local bb_lbl = frame:addChild("barebones/label")
@@ -32,8 +32,8 @@ function plan.makeWindowFrame(root)
 			bb_lbl:setLabel(string.format("This frame will self-destruct, via userUpdate, in %.1f seconds.", self.usr_time_max - self.usr_time))
 		end
 		if self.usr_time >= self.usr_time_max then
-			local lgcWimp = self.context:getLua("shared/lgc_wimp")
-			lgcWimp.closeFrame(self)
+			local wcWimp = self.context:getLua("shared/wc/wc_wimp")
+			wcWimp.closeFrame(self)
 			return true
 		end
 	end

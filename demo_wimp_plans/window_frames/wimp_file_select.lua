@@ -62,16 +62,16 @@ local function columnSortFiles(wid, column)
 		end
 	end
 
-	local lgcTab = wid.context:getLua("shared/lgc_tab")
+	local wcTab = wid.context:getLua("shared/wc/wc_tab")
 
 	table.sort(ord1, hof_sortName)
 	if not wid.column_sort_ascending then
-		lgcTab.reverseSequence(ord1)
+		wcTab.reverseSequence(ord1)
 	end
 
 	table.sort(ord2, sort_functions[column.id])
 	if not wid.column_sort_ascending then
-		lgcTab.reverseSequence(ord2)
+		wcTab.reverseSequence(ord2)
 	end
 
 	for i, item in ipairs(ord1) do
@@ -269,7 +269,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("File Selector")
 
 	frame:layoutSetBase("viewport")
-	frame:setScrollRangeMode("zero")
+	frame:containerSetScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 	local menu_tab = frame:addChild("wimp/menu_tab")

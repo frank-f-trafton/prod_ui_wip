@@ -164,7 +164,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	dialog:setFrameTitle(title)
 
 	dialog:layoutSetBase("viewport")
-	dialog:setScrollRangeMode("zero")
+	dialog:containerSetScrollRangeMode("zero")
 	dialog:setScrollBars(false, false)
 
 

@@ -5,7 +5,7 @@ function plan.make(panel)
 	--title("DragBox Test")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	-- Drag box.

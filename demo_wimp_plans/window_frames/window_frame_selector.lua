@@ -36,7 +36,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Window Frame Selector")
 
 	frame:layoutSetBase("viewport-width")
-	frame:setScrollRangeMode("auto")
+	frame:containerSetScrollRangeMode("auto")
 	frame:setScrollBars(false, true)
 
 

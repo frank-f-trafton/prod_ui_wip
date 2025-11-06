@@ -23,7 +23,6 @@ Optional icons (bijoux)  │
 local context = select(1, ...)
 
 
-local lgcScroll = context:getLua("shared/lgc_scroll")
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -32,6 +31,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -49,7 +49,7 @@ local def = {
 
 wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
-def.setScrollBars = lgcScroll.setScrollBars
+def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
@@ -379,7 +379,7 @@ function def:uiCall_reshapePre()
 
 	-- Border and scroll bars.
 	vp:reduceT(skin.box.border)
-	lgcScroll.arrangeScrollBars(self)
+	wcScrollBar.arrangeScrollBars(self)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
@@ -396,7 +396,7 @@ function def:uiCall_reshapePre()
 	vp5:reduceHorizontal(sm1, sm2)
 
 	self:scrollClampViewport()
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollState(self)
 
 	for i, item in ipairs(self.MN_items) do
 		updateItemDimensions(self, item)
@@ -541,7 +541,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
-		lgcScroll.widgetProcessHover(self, mx, my)
+		wcScrollBar.widgetProcessHover(self, mx, my)
 
 		-- Sash hover logic
 		if self.sash_enabled then
@@ -604,7 +604,7 @@ end
 
 function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
-		lgcScroll.widgetClearHover(self)
+		wcScrollBar.widgetClearHover(self)
 		self.sash_hovered = false
 		self.cursor_hover = nil
 		self.MN_item_hover = false
@@ -729,7 +729,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
-		lgcScroll.widgetClearPress(self)
+		wcScrollBar.widgetClearPress(self)
 		self.press_busy = false
 		self.cursor_press = nil
 	end
@@ -810,11 +810,11 @@ function def:uiCall_update(dt)
 	then
 		needs_update = true
 
-	elseif lgcScroll.press_busy_codes[self.press_busy] then
+	elseif wcScrollBar.press_busy_codes[self.press_busy] then
 		if self.context.mouse_pressed_ticks > 1 then
 			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
 			local button_step = 350 -- XXX style/config
-			lgcScroll.widgetDragLogic(self, mx, my, button_step*dt)
+			wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 		end
 	end
 
@@ -826,8 +826,8 @@ function def:uiCall_update(dt)
 	end
 
 	-- Update scroll bar registers and thumb position.
-	lgcScroll.updateScrollBarShapes(self)
-	lgcScroll.updateScrollState(self)
+	wcScrollBar.updateScrollBarShapes(self)
+	wcScrollBar.updateScrollState(self)
 
 	if needs_update then
 		self:cacheUpdate(false)
@@ -951,7 +951,7 @@ def.default_skinner = {
 		love.graphics.setColor(1, 1, 1, 1)
 		uiGraphics.drawSlice(sl_body, 0, 0, self.w, self.h)
 
-		lgcScroll.drawScrollBarsHV(self, skin.data_scroll) -- maybe do vertical bars only?
+		wcScrollBar.drawScrollBarsHV(self, skin.data_scroll) -- maybe do vertical bars only?
 
 		-- Sash
 		local s_style = skin.sash_style

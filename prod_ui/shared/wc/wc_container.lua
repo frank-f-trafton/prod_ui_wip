@@ -37,7 +37,7 @@ function wcContainer.setupMethods(self)
 end
 
 
-function _methods:setScrollRangeMode(mode)
+function _methods:containerSetScrollRangeMode(mode)
 	uiAssert.namedMap(1, mode, _nm_scr_rng)
 
 	self.scroll_range_mode = mode
@@ -46,7 +46,7 @@ function _methods:setScrollRangeMode(mode)
 end
 
 
-function _methods:getScrollRangeMode()
+function _methods:containerGetScrollRangeMode()
 	return self.scroll_range_mode
 end
 

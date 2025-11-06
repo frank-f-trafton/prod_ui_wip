@@ -6,10 +6,10 @@
 local context = select(1, ...)
 
 
-local lgcSlider = context:getLua("shared/lgc_slider")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local wcButtonBare = context:getLua("shared/wc/wc_button_bare")
 local wcLabelBare = context:getLua("shared/wc/wc_label_bare")
+local wcSlider = context:getLua("shared/wc/wc_slider")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -26,7 +26,7 @@ def.setEnabled = wcButtonBare.setEnabled
 def.setLabel = wcLabelBare.widSetLabel
 
 
-lgcSlider.setupMethods(def)
+wcSlider.setupMethods(def)
 
 
 def.uiCall_pointerHoverOn = wcButtonBare.uiCall_pointerHoverOn
@@ -40,7 +40,7 @@ function def:uiCall_initialize()
 	self.thimble_mode = 1
 
 	wcLabelBare.setup(self)
-	lgcSlider.setup(self)
+	wcSlider.setup(self)
 
 	-- State flags
 	self.enabled = true
@@ -73,7 +73,7 @@ function def:uiCall_reshapePre()
 	end
 
 	local slider_pos_old = self.slider_pos
-	lgcSlider.processMovedSliderPos(self)
+	wcSlider.processMovedSliderPos(self)
 	if self.slider_pos ~= slider_pos_old then
 		self:wid_actionSliderChanged()
 	end
@@ -94,7 +94,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 				x, y = self:getRelativePosition(x, y)
 
 				if button == 1 and self.context.mouse_pressed_button == button then
-					if lgcSlider.checkMousePress(self, x, y, true) then
+					if wcSlider.checkMousePress(self, x, y, true) then
 						self.pressed = true
 					end
 				end
@@ -109,7 +109,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if self.enabled then
 			if self.pressed then
 				local x, y = self:getRelativePosition(mouse_x, mouse_y)
-				lgcSlider.checkMousePress(self, x, y, true)
+				wcSlider.checkMousePress(self, x, y, true)
 			end
 		end
 	end
@@ -119,7 +119,7 @@ end
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
-			return lgcSlider.checkKeyPress(self, key, scancode, isrepeat)
+			return wcSlider.checkKeyPress(self, key, scancode, isrepeat)
 		end
 	end
 end
@@ -128,7 +128,7 @@ end
 function def:uiCall_pointerWheel(inst, x, y)
 	if self == inst then
 		if self.enabled then
-			return lgcSlider.mouseWheelLogic(self, x, y)
+			return wcSlider.mouseWheelLogic(self, x, y)
 		end
 	end
 end

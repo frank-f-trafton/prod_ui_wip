@@ -1,20 +1,16 @@
--- To load: local lib = context:getLua("shared/lib")
-
---[[
-Shared code for single static graphics in widgets.
---]]
+-- Shared code for single static graphics in widgets.
 
 
 local context = select(1, ...)
 
 
-local lgcGraphic = {}
+local wcGraphic = {}
 
 
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 
 
-function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, ox, oy)
+function wcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, ox, oy)
 	local vp2 = self.vp2
 
 	love.graphics.setColor(color)
@@ -49,4 +45,4 @@ function lgcGraphic.render(self, graphic, skin, color, graphic_ox, graphic_oy, o
 end
 
 
-return lgcGraphic
+return wcGraphic

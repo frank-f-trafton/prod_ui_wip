@@ -8,7 +8,7 @@ local context = select(1, ...)
 	* This doesn't handle the actual scrolling action of widgets. For that, please see 'core/wid_shared.lua'
 	  for shared functions. The default scroll bar drawing function is in shared/impl_scroll_bar1.lua.
 
-	* The plug-in methods assume that the client widget has the following methods affixed:
+	* Most functions here assume that the client widget has the following methods affixed:
 
 	- self:scrollH()         -> widShared.scrollH
 	- self:scrollDeltaH()    -> widShared.scrollDeltaH
@@ -17,20 +17,18 @@ local context = select(1, ...)
 --]]
 
 
-local lgcScroll = {}
+local wcScrollBar = {}
+
+
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 
 
 local _mt_bar = {}
 _mt_bar.__index = _mt_bar
 
 
-local function errArgBadType(n, arg, expected)
-	error("argument #" .. tostring(n) .. ": bad type (expected " .. tostring(expected) .. ", got " .. type(arg), 2)
-end
-
-
 -- A default scroll bar style table, used in cases where a style table is not provided.
-lgcScroll.default_scr_style = {
+wcScrollBar.default_scr_style = {
 	has_buttons = true,
 	trough_enabled = true,
 	thumb_enabled = true,
@@ -59,7 +57,7 @@ lgcScroll.default_scr_style = {
 
 
 -- Widgets may implement other press_busy codes (ie for dragging the mouse cursor through a menu).
-lgcScroll.press_busy_codes = {
+wcScrollBar.press_busy_codes = {
 	["v"] = true, -- vertical thumb (or trough->thumb)
 	["v1-pend"] = true, -- vertical button-less, pending repeat action
 	["v1-cont"] = true, -- vertical button-less, continuous scroll in update()
@@ -121,14 +119,14 @@ code_map_h["cont"]["b2"] = "h2-cont"
 -- @param scr_style The scroll bar style table (options and measurements). If not provided, a default will be used.
 -- @param [bar] An existing scroll bar table to update.
 -- @return The scroll bar table.
-function lgcScroll.newBar(horizontal, scr_style, bar)
+function wcScrollBar.newBar(horizontal, scr_style, bar)
 	-- XXX Assertions
 	if bar and getmetatable(bar) ~= _mt_bar then
 		error("invalid or corrupt scroll bar")
 	end
 
 	horizontal = not not horizontal
-	scr_style = scr_style or lgcScroll.default_scr_style
+	scr_style = scr_style or wcScrollBar.default_scr_style
 
 	local self = bar or setmetatable({}, _mt_bar)
 
@@ -427,8 +425,8 @@ function _mt_bar:updateThumb()
 
 	if self.th and self.tr and self.trough_valid and self.max > 0 then
 		if self.horizontal then
-			self.th_w = lgcScroll.getThumbLength(self.len, self.max, self.tr_w, self.thumb_size_min, self.thumb_size_max)
-			self.th_x = self.tr_x + lgcScroll.getThumbPosition(self.len, self.pos, self.max, self.tr_w, self.th_w)
+			self.th_w = wcScrollBar.getThumbLength(self.len, self.max, self.tr_w, self.thumb_size_min, self.thumb_size_max)
+			self.th_x = self.tr_x + wcScrollBar.getThumbPosition(self.len, self.pos, self.max, self.tr_w, self.th_w)
 			self.th_h = self.tr_h
 			self.th_y = self.tr_y
 
@@ -439,8 +437,8 @@ function _mt_bar:updateThumb()
 		else
 			self.th_w = self.w
 			self.th_x = self.tr_x
-			self.th_h = lgcScroll.getThumbLength(self.len, self.max, self.tr_h, self.thumb_size_min, self.thumb_size_max)
-			self.th_y = self.tr_y + lgcScroll.getThumbPosition(self.len, self.pos, self.max, self.tr_h, self.th_h)
+			self.th_h = wcScrollBar.getThumbLength(self.len, self.max, self.tr_h, self.thumb_size_min, self.thumb_size_max)
+			self.th_y = self.tr_y + wcScrollBar.getThumbPosition(self.len, self.pos, self.max, self.tr_h, self.th_h)
 
 			if self.max > 0 and self.th_h < self.tr_h then
 				self.thumb_valid = true
@@ -450,32 +448,31 @@ function _mt_bar:updateThumb()
 end
 
 
--- * Widget plug-in methods *
-
-
---- Plug-in to make, remake or remove embedded scroll bars.
+--- Method to make, remake or remove embedded scroll bars.
 -- @param self The widget to modify.
 -- @param hori Horizontal bar (self.scr_h)
 -- @param vert Vertical bar (self.scr_v)
-function lgcScroll.setScrollBars(self, hori, vert)
+function wcScrollBar.setScrollBars(self, hori, vert)
 	-- Scroll style priority: 1) Style in self, 2) Style in skin, 3) The application default style.
 	local scr_style = self.scr_style or (self.skin and self.skin.scr_style) or nil
 
-	self.scr_h = (hori) and lgcScroll.newBar(true, scr_style, self.scr_h) or nil
-	self.scr_v = (vert) and lgcScroll.newBar(false, scr_style, self.scr_v) or nil
+	self.scr_h = (hori) and wcScrollBar.newBar(true, scr_style, self.scr_h) or nil
+	self.scr_v = (vert) and wcScrollBar.newBar(false, scr_style, self.scr_v) or nil
 
 	-- If there was a state change, reshape the widget after calling.
+
+	return self
 end
 
 
---- Plug-in for the client's uiCall_pointerPress(). Detects clicks on embedded scroll bar components and initiates
+--- Logic for the client's uiCall_pointerPress(). Detects clicks on embedded scroll bar components and initiates
 -- the dragging state. It modifies 'self.press_busy', and state fields within the scroll bar tables.
 -- @param self The widget to test and modify.
 -- @param x Mouse X position in UI space.
 -- @param y Mouse Y position in UI space.
 -- @param fixed_step How much to scroll if a button in fixed-step mode is activated.
 -- @return True if the scroll is considered activated by the click.
-function lgcScroll.widgetScrollPress(self, x, y, fixed_step)
+function wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 	-- Don't override existing 'busy' state.
 	if self.press_busy then
 		return
@@ -578,8 +575,8 @@ function lgcScroll.widgetScrollPress(self, x, y, fixed_step)
 end
 
 
---- Plug-in for client's uiCall_pointerPressRepeat(), which implements repeated 'pend' button motions.
-function lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
+--- Logic for the client's uiCall_pointerPressRepeat(), which implements repeated 'pend' button motions.
+function wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
 
@@ -629,7 +626,7 @@ function lgcScroll.widgetScrollPressRepeat(self, x, y, fixed_step)
 end
 
 
-function lgcScroll.widgetProcessHover(self, mx, my)
+function wcScrollBar.widgetProcessHover(self, mx, my)
 	local skip = false
 
 	local scr_v = self.scr_v
@@ -648,9 +645,9 @@ function lgcScroll.widgetProcessHover(self, mx, my)
 end
 
 
---- A plug-in for 'uiCall_pointerHoverOff()', which just turns off the hover state.
+--- Logic for 'uiCall_pointerHoverOff()', which just turns off the hover state.
 -- @param self The client widget.
-function lgcScroll.widgetClearHover(self)
+function wcScrollBar.widgetClearHover(self)
 	local scr_h = self.scr_h
 	if scr_h then
 		scr_h.hover = false
@@ -663,9 +660,9 @@ function lgcScroll.widgetClearHover(self)
 end
 
 
---- A plug-in for 'uiCall_pointerUnpress()', which just turns off the press state.
+--- Logic for 'uiCall_pointerUnpress()', which just turns off the press state.
 -- @param self The client widget.
-function lgcScroll.widgetClearPress(self)
+function wcScrollBar.widgetClearPress(self)
 	local scr_h = self.scr_h
 	if scr_h then
 		scr_h.press = false
@@ -678,20 +675,20 @@ function lgcScroll.widgetClearPress(self)
 end
 
 
---- A plug-in for 'uiCall_update()' that controls scrolling while the mouse presses and moves. Some methods and
+--- Logic for 'uiCall_update()' that controls scrolling while the mouse presses and moves. Some methods and
 --  variables for handling scrolling must be present in the widget for this to work.
 -- @param self The client widget.
 -- @param mx Mouse X, relative to widget top-left.
 -- @param my Mouse Y, relative to widget top-left.
 -- @param button_step If holding a less/more button, how far it should scroll on this frame.
 -- @return true if an action was taken, false if not.
-function lgcScroll.widgetDragLogic(self, mx, my, button_step)
+function wcScrollBar.widgetDragLogic(self, mx, my, button_step)
 	local mode = self.press_busy
 
 	if mode == "v" then
 		local scr_v = self.scr_v
 		if scr_v and scr_v.active then
-			local scroll_y = lgcScroll.getDocumentPosition(self.doc_h, scr_v.tr_h, my - scr_v.tr_y - scr_v.drag_offset, scr_v.th_h, self.vp.h)
+			local scroll_y = wcScrollBar.getDocumentPosition(self.doc_h, scr_v.tr_h, my - scr_v.tr_y - scr_v.drag_offset, scr_v.th_h, self.vp.h)
 
 			self:scrollV(scroll_y, true)
 			return true
@@ -700,7 +697,7 @@ function lgcScroll.widgetDragLogic(self, mx, my, button_step)
 	elseif mode == "h" then
 		local scr_h = self.scr_h
 		if scr_h and scr_h.active then
-			local scroll_x = lgcScroll.getDocumentPosition(self.doc_w, scr_h.tr_w, mx - scr_h.tr_x - scr_h.drag_offset, scr_h.th_w, self.vp.w)
+			local scroll_x = wcScrollBar.getDocumentPosition(self.doc_w, scr_h.tr_w, mx - scr_h.tr_x - scr_h.drag_offset, scr_h.th_w, self.vp.w)
 
 			self:scrollH(scroll_x, true)
 			return true
@@ -737,11 +734,11 @@ function lgcScroll.widgetDragLogic(self, mx, my, button_step)
 end
 
 
---- Plug-in for clients that positions scroll bars and implements auto-hide. The client's viewport #1 needs to be
+--- Logic for the client that positions scroll bars and implements auto-hide. The client's viewport #1 needs to be
 --  set to a default size and position, from which the scroll bars will carve out space. Scroll bar shapes must then
 --  be updated.
 -- @param self The widget to modify.
-function lgcScroll.arrangeScrollBars(self)
+function wcScrollBar.arrangeScrollBars(self)
 	local vp = self.vp
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
@@ -825,19 +822,17 @@ function lgcScroll.arrangeScrollBars(self)
 end
 
 
---- Set a scroll bar's internal registers: Unworkable numbers cause all values to be set to zero, which is a shorthand
+--- Sets a scroll bar's internal registers: Unworkable numbers cause all values to be set to zero, which is a shorthand
 -- for the thumb not being in a valid state.
 -- @param scr The scroll bar table.
 -- @param pos The first bit of the visible viewport.
 -- @param len The length of the viewport on the scrolling axis.
 -- @param max The document length, where the upper bound of pos is max - len.
-function lgcScroll.updateRegisters(scr, pos, len, max)
+function wcScrollBar.updateRegisters(scr, pos, len, max)
 	-- Assertions -- XXX test
-	-- [[
-	if type(pos) ~= "number" then errArgBadType(1, pos, "number")
-	elseif type(len) ~= "number" then errArgBadType(2, len, "number")
-	elseif type(max) ~= "number" then errArgBadType(3, max, "number") end
-	--]]
+	uiAssert.type(2, pos, "number")
+	uiAssert.type(3, len, "number")
+	uiAssert.type(4, max, "number")
 
 	-- This needs to happen after viewport + content resizing.
 	if max <= 0 or pos + len > max then
@@ -852,8 +847,8 @@ function lgcScroll.updateRegisters(scr, pos, len, max)
 end
 
 
---- Widget plug-in that updates scroll bar component shapes.
-function lgcScroll.updateScrollBarShapes(self)
+--- Logic that updates scroll bar component shapes.
+function wcScrollBar.updateScrollBarShapes(self)
 	local scr_h, scr_v = self.scr_h, self.scr_v
 	if scr_h then
 		scr_h:updateShapes()
@@ -865,16 +860,16 @@ end
 
 
 --- Updates a widget's built-in scroll registers.
-function lgcScroll.updateScrollState(self)
+function wcScrollBar.updateScrollState(self)
 	local scr_h, scr_v = self.scr_h, self.scr_v
 
 	if scr_v then
 		local vp = self.vp
-		lgcScroll.updateRegisters(scr_v, math.floor(0.5 + vp.y + self.scr_y), vp.h, self.doc_h)
+		wcScrollBar.updateRegisters(scr_v, math.floor(0.5 + vp.y + self.scr_y), vp.h, self.doc_h)
 	end
 	if scr_h then
 		local vp = self.vp
-		lgcScroll.updateRegisters(scr_h, math.floor(0.5 + vp.x + self.scr_x), vp.w, self.doc_w)
+		wcScrollBar.updateRegisters(scr_h, math.floor(0.5 + vp.x + self.scr_x), vp.w, self.doc_w)
 	end
 end
 
@@ -882,7 +877,7 @@ end
 -- * Common scroll bar render methods *
 
 
-function lgcScroll.drawScrollBarsHV(self, data_scroll)
+function wcScrollBar.drawScrollBarsHV(self, data_scroll)
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
 
@@ -895,7 +890,7 @@ function lgcScroll.drawScrollBarsHV(self, data_scroll)
 end
 
 
-function lgcScroll.drawScrollBarsH(self, data_scroll)
+function wcScrollBar.drawScrollBarsH(self, data_scroll)
 	local scr_h = self.scr_h
 
 	if scr_h and scr_h.active then
@@ -904,7 +899,7 @@ function lgcScroll.drawScrollBarsH(self, data_scroll)
 end
 
 
-function lgcScroll.drawScrollBarsV(self, data_scroll)
+function wcScrollBar.drawScrollBarsV(self, data_scroll)
 	local scr_v = self.scr_v
 
 	if scr_v and scr_v.active then
@@ -920,8 +915,8 @@ end
 Terminology:
 
 Thumb: the movable block that shows where the viewport is located within the document. On systems with mouse cursors,
-you can typically (though not always) click and drag the thumb to scroll the viewport. There is typically a minimum
-thumb size to ensure that it's easy to see and click, and in some games, it is always the same size. Therefore, don't
+you can typically (though not always) click and drag the thumb to scroll the viewport. There is usually a minimum
+thumb size to ensure that it's easy to see and click, and in some games, it's always the same size. Therefore, don't
 count on this being an accurate indication of the document size.
 
 Trough: the area in which the thumb can be moved. For these functions, this excludes any additional buttons on the far
@@ -937,7 +932,7 @@ Document: An axis-aligned rectangle (format: XYWH) that represents the scrollabl
 -- @param trough_len Length of the scroll bar trough.
 -- @param thumb_min Minimum permitted thumb size.
 -- @param thumb_max Maximum permitted thumb size.
-function lgcScroll.getThumbLength(viewport_len, doc_len, trough_len, thumb_min, thumb_max)
+function wcScrollBar.getThumbLength(viewport_len, doc_len, trough_len, thumb_min, thumb_max)
 	return math.max(thumb_min, math.min(trough_len, math.min(thumb_max, math.floor(viewport_len / doc_len * trough_len))))
 end
 
@@ -949,7 +944,7 @@ end
 -- @param thumb_len Length of the scroll bar thumb.
 -- @param viewport_len Length of the visible content viewport.
 -- @return Floored and clamped scroll position in the document that corresponds to this position in the trough.
-function lgcScroll.getDocumentPosition(doc_len, trough_len, pos, thumb_len, viewport_len)
+function wcScrollBar.getDocumentPosition(doc_len, trough_len, pos, thumb_len, viewport_len)
 	local doc_shortened = doc_len - viewport_len
 	local scroll_shortened = trough_len - thumb_len
 
@@ -963,7 +958,7 @@ end
 
 --- Gets the scroll bar thumb position from the current scroll offset within the document.
 -- @param scroll_pos Scroll offset of the viewport (left or top side) within the document, in the range of 0 to doc_len - thumb_len.
-function lgcScroll.getThumbPosition(viewport_len, scroll_pos, doc_len, trough_len, thumb_len)
+function wcScrollBar.getThumbPosition(viewport_len, scroll_pos, doc_len, trough_len, thumb_len)
 	local doc_shortened = doc_len - viewport_len
 	local scroll_shortened = trough_len - thumb_len
 
@@ -981,7 +976,7 @@ end
 --- Debug-render code for built-in scroll bars. It assumes that (x0,y0) in the transformation state is the widget's
 --  top-left point.
 -- @param self The client widget.
-function lgcScroll.debugRender(self)
+function wcScrollBar.debugRender(self)
 	local scr_h, scr_v = self.scr_h, self.scr_v
 
 	if scr_h and scr_h.active then
@@ -1024,4 +1019,4 @@ function lgcScroll.debugRender(self)
 end
 
 
-return lgcScroll
+return wcScrollBar

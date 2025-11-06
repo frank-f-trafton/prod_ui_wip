@@ -19,7 +19,6 @@ A button with a main part and a secondary part which performs a different action
 local context = select(1, ...)
 
 
-local lgcGraphic = context:getLua("shared/lgc_graphic")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
@@ -27,6 +26,7 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")
+local wcGraphic = context:getLua("shared/wc/wc_graphic")
 local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
@@ -365,7 +365,7 @@ def.default_skinner = {
 
 		local graphic = self.graphic or skin.graphic
 		if graphic then
-			lgcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
+			wcGraphic.render(self, graphic, skin, res.color_quad, res.label_ox, res.label_oy, ox, oy)
 		end
 
 		if self.label_mode then

@@ -545,10 +545,10 @@ end
 
 	Keyhook callbacks:
 
-	(trickle) love.keypressed -> self.hooks_trickle_key_pressed
-	(trickle) love.keyreleased -> self.hooks_trickle_key_released
-	(bubble, direct) love.keypressed -> self.hooks_key_pressed
-	(bubble, direct) love.keyreleased -> self.hooks_key_released
+	(trickle) love.keypressed -> self.KH_trickle_key_pressed
+	(trickle) love.keyreleased -> self.KH_trickle_key_released
+	(bubble, direct) love.keypressed -> self.KH_key_pressed
+	(bubble, direct) love.keyreleased -> self.KH_key_released
 
 	Each keyhook entry is a function that takes the widget as its first argument, followed by the standard arguments
 	provided by the LÖVE callback. See source comments for parameter lists.
@@ -559,8 +559,8 @@ end
 
 
 function widShared.evaluateKeyhooks(self, keyhooks, a, b, c)
-	-- keyPressed: widShared.evaluateKeyhooks(self, self.hooks_key_pressed, key, scancode, isrepeat)
-	-- keyReleased: widShared.evaluateKeyhooks(self, self.hooks_key_released, key, scancode)
+	-- keyPressed: widShared.evaluateKeyhooks(self, self.KH_key_pressed, key, scancode, isrepeat)
+	-- keyReleased: widShared.evaluateKeyhooks(self, self.KH_key_released, key, scancode)
 
 	for i = #keyhooks, 1, -1 do
 		local func = keyhooks[i]

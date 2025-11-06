@@ -63,7 +63,7 @@ function plan.make(panel)
 	local context = panel.context
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	demoShared.makeTitle(panel, nil, "Themes and Scale")

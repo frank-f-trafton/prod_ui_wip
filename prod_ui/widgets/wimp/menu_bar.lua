@@ -17,7 +17,6 @@ The menu bar may act strangely if it becomes too narrow to display all categorie
 local context = select(1, ...)
 
 
-local lgcWimp = context:getLua("shared/lgc_wimp")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -25,6 +24,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -76,7 +76,7 @@ end
 -- @param doctor_press When true, if user is pressing down a mouse button, transfer pressed state to the pop-up widget.
 -- @param set_selection When true, set the default selection in the pop-up menu.
 -- @return true if the pop-up was created, false if not.
-local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to lgcWimp.makePopUpMenu()
+local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_selection) -- XXX name is too similar to wcWimp.makePopUpMenu()
 	item.pop_up_proto:configure(item)
 
 	-- Locate bottom of menu item in UI space.
@@ -92,7 +92,7 @@ local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_sele
 	end
 
 
-	local pop_up = lgcWimp.makePopUpMenu(client, item.pop_up_proto, p_x, p_y)
+	local pop_up = wcWimp.makePopUpMenu(client, item.pop_up_proto, p_x, p_y)
 
 	if doctor_press then
 		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")

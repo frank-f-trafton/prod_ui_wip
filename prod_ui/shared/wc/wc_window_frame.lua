@@ -4,7 +4,7 @@ local context = select(1, ...)
 -- Window frame utility functions.
 
 
-local lgcWindowFrame = {}
+local wcWindowFrame = {}
 
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
@@ -31,7 +31,7 @@ local function _resize(dir, x, w, min_w, target)
 end
 
 
-function lgcWindowFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, istouch)
+function wcWindowFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, istouch)
 	local mx, my = x, y
 	local old_w, old_h = self.w, self.h
 
@@ -63,7 +63,7 @@ function lgcWindowFrame.mouseMovedResize(self, axis_x, axis_y, x, y, dx, dy, ist
 end
 
 
-function lgcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
+function wcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 	--[[
 	Relies on the following fields:
 	self.drag_ox
@@ -126,4 +126,4 @@ function lgcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 end
 
 
-return lgcWindowFrame
+return wcWindowFrame

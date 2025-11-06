@@ -14,7 +14,7 @@ local function _makeFrameBlock2(self)
 		dialog = root:newWindowFrame()
 		dialog.w = 448
 		dialog.h = 256
-		dialog:setScrollRangeMode("zero")
+		dialog:containerSetScrollRangeMode("zero")
 		dialog:setScrollBars(false, false)
 		dialog:setFrameBlock(frame)
 		dialog:setFrameTitle("The Frame That Blocks")
@@ -61,7 +61,7 @@ local function _makeFrameBlock1(self)
 		dialog = root:newWindowFrame()
 		dialog.w = 448
 		dialog.h = 256
-		dialog:setScrollRangeMode("zero")
+		dialog:containerSetScrollRangeMode("zero")
 		dialog:setScrollBars(false, false)
 		dialog:setFrameTitle("The Frame That Is Blocked")
 
@@ -96,7 +96,7 @@ end
 
 function plan.make(panel)
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("zero")
+	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
 	demoShared.makeTitle(panel, nil, "Dialogs and Notifications")

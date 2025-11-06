@@ -26,7 +26,7 @@ function plan.make(panel)
 	--title("TreeBox Test")
 
 	panel:layoutSetBase("viewport-width")
-	panel:setScrollRangeMode("auto")
+	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
 	local wid_id = "wimp/tree_box"

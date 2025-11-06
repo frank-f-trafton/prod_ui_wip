@@ -148,7 +148,7 @@ function plan.makeWindowFrame(root)
 	frame:setFrameTitle("Widget Tree")
 
 	frame:layoutSetBase("viewport")
-	frame:setScrollRangeMode("zero")
+	frame:containerSetScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
 

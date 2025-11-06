@@ -50,7 +50,7 @@ function wcPopUp.checkBlocking(self)
 	if root.context.settings then
 		do_block = pTable.resolve(root.context.settings, "wimp/pop_up_menu/block_1st_click_out")
 	end
-	self:setBlocking(do_block)
+	wcPopUp.setBlocking(self, do_block)
 end
 
 
