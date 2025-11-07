@@ -133,6 +133,11 @@ local demo_zoom = 1.0
 local demo_canvas
 
 
+-- When true, center the mouse cursor when zooming.
+-- When false/nil, the mouse cursor rests over the same pixel as it would without zooming.
+local demo_zoom_center = true
+
+
 -- * / Demo State *
 
 
@@ -975,9 +980,17 @@ function love.draw()
 
 		local zoom_exp = demo_zoom^2
 
-		love.graphics.translate(context.mouse_x, context.mouse_y)
-		love.graphics.scale(zoom_exp, zoom_exp)
-		love.graphics.translate(-context.mouse_x, -context.mouse_y)
+		if not demo_zoom_center then
+			-- the mouse cursor is over the same pixel at any zoom
+			love.graphics.translate(context.mouse_x, context.mouse_y)
+			love.graphics.scale(zoom_exp, zoom_exp)
+			love.graphics.translate(-context.mouse_x, -context.mouse_y)
+		else
+		-- the mouse cursor is centered
+			love.graphics.translate(demo_canvas:getWidth() / 2, demo_canvas:getHeight() / 2)
+			love.graphics.scale(demo_zoom, demo_zoom)
+			love.graphics.translate(-context.mouse_x, -context.mouse_y)
+		end
 
 		love.graphics.setBlendMode("alpha", "premultiplied")
 		love.graphics.draw(demo_canvas, 0, 0)
