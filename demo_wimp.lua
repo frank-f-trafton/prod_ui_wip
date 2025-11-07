@@ -135,7 +135,7 @@ local demo_canvas
 
 -- When true, center the mouse cursor when zooming.
 -- When false/nil, the mouse cursor rests over the same pixel as it would without zooming.
-local demo_zoom_center = true
+local demo_zoom_center = false
 
 
 -- * / Demo State *
