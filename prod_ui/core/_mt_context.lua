@@ -17,11 +17,15 @@ local contextResources = context:getLua("core/context_resources")
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
 --local pools = context:getLua("core/res/pools")
+local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+
+
+local _roundInf = pMath.roundInf
 
 
 _mt_context.draw = contextDraw.draw
@@ -67,6 +71,8 @@ end
 
 
 local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
+	x, y = _roundInf(x), _roundInf(y)
+
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_virtualMouseRepeat and cap_cur:uiCap_virtualMouseRepeat(x, y, button, istouch, reps) then
@@ -89,24 +95,26 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 end
 
 
-local function event_mousemoved(context, x, y, dx, dy, istouch)
+local function event_mousemoved(self, x, y, dx, dy, istouch)
+	x, y = _roundInf(x), _roundInf(y)
+
 	-- Update mouse position
-	context.mouse_x = x
-	context.mouse_y = y
+	self.mouse_x = x
+	self.mouse_y = y
 
 	-- Update click-sequence origin if the mouse is being held.
-	if context.mouse_pressed_button then
-		context.cseq_x = x
-		context.cseq_y = y
+	if self.mouse_pressed_button then
+		self.cseq_x = x
+		self.cseq_y = y
 	end
 
 	-- Event capture
-	local cap_cur = context.captured_focus
+	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_mouseMoved and cap_cur:uiCap_mouseMoved(x, y, dx, dy, istouch) then
 		return
 	end
 
-	mouseLogic.checkHover(context, dx, dy)
+	mouseLogic.checkHover(self, dx, dy)
 end
 
 
@@ -407,6 +415,8 @@ end
 
 
 function _mt_context:love_mousereleased(x, y, button, istouch, presses)
+	x, y = _roundInf(x), _roundInf(y)
+
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_mouseReleased and cap_cur:uiCap_mouseReleased(x, y, button, istouch, presses) then
@@ -483,6 +493,8 @@ end
 
 
 function _mt_context:love_mousepressed(x, y, button, istouch, presses)
+	x, y = _roundInf(x), _roundInf(y)
+
 	-- Event capture
 	local cap_cur = self.captured_focus
 	if cap_cur and cap_cur.uiCap_mousePressed and cap_cur:uiCap_mousePressed(x, y, button, istouch, presses) then

@@ -223,8 +223,8 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- the root).
 	self.mouse_start = false
 
-	-- The mouse pointer's most recent position. Can be outside the window bounds if the user
-	-- clicks in the app and drags outwards.
+	-- The mouse pointer's most recent position, rounded to integers. Can be outside the window
+	-- bounds if the user clicks in the app and drags outwards.
 	self.mouse_x = 0
 	self.mouse_y = 0
 
