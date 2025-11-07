@@ -63,7 +63,7 @@ function def:uiCall_pointerHover(inst, x, y, dx, dy)
 					self.cursor_hover = self.skin.cursor_on
 				else
 					local mx, my = self:getRelativePosition(x, y)
-					if self.vp3:pointOverlap(mx, my) then
+					if self.vp2:pointOverlap(mx, my) then
 						self.cursor_hover = nil
 					else
 						self.cursor_hover = self.skin.cursor_on
@@ -97,7 +97,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 					if not self.aux_pressed then
 						local mx, my = self:getRelativePosition(x, y)
 						-- main button part
-						if not self.vp3:pointOverlap(mx, my) then
+						if not self.vp2:pointOverlap(mx, my) then
 							self.pressed = true
 							self.cursor_press = self.skin.cursor_press
 
@@ -156,7 +156,7 @@ function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 				if button == 1 then
 					local mx, my = self:getRelativePosition(x, y)
 					-- main button part
-					if not self.aux_pressed and not self.vp3:pointOverlap(mx, my) then
+					if not self.aux_pressed and not self.vp2:pointOverlap(mx, my) then
 						self:wid_buttonAction()
 					end
 				end
@@ -193,36 +193,35 @@ function def:uiCall_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self:reshape()
 end
 
 
 function def:uiCall_reshapePre()
-	-- Viewport #1 is the main text bounding box.
-	-- Viewport #2 is the main graphic drawing rectangle.
-	-- Viewport #3 is the aux bounding box.
+	-- Viewport #1 is the text bounding box.
+	-- Viewport #2 is the aux bounding box (for clicking).
+	-- Viewport #3 is the aux bounding box (for placement of the graphic).
 
 	local skin = self.skin
 	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 
 	vp:set(0, 0, self.w, self.h)
-	vp:reduceT(skin.box.border)
-	vp:splitOrOverlay(vp2, skin.graphic_placement, skin.graphic_spacing)
-	vp2:reduceT(skin.box.margin)
 
+	-- determine the aux button size
 	local aux_sz
 	if skin.aux_size == "auto" then
 		if skin.aux_placement == "right" or skin.aux_placement == "left" then
-			aux_sz = vp2.h
+			aux_sz = self.h
 		else -- "top", "bottom"
-			aux_sz = vp2.w
+			aux_sz = self.w
 		end
 	else
 		aux_sz = skin.aux_size
 	end
 
-	vp:split(vp3, skin.aux_placement, aux_sz)
+	vp:split(vp2, skin.aux_placement, aux_sz)
+	vp2:copy(vp3)
+	vp:reduceT(skin.box.border)
+	vp3:reduceT(skin.box.margin)
 
 	wcLabel.reshapeLabel(self)
 
@@ -329,7 +328,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		local vp3 = self.vp3
+		local vp2, vp3 = self.vp2, self.vp3
 		local res = uiTheme.pickButtonResource(self, skin)
 
 		local slc_body = res.slice
@@ -344,10 +343,10 @@ def.default_skinner = {
 		love.graphics.setColor(0.5, 0.5, 0.5, 1.0)
 		-- (get coordinates for the line)
 		local vx, vy, vw, vh
-		if     skin.aux_placement == "left"   then vx, vy, vw, vh = vp3.x + vp3.w - 1, vp3.y, 1, vp3.h - 1
-		elseif skin.aux_placement == "right"  then vx, vy, vw, vh = vp3.x, vp3.y, 1, vp3.h
-		elseif skin.aux_placement == "top"    then vx, vy, vw, vh = vp3.x, vp3.y + vp3.h - 1, vp3.w - 1, 1
-		elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = vp3.x, vp3.y, vp3.w - 1, 1 end
+		if     skin.aux_placement == "left"   then vx, vy, vw, vh = vp2.x + vp2.w - 1, vp3.y, 1, vp3.h - 1
+		elseif skin.aux_placement == "right"  then vx, vy, vw, vh = vp2.x, vp3.y, 1, vp3.h
+		elseif skin.aux_placement == "top"    then vx, vy, vw, vh = vp3.x, vp2.y + vp2.h - 1, vp3.w - 1, 1
+		elseif skin.aux_placement == "bottom" then vx, vy, vw, vh = vp3.x, vp2.y, vp3.w - 1, 1 end
 		uiGraphics.quadXYWH(tq_px, vx + res.label_ox, vy + res.label_oy, vw, vh)
 
 		-- aux part icon
