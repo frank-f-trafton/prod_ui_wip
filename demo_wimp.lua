@@ -722,10 +722,10 @@ function love.update(dt)
 	dpanel_cool = math.max(0, dpanel_cool - dt)
 
 	if love.keyboard.isDown("-") then
-		demo_zoom = demo_zoom - dt * 5
+		demo_zoom = demo_zoom - dt * 2.0
 
 	elseif love.keyboard.isDown("=") then
-		demo_zoom = demo_zoom + dt * 5
+		demo_zoom = demo_zoom + dt * 2.0
 	end
 
 	if not context.app.enable_zoom then
@@ -832,7 +832,10 @@ function love.draw()
 	end
 
 	if demo_zoom ~= 1.0 then
-		if not demo_canvas or demo_canvas:getWidth() ~= love.graphics.getWidth() or demo_canvas:getHeight() ~= love.graphics.getHeight() then
+		if not demo_canvas
+		or demo_canvas:getWidth() ~= love.graphics.getWidth()
+		or demo_canvas:getHeight() ~= love.graphics.getHeight()
+		then
 			demo_canvas = love.graphics.newCanvas()
 			collectgarbage("collect")
 			collectgarbage("collect")
@@ -970,8 +973,10 @@ function love.draw()
 
 		love.graphics.push("all")
 
-		love.graphics.translate(demo_canvas:getWidth() / 2, demo_canvas:getHeight() / 2)
-		love.graphics.scale(demo_zoom, demo_zoom)
+		local zoom_exp = demo_zoom^2
+
+		love.graphics.translate(context.mouse_x, context.mouse_y)
+		love.graphics.scale(zoom_exp, zoom_exp)
 		love.graphics.translate(-context.mouse_x, -context.mouse_y)
 
 		love.graphics.setBlendMode("alpha", "premultiplied")
