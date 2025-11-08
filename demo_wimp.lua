@@ -877,6 +877,19 @@ function love.draw()
 		_printPerf1(dpanel)
 	end
 
+	if draw_panel then
+		local mx, my = love.mouse.getPosition()
+		if dpanel_cool == 0 and dpanel.w < love.graphics.getWidth() and my > dpanel.y and my <= dpanel.y + qp.y2 + dpanel.y_pad*2 then
+			if (dpanel_left and mx < dpanel.x + dpanel.w + dpanel.x_pad*2)
+			or (not dpanel_left and mx >= dpanel.x)
+			then
+				dpanel_left = not dpanel_left
+				dpanel_cool = dpanel_cool_max
+				updateDPanelX(dpanel)
+			end
+		end
+	end
+
 	if app.show_mouse_cross then
 		love.graphics.push("all")
 
@@ -1000,17 +1013,6 @@ function love.draw()
 
 	if draw_panel then
 		dpanel:draw()
-
-		local mx, my = love.mouse.getPosition()
-		if dpanel_cool == 0 and dpanel.w < love.graphics.getWidth() and my > dpanel.y and my <= dpanel.y + dpanel.last_h + dpanel.y_pad*2 then
-			if (dpanel_left and mx < dpanel.x + dpanel.w + dpanel.x_pad*2)
-			or (not dpanel_left and mx >= dpanel.x)
-			then
-				dpanel_left = not dpanel_left
-				dpanel_cool = dpanel_cool_max
-				updateDPanelX(dpanel)
-			end
-		end
 	end
 
 	--[=[

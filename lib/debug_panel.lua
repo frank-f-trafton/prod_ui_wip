@@ -54,7 +54,6 @@ function debugPanel.new(w, font)
 	local self = setmetatable({
 		x = 0, y = 0,
 		w = w,
-		last_h = 0,
 		x_pad = 16, y_pad = 16,
 		corner_radius = 8,
 
@@ -76,14 +75,13 @@ end
 
 function _mt_debug_panel:draw()
 	local qp = self.qp
-	self.last_h = qp.y2
 
 	love.graphics.push("all")
 
-	love.graphics.setScissor(self.x, self.y, self.w + self.x_pad*2, self.last_h + self.y_pad*2)
+	love.graphics.setScissor(self.x, self.y, self.w + self.x_pad*2, qp.y2 + self.y_pad*2)
 
 	love.graphics.setColor(self.r1, self.g1, self.b1, self.a1)
-	love.graphics.rectangle("fill", self.x, self.y, self.w + self.x_pad*2, self.last_h + self.y_pad*2, self.corner_radius, self.corner_radius)
+	love.graphics.rectangle("fill", self.x, self.y, self.w + self.x_pad*2, qp.y2 + self.y_pad*2, self.corner_radius, self.corner_radius)
 
 	love.graphics.setColor(self.r2, self.g2, self.b2, self.a2)
 	love.graphics.draw(self.qp.text_object, self.x + self.x_pad, self.y + self.y_pad)
