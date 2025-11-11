@@ -212,10 +212,11 @@ function wcLabel.render(self, skin, font, c_text, c_ul, label_ox, label_oy, ox, 
 	if self.label_ul_x then
 		local tq_px = skin.tq_px
 		love.graphics.setColor(c_ul or c_text)
+		local ul_y = textUtil.getUnderlineOffset(font, label_style.ul_h)
 		uiGraphics.quadXYWH(
 			tq_px,
 			vp.x + label_ox + self.label_ul_x + self.label_ul_ox,
-			text_y + font_height + label_oy,
+			text_y + ul_y + label_oy,
 			self.label_ul_w,
 			label_style.ul_h
 		)
