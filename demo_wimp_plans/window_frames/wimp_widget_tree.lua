@@ -67,7 +67,7 @@ local function _buildTree(tree_box, root)
 	_buildLoop(tree_box, tree_box.tree, root, context.thimble1, context.thimble2, _collapsed)
 
 	tree_box:orderItems()
-	tree_box:arrangeItems()
+	tree_box:cacheUpdate(true)
 
 	-- Restore the selection, if any.
 	local restored

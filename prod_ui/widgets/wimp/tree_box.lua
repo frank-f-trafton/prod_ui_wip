@@ -56,9 +56,6 @@ def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-def.arrangeItems = wcTree.arrangeItems
-
-
 -- * Scroll helpers *
 
 
@@ -221,15 +218,16 @@ end
 
 
 --- Updates cached display state.
--- @param refresh_dimensions When true, update doc_w and doc_h based on the combined dimensions of all items.
+-- @param refresh_dimensions When true, update item positions, and doc_w and doc_h based on the combined dimensions of all items.
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
 	local skin = self.skin
 
 	if refresh_dimensions then
-		self.doc_w, self.doc_h = 0, 0
-
 		wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+		wcTree.arrangeItems(self)
+
+		self.doc_w, self.doc_h = 0, 0
 
 		-- Document height is based on the last item in the menu.
 		local last_item = self.MN_items[#self.MN_items]
@@ -257,6 +255,11 @@ function def:cacheUpdate(refresh_dimensions)
 		xx = xx + self.TR_icon_w
 
 		self.TR_text_x = xx
+
+		-- If applicable, update item positions for right alignment.
+		if self.TR_item_align_h == "right" then
+			wcTree.mirrorItemsHorizontal(self)
+		end
 	end
 
 	-- Set the draw ranges for items.
@@ -631,9 +634,9 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
-		wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+		--wcTree.updateAllItemDimensions(self, self.skin, self.tree)
 		wcTree.updateAllIconReferences(self, self.skin, self.tree)
-		self:arrangeItems()
+		self:cacheUpdate(true)
 
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
@@ -689,7 +692,7 @@ def.default_skinner = {
 				line_x_offset = math.floor((skin.first_col_spacing - skin.pipe_width) / 2)
 				dir_h = 1
 			else -- "right"
-				line_x_offset = math.floor(self.doc_w - (skin.first_col_spacing  - skin.pipe_width) / 2)
+				line_x_offset = math.floor(self.doc_w - (skin.first_col_spacing  + skin.pipe_width) / 2)
 				dir_h = -1
 			end
 

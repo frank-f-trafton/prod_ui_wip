@@ -8,7 +8,6 @@ local plan = {}
 
 local function _refreshTreeBox(self)
 	self:orderItems()
-	self:arrangeItems()
 	self:cacheUpdate(true)
 end
 
@@ -70,7 +69,7 @@ function plan.make(panel)
 	back_to.expanded = false
 
 	tree_box:orderItems()
-	tree_box:arrangeItems()
+	tree_box:cacheUpdate(true)
 
 	-- test marked item cleanup when toggling expanders
 	--tree_box.MN_mark_mode = "toggle"

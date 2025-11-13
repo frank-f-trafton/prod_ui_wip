@@ -9,6 +9,7 @@ local structTree = {}
 
 local _mt_tree = {}
 _mt_tree.__index = _mt_tree
+structTree.mt_tree = _mt_tree
 
 
 local function _getNodeIndex(self, parent)
@@ -166,6 +167,20 @@ function _mt_tree:getNodeDepth()
 	end
 
 	return depth
+end
+
+
+function _mt_tree:isNodeExpanded()
+	local node = self
+
+	while node do
+		if not node.expanded then
+			return false
+		end
+		node = node.parent
+	end
+
+	return true
 end
 
 

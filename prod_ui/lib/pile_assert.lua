@@ -307,10 +307,37 @@ function M.tableWithMetatable(n, v, mt)
 end
 
 
+lang.mt_bad_t_eval = "expected false/nil or table"
+lang.mt_bad_mt_eval = "expected false/nil or table to have a metatable"
+lang.mt_bad_match_eval = "expected false/nil or metatable for: $1"
+function M.tableWithMetatableEval(n, v, mt)
+	if v then
+		if type(v) ~= "table" then
+			error(_n(n) .. lang.mt_bad_t_eval, 2)
+		end
+		local this_mt = getmetatable(v)
+		if not this_mt then
+			error(_n(n) .. lang.mt_bad_mt_eval, 2)
+		end
+		if this_mt ~= mt then
+			error(_n(n) .. interp(lang.mt_bad_match_eval, pName.safeGet(mt)), 2)
+		end
+	end
+end
+
+
 lang.expect_no_mt = "expected a table without an assigned metatable"
 function M.tableWithoutMetatable(n, v)
 	if type(v) ~= "table" or getmetatable(v) then
 		error(_n(n) .. lang.expect_no_mt, 2)
+	end
+end
+
+
+lang.expect_no_mt_eval = "expected false/nil or a table without an assigned metatable"
+function M.tableWithoutMetatableEval(n, v)
+	if v and (type(v) ~= "table" or getmetatable(v)) then
+		error(_n(n) .. lang.expect_no_mt_eval, 2)
 	end
 end
 
