@@ -4,6 +4,8 @@
 local context = select(1, ...)
 
 
+local structTree = context:getLua("shared/struct_tree")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 
 
@@ -29,17 +31,11 @@ end
 function wcTree.setExpanded(self, item, exp)
 	item.expanded = exp
 	self:orderItems()
-	self:arrangeItems()
+	wcTree.arrangeItems(self)
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
 
-	--[[
-	Calling cacheUpdate() again. We need to set the item ranges after clamping. The function that we want
-	is wcMenu.widgetAutoRangeV(), but it's not accessible (without debug shenanigans) from this source
-	file. Either it needs to be attached to widgets as a method, or this source file needs to be loaded
-	through the context.
-	TODO: this file is now loaded through the context.
-	--]]
+	-- TODO: deal with having two calls to cacheUpdate().
 	self:cacheUpdate(true)
 end
 
@@ -191,9 +187,14 @@ function wcTree.setItemAlignment(self, align)
 end
 
 
-function wcTree.addNode(self, text, parent_node, tree_pos, icon_id)
-	--print("add node", text, parent_node, tree_pos, icon_id)
-	-- XXX: Assertions.
+function wcTree.addNode(self, text, parent_node, tree_pos, icon_id, expanded)
+	uiAssert.type(1, text, "string")
+	uiAssert.tableWithMetatableEval(2, parent_node, structTree.mt_tree)
+	uiAssert.typeEval(3, tree_pos, "number")
+	uiAssert.typeEval(4, icon_id, "string")
+	-- don't assert 'expanded'
+
+	--print("add node", text, parent_node, tree_pos, icon_id, expanded)
 
 	local skin = self.skin
 	local font = skin.font
@@ -215,7 +216,6 @@ function wcTree.addNode(self, text, parent_node, tree_pos, icon_id)
 
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = false
 	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
 
 	item.x, item.y = 0, 0
@@ -321,7 +321,7 @@ function wcTree.removeNode(self, node)
 	_removeNode(self, node, 1)
 
 	self:orderItems()
-	self:arrangeItems()
+	wcTree.arrangeItems(self)
 
 	return self
 end
@@ -329,20 +329,26 @@ end
 
 function wcTree.arrangeItems(self)
 	local skin, items = self.skin, self.MN_items
-	local font = skin.font
-
 	local yy = 0
 
 	for i = 1, #items do
 		local item = items[i]
 
-		if self.TR_item_align_h == "left" then
-			item.x = item.depth * skin.indent
-		else -- "right"
-			item.x = self.doc_w - item.w - (item.depth * skin.indent)
-		end
+		item.x = item.depth * skin.indent
 		item.y = yy
 		yy = item.y + item.h
+	end
+
+	return self
+end
+
+
+function wcTree.mirrorItemsHorizontal(self)
+	local items = self.MN_items
+	for i = 1, #items do
+		local item = items[i]
+
+		item.x = self.doc_w - item.x - item.w
 	end
 
 	return self

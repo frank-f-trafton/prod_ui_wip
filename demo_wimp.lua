@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.tree_box",
 	"widgets.button_work",
 	"widgets.button_split",
 	"widgets.dropdown_box",
@@ -623,7 +624,8 @@ do
 
 		_addPlans(demo_list, nil, demo_plan_list)
 		demo_list:orderItems()
-		demo_list:arrangeItems()
+		demo_list:cacheUpdate(true)
+		--demo_list:arrangeItems()
 
 		--print(inspect(demo_list.tree))
 
