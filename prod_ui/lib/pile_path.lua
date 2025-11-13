@@ -1,6 +1,6 @@
--- PILE Path v1.316
+-- PILE Path v2.000
 -- (C) 2024 - 2025 PILE Contributors
--- License: MIT or MIT-0
+-- License: MIT
 -- https://github.com/frank-f-trafton/pile_base
 
 local M = {}

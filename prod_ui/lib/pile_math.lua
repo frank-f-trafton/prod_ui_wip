@@ -1,6 +1,6 @@
--- PILE Math v1.316
+-- PILE Math v2.000
 -- (C) 2024 - 2025 PILE Contributors
--- License: MIT or MIT-0
+-- License: MIT
 -- https://github.com/frank-f-trafton/pile_base
 
 
