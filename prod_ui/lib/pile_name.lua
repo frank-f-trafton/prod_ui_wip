@@ -1,6 +1,6 @@
--- PILE Name Registry v1.316
+-- PILE Name Registry v2.000
 -- (C) 2025 PILE Contributors
--- License: MIT or MIT-0
+-- License: MIT
 -- https://github.com/frank-f-trafton/pile_base
 
 
