@@ -178,7 +178,7 @@ local function _updateColumnSize(self, col)
 	pRect.reduceTop(rht, self.header_text_y)
 	rht.h = skin.font:getHeight()
 
-	local text_reduce_v = math.floor(skin.item_h - skin.cell_font:getHeight() / 2)
+	local text_reduce_v = math.floor((skin.item_h - skin.cell_font:getHeight()) / 2)
 	pRect.reduceTop(rct, text_reduce_v)
 	pRect.reduceBottom(rct, text_reduce_v)
 end
@@ -1363,8 +1363,6 @@ local function drawWholeColumn(self, col, backfill, ox, oy)
 	uiGraphics.drawSlice(res.sl_body, 0, 0, col.w, col.h)
 
 	-- Header box text.
-	-- ZXC: header text alignment
-
 	love.graphics.push("all")
 
 	love.graphics.intersectScissor(
