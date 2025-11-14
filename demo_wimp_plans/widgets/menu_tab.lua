@@ -70,21 +70,22 @@ function plan.make(panel)
 	menu_tab:setScrollBars(true, true)
 
 	menu_tab:newColumn(1)
-		:setText("Column 1")
+		:setHeaderText("Column 1")
+		--:setHeaderTextAlignment("right") -- test...
 		:setLockedVisibility(true)
 		:setSortFunction(columnSortLabels)
 
 	menu_tab:newColumn(2)
-		:setText("Column 2")
+		:setHeaderText("Column 2")
 		:setSortFunction(columnSortLabels)
 
 	menu_tab:newColumn(3)
-		:setText("Column 3")
+		:setHeaderText("Column 3")
 		--:setContentTextAlignment("center") -- test
 		:setSortFunction(columnSortLabels)
 
 	menu_tab:newColumn(4)
-		:setText("Column 4")
+		:setHeaderText("Column 4")
 		:setSortFunction(columnSortLabels)
 
 	menu_tab.column_sort_ascending = true

@@ -60,6 +60,7 @@ local context = select(1, ...)
 
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -78,6 +79,8 @@ local _lerp = pMath.lerp
 
 
 local _nm_text_align = uiTable.newNamedMap("TextAlign", {left=0.0, center=0.5, right=1.0})
+local _nm_header_arrow_side = uiTable.newNamedMapV("HeaderArrowSide", "left", "right")
+local _nm_cell_icon_side = uiTable.newNamedMapV("IconSide", "left", "right")
 
 
 local def = {
@@ -144,19 +147,40 @@ local function _getColumnIndex(self, col)
 end
 
 
-local function _updateColumnSize(col, skin)
+local function _updateColumnSize(self, col)
+	local skin = self.skin
+	local rht, rha, rci, rct = col.rect_ht, col.rect_ha, col.rect_ci, col.rect_ct
+
 	col.w = math.floor(col.base_w * context.scale)
 	col.h = skin.column_bar_height
 
-	local xx = 0
-	if col.icons_enabled then
-		col.cell_icon_x = xx
-		col.cell_icon_y = math.floor((skin.item_h - skin.cell_icon_h) / 2)
-		xx = xx + skin.cell_icon_w
+	col.header_text_w = skin.font:getWidth(col.header_text)
+
+	pRect.set(rht, skin.category_h_pad, 0, col.w - skin.category_h_pad*2, col.h)
+
+	if skin.col_arrow_show then
+	--if skin.col_arrow_show and self.column_primary == col then
+		pRect.split(rht, rha, skin.col_arrow_side, skin.header_icon_w + skin.category_h_pad)
+		if skin.col_arrow_side == "right" then
+			pRect.reduceLeft(rha, skin.category_h_pad)
+		else -- "left"
+			pRect.reduceRight(rha, skin.category_h_pad)
+		end
 	end
 
-	col.cell_text_x = xx
-	col.cell_text_y = math.floor((skin.item_h - skin.cell_font:getHeight()) / 2)
+	pRect.set(rct, 0, 0, col.w, skin.item_h)
+
+	if col.icons_enabled then
+		pRect.split(rct, rci, skin.cell_icon_side, skin.cell_icon_w)
+		col.cell_icon_x = xx
+	end
+
+	pRect.reduceTop(rht, self.header_text_y)
+	rht.h = skin.font:getHeight()
+
+	local text_reduce_v = math.floor(skin.item_h - skin.cell_font:getHeight() / 2)
+	pRect.reduceTop(rct, text_reduce_v)
+	pRect.reduceBottom(rct, text_reduce_v)
 end
 
 
@@ -181,7 +205,7 @@ local function _refreshColumnBoxes(self, first_i)
 		if column.visible then
 			column.x = cx
 			column.y = 0
-			_updateColumnSize(column, skin) -- column.w, column.h, etc.
+			_updateColumnSize(self, column)
 			cx = cx + column.w
 		else
 			column.x, column.y, column.w, column.h = 0, 0, 0, 0
@@ -265,29 +289,30 @@ function def:newColumn(id, pos)
 	column.base_w = math.max(skin.column_min_w, skin.column_def_w)
 
 	column.x, column.y = 0, 0
-	_updateColumnSize(column, skin) -- column.w, column.h, cell_icon_x|y, cell_text_x|y
+
+	column.rect_ht = {x=0, y=0, w=0, h=0} -- header text
+	column.rect_ha = {x=0, y=0, w=0, h=0} -- header arrow
+	column.rect_ci = {x=0, y=0, w=0, h=0} -- cell/content icon
+	column.rect_ct = {x=0, y=0, w=0, h=0} -- cell/content text
 
 	column.visible = true
-	column.text = ""
-	column.text_align = skin.col_def_text_align
+	column.header_text = ""
+	column.header_text_align = skin.col_def_text_align
 	column.content_text_align = skin.content_def_text_align
 	column.icons_enabled = false
 
 	column.cb_sort = false
 
-	column.cell_icon_x = 0
-	column.cell_icon_y = 0
-	column.cell_text_x = 0 -- the left side of the text print space, after the icon has been carved out
-	column.cell_text_y = 0
+	_updateColumnSize(self, column)
 
 	return column
 end
 
 
 function def:removeColumn(id)
-	-- The caller is responsible for cleaning up cells associated with this column ID.
-
 	uiAssert.types(1, id, "string", "number")
+
+	-- The caller is responsible for cleaning up cells associated with this column ID.
 
 	local i, col = _getColumnByID(self, id)
 	col.owner = nil
@@ -334,17 +359,17 @@ function _mt_column:getVisibility()
 end
 
 
-function _mt_column:setText(text)
+function _mt_column:setHeaderText(text)
 	uiAssert.typeEval(1, text, "string")
 
-	self.text = text
+	self.header_text = text
 
 	return self
 end
 
 
-function _mt_column:getText()
-	return self.text
+function _mt_column:getHeaderText()
+	return self.header_text
 end
 
 
@@ -377,7 +402,7 @@ function _mt_column:setWidth(w, prescaled)
 	end
 
 	if old_base_w ~= col.base_w then
-		_updateColumnSize(self, self.owner.skin)
+		_updateColumnSize(self.owner, self)
 	end
 
 	return self
@@ -401,22 +426,19 @@ function _mt_column:getLockedVisibility()
 end
 
 
---[====[
--- TODO: Unfinished.
 function _mt_column:setHeaderTextAlignment(align)
 	align = align or self.owner.skin.col_def_text_align
 	uiAssert.namedMap(1, align, _nm_text_align)
 
-	self.text_align = align
+	self.header_text_align = align
 
 	return self
 end
 
 
 function _mt_column:getHeaderTextAlignment()
-	return self.text_align
+	return self.header_text_align
 end
---]====]
 
 
 function _mt_column:setContentTextAlignment(align)
@@ -440,7 +462,7 @@ function _mt_column:setContentIconsEnabled(enabled)
 	self.icons_enabled = not not enabled
 
 	if old_enabled ~= self.icons_enabled then
-		_updateColumnSize(self, self.owner.skin)
+		_updateColumnSize(self.owner, self)
 	end
 
 	return self
@@ -605,7 +627,7 @@ local function _makePopUpPrototype(self)
 	for i, column in ipairs(self.columns) do
 		local command = P.command()
 			:setIconID(column.visible and "check_on" or "check_off")
-			:setText(column.text ~= "" and column.text or "(Column #" .. i .. ")")
+			:setText(column.header_text ~= "" and column.header_text or "(Column #" .. i .. ")")
 			:setActionable(not column.lock_visibility)
 			:setCallback(callback_toggleCategoryVisibility)
 			:setUserValue(i) -- column index
@@ -714,7 +736,6 @@ function def:uiCall_initialize()
 	self:applyAllSettings()
 
 	self.header_text_y = 0
-	self.cell_text_y = 0
 end
 
 
@@ -748,7 +769,6 @@ function def:uiCall_reshapePre()
 	wcScrollBar.updateScrollState(self)
 
 	self.header_text_y = math.floor((skin.column_bar_height - skin.font:getHeight()) / 2)
-	self.cell_text_y = math.floor((skin.item_h - skin.cell_font:getHeight()) / 2)
 
 	_refreshColumnBoxes(self, 1)
 	self:cacheUpdate(true)
@@ -1155,6 +1175,8 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 			and smx >= old_col_press.x and smx < old_col_press.x + old_col_press.w
 			and my >= old_col_press.y and my < old_col_press.y + old_col_press.h
 			then
+				local old_col_pri = self.column_primary
+
 				-- Handle release event
 				if old_col_press == self.column_primary then
 					self.column_sort_ascending = not self.column_sort_ascending
@@ -1178,6 +1200,11 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 						end
 					end
 				end
+
+				if old_col_pri then
+					_updateColumnSize(self, old_col_pri)
+				end
+				_updateColumnSize(self, old_col_press)
 
 				self:selectionInView(true)
 			end
@@ -1305,60 +1332,71 @@ function def:uiCall_destroy(inst)
 end
 
 
-local function drawWholeColumn(self, column, backfill, ox, oy)
+local function drawWholeColumn(self, col, backfill, ox, oy)
 	local skin = self.skin
 	local vp3 = self.vp3
 	local tq_px = skin.tq_px
 	local font = skin.font
+	local rht, rha, rci, rct = col.rect_ht, col.rect_ha, col.rect_ci, col.rect_ct
 
-	local res = (self.column_pressed == column and column.cb_sort) and skin.res_column_press
-		or (self.column_hovered == column) and skin.res_column_hover
+	local res = (self.column_pressed == col and col.cb_sort) and skin.res_column_press
+		or (self.column_hovered == col) and skin.res_column_hover
 		or skin.res_column_idle
 
 	local header_icon_id = false
-	if self.column_primary == column then
+	if self.column_primary == col then
 		header_icon_id = self.column_sort_ascending and "ascending" or "descending"
 	end
 
 	love.graphics.push("all")
 
 	uiGraphics.intersectScissor(
-		ox + column.x - self.scr_x,
-		oy + vp3.y + column.y,
-		column.w,
-		column.h
+		ox + col.x - self.scr_x,
+		oy + vp3.y + col.y,
+		col.w,
+		col.h
 	)
-	love.graphics.translate(column.x - self.scr_x, vp3.y + column.y)
+	love.graphics.translate(col.x - self.scr_x, vp3.y + col.y)
 
 	-- Header box body.
 	love.graphics.setColor(res.color_body)
-	uiGraphics.drawSlice(res.sl_body, 0, 0, column.w, column.h)
+	uiGraphics.drawSlice(res.sl_body, 0, 0, col.w, col.h)
 
 	-- Header box text.
-	local text_x = skin.category_h_pad
-	local text_y = self.header_text_y
+	-- ZXC: header text alignment
+
+	love.graphics.push("all")
+
+	love.graphics.intersectScissor(
+		ox + col.x - self.scr_x + rht.x + res.offset_x,
+		oy + col.y + rht.y + res.offset_y,
+		rht.w,
+		rht.h
+	)
 
 	love.graphics.setColor(res.color_text)
 	love.graphics.setFont(font)
+
+	local h_lerp_amount = _nm_text_align[col.header_text_align]
+	local h_x_offset = math.floor(_lerp(rht.x, rht.x + rht.w - col.header_text_w, h_lerp_amount))
+
 	love.graphics.print(
-		column.text,
-		text_x + res.offset_x,
-		text_y + res.offset_y
+		col.header_text,
+		h_x_offset + res.offset_x,
+		rht.y + res.offset_y
 	)
+
+	love.graphics.pop()
 
 	-- Header box icon (indicating sort order).
 	if header_icon_id then
-		local text_w = font:getWidth(column.text)
-		local bx = 0 + math.max(text_w + skin.category_h_pad*2, column.w - skin.header_icon_w - skin.category_h_pad)
-		local by = math.floor(0.5 + column.h / 2 - skin.header_icon_h / 2)
-
 		local quad = (header_icon_id == "ascending") and skin.tq_arrow_up or skin.tq_arrow_down
-		uiGraphics.quadXYWH(
+		uiGraphics.quadShrinkOrCenterXYWH(
 			quad,
-			bx + res.offset_x,
-			by + res.offset_y,
-			skin.header_icon_w,
-			skin.header_icon_h
+			rha.x + res.offset_x,
+			rha.y + res.offset_y,
+			rha.w,
+			rha.h
 		)
 	end
 
@@ -1367,23 +1405,23 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	love.graphics.push("all")
 
 	uiGraphics.intersectScissor(
-		ox + column.x - self.scr_x,
+		ox + col.x - self.scr_x,
 		oy + self.vp.y,
-		column.w,
+		col.w,
 		self.vp.h
 	)
-	love.graphics.translate(column.x - self.scr_x, -self.scr_y)
+	love.graphics.translate(col.x - self.scr_x, -self.scr_y)
 
 	-- Optional backfill. Used to indicate a dragged column.
 	if backfill then
 		love.graphics.setColor(skin.color_drag_col_bg)
-		uiGraphics.quadXYWH(tq_px, 0, 0, column.w, self.vp2.h)
+		uiGraphics.quadXYWH(tq_px, 0, 0, col.w, self.vp2.h)
 	end
 
 	-- Thin vertical separators between columns
 	-- [XXX] This is kind of iffy. It might be better to draw a mosaic body for every column.
 	love.graphics.setColor(skin.color_column_sep)
-	uiGraphics.quadXYWH(tq_px, column.w - skin.column_sep_width, self.scr_y, skin.column_sep_width, self.h)
+	uiGraphics.quadXYWH(tq_px, col.w - skin.column_sep_width, self.scr_y, skin.column_sep_width, self.h)
 
 	-- Draw cell contents.
 	local items = self.MN_items
@@ -1391,20 +1429,20 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 	local last = math.min(self.MN_items_last, #items)
 
 	-- icons
-	if column.icons_enabled then
+	if col.icons_enabled then
 		for j = first, last do
 			local item = items[j]
-			local cell = item.cells[column.id]
+			local cell = item.cells[col.id]
 			if cell then
 				local tq_icon = cell.tq_icon
 				if tq_icon then
 					love.graphics.setColor(skin.color_cell_icon)
-					uiGraphics.quadXYWH(
+					uiGraphics.quadShrinkOrCenterXYWH(
 						tq_icon,
-						column.cell_icon_x,
-						item.y + column.cell_icon_y,
-						skin.cell_icon_w,
-						skin.cell_icon_h
+						item.x + rci.x,
+						item.y + rci.y,
+						rci.w,
+						rci.h
 					)
 				end
 			end
@@ -1412,19 +1450,19 @@ local function drawWholeColumn(self, column, backfill, ox, oy)
 		end
 	end
 
-	-- text
+	-- content text
 	love.graphics.setColor(skin.color_item_text)
 	for j = first, last do
 		local item = items[j]
-		local cell = item.cells[column.id]
+		local cell = item.cells[col.id]
 		if cell then
 			love.graphics.setColor(skin.color_cell_text)
 			love.graphics.setFont(skin.cell_font)
 
-			local lerp_amount = _nm_text_align[column.content_text_align]
-			local x_offset = math.floor(_lerp(column.cell_text_x, column.cell_text_x + column.w - cell.text_w, lerp_amount))
+			local lerp_amount = _nm_text_align[col.content_text_align]
+			local x_offset = math.floor(_lerp(rct.x, rct.x + rct.w - cell.text_w, lerp_amount))
 
-			love.graphics.print(cell.text, x_offset, item.y + self.cell_text_y)
+			love.graphics.print(cell.text, x_offset, item.y + rct.y)
 		end
 	end
 
@@ -1464,8 +1502,11 @@ def.default_skinner = {
 		column_def_w = {uiAssert.integerGE, 0},
 		column_bar_height = {uiAssert.integerGE, 0},
 
-		col_def_text_align = {uiAssert.oneOf, "left", "center", "right"},
-		content_def_text_align = {uiAssert.oneOf, "left", "center", "right"},
+		col_def_text_align = {uiAssert.namedMap, _nm_text_align},
+		content_def_text_align = {uiAssert.namedMap, _nm_text_align},
+
+		col_arrow_show = {uiAssert.type, "boolean"},
+		col_arrow_side = {uiAssert.namedMap, _nm_header_arrow_side},
 
 		item_h = {uiAssert.integerGE, 0},
 
@@ -1479,6 +1520,7 @@ def.default_skinner = {
 
 		cell_font = themeAssert.font,
 
+		cell_icon_side = {uiAssert.namedMap, _nm_cell_icon_side},
 		cell_icon_w = {uiAssert.integerGE, 0},
 		cell_icon_h = {uiAssert.integerGE, 0},
 
