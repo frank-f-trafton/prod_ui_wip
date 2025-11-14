@@ -27,6 +27,8 @@ function client:writeText(text, suppress_replace)
 	uiAssert.type(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.writeText, text, suppress_replace)
+
+	return self
 end
 
 
@@ -34,6 +36,8 @@ function client:replaceText(text)
 	uiAssert.type(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.replaceText, text)
+
+	return self
 end
 
 
@@ -41,6 +45,8 @@ function client:setText(text)
 	uiAssert.type(1, text, "string")
 
 	editWidM.wrapAction(self, editCommandM.setText, text)
+
+	return self
 end
 
 
@@ -67,16 +73,22 @@ end
 
 function client:cut()
 	editWidM.wrapAction(self, editCommandM.cut)
+
+	return self
 end
 
 
 function client:copy()
 	editWidM.wrapAction(self, editCommandM.copy)
+
+	return self
 end
 
 
 function client:paste()
 	editWidM.wrapAction(self, editCommandM.paste)
+
+	return self
 end
 
 
@@ -87,91 +99,127 @@ end
 
 function client:caretStepLeft(clear_highlight)
 	editWidM.wrapAction(self, editCommandM.caretStepLeft, clear_highlight)
+
+	return self
 end
 
 
 function client:caretStepRight(clear_highlight)
 	editWidM.wrapAction(self, editCommandM.caretStepRight, clear_highlight)
+
+	return self
 end
 
 
 function client:caretJumpLeft(clear_highlight)
 	editWidM.wrapAction(self, editCommandM.caretJumpLeft, clear_highlight)
+
+	return self
 end
 
 
 function client:caretJumpRight(clear_highlight)
 	editWidM.wrapAction(self, editCommandM.caretJumpRight, clear_highlight)
+
+	return self
 end
 
 
 function client:caretFirst(clear_highlight)
 	editWidM.wrapAction(self, editCommandM.caretFirst, clear_highlight)
+
+	return self
 end
 
 
 function client:caretLast(clear_highlight)
 	editWidM.wrapAction(self, editCommandM.caretLast, clear_highlight)
+
+	return self
 end
 
 
 function client:caretFullLineFirst(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretFullLineFirst, clear_highlight)
+
+	return self
 end
 
 
 function client:caretFullLineLast(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretFullLineLast, clear_highlight)
+
+	return self
 end
 
 
 function client:caretSubLineFirst(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretSubLineFirst, clear_highlight)
+
+	return self
 end
 
 
 function client:caretSubLineLast(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretSubLineLast, clear_highlight)
+
+	return self
 end
 
 
 function client:caretLineFirst(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretLineFirst, clear_highlight)
+
+	return self
 end
 
 
 function client:caretLineLast(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretLineLast, clear_highlight)
+
+	return self
 end
 
 
 function client:caretToHighlightEdgeLeft()
 	editWidM.wrapAction(self, editCommandM.caretToHighlightEdgeLeft)
+
+	return self
 end
 
 
 function client:caretToHighlightEdgeRight()
 	editWidM.wrapAction(self, editCommandM.caretToHighlightEdgeRight)
+
+	return self
 end
 
 
 function client:caretStepUp(clear_highlight, n_steps) -- M
 	editWidM.wrapAction(self, editCommandM.caretStepUp, clear_highlight, n_steps)
+
+	return self
 end
 
 
 function client:caretStepDown(clear_highlight, n_steps) -- M
 	editWidM.wrapAction(self, editCommandM.caretStepDown, clear_highlight, n_steps)
+
+	return self
 end
 
 
 function client:caretStepUpCoreLine(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretStepUpCoreLine, clear_highlight)
+
+	return self
 end
 
 
 function client:caretStepDownCoreLine(clear_highlight) -- M
 	editWidM.wrapAction(self, editCommandM.caretStepDownCoreLine, clear_highlight)
+
+	return self
 end
 
 
@@ -182,66 +230,92 @@ end
 
 function client:highlightAll()
 	editWidM.wrapAction(self, editCommandM.highlightAll)
+
+	return self
 end
 
 
 function client:highlightCurrentLine() -- M
 	editWidM.wrapAction(self, editCommandM.highlightCurrentLine)
+
+	return self
 end
 
 
 function client:highlightCurrentWrappedLine() -- M
 	editWidM.wrapAction(self, editCommandM.highlightCurrentWrappedLine)
+
+	return self
 end
 
 
 function client:highlightCurrentWord()
 	editWidM.wrapAction(self, editCommandM.highlightCurrentWord)
+
+	return self
 end
 
 
 function client:clearHighlight()
 	editWidM.wrapAction(self, editCommandM.clearHighlight)
+
+	return self
 end
 
 
 function client:deleteHighlighted()
 	editWidM.wrapAction(self, editCommandM.deleteHighlighted)
+
+	return self
 end
 
 
 function client:deleteCaretToLineStart() -- M
 	editWidM.wrapAction(self, editCommandM.deleteCaretToLineStart)
+
+	return self
 end
 
 
 function client:deleteCaretToLineEnd() -- M
 	editWidM.wrapAction(self, editCommandM.deleteCaretToLineEnd)
+
+	return self
 end
 
 
 function client:deleteLine() -- M
 	editWidM.wrapAction(self, editCommandM.deleteLine)
+
+	return self
 end
 
 
 function client:backspace()
 	editWidM.wrapAction(self, editCommandM.backspace)
+
+	return self
 end
 
 
 function client:deleteAll()
 	editWidM.wrapAction(self, editCommandM.deleteAll)
+
+	return self
 end
 
 
 function client:backspaceGroup()
 	editWidM.wrapAction(self, editCommandM.backspaceGroup)
+
+	return self
 end
 
 
 function client:deleteGroup()
 	editWidM.wrapAction(self, editCommandM.deleteGroup)
+
+	return self
 end
 
 
@@ -252,32 +326,44 @@ function client:deleteUChar(n_u_chars)
 	uiAssert.type(1, n_u_chars, "number")
 
 	editWidM.wrapAction(self, editCommandM.deleteUChar, n_u_chars)
+
+	return self
 end
 
 
 function client:undo()
 	editWidM.wrapAction(self, editCommandM.undo)
+
+	return self
 end
 
 
 function client:redo()
 	editWidM.wrapAction(self, editCommandM.redo)
+
+	return self
 end
 
 
 function client:resetInputCategory()
 	-- Used to force a new history entry.
 	self.LE_input_category = false
+
+	return self
 end
 
 
 function client:scrollGetCaretInBounds(immediate)
 	editWidM.scrollGetCaretInBounds(self, immediate)
+
+	return self
 end
 
 
 function client:setAllowReplaceMode(enabled)
 	editWidM.wrapAction(self, editCommandM.setAllowReplaceMode, enabled)
+
+	return self
 end
 
 
@@ -288,6 +374,8 @@ end
 
 function client:setReplaceMode(enabled)
 	editWidM.wrapAction(self, editCommandM.setReplaceMode, enabled)
+
+	return self
 end
 
 
@@ -298,6 +386,8 @@ end
 
 function client:setWrapMode(enabled) -- M
 	editWidM.wrapAction(self, editCommandM.setWrapMode, enabled)
+
+	return self
 end
 
 
@@ -310,6 +400,8 @@ function client:setTextAlignment(align)
 	uiAssert.namedMap(1, align, editWid._nm_align)
 
 	editWidM.wrapAction(self, editCommandM.setTextAlignment, align)
+
+	return self
 end
 
 
@@ -320,6 +412,8 @@ end
 
 function client:setColorization(enabled)
 	editWidM.wrapAction(self, editCommandM.setColorization, enabled)
+
+	return self
 end
 
 
@@ -330,6 +424,8 @@ end
 
 function client:setAllowHighlight(enabled)
 	editWidM.wrapAction(self, editCommandM.setAllowHighlight, enabled)
+
+	return self
 end
 
 
@@ -340,6 +436,8 @@ end
 
 function client:setAllowTab(enabled) -- M
 	self.LE_allow_tab = not not enabled
+
+	return self
 end
 
 
@@ -350,6 +448,8 @@ end
 
 function client:setAllowUntab(enabled) -- M
 	self.LE_allow_untab = not not enabled
+
+	return self
 end
 
 
@@ -360,6 +460,8 @@ end
 
 function client:setTabsToSpaces(enabled) -- M
 	self.LE_tabs_to_spaces = not not enabled
+
+	return self
 end
 
 
@@ -370,6 +472,8 @@ end
 
 function client:setAutoIndent(enabled) -- M
 	self.LE_auto_indent = not not enabled
+
+	return self
 end
 
 
@@ -380,6 +484,8 @@ end
 
 function client:setAllowInput(enabled)
 	editWidM.wrapAction(self, editCommandM.setAllowInput, enabled)
+
+	return self
 end
 
 
@@ -390,6 +496,8 @@ end
 
 function client:setAllowCut(enabled)
 	self.LE_allow_cut = not not enabled
+
+	return self
 end
 
 
@@ -400,6 +508,8 @@ end
 
 function client:setAllowCopy(enabled)
 	self.LE_allow_copy = not not enabled
+
+	return self
 end
 
 
@@ -410,6 +520,8 @@ end
 
 function client:setAllowPaste(enabled)
 	self.LE_allow_paste = not not enabled
+
+	return self
 end
 
 
@@ -420,6 +532,8 @@ end
 
 function client:setAllowLineFeed(enabled)
 	self.LE_allow_line_feed = not not enabled
+
+	return self
 end
 
 
@@ -436,6 +550,8 @@ function client:setBadInputRule(rule)
 	uiAssert.namedMapEval(1, rule, editWid._nm_bad_input)
 
 	self.LE_bad_input_rule = rule or false
+
+	return self
 end
 
 
@@ -446,6 +562,8 @@ end
 
 function client:setSelectAllOnThimble1Take(enabled)
 	self.LE_select_all_on_thimble1_take = not not enabled
+
+	return self
 end
 
 
@@ -456,6 +574,8 @@ end
 
 function client:setDeselectAllOnThimble1Release(enabled)
 	self.LE_deselect_all_on_thimble1_release = not not enabled
+
+	return self
 end
 
 
@@ -466,6 +586,8 @@ end
 
 function client:setClearHistoryOnDeselect(enabled)
 	self.LE_clear_history_on_deselect = not not enabled
+
+	return self
 end
 
 
@@ -476,6 +598,8 @@ end
 
 function client:setClearInputCategoryOnDeselect(enabled)
 	self.LE_clear_input_category_on_deselect = not not enabled
+
+	return self
 end
 
 

@@ -289,17 +289,17 @@ function plan.makeWindowFrame(root)
 	enforceDefaultPrimaryColumn(menu_tab)
 
 	menu_tab:newColumn("name")
-		:setText("Name")
+		:setHeaderText("Name")
 		:setContentIconsEnabled(true)
 		:setLockedVisibility(true)
 		:setSortFunction(columnSortFiles)
 
 	menu_tab:newColumn("size")
-		:setText("Size")
+		:setHeaderText("Size")
 		:setSortFunction(columnSortFiles)
 
 	menu_tab:newColumn("modtime")
-		:setText("ModTime")
+		:setHeaderText("ModTime")
 		:setSortFunction(columnSortFiles)
 
 	--[[

@@ -172,7 +172,6 @@ local function _updateColumnSize(self, col)
 
 	if col.icons_enabled then
 		pRect.split(rct, rci, skin.cell_icon_side, skin.cell_icon_w)
-		col.cell_icon_x = xx
 	end
 
 	pRect.reduceTop(rht, self.header_text_y)

@@ -93,10 +93,10 @@ function plan.make(panel)
 	local wid_id = "wimp/button_split"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local btn_spl = panel:addChild(wid_id, skin_id)
-	btn_spl:geometrySetMode("static", 0, 0, 224, 64)
-	btn_spl:setTag("demo_split_btn")
+		:geometrySetMode("static", 0, 0, 224, 64)
+		:setTag("demo_split_btn")
+		:setLabel("Split Button")
 
-	btn_spl:setLabel("Split Button")
 	btn_spl.wid_buttonAction = function(self)
 		print("(Click)")
 	end
@@ -107,9 +107,10 @@ function plan.make(panel)
 
 	do
 		local chk = panel:addChild("base/checkbox")
-		chk:geometrySetMode("static", xx, yy, ww, hh)
-		chk:setLabel("Aux Enabled")
-		chk:setChecked(not not btn_spl.aux_enabled)
+			:geometrySetMode("static", xx, yy, ww, hh)
+			:setLabel("Aux Enabled")
+			:setChecked(not not btn_spl.aux_enabled)
+
 		chk.wid_buttonAction = function(self)
 			local btn = self:findSiblingTag("demo_split_btn")
 			if btn then
@@ -123,11 +124,11 @@ function plan.make(panel)
 	yy = yy + hh
 
 	do
-		local rdo = panel:addChild("barebones/radio_button")
-		rdo:geometrySetMode("static", xx, yy, ww, hh)
-		rdo.radio_group = "split_placement"
+		local rdo = panel:addChild("base/radio_button")
+			:geometrySetMode("static", xx, yy, ww, hh)
+			:setRadioGroup("split_placement")
+			:setLabel("Right")
 		rdo.usr_placement = "right"
-		rdo:setLabel("Right")
 		rdo.wid_buttonAction = _radioPlacement
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
@@ -136,11 +137,11 @@ function plan.make(panel)
 	end
 
 	do
-		local rdo = panel:addChild("barebones/radio_button")
-		rdo:geometrySetMode("static", xx, yy, ww, hh)
-		rdo.radio_group = "split_placement"
+		local rdo = panel:addChild("base/radio_button")
+			:geometrySetMode("static", xx, yy, ww, hh)
+			:setRadioGroup("split_placement")
+			:setLabel("Left")
 		rdo.usr_placement = "left"
-		rdo:setLabel("Left")
 		rdo.wid_buttonAction = _radioPlacement
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
@@ -149,11 +150,11 @@ function plan.make(panel)
 	end
 
 	do
-		local rdo = panel:addChild("barebones/radio_button")
-		rdo:geometrySetMode("static", xx, yy, ww, hh)
-		rdo.radio_group = "split_placement"
+		local rdo = panel:addChild("base/radio_button")
+			:geometrySetMode("static", xx, yy, ww, hh)
+			:setRadioGroup("split_placement")
+			:setLabel("Top")
 		rdo.usr_placement = "top"
-		rdo:setLabel("Top")
 		rdo.wid_buttonAction = _radioPlacement
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
@@ -162,11 +163,11 @@ function plan.make(panel)
 	end
 
 	do
-		local rdo = panel:addChild("barebones/radio_button")
-		rdo:geometrySetMode("static", xx, yy, ww, hh)
-		rdo.radio_group = "split_placement"
+		local rdo = panel:addChild("base/radio_button")
+			:geometrySetMode("static", xx, yy, ww, hh)
+			:setRadioGroup("split_placement")
+			:setLabel("Bottom")
 		rdo.usr_placement = "bottom"
-		rdo:setLabel("Bottom")
 		rdo.wid_buttonAction = _radioPlacement
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
@@ -177,10 +178,13 @@ function plan.make(panel)
 	yy = yy + math.floor(hh/2)
 
 	do
-		local sld = panel:addChild("barebones/slider_bar")
-		sld:geometrySetMode("static", xx, yy, ww, hh)
+		demoShared.makeLabel(panel, xx, yy, ww, hh, "Aux Size", "single")
+
+		yy = yy + hh
+
+		local sld = panel:addChild("base/slider_bar")
+			:geometrySetMode("static", xx, yy, ww, hh)
 		sld.trough_vertical = false
-		sld:setLabel("Aux Size")
 		sld.slider_def = btn_spl.skin.aux_size
 		sld.slider_pos = sld.slider_def
 		sld.slider_max = 224

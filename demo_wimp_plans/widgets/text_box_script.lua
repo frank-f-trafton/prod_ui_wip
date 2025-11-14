@@ -151,10 +151,10 @@ function plan.make(panel)
 	local xx, yy, ww, hh = x1, y1, 160, 32
 	local w2, h2 = 168, 40
 
-	local cbox_wrap = panel:addChild("barebones/checkbox")
-	cbox_wrap:geometrySetMode("static", xx, yy, ww, hh)
-	cbox_wrap:setTag("demo_wrap")
-	cbox_wrap:setLabel("Wrap (F5)", "single")
+	local cbox_wrap = panel:addChild("base/checkbox")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_wrap")
+		:setLabel("Wrap (F5)", "single")
 	cbox_wrap.wid_buttonAction = function(self)
 		local tb = panel:findTag("demo_script_ed")
 		if tb then
@@ -176,32 +176,32 @@ function plan.make(panel)
 
 	local rdo_align
 
-	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
-	rdo_align:setTag("demo_align_l")
-	rdo_align.radio_group = "align_h"
+	rdo_align = panel:addChild("base/radio_button")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_align_l")
+		:setRadioGroup("align_h")
+		:setLabel("Align Left (F2)", "single")
 	rdo_align.usr_align = "left"
-	rdo_align:setLabel("Align Left (F2)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = xx + w2
 
-	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
-	rdo_align:setTag("demo_align_c")
-	rdo_align.radio_group = "align_h"
+	rdo_align = panel:addChild("base/radio_button")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_align_c")
+		:setRadioGroup("align_h")
+		:setLabel("Align Center (F3)", "single")
 	rdo_align.usr_align = "center"
-	rdo_align:setLabel("Align Center (F3)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = xx + w2
 
-	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
-	rdo_align:setTag("demo_align_r")
-	rdo_align.radio_group = "align_h"
+	rdo_align = panel:addChild("base/radio_button")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_align_r")
+		:setRadioGroup("align_h")
+		:setLabel("Align Right (F4)", "single")
 	rdo_align.usr_align = "right"
-	rdo_align:setLabel("Align Right (F4)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = x1
@@ -210,17 +210,17 @@ function plan.make(panel)
 	local ED_W, ED_H = 496, 350
 
 	local script_ed = panel:addChild("input/script_editor")
-	script_ed:geometrySetMode("static", xx, yy, ED_W, ED_H)
-	script_ed:setTag("demo_script_ed")
-	script_ed:setScrollBars(true, true)
+		:geometrySetMode("static", xx, yy, ED_W, ED_H)
+		:setTag("demo_script_ed")
+		:setScrollBars(true, true)
 
 	script_ed.LE_ghost_text = "Ghost text"
 
 	script_ed:setAllowTab(true)
-	script_ed:setAllowUntab(true)
-	script_ed:setTabsToSpaces(false)
-	script_ed:setAutoIndent(true)
-	--script_ed:setAllowReplaceMode(false)
+		:setAllowUntab(true)
+		:setTabsToSpaces(false)
+		:setAutoIndent(true)
+		--:setAllowReplaceMode(false)
 
 	-- Debug...
 	local quickPrint = require("lib.quick_print")
@@ -235,8 +235,8 @@ function plan.make(panel)
 	--]]
 
 --[[
-This widget will contain "advanced" input features that
-are
+This widget will contain "advanced" input features (ie a column of line numbers)
+that would clutter up the standard multi-line text input box.
 --]]
 
 	local demo_text = [=[

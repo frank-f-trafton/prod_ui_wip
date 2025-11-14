@@ -8,6 +8,7 @@ local context = select(1, ...)
 
 
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
+local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")
@@ -30,6 +31,8 @@ def.setChecked = wcButton.setCheckedRadio
 def.setCheckedConditional = wcButton.setCheckedRadioConditional
 def.uncheckAll = wcButton.uncheckAllRadioSiblings
 def.setLabel = wcLabel.widSetLabel
+def.setRadioGroup = wcButton.setRadioGroup
+def.getRadioGroup = wcButton.getRadioGroup
 
 
 def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn

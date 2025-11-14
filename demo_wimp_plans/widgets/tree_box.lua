@@ -31,8 +31,11 @@ function plan.make(panel)
 	local wid_id = "wimp/tree_box"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local tree_box = panel:addChild(wid_id, skin_id)
-	tree_box:geometrySetMode("static", 0, 0, 224, 256)
-	tree_box:setTag("demo_treebox")
+		:geometrySetMode("static", 0, 0, 224, 256)
+		:setTag("demo_treebox")
+		:setScrollBars(false, true)
+		:setIconsEnabled(true)
+		:setExpandersActive(true)
 
 	tree_box.wid_action = function(self, item, index)
 		print("wid_action()", item, index)
@@ -46,10 +49,6 @@ function plan.make(panel)
 	tree_box.wid_select = function(self, item, index)
 		print("wid_select()", item, index)
 	end
-
-	tree_box:setScrollBars(false, true)
-	tree_box:setIconsEnabled(true)
-	tree_box:setExpandersActive(true)
 
 	tree_box.MN_drag_scroll = true
 	tree_box.MN_drag_select = true
@@ -81,11 +80,10 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local rdo_btn = panel:addChild("barebones/radio_button")
-		rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
-
-		rdo_btn.radio_group = "tb_item_h_align"
-		rdo_btn:setLabel("left")
+		local rdo_btn = panel:addChild("base/radio_button")
+			:geometrySetMode("static", wx, wy, ww, wh)
+			:setRadioGroup("tb_item_h_align")
+			:setLabel("left")
 		rdo_btn.usr_item_align_h = "left"
 		rdo_btn.wid_buttonAction = rdo_item_align_h_action
 	end
@@ -93,11 +91,10 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local rdo_btn = panel:addChild("barebones/radio_button")
-		rdo_btn:geometrySetMode("static", wx, wy, ww, wh)
-
-		rdo_btn.radio_group = "tb_item_h_align"
-		rdo_btn:setLabel("right")
+		local rdo_btn = panel:addChild("base/radio_button")
+			:geometrySetMode("static", wx, wy, ww, wh)
+			:setRadioGroup("tb_item_h_align")
+			:setLabel("right")
 		rdo_btn.usr_item_align_h = "right"
 		rdo_btn.wid_buttonAction = rdo_item_align_h_action
 
@@ -108,11 +105,14 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local sld = panel:addChild("barebones/slider_bar")
-		sld:geometrySetMode("static", wx, wy, ww, wh)
+		demoShared.makeLabel(panel, wx, wy, ww, wh, "Item Vertical Pad", "single")
 
+		wy = wy + wh
+
+		local sld = panel:addChild("base/slider_bar")
+			:geometrySetMode("static", wx, wy, ww, wh)
+			:setLabel("Item Vertical Pad")
 		sld.trough_vertical = false
-		sld:setLabel("Item Vertical Pad")
 		sld.slider_pos = 0
 		sld.slider_def = tree_box.skin.item_pad_v
 		sld.slider_max = 64
@@ -128,11 +128,13 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local sld = panel:addChild("barebones/slider_bar")
-		sld:geometrySetMode("static", wx, wy, ww, wh)
+		demoShared.makeLabel(panel, wx, wy, ww, wh, "Pipe width", "single")
 
+		wy = wy + wh
+
+		local sld = panel:addChild("base/slider_bar")
+			:geometrySetMode("static", wx, wy, ww, wh)
 		sld.trough_vertical = false
-		sld:setLabel("Pipe width")
 		sld.slider_pos = 0
 		sld.slider_def = tree_box.skin.pipe_width
 		sld.slider_max = 64
@@ -149,11 +151,10 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local chk = panel:addChild("barebones/checkbox")
-		chk:geometrySetMode("static", wx, wy, ww, wh)
-
-		chk:setLabel("Draw pipes")
-		chk:setChecked(tree_box.skin.draw_pipes)
+		local chk = panel:addChild("base/checkbox")
+			:geometrySetMode("static", wx, wy, ww, wh)
+			:setLabel("Draw pipes")
+			:setChecked(tree_box.skin.draw_pipes)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
@@ -166,11 +167,10 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local chk = panel:addChild("barebones/checkbox")
-		chk:geometrySetMode("static", wx, wy, ww, wh)
-
-		chk:setLabel("Draw icons")
-		chk:setChecked(tree_box.TR_show_icons)
+		local chk = panel:addChild("base/checkbox")
+			:geometrySetMode("static", wx, wy, ww, wh)
+			:setLabel("Draw icons")
+			:setChecked(tree_box.TR_show_icons)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
@@ -183,11 +183,10 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		local chk = panel:addChild("barebones/checkbox")
-		chk:geometrySetMode("static", wx, wy, ww, wh)
-
-		chk:setLabel("Expanders enabled")
-		chk:setChecked(tree_box.TR_expanders_active)
+		local chk = panel:addChild("base/checkbox")
+			:geometrySetMode("static", wx, wy, ww, wh)
+			:setLabel("Expanders enabled")
+			:setChecked(tree_box.TR_expanders_active)
 		chk.wid_buttonAction = function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
