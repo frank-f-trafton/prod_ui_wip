@@ -27,6 +27,8 @@ function client:writeText(text, suppress_replace)
 	uiAssert.type(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.writeText, text, suppress_replace)
+
+	return self
 end
 
 
@@ -34,6 +36,8 @@ function client:replaceText(text)
 	uiAssert.type(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.replaceText, text)
+
+	return self
 end
 
 
@@ -41,6 +45,8 @@ function client:setText(text)
 	uiAssert.type(1, text, "string")
 
 	editWidS.wrapAction(self, editCommandS.setText, text)
+
+	return self
 end
 
 
@@ -61,56 +67,78 @@ end
 
 function client:cut()
 	editWidS.wrapAction(self, editCommandS.cut)
+
+	return self
 end
 
 
 function client:copy()
 	editWidS.wrapAction(self, editCommandS.copy)
+
+	return self
 end
 
 
 function client:paste()
 	editWidS.wrapAction(self, editCommandS.paste)
+
+	return self
 end
 
 
 function client:caretStepLeft(clear_highlight)
 	editWidS.wrapAction(self, editCommandS.caretLeft, clear_highlight)
+
+	return self
 end
 
 
 function client:caretStepRight(clear_highlight)
 	editWidS.wrapAction(self, editCommandS.caretRight, clear_highlight)
+
+	return self
 end
 
 
 function client:caretJumpLeft(clear_highlight)
 	editWidS.wrapAction(self, editCommandS.caretJumpRight, clear_highlight)
+
+	return self
 end
 
 
 function client:caretJumpRight(clear_highlight)
 	editWidS.wrapAction(self, editCommandS.caretJumpRight, clear_highlight)
+
+	return self
 end
 
 
 function client:caretFirst(clear_highlight)
 	editWidS.wrapAction(self, editFuncS.caretFirst, clear_highlight)
+
+	return self
 end
 
 
 function client:caretLast(clear_highlight)
 	editWidS.wrapAction(self, editFuncS.caretLast, clear_highlight)
+
+	return self
 end
 
 
 function client:caretToHighlightEdgeLeft()
 	editWidS.wrapAction(self, editCommandS.caretToHighlightEdgeLeft)
+
+	return self
 end
 
 
 function client:caretToHighlightEdgeRight()
 	editWidS.wrapAction(self, editCommandS.caretToHighlightEdgeRight)
+
+	return self
 end
 
 
@@ -121,36 +149,50 @@ end
 
 function client:highlightAll()
 	editWidS.wrapAction(self, editCommandS.highlightAll)
+
+	return self
 end
 
 
 function client:highlightCurrentWord()
 	editWidS.wrapAction(self, editCommandS.highlightCurrentWord)
+
+	return self
 end
 
 
 function client:clearHighlight()
 	editWidS.wrapAction(self, editCommandS.clearHighlight)
+
+	return self
 end
 
 
 function client:deleteHighlighted()
 	editWidS.wrapAction(self, editCommandS.deleteHighlighted)
+
+	return self
 end
 
 
 function client:deleteCaretToStart() -- S
 	editWidS.wrapAction(self, editCommandS.deleteCaretToStart)
+
+	return self
 end
 
 
 function client:deleteCaretToEnd() -- S
 	editWidS.wrapAction(self, editCommandS.deleteCaretToEnd)
+
+	return self
 end
 
 
 function client:backspace()
 	editWidS.wrapAction(self, editCommandS.backspace)
+
+	return self
 end
 
 
@@ -158,47 +200,65 @@ function client:deleteUChar(n_u_chars)
 	uiAssert.type(1, n_u_chars, "number")
 
 	editWidS.wrapAction(self, editCommandS.deleteUChar, n_u_chars)
+
+	return self
 end
 
 
 function client:deleteAll()
 	editWidS.wrapAction(self, editCommandS.deleteAll)
+
+	return self
 end
 
 
 function client:backspaceGroup()
 	editWidS.wrapAction(self, editCommandS.backspaceGroup)
+
+	return self
 end
 
 
 function client:deleteGroup()
 	editWidS.wrapAction(self, editCommandS.deleteGroup)
+
+	return self
 end
 
 
 function client:undo()
 	editWidS.wrapAction(self, editCommandS.undo)
+
+	return self
 end
 
 
 function client:redo()
 	editWidS.wrapAction(self, editCommandS.redo)
+
+	return self
 end
 
 
 function client:resetInputCategory()
 	-- Used to force a new history entry.
 	self.LE_input_category = false
+
+	return self
 end
 
 
 function client:scrollGetCaretInBounds(immediate)
 	editWidS.scrollGetCaretInBounds(self, immediate)
+
+	return self
 end
 
 
 function client:setAllowReplaceMode(enabled)
 	editWidS.wrapAction(self, editCommandS.setAllowReplaceMode, enabled)
+
+	return self
 end
 
 
@@ -209,6 +269,8 @@ end
 
 function client:setReplaceMode(enabled)
 	editWidS.wrapAction(self, editCommandS.setReplaceMode, enabled)
+
+	return self
 end
 
 
@@ -221,6 +283,8 @@ function client:setTextAlignment(align)
 	uiAssert.namedMap(1, align, editWid._nm_align)
 
 	editWidS.wrapAction(self, editCommandS.setTextAlignment, align)
+
+	return self
 end
 
 
@@ -231,6 +295,8 @@ end
 
 function client:setColorization(enabled)
 	editWidS.wrapAction(self, editCommandS.setColorization, enabled)
+
+	return self
 end
 
 
@@ -241,6 +307,8 @@ end
 
 function client:setAllowHighlight(enabled)
 	editWidS.wrapAction(self, editCommandS.setAllowHighlight, enabled)
+
+	return self
 end
 
 
@@ -251,6 +319,8 @@ end
 
 function client:setAllowInput(enabled)
 	editWidS.wrapAction(self, editCommandS.setAllowInput, enabled)
+
+	return self
 end
 
 
@@ -261,6 +331,8 @@ end
 
 function client:setAllowCut(enabled)
 	self.LE_allow_cut = not not enabled
+
+	return self
 end
 
 
@@ -271,6 +343,8 @@ end
 
 function client:setAllowCopy(enabled)
 	self.LE_allow_copy = not not enabled
+
+	return self
 end
 
 
@@ -281,6 +355,8 @@ end
 
 function client:setAllowPaste(enabled)
 	self.LE_allow_paste = not not enabled
+
+	return self
 end
 
 
@@ -291,6 +367,8 @@ end
 
 function client:setAllowLineFeed(enabled)
 	self.LE_allow_line_feed = not not enabled
+
+	return self
 end
 
 
@@ -307,6 +385,8 @@ function client:setBadInputRule(rule)
 	uiAssert.namedMapEval(1, rule, editWid._nm_bad_input)
 
 	self.LE_bad_input_rule = rule or false
+
+	return self
 end
 
 
@@ -317,6 +397,8 @@ end
 
 function client:setSelectAllOnThimble1Take(enabled)
 	self.LE_select_all_on_thimble1_take = not not enabled
+
+	return self
 end
 
 
@@ -327,6 +409,8 @@ end
 
 function client:setDeselectAllOnThimble1Release(enabled)
 	self.LE_deselect_all_on_thimble1_release = not not enabled
+
+	return self
 end
 
 
@@ -337,6 +421,8 @@ end
 
 function client:setClearHistoryOnDeselect(enabled)
 	self.LE_clear_history_on_deselect = not not enabled
+
+	return self
 end
 
 
@@ -347,6 +433,8 @@ end
 
 function client:setClearInputCategoryOnDeselect(enabled)
 	self.LE_clear_input_category_on_deselect = not not enabled
+
+	return self
 end
 
 
@@ -357,6 +445,8 @@ end
 
 function client:setCharacterMasking(enabled)
 	editWidS.wrapAction(self, editCommandS.setCharacterMasking, enabled)
+
+	return self
 end
 
 

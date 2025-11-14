@@ -104,62 +104,58 @@ function plan.make(panel)
 
 	local rdo_align
 
-	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
-	rdo_align:setTag("demo_align_l")
-	rdo_align.radio_group = "align_h"
+	rdo_align = panel:addChild("base/radio_button")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_align_l")
+		:setRadioGroup("align_h")
+		:setLabel("Align Left (F2)", "single")
 	rdo_align.usr_align = "left"
-	rdo_align:setLabel("Align Left (F2)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = xx + w2
 
-	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
-	rdo_align:setTag("demo_align_c")
-	rdo_align.radio_group = "align_h"
+	rdo_align = panel:addChild("base/radio_button")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_align_c")
+		:setRadioGroup("align_h")
+		:setLabel("Align Center (F3)", "single")
 	rdo_align.usr_align = "center"
-	rdo_align:setLabel("Align Center (F3)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = xx + w2
 
-	rdo_align = panel:addChild("barebones/radio_button")
-	rdo_align:geometrySetMode("static", xx, yy, ww, hh)
-	rdo_align:setTag("demo_align_r")
-	rdo_align.radio_group = "align_h"
+	rdo_align = panel:addChild("base/radio_button")
+		:geometrySetMode("static", xx, yy, ww, hh)
+		:setTag("demo_align_r")
+		:setRadioGroup("align_h")
+		:setLabel("Align Right (F4)", "single")
 	rdo_align.usr_align = "right"
-	rdo_align:setLabel("Align Right (F4)", "single")
 	rdo_align.wid_buttonAction = radioAlignH
 
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
 
-	-- [=[
 	local input_single = panel:addChild("input/text_box_single")
-	input_single:geometrySetMode("static", xx, yy, 256, 32)
-	input_single:setTag("demo_text_box_s")
-	input_single:setText("Single-Line Text Box")
-
-	--input_single:setAllowLineFeed(true)
-	--input_single:setTextAlignment("right")
+		:geometrySetMode("static", xx, yy, 256, 32)
+		:setTag("demo_text_box_s")
+		:setText("Single-Line Text Box")
+		--:setAllowLineFeed(true)
+		--:setTextAlignment("right")
 
 	input_single.wid_action = function(self)
 		print("input_single: The internal text is: " .. self:getText())
 	end
-	--]=]
 
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
 
 	local input_s_mask = panel:addChild("input/text_box_single")
-	input_s_mask:geometrySetMode("static", xx, yy, 256, 32)
-	input_s_mask:setTag("demo_text_box_s_masked")
+		:geometrySetMode("static", xx, yy, 256, 32)
+		:setTag("demo_text_box_s_masked")
+		:setCharacterMasking(true)
+		:setText("¡Silencio!")
 
 	input_s_mask.LE_hist.enabled = false -- TODO: write up an actual method to do this
-	input_s_mask:setCharacterMasking(true)
-	input_s_mask:setText("¡Silencio!")
-
 	input_s_mask.wid_action = function(self)
 		print("input_s_mask: The unmasked text is: " .. self:getUnmaskedText())
 	end

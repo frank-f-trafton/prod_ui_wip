@@ -16,12 +16,16 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
-	"widgets.menu_tab",
-	"widgets.tree_box",
-	"widgets.button_work",
-	"widgets.button_split",
-	"widgets.dropdown_box",
 	"widgets.list_box",
+	"widgets.tree_box",
+	"widgets.text_box_multi",
+	"widgets.text_box_single",
+	"widgets.button_split",
+	"theming_skinning.button_skinners",
+	"demo_welcome",
+	"widgets.menu_tab",
+	"widgets.button_work",
+	"widgets.dropdown_box",
 	"widgets.number_box",
 	"ui_frames.workspaces",
 	"widgets.properties_box",
@@ -29,10 +33,7 @@ local demo_panel_launch = {
 	"layouts.layout_sashes",
 	"layouts.layout",
 	"layouts.layout_static",
-	"widgets.text_box_multi",
-	"widgets.text_box_single",
 	"themes_and_scale",
-	"demo_welcome",
 	"widgets.progress_bar",
 	"widgets.slider_work",
 }
@@ -63,9 +64,8 @@ local demo_plan_list = {
 		{plan_id = "widgets.properties_box", label = "Properties Box"},
 		{plan_id = "widgets.combo_box", label = "Combo Box"},
 		{plan_id = "widgets.dropdown_box", label = "Dropdown Box"},
-		{plan_id = "widgets.barebones", label = "Barebones Widgets"},
-		{plan_id = "widgets.tree_box", label = "Tree Box"},
 		{plan_id = "widgets.list_box", label = "List Box"},
+		{plan_id = "widgets.tree_box", label = "Tree Box"},
 		{plan_id = "widgets.menu_tab", label = "Tabular Menu"},
 		{plan_id = "widgets.progress_bar", label = "Progress Bar"},
 		-- TODO: text blocks

@@ -6,13 +6,6 @@ return {
 		thimble_glow = {
 			color = {0.3, 0.3, 1.0, 1.0}
 		},
-		barebones_info = {
-			col_edge_enabled = {0.1, 0.1, 0.1, 1.0},
-			col_edge_disabled = {0.33, 0.33, 0.33, 1.0},
-			col_edge_pressed = {0.5, 0.2, 0.2, 1.0},
-			col_edge_hover = {0.15, 0.15, 0.15, 1.0},
-			col_accent = {0.5, 0.5, 0.5, 0.75},
-		},
 		misc = {
 			dropping_text_color = {0.1, 0.1, 0.1, 1.0}
 		}

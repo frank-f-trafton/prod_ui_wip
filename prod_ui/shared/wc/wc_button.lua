@@ -112,18 +112,27 @@ function wcButton.setMaxValue(self, max)
 end
 
 
+function wcButton.setRadioGroup(self, id)
+	uiAssert.type(1, id, "string")
+
+	self.radio_group = id
+
+	return self
+end
+
+
+function wcButton.getRadioGroup(self)
+	return self.radio_group
+end
+
+
 --- Turns off a radio button, plus all sibling radio buttons with the same group ID.
 function wcButton.uncheckAllRadioSiblings(self)
 	local parent = self.parent
 
-	-- No parent (this is the root, or the widget data is corrupt): just uncheck self.
-	if not parent then
-		self.checked = false
-	else
-		for i, sibling in ipairs(parent.children) do
-			if sibling.is_radio_button and sibling.radio_group == self.radio_group then
-				sibling.checked = false
-			end
+	for i, sibling in ipairs(parent.children) do
+		if sibling.is_radio_button and sibling.radio_group == self.radio_group then
+			sibling.checked = false
 		end
 	end
 

@@ -55,12 +55,12 @@ function plan.makeWindowFrame(root)
 	menu_tab:setScrollBars(true, true)
 
 	menu_tab:newColumn("key")
-		:setText("Key")
+		:setHeaderText("Key")
 		:setLockedVisibility(true)
 		:setSortFunction(columnSortGlobals)
 
 	menu_tab:newColumn("value")
-		:setText("Value")
+		:setHeaderText("Value")
 		:setSortFunction(columnSortGlobals)
 
 	menu_tab.column_sort_ascending = true

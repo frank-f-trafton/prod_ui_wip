@@ -14,13 +14,9 @@ function plan.makeWindowFrame(root)
 	frame:containerSetScrollRangeMode("zero")
 	frame:setScrollBars(false, false)
 
-	local bb_lbl = frame:addChild("barebones/label")
-	bb_lbl.x = 0
-	bb_lbl.y = 0
-	bb_lbl.w = 256
-	bb_lbl.h = 192
-	bb_lbl:geometrySetMode("static", 0, 0, 256, 192)
-	bb_lbl:setTag("countdown_label")
+	local bb_lbl = frame:addChild("base/label")
+		:geometrySetMode("static", 0, 0, 256, 192)
+		:setTag("countdown_label")
 
 	frame.usr_time = 0.0
 	frame.usr_time_max = 4.0

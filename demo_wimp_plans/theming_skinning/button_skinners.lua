@@ -16,14 +16,14 @@ function plan.make(panel)
 	local wid_id = "base/button"
 	local skin_id = panel.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local button_norm = panel:addChild(wid_id, skin_id)
-	button_norm:geometrySetMode("static", 256, 0, 224, 64)
-	button_norm:setLabel("Normal Skinned Button")
+		:geometrySetMode("static", 256, 0, 224, 64)
+		:setLabel("Normal Skinned Button")
 
-	local function radioAlignH(self)
+	local function buttonAlignH(self)
 		button_norm.skin.label_align_h = self.usr_align
 	end
 
-	local function radioAlignV(self)
+	local function buttonAlignV(self)
 		button_norm.skin.label_align_v = self.usr_align
 	end
 
@@ -34,42 +34,36 @@ function plan.make(panel)
 	yy = yy + hh1
 
 	local bb_rdo
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
-	bb_rdo.radio_group = "align_h"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww1, hh2)
+		:setLabel("Left")
 	bb_rdo.usr_align = "left"
-	bb_rdo:setLabel("Left")
-	bb_rdo.wid_buttonAction = radioAlignH
+	bb_rdo.wid_buttonAction = buttonAlignH
 
 	xx = xx + ww1
 
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
-	bb_rdo.radio_group = "align_h"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww1, hh2)
+		:setLabel("Center")
 	bb_rdo.usr_align = "center"
-	bb_rdo:setLabel("Center")
-	bb_rdo.wid_buttonAction = radioAlignH
+	bb_rdo.wid_buttonAction = buttonAlignH
 
 	xx = xx + ww1
 
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
-	bb_rdo.radio_group = "align_h"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww1, hh2)
+		:setLabel("Right")
 	bb_rdo.usr_align = "right"
-	bb_rdo:setLabel("Right")
-	bb_rdo.wid_buttonAction = radioAlignH
+	bb_rdo.wid_buttonAction = buttonAlignH
 
 	xx = 0
 	yy = yy + hh2
 
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww2, hh2)
-	bb_rdo.radio_group = "align_h"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww2, hh2)
+		:setLabel("Justify")
 	bb_rdo.usr_align = "justify"
-	bb_rdo:setLabel("Justify")
-	bb_rdo.wid_buttonAction = radioAlignH
-
-	bb_rdo:setCheckedConditional("usr_align", button_norm.skin.label_align_h)
+	bb_rdo.wid_buttonAction = buttonAlignH
 
 	yy = yy + hh2
 
@@ -79,33 +73,27 @@ function plan.make(panel)
 
 	yy = yy + hh1
 
-	local bb_rdo
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
-	bb_rdo.radio_group = "align_v"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww1, hh2)
+		:setLabel("Top")
 	bb_rdo.usr_align = "top"
-	bb_rdo:setLabel("Top")
-	bb_rdo.wid_buttonAction = radioAlignV
+	bb_rdo.wid_buttonAction = buttonAlignV
 
 	xx = xx + ww1
 
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
-	bb_rdo.radio_group = "align_v"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww1, hh2)
+		:setLabel("Middle")
 	bb_rdo.usr_align = "middle"
-	bb_rdo:setLabel("Middle")
-	bb_rdo.wid_buttonAction = radioAlignV
+	bb_rdo.wid_buttonAction = buttonAlignV
 
 	xx = xx + ww1
 
-	bb_rdo = panel:addChild("barebones/radio_button")
-	bb_rdo:geometrySetMode("static", xx, yy, ww1, hh2)
-	bb_rdo.radio_group = "align_v"
+	bb_rdo = panel:addChild("base/button")
+		:geometrySetMode("static", xx, yy, ww1, hh2)
+		:setLabel("Bottom")
 	bb_rdo.usr_align = "bottom"
-	bb_rdo:setLabel("Bottom")
-	bb_rdo.wid_buttonAction = radioAlignV
-
-	bb_rdo:setCheckedConditional("usr_align", button_norm.skin.label_align_v)
+	bb_rdo.wid_buttonAction = buttonAlignV
 
 	xx = xx + ww1
 end
