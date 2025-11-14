@@ -15,6 +15,9 @@ return {
 	col_def_text_align = "left",
 	content_def_text_align = "left",
 
+	col_arrow_show = true,
+	col_arrow_side = "right",
+
 	item_h = 24,
 
 	drag_threshold = 5,
@@ -24,6 +27,7 @@ return {
 
 	cell_font = "*fonts/p",
 
+	cell_icon_side = "left",
 	cell_icon_w = 16,
 	cell_icon_h = 16,
 
