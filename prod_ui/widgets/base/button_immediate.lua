@@ -1,5 +1,7 @@
 --[[
 A skinned button which activates on click-down (without repeat events).
+
+(No relation to Immediate Mode GUIs.)
 --]]
 
 
@@ -18,22 +20,10 @@ local def = {
 }
 
 
-def.wid_buttonAction = wcButton.wid_buttonAction
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = wcButton.wid_buttonAction3
+wcButton.setupDefImmediate(def)
 
 
-def.setEnabled = wcButton.setEnabled
 def.setLabel = wcLabel.widSetLabel
-
-
-def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = wcButton.uiCall_pointerPressActivate
-def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
-def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_initialize()

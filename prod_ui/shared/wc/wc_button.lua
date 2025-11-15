@@ -35,6 +35,151 @@ wcButton.wid_buttonAction2 = uiDummy.func
 wcButton.wid_buttonAction3 = uiDummy.func
 
 
+function wcButton.setupDefPlain(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseActivate
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefDoubleClick(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPressDoubleClick
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefImmediate(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPressActivate
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefRepeat(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPressActivate
+	def.uiCall_pointerPressRepeat = wcButton.uiCall_pointerPressRepeat
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefSticky(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabledSticky
+	def.setPressed = wcButton.setPressedSticky
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOnSticky
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPressSticky
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionSticky
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefCheckbox(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+	def.setChecked = wcButton.setChecked
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseCheck
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionCheck
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefCheckboxMulti(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+	def.setValue = wcButton.setValue
+	def.setMaxValue = wcButton.setMaxValue
+	def.rollValue = wcButton.rollValue
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseCheckMulti
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionCheckMulti
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
+function wcButton.setupDefRadioButton(def)
+	def.wid_buttonAction = wcButton.wid_buttonAction
+	def.wid_buttonAction2 = wcButton.wid_buttonAction2
+	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+	def.setEnabled = wcButton.setEnabled
+	def.setChecked = wcButton.setCheckedRadio
+	def.setCheckedConditional = wcButton.setCheckedRadioConditional
+	def.uncheckAll = wcButton.uncheckAllRadioSiblings
+	def.setRadioGroup = wcButton.setRadioGroup
+	def.getRadioGroup = wcButton.getRadioGroup
+
+	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
+	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
+	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
+	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseRadio
+	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
+	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionRadio
+	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+end
+
+
 -- * Widget Plug-In Methods *
 
 

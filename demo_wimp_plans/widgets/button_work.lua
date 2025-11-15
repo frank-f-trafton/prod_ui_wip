@@ -20,7 +20,6 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	-- Repeat-Button
 	local b_rep = panel:addChild("base/button_repeat")
 	b_rep:geometrySetMode("static", 0, 0, 128, 64)
 	b_rep:setLabel("Button (Rep)")
@@ -32,7 +31,6 @@ function plan.make(panel)
 		self:setLabel(tostring(self.usr_count))
 	end
 
-	-- Checkbox
 	local chk = panel:addChild("base/checkbox")
 	chk:geometrySetMode("static", 160, 0, 256, 64)
 
@@ -44,7 +42,7 @@ function plan.make(panel)
 		print("Check it!")
 	end
 
-	-- Multi-state checkbox
+
 	local chk_m = panel:addChild("base/checkbox_multi")
 	chk_m:geometrySetMode("static", 160, 96, 256, 64)
 	chk_m:setLabel("Multi-State Checkbox", "single")
@@ -94,7 +92,6 @@ function plan.make(panel)
 	--rdo.wid_buttonAction
 
 
-	-- Sticky Button.
 	local sticky = panel:addChild("base/button_sticky")
 	sticky:geometrySetMode("static", 256, 192, 240, 32)
 	sticky:setTag("button_sticky")
@@ -110,7 +107,6 @@ function plan.make(panel)
 	end
 
 
-	-- A normal button that unpresses the sticky button.
 	local b_unst = panel:addChild("base/button")
 	b_unst:setTag("button_unsticker")
 	b_unst:geometrySetMode("static", 256, 192+48, 240, 32)
@@ -127,17 +123,16 @@ function plan.make(panel)
 		end
 	end
 
-	-- An instant-action button. Fires on click-down, without continuous action (at least from holding the mouse button).
-	local b_instant = panel:addChild("base/button_instant")
-	b_instant:geometrySetMode("static", 256, 192+48+48, 240, 32)
-	b_instant:setLabel("Instant Action Button.")
 
-	b_instant.wid_buttonAction = function(self)
-		self:setLabel("Instant Activate! Time: " .. timeFormatted())
+	local b_immediate = panel:addChild("base/button_immediate")
+	b_immediate:geometrySetMode("static", 256, 192+48+48, 240, 32)
+	b_immediate:setLabel("Immediate Action Button.")
+
+	b_immediate.wid_buttonAction = function(self)
+		self:setLabel("Activated! Time: " .. timeFormatted())
 	end
 
 
-	-- A button with a secondary action.
 	demoShared.makeLabel(panel, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
 	local b_secondary = panel:addChild("base/button")
 	b_secondary:geometrySetMode("static", 256, 192+48+48+48+64, 240, 32)
