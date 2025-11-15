@@ -18,21 +18,10 @@ local def = {
 }
 
 
-def.wid_buttonAction = wcButton.wid_buttonAction
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = wcButton.wid_buttonAction3
+wcButton.setupDefSticky(def)
 
 
-def.setEnabled = wcButton.setEnabledSticky
-def.setPressed = wcButton.setPressedSticky
 def.setLabel = wcLabel.widSetLabel
-
-
-def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOnSticky
-def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = wcButton.uiCall_pointerPressSticky
-def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionSticky
-def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
 
 
 function def:uiCall_initialize()
