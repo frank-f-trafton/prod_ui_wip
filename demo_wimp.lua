@@ -76,13 +76,12 @@ local demo_plan_list = {
 		{plan_id = "layouts.layout_static", label = "Layout (Static)"},
 		{plan_id = "layouts.layout_sashes", label = "Layout (Sashes)"},
 		{plan_id = "layouts.layout_unit", label = "Layout (Unit Segments)"},
-		--[[
-		{plan_id = "unfinished", label = "Unfinished Stuff", nodes = {
-			{plan_id = "unfinished.drag_box", label = "Drag Box"},
-			{plan_id = "unfinished.dial", label = "Dials"},
-			{plan_id = "unfinished.container_work", label = "Container work"},
-
-			{plan_id = "unfinished.label_test", label = "Label test"},
+		-- [[
+		{plan_id = nil, label = "Unfinished Stuff", nodes = {
+			{plan_id = "widgets.unfinished.drag_box", label = "Drag Box"},
+			{plan_id = "widgets.unfinished.dial", label = "Dials"},
+			{plan_id = "widgets.unfinished.container_work", label = "Container work"},
+			{plan_id = "widgets.unfinished.label_test", label = "Label test"},
 		}},
 		--]]
 	}

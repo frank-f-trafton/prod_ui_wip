@@ -207,7 +207,7 @@ function def:uiCall_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(skin.box.border)
 	vp:splitOrOverlay(vp2, skin.label_placement, skin.label_spacing)
-	vp:reduceSideDetla(skin.box.margin)
+	vp:reduceT(skin.box.margin)
 
 	wcLabel.reshapeLabel(self)
 
