@@ -50,39 +50,65 @@ local demo_window_launch = {
 
 local demo_plan_list = {
 	nodes = {
-		{plan_id = "demo_welcome", label = "Welcome"},
-		{plan_id = "widgets.button_work", label = "Button work"},
-		{plan_id = "theming_skinning.button_skinners", label = "Button Skinners"},
-		{plan_id = "widgets.button_split", label = "Split Button"},
-		{plan_id = "widgets.slider_work", label = "Slider work"},
-		{plan_id = "widgets.stepper", label = "Stepper"},
-		{plan_id = "widgets.text_box_single", label = "Textbox (Single-Line)"},
-		{plan_id = "widgets.text_box_multi", label = "Textbox (Multi-Line)"},
-		-- Working on it...
-		--{plan_id = "widgets.text_box_script", label = "Script Editor"},
-		{plan_id = "widgets.number_box", label = "Number Box"},
-		{plan_id = "widgets.properties_box", label = "Properties Box"},
-		{plan_id = "widgets.combo_box", label = "Combo Box"},
-		{plan_id = "widgets.dropdown_box", label = "Dropdown Box"},
-		{plan_id = "widgets.list_box", label = "List Box"},
-		{plan_id = "widgets.tree_box", label = "Tree Box"},
-		{plan_id = "widgets.menu_tab", label = "Tabular Menu"},
-		{plan_id = "widgets.progress_bar", label = "Progress Bar"},
+		{
+			label = "Information", nodes = {
+				{plan_id = "demo_welcome", label = "Welcome"},
+			},
+		},
+
+		{
+			label = "Controls", nodes = {
+				{plan_id = "widgets.button_work", label = "Button work"},
+				{plan_id = "theming_skinning.button_skinners", label = "Button Skinners"},
+				{plan_id = "widgets.button_split", label = "Split Button"},
+				{plan_id = "widgets.slider_work", label = "Slider work"},
+				{plan_id = "widgets.stepper", label = "Stepper"},
+				{plan_id = "widgets.text_box_single", label = "Textbox (Single-Line)"},
+				{plan_id = "widgets.text_box_multi", label = "Textbox (Multi-Line)"},
+				-- Working on it...
+				--{plan_id = "widgets.text_box_script", label = "Script Editor"},
+				{plan_id = "widgets.number_box", label = "Number Box"},
+				{plan_id = "widgets.properties_box", label = "Properties Box"},
+				{plan_id = "widgets.combo_box", label = "Combo Box"},
+				{plan_id = "widgets.dropdown_box", label = "Dropdown Box"},
+				{plan_id = "widgets.list_box", label = "List Box"},
+				{plan_id = "widgets.tree_box", label = "Tree Box"},
+				{plan_id = "widgets.menu_tab", label = "Tabular Menu"},
+				{plan_id = "widgets.progress_bar", label = "Progress Bar"},
+			},
+		},
+
+		{
+			label = "Containers, Layouts, Theming",
+			nodes = {
+				{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
+				{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
+				{plan_id = "themes_and_scale", label = "Themes and Scale"},
+				{plan_id = "layouts.layout", label = "Layout"},
+				{plan_id = "layouts.layout_static", label = "Layout (Static)"},
+				{plan_id = "layouts.layout_sashes", label = "Layout (Sashes)"},
+				{plan_id = "layouts.layout_unit", label = "Layout (Unit Segments)"},
+			},
+		},
+
 		-- TODO: text blocks
-		{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
-		{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
-		{plan_id = "themes_and_scale", label = "Themes and Scale"},
-		{plan_id = "layouts.layout", label = "Layout"},
-		{plan_id = "layouts.layout_static", label = "Layout (Static)"},
-		{plan_id = "layouts.layout_sashes", label = "Layout (Sashes)"},
-		{plan_id = "layouts.layout_unit", label = "Layout (Unit Segments)"},
+
+		{
+			label = "Test and Debug",
+			nodes = {
+				{plan_id = "widgets.unfinished.drag_box", label = "Drag Box"},
+				{plan_id = "widgets.unfinished.label_test", label = "Label test"},
+			},
+		},
 		-- [[
-		{plan_id = nil, label = "Unfinished Stuff", nodes = {
-			{plan_id = "widgets.unfinished.drag_box", label = "Drag Box"},
-			{plan_id = "widgets.unfinished.dial", label = "Dials"},
-			{plan_id = "widgets.unfinished.container_work", label = "Container work"},
-			{plan_id = "widgets.unfinished.label_test", label = "Label test"},
-		}},
+		{
+			label = "(Working on it)",
+			nodes = {
+				{plan_id = "widgets.unfinished.dial", label = "Dials"},
+				{plan_id = "widgets.unfinished.container_work", label = "Container work"},
+
+			},
+		},
 		--]]
 	}
 }
@@ -594,6 +620,8 @@ do
 		local demo_list = ws1:addChild("wimp/tree_box")
 			:geometrySetMode("segment", "left", 300, "norm")
 			:setTag("plan_menu")
+			:setScrollBars(false, true)
+			:setExpandersActive(true)
 
 		demo_list.MN_wrap_selection = "no-rep"
 
@@ -602,7 +630,6 @@ do
 		-- over the ListBox.
 		--demo_list.MN_drag_select = true
 
-		demo_list:setScrollBars(false, true)
 
 		local function _addPlans(tree_box, parent, src_node)
 			--print("parent", parent, "src_node.nodes", src_node.nodes)

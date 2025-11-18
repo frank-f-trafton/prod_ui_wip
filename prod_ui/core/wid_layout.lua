@@ -351,19 +351,23 @@ widLayout.handlers = {
 }
 
 
-local function _layoutSetBase(self, layout_base)
+local methods = {}
+
+function methods:layoutSetBase(layout_base)
 	uiAssert.namedMap(1, layout_base, widLayout._nm_layout_base)
 
 	self.LO_base = layout_base
+
+	return self
 end
 
 
-local function _layoutGetBase(self)
+function methods:layoutGetBase()
 	return self.LO_base
 end
 
 
-local function _layoutSetGridDimensions(self, rows, cols)
+function methods:layoutSetGridDimensions(rows, cols)
 	uiAssert.numberNotNaN(1, rows)
 	uiAssert.numberNotNaN(2, cols)
 
@@ -374,12 +378,12 @@ local function _layoutSetGridDimensions(self, rows, cols)
 end
 
 
-local function _layoutGetGridDimensions(self, rows, cols)
+function methods:layoutGetGridDimensions(rows, cols)
 	return self.LO_grid_rows, self.LO_grid_cols
 end
 
 
-local function _layoutSetMargin(self, x1, y1, x2, y2)
+function methods:layoutSetMargin(x1, y1, x2, y2)
 	uiAssert.numberNotNaN(1, x1)
 
 	if y1 then
@@ -402,7 +406,7 @@ local function _layoutSetMargin(self, x1, y1, x2, y2)
 end
 
 
-local function _layoutGetMargin(self)
+function methods:layoutGetMargin()
 	return self.LO_margin_x1, self.LO_margin_y1, self.LO_margin_x2, self.LO_margin_y2
 end
 
@@ -412,19 +416,13 @@ local function _hof_sortLayoutList(a, b)
 end
 
 
-local function _layoutSort(self)
+function methods:layoutSort()
 	table.sort(self.LO_list, _hof_sortLayoutList)
 end
 
 
 function widLayout.setupContainerDef(def)
-	def.layoutSetBase = _layoutSetBase
-	def.layoutGetBase = _layoutGetBase
-	def.layoutSetGridDimensions = _layoutSetGridDimensions
-	def.layoutGetGridDimensions = _layoutGetGridDimensions
-	def.layoutSetMargin = _layoutSetMargin
-	def.layoutGetMargin = _layoutGetMargin
-	def.layoutSort = _layoutSort
+	uiTable.patch(def, methods, true)
 end
 
 

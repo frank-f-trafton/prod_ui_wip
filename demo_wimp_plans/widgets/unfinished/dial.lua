@@ -10,8 +10,8 @@ function plan.make(panel)
 	--title("Dials")
 
 	panel:layoutSetBase("viewport-width")
-	panel:containerSetScrollRangeMode("zero")
-	panel:setScrollBars(false, false)
+		:containerSetScrollRangeMode("zero")
+		:setScrollBars(false, false)
 
 	local v_wid_w = 32
 	local v_wid_h = 128
