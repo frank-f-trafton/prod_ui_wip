@@ -5,32 +5,24 @@ function plan.make(panel)
 	--title("Widget Containers")
 
 	panel:layoutSetBase("viewport-width")
-	panel:containerSetScrollRangeMode("zero")
-	panel:setScrollBars(false, false)
+		:containerSetScrollRangeMode("zero")
+		:setScrollBars(false, false)
 
 	-- Base container
 	local ctnr = panel:addChild("base/container")
-	ctnr.x = 0
-	ctnr.y = 0
-	ctnr.w = 160
-	ctnr.h = 160
-
-	ctnr:containerSetScrollRangeMode("auto")
-	ctnr:setScrollBars(true, true)
-
-	ctnr:reshape()
+		:geometrySetMode("static", 0, 0, 160, 160)
+		:containerSetScrollRangeMode("auto")
+		:setScrollBars(true, true)
+		:reshape()
 
 	local btn = ctnr:addChild("base/button")
-	btn.x = 0
-	btn.y = 0
-	btn.w = 256
-	btn.h = 256
-	btn:setLabel("Button in container")
-
+		:geometrySetMode("static", 0, 0, 256, 256)
+		:setLabel("Button in container")
 
 	-- Simple container
 	local cntr_s = panel:addChild("base/container_simple")
-	cntr_s.x, cntr_s.y, cntr_s.w, cntr_s.h = 400, 16, 64, 64
+		:geometrySetMode("static", 400, 16, 64, 64)
+
 	cntr_s.usr_text = "<Simple Container>"
 	cntr_s.wid_pressed = function()
 		cntr_s.usr_text = "I've been clicked!"
