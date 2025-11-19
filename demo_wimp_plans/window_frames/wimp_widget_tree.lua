@@ -155,9 +155,8 @@ function plan.makeWindowFrame(root)
 	local tree_box = frame:addChild("wimp/tree_box")
 		:geometrySetMode("remaining")
 		:geometrySetOrder(-1)
-
-	tree_box:setExpandersActive(true)
-	tree_box:setScrollBars(false, true)
+		:setExpandersActive(true)
+		:setScrollBars(false, true)
 
 	tree_box.MN_drag_scroll = true
 	tree_box.MN_drag_select = true

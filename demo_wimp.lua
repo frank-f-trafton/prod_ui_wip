@@ -95,6 +95,7 @@ local demo_plan_list = {
 
 		{
 			label = "Test and Debug",
+			collapsed = true,
 			nodes = {
 				{plan_id = "widgets.unfinished.drag_box", label = "Drag Box"},
 				{plan_id = "widgets.unfinished.label_test", label = "Label test"},
@@ -103,6 +104,7 @@ local demo_plan_list = {
 		-- [[
 		{
 			label = "(Working on it)",
+			collapsed = true,
 			nodes = {
 				{plan_id = "widgets.unfinished.dial", label = "Dials"},
 				{plan_id = "widgets.unfinished.container_work", label = "Container work"},
@@ -617,18 +619,18 @@ do
 		wimp_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
 
-		local demo_list = ws1:addChild("wimp/tree_box")
+		local demo_tree = ws1:addChild("wimp/tree_box")
 			:geometrySetMode("segment", "left", 300, "norm")
 			:setTag("plan_menu")
 			:setScrollBars(false, true)
 			:setExpandersActive(true)
 
-		demo_list.MN_wrap_selection = "no-rep"
+		demo_tree.MN_wrap_selection = "no-rep"
 
 
 		-- Uncomment this to continuously select menu items as you scrub the mouse cursor
 		-- over the ListBox.
-		--demo_list.MN_drag_select = true
+		--demo_tree.MN_drag_select = true
 
 
 		local function _addPlans(tree_box, parent, src_node)
@@ -638,6 +640,9 @@ do
 			if parent then
 				item = tree_box:addNode(src_node.label, parent)
 				item.plan_id = src_node.plan_id
+				if src_node.collapsed then
+					tree_box:setNodeExpanded(item, false)
+				end
 			end
 
 			if src_node.nodes then
@@ -648,12 +653,12 @@ do
 			end
 		end
 
-		_addPlans(demo_list, nil, demo_plan_list)
-		demo_list:orderItems()
-		demo_list:cacheUpdate(true)
-		--demo_list:arrangeItems()
+		_addPlans(demo_tree, nil, demo_plan_list)
+		demo_tree:orderItems()
+		demo_tree:cacheUpdate(true)
+		--demo_tree:arrangeItems()
 
-		--print(inspect(demo_list.tree))
+		--print(inspect(demo_tree.tree))
 
 		local function _instantiateDemoContainer(workspace)
 			-- First, destroy any existing containers with the same tag.
@@ -672,7 +677,7 @@ do
 			return plan_container
 		end
 
-		demo_list.wid_select = function(self, item, item_i)
+		demo_tree.wid_select = function(self, item, item_i)
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace and item.plan_id then
 				local plan = require("demo_wimp_plans." .. item.plan_id)
@@ -706,9 +711,9 @@ do
 	wimp_root:selectTopFrame()
 
 	-- If no Window Frames were created, hand the thimble to the main demo list.
-	local demo_list = wimp_root:findTag("plan_menu")
-	if demo_list then
-		demo_list:tryTakeThimble1()
+	local demo_tree = wimp_root:findTag("plan_menu")
+	if demo_tree then
+		demo_tree:tryTakeThimble1()
 	end
 
 	-- Refresh everything.
