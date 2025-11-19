@@ -134,12 +134,7 @@ end
 def.wid_defaultKeyNav = wcTree.wid_defaultKeyNav
 
 
-def.setIconsEnabled = wcTree.setIconsEnabled
-def.setExpandersActive = wcTree.setExpandersActive
-def.setItemAlignment = wcTree.setItemAlignment
-def.addNode = wcTree.addNode
-def.orderItems = wcTree.orderItems
-def.removeNode = wcTree.removeNode
+wcTree.defSetup(def)
 
 
 function def:setSelection(item_t)
@@ -225,7 +220,7 @@ function def:cacheUpdate(refresh_dimensions)
 
 	if refresh_dimensions then
 		wcTree.updateAllItemDimensions(self, self.skin, self.tree)
-		wcTree.arrangeItems(self)
+		self:arrangeItems()
 
 		self.doc_w, self.doc_h = 0, 0
 
@@ -380,7 +375,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 						and (self.TR_item_align_h == "left" and mx >= it_x + ex_x and mx < it_x + ex_x + ex_w)
 						or (self.TR_item_align_h == "right" and mx >= it_x + it_w - ex_x - ex_w and mx < it_x + it_w - ex_x)
 						then
-							wcTree.setExpanded(self, item_t, not item_t.expanded)
+							self:setNodeExpanded(item_t, not item_t.expanded)
 
 							clicked_expander = true
 						end

@@ -6,6 +6,7 @@ local context = select(1, ...)
 
 local structTree = context:getLua("shared/struct_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 
 
@@ -28,15 +29,210 @@ function wcTree.instanceSetup(self)
 end
 
 
-function wcTree.setExpanded(self, item, exp)
-	item.expanded = exp
+local methods = {}
+
+
+function wcTree.defSetup(def)
+	uiTable.patch(def, methods, true)
+end
+
+
+function methods:setNodeExpanded(item, exp)
+	-- TODO: confirm that the widget owns the item
+	item.expanded = not not exp
 	self:orderItems()
-	wcTree.arrangeItems(self)
+	self:arrangeItems(self)
 	self:cacheUpdate(true)
 	self:scrollClampViewport()
 
 	-- TODO: deal with having two calls to cacheUpdate().
 	self:cacheUpdate(true)
+end
+
+
+function methods:setIconsEnabled(enabled)
+	self:writeSetting("TR_show_icons", not not enabled)
+	self:cacheUpdate(true)
+	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	return self
+end
+
+
+function methods:setExpandersActive(active)
+	self:writeSetting("TR_expanders_active", not not active)
+	self:cacheUpdate(true)
+	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	return self
+end
+
+
+function methods:setItemAlignment(align)
+	if not _nm_align[align] then
+		error("invalid alignment setting.")
+	end
+	self:writeSetting("TR_item_align_h", align)
+	self:cacheUpdate(true)
+	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	return self
+end
+
+
+function methods:addNode(text, parent_node, tree_pos, icon_id, expanded)
+	uiAssert.type(1, text, "string")
+	uiAssert.tableWithMetatableEval(2, parent_node, structTree.mt_tree)
+	uiAssert.typeEval(3, tree_pos, "number")
+	uiAssert.typeEval(4, icon_id, "string")
+	-- don't assert 'expanded'
+
+	--print("add node", text, parent_node, tree_pos, icon_id, expanded)
+
+	local skin = self.skin
+	local font = skin.font
+
+	parent_node = parent_node or self.tree
+	local node = parent_node:addNode(tree_pos)
+
+	node.depth = node:getNodeDepth() - 1
+
+	-- Nodes function as menu items.
+	local item = node
+
+	-- Is true when the node is visible as a menu item.
+	-- Needed to simplify the clearing of marks and the menu selection when unexpanding a node.
+	item.presented = false
+
+	item.selectable = true
+	item.marked = false -- multi-select
+
+	item.text = text
+	item.icon_id = icon_id
+	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+
+	item.x, item.y = 0, 0
+	wcTree.updateItemDimensions(self, skin, item)
+
+	return item
+end
+
+
+local function _orderLoop(self, items, node)
+	if node.expanded then
+		for i, child in ipairs(node.nodes) do
+			items[#items + 1] = child
+			child.presented = true
+			_orderLoop(self, items, child)
+		end
+	end
+end
+
+
+local function _unmarkLoop(self, node, _depth)
+	_depth = _depth or 1
+	for i, child in ipairs(node.nodes) do
+		if not child.presented then
+			child.marked = false
+		end
+		_unmarkLoop(self, child, _depth + 1)
+	end
+end
+
+
+local function _selectionLoop(self, node)
+	while node do
+		if node.presented and node.selectable then
+			self:menuSetSelectedItem(node)
+			return
+		else
+			node = node.parent
+		end
+	end
+
+	self:menuSetSelectedIndex(0)
+end
+
+
+function methods:orderItems()
+	local items = self.MN_items
+
+	-- Note the current selected item, if any.
+	local item_sel = items[self.MN_index]
+
+	-- Clear the existing menu layout.
+	for i = #items, 1, -1 do
+		items[i].presented = false
+		items[i] = nil
+	end
+
+	-- Repopulate the menu based on the tree order.
+	_orderLoop(self, items, self.tree)
+
+	-- Unmark any items that are now hidden from the menu.
+	_unmarkLoop(self, self.tree)
+
+	-- Fix the selected item.
+	if item_sel then
+		-- If the item is still visible, update the selected index.
+		-- If not, find the next selectable ancestor, or select nothing if there is no suitable candidate.
+		if item_sel.presented then
+			self:menuSetSelectedItem(item_sel)
+		else
+			_selectionLoop(self, item_sel)
+		end
+	end
+
+	return self
+end
+
+
+local function _removeNode(self, node, depth)
+	local node_i = node:getNodeIndex()
+	local node_parent = node.parent
+	if not node_parent then
+		error("cannot remove the root tree node")
+	end
+
+	-- Remove all child nodes first.
+	for i, child_node in ipairs(node.nodes) do
+		self:removeNode(child_node, depth + 1)
+		node:removeNode(node_i)
+	end
+
+	local item = node.item
+	item.presented = nil
+	node.item = nil
+	local item_i = self:menuGetItemIndex(item)
+	table.remove(self.MN_items, item_i)
+end
+
+
+function methods:removeNode(node)
+	-- XXX: Assertions (?)
+
+	_removeNode(self, node, 1)
+
+	self:orderItems()
+	self:arrangeItems()
+
+	return self
+end
+
+
+function methods:arrangeItems()
+	local skin, items = self.skin, self.MN_items
+	local yy = 0
+
+	for i = 1, #items do
+		local item = items[i]
+
+		item.x = item.depth * skin.indent
+		item.y = yy
+		yy = item.y + item.h
+	end
+
+	return self
 end
 
 
@@ -47,7 +243,7 @@ function wcTree.keyForward(self, dir)
 	and #item.nodes > 0
 	and not item.expanded
 	then
-		wcTree.setExpanded(self, item, true)
+		self:setNodeExpanded(item, true)
 
 	elseif item and #item.nodes > 0 and item.expanded then
 		self:menuSetSelectedIndex(self:menuGetItemIndex(item.nodes[1]))
@@ -69,7 +265,7 @@ function wcTree.keyBackward(self, dir)
 	and #item.nodes > 0
 	and item.expanded
 	then
-		wcTree.setExpanded(self, item, false)
+		self:setNodeExpanded(item, false)
 
 	elseif item and item.parent and item.parent.parent then -- XXX double-check this logic
 		self:menuSetSelectedIndex(self:menuGetItemIndex(item.parent))
@@ -154,192 +350,6 @@ function wcTree.updateAllIconReferences(self, skin, node)
 			wcTree.updateAllIconReferences(self, skin, item)
 		end
 	end
-end
-
-
-function wcTree.setIconsEnabled(self, enabled)
-	self:writeSetting("TR_show_icons", not not enabled)
-	self:cacheUpdate(true)
-	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
-
-	return self
-end
-
-
-function wcTree.setExpandersActive(self, active)
-	self:writeSetting("TR_expanders_active", not not active)
-	self:cacheUpdate(true)
-	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
-
-	return self
-end
-
-
-function wcTree.setItemAlignment(self, align)
-	if not _nm_align[align] then
-		error("invalid alignment setting.")
-	end
-	self:writeSetting("TR_item_align_h", align)
-	self:cacheUpdate(true)
-	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
-
-	return self
-end
-
-
-function wcTree.addNode(self, text, parent_node, tree_pos, icon_id, expanded)
-	uiAssert.type(1, text, "string")
-	uiAssert.tableWithMetatableEval(2, parent_node, structTree.mt_tree)
-	uiAssert.typeEval(3, tree_pos, "number")
-	uiAssert.typeEval(4, icon_id, "string")
-	-- don't assert 'expanded'
-
-	--print("add node", text, parent_node, tree_pos, icon_id, expanded)
-
-	local skin = self.skin
-	local font = skin.font
-
-	parent_node = parent_node or self.tree
-	local node = parent_node:addNode(tree_pos)
-
-	node.depth = node:getNodeDepth() - 1
-
-	-- Nodes function as menu items.
-	local item = node
-
-	-- Is true when the node is visible as a menu item.
-	-- Needed to simplify the clearing of marks and the menu selection when unexpanding a node.
-	item.presented = false
-
-	item.selectable = true
-	item.marked = false -- multi-select
-
-	item.text = text
-	item.icon_id = icon_id
-	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
-
-	item.x, item.y = 0, 0
-	wcTree.updateItemDimensions(self, skin, item)
-
-	return item
-end
-
-
-local function _orderLoop(self, items, node)
-	if node.expanded then
-		for i, child in ipairs(node.nodes) do
-			items[#items + 1] = child
-			child.presented = true
-			_orderLoop(self, items, child)
-		end
-	end
-end
-
-
-local function _unmarkLoop(self, node, _depth)
-	_depth = _depth or 1
-	for i, child in ipairs(node.nodes) do
-		if not child.presented then
-			child.marked = false
-		end
-		_unmarkLoop(self, child, _depth + 1)
-	end
-end
-
-
-local function _selectionLoop(self, node)
-	while node do
-		if node.presented and node.selectable then
-			self:menuSetSelectedItem(node)
-			return
-		else
-			node = node.parent
-		end
-	end
-
-	self:menuSetSelectedIndex(0)
-end
-
-
-function wcTree.orderItems(self)
-	local items = self.MN_items
-
-	-- Note the current selected item, if any.
-	local item_sel = items[self.MN_index]
-
-	-- Clear the existing menu layout.
-	for i = #items, 1, -1 do
-		items[i].presented = false
-		items[i] = nil
-	end
-
-	-- Repopulate the menu based on the tree order.
-	_orderLoop(self, items, self.tree)
-
-	-- Unmark any items that are now hidden from the menu.
-	_unmarkLoop(self, self.tree)
-
-	-- Fix the selected item.
-	if item_sel then
-		-- If the item is still visible, update the selected index.
-		-- If not, find the next selectable ancestor, or select nothing if there is no suitable candidate.
-		if item_sel.presented then
-			self:menuSetSelectedItem(item_sel)
-		else
-			_selectionLoop(self, item_sel)
-		end
-	end
-
-	return self
-end
-
-
-local function _removeNode(self, node, depth)
-	local node_i = node:getNodeIndex()
-	local node_parent = node.parent
-	if not node_parent then
-		error("cannot remove the root tree node")
-	end
-
-	-- Remove all child nodes first.
-	for i, child_node in ipairs(node.nodes) do
-		self:removeNode(child_node, depth + 1)
-		node:removeNode(node_i)
-	end
-
-	local item = node.item
-	item.presented = nil
-	node.item = nil
-	local item_i = self:menuGetItemIndex(item)
-	table.remove(self.MN_items, item_i)
-end
-
-
-function wcTree.removeNode(self, node)
-	-- XXX: Assertions (?)
-
-	_removeNode(self, node, 1)
-
-	self:orderItems()
-	wcTree.arrangeItems(self)
-
-	return self
-end
-
-
-function wcTree.arrangeItems(self)
-	local skin, items = self.skin, self.MN_items
-	local yy = 0
-
-	for i = 1, #items do
-		local item = items[i]
-
-		item.x = item.depth * skin.indent
-		item.y = yy
-		yy = item.y + item.h
-	end
-
-	return self
 end
 
 
