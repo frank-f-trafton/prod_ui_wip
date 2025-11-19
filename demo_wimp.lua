@@ -15,7 +15,9 @@ demo_default_theme = "vacuum_dark"
 
 
 -- The first panel to load.
+-- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
+	--"widgets.unfinished.dial",
 	"demo_welcome",
 	"widgets.list_box",
 	"widgets.tree_box",
@@ -638,11 +640,8 @@ do
 			--print(inspect(src_node))
 			local item
 			if parent then
-				item = tree_box:addNode(src_node.label, parent)
+				item = tree_box:addNode(src_node.label, parent, nil, nil, not src_node.collapsed)
 				item.plan_id = src_node.plan_id
-				if src_node.collapsed then
-					tree_box:setNodeExpanded(item, false)
-				end
 			end
 
 			if src_node.nodes then
@@ -693,13 +692,15 @@ do
 	--love.mouse.setRelativeMode(true)
 
 	-- Quick-launch windows and up to one panel (see top of file for the lists).
-	local panel_id = demo_panel_launch[1]
-	local plan_list = wimp_root:findTag("plan_menu")
-	if panel_id and plan_list then
-		for i, item in ipairs(plan_list.MN_items) do
-			if item.plan_id == panel_id then
-				plan_list:setSelection(item)
-				break
+	do
+		local panel_id = demo_panel_launch[1]
+		local demo_tree = wimp_root:findTag("plan_menu")
+		if panel_id and demo_tree then
+			for i, item in ipairs(demo_tree.MN_items) do
+				if item.plan_id == panel_id then
+					demo_tree:setSelection(item)
+					break
+				end
 			end
 		end
 	end
