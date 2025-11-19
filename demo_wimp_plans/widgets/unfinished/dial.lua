@@ -20,13 +20,8 @@ function plan.make(panel)
 
 	demoShared.makeLabel(panel, xx, 0, 256, 32, "Dial -- **Under construction**")
 	local dial1 = panel:addChild("base/dial")
-	dial1.x = xx
-	dial1.y = 32
-	dial1.w = 64
-	dial1.h = 64
-
-	--:setDialParameters(pos, min, max, home, rnd)
-	dial1:setDialParameters(0, 0, 100, 0, "none")
+		:geometrySetMode("static", xx, 32, 64, 64)
+		:setDialParameters(0, 0, 100, 0, "none") -- (pos, min, max, home, rnd)
 end
 
 
