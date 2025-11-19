@@ -40,6 +40,17 @@ end
 function methods:setNodeExpanded(item, exp)
 	-- TODO: confirm that the widget owns the item
 	item.expanded = not not exp
+
+	-- If expanding this node, then ensure that all
+	-- parent nodes are expanded, too.
+	if exp then
+		local node = item
+		while node.parent do -- (stop just before the root node)
+			node.expanded = true
+			node = node.parent
+		end
+	end
+
 	self:orderItems()
 	self:arrangeItems(self)
 	self:cacheUpdate(true)
@@ -99,6 +110,8 @@ function methods:addNode(text, parent_node, tree_pos, icon_id, expanded)
 
 	-- Nodes function as menu items.
 	local item = node
+
+	item.expanded = not not expanded
 
 	-- Is true when the node is visible as a menu item.
 	-- Needed to simplify the clearing of marks and the menu selection when unexpanding a node.

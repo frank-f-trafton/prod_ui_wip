@@ -39,7 +39,7 @@ local function _buildLoop(tree_box, node, root, thimble1, thimble2, _collapsed)
 		if not tree_box.parent.usr_exclude
 		or tree_box.parent.usr_exclude and tree_box.parent ~= wid_g2
 		then
-			local n1 = tree_box:addNode(_widgetToString(wid_g2, i, thimble1, thimble2), node)
+			local n1 = tree_box:addNode(_widgetToString(wid_g2, i, thimble1, thimble2), node, nil, nil, true)
 			n1.usr_wid = wid_g2
 			if _collapsed[wid_g2] then
 				n1.expanded = false
