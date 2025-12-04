@@ -39,7 +39,7 @@ end
 
 --- Makes a generic context menu and registers it with the WIMP root.
 function wcWimp.makePopUpMenu(self, menu_def, x, y)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	local pop_up = root:addChild("wimp/menu_pop")
 	pop_up.x = x
@@ -79,7 +79,7 @@ end
 --- Registers a widget as a pop-up in the WIMP root. The caller needs to create and initialize the widget
 -- before calling.
 function wcWimp.assignPopUp(self, pop_up)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	pop_up.wid_ref = self
 
@@ -89,7 +89,7 @@ end
 
 -- Destroy the pop-up menu if it exists in reference to this widget.
 function wcWimp.checkDestroyPopUp(self)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
 		root:sendEvent("rootCall_destroyPopUp", self, "concluded")

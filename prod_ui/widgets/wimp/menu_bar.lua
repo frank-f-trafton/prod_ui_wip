@@ -17,6 +17,7 @@ The menu bar may act strangely if it becomes too narrow to display all categorie
 local context = select(1, ...)
 
 
+local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -85,9 +86,9 @@ local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_sele
 	local p_y = ay + client.h
 	--local p_y = ay + item.y + item.h
 
-	local root = client:getRootWidget()
+	local root = client:nodeGetRoot()
 
-	if client.chain_next then
+	if client["next"] then
 		root:sendEvent("rootCall_destroyPopUp", client)
 	end
 
@@ -98,11 +99,11 @@ local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_sele
 		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
 	end
 
-	client.chain_next = pop_up
+	client["next"] = pop_up
 	client.state = "opened"
 	client.last_open = item
 
-	pop_up.chain_prev = client
+	pop_up["prev"] = client
 
 	if set_selection then
 		pop_up.MN_default_deselect = false
@@ -116,12 +117,12 @@ end
 
 
 local function _destroyPopUpMenu(client, reason_code)
-	local root = client:getRootWidget()
+	local root = client:nodeGetRoot()
 
 	root:sendEvent("rootCall_destroyPopUp", client, reason_code)
 
 	client.last_open = false
-	client.chain_next = false
+	client["next"] = false
 end
 
 
@@ -265,7 +266,7 @@ function def:removeCategoryByIndex(item_i)
 	self:arrangeItems()
 
 	-- If there is a pop up menu associated with this category, destroy it.
-	if self.chain_next then
+	if self["next"] then
 		_destroyPopUpMenu(self, "concluded")
 	end
 
@@ -274,7 +275,7 @@ end
 
 
 local function setStateIdle(self)
-	self.chain_next = false
+	self["next"] = false
 	self.last_open = false
 	self:menuSetSelectedIndex(0)
 	self.state = "idle"
@@ -304,7 +305,7 @@ function def:wid_popUpCleanup(reason_code)
 		setStateIdle(self)
 	end
 
-	self.chain_next = false
+	self["next"] = false
 	self.last_open = false
 end
 
@@ -366,7 +367,7 @@ function def:uiCall_initialize()
 	self.MN_items_last = 2^53 -- min(last, #items)
 
 	-- References populated when this widget is part of a chain of menus.
-	self.chain_next = false
+	self["next"] = false
 
 	-- When true, the height reported to the layout node is zero. The menu may still respond
 	-- through key shortcuts, though.
@@ -438,7 +439,7 @@ end
 local function _findMenuInParent(parent)
 	-- XXX: This sucks; it's collatoral damage from rewriting how keyhooks work.
 	-- I probably want containers with menus to have a standard set of methods to interact with them.
-	for i, child in ipairs(parent.children) do
+	for i, child in ipairs(parent.nodes) do
 		if child.id == "wimp/menu_bar" then
 			return child
 		end
@@ -463,7 +464,7 @@ function def:widHook_pressed(key, scancode, isrepeat)
 
 		-- Menu deactivation
 		if key == "f10" then
-			local root = self:getRootWidget()
+			local root = self:nodeGetRoot()
 			if root.pop_up_menu then
 				_destroyPopUpMenu(menu_bar, "concluded")
 				setStateIdle(menu_bar)
@@ -540,7 +541,7 @@ end
 --- Activate the menu bar, opening the first selectable category (if one exists).
 function def:widCall_keyboardActivate()
 	-- If there is already a pop-up menu (whether chained to the menu bar or just in general), destroy it
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 	if root.pop_up_menu then
 		_destroyPopUpMenu(self, "concluded")
 		setStateIdle(self)
@@ -677,7 +678,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 				--print("item_t.pop_up_proto", item_t.pop_up_proto, "self.state", self.state)
 				if item_t.pop_up_proto and self.state ~= "idle" then
 					if self.last_open ~= item_t then
-						if self.chain_next then
+						if self["next"] then
 							_destroyPopUpMenu(self)
 						end
 						if item_t.pop_up_proto then
@@ -726,7 +727,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 					end
 
 					if self.last_open ~= item then
-						if self.chain_next then
+						if self["next"] then
 							_destroyPopUpMenu(self)
 						end
 						if item.pop_up_proto then
@@ -788,7 +789,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 						if item_t then
 							-- If this menu already has a pop-up menu opened, close it and restore thimble state.
-							if self.chain_next then
+							if self["next"] then
 								_destroyPopUpMenu(self)
 
 							elseif item_t.pop_up_proto then
@@ -877,7 +878,7 @@ function def:uiCall_update(dt)
 		self.show_underlines = true
 
 	elseif uline_draw == "when-active" then
-		self.show_underlines = (self.chain_next or mod["alt"]) and true or false
+		self.show_underlines = (self["next"] or mod["alt"]) and true or false
 
 	else -- "never"
 		self.show_underlines = false
@@ -888,10 +889,10 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		-- If a pop-up menu exists that references this widget, destroy it.
-		if self.chain_next then
+		if self["next"] then
 			_destroyPopUpMenu(self, "concluded")
 		end
-		widShared.chainUnlink(self)
+		pList2.unlink(self)
 
 		widShared.removeViewports(self, 2)
 	end
@@ -1051,7 +1052,7 @@ def.default_skinner = {
 		love.graphics.setFont(self.context.resources.fonts.p)
 		local ww = love.graphics.getWidth() - 288
 
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 
 		love.graphics.print("state: " .. self.state
 		.. "\npressed: " .. tostring(self == self.context.current_pressed)

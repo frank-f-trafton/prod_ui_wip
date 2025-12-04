@@ -15,7 +15,7 @@ local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
 	and widget:ui_evaluateHover(x, y, os_x, os_y)
 	then
 		-- Evaluate descendants front-to-back, depth-first.
-		if #widget.children > 0 then
+		if #widget.nodes > 0 then
 			-- Update the hover clipping rectangle for recursive calls
 			if widget.clip_hover == true then
 				x1 = math.max(x1, os_x + widget.x)
@@ -30,7 +30,7 @@ local function _hoverLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2)
 				y2 = math.min(y2, os_y + widget.y + widget.clip_hover_y + widget.clip_hover_h)
 			end
 
-			local children = widget.children
+			local children = widget.nodes
 			for i = #children, 1, -1 do
 				local wid = children[i]
 				local sub = _hoverLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid, x1, y1, x2, y2)
@@ -61,7 +61,7 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 	and widget:ui_evaluatePress(x, y, os_x, os_y, button, istouch, presses)
 	then
 		-- Evaluate descendants front-to-back, depth-first.
-		if #widget.children > 0 then
+		if #widget.nodes > 0 then
 			-- Update the press clipping rectangle for recursive calls
 			if widget.clip_hover == true then
 				x1 = math.max(x1, os_x + widget.x)
@@ -76,7 +76,7 @@ local function _pressLoop(x, y, os_x, os_y, widget, x1, y1, x2, y2, button, isto
 				y2 = math.min(y2, os_y + widget.y + widget.clip_hover_y + widget.clip_hover_h)
 			end
 
-			local children = widget.children
+			local children = widget.nodes
 			for i = #children, 1, -1 do
 				local wid = children[i]
 				local sub = _pressLoop(x, y, os_x + widget.x - widget.scr_x, os_y + widget.y - widget.scr_y, wid,

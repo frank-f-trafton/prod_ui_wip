@@ -84,7 +84,7 @@ function debug.debugDrawLayoutNodes(wid)
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.setLineWidth(1)
 
-	for i, child in ipairs(wid.children) do
+	for i, child in ipairs(wid.nodes) do
 		local GE = child.GE
 		if GE.mode ~= "null" then
 			love.graphics.rectangle("line", child.x, child.y, child.w, child.h)

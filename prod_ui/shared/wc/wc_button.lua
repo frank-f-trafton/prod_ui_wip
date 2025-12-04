@@ -275,7 +275,7 @@ end
 function wcButton.uncheckAllRadioSiblings(self)
 	local parent = self.parent
 
-	for i, sibling in ipairs(parent.children) do
+	for i, sibling in ipairs(parent.nodes) do
 		if sibling.is_radio_button and sibling.radio_group == self.radio_group then
 			sibling.checked = false
 		end
@@ -300,10 +300,10 @@ end
 -- @param value The value to check.
 -- @return self (for chaining).
 function wcButton.setCheckedRadioConditional(self, key, value)
-	local parent = self:getParent()
-	local siblings = parent.children
+	local parent = self:nodeAssertParent()
+	local siblings = parent.nodes
 
-	for i, wid in ipairs(parent.children) do
+	for i, wid in ipairs(parent.nodes) do
 		if wid.is_radio_button and wid.radio_group == self.radio_group and wid[key] == value then
 			wid:setChecked(true)
 			break

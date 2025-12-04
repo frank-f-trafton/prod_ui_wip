@@ -6,7 +6,7 @@ local demoShared = require("demo_shared")
 
 
 local function _makeFrameBlock2(self)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 	local frame, dialog
 	frame = demoShared.getUIFrame(self)
 
@@ -39,7 +39,7 @@ This Window Frame should block interaction with the UI Frame that invoked it, un
 		dialog.x = dialog.x + 32
 		dialog.y = dialog.y + 32
 
-		local root = dialog:getRootWidget()
+		local root = dialog:nodeGetRoot()
 		root:setSelectedFrame(dialog)
 
 		local try_host = dialog:getOpenThimble1DepthFirst()
@@ -53,7 +53,7 @@ end
 
 
 local function _makeFrameBlock1(self)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 	local frame, dialog
 	frame = demoShared.getUIFrame(self)
 
@@ -81,7 +81,7 @@ Click the button to make a blocking UI Frame.
 		end
 
 		dialog:center(true, true)
-		local root = dialog:getRootWidget()
+		local root = dialog:nodeGetRoot()
 		root:setSelectedFrame(dialog)
 
 		local try_host = dialog:getOpenThimble1DepthFirst()

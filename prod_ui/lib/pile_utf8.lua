@@ -1,4 +1,4 @@
--- PILE UTF-8 v2.000
+-- PILE UTF-8 v2.000 (modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT
 -- https://github.com/frank-f-trafton/pile_base

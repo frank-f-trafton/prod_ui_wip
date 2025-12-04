@@ -2,7 +2,7 @@
 wimp/menu_pop: A pop-up menu implementation.
 
 Supports sub-menus by spawning additional menu widgets. All widgets in the sequence
-form a doubly-linked list, using the fields 'self.chain_next' and 'self.chain_prev'.
+form a doubly-linked list, using the fields 'self["next"]' and 'self["prev"]'.
 The first item in the chain may be the client (invoking) widget.
 
 
@@ -74,6 +74,7 @@ Horizontal item padding (not including widget margins):
 local context = select(1, ...)
 
 
+local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -110,7 +111,7 @@ end
 
 
 local function destroySubMenus(self)
-	if self.chain_next then
+	if self["next"] then
 		widShared.chainDestroyPost(self)
 		self.last_open_group = false
 	end
@@ -130,8 +131,8 @@ local function assignSubMenu(item, client, set_selection)
 		if group_prototype and parent then
 			-- Add as a sibling and attach to the menu chain.
 			local client_sub = parent:addChild("wimp/menu_pop")
-			client.chain_next = client_sub
-			client_sub.chain_prev = client
+			client["next"] = client_sub
+			client_sub["prev"] = client
 			client_sub.wid_ref = client.wid_ref
 
 			-- Configure menu defs.
@@ -198,7 +199,7 @@ local function activateCommand(client, item)
 		item.callback(wid_ref, item)
 	end
 
-	local root = client:getRootWidget()
+	local root = client:nodeGetRoot()
 	root:sendEvent("rootCall_destroyPopUp", client, "concluded")
 end
 
@@ -411,7 +412,7 @@ function def:updateDimensions()
 	ww = ww + skin.pad_x2
 
 	-- We assume that the root widget's dimensions match the display area.
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 	local margin = skin.box.margin
 
 	-- Manually add the margin edges...
@@ -481,8 +482,8 @@ function def:uiCall_initialize()
 	self.group_arrow_x = 0
 
 	-- References populated when this widget is part of a chain of menus.
-	self.chain_next = false
-	self.chain_prev = false
+	self["next"] = false
+	self["prev"] = false
 
 	-- Caller sets this to the widget table that this menu "belongs to" or extends.
 	self.wid_ref = false
@@ -557,18 +558,18 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 
 		if key == "escape" then
 			destroySubMenus(self)
-			--print("self.chain_prev", self.chain_prev)
+			--print("self["prev"]", self["prev"])
 
 			-- Need some special handling depending on whether this is the base pop-up, or
 			-- if the previous chain entry is the widget that invoked the pop-up (or is
 			-- yet another temporary pop-up menu).
 
 			-- This is the base pop-up.
-			if not self.chain_prev or (self.wid_ref and self.wid_ref == self.chain_prev) then
+			if not self["prev"] or (self.wid_ref and self.wid_ref == self["prev"]) then
 				local wid_ref = self.wid_ref
 
 				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
@@ -579,28 +580,28 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			-- We do not want to destroy the entire chain, just this one (and any others to the
 			-- right, which we took care of above).
 			else
-				local temp_chain_prev = self.chain_prev
+				local temp_prev = self["prev"]
 
 				self:destroy()
 
-				temp_chain_prev.chain_next = false
-				temp_chain_prev.last_open_group = false
-				temp_chain_prev:tryTakeThimble2()
+				temp_prev["next"] = false
+				temp_prev.last_open_group = false
+				temp_prev:tryTakeThimble2()
 
 				return true
 			end
 
 		elseif key == "left" then
-			-- Similar to Esc, but we only want to act here if chain_prev is another pop-up.
-			if self.chain_prev and self.chain_prev ~= self.wid_ref then
+			-- Similar to Esc, but we only want to act here if prev is another pop-up.
+			if self["prev"] and self["prev"] ~= self.wid_ref then
 				destroySubMenus(self)
-				local temp_chain_prev = self.chain_prev
+				local temp_prev = self["prev"]
 
 				self:destroy()
 
-				temp_chain_prev.chain_next = false
-				temp_chain_prev.last_open_group = false
-				temp_chain_prev:tryTakeThimble2()
+				temp_prev["next"] = false
+				temp_prev.last_open_group = false
+				temp_prev:tryTakeThimble2()
 
 				return true
 			end
@@ -740,11 +741,11 @@ end
 local function restingOnOpenGroup(self)
 	--[[
 	print("restingOnOpenGroup",
-		self.chain_next,
-		self.chain_next and self.chain_next.origin_item,
+		self["next"],
+		self["next"] and self["next"].origin_item,
 		self.MN_items[self.MN_index])
 	--]]
-	return self.chain_next and self.chain_next.origin_item == self.MN_items[self.MN_index]
+	return self["next"] and self["next"].origin_item == self.MN_items[self.MN_index]
 end
 
 
@@ -759,7 +760,7 @@ end
 
 
 local function forceSuperMenuGroupSelection(self)
-	local w_prev = self.chain_prev
+	local w_prev = self["prev"]
 
 	-- (Filter out menu-bars -> they don't have 'menu' populated)
 	if w_prev and w_prev.menu and self.origin_item then
@@ -844,7 +845,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		end
 
 		-- If this is a sub-menu, force the left-menu's open group to remain selected.
-		if self.chain_prev then
+		if self["prev"] then
 			forceSuperMenuGroupSelection(self)
 		end
 	end
@@ -869,7 +870,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
-				local root = self:getRootWidget()
+				local root = self:nodeGetRoot()
 				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 				return
 			end
@@ -988,16 +989,16 @@ function def:uiCall_update(dt)
 	--[[
 	local cur_thimble2 = self.context.thimble2
 	local in_chain = false
-	local wid = self.chain_next
+	local wid = self["next"]
 	while wid do
 		if cur_thimble2 == wid then
 			in_chain = true
 			break
 		end
-		wid = wid.chain_next
+		wid = wid["next"]
 	end
 
-	--print("chain_next", self.chain_next, "in_chain", in_chain)
+	--print("(list) next", self["next"], "in_chain", in_chain)
 	--print("self.MN_index", self.MN_index, "selected", selected, "type", selected and selected.type, "last_open_group", self.last_open_group)
 	--]]
 
@@ -1036,13 +1037,13 @@ function def:uiCall_destroy(inst)
 		-- If this widget is part of a chain and currently holds the context pressed and/or thimble state,
 		-- try to transfer it back to the previous menu in the chain.
 		if self.press_busy == "menu-drag" then
-			local c_prev = self.chain_prev
+			local c_prev = self["prev"]
 			if c_prev then
 				pressedAndThimbleHandoff(self, c_prev)
 			end
 		end
 
-		widShared.chainUnlink(self)
+		pList2.unlink(self)
 
 		widShared.removeViewports(self, 2)
 	end

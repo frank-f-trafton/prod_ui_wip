@@ -35,7 +35,7 @@ end
 
 
 local function _buildLoop(tree_box, node, root, thimble1, thimble2, _collapsed)
-	for i, wid_g2 in ipairs(root.children) do
+	for i, wid_g2 in ipairs(root.nodes) do
 		if not tree_box.parent.usr_exclude
 		or tree_box.parent.usr_exclude and tree_box.parent ~= wid_g2
 		then
@@ -88,7 +88,7 @@ end
 
 local function tree_userUpdate(self, dt)
 	local context = self.context
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	if root then
 		self.usr_timer = self.usr_timer - dt

@@ -1,9 +1,6 @@
 -- ProdUI: Widget implementation.
 
 
---- TODO: remove '_depth' debug fields in layout code
-
-
 local context = select(1, ...)
 
 
@@ -18,11 +15,40 @@ _mt_widget.context = context
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 --local pools = context:getLua("core/res/pools")
 local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pTree = require(context.conf.prod_ui_req .. "lib.pile_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+
+
+-- Pull in some methods from PILE Tree.
+_mt_widget.nodeGetIndex = pTree.nodeGetIndex
+_mt_widget._nodeAssertIndex = pTree.nodeAssertIndex
+_mt_widget.nodeGetDepth = pTree.nodeGetDepth
+_mt_widget._nodeAssertNoCycles = pTree.nodeAssertNoCycles
+_mt_widget.nodeGetNext = pTree.nodeGetNext
+_mt_widget.nodeGetPrevious = pTree.nodeGetPrevious
+_mt_widget.nodeGetNextSibling = pTree.nodeGetNextSibling
+_mt_widget.nodeGetPreviousSibling = pTree.nodeGetPreviousSibling
+_mt_widget.nodeAssertParent = pTree.nodeAssertParent
+
+
+-- In this case, we have a shortcut that isn't available to the generic tree code.
+function _mt_widget:nodeGetRoot()
+	return context.root
+end
+
+
+_mt_widget.nodeGetVeryLast = pTree.nodeGetVeryLast
+_mt_widget.nodeForEach = pTree.nodeForEach
+_mt_widget.nodeForEachBack = pTree.nodeForEachBack
+_mt_widget.nodeHasThisAncestor = pTree.nodeHasThisAncestor
+_mt_widget.nodeIsInLineage = pTree.nodeIsInLineage
+_mt_widget.nodeFindKeyInChildren = pTree.nodeFindKeyInChildren
+_mt_widget.nodeFindKeyDescending = pTree.nodeFindKeyDescending
+_mt_widget.nodeFindKeyAscending = pTree.nodeFindKeyAscending
 
 
 local function _errNoDescendants()
@@ -44,7 +70,7 @@ _mt_widget.tag = ""
 
 
 -- Dummy children table
-_mt_widget.children = _mt_no_descendants
+_mt_widget.nodes = _mt_no_descendants
 
 
 _mt_widget.x = 0
@@ -418,20 +444,13 @@ function _mt_widget:releaseThimble2(a, b, c, d)
 end
 
 
---- Gets the root widget instance.
--- @return The root widget.
-function _mt_widget:getRootWidget()
-	return context.root
-end
-
-
 --- Depth-first search for the first widget which can take the thimble.
 -- @return The found widget, or nil if the search was unsuccessful.
 function _mt_widget:getOpenThimble1DepthFirst()
 	if self:canTakeThimble(1) then
 		return self
 	else
-		for i, child in ipairs(self.children) do
+		for i, child in ipairs(self.nodes) do
 			if child:getOpenThimble1DepthFirst() then
 				return child
 			end
@@ -535,7 +554,7 @@ end
 --  Locked during update: yes (self)
 -- @param id The widget def ID.
 -- @param [skin_id] The starting Skin ID, if applicable.
--- @param [pos] (default: #self.children + 1) Where to place the new widget in the table of children.
+-- @param [pos] (default: #self.nodes + 1) Where to place the new widget in the table of children.
 -- @param [...] Additional arguments for the widget's uiCall_initialize() callback.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, skin_id, pos, ...)
@@ -543,7 +562,7 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 	uiAssert.typeEval(2, skin_id, "string")
 	uiAssert.numberNotNaNEval(3, pos)
 
-	local children = self.children
+	local children = self.nodes
 	pos = pos or #children + 1
 	if pos < 1 or pos > #children + 1 then
 		error("position is out of range")
@@ -593,19 +612,19 @@ function _mt_widget:destroy()
 	end
 
 	-- Handle children, grandchildren, etc.
-	local children = self.children
+	local children = self.nodes
 	if children then
 		for i = #children, 1, -1 do
 			children[i]:destroy()
 			-- Removal from 'children' list is handled below.
 		end
 
-		self.children = nil
+		self.nodes = nil
 		--[[
 		if children == _mt_no_descendants then
-			self.children = nil
+			self.nodes = nil
 		else
-			self.children = pools.children:push(children)
+			self.nodes = pools.nodes:push(children)
 		end
 		--]]
 	end
@@ -621,7 +640,7 @@ function _mt_widget:destroy()
 
 	-- If parent exists, find and destroy self from parent's 1) children and 2) layout
 	if parent then
-		if uiTable.removeElement(parent.children, self) == 0 then
+		if uiTable.removeElement(parent.nodes, self) == 0 then
 			error("widget can't find itself in parent's list of children.")
 		end
 
@@ -733,6 +752,8 @@ _mt_widget.bubbleEvent = _bubbleEvent -- _mt_widget:bubbleEvent(field, a,b,c,d,e
 
 
 local function _trickleEvent(self, field, a,b,c,d,e,f)
+	--print("trickleEvent", self, field, a,b,c,d,e,f)
+
 	if self.parent then
 		local retval = _trickleEvent(self.parent, field, a,b,c,d,e,f)
 		if retval then
@@ -758,66 +779,10 @@ end
 _mt_widget.trickleEvent = _trickleEvent -- _mt_widget:trickleEvent(field, a,b,c,d,e,f)
 
 
---- Trickle, then bubble an event.
 function _mt_widget:cycleEvent(field, a,b,c,d,e,f)
-	local retval = _trickleEvent(self, field, a,b,c,d,e,f)
-	if retval then
-		return retval
-	end
-	local var = self[field]
-	if type(var) == "function" then
-		retval = var(self, a,b,c,d,e,f)
-		if retval then
-			return retval
-		end
+	--print("cycleEvent", self, field, a,b,c,d,e,f)
 
-	elseif var then
-		errEventBadType(field, var)
-	end
-
-	if self.parent then
-		return _bubbleEvent(self.parent, field, a,b,c,d,e,f)
-	end
-end
-
-
-function _mt_widget:getIndex(seq)
-	seq = seq or (self.parent and self.parent.children)
-
-	for i, child in ipairs(seq) do
-		if self == child then
-			return i
-		end
-	end
-
-	error("couldn't find self in provided list of widgets.")
-end
-
-
-local function getSiblingDelta(self, delta, wrap)
-	if not self.parent then
-		error("can't get siblings for the root widget.")
-	end
-
-	local siblings = self.parent.children
-	local index = self:getIndex(siblings)
-	local retval = siblings[index + delta]
-	if not retval and wrap then
-		local wrap_i = delta > 0 and 1 or #siblings
-		retval = siblings[wrap_i]
-	end
-
-	return retval
-end
-
-
-function _mt_widget:getSiblingNext(wrap)
-	return getSiblingDelta(self, 1, wrap)
-end
-
-
-function _mt_widget:getSiblingPrevious(wrap)
-	return getSiblingDelta(self, -1, wrap)
+	return _trickleEvent(self, field, a,b,c,d,e,f) or _bubbleEvent(self, field, a,b,c,d,e,f)
 end
 
 
@@ -843,7 +808,7 @@ function _mt_widget:sortChildren(recurse)
 		coreErr.errLocked("sort children")
 	end
 
-	local seq = self.children
+	local seq = self.nodes
 
 	if self.sort_max > 0 and #seq > 1 then
 		-- All in-use fields in 'count' default to 0.
@@ -915,9 +880,9 @@ function _mt_widget:reorder(var)
 		error("cannot reorder the root widget.")
 	end
 
-	local seq = self.parent.children
+	local seq = self.parent.nodes
 
-	local self_i = self:getIndex(seq)
+	local self_i = self:_nodeAssertIndex(seq)
 	local dest_i = math.max(1, math.min(var, #seq))
 
 	if self_i == dest_i then
@@ -947,94 +912,24 @@ function _mt_widget:getTag()
 end
 
 
--- Depth-first tag search among descendants. Does not include self.
--- @param str The string to find.
--- @return The widget, plus its sibling index, or nil if there was no match.
-function _mt_widget:findTag(str)
-	for i, child in ipairs(self.children) do
-		--print("findTag", self.id, i, child.id, child.tag)
-		if child.tag == str then
-			--print("findTag: MATCH")
-			return child, i
-		else
-			local ret1, ret2 = child:findTag(str)
-			if ret1 then
-				return ret1, ret2
-			end
-		end
-	end
+function _mt_widget:findTag(tag, inclusive)
+	uiAssert.type(1, tag, "string")
+
+	return self:nodeFindKeyDescending(inclusive, "tag", tag)
 end
 
 
--- Shallow tag search among descendants.
-function _mt_widget:findTagFlat(str, pos)
-	pos = pos or 1
-	local children = self.children
+function _mt_widget:findChildTag(tag, i)
+	uiAssert.type(1, tag, "string")
 
-	for i = pos, #children do
-		local child = children[i]
-		if child.tag == str then
-			return child, i
-		end
-	end
+	return self:nodeFindKeyInChildren(i, "tag", tag)
 end
 
 
--- Flat search of siblings for a specific string tag.
-function _mt_widget:findSiblingTag(str, i)
-	if not self.parent then
-		error("the root widget does not have siblings.")
-	end
+function _mt_widget:findSiblingTag(tag, i)
+	uiAssert.type(1, tag, "string")
 
-	i = i or 1
-
-	local seq = self.parent.children
-	local instance = seq[i]
-
-	while instance do
-		if instance.tag == str then
-			return instance, i
-		end
-		i = i + 1
-		instance = seq[i]
-	end
-end
-
-
-function _mt_widget:hasThisAncestor(wid)
-	local ancestor = self.parent
-	while ancestor do
-		if ancestor == wid then
-			return true
-		end
-		ancestor = ancestor.parent
-	end
-
-	return false
-end
-
-
-function _mt_widget:isInLineage(wid)
-	local w2 = self
-	while w2 do
-		if w2 == wid then
-			return true
-		end
-		w2 = w2.parent
-	end
-
-	return false
-end
-
-
-function _mt_widget:hasDirectChild(wid)
-	for i, child in ipairs(self.children) do
-		if wid == child then
-			return true
-		end
-	end
-
-	return false
+	return self:nodeAssertParent():nodeFindKeyInChildren(i, "tag", tag)
 end
 
 
@@ -1061,21 +956,11 @@ function _mt_widget:reshape()
 		widLayout.applyLayout(self, 1)
 	end
 
-	for i, child in ipairs(self.children) do
+	for i, child in ipairs(self.nodes) do
 		child:reshape()
 	end
 
 	self:uiCall_reshapePost()
-
-	return self
-end
-
-
---- Convenience wrapper for reshape() which skips the calling widget and starts with its children.
-function _mt_widget:reshapeDescendants()
-	for i, child in ipairs(self.children) do
-		child:reshape()
-	end
 
 	return self
 end
@@ -1143,33 +1028,6 @@ function _mt_widget:renderThimble()
 	end
 
 	love.graphics.rectangle(thimble_t.mode, 0.5 + x, 0.5 + y, w - 1, h - 1, thimble_t.corner_rx, thimble_t.corner_ry, thimble_t.segments)
-end
-
-
--- @returns the first widget where wid[key] has a non-nil value, plus the value.
-function _mt_widget:findAscendingKey(key)
-	local wid = self
-	while wid do
-		if wid[key] ~= nil then
-			return wid, wid[key]
-		end
-		wid = wid.parent
-	end
-end
-
-
--- @returns the first widget where wid[key] == value.
-function _mt_widget:findAscendingKeyValue(key, value)
-	--print("findAscendingKeyValue: start: ", key, value)
-	local wid = self
-	while wid do
-		--print("findAscendingKeyValue: ancestor: ", wid.id, wid[key], wid[value])
-		if wid[key] == value then
-			--print("^ MATCH")
-			return wid
-		end
-		wid = wid.parent
-	end
 end
 
 
@@ -1251,17 +1109,6 @@ function _mt_widget:skinUpdate(dt)
 end
 
 
---- Get a widget's parent, throwing an error if there is no reference (it's the root widget, or data corruption).
-function _mt_widget:getParent()
-	local parent = self.parent
-	if not parent then
-		error("missing parent reference in widget.")
-	end
-
-	return parent
-end
-
-
 local function _applySetting(self, k, default_settings, skin, settings)
 	if settings[k] ~= nil then
 		self[k] = settings[k]
@@ -1320,68 +1167,6 @@ function _mt_widget:isAwake()
 		wid = wid.parent
 	end
 	return true
-end
-
-
-function _mt_widget:previousWidget() -- untested
-	local parent = self.parent
-	if not parent then
-		return
-	end
-	local siblings = parent.children
-	local i = self:getIndex(siblings)
-	if i == 1 then
-		return parent
-	else
-		local wid = self
-		while wid.children do
-			wid = wid.children[#wid.children]
-		end
-		return wid
-	end
-end
-
-
-function _mt_widget:nextWidget() -- untested
-	if self.children[1] then
-		return self.children[1]
-	else
-		local wid = self
-		while wid do
-			local parent = wid.parent
-			if not parent then
-				break
-			end
-			local siblings = parent.children
-			local i = wid:getIndex(siblings)
-			if i < #siblings then
-				return siblings[i + 1]
-			else
-				wid = parent
-			end
-		end
-	end
-end
-
-
-function _mt_widget:forEach(callback, ...)
-	callback(self, ...)
-	for i, child in ipairs(self.children) do
-		local a, b, c, d = child:forEach(callback, ...)
-		if a then
-			return a, b, c, d
-		end
-	end
-end
-
-
-function _mt_widget:forEachDescendant(callback, ...)
-	for i, child in ipairs(self.children) do
-		local a, b, c, d = child:forEach(callback, ...)
-		if a then
-			return a, b, c, d
-		end
-	end
 end
 
 

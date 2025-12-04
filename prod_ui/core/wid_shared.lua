@@ -10,6 +10,7 @@ local widShared = {}
 widShared.debug = context:getLua("core/wid/debug")
 
 
+local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
 local pools = context:getLua("core/res/pools")
 local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
 
@@ -146,7 +147,7 @@ function widShared.wid_maximize(self)
 	self.maximized = true
 
 	-- Turn off resize sensors.
-	for _, child in ipairs(self.children) do
+	for _, child in ipairs(self.nodes) do
 		if child.id == "sensor_resize" then
 			child.allow_hover = false
 		end
@@ -199,7 +200,7 @@ function widShared.wid_unmaximize(self)
 	self.maximized = false
 
 	-- Turn on resize sensors.
-	for _, child in ipairs(self.children) do
+	for _, child in ipairs(self.nodes) do
 		if child.id == "sensor_resize" then
 			child.allow_hover = true
 		end
@@ -212,7 +213,7 @@ end
 function widShared.getChildrenPerimeter(self)
 	local w, h = 0, 0
 
-	for _, child in ipairs(self.children) do
+	for _, child in ipairs(self.nodes) do
 		w = math.max(w, child.x + child.w)
 		h = math.max(h, child.y + child.h)
 	end
@@ -421,34 +422,12 @@ function widShared.scrollSetMethods(self)
 end
 
 
--- * Widget chaining *
-
-
 --[[
-	Functions to set up and traverse widgets as doubly-linked lists, independent of the tree hierarchy.
+	Auxiliary functions for widgets with embedded doubly linked lists.
+
+	The fields 'next' and 'prev' are written like ["next"] and ["prev"] so that they
+	are easier to search in the codebase.
 --]]
-
-
-function widShared.chainLink(from, to)
-	from.chain_next = to
-	to.chain_prev = from
-end
-
-
-function widShared.chainUnlink(self)
-	local temp_next = self.chain_next or false
-	local temp_prev = self.chain_prev or false
-
-	if temp_prev then
-		temp_prev.chain_next = temp_next
-	end
-	if temp_next then
-		temp_next.chain_prev = temp_prev
-	end
-
-	self.chain_next = false
-	self.chain_prev = false
-end
 
 
 --- Given a widget chain and mouse coordinates, find the first intersection with a widget capable of
@@ -465,10 +444,7 @@ function widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 	-- all the way up to the widget root.
 
 	-- Start at the end of the chain.
-	local wid = self
-	while wid.chain_next do
-		wid = wid.chain_next
-	end
+	local wid = pList2.getTail(self)
 	while wid do
 		if wid.allow_hover then
 			local ax, ay = wid:getAbsolutePosition()
@@ -480,98 +456,22 @@ function widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 			end
 		end
 
-		wid = wid.chain_prev
+		wid = wid["prev"]
 	end
 end
 
 
 --- Given a widget in a chain, destroy all widgets after this one.
 function widShared.chainDestroyPost(self)
-	local wid = self
-
-	while wid.chain_next do
-		wid = wid.chain_next
-	end
+	local wid = pList2.getTail(self)
 
 	while wid ~= self do
-		local wid_prev = wid.chain_prev
+		local wid_prev = wid["prev"]
 		wid:destroy()
 		wid = wid_prev
 	end
 
-	self.chain_next = false
-end
-
-
-function widShared.chainHasThisWidget(self, wid_check)
-	local wid = self.chain_next
-	while wid do
-		if wid == wid_check then
-			return true
-		end
-		wid = wid.chain_next
-	end
-
-	wid = self.chain_prev
-	while wid do
-		if wid == wid_check then
-			return true
-		end
-		wid = wid.chain_prev
-	end
-
-	return self == wid_check
-end
-
-
-function widShared.chainHasThisWidgetRight(self, wid_check)
-	local wid = self.chain_next
-	while wid do
-		if wid == wid_check then
-			return true
-		end
-		wid = wid.chain_next
-	end
-
-	return self == wid_check
-end
-
-
--- * Keyhooks *
-
-
---[[
-	Keyhooks are a way to apply non-hardcoded keyboard shortcuts to widgets (typically UI Frames or the root widget).
-
-	Keyhook callbacks:
-
-	(trickle) love.keypressed -> self.KH_trickle_key_pressed
-	(trickle) love.keyreleased -> self.KH_trickle_key_released
-	(bubble, direct) love.keypressed -> self.KH_key_pressed
-	(bubble, direct) love.keyreleased -> self.KH_key_released
-
-	Each keyhook entry is a function that takes the widget as its first argument, followed by the standard arguments
-	provided by the LÖVE callback. See source comments for parameter lists.
-
-	Keyhooks are evaluated in reverse order, so the most recently added hook gets priority. You should not
-	add or remove keyhooks during the evaluation loop.
---]]
-
-
-function widShared.evaluateKeyhooks(self, keyhooks, a, b, c)
-	-- keyPressed: widShared.evaluateKeyhooks(self, self.KH_key_pressed, key, scancode, isrepeat)
-	-- keyReleased: widShared.evaluateKeyhooks(self, self.KH_key_released, key, scancode)
-
-	for i = #keyhooks, 1, -1 do
-		local func = keyhooks[i]
-		if not self._dead then
-			local res = func(self, a, b, c)
-
-			if res then
-				return res
-			end
-		end
-	end
+	self["next"] = false
 end
 
 
@@ -582,10 +482,10 @@ end
 -- @self The widget whose children will be scanned.
 -- @return Combined width and height of children.
 function widShared.getCombinedChildrenDimensions(self)
-	-- TODO --return pRectangle.getCombinedDimensions(self.children)
+	-- TODO --return pRectangle.getCombinedDimensions(self.nodes)
 	local dw, dh = 0, 0
 
-	for i, child in ipairs(self.children) do
+	for i, child in ipairs(self.nodes) do
 		dw = math.max(dw, child.x + child.w)
 		dh = math.max(dh, child.y + child.h)
 	end

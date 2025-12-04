@@ -24,7 +24,7 @@ function dbg.widStringHierarchy(wid, _str, _tabs)
 	end
 	_str = _str .. "\n"
 
-	for i, child in ipairs(wid.children) do
+	for i, child in ipairs(wid.nodes) do
 		local _
 		_str, _ = dbg.widStringHierarchy(child, _str, _tabs + 1)
 	end

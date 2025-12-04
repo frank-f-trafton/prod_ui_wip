@@ -942,7 +942,7 @@ function def:uiCall_destroy(inst)
 
 			-- Clean up the target's focus a bit.
 			--[[
-			local root = self:getRootWidget()
+			local root = self:nodeGetRoot()
 			root:setSelectedFrame(target, true)
 
 			target:reorder(math.huge)
@@ -953,7 +953,7 @@ function def:uiCall_destroy(inst)
 		end
 
 		-- Clean up modal level, if applicable.
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 		if self == root.modals[#root.modals] then
 			root:sendEvent("rootCall_clearModalFrame", self)
 		end

@@ -282,7 +282,7 @@ end
 function def:uiCall_destroy(inst)
 	if self == inst then
 		-- Destroy pop-up menu if it exists in reference to this widget.
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
 			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end

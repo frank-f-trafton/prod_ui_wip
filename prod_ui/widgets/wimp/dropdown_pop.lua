@@ -126,7 +126,7 @@ function def:_closeSelf(update_chosen)
 			end
 		end
 
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 		if root.pop_up_menu == self then
 			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 		end
@@ -303,7 +303,7 @@ function def:uiCall_reshapePre()
 	local skin = self.skin
 	local vp, vp2, vp3, vp4, vp5 = self.vp, self.vp2, self.vp3, self.vp4, self.vp5
 	local wid_ref = self.wid_ref
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	if not wid_ref or wid_ref._dead then
 		return true
@@ -463,7 +463,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
-				local root = self:getRootWidget()
+				local root = self:nodeGetRoot()
 				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
 				return
 			end

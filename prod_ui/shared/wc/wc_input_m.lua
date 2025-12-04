@@ -359,7 +359,7 @@ function wcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before)
 		end
 
 	elseif button == 2 then
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 		self.pop_up_proto:configure(self)
 
 		--print("text_box: thimble1, thimble2", self.context.thimble1, self.context.thimble2)

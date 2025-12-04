@@ -47,7 +47,7 @@ function plan.makeWindowFrame(root)
 
 	bb_btn:setLabel("Open all")
 	bb_btn.wid_buttonAction = function(self)
-		local siblings = self:getParent().children
+		local siblings = self:nodeAssertParent().nodes
 		for i, sib in ipairs(siblings) do
 			if sib ~= self and type(sib.usr_plan) == "string" then
 				_button_launchFrame(sib)

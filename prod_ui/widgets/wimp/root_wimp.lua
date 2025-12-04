@@ -3,6 +3,7 @@ local context = select(1, ...)
 
 local hndStep = context:getLua("shared/hnd_step")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
+local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
@@ -23,7 +24,7 @@ widLayout.setupContainerDef(def)
 local function _printUIFrames(self)
 	print("_printUIFrames()")
 	local selected = self.selected_frame
-	for i, child in ipairs(self.children) do
+	for i, child in ipairs(self.nodes) do
 		if child.frame_type then
 			local frame_title = child.frame_type == "window" and (child:getFrameTitle() or "") or "(Workspace)"
 			frame_title = frame_title == "" and "(Untitled)" or frame_title
@@ -131,7 +132,7 @@ local function clearPopUp(self, reason_code)
 	-- We exclude `wid_ref` which may be part of the chain (to the left of the base pop-up) because it is not
 	-- being destroyed by this function.
 	if self.context.current_pressed
-	and widShared.chainHasThisWidgetRight(self.pop_up_menu, self.context.current_pressed)
+	and pList2.inListForward(self.pop_up_menu["next"], self.context.current_pressed)
 	then
 		self.context.current_pressed = false
 	end
@@ -156,7 +157,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local pop_up = self.pop_up_menu
 	local inst_in_pop_up
 	if pop_up then
-		inst_in_pop_up = widShared.chainHasThisWidget(pop_up, inst)
+		inst_in_pop_up = pList2.inListBackward(pop_up["prev"], inst) or pList2.inListForward(pop_up["next"], inst)
 		if not inst_in_pop_up then
 			clearPopUp(self, "concluded")
 		end
@@ -171,7 +172,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		if modal_wid.frame_type and self.selected_frame ~= modal_wid then
 			self:setSelectedFrame(modal_wid, true)
 		end
-		if not inst:isInLineage(modal_wid) and not inst_in_pop_up then
+		if not inst:nodeIsInLineage(modal_wid) and not inst_in_pop_up then
 			self.context.current_pressed = false
 			return true
 		end
@@ -201,7 +202,7 @@ end
 
 function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.KH_trickle_key_pressed, key, scancode, isrepeat) then
+		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
 			return true
 		end
 	end
@@ -210,7 +211,7 @@ end
 
 function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.KH_key_pressed, key, scancode, isrepeat) then
+		if self.KH_key_pressed(self, key, scancode, isrepeat) then
 			return true
 		end
 	end
@@ -280,7 +281,7 @@ end
 
 function def:uiCall_keyReleased(inst, key, scancode)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.KH_key_released, key, scancode) then
+		if self.KH_key_released(self, key, scancode) then
 			return true
 		end
 	end
@@ -289,7 +290,7 @@ end
 
 function def.trickle:uiCall_keyReleased(inst, key, scancode)
 	if #self.modals == 0 then
-		if widShared.evaluateKeyhooks(self, self.KH_trickle_key_released, key, scancode) then
+		if self.KH_trickle_key_released(self, key, scancode) then
 			return true
 		end
 	end
@@ -326,7 +327,7 @@ function def:setActiveWorkspace(inst)
 
 	inst:reshape()
 
-	for i, wid_g2 in ipairs(self.children) do
+	for i, wid_g2 in ipairs(self.nodes) do
 		if wid_g2 ~= inst then
 			local frame_type = wid_g2.frame_type
 			if frame_type == "workspace" then
@@ -347,7 +348,7 @@ function def:sortG2()
 
 	-- G2 Widgets with a sort_id of 1 are asleep.
 	local start_index
-	for i, child in ipairs(self.children) do
+	for i, child in ipairs(self.nodes) do
 		child.awake = child.sort_id > 1
 		if child.sort_id > 1 and not start_index then
 			start_index = i
@@ -414,9 +415,9 @@ function def:selectTopFrame(exclude)
 		return
 	end
 
-	for i = #self.children, 1, -1 do
+	for i = #self.nodes, 1, -1 do
 		--print("child #", i)
-		local child = self.children[i]
+		local child = self.nodes[i]
 
 		--print("frame_type", child.frame_type, "ref_block_next", child.ref_block_next, "~= exclude", child ~= exclude)
 		if child.frame_type == "window"
@@ -452,7 +453,7 @@ end
 local function frameSearch(self, dir, v1, v2)
 	local candidate = false
 
-	for i, wid_g2 in ipairs(self.children) do
+	for i, wid_g2 in ipairs(self.nodes) do
 		if wid_g2.frame_type
 		and wid_g2.frame_is_selectable
 		and not wid_g2.frame_hidden
@@ -563,7 +564,7 @@ function def:rootCall_assignPopUp(inst, pop_up)
 	end
 
 	-- If invoking widget is part of a selectable Window Frame, then bring it to the front.
-	local frame = inst:findAscendingKeyValue("frame_type", "window")
+	local frame = inst:nodeFindKeyAscending(true, "frame_type", "window")
 	if frame and frame.frame_is_selectable then
 		self:setSelectedFrame(frame, true)
 	end
@@ -640,7 +641,7 @@ function def:newWindowFrame(skin_id, unselectable, view_level)
 	view_level = view_level or "normal"
 
 	local lane = wcUIFrame.view_levels[view_level]
-	local pos = widShared.getSortLaneEdge(self.children, lane, "last")
+	local pos = widShared.getSortLaneEdge(self.nodes, lane, "last")
 	local w_frame = self:addChild("wimp/window_frame", skin_id, pos, unselectable, view_level)
 	return w_frame
 end

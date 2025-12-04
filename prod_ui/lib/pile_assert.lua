@@ -1,4 +1,4 @@
--- PILE Assert v2.000
+-- PILE Assert v2.000 (modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT
 -- https://github.com/frank-f-trafton/pile_base

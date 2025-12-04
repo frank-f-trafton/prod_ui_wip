@@ -49,7 +49,7 @@ local function _createPopUpMenu(self)
 
 		_pop_up_proto:configure(self)
 
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 		local ax, ay = self:getAbsolutePosition()
 		local menu_x
 		local menu_y = ay + self.h
