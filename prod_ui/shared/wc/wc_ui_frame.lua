@@ -146,7 +146,7 @@ function wcUIFrame.tryUnbankingThimble1(self)
 
 	local wid_banked = self.banked_thimble1
 
-	if wid_banked and wid_banked:isInLineage(self) then
+	if wid_banked and wid_banked:nodeIsInLineage(self) then
 		wid_banked:tryTakeThimble1()
 	end
 end
@@ -172,7 +172,7 @@ function wcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.KH_key_pressed, key, scancode, isrepeat) then
+	if self.KH_key_pressed(self, key, scancode, isrepeat) then
 		return true
 	end
 end
@@ -183,7 +183,7 @@ function wcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.KH_trickle_key_pressed, key, scancode, isrepeat) then
+	if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
 		return true
 	end
 end
@@ -194,7 +194,7 @@ function wcUIFrame.logic_keyReleased(self, inst, key, scancode)
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.KH_key_released, key, scancode) then
+	if self.KH_key_released(self, key, scancode) then
 		return true
 	end
 end
@@ -205,7 +205,7 @@ function wcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
 		return
 	end
 
-	if widShared.evaluateKeyhooks(self, self.KH_trickle_key_released, key, scancode) then
+	if self.KH_trickle_key_released(self, key, scancode) then
 		return true
 	end
 end
@@ -247,14 +247,14 @@ function wcUIFrame.pointerPressLogicFirst(self)
 	-- Press events that create a pop-up menu should block propagation (return truthy)
 	-- so that this and the WIMP root do not cause interference.
 
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	if self.frame_is_selectable then
 		root:setSelectedFrame(self, true)
 
 		-- If thimble1 is not in this widget tree, move it to the Window Frame.
 		local thimble1 = self.context.thimble1
-		if not thimble1 or not thimble1:isInLineage(self) then
+		if not thimble1 or not thimble1:nodeIsInLineage(self) then
 			wcUIFrame.tryUnbankingThimble1(self)
 		end
 	end

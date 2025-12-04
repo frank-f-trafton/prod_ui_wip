@@ -158,7 +158,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 		return
 	end
 
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 
 	if self == inst then
 		local handled = false
@@ -220,7 +220,7 @@ function def:uiCall_destroy(inst)
 	if self == inst then
 		-- Destroy any Window Frames that are associated with this Workspace.
 		local root = self.context.root
-		for i, wid_g2 in ipairs(root.children) do
+		for i, wid_g2 in ipairs(root.nodes) do
 			if wid_g2.frame_type == "window" and wid_g2.workspace == self then
 				wid_g2:destroy()
 			end

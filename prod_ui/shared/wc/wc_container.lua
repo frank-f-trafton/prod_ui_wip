@@ -124,7 +124,7 @@ function wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	if not self.SA_hover then
 		-- check hover-on
 		local wid, sash_style
-		for i, child in ipairs(self.children) do
+		for i, child in ipairs(self.nodes) do
 			local GE = child.GE
 			if GE.mode == "segment" and GE.sash_style then
 				local style = widLayout.getSashStyleTable(GE.sash_style)
@@ -274,7 +274,7 @@ end
 function wcContainer.renderSashes(self)
 	local scr_x, scr_y = self.scr_x, self.scr_y
 
-	for i, child in ipairs(self.children) do
+	for i, child in ipairs(self.nodes) do
 		local GE = child.GE
 		if GE.mode == "segment" and GE.sash_style then
 			local style = widLayout.getSashStyleTable(GE.sash_style)

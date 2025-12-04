@@ -38,8 +38,8 @@ local function _pushingArraySmall(r)
 end
 
 
--- Small array: 'widget.children'
-pools.children = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
+-- Small array: 'widget.nodes'
+pools.nodes = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test
 
 -- Small array: 'widget.LO_list'
 --pools.LO_list = pPool.new(_poppingArraySmall, _pushingArraySmall, math.huge) -- test

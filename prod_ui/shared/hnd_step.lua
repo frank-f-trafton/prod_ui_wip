@@ -7,19 +7,16 @@ local context = select(1, ...)
 local hndStep = {}
 
 
-local function _getSiblings(self)
-	if not self.parent then
-		error("can't get siblings of the root widget.")
-	end
+local pTree = require(context.conf.prod_ui_req .. "lib.pile_tree")
 
-	return self.parent.children
-end
+
+local _nodeGetSiblings = pTree.nodeGetSiblings
 
 
 function hndStep.linear(self, start, delta, wrap)
-	local seq = _getSiblings(self)
+	local seq = _nodeGetSiblings(self)
 
-	start = start or self:getIndex(seq)
+	start = start or self:_nodeAssertIndex(seq)
 	if start < 1 or start > #seq then
 		error("start position is out of bounds.")
 	end
@@ -48,8 +45,8 @@ function hndStep.intergenerationalNext(wid)
 
 	while true do
 		-- Advance depth-first.
-		if #wid.children > 0 then
-			wid = wid.children[1]
+		if #wid.nodes > 0 then
+			wid = wid.nodes[1]
 		else
 			while true do -- (ancestors)
 				local parent = wid.parent
@@ -60,8 +57,8 @@ function hndStep.intergenerationalNext(wid)
 
 				-- Select sibling to the right
 				else
-					local wid_ind = wid:getIndex(parent.children)
-					local sibling = parent.children[wid_ind + 1]
+					local wid_ind = wid:_nodeAssertIndex(parent.nodes)
+					local sibling = parent.nodes[wid_ind + 1]
 					if sibling then
 						wid = sibling
 						break -- (/ancestors)
@@ -87,8 +84,8 @@ end
 
 local function getRightmostDescendant(wid)
 	-- https://github.com/airstruck/luigi/blob/gh-pages/luigi/widget.lua#L375
-	while #wid.children > 0 do
-		wid = wid.children[#wid.children]
+	while #wid.nodes > 0 do
+		wid = wid.nodes[#wid.nodes]
 	end
 
 	return wid
@@ -107,8 +104,8 @@ function hndStep.intergenerationalPrevious(wid)
 		else
 			-- If left-sibling exists, try diving to its rightmost descendant.
 			-- If none exists, rise up one generation.
-			local wid_ind = wid:getIndex(parent.children)
-			local sibling = parent.children[wid_ind - 1]
+			local wid_ind = wid:_nodeAssertIndex(parent.nodes)
+			local sibling = parent.nodes[wid_ind - 1]
 			if sibling then
 				wid = getRightmostDescendant(sibling)
 			else
@@ -144,7 +141,7 @@ function hndStep.proximity(self, px, py, dx, dy, wrap)
 	local wid = false
 	local dist_closest = math.huge
 
-	local siblings = _getSiblings(self) -- asserts 'self' has a parent / is not the root.
+	local siblings = _nodeGetSiblings(self) -- asserts 'self' has a parent / is not the root.
 	local parent = self.parent
 
 	local i = 1
@@ -194,7 +191,7 @@ end
 
 
 function hndStep.byIndex(self, index)
-	local seq = _getSiblings(self)
+	local seq = _nodeGetSiblings(self)
 	if index < 1 or index > #seq then
 		error("step index is out of bounds.")
 	end

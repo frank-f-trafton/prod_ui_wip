@@ -1,4 +1,4 @@
--- PILE Table v2.000
+-- PILE Table v2.000 (modified)
 -- (C) 2024 - 2025 PILE Contributors
 -- License: MIT
 -- https://github.com/frank-f-trafton/pile_base
@@ -176,7 +176,7 @@ function M.hasAnyDuplicateTables(...)
 	if n < 1 then
 		error(lang.err_dupes_zero_args)
 	end
-	for i = 1, select("#", ...) do
+	for i = 1, n do
 		local t = select(i, ...)
 		pAssert.type(i, t, "table")
 		if _hash[t] then
@@ -191,6 +191,17 @@ function M.hasAnyDuplicateTables(...)
 	end
 	M.clearAll(_hash)
 	return ret
+end
+
+
+function M.arrayHasDuplicateValues(t)
+	for j = 1, #t do
+		for i = j + 1, #t do
+			if list[i] == list[j] then
+				return  i
+			end
+		end
+	end
 end
 
 
@@ -353,6 +364,39 @@ function M.valueInArray(t, v, i)
 			return p
 		end
 	end
+end
+
+
+function M.valueInArrayBack(t, v, i)
+	for p = i or #t, 1, -1 do
+		if t[p] == v then
+			return p
+		end
+	end
+end
+
+
+lang.put_absent_ref = "the reference element is absent from the array"
+function M.putInArrayAfter(t, a, b)
+	pAssert.notNil(3, b)
+
+	local i = M.valueInArrayBack(t, a)
+	if not i then
+		error(lang.put_absent_ref)
+	end
+	table.insert(t, i + 1, b)
+	return i + 1
+end
+
+
+function M.putInArrayBefore(t, a, b)
+	pAssert.notNil(3, b)
+
+	local i = M.valueInArrayBack(t, a)
+	if not i then
+		error(lang.put_absent_ref)
+	end
+	table.insert(t, i, b)
 end
 
 

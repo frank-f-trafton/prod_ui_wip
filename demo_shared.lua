@@ -66,9 +66,9 @@ function demoShared.executeThemeUpdate(context, scale, dpi, id)
 
 			local theme = demoShared.loadThemeDuplicateSkins(context, id)
 
-			context.root:forEach(_unskin)
+			context.root:nodeForEach(true, _unskin)
 			context:applyTheme(theme)
-			context.root:forEach(_reskin)
+			context.root:nodeForEach(true, _reskin)
 			context.root:reshape()
 
 			return true

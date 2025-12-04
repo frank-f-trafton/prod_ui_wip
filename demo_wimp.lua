@@ -366,19 +366,19 @@ function love.keypressed(kc, sc, rep)
 	if love.keyboard.isDown("lshift", "rshift") and love.keyboard.isDown("lctrl", "rctrl") then
 		if kc == "1" or kc == "kp1" then
 			context.app.show_details = not context.app.show_details
-			context.root:forEach(cb_updateDebugControls)
+			context.root:nodeForEach(true, cb_updateDebugControls)
 
 		elseif kc == "2" or kc == "kp2" then
 			context.app.show_perf = not context.app.show_perf
-			context.root:forEach(cb_updateDebugControls)
+			context.root:nodeForEach(true, cb_updateDebugControls)
 
 		elseif kc == "3" or kc == "kp3" then
 			context.app.show_mouse_cross = not context.app.show_mouse_cross
-			context.root:forEach(cb_updateDebugControls)
+			context.root:nodeForEach(true, cb_updateDebugControls)
 
 		elseif kc == "4" or kc == "kp4" then
 			context.app.enable_zoom = not context.app.enable_zoom
-			context.root:forEach(cb_updateDebugControls)
+			context.root:nodeForEach(true, cb_updateDebugControls)
 		end
 	end
 	--]====]
@@ -420,7 +420,7 @@ do
 
 
 		local function cb_hide_menu(client, item)
-			local root = client:getRootWidget()
+			local root = client:nodeGetRoot()
 			if root then
 				local menu_bar = root:findTag("root_menu_bar")
 				if menu_bar then
@@ -437,7 +437,7 @@ do
 
 
 		local function _tryLaunchFrame(self, plan_id)
-			local root = self:getRootWidget()
+			local root = self:nodeGetRoot()
 			if root then
 				demoShared.launchWindowFrameFromPlan(root, plan_id, true)
 			end
@@ -577,7 +577,7 @@ do
 			local shortcuts = {
 				["C+q"] = function(self, key, scancode, isrepeat) love.event.quit() end,
 				["+f8"] = function(self, key, scancode, isrepeat)
-					local root = self:getRootWidget()
+					local root = self:nodeGetRoot()
 					if root then
 						local menu_bar = root:findTag("root_menu_bar")
 						if menu_bar then
@@ -776,7 +776,7 @@ function love.update(dt)
 	-- debug
 	--[[
 	if context.root then
-		context.root:forEach(function(self)
+		context.root:nodeForEach(true, function(self)
 			-- etc.
 		end
 		)
@@ -1052,7 +1052,7 @@ function love.draw()
 	--[=[
 	-- Debug: testing pooled resources
 	local pools = context:getLua("core/res/pools")
-	local aa, bb = pools.children:getCounters()
+	local aa, bb = pools.nodes:getCounters()
 	love.graphics.print(aa .. ", " .. bb, 32, 600)
 	--]=]
 

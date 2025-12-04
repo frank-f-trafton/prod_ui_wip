@@ -26,12 +26,12 @@ end
 
 local function _refreshButtonState(self)
 	--print("_refreshButtonState()")
-	local panel = self.tag == "plan_container" and self or self:findAscendingKeyValue("tag", "plan_container")
+	local panel = self.tag == "plan_container" and self or self:nodeFindKeyAscending(true, "tag", "plan_counter")
 	if not panel then
 		error("couldn't find this widget's container.")
 	end
 
-	panel:forEachDescendant(cb_refresh)
+	panel:nodeForEach(false, cb_refresh)
 end
 
 

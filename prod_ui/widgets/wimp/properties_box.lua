@@ -420,7 +420,7 @@ function def:cacheUpdate(refresh_dimensions)
 		self.doc_w, self.doc_h = 0, 0
 
 		-- Document height is based on the last control in the menu.
-		local children = self.children
+		local children = self.nodes
 		local last_wid = children[#children]
 		if last_wid then
 			self.doc_h = last_wid.y + last_wid.h

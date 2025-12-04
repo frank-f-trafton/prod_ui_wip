@@ -1,4 +1,4 @@
--- PILE Schema v2.000
+-- PILE Schema v2.000 (modified)
 -- (C) 2025 PILE Contributors
 -- License: MIT
 -- https://github.com/frank-f-trafton/pile_base

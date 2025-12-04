@@ -53,10 +53,10 @@ local function _updateLoop(wid, dt, locks)
 			skip_children = wid:uiCall_update(dt)
 		end
 
-		if not skip_children and #wid.children > 0 then
+		if not skip_children and #wid.nodes > 0 then
 			locks[wid] = true
 
-			local children = wid.children
+			local children = wid.nodes
 			local i = 1
 
 			while i <= #children do
@@ -245,14 +245,14 @@ function _mt_context:love_update(dt)
 		cursor_mgr:assignCursor(self.cursor_low, 4)
 
 		if self.current_hover then
-			local _, k = self.current_hover:findAscendingKey("cursor_hover")
+			local _, k = self.current_hover:nodeFindKeyAscending(true, "cursor_hover")
 			cursor_mgr:assignCursor(k, 3)
 		else
 			cursor_mgr:assignCursor(false, 3)
 		end
 
 		if self.current_pressed then
-			local _, k = self.current_pressed:findAscendingKey("cursor_press")
+			local _, k = self.current_pressed:nodeFindKeyAscending(true, "cursor_press")
 			cursor_mgr:assignCursor(k, 2)
 		else
 			cursor_mgr:assignCursor(false, 2)
@@ -755,7 +755,7 @@ function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_gamepadAxis", wid_cur, joystick, axis, value)
+		wid_cur:cycleEvent("uiCall_uiCall_gamepadAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
@@ -898,7 +898,7 @@ local function _unloadFindWidgetByID(wid, id)
 	if wid.id == id then
 		return wid
 	else
-		for i, child in ipairs(wid.children) do
+		for i, child in ipairs(wid.nodes) do
 			local found = findWidgetByID(child, id)
 			if found then
 				return found
@@ -960,8 +960,8 @@ function _mt_context:_prepareWidgetInstance(id, parent, skin_id)
 	}, def._inst_mt)
 
 	if not inst._no_descendants then
-		inst.children = {}
-		--inst.children = pools.children:pop()
+		inst.nodes = {}
+		--inst.nodes = pools.nodes:pop()
 	end
 
 	return inst

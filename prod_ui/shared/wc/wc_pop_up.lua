@@ -45,7 +45,7 @@ end
 
 
 function wcPopUp.checkBlocking(self)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 	local do_block
 	if root.context.settings then
 		do_block = pTable.resolve(root.context.settings, "wimp/pop_up_menu/block_1st_click_out")

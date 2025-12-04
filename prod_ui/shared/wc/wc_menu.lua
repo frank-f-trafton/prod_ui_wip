@@ -1305,7 +1305,7 @@ end
 
 
 function wcMenu.dragDropReleaseLogic(self)
-	local root = self:getRootWidget()
+	local root = self:nodeGetRoot()
 	local drop_state = root.drop_state
 
 	if type(drop_state) == "table" then

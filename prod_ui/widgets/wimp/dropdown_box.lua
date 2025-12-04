@@ -255,7 +255,7 @@ end
 function def:_openPopUpMenu()
 	if not self.wid_drawer then
 		local skin = self.skin
-		local root = self:getRootWidget()
+		local root = self:nodeGetRoot()
 
 		local ax, ay = self:getAbsolutePosition()
 
@@ -263,8 +263,8 @@ function def:_openPopUpMenu()
 		drawer.x = ax
 		drawer.y = ay + self.h
 		self.wid_drawer = drawer
-		self.chain_next = drawer
-		drawer.chain_prev = self
+		self["next"] = drawer
+		drawer["prev"] = self
 		drawer:writeSetting("show_icons", self.show_icons)
 		drawer:setIconSetID(self.icon_set_id)
 
@@ -292,7 +292,7 @@ function def:_closePopUpMenu(update_chosen)
 	local wid_drawer = self.wid_drawer
 	if wid_drawer and not wid_drawer._dead then
 		self.wid_drawer:_closeSelf(update_chosen)
-		self.chain_next = false
+		self["next"] = false
 	end
 end
 
