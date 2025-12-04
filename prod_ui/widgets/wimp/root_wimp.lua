@@ -157,7 +157,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local pop_up = self.pop_up_menu
 	local inst_in_pop_up
 	if pop_up then
-		inst_in_pop_up = pList2.inListBackward(pop_up["prev"], inst) or pList2.inListForward(pop_up["next"], inst)
+		inst_in_pop_up = pList2.inListBackward(pop_up, inst) or pList2.inListForward(pop_up["next"], inst)
 		if not inst_in_pop_up then
 			clearPopUp(self, "concluded")
 		end
@@ -552,7 +552,6 @@ end
 --- Set a widget as the current pop-up, destroying any existing pop-up chain first.
 -- @param inst The event invoker.
 -- @param pop_up The widget to assign as a pop-up.
--- @return A reference to the new pop-up widget.
 function def:rootCall_assignPopUp(inst, pop_up)
 	--print("rootCall_assignPopUp", inst, pop_up, debug.traceback())
 
