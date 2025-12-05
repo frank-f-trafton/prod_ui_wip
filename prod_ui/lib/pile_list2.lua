@@ -1,7 +1,39 @@
--- PILE Linked List v2.000 (modified)
--- (C) 2024 - 2025 PILE Contributors
--- License: MIT
+-- PILE List2 v2.010
 -- https://github.com/frank-f-trafton/pile_base
+
+
+--[[
+MIT License
+
+Copyright (c) 2024 - 2025 PILE Contributors
+
+PILE Base uses code from these libraries:
+
+PILE Tree:
+  LUIGI
+  Copyright (c) 2015 airstruck
+  License: MIT
+  https://github.com/airstruck/luigi
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
 
 
 local M = {}
@@ -21,15 +53,12 @@ M.lang = {
 local lang = M.lang
 
 
-function M.newNode()
-	local node = {}
-	node["prev"] = false
-	node["next"] = false
-	return node
+function M.nodeNew()
+	return {["prev"] = false, ["next"] = false}
 end
 
 
-function M.link(from, to)
+function M.nodeLink(from, to)
 	if from == to then
 		error(lang.self_ref)
 	end
@@ -45,7 +74,7 @@ function M.link(from, to)
 end
 
 
-function M.unlink(self)
+function M.nodeUnlink(self)
 	local temp_next, temp_prev = self["next"], self["prev"]
 
 	if temp_prev then
@@ -59,7 +88,7 @@ function M.unlink(self)
 end
 
 
-function M.unlinkNext(self)
+function M.nodeUnlinkNext(self)
 	if self["next"] then
 		self["next"]["prev"] = false
 		self["next"] = false
@@ -67,7 +96,7 @@ function M.unlinkNext(self)
 end
 
 
-function M.unlinkPrevious(self)
+function M.nodeUnlinkPrevious(self)
 	if self["prev"] then
 		self["prev"]["next"] = false
 		self["prev"] = false
@@ -90,7 +119,7 @@ local function _checkForCycles(node, label, seen)
 end
 
 
-function M.assertNoCycles(self)
+function M.nodeAssertNoCycles(self)
 	local seen = {self=true}
 	local head = _checkForCycles(self, "prev", seen)
 	local tail = _checkForCycles(self, "next", seen)
@@ -100,9 +129,8 @@ function M.assertNoCycles(self)
 end
 
 
-function M.getHead(self)
+function M.nodeGetHead(self)
 	local node = self
-
 	while node["prev"] do
 		node = node["prev"]
 	end
@@ -110,9 +138,8 @@ function M.getHead(self)
 end
 
 
-function M.getTail(self)
+function M.nodeGetTail(self)
 	local node = self
-
 	while node["next"] do
 		node = node["next"]
 	end
@@ -120,17 +147,17 @@ function M.getTail(self)
 end
 
 
-function M.getNext(self)
+function M.nodeGetNext(self)
 	return self["next"] or nil
 end
 
 
-function M.getPrevious(self)
+function M.nodeGetPrevious(self)
 	return self["prev"] or nil
 end
 
 
-function M.iterateNext(t)
+function M.nodeIterateNext(t)
 	pAssert.type(1, t, "table")
 
 	local first = true
@@ -147,7 +174,7 @@ function M.iterateNext(t)
 end
 
 
-function M.iteratePrevious(t)
+function M.nodeIteratePrevious(t)
 	pAssert.type(1, t, "table")
 
 	local first = true
@@ -164,7 +191,7 @@ function M.iteratePrevious(t)
 end
 
 
-local function _inListForward(self, check)
+local function _nodeInListForward(self, check)
 	pAssert.type(2, check, "table")
 
 	local node = self
@@ -177,10 +204,10 @@ local function _inListForward(self, check)
 
 	return false
 end
-M.inListForward = _inListForward
+M.nodeInListForward = _nodeInListForward
 
 
-local function _inListBackward(self, check)
+local function _nodeInListBackward(self, check)
 	pAssert.type(2, check, "table")
 
 	local node = self
@@ -193,12 +220,12 @@ local function _inListBackward(self, check)
 
 	return false
 end
-M.inListBackward = _inListBackward
+M.nodeInListBackward = _nodeInListBackward
 
 
-function M.inList(self, check)
+function M.nodeInList(self, check)
 	local prev = self["prev"]
-	return _inListForward(self, check) or (prev and _inListBackward(self, prev))
+	return _nodeInListForward(self, check) or (prev and _nodeInListBackward(self, prev))
 end
 
 

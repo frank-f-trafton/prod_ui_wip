@@ -132,7 +132,7 @@ local function clearPopUp(self, reason_code)
 	-- We exclude `wid_ref` which may be part of the chain (to the left of the base pop-up) because it is not
 	-- being destroyed by this function.
 	if self.context.current_pressed
-	and pList2.inListForward(self.pop_up_menu["next"], self.context.current_pressed)
+	and pList2.nodeInListForward(self.pop_up_menu["next"], self.context.current_pressed)
 	then
 		self.context.current_pressed = false
 	end
@@ -157,7 +157,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 	local pop_up = self.pop_up_menu
 	local inst_in_pop_up
 	if pop_up then
-		inst_in_pop_up = pList2.inListBackward(pop_up, inst) or pList2.inListForward(pop_up["next"], inst)
+		inst_in_pop_up = pList2.nodeInList(pop_up, inst)
 		if not inst_in_pop_up then
 			clearPopUp(self, "concluded")
 		end
