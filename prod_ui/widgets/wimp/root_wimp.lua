@@ -76,9 +76,6 @@ function def:evt_initialize()
 	-- Helps with ctrl+tabbing through 2nd-gen frames.
 	self.frame_order_counter = 0
 
-	-- Don't let inter-generational thimble stepping leave the 2nd-gen UI Frames.
-	self.block_step_intergen = true
-
 	-- ToolTip state.
 	self.tool_tip = notifMgr.newToolTip(self.context.resources.fonts.p) -- XXX font ref needs to be refresh-able
 

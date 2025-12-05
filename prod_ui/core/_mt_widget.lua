@@ -25,7 +25,7 @@ local widShared = context:getLua("core/wid_shared")
 
 -- Pull in some methods from PILE Tree.
 _mt_widget.nodeGetIndex = pTree.nodeGetIndex
-_mt_widget._nodeAssertIndex = pTree.nodeAssertIndex
+_mt_widget.nodeAssertIndex = pTree.nodeAssertIndex
 _mt_widget.nodeGetDepth = pTree.nodeGetDepth
 _mt_widget._nodeAssertNoCycles = pTree.nodeAssertNoCycles
 _mt_widget.nodeGetNext = pTree.nodeGetNext
@@ -882,7 +882,7 @@ function _mt_widget:reorder(var)
 
 	local seq = self.parent.nodes
 
-	local self_i = self:_nodeAssertIndex(seq)
+	local self_i = self:nodeAssertIndex(seq)
 	local dest_i = math.max(1, math.min(var, #seq))
 
 	if self_i == dest_i then
