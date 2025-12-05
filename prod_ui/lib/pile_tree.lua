@@ -1,4 +1,4 @@
--- PILE Tree v2.010
+-- PILE Tree v2.010 (modified)
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -133,7 +133,7 @@ _nodeAssertIndex = function(self, siblings)
 	end
 	error(lang.node_no_index)
 end
-M._nodeAssertIndex = _nodeAssertIndex
+M.nodeAssertIndex = _nodeAssertIndex
 
 
 function M.nodeGetDepth(self)

@@ -16,7 +16,7 @@ local _nodeGetSiblings = pTree.nodeGetSiblings
 function hndStep.linear(self, start, delta, wrap)
 	local seq = _nodeGetSiblings(self)
 
-	start = start or self:_nodeAssertIndex(seq)
+	start = start or self:nodeAssertIndex(seq)
 	if start < 1 or start > #seq then
 		error("start position is out of bounds.")
 	end
@@ -40,85 +40,68 @@ function hndStep.linear(self, start, delta, wrap)
 end
 
 
-function hndStep.intergenerationalNext(wid)
-	local failsafe_loops = 0
-
-	while true do
-		-- Advance depth-first.
-		if #wid.nodes > 0 then
-			wid = wid.nodes[1]
-		else
-			while true do -- (ancestors)
-				local parent = wid.parent
-				-- Reached top of tree or encountered intergenerational search blocker.
-				if not parent or parent.block_step_intergen then
-					failsafe_loops = failsafe_loops + 1
-					break -- (/ancestors)
-
-				-- Select sibling to the right
-				else
-					local wid_ind = wid:_nodeAssertIndex(parent.nodes)
-					local sibling = parent.nodes[wid_ind + 1]
-					if sibling then
-						wid = sibling
-						break -- (/ancestors)
-
-					-- No right-side sibling: continue up the tree
-					else
-						wid = parent
-					end
-				end -- (/ancestors)
-			end
-		end
-
-		if wid:canTakeThimble(1) then
-			return wid
-
-		-- Failsafe: Reached end of tree twice without finding a suitable new host.
-		elseif failsafe_loops >= 2 then
-			return
-		end
+local function _getGen2Ancestor(wid)
+	if not wid.parent then
+		return false
 	end
-end
 
-
-local function getRightmostDescendant(wid)
-	-- https://github.com/airstruck/luigi/blob/gh-pages/luigi/widget.lua#L375
-	while #wid.nodes > 0 do
-		wid = wid.nodes[#wid.nodes]
+	while wid.parent.parent do
+		wid = wid.parent
 	end
 
 	return wid
 end
 
 
-function hndStep.intergenerationalPrevious(wid)
-	local failsafe_loops = 0
+function hndStep.intergenerationalNext(wid)
+	local g2 = _getGen2Ancestor(wid)
+	if not g2 then
+		return
+	end
 
-	while true do
-		local parent = wid.parent
-		-- Reached top of tree or hit intergenerational search blocker
-		if not parent or parent.block_step_intergen then
-			failsafe_loops = failsafe_loops + 1
-			wid = getRightmostDescendant(wid)
-		else
-			-- If left-sibling exists, try diving to its rightmost descendant.
-			-- If none exists, rise up one generation.
-			local wid_ind = wid:_nodeAssertIndex(parent.nodes)
-			local sibling = parent.nodes[wid_ind - 1]
-			if sibling then
-				wid = getRightmostDescendant(sibling)
-			else
-				wid = parent
-			end
+	local i = 0
+	while i <= 2 do
+		local nxt = wid:nodeGetNext()
+
+		-- reached the tree's end, or otherwise landed on a second-gen node
+		if not nxt or not nxt.parent or not nxt.parent.parent then
+			nxt = g2
+			i = i + 1
 		end
 
-		if wid:canTakeThimble(1) then
-			return wid
+		if nxt:canTakeThimble(1) then
+			return nxt
+		else
+			wid = nxt
+		end
+	end
+end
 
-		-- Failsafe: Reached end of tree twice without finding a suitable new host.
-		elseif failsafe_loops >= 2 then
-			return
+
+function hndStep.intergenerationalPrevious(wid)
+	local g2 = _getGen2Ancestor(wid)
+	if not g2 then
+		return
+	end
+
+	local i = 0
+	while i <= 2 do
+		local prv
+		if wid.parent and wid.parent.parent then
+			prv = wid:nodeGetPrevious()
+		else
+			prv = g2:nodeGetVeryLast()
+			i = i + 1
+		end
+
+		if not prv then
+			break
+
+		elseif prv:canTakeThimble(1) then
+			return prv
+
+		else
+			wid = prv
 		end
 	end
 end
