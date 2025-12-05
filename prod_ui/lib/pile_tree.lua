@@ -1,4 +1,4 @@
--- PILE Tree v2.010 (modified)
+-- PILE Tree v2.011
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -125,9 +125,8 @@ end
 
 
 _nodeAssertIndex = function(self, siblings)
-	local node = self
 	for i = 1, #siblings do
-		if node == siblings[i] then
+		if self == siblings[i] then
 			return i
 		end
 	end
