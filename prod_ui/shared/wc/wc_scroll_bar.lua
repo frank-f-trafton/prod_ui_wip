@@ -465,7 +465,7 @@ function wcScrollBar.setScrollBars(self, hori, vert)
 end
 
 
---- Logic for the client's uiCall_pointerPress(). Detects clicks on embedded scroll bar components and initiates
+--- Logic for the client's evt_pointerPress(). Detects clicks on embedded scroll bar components and initiates
 -- the dragging state. It modifies 'self.press_busy', and state fields within the scroll bar tables.
 -- @param self The widget to test and modify.
 -- @param x Mouse X position in UI space.
@@ -575,7 +575,7 @@ function wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 end
 
 
---- Logic for the client's uiCall_pointerPressRepeat(), which implements repeated 'pend' button motions.
+--- Logic for the client's evt_pointerPressRepeat(), which implements repeated 'pend' button motions.
 function wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 	local scr_h = self.scr_h
 	local scr_v = self.scr_v
@@ -645,7 +645,7 @@ function wcScrollBar.widgetProcessHover(self, mx, my)
 end
 
 
---- Logic for 'uiCall_pointerHoverOff()', which just turns off the hover state.
+--- Logic for 'evt_pointerHoverOff()', which just turns off the hover state.
 -- @param self The client widget.
 function wcScrollBar.widgetClearHover(self)
 	local scr_h = self.scr_h
@@ -660,7 +660,7 @@ function wcScrollBar.widgetClearHover(self)
 end
 
 
---- Logic for 'uiCall_pointerUnpress()', which just turns off the press state.
+--- Logic for 'evt_pointerUnpress()', which just turns off the press state.
 -- @param self The client widget.
 function wcScrollBar.widgetClearPress(self)
 	local scr_h = self.scr_h
@@ -675,7 +675,7 @@ function wcScrollBar.widgetClearPress(self)
 end
 
 
---- Logic for 'uiCall_update()' that controls scrolling while the mouse presses and moves. Some methods and
+--- Logic for 'evt_update()' that controls scrolling while the mouse presses and moves. Some methods and
 --  variables for handling scrolling must be present in the widget for this to work.
 -- @param self The client widget.
 -- @param mx Mouse X, relative to widget top-left.

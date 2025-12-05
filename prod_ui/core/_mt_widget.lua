@@ -89,7 +89,7 @@ _mt_widget.scr_y = 0
 _mt_widget.thimble_mode = 0
 
 
--- Affects ticking (uiCall_update, userUpdate), mouse events, and various kinds of selection (ie thimble handoff).
+-- Affects ticking (evt_update, userUpdate), mouse events, and various kinds of selection (ie thimble handoff).
 _mt_widget.awake = true
 
 
@@ -204,12 +204,12 @@ _mt_widget.ly_fn_start = uiDummy.func -- XXX untested
 _mt_widget.ly_fn_end = uiDummy.func -- XXX untested
 
 
-function _mt_widget:uiCall_initialize(...)
+function _mt_widget:evt_initialize(...)
 
 end
 
 
-function _mt_widget:uiCall_reshapePre()
+function _mt_widget:evt_reshapePre()
 
 end
 
@@ -218,12 +218,12 @@ end
 -- @param x_axis True if the segment is horizontal, false if vertical.
 -- @param cross_length The length of available space on the other axis.
 -- @return 1) the length and 2) true/false/nil, indicating whether the value should be scaled or not, or nothing.
-function _mt_widget:uiCall_getSegmentLength(x_axis, cross_length)
+function _mt_widget:evt_getSegmentLength(x_axis, cross_length)
 
 end
 
 
-function _mt_widget:uiCall_reshapePost()
+function _mt_widget:evt_reshapePost()
 
 end
 
@@ -324,13 +324,13 @@ local function _takeThimble1(self, a, b, c, d)
 			thimble1:releaseThimble1(a, b, c, d)
 		end
 		context.thimble1 = self
-		self:cycleEvent("uiCall_thimble1Take", self, a, b, c, d)
+		self:eventCycle("evt_thimble1Take", self, a, b, c, d)
 		if not thimble2 then
-			self:cycleEvent("uiCall_thimbleTopTake", self, a, b, c, d)
+			self:eventCycle("evt_thimbleTopTake", self, a, b, c, d)
 		end
 
 		if thimble2 then
-			thimble2:cycleEvent("uiCall_thimble1Changed", thimble2, a, b, c, d)
+			thimble2:eventCycle("evt_thimble1Changed", thimble2, a, b, c, d)
 		end
 	end
 end
@@ -341,19 +341,19 @@ local function _takeThimble2(self, a, b, c, d)
 
 	if thimble2 ~= self then
 		if thimble1 and not thimble2 then
-			thimble1:cycleEvent("uiCall_thimbleTopRelease", thimble1, a, b, c, d)
+			thimble1:eventCycle("evt_thimbleTopRelease", thimble1, a, b, c, d)
 		end
 		context.thimble2 = false
 		if thimble2 then
-			thimble2:cycleEvent("uiCall_thimbleTopRelease", thimble2, a, b, c, d)
-			thimble2:cycleEvent("uiCall_thimble2Release", thimble2, a, b, c, d)
+			thimble2:eventCycle("evt_thimbleTopRelease", thimble2, a, b, c, d)
+			thimble2:eventCycle("evt_thimble2Release", thimble2, a, b, c, d)
 		end
 		context.thimble2 = self
-		self:cycleEvent("uiCall_thimble2Take", self, a, b, c, d)
-		self:cycleEvent("uiCall_thimbleTopTake", self, a, b, c, d)
+		self:eventCycle("evt_thimble2Take", self, a, b, c, d)
+		self:eventCycle("evt_thimbleTopTake", self, a, b, c, d)
 
 		if thimble1 then
-			thimble1:cycleEvent("uiCall_thimble2Changed", thimble1, a, b, c, d)
+			thimble1:eventCycle("evt_thimble2Changed", thimble1, a, b, c, d)
 		end
 	end
 end
@@ -415,11 +415,11 @@ function _mt_widget:releaseThimble1(a, b, c, d)
 	if context.thimble1 == self then
 		context.thimble1 = false
 		if not thimble2 then
-			self:cycleEvent("uiCall_thimbleTopRelease", self, a, b, c, d)
+			self:eventCycle("evt_thimbleTopRelease", self, a, b, c, d)
 		end
-		self:cycleEvent("uiCall_thimble1Release", self, a, b, c, d)
+		self:eventCycle("evt_thimble1Release", self, a, b, c, d)
 		if thimble2 then
-			thimble2:cycleEvent("uiCall_thimble1Changed", self, a, b, c, d)
+			thimble2:eventCycle("evt_thimble1Changed", self, a, b, c, d)
 		end
 	end
 
@@ -432,11 +432,11 @@ function _mt_widget:releaseThimble2(a, b, c, d)
 
 	if context.thimble2 == self then
 		context.thimble2 = false
-		self:cycleEvent("uiCall_thimble2Release", self, a, b, c, d)
-		self:cycleEvent("uiCall_thimbleTopRelease", self, a, b, c, d)
+		self:eventCycle("evt_thimble2Release", self, a, b, c, d)
+		self:eventCycle("evt_thimbleTopRelease", self, a, b, c, d)
 		if thimble1 then
-			thimble1:cycleEvent("uiCall_thimbleTopTake", thimble1, a, b, c, d)
-			thimble1:cycleEvent("uiCall_thimble2Changed", thimble1, a, b, c, d)
+			thimble1:eventCycle("evt_thimbleTopTake", thimble1, a, b, c, d)
+			thimble1:eventCycle("evt_thimble2Changed", thimble1, a, b, c, d)
 		end
 	end
 
@@ -466,12 +466,12 @@ function _mt_widget:captureFocus()
 	end
 
 	if context.captured_focus then
-		context.captured_focus:sendEvent("uiCall_uncapture", self)
+		context.captured_focus:eventSend("evt_uncapture", self)
 	end
 
 	context.captured_focus = self
 
-	self:sendEvent("uiCall_capture")
+	self:eventSend("evt_capture")
 
 	return self
 end
@@ -483,7 +483,7 @@ function _mt_widget:uncaptureFocus()
 		error("can't release focus as widget isn't currently capturing it.")
 	end
 
-	self:sendEvent("uiCall_uncapture")
+	self:eventSend("evt_uncapture")
 
 	context.captured_focus = false
 
@@ -555,7 +555,7 @@ end
 -- @param id The widget def ID.
 -- @param [skin_id] The starting Skin ID, if applicable.
 -- @param [pos] (default: #self.nodes + 1) Where to place the new widget in the table of children.
--- @param [...] Additional arguments for the widget's uiCall_initialize() callback.
+-- @param [...] Additional arguments for the widget's evt_initialize() callback.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, skin_id, pos, ...)
 	uiAssert.notNilNotFalseNotNaN(1, id)
@@ -585,7 +585,7 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 		LO_list[#LO_list + 1] = child
 	end
 
-	child:uiCall_initialize(...)
+	child:evt_initialize(...)
 	child:_runUserEvent("userInitialize")
 
 	return child
@@ -597,7 +597,7 @@ end
 --	the widget is removed from the parent's layout list.
 --  Locked during update: yes (parent)
 --	Callbacks:
---	* Bubble: uiCall_destroy()
+--	* Bubble: evt_destroy()
 function _mt_widget:destroy()
 	local parent = self.parent
 
@@ -636,7 +636,7 @@ function _mt_widget:destroy()
 	end
 
 	self:_runUserEvent("userDestroy")
-	self:bubbleEvent("uiCall_destroy", self)
+	self:eventBubble("evt_destroy", self)
 
 	-- If parent exists, find and destroy self from parent's 1) children and 2) layout
 	if parent then
@@ -713,7 +713,7 @@ end
 -- @param field The field in 'self' to try executing.
 -- @param a,b,c,d,e,f Additional arguments to pass.
 -- @return the return results of the called function, or nil if nothing was called.
-function _mt_widget:sendEvent(field, a,b,c,d,e,f)
+function _mt_widget:eventSend(field, a,b,c,d,e,f)
 	local var = self[field]
 	if type(var) == "function" then
 		return var(self, a,b,c,d,e,f)
@@ -724,7 +724,7 @@ function _mt_widget:sendEvent(field, a,b,c,d,e,f)
 end
 
 
-local function _bubbleEvent(wid, field, a,b,c,d,e,f)
+local function _eventBubble(wid, field, a,b,c,d,e,f)
 	while wid do
 		if wid[field] then
 			local var = wid[field]
@@ -748,14 +748,14 @@ end
 -- @param field The field in each widget to try executing.
 -- @param a,b,c,d,e,f Additional arguments to pass.
 -- @return the first return value that evaluates to true, or nil if that doesn't happen.
-_mt_widget.bubbleEvent = _bubbleEvent -- _mt_widget:bubbleEvent(field, a,b,c,d,e,f)
+_mt_widget.eventBubble = _eventBubble -- _mt_widget:eventBubble(field, a,b,c,d,e,f)
 
 
-local function _trickleEvent(self, field, a,b,c,d,e,f)
-	--print("trickleEvent", self, field, a,b,c,d,e,f)
+local function _eventTrickle(self, field, a,b,c,d,e,f)
+	--print("eventTrickle", self, field, a,b,c,d,e,f)
 
 	if self.parent then
-		local retval = _trickleEvent(self.parent, field, a,b,c,d,e,f)
+		local retval = _eventTrickle(self.parent, field, a,b,c,d,e,f)
 		if retval then
 			return retval
 		end
@@ -776,13 +776,13 @@ end
 
 --- Try to execute 'self.trickle[field](self, a,b,c,d,e,f)' from the root widget to this widget, until one returns a
 --	success value or all widgets are exhausted.
-_mt_widget.trickleEvent = _trickleEvent -- _mt_widget:trickleEvent(field, a,b,c,d,e,f)
+_mt_widget.eventTrickle = _eventTrickle -- _mt_widget:eventTrickle(field, a,b,c,d,e,f)
 
 
-function _mt_widget:cycleEvent(field, a,b,c,d,e,f)
-	--print("cycleEvent", self, field, a,b,c,d,e,f)
+function _mt_widget:eventCycle(field, a,b,c,d,e,f)
+	--print("eventCycle", self, field, a,b,c,d,e,f)
 
-	return _trickleEvent(self, field, a,b,c,d,e,f) or _bubbleEvent(self, field, a,b,c,d,e,f)
+	return _eventTrickle(self, field, a,b,c,d,e,f) or _eventBubble(self, field, a,b,c,d,e,f)
 end
 
 
@@ -948,7 +948,7 @@ end
 function _mt_widget:reshape()
 	--print("Reshape! " .. self:_getHierarchy())
 
-	if self:uiCall_reshapePre() then
+	if self:evt_reshapePre() then
 		return
 	end
 
@@ -960,7 +960,7 @@ function _mt_widget:reshape()
 		child:reshape()
 	end
 
-	self:uiCall_reshapePost()
+	self:evt_reshapePost()
 
 	return self
 end

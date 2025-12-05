@@ -24,18 +24,18 @@ local function cb_keyDown(self, kc, sc, rep, latest, hot_kc, hot_sc)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_keyPressed and cap_cur:uiCap_keyPressed(kc, sc, rep, hot_kc, hot_sc) then
+	if cap_cur and cap_cur.cpt_keyPressed and cap_cur:cpt_keyPressed(kc, sc, rep, hot_kc, hot_sc) then
 		return
 	end
 
 	-- Any widget has thimble focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_keyPressed", wid_cur, kc, sc, rep, hot_kc, hot_sc)
+		wid_cur:eventCycle("evt_keyPressed", wid_cur, kc, sc, rep, hot_kc, hot_sc)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_keyPressed", self.root, kc, sc, rep, hot_kc, hot_sc) -- no ancestors
+		self.root:eventSend("evt_keyPressed", self.root, kc, sc, rep, hot_kc, hot_sc) -- no ancestors
 	end
 end
 
@@ -43,18 +43,18 @@ end
 local function cb_keyUp(self, kc, sc)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_keyReleased and cap_cur:uiCap_keyReleased(kc, sc) then
+	if cap_cur and cap_cur.cpt_keyReleased and cap_cur:cpt_keyReleased(kc, sc) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_keyReleased", wid_cur, kc, sc)
+		wid_cur:eventCycle("evt_keyReleased", wid_cur, kc, sc)
 
 	-- Nothing is focused: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_keyReleased", self.root, kc, sc) -- no ancestors
+		self.root:eventSend("evt_keyReleased", self.root, kc, sc) -- no ancestors
 	end
 end
 

@@ -61,7 +61,7 @@ local function _createPopUpMenu(self)
 
 		local wcWimp = self.context:getLua("shared/wc/wc_wimp")
 		local pop_up = wcWimp.makePopUpMenu(self, _pop_up_proto, menu_x, menu_y)
-		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+		root:eventSend("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
 

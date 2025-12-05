@@ -30,7 +30,7 @@ This Window Frame should block interaction with the UI Frame that invoked it, un
 		button_close.h = 32
 		button_close:setLabel("All right, close it")
 		button_close.wid_buttonAction = function(self)
-			self:bubbleEvent("frameCall_close", true)
+			self:eventBubble("frameCall_close", true)
 		end
 
 		dialog:center(true, true)

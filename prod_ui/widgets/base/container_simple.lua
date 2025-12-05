@@ -14,7 +14,7 @@ local def = {}
 widLayout.setupContainerDef(def)
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 0
@@ -26,7 +26,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button <= 3 then
@@ -37,7 +37,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	widLayout.resetLayoutSpace(self)
 end
 

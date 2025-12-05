@@ -36,16 +36,16 @@ def.setEnabled = wcButton.setEnabled
 def.setChecked = wcButton.setChecked
 
 
-def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = wcButton.uiCall_pointerPress
-def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseCheck
-def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionCheck
-def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+def.evt_pointerPress = wcButton.evt_pointerPress
+def.evt_pointerRelease = wcButton.evt_pointerReleaseCheck
+def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+def.evt_thimbleAction = wcButton.evt_thimbleActionCheck
+def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -67,7 +67,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the checkbox rectangle.
 
 	local vp = self.vp
@@ -77,7 +77,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 1)
 	end

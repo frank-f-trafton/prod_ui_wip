@@ -42,13 +42,13 @@ function wcButton.setupDefPlain(def)
 
 	def.setEnabled = wcButton.setEnabled
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseActivate
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPress
+	def.evt_pointerRelease = wcButton.evt_pointerReleaseActivate
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleAction
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -59,13 +59,13 @@ function wcButton.setupDefDoubleClick(def)
 
 	def.setEnabled = wcButton.setEnabled
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPressDoubleClick
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPressDoubleClick
+	def.evt_pointerRelease = wcButton.evt_pointerRelease
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleAction
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -76,13 +76,13 @@ function wcButton.setupDefImmediate(def)
 
 	def.setEnabled = wcButton.setEnabled
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPressActivate
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPressActivate
+	def.evt_pointerRelease = wcButton.evt_pointerRelease
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleAction
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -93,14 +93,14 @@ function wcButton.setupDefRepeat(def)
 
 	def.setEnabled = wcButton.setEnabled
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPressActivate
-	def.uiCall_pointerPressRepeat = wcButton.uiCall_pointerPressRepeat
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerRelease
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPressActivate
+	def.evt_pointerPressRepeat = wcButton.evt_pointerPressRepeat
+	def.evt_pointerRelease = wcButton.evt_pointerRelease
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleAction
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -112,11 +112,11 @@ function wcButton.setupDefSticky(def)
 	def.setEnabled = wcButton.setEnabledSticky
 	def.setPressed = wcButton.setPressedSticky
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOnSticky
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPressSticky
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionSticky
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOnSticky
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPressSticky
+	def.evt_thimbleAction = wcButton.evt_thimbleActionSticky
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -128,13 +128,13 @@ function wcButton.setupDefCheckbox(def)
 	def.setEnabled = wcButton.setEnabled
 	def.setChecked = wcButton.setChecked
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseCheck
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionCheck
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPress
+	def.evt_pointerRelease = wcButton.evt_pointerReleaseCheck
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleActionCheck
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -148,13 +148,13 @@ function wcButton.setupDefCheckboxMulti(def)
 	def.setMaxValue = wcButton.setMaxValue
 	def.rollValue = wcButton.rollValue
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseCheckMulti
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionCheckMulti
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPress
+	def.evt_pointerRelease = wcButton.evt_pointerReleaseCheckMulti
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleActionCheckMulti
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -170,13 +170,13 @@ function wcButton.setupDefRadioButton(def)
 	def.setRadioGroup = wcButton.setRadioGroup
 	def.getRadioGroup = wcButton.getRadioGroup
 
-	def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-	def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-	def.uiCall_pointerPress = wcButton.uiCall_pointerPress
-	def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseRadio
-	def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-	def.uiCall_thimbleAction = wcButton.uiCall_thimbleActionRadio
-	def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+	def.evt_pointerPress = wcButton.evt_pointerPress
+	def.evt_pointerRelease = wcButton.evt_pointerReleaseRadio
+	def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+	def.evt_thimbleAction = wcButton.evt_thimbleActionRadio
+	def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 end
 
 
@@ -318,7 +318,7 @@ end
 
 
 --- Mouse callback for when the cursor overlaps a widget.
-function wcButton.uiCall_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcButton.evt_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -329,7 +329,7 @@ end
 
 
 --- Mouse callback for when the cursor overlaps a sticky button.
-function wcButton.uiCall_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcButton.evt_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			if not self.pressed then
@@ -342,7 +342,7 @@ end
 
 
 --- Mouse callback for when the cursor leaves a widget.
-function wcButton.uiCall_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcButton.evt_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -353,7 +353,7 @@ end
 
 
 --- Mouse callback for pressing normal buttons (whose primary actions don't activate upon click-down).
-function wcButton.uiCall_pointerPress(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerPress(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -380,7 +380,7 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon first click-down.
-function wcButton.uiCall_pointerPressActivate(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerPressActivate(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -410,7 +410,7 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon double-click.
-function wcButton.uiCall_pointerPressDoubleClick(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerPressDoubleClick(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -440,7 +440,7 @@ end
 
 
 --- Mouse callback for pressing buttons which activate repeatedly while held down.
-function wcButton.uiCall_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
+function wcButton.evt_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -457,7 +457,7 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon first click-down, but which do not have a repeat-held action.
-function wcButton.uiCall_pointerPressSticky(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerPressSticky(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -495,7 +495,7 @@ end
 
 
 --- Mouse callback for releasing buttons which activate upon click-up (while hovered over the widget).
-function wcButton.uiCall_pointerReleaseActivate(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerReleaseActivate(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -510,7 +510,7 @@ end
 
 
 --- Mouse callback for releasing buttons which do not activate upon click-up.
-function wcButton.uiCall_pointerRelease(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerRelease(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -524,7 +524,7 @@ end
 
 
 --- Mouse callback for releasing checkboxes, which toggle and activate upon click-up.
-function wcButton.uiCall_pointerReleaseCheck(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerReleaseCheck(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -539,7 +539,7 @@ function wcButton.uiCall_pointerReleaseCheck(self, inst, x, y, button, istouch, 
 end
 
 
-function wcButton.uiCall_pointerReleaseCheckMulti(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerReleaseCheckMulti(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -555,7 +555,7 @@ end
 
 
 --- Mouse callback for releasing radio buttons. Upon click-up, they turn on, while turning off all siblings with the same group ID.
-function wcButton.uiCall_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -574,7 +574,7 @@ end
 
 
 --- Mouse callback for releasing normal buttons upon click-up (in general, regardless of the cursor location).
-function wcButton.uiCall_pointerUnpress(self, inst, x, y, button, istouch, presses)
+function wcButton.evt_pointerUnpress(self, inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -589,7 +589,7 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on normal buttons.
-function wcButton.uiCall_thimbleAction(self, inst, key, scancode, isrepeat)
+function wcButton.evt_thimbleAction(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:wid_buttonAction()
@@ -599,7 +599,7 @@ end
 
 
 --- Callback for secondary thimble action (ie user presses "application" KeyConstant) on normal buttons.
-function wcButton.uiCall_thimbleAction2(self, inst, key, scancode, isrepeat)
+function wcButton.evt_thimbleAction2(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:wid_buttonAction2()
@@ -612,7 +612,7 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on checkboxes.
-function wcButton.uiCall_thimbleActionCheck(self, inst, key, scancode, isrepeat)
+function wcButton.evt_thimbleActionCheck(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:setChecked(not self.checked)
@@ -623,7 +623,7 @@ end
 
 
 --- Primary thimble action for multi-state checkboxes.
-function wcButton.uiCall_thimbleActionCheckMulti(self, inst, key, scancode, isrepeat)
+function wcButton.evt_thimbleActionCheckMulti(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:rollValue(1)
@@ -634,7 +634,7 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on radio buttons.
-function wcButton.uiCall_thimbleActionRadio(self, inst, key, scancode, isrepeat)
+function wcButton.evt_thimbleActionRadio(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			self:setChecked(true)
@@ -645,7 +645,7 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on sticky buttons.
-function wcButton.uiCall_thimbleActionSticky(self, inst, key, scancode, isrepeat)
+function wcButton.evt_thimbleActionSticky(self, inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			if not self.pressed then

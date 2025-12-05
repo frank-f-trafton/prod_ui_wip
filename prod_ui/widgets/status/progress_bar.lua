@@ -1,7 +1,7 @@
 --[[
 A skinned progress bar.
 
-XXX gradual update support via uiCall_update() and a target position.
+XXX gradual update support via evt_update() and a target position.
 --]]
 
 
@@ -66,7 +66,7 @@ function def:getCounter()
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 
 	widShared.setupViewports(self, 2)
@@ -97,7 +97,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 is the progress bar drawing rectangle.
 
@@ -115,7 +115,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 2)
 	end

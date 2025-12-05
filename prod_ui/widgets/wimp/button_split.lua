@@ -51,7 +51,7 @@ function def:setAuxEnabled(enabled)
 end
 
 
-function def:uiCall_pointerHover(inst, x, y, dx, dy)
+function def:evt_pointerHover(inst, x, y, dx, dy)
 	if self == inst then
 		if self.enabled then
 			if self.aux_pressed then
@@ -75,7 +75,7 @@ function def:uiCall_pointerHover(inst, x, y, dx, dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, x, y, dx, dy)
+function def:evt_pointerHoverOff(inst, x, y, dx, dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -85,7 +85,7 @@ function def:uiCall_pointerHoverOff(inst, x, y, dx, dy)
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -133,7 +133,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -149,7 +149,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
+function def:evt_pointerRelease(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -166,11 +166,11 @@ function def:uiCall_pointerRelease(inst, x, y, button, istouch, presses)
 end
 
 
-def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+def.evt_thimbleAction = wcButton.evt_thimbleAction
+def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -196,7 +196,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the aux bounding box (for clicking).
 	-- Viewport #3 is the aux bounding box (for placement of the graphic).
@@ -229,7 +229,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 3)
 	end

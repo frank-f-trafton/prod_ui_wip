@@ -386,7 +386,7 @@ function def:closeFrame(force)
 end
 
 
-function def:uiCall_initialize(unselectable, view_level)
+function def:evt_initialize(unselectable, view_level)
 	-- UI Frame
 	self.frame_type = "window"
 	wcUIFrame.instanceSetup(self, unselectable)
@@ -488,7 +488,7 @@ function def:frameCall_close(force)
 end
 
 
-def.trickle.uiCall_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
+def.trickle.evt_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
 
 
 local function _getCursorAxisInfo(self, mx, my)
@@ -507,7 +507,7 @@ local function _pointInSensor(sen, x, y)
 end
 
 
-function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		-- Because this widget accepts hover events outside of its boundaries (for resizing), we need to confirm
@@ -551,7 +551,7 @@ function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		wcScrollBar.widgetClearHover(self)
 
@@ -562,16 +562,16 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-def.uiCall_thimble1Take = wcUIFrame.logic_thimble1Take
-def.trickle.uiCall_keyPressed = wcUIFrame.logic_trickleKeyPressed
-def.uiCall_keyPressed = wcUIFrame.logic_keyPressed
-def.trickle.uiCall_keyReleased = wcUIFrame.logic_trickleKeyReleased
-def.uiCall_keyReleased = wcUIFrame.logic_keyReleased
-def.trickle.uiCall_textInput = wcUIFrame.logic_trickleTextInput
-def.trickle.uiCall_pointerPress = wcUIFrame.logic_tricklePointerPress
+def.evt_thimble1Take = wcUIFrame.logic_thimble1Take
+def.trickle.evt_keyPressed = wcUIFrame.logic_trickleKeyPressed
+def.evt_keyPressed = wcUIFrame.logic_keyPressed
+def.trickle.evt_keyReleased = wcUIFrame.logic_trickleKeyReleased
+def.evt_keyReleased = wcUIFrame.logic_keyReleased
+def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
+def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if wcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
@@ -676,10 +676,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-def.uiCall_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
+def.evt_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
 
 
-function def.trickle:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.press_busy == "resize" then
 			wcWindowFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -695,7 +695,7 @@ function def.trickle:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_
 end
 
 
-function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 and self.context.mouse_pressed_button == button then
 			if self.press_busy == "resize" or self.press_busy == "drag" then
@@ -739,8 +739,8 @@ function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-def.trickle.uiCall_pointerWheel = wcUIFrame.logic_tricklePointerWheel
-def.uiCall_pointerWheel = wcUIFrame.logic_pointerWheel
+def.trickle.evt_pointerWheel = wcUIFrame.logic_tricklePointerWheel
+def.evt_pointerWheel = wcUIFrame.logic_pointerWheel
 
 
 local function _getHeaderSkinTable(self)
@@ -750,7 +750,7 @@ local function _getHeaderSkinTable(self)
 end
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 
 	if wcScrollBar.press_busy_codes[self.press_busy] then
@@ -815,8 +815,8 @@ local function _measureButtonShortenPort(self, sensor, skin, res, right, w, h)
 end
 
 
-function def:uiCall_reshapePre()
-	--print("window_frame: uiCall_reshapePre")
+function def:evt_reshapePre()
+	--print("window_frame: evt_reshapePre")
 
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars, header bar, etc.) from the content.
@@ -922,8 +922,8 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_reshapePost()
-	--print("window_frame: uiCall_reshapePost")
+function def:evt_reshapePost()
+	--print("window_frame: evt_reshapePost")
 
 	widShared.updateDoc(self)
 
@@ -933,7 +933,7 @@ function def:uiCall_reshapePost()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		-- Clean up any existing frame-blocking connection. Note that this function will raise an error if another frame
 		-- is still blocking this frame.
@@ -955,7 +955,7 @@ function def:uiCall_destroy(inst)
 		-- Clean up modal level, if applicable.
 		local root = self:nodeGetRoot()
 		if self == root.modals[#root.modals] then
-			root:sendEvent("rootCall_clearModalFrame", self)
+			root:eventSend("rootCall_clearModalFrame", self)
 		end
 
 		widShared.removeViewports(self, 6)

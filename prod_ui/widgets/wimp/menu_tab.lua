@@ -645,7 +645,7 @@ local function invokePopUpMenu(self, x, y)
 	local pop_up = wcWimp.makePopUpMenu(self, proto_menu, x, y)
 
 	local root = self:nodeGetRoot()
-	root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+	root:eventSend("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 	pop_up:tryTakeThimble2()
 end
@@ -682,7 +682,7 @@ local function _moveColumn(self, col, dest_i)
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -705,7 +705,7 @@ function def:uiCall_initialize()
 	self.col_bar_visible = true
 
 	-- Location of initial click when dragging column headers. Only valid between
-	-- uiCall_pointerPress and uiCall_pointerUnpress.
+	-- evt_pointerPress and evt_pointerUnpress.
 	self.col_click = false
 	self.col_click_x = 0
 	self.col_click_y = 0
@@ -738,7 +738,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the scrollable tabular content (excluding the column header).
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 	-- Viewport #3 is the column header.
@@ -836,7 +836,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:evt_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
@@ -859,7 +859,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -969,7 +969,7 @@ local function testColumnMouseOverlap(self, mx, my)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		wcScrollBar.widgetProcessHover(self, mx, my)
@@ -1029,7 +1029,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		wcScrollBar.widgetClearHover(self)
 
@@ -1045,7 +1045,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and button == self.context.mouse_pressed_button
 	then
@@ -1116,7 +1116,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		if not self.MN_mouse_clicked_item then
 			-- Repeat-press events for scroll bar buttons
@@ -1139,7 +1139,7 @@ function def:sort()
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			wcScrollBar.widgetClearPress(self)
@@ -1250,7 +1250,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -1267,17 +1267,17 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
+function def:evt_thimbleAction(inst, key, scancode, isrepeat)
 	if self == inst then
 		-- ...
 	end
 end
 
 
--- TODO: uiCall_thimbleAction2()
+-- TODO: evt_thimbleAction2()
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -1324,7 +1324,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 3)
 	end

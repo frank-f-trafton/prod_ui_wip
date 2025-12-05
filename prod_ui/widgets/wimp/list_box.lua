@@ -116,7 +116,7 @@ function def:wid_select(item, item_i)
 end
 
 
---- Called in uiCall_keyPressed() before the default keyboard navigation checks.
+--- Called in evt_keyPressed() before the default keyboard navigation checks.
 -- @param key The key code.
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
@@ -134,7 +134,7 @@ function def:wid_dropped(drop_state)
 end
 
 
---- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
+--- Called in evt_keyPressed(). Implements basic keyboard navigation.
 -- @param key The key code.
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
@@ -272,7 +272,7 @@ def.setIconSetID = wcMenu.setIconSetID
 def.getIconSetID = wcMenu.getIconSetID
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -303,7 +303,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 
@@ -372,7 +372,7 @@ function def:cacheUpdate(refresh_dimensions)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:evt_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		local items = self.MN_items
 		local old_index = self.MN_index
@@ -409,7 +409,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -438,7 +438,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		wcScrollBar.widgetClearHover(self)
 		self.MN_item_hover = false
@@ -446,7 +446,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -511,21 +511,21 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst and self.press_busy == "menu-drag" then
 		wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	end
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -536,7 +536,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
@@ -547,14 +547,14 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
+function def:evt_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 	if self == inst then
 		return wcMenu.dragDropReleaseLogic(self)
 	end
 end
 
 
-function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
+function def:evt_thimbleAction(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
@@ -568,7 +568,7 @@ function def:uiCall_thimbleAction(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
+function def:evt_thimbleAction2(inst, key, scancode, isrepeat)
 	if self == inst
 	and self.enabled
 	then
@@ -582,7 +582,7 @@ function def:uiCall_thimbleAction2(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -625,7 +625,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 2)
 	end

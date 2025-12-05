@@ -12,8 +12,8 @@ Usage:
 --[[
 Widgets using this system are not compatible with the following callbacks:
 
-* uiCall_thimbleAction: interferes with typing space bar and enter.
-Instead, check for enter (or space) in the widget's 'uiCall_keyPressed' callback.
+* evt_thimbleAction: interferes with typing space bar and enter.
+Instead, check for enter (or space) in the widget's 'evt_keyPressed' callback.
 
 Example:
 ----
@@ -24,7 +24,7 @@ else
 end
 ----
 
-* uiCall_thimbleAction2: interferes with the pop-up menu (undo, etc.)
+* evt_thimbleAction2: interferes with the pop-up menu (undo, etc.)
 --]]
 
 
@@ -357,7 +357,7 @@ function wcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 		local ax, ay = self:getAbsolutePosition()
 		local pop_up = wcWimp.makePopUpMenu(self, self.pop_up_proto, ax + mx, ay + my)
-		root:sendEvent("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+		root:eventSend("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
 
@@ -367,7 +367,7 @@ function wcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 end
 
 
--- Used in uiCall_update(). Before calling, check that text-drag state is active.
+-- Used in evt_update(). Before calling, check that text-drag state is active.
 function wcInputS.mouseDragLogic(self)
 	local context = self.context
 	local LE = self.LE

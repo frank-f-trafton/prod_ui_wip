@@ -128,7 +128,7 @@ function def:_closeSelf(update_chosen)
 
 		local root = self:nodeGetRoot()
 		if root.pop_up_menu == self then
-			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+			root:eventSend("rootCall_destroyPopUp", self, "concluded")
 		end
 	end
 end
@@ -261,7 +261,7 @@ def.getIconSetID = wcMenu.getIconSetID
 
 
 -- @param wid_ref The widget that owns this drawer.
-function def:uiCall_initialize(wid_ref)
+function def:evt_initialize(wid_ref)
 	context:assertWidget(wid_ref)
 
 	self.wid_ref = wid_ref
@@ -293,7 +293,7 @@ function def:uiCall_initialize(wid_ref)
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the main content viewport.
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
 	-- Viewport #3 represents the size and horizontal position of one item.
@@ -350,7 +350,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_keyPressed(key, scancode, isrepeat)
+function def:evt_keyPressed(key, scancode, isrepeat)
 	if scancode == "up" then
 		self:movePrev(1, true, isrepeat)
 		return true
@@ -387,7 +387,7 @@ function def:uiCall_keyPressed(key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local rolled = false
 
@@ -418,7 +418,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
@@ -450,21 +450,21 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		wcScrollBar.widgetClearHover(self)
 	end
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		local mx, my, ax, ay = self:getRelativePosition(x, y)
 
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
 				local root = self:nodeGetRoot()
-				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+				root:eventSend("rootCall_destroyPopUp", self, "concluded")
 				return
 			end
 		end
@@ -500,14 +500,14 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and button == context.mouse_pressed_button
 	then
@@ -531,7 +531,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -548,7 +548,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	-- This widget cannot operate if the owner that it extends is gone.
 	local wid_ref = self.wid_ref
 	if not wid_ref then
@@ -589,7 +589,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		self:_closeSelf(false)
 

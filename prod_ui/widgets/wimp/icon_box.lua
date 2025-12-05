@@ -96,7 +96,7 @@ def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	-- ...
 end
 

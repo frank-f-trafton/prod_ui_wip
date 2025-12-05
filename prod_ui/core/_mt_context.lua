@@ -49,8 +49,8 @@ local function _updateLoop(wid, dt, locks)
 			wid:_runUserEvent("userUpdate", dt)
 		end
 
-		if wid.uiCall_update then
-			skip_children = wid:uiCall_update(dt)
+		if wid.evt_update then
+			skip_children = wid:evt_update(dt)
 		end
 
 		if not skip_children and #wid.nodes > 0 then
@@ -75,7 +75,7 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_virtualMouseRepeat and cap_cur:uiCap_virtualMouseRepeat(x, y, button, istouch, reps) then
+	if cap_cur and cap_cur.cpt_virtualMouseRepeat and cap_cur:cpt_virtualMouseRepeat(x, y, button, istouch, reps) then
 		return
 	end
 
@@ -90,7 +90,7 @@ local function event_virtualMouseRepeat(self, x, y, button, istouch, reps)
 		-- If necessary, the widget needs to check if the pointer is in bounds.
 		-- We don't check that here, because what is "in bounds" depends on the
 		-- widget's design.
-		self.current_pressed:cycleEvent("uiCall_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
+		self.current_pressed:eventCycle("evt_pointerPressRepeat", self.current_pressed, x, y, button, istouch, reps)
 	end
 end
 
@@ -110,7 +110,7 @@ local function event_mousemoved(self, x, y, dx, dy, istouch)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_mouseMoved and cap_cur:uiCap_mouseMoved(x, y, dx, dy, istouch) then
+	if cap_cur and cap_cur.cpt_mouseMoved and cap_cur:cpt_mouseMoved(x, y, dx, dy, istouch) then
 		return
 	end
 
@@ -119,7 +119,7 @@ end
 
 
 --- Append an asynchronous action to the UI context, to be run after the main update loop is finished (and after all
---  widget tables are unlocked). This method can only be called during widget update time (ie 'uiCall_update()').
+--  widget tables are unlocked). This method can only be called during widget update time (ie 'evt_update()').
 -- @param wid The widget which will perform the action.
 -- @param func The function the widget will call (Arguments: widget, params, dt)
 -- @param opt A value (presumably a table of parameters) for the function's arg #2. Nil is replaced with false.
@@ -180,7 +180,7 @@ function _mt_context:love_update(dt)
 	-- If a widget has captured focus, let it run its own update function now, and optionally deny
 	-- updates for the widget tree.
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCall_captureTick and not cap_cur:uiCall_captureTick(dt) then
+	if cap_cur and cap_cur.evt_captureTick and not cap_cur:evt_captureTick(dt) then
 		return
 	end
 
@@ -309,18 +309,18 @@ function _mt_context:love_textinput(text)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_textInput and cap_cur:uiCap_textInput(text) then
+	if cap_cur and cap_cur.cpt_textInput and cap_cur:cpt_textInput(text) then
 		return
 	end
 
 	-- Any widget has focus: emit a textInput event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_textInput", wid_cur, text)
+		wid_cur:eventCycle("evt_textInput", wid_cur, text)
 
 	-- Nothing is focused: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_textInput", self.root, text) -- no ancestors
+		self.root:eventSend("evt_textInput", self.root, text) -- no ancestors
 	end
 end
 
@@ -328,14 +328,14 @@ end
 function _mt_context:love_focus(focus)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_windowFocus and cap_cur.uiCap_windowFocus(focus) then
+	if cap_cur and cap_cur.cpt_windowFocus and cap_cur.cpt_windowFocus(focus) then
 		return
 	end
 
 	self.window_focus = focus
 
 	if self.root then
-		self.root:sendEvent("uiCall_windowFocus", focus)
+		self.root:eventSend("evt_windowFocus", focus)
 	end
 end
 
@@ -343,14 +343,14 @@ end
 function _mt_context:love_visible(visible)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_windowVisible and cap_cur.uiCap_windowVisible(visible) then
+	if cap_cur and cap_cur.cpt_windowVisible and cap_cur.cpt_windowVisible(visible) then
 		return
 	end
 
 	self.window_visible = visible
 
 	if self.root then
-		self.root:sendEvent("uiCall_windowVisible", visible)
+		self.root:eventSend("evt_windowVisible", visible)
 	end
 end
 
@@ -358,14 +358,14 @@ end
 function _mt_context:love_mousefocus(focus)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_mouseFocus and cap_cur:uiCap_mouseFocus(focus) then
+	if cap_cur and cap_cur.cpt_mouseFocus and cap_cur:cpt_mouseFocus(focus) then
 		return
 	end
 
 	self.mouse_focus = focus
 
 	if self.root then
-		self.root:sendEvent("uiCall_mouseFocus", focus)
+		self.root:eventSend("evt_mouseFocus", focus)
 	end
 end
 
@@ -374,7 +374,7 @@ end
 function _mt_context:love_textedited(text, start, length)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_textEdited and cap_cur:uiCap_textEdited(text, start, length) then
+	if cap_cur and cap_cur.cpt_textEdited and cap_cur:cpt_textEdited(text, start, length) then
 		return
 	end
 
@@ -396,7 +396,7 @@ end
 function _mt_context:love_wheelmoved(x, y)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_wheelMoved and cap_cur:uiCap_wheelMoved(x, y) then
+	if cap_cur and cap_cur.cpt_wheelMoved and cap_cur:cpt_wheelMoved(x, y) then
 		return
 	end
 
@@ -405,11 +405,11 @@ function _mt_context:love_wheelmoved(x, y)
 	if self.wheelmoved_to_thimble then
 		local wid = self.thimble2 or self.thimble1
 		if wid then
-			wid:cycleEvent("uiCall_pointerWheel", wid, x, y)
+			wid:eventCycle("evt_pointerWheel", wid, x, y)
 		end
 
 	elseif self.current_hover then
-		self.current_hover:cycleEvent("uiCall_pointerWheel", self.current_hover, x, y)
+		self.current_hover:eventCycle("evt_pointerWheel", self.current_hover, x, y)
 	end
 end
 
@@ -419,13 +419,13 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_mouseReleased and cap_cur:uiCap_mouseReleased(x, y, button, istouch, presses) then
+	if cap_cur and cap_cur.cpt_mouseReleased and cap_cur:cpt_mouseReleased(x, y, button, istouch, presses) then
 		return
 	end
 
 	--[[
 	NOTE: The context mouse button state is updated after callbacks are fired.
-	This gives uiCall_pointerUnpress / uiCall_pointerRelease a chance to check 'mouse_current_pressed'
+	This gives evt_pointerUnpress / evt_pointerRelease a chance to check 'mouse_current_pressed'
 	before it is potentially erased.
 	--]]
 
@@ -441,19 +441,19 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 	-- some mice have a lot of buttons). As a side effect, you can release on a widget which is covered by
 	-- other widgets, if you were able to hover over it for the initial down-click.
 	if old_current_pressed then
-		old_current_pressed:cycleEvent("uiCall_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
+		old_current_pressed:eventCycle("evt_pointerUnpress", old_current_pressed, x, y, button, istouch, presses)
 
 		if not old_current_pressed._dead then
 			local old_x, old_y = old_current_pressed:getAbsolutePosition()
 			if _pointInRect(x, y, old_x, old_y, old_x + old_current_pressed.w, old_y + old_current_pressed.h) then
-				old_current_pressed:cycleEvent("uiCall_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
+				old_current_pressed:eventCycle("evt_pointerRelease", old_current_pressed, x, y, button, istouch, presses)
 			end
 		end
 
 	elseif self.root then
-		self.root:sendEvent("uiCall_pointerUnpress", self.root, x, y, button, istouch, presses) -- no ancestors
+		self.root:eventSend("evt_pointerUnpress", self.root, x, y, button, istouch, presses) -- no ancestors
 		if self.root then
-			self.root:sendEvent("uiCall_pointerRelease", self.root, x, y, button, istouch, presses) -- no ancestors
+			self.root:eventSend("evt_pointerRelease", self.root, x, y, button, istouch, presses) -- no ancestors
 		end
 	end
 
@@ -461,9 +461,9 @@ function _mt_context:love_mousereleased(x, y, button, istouch, presses)
 		-- Clean up Drag-Dest state.
 		local old_drag_dest = self.current_drag_dest
 		if old_drag_dest then
-			old_drag_dest:cycleEvent("uiCall_pointerDragDestOff", old_drag_dest, x, y, 0, 0)
+			old_drag_dest:eventCycle("evt_pointerDragDestOff", old_drag_dest, x, y, 0, 0)
 			if not old_drag_dest._dead then
-				old_drag_dest:cycleEvent("uiCall_pointerDragDestRelease", old_drag_dest, x, y, button, istouch, presses)
+				old_drag_dest:eventCycle("evt_pointerDragDestRelease", old_drag_dest, x, y, button, istouch, presses)
 			end
 			self.current_drag_dest = false
 		end
@@ -497,7 +497,7 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_mousePressed and cap_cur:uiCap_mousePressed(x, y, button, istouch, presses) then
+	if cap_cur and cap_cur.cpt_mousePressed and cap_cur:cpt_mousePressed(x, y, button, istouch, presses) then
 		return
 	end
 
@@ -551,13 +551,13 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 			if old_hover and old_hover ~= wid_pressed then
 				-- Hover off
 				self.current_hover = false
-				old_hover:cycleEvent("uiCall_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
+				old_hover:eventCycle("evt_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
 
 				-- Hover on + move
 				self.current_hover = wid_pressed
-				wid_pressed:cycleEvent("uiCall_pointerHoverOn", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+				wid_pressed:eventCycle("evt_pointerHoverOn", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
 				if not wid_pressed._dead then
-					wid_pressed:cycleEvent("uiCall_pointerHover", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
+					wid_pressed:eventCycle("evt_pointerHover", wid_pressed, self.mouse_x, self.mouse_y, 0, 0)
 				end
 			end
 		end
@@ -566,7 +566,7 @@ function _mt_context:love_mousepressed(x, y, button, istouch, presses)
 	self.mouse_buttons[button] = true
 
 	if self.current_pressed then
-		self.current_pressed:cycleEvent("uiCall_pointerPress", self.current_pressed, x, y, button, istouch, presses)
+		self.current_pressed:eventCycle("evt_pointerPress", self.current_pressed, x, y, button, istouch, presses)
 	end
 end
 
@@ -595,12 +595,12 @@ end
 function _mt_context:love_resize(w, h)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_windowResize and cap_cur:uiCap_windowResize(w, h) then
+	if cap_cur and cap_cur.cpt_windowResize and cap_cur:cpt_windowResize(w, h) then
 		return
 	end
 
 	if self.root then
-		self.root:sendEvent("uiCall_windowResize", w, h) -- no ancestors
+		self.root:eventSend("evt_windowResize", w, h) -- no ancestors
 	end
 end
 
@@ -608,12 +608,12 @@ end
 function _mt_context:love_joystickadded(joystick) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_joystickAdded and cap_cur:uiCap_joystickAdded(joystick) then
+	if cap_cur and cap_cur.cpt_joystickAdded and cap_cur:cpt_joystickAdded(joystick) then
 		return
 	end
 
 	if self.root then
-		self.root:sendEvent("uiCall_joystickAdded", joystick) -- no ancestors
+		self.root:eventSend("evt_joystickAdded", joystick) -- no ancestors
 	end
 end
 
@@ -621,12 +621,12 @@ end
 function _mt_context:love_joystickremoved(joystick) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_joystickRemoved and cap_cur:uiCap_joystickRemoved(joystick) then
+	if cap_cur and cap_cur.cpt_joystickRemoved and cap_cur:cpt_joystickRemoved(joystick) then
 		return
 	end
 
 	if self.root then
-		self.root:sendEvent("uiCall_joystickRemoved", joystick) -- no ancestors
+		self.root:eventSend("evt_joystickRemoved", joystick) -- no ancestors
 	end
 end
 
@@ -634,18 +634,18 @@ end
 function _mt_context:love_joystickpressed(joystick, button) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_joystickPressed and cap_cur:uiCap_joystickPressed(joystick, button) then
+	if cap_cur and cap_cur.cpt_joystickPressed and cap_cur:cpt_joystickPressed(joystick, button) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_joystickPressed", wid_cur, joystick, button)
+		wid_cur:eventCycle("evt_joystickPressed", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_joystickPressed", self.root, joystick, button) -- no ancestors
+		self.root:eventSend("evt_joystickPressed", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -653,18 +653,18 @@ end
 function _mt_context:love_joystickreleased(joystick, button) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_joystickReleased and cap_cur:uiCap_joystickReleased(joystick, button) then
+	if cap_cur and cap_cur.cpt_joystickReleased and cap_cur:cpt_joystickReleased(joystick, button) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_joystickReleased", wid_cur, joystick, button)
+		wid_cur:eventCycle("evt_joystickReleased", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_joystickReleased", self.root, joystick, button) -- no ancestors
+		self.root:eventSend("evt_joystickReleased", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -672,18 +672,18 @@ end
 function _mt_context:love_joystickaxis(joystick, axis, value) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_joystickAxis and cap_cur:uiCap_joystickAxis(joystick, axis, value) then
+	if cap_cur and cap_cur.cpt_joystickAxis and cap_cur:cpt_joystickAxis(joystick, axis, value) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_joystickAxis", wid_cur, joystick, axis, value)
+		wid_cur:eventCycle("evt_joystickAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_joystickAxis", self.root, joystick, axis, value) -- no ancestors
+		self.root:eventSend("evt_joystickAxis", self.root, joystick, axis, value) -- no ancestors
 	end
 end
 
@@ -691,18 +691,18 @@ end
 function _mt_context:love_joystickhat(joystick, hat, direction) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_joystickHat and cap_cur:uiCap_joystickHat(joystick, hat, direction) then
+	if cap_cur and cap_cur.cpt_joystickHat and cap_cur:cpt_joystickHat(joystick, hat, direction) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_joystickHat", wid_cur, joystick, hat, direction)
+		wid_cur:eventCycle("evt_joystickHat", wid_cur, joystick, hat, direction)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_joystickHat", self.root, joystick, hat, direction) -- no ancestors
+		self.root:eventSend("evt_joystickHat", self.root, joystick, hat, direction) -- no ancestors
 	end
 end
 
@@ -710,18 +710,18 @@ end
 function _mt_context:love_gamepadpressed(joystick, button) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_gamepadPressed and cap_cur:uiCap_gamepadPressed(joystick, button) then
+	if cap_cur and cap_cur.cpt_gamepadPressed and cap_cur:cpt_gamepadPressed(joystick, button) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_gamepadPressed", wid_cur, joystick, button)
+		wid_cur:eventCycle("evt_gamepadPressed", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_gamepadPressed", self.root, joystick, button) -- no ancestors
+		self.root:eventSend("evt_gamepadPressed", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -729,18 +729,18 @@ end
 function _mt_context:love_gamepadreleased(joystick, button) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_gamepadReleased and cap_cur:uiCap_gamepadReleased(joystick, button) then
+	if cap_cur and cap_cur.cpt_gamepadReleased and cap_cur:cpt_gamepadReleased(joystick, button) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_gamepadReleased", wid_cur, joystick, button)
+		wid_cur:eventCycle("evt_gamepadReleased", wid_cur, joystick, button)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_gamepadReleased", self.root, joystick, button) -- no ancestors
+		self.root:eventSend("evt_gamepadReleased", self.root, joystick, button) -- no ancestors
 	end
 end
 
@@ -748,18 +748,18 @@ end
 function _mt_context:love_gamepadaxis(joystick, axis, value) -- XXX untested
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_gamepadAxis and cap_cur:uiCap_gamepadAxis(joystick, axis, value) then
+	if cap_cur and cap_cur.cpt_gamepadAxis and cap_cur:cpt_gamepadAxis(joystick, axis, value) then
 		return
 	end
 
 	-- Any widget has focus: cycle the key event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_uiCall_gamepadAxis", wid_cur, joystick, axis, value)
+		wid_cur:eventCycle("evt_evt_gamepadAxis", wid_cur, joystick, axis, value)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_gamepadAxis", self.root, joystick, axis, value) -- no ancestors
+		self.root:eventSend("evt_gamepadAxis", self.root, joystick, axis, value) -- no ancestors
 	end
 end
 
@@ -767,18 +767,18 @@ end
 function _mt_context:love_filedropped(file)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_fileDropped and cap_cur:uiCap_fileDropped(file) then
+	if cap_cur and cap_cur.cpt_fileDropped and cap_cur:cpt_fileDropped(file) then
 		return
 	end
 
 	-- Any widget has focus: cycle the event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_fileDropped", wid_cur, file)
+		wid_cur:eventCycle("evt_fileDropped", wid_cur, file)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_fileDropped", self.root, file) -- no ancestors
+		self.root:eventSend("evt_fileDropped", self.root, file) -- no ancestors
 	end
 end
 
@@ -786,18 +786,18 @@ end
 function _mt_context:love_directorydropped(path)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_directoryDropped and cap_cur:uiCap_directoryDropped(file) then
+	if cap_cur and cap_cur.cpt_directoryDropped and cap_cur:cpt_directoryDropped(file) then
 		return
 	end
 
 	-- Any widget has focus: cycle the event
 	local wid_cur = self.thimble2 or self.thimble1
 	if wid_cur then
-		wid_cur:cycleEvent("uiCall_directoryDropped", wid_cur, file)
+		wid_cur:eventCycle("evt_directoryDropped", wid_cur, file)
 
 	-- Nothing has focus: send to root widget, if present
 	elseif self.root then
-		self.root:sendEvent("uiCall_directoryDropped", self.root, file) -- no ancestors
+		self.root:eventSend("evt_directoryDropped", self.root, file) -- no ancestors
 	end
 end
 
@@ -805,13 +805,13 @@ end
 function _mt_context:love_quit()
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.uiCap_quit and cap_cur:uiCap_quit() then
+	if cap_cur and cap_cur.cpt_quit and cap_cur:cpt_quit() then
 		return
 	end
 
 	-- Send to root; return root's response to the love.quit() handler.
 	if self.root then
-		return self.root:sendEvent("uiCall_quit", self.root)
+		return self.root:eventSend("evt_quit", self.root)
 	end
 end
 
@@ -972,7 +972,7 @@ end
 --  Locked during update: yes (context)
 -- @param id The widget def ID.
 -- @param [skin_id] The starting Skin ID, if applicable.
--- @param [...] Additional arguments for the root's uiCall_initialize() callback.
+-- @param [...] Additional arguments for the root's evt_initialize() callback.
 -- @return A reference to the new root instance.
 function _mt_context:addRoot(id, skin_id, ...)
 	uiAssert.notNilNotFalseNotNaN(1, id)
@@ -988,7 +988,7 @@ function _mt_context:addRoot(id, skin_id, ...)
 	local root = self:_prepareWidgetInstance(id, nil, skin_id)
 	self.root = root
 
-	root:uiCall_initialize(...)
+	root:evt_initialize(...)
 	root:_runUserEvent("userInitialize")
 
 	return root
@@ -1052,7 +1052,7 @@ end
 
 
 --- Move The context's 'current_hover' and/or 'current_pressed' state to another widget. Intended for special use
---  cases, between compatible widgets, within 'uiCall_pointerDrag' callbacks. The widgets must be programmed to
+--  cases, between compatible widgets, within 'evt_pointerDrag' callbacks. The widgets must be programmed to
 --  correctly deal with the transfer. See source code for notes, including which callbacks are fired and which
 --  are skipped.
 -- @param wid The widget to transfer hover and/or pressed state to.
@@ -1072,15 +1072,15 @@ function _mt_context:transferPressedState(wid)
 
 	--[[
 	Callbacks triggered:
-	* uiCall_pointerHoverOff() for the old hover.
-	* uiCall_pointerHoverOn() for the new hover.
+	* evt_pointerHoverOff() for the old hover.
+	* evt_pointerHoverOn() for the new hover.
 
 	Not triggered:
-	* uiCall_pointerUnpress() for the old pressed widget.
-	* uiCall_pointerRelease() for the old pressed widget.
-	* uiCall_pointerPress() for the new pressed widget.
+	* evt_pointerUnpress() for the old pressed widget.
+	* evt_pointerRelease() for the old pressed widget.
+	* evt_pointerPress() for the new pressed widget.
 
-	uiCall_pointerDrag() should happen -- soon-ish -- as a result of mouseLogic being called in the context update
+	evt_pointerDrag() should happen -- soon-ish -- as a result of mouseLogic being called in the context update
 	function.
 	--]]
 
@@ -1088,11 +1088,11 @@ function _mt_context:transferPressedState(wid)
 
 	self.current_hover = false
 	if old_hover then
-		old_hover:cycleEvent("uiCall_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
+		old_hover:eventCycle("evt_pointerHoverOff", old_hover, self.mouse_x, self.mouse_y, 0, 0)
 	end
 
 	self.current_hover = wid
-	wid:cycleEvent("uiCall_pointerHoverOn", wid, self.mouse_x, self.mouse_y, 0, 0)
+	wid:eventCycle("evt_pointerHoverOn", wid, self.mouse_x, self.mouse_y, 0, 0)
 
 	self.current_pressed = wid
 end

@@ -43,7 +43,7 @@ local function _printUIFrames(self)
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.allow_hover = true
 	self.thimble_mode = 0
 	self.allow_focus_capture = false
@@ -96,8 +96,8 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
-	--print("root_wimp: uiCall_reshapePre")
+function def:evt_reshapePre()
+	--print("root_wimp: evt_reshapePre")
 
 	widLayout.resetLayoutSpace(self)
 
@@ -105,8 +105,8 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_reshapePost()
-	--print("root_wimp: uiCall_reshapePost")
+function def:evt_reshapePost()
+	--print("root_wimp: evt_reshapePost")
 
 	-- Viewport #1 is the area for Workspaces and maximized Window Frames.
 
@@ -151,7 +151,7 @@ local function clearPopUp(self, reason_code)
 end
 
 
-function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerPress(inst, x, y, button, istouch, presses)
 	-- Destroy pop-up menu when clicking outside of its lateral chain.
 	local cur_pres = self.context.current_pressed
 	local pop_up = self.pop_up_menu
@@ -180,7 +180,7 @@ function def.trickle:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	local context = self.context
 
 	-- User clicked on the root widget (whether directly or because other widgets aren't clickable).
@@ -194,13 +194,13 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerDragDestRelease(inst, x, y, button, istouch, presses)
+function def:evt_pointerDragDestRelease(inst, x, y, button, istouch, presses)
 	-- DropState cleanup
 	self.drop_state = false
 end
 
 
-function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def.trickle:evt_keyPressed(inst, key, scancode, isrepeat)
 	if #self.modals == 0 then
 		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
 			return true
@@ -209,7 +209,7 @@ function def.trickle:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
+function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if #self.modals == 0 then
 		if self.KH_key_pressed(self, key, scancode, isrepeat) then
 			return true
@@ -263,12 +263,12 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 
 				-- Thimble action #1.
 				elseif scancode == "return" or scancode == "kpenter" or (scancode == "space" and not isrepeat) then
-					wid_cur:cycleEvent("uiCall_thimbleAction", wid_cur, key, scancode, isrepeat)
+					wid_cur:eventCycle("evt_thimbleAction", wid_cur, key, scancode, isrepeat)
 					context.current_pressed = false
 
 				-- Thimble action #2.
 				elseif (scancode == "application" or (mods["shift"] and scancode == "f10")) and not isrepeat then
-					wid_cur:cycleEvent("uiCall_thimbleAction2", wid_cur, key, scancode, isrepeat)
+					wid_cur:eventCycle("evt_thimbleAction2", wid_cur, key, scancode, isrepeat)
 					context.current_pressed = false
 				end
 			end
@@ -279,7 +279,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 end
 
 
-function def:uiCall_keyReleased(inst, key, scancode)
+function def:evt_keyReleased(inst, key, scancode)
 	if #self.modals == 0 then
 		if self.KH_key_released(self, key, scancode) then
 			return true
@@ -288,7 +288,7 @@ function def:uiCall_keyReleased(inst, key, scancode)
 end
 
 
-function def.trickle:uiCall_keyReleased(inst, key, scancode)
+function def.trickle:evt_keyReleased(inst, key, scancode)
 	if #self.modals == 0 then
 		if self.KH_trickle_key_released(self, key, scancode) then
 			return true
@@ -297,7 +297,7 @@ function def.trickle:uiCall_keyReleased(inst, key, scancode)
 end
 
 
-function def:uiCall_windowResize(w, h)
+function def:evt_windowResize(w, h)
 	-- XXX consider rate-limiting this (either here or in the core) to about 1/10th of a second.
 	-- It fires over and over on Fedora, but pauses the main thread on Windows. Apparently, Wayland
 	-- can fire it multiple times per frame.
@@ -570,7 +570,7 @@ function def:rootCall_assignPopUp(inst, pop_up)
 
 	self.pop_up_menu = pop_up
 
-	-- If the calling function is a uiCall_pointerPress event, it should return true to block further propagation
+	-- If the calling function is a evt_pointerPress event, it should return true to block further propagation
 	-- up. Otherwise, the window-frame and root pointerPress code may interfere with thimble and banking state.
 end
 
@@ -666,11 +666,11 @@ local function _thimbleCheck(self, inst)
 end
 
 
-def.trickle.uiCall_thimble1Take = _thimbleCheck
-def.trickle.uiCall_thimble2Take = _thimbleCheck
+def.trickle.evt_thimble1Take = _thimbleCheck
+def.trickle.evt_thimble2Take = _thimbleCheck
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	local tool_tip = self.tool_tip
 	local current_hover = self.context.current_hover
 
@@ -705,7 +705,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 1)
 	-- Bubbled events from children

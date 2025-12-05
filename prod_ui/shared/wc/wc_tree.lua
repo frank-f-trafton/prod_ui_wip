@@ -292,7 +292,7 @@ function wcTree.keyBackward(self, dir)
 end
 
 
---- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
+--- Called in evt_keyPressed(). Implements basic keyboard navigation.
 -- @param key The key code.
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.

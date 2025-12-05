@@ -45,7 +45,7 @@ def.colors = {
 }
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 
 	self.fill = self.colors.darkcyan

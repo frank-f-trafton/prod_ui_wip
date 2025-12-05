@@ -24,7 +24,7 @@ wcButton.setupDefRepeat(def)
 def.setLabel = wcLabel.widSetLabel
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -48,7 +48,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the graphic drawing rectangle.
 
@@ -67,7 +67,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 2)
 	end

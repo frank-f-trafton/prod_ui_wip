@@ -32,8 +32,8 @@ function plan.makeWindowFrame(root)
 			error("this frame should not be selectable.")
 		end
 	end
-	frame.uiCall_thimble1Take = _assertNoThimble
-	frame.uiCall_thimble2Take = _assertNoThimble
+	frame.evt_thimble1Take = _assertNoThimble
+	frame.evt_thimble2Take = _assertNoThimble
 
 	demoShared.makeLabel(frame, 0, 0, 320, 190, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "multi")
 
@@ -43,8 +43,8 @@ function plan.makeWindowFrame(root)
 	local bb_button = frame:addChild("base/button")
 	bb_button:geometrySetMode("static", xx, yy, ww, hh)
 
-	bb_button.uiCall_thimble1Take = _assertNoThimble
-	bb_button.uiCall_thimble2Take = _assertNoThimble
+	bb_button.evt_thimble1Take = _assertNoThimble
+	bb_button.evt_thimble2Take = _assertNoThimble
 
 	bb_button.thimble_mode = 0
 
@@ -55,8 +55,8 @@ function plan.makeWindowFrame(root)
 	local bb_cbox = frame:addChild("base/checkbox")
 	bb_cbox:geometrySetMode("static", xx, yy, ww, hh)
 
-	bb_cbox.uiCall_thimble1Take = _assertNoThimble
-	bb_cbox.uiCall_thimble2Take = _assertNoThimble
+	bb_cbox.evt_thimble1Take = _assertNoThimble
+	bb_cbox.evt_thimble2Take = _assertNoThimble
 
 	bb_cbox.thimble_mode = 0
 
