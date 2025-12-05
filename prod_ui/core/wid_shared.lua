@@ -444,7 +444,7 @@ function widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 	-- all the way up to the widget root.
 
 	-- Start at the end of the chain.
-	local wid = pList2.getTail(self)
+	local wid = pList2.nodeGetTail(self)
 	while wid do
 		if wid.allow_hover then
 			local ax, ay = wid:getAbsolutePosition()
@@ -463,7 +463,7 @@ end
 
 --- Given a widget in a chain, destroy all widgets after this one.
 function widShared.chainDestroyPost(self)
-	local wid = pList2.getTail(self)
+	local wid = pList2.nodeGetTail(self)
 
 	while wid ~= self do
 		local wid_prev = wid["prev"]

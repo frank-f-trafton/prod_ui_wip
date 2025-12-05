@@ -1,7 +1,39 @@
--- PILE Tree v2.000 (modified)
--- (C) 2024 - 2025 PILE Contributors
--- License: MIT
+-- PILE Tree v2.010
 -- https://github.com/frank-f-trafton/pile_base
+
+
+--[[
+MIT License
+
+Copyright (c) 2024 - 2025 PILE Contributors
+
+PILE Base uses code from these libraries:
+
+PILE Tree:
+  LUIGI
+  Copyright (c) 2015 airstruck
+  License: MIT
+  https://github.com/airstruck/luigi
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
 
 
 local M = {}
@@ -14,16 +46,20 @@ local interp = require(PATH .. "pile_interp")
 local pAssert = require(PATH .. "pile_assert")
 
 
-local ipairs, type = ipairs, type
-local _pAssert_integerEval, _pAssert_notNil, _pAssert_type = pAssert.integerEval, pAssert.notNil, pAssert.type
+local ipairs, table, type = ipairs, table, type
+
+
+local _pAssert_integerEval = pAssert.integerEval
+local _pAssert_integerRangeEval = pAssert.integerRangeEval
+local _pAssert_notNil = pAssert.notNil
+local _pAssert_type = pAssert.type
 
 
 M.lang = {
 	assert_cycles = "assertion: tree contains a cycle (duplicate node reference)",
-	event_bad_type = "event handler $1: unsupported type: $2",
-	node_already_attached = "this node is already attached to another parent",
+	node_already_attached = "node is already attached to another parent",
 	node_attach_self = "tried to attach a node to itself",
-	node_no_index = "couldn't find this node in its parent",
+	node_no_index = "couldn't find node in list of siblings",
 	node_no_parent = "corrupt or missing 'parent' link. (Tried to run on a root node?)",
 }
 local lang = M.lang
@@ -34,27 +70,30 @@ local _nodeGetVeryLast, _nodeAssertIndex, _nodeAssertParent
 
 
 local function _nodeNew()
-	local node = {}
-	node["nodes"] = {}
-	node["parent"] = false
-	return node
+	return {["nodes"] = {}, ["parent"] = false}
 end
 M.nodeNew = _nodeNew
 
 
 function M.nodeAdd(self, pos)
-	pos = pos or #self["nodes"] + 1
+	local nodes = self["nodes"]
+
+	_pAssert_integerRangeEval("pos", pos, 1, #nodes + 1)
 
 	local node = _nodeNew()
 	node["parent"] = self
-
-	table.insert(self["nodes"], pos, node)
+	table.insert(nodes, pos or #nodes + 1, node)
 
 	return node
 end
 
 
 function M.nodeAttach(self, node, pos)
+	local nodes = self["nodes"]
+
+	_pAssert_type("node", node, "table")
+	_pAssert_integerRangeEval("pos", pos, 1, #nodes + 1)
+
 	if node == self then
 		error(lang.node_attach_self)
 
@@ -62,11 +101,8 @@ function M.nodeAttach(self, node, pos)
 		error(lang.node_already_attached)
 	end
 
-	pos = pos or #self["nodes"] + 1
-
 	node["parent"] = self
-
-	table.insert(self["nodes"], pos, node)
+	table.insert(nodes, pos or #nodes + 1, node)
 
 	return node
 end
@@ -76,9 +112,9 @@ function M.nodeRemove(self)
 	local parent = _nodeAssertParent(self)
 	local siblings = parent["nodes"]
 
-	local i = _nodeAssertIndex(self, siblings)
-	self["parent"] = nil
-	table.remove(siblings, i)
+	local pos = _nodeAssertIndex(self, siblings)
+	self["parent"] = false
+	table.remove(siblings, pos)
 end
 
 
@@ -88,24 +124,23 @@ function M.nodeGetIndex(self, nodes)
 end
 
 
-_nodeAssertIndex = function(node, siblings)
+_nodeAssertIndex = function(self, siblings)
+	local node = self
 	for i = 1, #siblings do
-		if siblings[i] == node then
+		if node == siblings[i] then
 			return i
 		end
 	end
 	error(lang.node_no_index)
 end
-M.nodeAssertIndex = _nodeAssertIndex
+M._nodeAssertIndex = _nodeAssertIndex
 
 
 function M.nodeGetDepth(self)
 	local node, depth = self, 0
 	while node do
-		depth = depth + 1
-		node = node["parent"]
+		node, depth = node["parent"], depth + 1
 	end
-
 	return depth
 end
 
@@ -182,27 +217,22 @@ function M.nodeGetPrevious(self)
 end
 
 
-local function _nodeGetSiblingDelta(node, delta, wrap)
+local function _nodeGetSiblingDelta(node, delta)
 	local parent = _nodeAssertParent(node)
 	local siblings = node["parent"]["nodes"]
 	local index = _nodeAssertIndex(node, siblings)
 
-	local selected = siblings[index + delta]
-	if not selected and wrap then
-		selected = siblings[delta > 0 and 1 or #siblings]
-	end
-
-	return selected
+	return siblings[index + delta]
 end
 
 
-function M.nodeGetNextSibling(self, wrap)
-	return _nodeGetSiblingDelta(self, 1, wrap)
+function M.nodeGetNextSibling(self)
+	return _nodeGetSiblingDelta(self, 1)
 end
 
 
-function M.nodeGetPreviousSibling(self, wrap)
-	return _nodeGetSiblingDelta(self, -1, wrap)
+function M.nodeGetPreviousSibling(self)
+	return _nodeGetSiblingDelta(self, -1)
 end
 
 
@@ -248,6 +278,7 @@ function M.nodeGetRoot(self)
 end
 
 
+-- Based on: https://github.com/airstruck/luigi/blob/gh-pages/luigi/widget.lua#L375
 _nodeGetVeryLast = function(self)
 	local node = self
 	while #node["nodes"] > 0 do

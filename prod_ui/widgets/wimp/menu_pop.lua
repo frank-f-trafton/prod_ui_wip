@@ -1043,7 +1043,7 @@ function def:uiCall_destroy(inst)
 			end
 		end
 
-		pList2.unlink(self)
+		pList2.nodeUnlink(self)
 
 		widShared.removeViewports(self, 2)
 	end

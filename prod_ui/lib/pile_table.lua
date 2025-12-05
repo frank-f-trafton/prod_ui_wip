@@ -1,7 +1,39 @@
--- PILE Table v2.000 (modified)
--- (C) 2024 - 2025 PILE Contributors
--- License: MIT
+-- PILE Table v2.010
 -- https://github.com/frank-f-trafton/pile_base
+
+
+--[[
+MIT License
+
+Copyright (c) 2024 - 2025 PILE Contributors
+
+PILE Base uses code from these libraries:
+
+PILE Tree:
+  LUIGI
+  Copyright (c) 2015 airstruck
+  License: MIT
+  https://github.com/airstruck/luigi
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+--]]
 
 
 local M = {}
@@ -95,6 +127,33 @@ function M.deepCopy(t)
 end
 
 
+local function _patch2(t, k, v, overwrite)
+	local rg = rawget(t, k)
+	if overwrite or rg == nil then
+		rawset(t, k, v)
+	end
+	return rg and 1 or 0
+end
+
+
+function M.patch(a, b, overwrite)
+	pAssert.type(1, a, "table")
+	pAssert.type(2, b, "table")
+
+	local c = 0
+	for i, v in ipairs(b) do
+		c = c + _patch2(a, i, v, overwrite)
+	end
+	local n = #b
+	for k, v in pairs(b) do
+		if type(k) ~= "number" or math.floor(k) ~= k or k < 1 or k > n then
+			c = c + _patch2(a, k, v, overwrite)
+		end
+	end
+	return c
+end
+
+
 local deepPatch1
 lang.err_deeppatch_key = "cannot patch tables as keys"
 local function deepPatch2(t, k, v, overwrite)
@@ -144,13 +203,13 @@ end
 
 local _hash = {}
 local hasDupes1
-local function hasDupes2(v, _d)
+local function hasDupes2(v)
 	if type(v) == "table" then
 		if _hash[v] then
 			return v
 		end
 		_hash[v] = true
-		local ret = hasDupes1(v, _d + 1)
+		local ret = hasDupes1(v)
 		if ret then
 			return ret
 		end
@@ -158,9 +217,9 @@ local function hasDupes2(v, _d)
 end
 
 
-hasDupes1 = function(t, _d)
+hasDupes1 = function(t)
 	for k, v in pairs(t) do
-		local ret = hasDupes2(k, _d + 1) or hasDupes2(v, _d + 1)
+		local ret = hasDupes2(k) or hasDupes2(v)
 		if ret then
 			return ret
 		end
@@ -184,51 +243,13 @@ function M.hasAnyDuplicateTables(...)
 			return t
 		end
 		_hash[t] = true
-		ret = hasDupes1(t, 1)
+		ret = hasDupes1(t)
 		if ret then
 			break
 		end
 	end
 	M.clearAll(_hash)
 	return ret
-end
-
-
-function M.arrayHasDuplicateValues(t)
-	for j = 1, #t do
-		for i = j + 1, #t do
-			if list[i] == list[j] then
-				return  i
-			end
-		end
-	end
-end
-
-
-local function _patch2(t, k, v, overwrite)
-	local rg = rawget(t, k)
-	if overwrite or rg == nil then
-		rawset(t, k, v)
-	end
-	return rg and 1 or 0
-end
-
-
-function M.patch(a, b, overwrite)
-	pAssert.type(1, a, "table")
-	pAssert.type(2, b, "table")
-
-	local c = 0
-	for i, v in ipairs(b) do
-		c = c + _patch2(a, i, v, overwrite)
-	end
-	local n = #b
-	for k, v in pairs(b) do
-		if type(k) ~= "number" or math.floor(k) ~= k or k < 1 or k > n then
-			c = c + _patch2(a, k, v, overwrite)
-		end
-	end
-	return c
 end
 
 
@@ -269,6 +290,17 @@ function M.isArrayOnlyZero(t)
 		end
 	end
 	return c == #t
+end
+
+
+function M.arrayHasDuplicateValues(t)
+	for j = 1, #t do
+		for i = j + 1, #t do
+			if t[i] == t[j] then
+				return  j, i
+			end
+		end
+	end
 end
 
 
@@ -364,39 +396,6 @@ function M.valueInArray(t, v, i)
 			return p
 		end
 	end
-end
-
-
-function M.valueInArrayBack(t, v, i)
-	for p = i or #t, 1, -1 do
-		if t[p] == v then
-			return p
-		end
-	end
-end
-
-
-lang.put_absent_ref = "the reference element is absent from the array"
-function M.putInArrayAfter(t, a, b)
-	pAssert.notNil(3, b)
-
-	local i = M.valueInArrayBack(t, a)
-	if not i then
-		error(lang.put_absent_ref)
-	end
-	table.insert(t, i + 1, b)
-	return i + 1
-end
-
-
-function M.putInArrayBefore(t, a, b)
-	pAssert.notNil(3, b)
-
-	local i = M.valueInArrayBack(t, a)
-	if not i then
-		error(lang.put_absent_ref)
-	end
-	table.insert(t, i, b)
 end
 
 
