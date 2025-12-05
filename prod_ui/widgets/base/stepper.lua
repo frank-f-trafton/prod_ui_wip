@@ -87,10 +87,10 @@ function def:setOrientation(orientation)
 end
 
 
-def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+def.evt_thimbleAction = wcButton.evt_thimbleAction
+def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 
 
 local function wrapSetLabel(self)
@@ -230,7 +230,7 @@ function def:stepIndex(delta)
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -270,7 +270,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 is the "prev" button component.
 	-- Viewport #3 is the "next" button component.
@@ -297,7 +297,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -334,7 +334,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -354,7 +354,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
@@ -369,7 +369,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:evt_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		if self.enabled then
 			local key_prev, key_next
@@ -390,7 +390,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		if self.enabled then
 			if self.b_prev_enabled and y > 0 then
@@ -404,7 +404,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 3)
 	end

@@ -113,7 +113,7 @@ function wcContainer.getSashCursorID(edge, is_drag)
 end
 
 
--- For widgets that support dragging sashes. Call in def.trickle:uiCall_pointerHover().
+-- For widgets that support dragging sashes. Call in def.trickle:evt_pointerHover().
 -- @return true if a sash hover action occurred.
 function wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 	if not self.SA_enabled then
@@ -177,7 +177,7 @@ function wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 end
 
 
--- For containers that support draggable sashes. Call in def.trickle:uiCall_pointerHoverOff().
+-- For containers that support draggable sashes. Call in def.trickle:evt_pointerHoverOff().
 function wcContainer.sashHoverOffLogic(self)
 	self.SA_hover = false
 	self.cursor_hover = false

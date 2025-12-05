@@ -175,7 +175,7 @@ end
 
 
 local function _querySegmentLength(wid, GE, x_axis, cross_length)
-	local a, b = wid:uiCall_getSegmentLength(x_axis, cross_length)
+	local a, b = wid:evt_getSegmentLength(x_axis, cross_length)
 	if a then
 		return a, b
 	end

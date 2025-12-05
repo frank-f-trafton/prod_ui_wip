@@ -87,8 +87,8 @@ def.wid_buttonAction2 = uiDummy.func
 def.wid_buttonAction3 = uiDummy.func
 
 
---def.uiCall_thimbleAction
---def.uiCall_thimbleAction2
+--def.evt_thimbleAction
+--def.evt_thimbleAction2
 
 
 --- Callback for a change in the item choice.
@@ -194,7 +194,7 @@ def.setIconSetID = wcMenu.setIconSetID
 def.getIconSetID = wcMenu.getIconSetID
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -219,7 +219,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the main content area.
 	-- Viewport #2 is the item area.
 	-- Viewport #3 is for the item text.
@@ -316,7 +316,7 @@ function def:wid_popUpCleanup(reason_code)
 end
 
 
---- Called in uiCall_keyPressed(). Implements basic keyboard navigation.
+--- Called in evt_keyPressed(). Implements basic keyboard navigation.
 -- @param key The key code.
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
@@ -359,7 +359,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:uiCall_thimble1Release(inst)
+function def:evt_thimble1Release(inst)
 	if self == inst then
 		if self.wid_drawer then
 			-- The pop-up menu should not exist if the dropdown body does not have thimble1.
@@ -370,7 +370,7 @@ function def:uiCall_thimble1Release(inst)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		self:_closePopUpMenu(false)
 
@@ -379,7 +379,7 @@ function def:uiCall_destroy(inst)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:evt_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		if not self.wid_drawer then
 			local items = self.MN_items
@@ -404,11 +404,11 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
---function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
---function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+--function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+--function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -432,7 +432,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	-- If the cursor overlaps the pop-up drawer while not overlapping the body,
 	-- transfer context pressed state.
 	local wid_drawer = self.wid_drawer
@@ -452,7 +452,7 @@ function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		-- Cycle menu options if the drawer is closed and this widget has top thimble focus.
 		if not self.wid_drawer and self:hasTopThimble() then

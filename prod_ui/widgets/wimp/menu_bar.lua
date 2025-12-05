@@ -89,14 +89,14 @@ local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_sele
 	local root = client:nodeGetRoot()
 
 	if client["next"] then
-		root:sendEvent("rootCall_destroyPopUp", client)
+		root:eventSend("rootCall_destroyPopUp", client)
 	end
 
 
 	local pop_up = wcWimp.makePopUpMenu(client, item.pop_up_proto, p_x, p_y)
 
 	if doctor_press then
-		root:sendEvent("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
+		root:eventSend("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
 	end
 
 	client["next"] = pop_up
@@ -119,7 +119,7 @@ end
 local function _destroyPopUpMenu(client, reason_code)
 	local root = client:nodeGetRoot()
 
-	root:sendEvent("rootCall_destroyPopUp", client, reason_code)
+	root:eventSend("rootCall_destroyPopUp", client, reason_code)
 
 	client.last_open = false
 	client["next"] = false
@@ -334,7 +334,7 @@ function def:menuChangeCleanup()
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 0
@@ -386,7 +386,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_getSegmentLength(x_axis, cross_length)
+function def:evt_getSegmentLength(x_axis, cross_length)
 	if not x_axis then
 		if self.hidden then
 			return 0, false
@@ -397,7 +397,7 @@ function def:uiCall_getSegmentLength(x_axis, cross_length)
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	local vp, vp2 = self.vp, self.vp2
 
 	vp:set(0, 0, self.w, self.h)
@@ -606,7 +606,7 @@ end
 
 
 -- Menu bars cannot hold onto the thimble, so they don't get keyboard input events directly.
---function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+--function def:evt_keyPressed(inst, key, scancode, isrepeat)
 
 
 --- Sent from a pop-up menu that hasn't handled left/right input.
@@ -617,7 +617,7 @@ function def:widCall_keyPressedFallback(invoker, key, scancode, isrepeat)
 end
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local rolled = false
 
@@ -692,7 +692,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local vp, vp2 = self.vp, self.vp2
 		local ax, ay = self:getAbsolutePosition()
@@ -748,14 +748,14 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		self.MN_item_hover = false
 	end
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	--print("menu bar pointerPress", self, inst, x, y, button)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
@@ -813,7 +813,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			self.press_busy = false
@@ -844,7 +844,7 @@ local function async_destroy(self, _reserved, dt)
 end
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	--print(self.w, self.h, self.doc_w, self.doc_h, self.scr_x, self.scr_y)
 	--print("vp1", self.vp.x, self.vp.y, self.vp.w, self.vp.h)
 
@@ -886,7 +886,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		-- If a pop-up menu exists that references this widget, destroy it.
 		if self["next"] then

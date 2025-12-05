@@ -31,7 +31,7 @@ wcUIFrame.definitionSetup(def)
 wcContainer.setupMethods(def)
 
 
-function def:uiCall_initialize(unselectable)
+function def:evt_initialize(unselectable)
 	-- UI Frame
 	self.frame_type = "workspace"
 	wcUIFrame.instanceSetup(self, unselectable)
@@ -72,8 +72,8 @@ Viewport #2 is an outer border.
 --]]
 
 
-function def:uiCall_reshapePre()
-	--print("workspace: uiCall_reshapePre")
+function def:evt_reshapePre()
+	--print("workspace: evt_reshapePre")
 
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
@@ -99,8 +99,8 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_reshapePost()
-	--print("workspace: uiCall_reshapePost")
+function def:evt_reshapePost()
+	--print("workspace: evt_reshapePost")
 
 	widShared.updateDoc(self)
 
@@ -110,16 +110,16 @@ function def:uiCall_reshapePost()
 end
 
 
-def.trickle.uiCall_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
+def.trickle.evt_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
 
 
-function def.trickle:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	local skin = self.skin
 	return wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		wcScrollBar.widgetProcessHover(self, mx, my)
@@ -127,33 +127,33 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def.trickle:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	wcContainer.sashHoverOffLogic(self)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		wcScrollBar.widgetClearHover(self)
 	end
 end
 
 
-function def.trickle:uiCall_pointerDrag(inst, x, y, dx, dy)
+function def.trickle:evt_pointerDrag(inst, x, y, dx, dy)
 	if wcContainer.sashDragLogic(self, x, y) then
 		return true
 	end
 end
 
 
-function def.trickle:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if wcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if wcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
@@ -177,10 +177,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-def.uiCall_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
+def.evt_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 then
 			wcScrollBar.widgetClearPress(self)
@@ -191,18 +191,18 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-def.trickle.uiCall_pointerWheel = wcUIFrame.logic_tricklePointerWheel
-def.uiCall_pointerWheel = wcUIFrame.logic_pointerWheel
-def.uiCall_thimble1Take = wcUIFrame.logic_thimble1Take
-def.trickle.uiCall_keyPressed = wcUIFrame.logic_trickleKeyPressed
-def.uiCall_keyPressed = wcUIFrame.logic_keyPressed
-def.trickle.uiCall_keyReleased = wcUIFrame.logic_trickleKeyReleased
-def.uiCall_keyReleased = wcUIFrame.logic_keyReleased
-def.trickle.uiCall_textInput = wcUIFrame.logic_trickleTextInput
-def.trickle.uiCall_pointerPress = wcUIFrame.logic_tricklePointerPress
+def.trickle.evt_pointerWheel = wcUIFrame.logic_tricklePointerWheel
+def.evt_pointerWheel = wcUIFrame.logic_pointerWheel
+def.evt_thimble1Take = wcUIFrame.logic_thimble1Take
+def.trickle.evt_keyPressed = wcUIFrame.logic_trickleKeyPressed
+def.evt_keyPressed = wcUIFrame.logic_keyPressed
+def.trickle.evt_keyReleased = wcUIFrame.logic_trickleKeyReleased
+def.evt_keyReleased = wcUIFrame.logic_keyReleased
+def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
+def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 	if wcScrollBar.press_busy_codes[self.press_busy] then
 		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
@@ -216,7 +216,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		-- Destroy any Window Frames that are associated with this Workspace.
 		local root = self.context.root

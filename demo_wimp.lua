@@ -266,7 +266,7 @@ local function newWimpContext()
 	--[[
 	local counter = 0
 
-	wid_root.uiCall_quit = function(self)
+	wid_root.evt_quit = function(self)
 		counter = counter + 1
 		print("counter (allow quitting at 3):", counter)
 		if counter >= 3 then

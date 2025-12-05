@@ -383,7 +383,7 @@ function plan.makeWindowFrame(root)
 
 		btn:setLabel("Close (forcefully)")
 		btn.wid_buttonAction = function(self)
-			self:bubbleEvent("frameCall_close", true)
+			self:eventBubble("frameCall_close", true)
 		end
 		yy = yy + hh
 	end

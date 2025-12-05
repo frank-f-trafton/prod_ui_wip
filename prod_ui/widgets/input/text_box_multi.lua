@@ -60,7 +60,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 def.pop_up_proto = wcInputM.pop_up_proto
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
@@ -81,7 +81,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the scrollable region.
 	-- Viewport #2 includes margins and excludes borders.
 
@@ -106,7 +106,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_pointerHover(inst, mx, my, dx, dy)
+function def:evt_pointerHover(inst, mx, my, dx, dy)
 	if self == inst then
 		mx, my = self:getRelativePosition(mx, my)
 
@@ -121,7 +121,7 @@ function def:uiCall_pointerHover(inst, mx, my, dx, dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mx, my, dx, dy)
+function def:evt_pointerHoverOff(inst, mx, my, dx, dy)
 	if self == inst then
 		wcScrollBar.widgetClearHover(self)
 
@@ -130,7 +130,7 @@ function def:uiCall_pointerHoverOff(inst, mx, my, dx, dy)
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst
 	and self.enabled
 	and button == self.context.mouse_pressed_button
@@ -166,7 +166,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- XXX style/config
@@ -177,7 +177,7 @@ function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
 end
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			wcScrollBar.widgetClearPress(self)
@@ -188,7 +188,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			return true
@@ -197,49 +197,49 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_thimbleTopTake(inst)
+function def:evt_thimbleTopTake(inst)
 	if self == inst then
 		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:uiCall_thimbleTopRelease(inst)
+function def:evt_thimbleTopRelease(inst)
 	if self == inst then
 		love.keyboard.setTextInput(false)
 	end
 end
 
 
-function def:uiCall_thimble1Take(inst)
+function def:evt_thimble1Take(inst)
 	if self == inst then
 		wcInputM.thimble1Take(self)
 	end
 end
 
 
-function def:uiCall_thimble1Release(inst)
+function def:evt_thimble1Release(inst)
 	if self == inst then
 		wcInputM.thimble1Release(self)
 	end
 end
 
 
-function def:uiCall_textInput(inst, text)
+function def:evt_textInput(inst, text)
 	if self == inst then
 		wcInputM.textInputLogic(self, text)
 	end
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
+function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == inst then
 		return wcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	end
 end
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	editWid.updateCaretBlink(self, dt)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -279,12 +279,12 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		-- Destroy pop-up menu if it exists in reference to this widget.
 		local root = self:nodeGetRoot()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
-			root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+			root:eventSend("rootCall_destroyPopUp", self, "concluded")
 		end
 
 		widShared.removeViewports(self, 2)

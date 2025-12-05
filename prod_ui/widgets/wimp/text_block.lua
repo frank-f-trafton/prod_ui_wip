@@ -36,13 +36,13 @@ def.wid_buttonAction3 = _openURL
 def.setEnabled = wcButton.setEnabled
 
 
-def.uiCall_pointerHoverOn = wcButton.uiCall_pointerHoverOn
-def.uiCall_pointerHoverOff = wcButton.uiCall_pointerHoverOff
-def.uiCall_pointerPress = wcButton.uiCall_pointerPress
-def.uiCall_pointerRelease = wcButton.uiCall_pointerReleaseActivate
-def.uiCall_pointerUnpress = wcButton.uiCall_pointerUnpress
-def.uiCall_thimbleAction = wcButton.uiCall_thimbleAction
-def.uiCall_thimbleAction2 = wcButton.uiCall_thimbleAction2
+def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
+def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
+def.evt_pointerPress = wcButton.evt_pointerPress
+def.evt_pointerRelease = wcButton.evt_pointerReleaseActivate
+def.evt_pointerUnpress = wcButton.evt_pointerUnpress
+def.evt_thimbleAction = wcButton.evt_thimbleAction
+def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 
 
 function def:setFontID(id)
@@ -148,7 +148,7 @@ function def:getWrapping()
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = false
 	self.thimble_mode = 0
@@ -204,7 +204,7 @@ local function _determineTextDimensions(self, wrap_limit)
 end
 
 
-function def:uiCall_getSegmentLength(x_axis, cross_length)
+function def:evt_getSegmentLength(x_axis, cross_length)
 	if not x_axis and self.auto_size == "v" then
 		_determineTextDimensions(self, cross_length)
 		local border = self.skin.box.border
@@ -213,7 +213,7 @@ function def:uiCall_getSegmentLength(x_axis, cross_length)
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- Viewport #1 is the text bounding box. It may exceed the widget's dimensions, depending on the text
 	-- and auto_size mode.
 	-- Viewport #2 is the border.
@@ -241,7 +241,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 2)
 	end

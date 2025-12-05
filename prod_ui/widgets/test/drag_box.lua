@@ -13,7 +13,7 @@ function def:wid_dragAction()
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 0
@@ -43,7 +43,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = true
@@ -52,7 +52,7 @@ function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		if self.enabled then
 			self.hovered = false
@@ -61,8 +61,7 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			if button == 1 then
@@ -84,7 +83,7 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
+function def:cpt_mouseMoved(x, y, dx, dy, istouch)
 	-- Update mouse position
 	self.context.mouse_x = x
 	self.context.mouse_y = y
@@ -106,7 +105,7 @@ function def:uiCap_mouseMoved(x, y, dx, dy, istouch)
 end
 
 
-function def:uiCap_mouseReleased(x, y, button, istouch, presses)
+function def:cpt_mouseReleased(x, y, button, istouch, presses)
 	if button == 1 then
 		self.context.current_pressed = false
 		self.context.mouse_pressed_button = false

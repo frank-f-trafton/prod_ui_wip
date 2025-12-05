@@ -23,7 +23,7 @@ local def = {
 def.setLabel = wcLabel.widSetLabel
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 
 	widShared.setupViewports(self, 1)
@@ -40,7 +40,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	local vp = self.vp
 
 	vp:set(0, 0, self.w, self.h)
@@ -52,7 +52,7 @@ function def:uiCall_reshapePre()
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		widShared.removeViewports(self, 1)
 	end

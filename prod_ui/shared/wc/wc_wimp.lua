@@ -60,7 +60,7 @@ function wcWimp.makePopUpMenu(self, menu_def, x, y)
 
 	pop_up:menuSetDefaultSelection()
 
-	root:sendEvent("rootCall_assignPopUp", self, pop_up)
+	root:eventSend("rootCall_assignPopUp", self, pop_up)
 
 	local do_block
 	if root.context.settings then
@@ -83,7 +83,7 @@ function wcWimp.assignPopUp(self, pop_up)
 
 	pop_up.wid_ref = self
 
-	root:sendEvent("rootCall_assignPopUp", self, pop_up)
+	root:eventSend("rootCall_assignPopUp", self, pop_up)
 end
 
 
@@ -92,7 +92,7 @@ function wcWimp.checkDestroyPopUp(self)
 	local root = self:nodeGetRoot()
 
 	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
-		root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+		root:eventSend("rootCall_destroyPopUp", self, "concluded")
 	end
 end
 

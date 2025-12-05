@@ -1239,7 +1239,7 @@ function wcMenu.markItemsCursorMode(self, old_index)
 end
 
 
--- For uiCall_pointerPress().
+-- For evt_pointerPress().
 function wcMenu.checkItemIntersect(self, mx, my, button)
 	-- Check for the cursor intersecting with a clickable item.
 	local item_i, item_t = self:getItemAtPoint(mx, my, math.max(1, self.MN_items_first), math.min(#self.MN_items, self.MN_items_last))
@@ -1252,7 +1252,7 @@ function wcMenu.checkItemIntersect(self, mx, my, button)
 end
 
 
--- For uiCall_pointerPress().
+-- For evt_pointerPress().
 function wcMenu.pointerPressButton1(self, item_t, old_index)
 	if self.MN_mark_mode == "toggle" then
 		item_t.marked = not item_t.marked
@@ -1318,7 +1318,7 @@ function wcMenu.dragDropReleaseLogic(self)
 end
 
 
--- Implements click-and-drag behavior for uiCall_pointerDrag().
+-- Implements click-and-drag behavior for evt_pointerDrag().
 function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	-- Confirm 'self.press_busy == "menu-drag"' before calling.
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
@@ -1343,7 +1343,7 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 
 			-- XXX: cursor, icon or render callback...?
 
-			self:bubbleEvent("rootCall_setDragAndDropState", self, drop_state)
+			self:eventBubble("rootCall_setDragAndDropState", self, drop_state)
 		end
 	else
 		-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.

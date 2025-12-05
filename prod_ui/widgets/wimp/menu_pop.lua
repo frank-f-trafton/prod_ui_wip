@@ -200,7 +200,7 @@ local function activateCommand(client, item)
 	end
 
 	local root = client:nodeGetRoot()
-	root:sendEvent("rootCall_destroyPopUp", client, "concluded")
+	root:eventSend("rootCall_destroyPopUp", client, "concluded")
 end
 
 
@@ -458,7 +458,7 @@ function def:menuChangeCleanup()
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 2
@@ -506,7 +506,7 @@ function def:uiCall_initialize()
 end
 
 
-function def:uiCall_reshapePre()
+function def:evt_reshapePre()
 	-- vp - viewport area
 	-- vp2 - reserved for separating scroll bars (etc.) from content
 
@@ -556,7 +556,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
+function def:evt_keyPressed(inst, key, scancode, isrepeat)
 	if self == inst then
 		local root = self:nodeGetRoot()
 
@@ -572,7 +572,7 @@ function def:uiCall_keyPressed(inst, key, scancode, isrepeat)
 			if not self["prev"] or (self.wid_ref and self.wid_ref == self["prev"]) then
 				local wid_ref = self.wid_ref
 
-				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+				root:eventSend("rootCall_destroyPopUp", self, "concluded")
 				-- NOTE: self is now dead.
 
 				return true
@@ -688,7 +688,7 @@ function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
 end
 
 
-function def:uiCall_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		self:tryTakeThimble2()
 	end
@@ -714,7 +714,7 @@ local function pressedAndThimbleHandoff(self, wid)
 end
 
 
-function def:uiCall_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local rolled = false
 
@@ -807,7 +807,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
@@ -852,7 +852,7 @@ function def:uiCall_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == inst then
 		self.MN_item_hover = false
 
@@ -864,14 +864,14 @@ function def:uiCall_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		local mx, my, ax, ay = self:getRelativePosition(x, y)
 
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
 				local root = self:nodeGetRoot()
-				root:sendEvent("rootCall_destroyPopUp", self, "concluded")
+				root:eventSend("rootCall_destroyPopUp", self, "concluded")
 				return
 			end
 		end
@@ -908,10 +908,10 @@ function def:uiCall_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
---function def:uiCall_pointerPressRepeat(inst, x, y, button, istouch, reps)
+--function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 
 
-function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
+function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 	if self == inst then
 		if button == self.context.mouse_pressed_button then
 			self.press_busy = false
@@ -947,7 +947,7 @@ function def:uiCall_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:uiCall_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(inst, x, y)
 	if self == inst then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
@@ -964,7 +964,7 @@ function def:uiCall_pointerWheel(inst, x, y)
 end
 
 
-function def:uiCall_update(dt)
+function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 
 	local scr_x_old, scr_y_old = self.scr_x, self.scr_y
@@ -1032,7 +1032,7 @@ function def:uiCall_update(dt)
 end
 
 
-function def:uiCall_destroy(inst)
+function def:evt_destroy(inst)
 	if self == inst then
 		-- If this widget is part of a chain and currently holds the context pressed and/or thimble state,
 		-- try to transfer it back to the previous menu in the chain.

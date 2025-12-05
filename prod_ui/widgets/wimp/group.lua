@@ -33,7 +33,7 @@ function def:setText(text)
 end
 
 
-function def:uiCall_initialize()
+function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 
