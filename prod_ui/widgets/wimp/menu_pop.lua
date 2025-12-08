@@ -200,7 +200,7 @@ local function activateCommand(client, item)
 	end
 
 	local root = client:nodeGetRoot()
-	root:eventSend("rootCall_destroyPopUp", client, "concluded")
+	root:destroyPopUp("concluded")
 end
 
 
@@ -572,7 +572,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 			if not self["prev"] or (self.wid_ref and self.wid_ref == self["prev"]) then
 				local wid_ref = self.wid_ref
 
-				root:eventSend("rootCall_destroyPopUp", self, "concluded")
+				root:destroyPopUp("concluded")
 				-- NOTE: self is now dead.
 
 				return true
@@ -871,7 +871,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
 				local root = self:nodeGetRoot()
-				root:eventSend("rootCall_destroyPopUp", self, "concluded")
+				root:destroyPopUp("concluded")
 				return
 			end
 		end

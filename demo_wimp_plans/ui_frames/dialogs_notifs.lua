@@ -8,7 +8,7 @@ local demoShared = require("demo_shared")
 local function _makeFrameBlock2(self)
 	local root = self:nodeGetRoot()
 	local frame, dialog
-	frame = demoShared.getUIFrame(self)
+	frame = self:getUIFrame()
 
 	if frame then
 		dialog = root:newWindowFrame()
@@ -30,7 +30,7 @@ This Window Frame should block interaction with the UI Frame that invoked it, un
 		button_close.h = 32
 		button_close:setLabel("All right, close it")
 		button_close.wid_buttonAction = function(self)
-			self:eventBubble("frameCall_close", true)
+			self:getUIFrame():closeFrame(true)
 		end
 
 		dialog:center(true, true)
@@ -55,7 +55,7 @@ end
 local function _makeFrameBlock1(self)
 	local root = self:nodeGetRoot()
 	local frame, dialog
-	frame = demoShared.getUIFrame(self)
+	frame = self:getUIFrame()
 
 	if frame then
 		dialog = root:newWindowFrame()
@@ -136,7 +136,7 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 		button_quote.str_tool_tip = "Click for an inspiring quote."
 
 		button_quote.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if not frame then
 				print("Demo Error: frame not found")
 			else

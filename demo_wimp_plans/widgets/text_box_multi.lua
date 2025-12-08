@@ -135,11 +135,11 @@ function plan.make(panel)
 		end
 	end
 
-	local ui_frame = assert(demoShared.getUIFrame(panel), "no UI Frame to hook into.")
+	local ui_frame = assert(panel:getUIFrame(), "no UI Frame to hook into.")
 
 	table.insert(ui_frame.KH_trickle_key_pressed, hook_pressed)
 	panel.userDestroy = function(self)
-		local ui_frame = demoShared.getUIFrame(panel)
+		local ui_frame = panel:getUIFrame()
 		if ui_frame then
 			pTable.removeElement(ui_frame.KH_trickle_key_pressed, hook_pressed)
 		end

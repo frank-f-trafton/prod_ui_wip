@@ -306,7 +306,7 @@ function def:evt_windowResize(w, h)
 end
 
 
-function def:rootCall_getFrameOrderID()
+function def:dispenseFrameOrderID()
 	self.frame_order_counter = self.frame_order_counter + 1
 	return self.frame_order_counter
 end
@@ -393,7 +393,7 @@ function def:setSelectedFrame(targ, set_new_order)
 			wcUIFrame.tryUnbankingThimble1(targ)
 
 			if set_new_order then
-				targ.order_id = self:rootCall_getFrameOrderID()
+				targ.order_id = self:dispenseFrameOrderID()
 			end
 		end
 	end
@@ -526,11 +526,10 @@ end
 
 
 --- Doctor the context 'current_pressed' field. Intended for use with pop-up menus in some special cases.
--- @param targ The invoking widget.
 -- @param new_pressed The widget that will be assigned to 'current_pressed' if it meets the criteria.
 -- @param press_busy_code If truthy, and we go through with the change, assign this value to 'new_pressed.press_busy'.
-function def:rootCall_doctorCurrentPressed(targ, new_pressed, press_busy_code)
-	--print("rootCall_doctorCurrentPressed", targ, new_pressed, press_busy_code, debug.traceback())
+function def:doctorCurrentPressed(new_pressed, press_busy_code)
+	--print("doctorCurrentPressed", new_pressed, press_busy_code, debug.traceback())
 
 	-- If this was the result of a click action, doctor the current-pressed state
 	-- to reference the menu, not the clicked widget.
@@ -547,10 +546,10 @@ end
 
 
 --- Set a widget as the current pop-up, destroying any existing pop-up chain first.
--- @param targ The event invoker.
+-- @param inst The event invoker.
 -- @param pop_up The widget to assign as a pop-up.
-function def:rootCall_assignPopUp(targ, pop_up)
-	--print("rootCall_assignPopUp", targ, pop_up, debug.traceback())
+function def:assignPopUp(inst, pop_up)
+	--print("assignPopUp", inst, pop_up, debug.traceback())
 
 	-- Caller should create and initialize the widget before attaching it to the root here.
 
@@ -560,7 +559,7 @@ function def:rootCall_assignPopUp(targ, pop_up)
 	end
 
 	-- If invoking widget is part of a selectable Window Frame, then bring it to the front.
-	local frame = targ:nodeFindKeyAscending(true, "frame_type", "window")
+	local frame = inst:nodeFindKeyAscending(true, "frame_type", "window")
 	if frame and frame.frame_is_selectable then
 		self:setSelectedFrame(frame, true)
 	end
@@ -572,8 +571,8 @@ function def:rootCall_assignPopUp(targ, pop_up)
 end
 
 
-function def:rootCall_destroyPopUp(targ, reason_code)
-	--print("rootCall_destroyPopUp", targ, self.pop_up_menu, reason_code, debug.traceback())
+function def:destroyPopUp(reason_code)
+	--print("destroyPopUp", self.pop_up_menu, reason_code, debug.traceback())
 
 	if self.pop_up_menu then
 		clearPopUp(self, reason_code)
@@ -581,31 +580,31 @@ function def:rootCall_destroyPopUp(targ, reason_code)
 end
 
 
-function def:rootCall_setModalFrame(targ)
-	uiAssert.type(1, targ, "table")
+function def:setModalFrame(frame)
+	uiAssert.type(1, frame, "table")
 
-	if targ.frame_type ~= "window" then
+	if frame.frame_type ~= "window" then
 		error("only Window Frames can be assigned as modal.")
 
-	elseif targ.workspace then
+	elseif frame.workspace then
 		error("Window Frames that are associated with a Workspace cannot be assigned as modal.")
 	end
 
 	for i, child in ipairs(self.modals) do
-		if child == targ then
+		if child == frame then
 			error("this frame is already in the stack of modals.")
 		end
 	end
 
-	self.modals[#self.modals + 1] = targ
-	self.context.mouse_start = targ
+	self.modals[#self.modals + 1] = frame
+	self.context.mouse_start = frame
 end
 
 
-function def:rootCall_clearModalFrame(targ)
-	uiAssert.type(1, targ, "table")
+function def:clearModalFrame(frame)
+	uiAssert.type(1, frame, "table")
 
-	if self.modals[#self.modals] ~= targ then
+	if self.modals[#self.modals] ~= frame then
 		error("tried to clear the modal status of a frame that is not at the top of the 'modals' stack.")
 	end
 
@@ -614,8 +613,7 @@ function def:rootCall_clearModalFrame(targ)
 end
 
 
-function def:rootCall_setDragAndDropState(targ, drop_state)
-	uiAssert.type(1, targ, "table")
+function def:setDragAndDropState(drop_state)
 	uiAssert.type(2, drop_state, "table")
 
 	self.drop_state = drop_state

@@ -89,14 +89,13 @@ local function _makePopUpMenu(item, client, take_thimble, doctor_press, set_sele
 	local root = client:nodeGetRoot()
 
 	if client["next"] then
-		root:eventSend("rootCall_destroyPopUp", client)
+		root:destroyPopUp()
 	end
-
 
 	local pop_up = wcWimp.makePopUpMenu(client, item.pop_up_proto, p_x, p_y)
 
 	if doctor_press then
-		root:eventSend("rootCall_doctorCurrentPressed", client, pop_up, "menu-drag")
+		root:doctorCurrentPressed(pop_up, "menu-drag")
 	end
 
 	client["next"] = pop_up
@@ -119,7 +118,7 @@ end
 local function _destroyPopUpMenu(client, reason_code)
 	local root = client:nodeGetRoot()
 
-	root:eventSend("rootCall_destroyPopUp", client, reason_code)
+	root:destroyPopUp(reason_code)
 
 	client.last_open = false
 	client["next"] = false

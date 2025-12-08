@@ -168,7 +168,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	dialog:setScrollBars(false, false)
 
 
-	root:eventSend("rootCall_setModalFrame", dialog)
+	root:setModalFrame(dialog)
 
 
 	local text_block = dialog:addChild("wimp/text_block")
@@ -181,14 +181,14 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	local button_n = dialog:addChild("base/button")
 	button_n:setLabel("No")
 	button_n.wid_buttonAction = function(self)
-		self:eventBubble("frameCall_close", true)
+		self:getUIFrame():closeFrame(true)
 	end
 	button_n:geometrySetMode("segment", "left", 160)
 
 	local button_y = dialog:addChild("base/button")
 	button_y:setLabel("Yes")
 	button_y.wid_buttonAction = function(self)
-		self:eventBubble("frameCall_close", true)
+		self:getUIFrame():closeFrame(true)
 	end
 	button_y:geometrySetMode("segment", "right", 160)
 
@@ -217,20 +217,6 @@ function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
 	label:geometrySetMode("static", x, y, w, h)
 
 	return label
-end
-
-
--- Looks up the hierarchy for a UI Frame, starting at this widget.
--- @param self Any descendent of a UI Frame, or the UI Frame itself.
--- @return The UI Frame, or nil if no UI Frame was found.
-function demoShared.getUIFrame(self)
-	local wid = self
-	while wid do
-		if wid.frame_type then
-			return wid
-		end
-		wid = wid.parent
-	end
 end
 
 
