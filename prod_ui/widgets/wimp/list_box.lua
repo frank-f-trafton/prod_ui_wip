@@ -372,8 +372,8 @@ function def:cacheUpdate(refresh_dimensions)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
+	if self == targ then
 		local items = self.MN_items
 		local old_index = self.MN_index
 		local old_item = items[old_index]
@@ -409,8 +409,8 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
 		wcScrollBar.widgetProcessHover(self, mx, my)
@@ -438,16 +438,16 @@ function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 		self.MN_item_hover = false
 	end
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -511,22 +511,22 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
+function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
+	if self == targ then
 		wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst and self.press_busy == "menu-drag" then
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ and self.press_busy == "menu-drag" then
 		wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	end
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -536,8 +536,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
 
@@ -547,15 +547,15 @@ function def:evt_pointerWheel(inst, x, y)
 end
 
 
-function def:evt_pointerDragDestRelease(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerDragDestRelease(targ, x, y, button, istouch, presses)
+	if self == targ then
 		return wcMenu.dragDropReleaseLogic(self)
 	end
 end
 
 
-function def:evt_thimbleAction(inst, key, scancode, isrepeat)
-	if self == inst
+function def:evt_thimbleAction(targ, key, scancode, isrepeat)
+	if self == targ
 	and self.enabled
 	then
 		local index = self.MN_index
@@ -568,8 +568,8 @@ function def:evt_thimbleAction(inst, key, scancode, isrepeat)
 end
 
 
-function def:evt_thimbleAction2(inst, key, scancode, isrepeat)
-	if self == inst
+function def:evt_thimbleAction2(targ, key, scancode, isrepeat)
+	if self == targ
 	and self.enabled
 	then
 		local index = self.MN_index
@@ -625,8 +625,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 2)
 	end
 end

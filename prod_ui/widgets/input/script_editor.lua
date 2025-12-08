@@ -108,8 +108,8 @@ function def:evt_reshapePre()
 end
 
 
-function def:evt_pointerHover(inst, mx, my, dx, dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mx, my, dx, dy)
+	if self == targ then
 		mx, my = self:getRelativePosition(mx, my)
 
 		wcScrollBar.widgetProcessHover(self, mx, my)
@@ -123,8 +123,8 @@ function def:evt_pointerHover(inst, mx, my, dx, dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mx, my, dx, dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mx, my, dx, dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 
 		self.cursor_hover = nil
@@ -132,8 +132,8 @@ function def:evt_pointerHoverOff(inst, mx, my, dx, dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -168,8 +168,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
+function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- XXX style/config
 
@@ -179,8 +179,8 @@ function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			wcScrollBar.widgetClearPress(self)
 
@@ -190,8 +190,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			return true
 		end
@@ -199,43 +199,43 @@ function def:evt_pointerWheel(inst, x, y)
 end
 
 
-function def:evt_thimbleTopTake(inst)
-	if self == inst then
+function def:evt_thimbleTopTake(targ)
+	if self == targ then
 		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:evt_thimbleTopRelease(inst)
-	if self == inst then
+function def:evt_thimbleTopRelease(targ)
+	if self == targ then
 		love.keyboard.setTextInput(false)
 	end
 end
 
 
-function def:evt_thimble1Take(inst)
-	if self == inst then
+function def:evt_thimble1Take(targ)
+	if self == targ then
 		wcInputM.thimble1Take(self)
 	end
 end
 
 
-function def:evt_thimble1Release(inst)
-	if self == inst then
+function def:evt_thimble1Release(targ)
+	if self == targ then
 		wcInputM.thimble1Release(self)
 	end
 end
 
 
-function def:evt_textInput(inst, text)
-	if self == inst then
+function def:evt_textInput(targ, text)
+	if self == targ then
 		wcInputM.textInputLogic(self, text)
 	end
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
+	if self == targ then
 		return wcInputM.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	end
 end
@@ -281,8 +281,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		-- Destroy pop-up menu if it exists in reference to this widget.
 		local root = self:nodeGetRoot()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then

@@ -43,8 +43,8 @@ function def:evt_initialize()
 end
 
 
-function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOn(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = true
 		end
@@ -52,8 +52,8 @@ function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = false
 		end
@@ -61,8 +61,8 @@ function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == self.context.mouse_pressed_button then
 			if button == 1 then
 				self.pressed = true

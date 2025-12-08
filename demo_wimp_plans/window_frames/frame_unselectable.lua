@@ -6,8 +6,8 @@ local demoShared = require("demo_shared")
 local plan = {}
 
 
-local function _assertNoThimble(self, inst)
-	if self == inst then
+local function _assertNoThimble(self, targ)
+	if self == targ then
 		if self.context.thimble1 == self or self.context.thimble2 == self then
 			error("this widget should not be capable of holding the thimble.")
 		end

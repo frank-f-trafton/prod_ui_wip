@@ -606,7 +606,7 @@ end
 
 
 -- Menu bars cannot hold onto the thimble, so they don't get keyboard input events directly.
---function def:evt_keyPressed(inst, key, scancode, isrepeat)
+--function def:evt_keyPressed(targ, key, scancode, isrepeat)
 
 
 --- Sent from a pop-up menu that hasn't handled left/right input.
@@ -617,8 +617,8 @@ function def:widCall_keyPressedFallback(invoker, key, scancode, isrepeat)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local rolled = false
 
 		--print("self.state", self.state, "self.press_busy", self.press_busy)
@@ -692,8 +692,8 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local vp, vp2 = self.vp, self.vp2
 		local ax, ay = self:getAbsolutePosition()
 		mouse_x = mouse_x - ax
@@ -748,16 +748,16 @@ function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		self.MN_item_hover = false
 	end
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	--print("menu bar pointerPress", self, inst, x, y, button)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	--print("menu bar pointerPress", self, targ, x, y, button)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local vp, vp2 = self.vp, self.vp2
 			local ax, ay = self:getAbsolutePosition()
@@ -813,8 +813,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == self.context.mouse_pressed_button then
 			self.press_busy = false
 
@@ -886,8 +886,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		-- If a pop-up menu exists that references this widget, destroy it.
 		if self["next"] then
 			_destroyPopUpMenu(self, "concluded")

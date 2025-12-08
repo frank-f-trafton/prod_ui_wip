@@ -387,8 +387,8 @@ function def:evt_keyPressed(key, scancode, isrepeat)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local rolled = false
 
 		if self.press_busy == "menu-drag" then
@@ -418,8 +418,8 @@ function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
@@ -450,15 +450,15 @@ function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 	end
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		local mx, my, ax, ay = self:getRelativePosition(x, y)
 
 		if self.is_blocking_clicks then
@@ -500,15 +500,15 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
+function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
+	if self == targ then
 		wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and button == context.mouse_pressed_button
 	then
 		wcScrollBar.widgetClearPress(self)
@@ -531,8 +531,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
 		-- event should bubble up.
@@ -589,8 +589,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		self:_closeSelf(false)
 
 		widShared.removeViewports(self, 5)

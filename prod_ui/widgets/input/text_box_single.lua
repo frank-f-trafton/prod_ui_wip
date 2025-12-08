@@ -102,8 +102,8 @@ function def:evt_reshapePre()
 end
 
 
-function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOn(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = true
 			self.cursor_hover = self.skin.cursor_on
@@ -112,8 +112,8 @@ function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = false
 			self.cursor_hover = nil
@@ -122,8 +122,8 @@ function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -146,8 +146,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			self.press_busy = false
 		end
@@ -155,43 +155,43 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_thimbleTopTake(inst)
-	if self == inst then
+function def:evt_thimbleTopTake(targ)
+	if self == targ then
 		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:evt_thimbleTopRelease(inst)
-	if self == inst then
+function def:evt_thimbleTopRelease(targ)
+	if self == targ then
 		love.keyboard.setTextInput(false)
 	end
 end
 
 
-function def:evt_thimble1Take(inst)
-	if self == inst then
+function def:evt_thimble1Take(targ)
+	if self == targ then
 		wcInputS.thimble1Take(self)
 	end
 end
 
 
-function def:evt_thimble1Release(inst)
-	if self == inst then
+function def:evt_thimble1Release(targ)
+	if self == targ then
 		wcInputS.thimble1Release(self)
 	end
 end
 
 
-function def:evt_textInput(inst, text)
-	if self == inst then
+function def:evt_textInput(targ, text)
+	if self == targ then
 		return wcInputS.textInputLogic(self, text)
 	end
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
+	if self == targ then
 		if self.enabled then
 			if (scancode == "return" or scancode == "kpenter") and self:wid_action() then
 				return true
@@ -231,8 +231,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		wcWimp.checkDestroyPopUp(self)
 
 		widShared.removeViewports(self, 2)

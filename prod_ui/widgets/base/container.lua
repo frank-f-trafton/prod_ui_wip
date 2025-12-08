@@ -102,54 +102,54 @@ function def:evt_reshapePost()
 end
 
 
-function def.trickle:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	return wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		wcScrollBar.widgetProcessHover(self, mx, my)
 	end
 end
 
 
-function def.trickle:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	wcContainer.sashHoverOffLogic(self)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 	end
 end
 
 
-function def.trickle:evt_pointerPress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if wcContainer.sashPressLogic(self, x, y, button) then
 		return true
 	end
 end
 
 
-function def.trickle:evt_pointerDrag(inst, x, y, dx, dy)
+function def.trickle:evt_pointerDrag(targ, x, y, dx, dy)
 	if wcContainer.sashDragLogic(self, x, y) then
 		return true
 	end
 end
 
 
-function def.trickle:evt_pointerUnpress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if wcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		local handled = false
 
 		-- Check for pressing on scroll bar components.
@@ -176,8 +176,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
+function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
 
@@ -187,8 +187,8 @@ function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == 1 then
 			wcScrollBar.widgetClearPress(self)
 
@@ -198,7 +198,7 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
+function def:evt_pointerWheel(targ, x, y)
 	-- Catch wheel events from descendants that did not block it.
 	local caught = widShared.checkScrollWheelScroll(self, x, y)
 	wcScrollBar.updateScrollBarShapes(self)
@@ -210,11 +210,11 @@ end
 
 -- Catch focus step actions so that we can ensure the hosted widget is in view.
 -- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
-function def:evt_thimble1Take(inst, keep_in_view)
-	if inst ~= self then -- don't try to center the container itself
+function def:evt_thimble1Take(targ, keep_in_view)
+	if targ ~= self then -- don't try to center the container itself
 		if keep_in_view == "widget_in_view" then
 			local skin = self.skin
-			wcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
+			wcContainer.keepWidgetInView(self, targ, skin.in_view_pad_x, skin.in_view_pad_y)
 			wcScrollBar.updateScrollBarShapes(self)
 		end
 	end
@@ -235,8 +235,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 2)
 	end
 end

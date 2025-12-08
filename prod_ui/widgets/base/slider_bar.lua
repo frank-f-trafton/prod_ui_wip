@@ -135,8 +135,8 @@ function def:evt_reshapePre()
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if self.context.mouse_pressed_button == button then
 				if button <= 3 then
@@ -165,8 +165,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			if self.pressed then
 				if self.context.mouse_pressed_button == 1 then
@@ -179,8 +179,8 @@ function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			return wcSlider.checkKeyPress(self, key, scancode, isrepeat)
 		end
@@ -188,8 +188,8 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		if self.enabled then
 			return wcSlider.mouseWheelLogic(self, x, y)
 		end
@@ -197,8 +197,8 @@ function def:evt_pointerWheel(inst, x, y)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 2)
 	end
 end

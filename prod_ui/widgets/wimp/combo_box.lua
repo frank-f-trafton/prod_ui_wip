@@ -389,29 +389,29 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:evt_thimbleTopTake(inst)
-	if self == inst then
+function def:evt_thimbleTopTake(targ)
+	if self == targ then
 		love.keyboard.setTextInput(true)
 	end
 end
 
 
-function def:evt_thimbleTopRelease(inst)
-	if self == inst then
+function def:evt_thimbleTopRelease(targ)
+	if self == targ then
 		love.keyboard.setTextInput(false)
 	end
 end
 
 
-function def:evt_thimble1Take(inst)
-	if self == inst then
+function def:evt_thimble1Take(targ)
+	if self == targ then
 		wcInputS.thimble1Take(self)
 	end
 end
 
 
-function def:evt_thimble1Release(inst)
-	if self == inst then
+function def:evt_thimble1Release(targ)
+	if self == targ then
 		wcInputS.thimble1Release(self)
 
 		if self.wid_drawer then
@@ -424,8 +424,8 @@ function def:evt_thimble1Release(inst)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		-- Destroy pop-up menu (either kind) if it exists in reference to this widget.
 		wcWimp.checkDestroyPopUp(self)
 		--self:_closePopUpMenu(false)
@@ -436,8 +436,8 @@ function def:evt_destroy(inst)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
+	if self == targ then
 		-- Forward keyboard events to the pop-up menu.
 		if not self.wid_drawer then
 			local items = self.MN_items
@@ -469,8 +469,8 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 end
 
 
-function def:evt_textInput(inst, text)
-	if self == inst then
+function def:evt_textInput(targ, text)
+	if self == targ then
 		local old_line = self.LE.line
 		local rv = wcInputS.textInputLogic(self, text)
 		if old_line ~= self.LE.line then
@@ -481,8 +481,8 @@ function def:evt_textInput(inst, text)
 end
 
 
-function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst
+function def:evt_pointerHoverOn(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ
 	and self.enabled
 	then
 		self.hovered = true
@@ -490,8 +490,8 @@ function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ
 	and self.enabled
 	then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
@@ -505,8 +505,8 @@ function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = false
 			self.cursor_hover = nil
@@ -515,8 +515,8 @@ function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -554,7 +554,7 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	-- XXX: text manipulation stuff.
 
 	-- If the cursor overlaps the pop-up drawer while not overlapping the body,
@@ -576,8 +576,8 @@ function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			self.press_busy = false
 		end
@@ -585,8 +585,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		-- Cycle menu options if the drawer is closed and this widget has top thimble focus.
 		if not self.wid_drawer and self:hasTopThimble() then
 			local check_chosen = false

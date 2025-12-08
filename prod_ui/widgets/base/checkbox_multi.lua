@@ -86,8 +86,8 @@ function def:evt_reshapePre()
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 2)
 	end
 end

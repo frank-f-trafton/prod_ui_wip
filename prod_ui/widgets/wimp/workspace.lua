@@ -113,54 +113,54 @@ end
 def.trickle.evt_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
 
 
-function def.trickle:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	local skin = self.skin
 	return wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		wcScrollBar.widgetProcessHover(self, mx, my)
 	end
 end
 
 
-function def.trickle:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def.trickle:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	wcContainer.sashHoverOffLogic(self)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 	end
 end
 
 
-function def.trickle:evt_pointerDrag(inst, x, y, dx, dy)
+function def.trickle:evt_pointerDrag(targ, x, y, dx, dy)
 	if wcContainer.sashDragLogic(self, x, y) then
 		return true
 	end
 end
 
 
-function def.trickle:evt_pointerUnpress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if wcContainer.sashUnpressLogic(self) then
 		return true
 	end
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if wcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
 	local root = self:nodeGetRoot()
 
-	if self == inst then
+	if self == targ then
 		local handled = false
 
 		-- Check for pressing on scroll bar components.
@@ -180,8 +180,8 @@ end
 def.evt_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == 1 then
 			wcScrollBar.widgetClearPress(self)
 
@@ -216,8 +216,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		-- Destroy any Window Frames that are associated with this Workspace.
 		local root = self.context.root
 		for i, wid_g2 in ipairs(root.nodes) do
