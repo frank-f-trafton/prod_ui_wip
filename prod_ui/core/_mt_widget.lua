@@ -949,6 +949,13 @@ function _mt_widget:reorder(var)
 end
 
 
+-- Looks for a UI Frame, starting at this widget and traveling upwards. If there is no UI Frame, raises an error.
+-- @return The UI Frame, or nil if not found.
+function _mt_widget:getUIFrame()
+	return self:nodeFindKeyAscending(true, "frame_type", nil)
+end
+
+
 --- Sets the widget's tag string.
 -- @param tag (string) The tag to assign.
 -- @return self (for chaining).

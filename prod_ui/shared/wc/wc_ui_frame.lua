@@ -95,7 +95,7 @@ function wcUIFrame.instanceSetup(self, unselectable)
 	self.frame_hidden = false
 
 	-- Helps with ctrl+tabbing through UI Frames.
-	self.order_id = self.context.root:rootCall_getFrameOrderID()
+	self.order_id = self.context.root:dispenseFrameOrderID()
 end
 
 

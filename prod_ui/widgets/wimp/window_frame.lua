@@ -482,12 +482,6 @@ function def:evt_initialize(unselectable, view_level)
 end
 
 
-function def:frameCall_close(force)
-	self:closeFrame(force)
-	return true
-end
-
-
 def.trickle.evt_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
 
 
@@ -955,7 +949,7 @@ function def:evt_destroy(targ)
 		-- Clean up modal level, if applicable.
 		local root = self:nodeGetRoot()
 		if self == root.modals[#root.modals] then
-			root:eventSend("rootCall_clearModalFrame", self)
+			root:clearModalFrame(self)
 		end
 
 		widShared.removeViewports(self, 6)

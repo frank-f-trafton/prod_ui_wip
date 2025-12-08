@@ -284,7 +284,7 @@ function def:evt_destroy(targ)
 		-- Destroy pop-up menu if it exists in reference to this widget.
 		local root = self:nodeGetRoot()
 		if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
-			root:eventSend("rootCall_destroyPopUp", self, "concluded")
+			root:destroyPopUp("concluded")
 		end
 
 		widShared.removeViewports(self, 2)

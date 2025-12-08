@@ -366,7 +366,7 @@ function wcInputM.mousePressLogic(self, button, mx, my, had_thimble1_before)
 
 		local ax, ay = self:getAbsolutePosition()
 		local pop_up = wcWimp.makePopUpMenu(self, self.pop_up_proto, ax + mx, ay + my)
-		root:eventSend("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+		root:doctorCurrentPressed(pop_up, "menu-drag")
 
 		pop_up:tryTakeThimble2()
 

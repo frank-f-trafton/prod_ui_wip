@@ -16,23 +16,18 @@ function wcWimp.async_widget_destroy(self)
 end
 
 
---- Destroy the UI Frame that this widget belongs to. If called in update, the removal will be handled as an async action after the update loop is complete.
+--- Destroys the UI Frame that this widget belongs to. If called in update, the removal will be handled as an async
+--	action after the update loop is complete. If the widget is not within a UI Frame, then nothing happens.
 -- @param self Any widget belonging to the current UI Frame, or the UI Frame itself.
 -- @return Nothing.
 function wcWimp.closeFrame(self)
-	local wid = self
-	while wid do
-		if wid.frame_type then
-			if not self.context:isLocked() then
-				wid:destroy()
-			else
-				self.context:appendAsyncAction(wid, wcWimp.async_widget_destroy, false)
-			end
-
-			return
+	local frame = self:getUIFrame()
+	if frame then
+		if not self.context:isLocked() then
+			frame:destroy()
+		else
+			self.context:appendAsyncAction(frame, wcWimp.async_widget_destroy, false)
 		end
-
-		wid = wid.parent
 	end
 end
 
@@ -60,7 +55,7 @@ function wcWimp.makePopUpMenu(self, menu_def, x, y)
 
 	pop_up:menuSetDefaultSelection()
 
-	root:eventSend("rootCall_assignPopUp", self, pop_up)
+	root:assignPopUp(self, pop_up)
 
 	local do_block
 	if root.context.settings then
@@ -83,7 +78,7 @@ function wcWimp.assignPopUp(self, pop_up)
 
 	pop_up.wid_ref = self
 
-	root:eventSend("rootCall_assignPopUp", self, pop_up)
+	root:assignPopUp(self, pop_up)
 end
 
 
@@ -92,7 +87,7 @@ function wcWimp.checkDestroyPopUp(self)
 	local root = self:nodeGetRoot()
 
 	if root.pop_up_menu and root.pop_up_menu.wid_ref == self then
-		root:eventSend("rootCall_destroyPopUp", self, "concluded")
+		root:destroyPopUp("concluded")
 	end
 end
 

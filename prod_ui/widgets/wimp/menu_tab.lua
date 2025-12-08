@@ -645,7 +645,7 @@ local function invokePopUpMenu(self, x, y)
 	local pop_up = wcWimp.makePopUpMenu(self, proto_menu, x, y)
 
 	local root = self:nodeGetRoot()
-	root:eventSend("rootCall_doctorCurrentPressed", self, pop_up, "menu-drag")
+	root:doctorCurrentPressed(pop_up, "menu-drag")
 
 	pop_up:tryTakeThimble2()
 end

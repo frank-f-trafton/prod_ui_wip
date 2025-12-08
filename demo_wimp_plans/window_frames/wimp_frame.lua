@@ -31,7 +31,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 
 		local r_action = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setHeaderSize(self.usr_header_size)
 			end
@@ -99,7 +99,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Resizable frame", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setResizable(self.checked)
 			end
@@ -118,7 +118,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame.DEBUG_show_resize_range = not not self.checked
 			end
@@ -138,7 +138,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Show 'Close' control", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setCloseControlVisibility(self.checked)
 			end
@@ -158,7 +158,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Enable 'Close'", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setCloseEnabled(self.checked)
 			end
@@ -178,7 +178,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Show 'Maximize' control", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setMaximizeControlVisibility(self.checked)
 			end
@@ -198,7 +198,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Enable 'Maximize'", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setMaximizeEnabled(self.checked)
 			end
@@ -218,7 +218,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Visible header", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setHeaderVisible(self.checked)
 			end
@@ -238,7 +238,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Draggable header", "single-ul")
 
 		checkbox.wid_buttonAction = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:setDraggable(self.checked)
 			end
@@ -260,7 +260,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 
 		local r_action = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame:writeSetting("header_button_side", self.usr_button_side)
 				frame:reshape()
@@ -315,7 +315,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 
 		local r_action = function(self)
-			local frame = demoShared.getUIFrame(self)
+			local frame = self:getUIFrame()
 			if frame then
 				frame.skin.header_text_align_h = self.usr_text_align_h
 				frame:reshape()
@@ -383,7 +383,7 @@ function plan.makeWindowFrame(root)
 
 		btn:setLabel("Close (forcefully)")
 		btn.wid_buttonAction = function(self)
-			self:eventBubble("frameCall_close", true)
+			self:getUIFrame():closeFrame(true)
 		end
 		yy = yy + hh
 	end

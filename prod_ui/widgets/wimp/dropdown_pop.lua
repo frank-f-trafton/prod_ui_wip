@@ -128,7 +128,7 @@ function def:_closeSelf(update_chosen)
 
 		local root = self:nodeGetRoot()
 		if root.pop_up_menu == self then
-			root:eventSend("rootCall_destroyPopUp", self, "concluded")
+			root:destroyPopUp("concluded")
 		end
 	end
 end
@@ -464,7 +464,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 		if self.is_blocking_clicks then
 			if not (mx >= 0 and my >= 0 and mx < self.w and my < self.h) then
 				local root = self:nodeGetRoot()
-				root:eventSend("rootCall_destroyPopUp", self, "concluded")
+				root:destroyPopUp("concluded")
 				return
 			end
 		end

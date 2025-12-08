@@ -1343,7 +1343,7 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 
 			-- XXX: cursor, icon or render callback...?
 
-			self:eventBubble("rootCall_setDragAndDropState", self, drop_state)
+			context.root:setDragAndDropState(drop_state)
 		end
 	else
 		-- Need to test the full range of items because the mouse can drag outside the bounds of the viewport.
