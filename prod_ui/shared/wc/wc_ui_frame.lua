@@ -153,21 +153,21 @@ end
 
 
 -- @param keep_in_view When true, the container scrolls to ensure that the widget is visible within the viewport.
-function wcUIFrame.logic_thimble1Take(self, inst, keep_in_view)
-	--print("thimbleTake", self.id, inst.id)
-	self.banked_thimble1 = inst
+function wcUIFrame.logic_thimble1Take(self, targ, keep_in_view)
+	--print("thimbleTake", self.id, targ.id)
+	self.banked_thimble1 = targ
 
-	if inst ~= self then -- don't try to center the UI Frame itself
+	if targ ~= self then -- don't try to center the UI Frame itself
 		if keep_in_view == "widget_in_view" then
 			local skin = self.skin
-			wcContainer.keepWidgetInView(self, inst, skin.in_view_pad_x, skin.in_view_pad_y)
+			wcContainer.keepWidgetInView(self, targ, skin.in_view_pad_x, skin.in_view_pad_y)
 			wcScrollBar.updateScrollBarShapes(self)
 		end
 	end
 end
 
 
-function wcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
+function wcUIFrame.logic_keyPressed(self, targ, key, scancode, isrepeat)
 	if self.ref_block_next then
 		return
 	end
@@ -178,7 +178,7 @@ function wcUIFrame.logic_keyPressed(self, inst, key, scancode, isrepeat)
 end
 
 
-function wcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
+function wcUIFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat)
 	if self.ref_block_next then
 		return
 	end
@@ -189,7 +189,7 @@ function wcUIFrame.logic_trickleKeyPressed(self, inst, key, scancode, isrepeat)
 end
 
 
-function wcUIFrame.logic_keyReleased(self, inst, key, scancode)
+function wcUIFrame.logic_keyReleased(self, targ, key, scancode)
 	if self.ref_block_next then
 		return
 	end
@@ -200,7 +200,7 @@ function wcUIFrame.logic_keyReleased(self, inst, key, scancode)
 end
 
 
-function wcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
+function wcUIFrame.logic_trickleKeyReleased(self, targ, key, scancode)
 	if self.ref_block_next then
 		return
 	end
@@ -211,14 +211,14 @@ function wcUIFrame.logic_trickleKeyReleased(self, inst, key, scancode)
 end
 
 
-function wcUIFrame.logic_trickleTextInput(self, inst, text)
+function wcUIFrame.logic_trickleTextInput(self, targ, text)
 	if self.ref_block_next then
 		return
 	end
 end
 
 
-function wcUIFrame.logic_tricklePointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcUIFrame.logic_tricklePointerHoverOn(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self.ref_block_next then
 		self.context.current_hover = false
 		return true
@@ -226,7 +226,7 @@ function wcUIFrame.logic_tricklePointerHoverOn(self, inst, mouse_x, mouse_y, mou
 end
 
 
-function wcUIFrame.logic_tricklePointerPress(self, inst, x, y, button, istouch, presses)
+function wcUIFrame.logic_tricklePointerPress(self, targ, x, y, button, istouch, presses)
 	if self.ref_block_next then
 		local block_last = wcUIFrame.getLastBlockingFrame(self)
 
@@ -261,8 +261,8 @@ function wcUIFrame.pointerPressLogicFirst(self)
 end
 
 
-function wcUIFrame.logic_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
-	if self == inst then
+function wcUIFrame.logic_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
+	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = 24 -- [XXX 2] style/config
 
@@ -272,14 +272,14 @@ function wcUIFrame.logic_pointerPressRepeat(self, inst, x, y, button, istouch, r
 end
 
 
-function wcUIFrame.logic_tricklePointerWheel(self, inst, x, y)
+function wcUIFrame.logic_tricklePointerWheel(self, targ, x, y)
 	if self.ref_block_next then
 		return
 	end
 end
 
 
-function wcUIFrame.logic_pointerWheel(self, inst, x, y)
+function wcUIFrame.logic_pointerWheel(self, targ, x, y)
 	if self.ref_block_next then
 		return
 	end

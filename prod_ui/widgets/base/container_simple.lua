@@ -26,8 +26,8 @@ function def:evt_initialize()
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == self.context.mouse_pressed_button then
 			if button <= 3 then
 				self:tryTakeThimble1()

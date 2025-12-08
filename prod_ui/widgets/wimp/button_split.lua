@@ -51,8 +51,8 @@ function def:setAuxEnabled(enabled)
 end
 
 
-function def:evt_pointerHover(inst, x, y, dx, dy)
-	if self == inst then
+function def:evt_pointerHover(targ, x, y, dx, dy)
+	if self == targ then
 		if self.enabled then
 			if self.aux_pressed then
 				self.hovered = false
@@ -75,8 +75,8 @@ function def:evt_pointerHover(inst, x, y, dx, dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, x, y, dx, dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, x, y, dx, dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = false
 			self.cursor_hover = nil
@@ -85,8 +85,8 @@ function def:evt_pointerHoverOff(inst, x, y, dx, dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
@@ -133,8 +133,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -149,8 +149,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerRelease(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerRelease(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then

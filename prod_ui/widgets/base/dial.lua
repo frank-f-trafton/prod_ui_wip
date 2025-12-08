@@ -215,8 +215,8 @@ function def:evt_reshapePre()
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and self.context.mouse_pressed_button == button then
 		if button <= 3 then
@@ -240,8 +240,8 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ
 	and self.enabled
 	and self.press_busy == "adjusting"
 	and self.context.mouse_pressed_button == 1
@@ -258,8 +258,8 @@ function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and button == 1
 	and button == self.context.mouse_pressed_button
 	then
@@ -268,8 +268,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			local additive = 1
 			local dir
@@ -308,8 +308,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 2)
 	end
 end

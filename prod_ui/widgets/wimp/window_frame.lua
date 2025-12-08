@@ -507,8 +507,8 @@ local function _pointInSensor(sen, x, y)
 end
 
 
-function def.trickle:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def.trickle:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		-- Because this widget accepts hover events outside of its boundaries (for resizing), we need to confirm
 		-- that the mouse cursor actually is within the Window Frame area before checking scroll bar hover.
@@ -551,8 +551,8 @@ function def.trickle:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 
 		self.hover_zone = false
@@ -571,12 +571,12 @@ def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
 def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if wcUIFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
-	if self == inst then
+	if self == targ then
 		local mx, my = self:getRelativePosition(x, y)
 		local handled = false
 
@@ -679,8 +679,8 @@ end
 def.evt_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
 
 
-function def.trickle:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def.trickle:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.press_busy == "resize" then
 			wcWindowFrame.mouseMovedResize(self, self.adjust_axis_x, self.adjust_axis_y, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
@@ -695,8 +695,8 @@ function def.trickle:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def.trickle:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def.trickle:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == 1 and self.context.mouse_pressed_button == button then
 			if self.press_busy == "resize" or self.press_busy == "drag" then
 				-- Hack: clamp frame to parent. This isn't handled while resizing because the
@@ -933,8 +933,8 @@ function def:evt_reshapePost()
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		-- Clean up any existing frame-blocking connection. Note that this function will raise an error if another frame
 		-- is still blocking this frame.
 		if self.ref_block_prev then

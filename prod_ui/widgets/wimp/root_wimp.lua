@@ -148,14 +148,14 @@ local function clearPopUp(self, reason_code)
 end
 
 
-function def.trickle:evt_pointerPress(inst, x, y, button, istouch, presses)
+function def.trickle:evt_pointerPress(targ, x, y, button, istouch, presses)
 	-- Destroy pop-up menu when clicking outside of its lateral chain.
 	local cur_pres = self.context.current_pressed
 	local pop_up = self.pop_up_menu
-	local inst_in_pop_up
+	local targ_in_pop_up
 	if pop_up then
-		inst_in_pop_up = pList2.nodeInList(pop_up, inst)
-		if not inst_in_pop_up then
+		targ_in_pop_up = pList2.nodeInList(pop_up, targ)
+		if not targ_in_pop_up then
 			clearPopUp(self, "concluded")
 		end
 	end
@@ -169,7 +169,7 @@ function def.trickle:evt_pointerPress(inst, x, y, button, istouch, presses)
 		if modal_wid.frame_type and self.selected_frame ~= modal_wid then
 			self:setSelectedFrame(modal_wid, true)
 		end
-		if not inst:nodeIsInLineage(modal_wid) and not inst_in_pop_up then
+		if not targ:nodeIsInLineage(modal_wid) and not targ_in_pop_up then
 			self.context.current_pressed = false
 			return true
 		end
@@ -177,11 +177,11 @@ function def.trickle:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	local context = self.context
 
 	-- User clicked on the root widget (whether directly or because other widgets aren't clickable).
-	if self == inst then
+	if self == targ then
 		if button <= 3 then
 			-- Clicking on "nothing" should release the thimbles and deselect any frames.
 			context:releaseThimbles()
@@ -191,13 +191,13 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerDragDestRelease(inst, x, y, button, istouch, presses)
+function def:evt_pointerDragDestRelease(targ, x, y, button, istouch, presses)
 	-- DropState cleanup
 	self.drop_state = false
 end
 
 
-function def.trickle:evt_keyPressed(inst, key, scancode, isrepeat)
+function def.trickle:evt_keyPressed(targ, key, scancode, isrepeat)
 	if #self.modals == 0 then
 		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
 			return true
@@ -206,7 +206,7 @@ function def.trickle:evt_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
+function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
 	if #self.modals == 0 then
 		if self.KH_key_pressed(self, key, scancode, isrepeat) then
 			return true
@@ -276,7 +276,7 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat, hot_key, hot_scan)
 end
 
 
-function def:evt_keyReleased(inst, key, scancode)
+function def:evt_keyReleased(targ, key, scancode)
 	if #self.modals == 0 then
 		if self.KH_key_released(self, key, scancode) then
 			return true
@@ -285,7 +285,7 @@ function def:evt_keyReleased(inst, key, scancode)
 end
 
 
-function def.trickle:evt_keyReleased(inst, key, scancode)
+function def.trickle:evt_keyReleased(targ, key, scancode)
 	if #self.modals == 0 then
 		if self.KH_trickle_key_released(self, key, scancode) then
 			return true
@@ -312,20 +312,20 @@ function def:rootCall_getFrameOrderID()
 end
 
 
-function def:setActiveWorkspace(inst)
-	if inst and inst.frame_type ~= "workspace" then
+function def:setActiveWorkspace(targ)
+	if targ and targ.frame_type ~= "workspace" then
 		error("argument #1: expected a Workspace widget or false.")
 	end
 
-	self.workspace = inst or false
-	if inst then
-		inst.sort_id = 2
+	self.workspace = targ or false
+	if targ then
+		targ.sort_id = 2
 	end
 
-	inst:reshape()
+	targ:reshape()
 
 	for i, wid_g2 in ipairs(self.nodes) do
-		if wid_g2 ~= inst then
+		if wid_g2 ~= targ then
 			local frame_type = wid_g2.frame_type
 			if frame_type == "workspace" then
 				wid_g2.sort_id = 1
@@ -360,40 +360,40 @@ end
 --- Select a UI Frame to have root focus.
 -- @param set_new_order When true, assign a new top order_id to the UI Frame. This may be desired when clicking on a
 --	UI Frame, and not when cycling through them with ctrl+tab or ctrl+shift+tab.
-function def:setSelectedFrame(inst, set_new_order)
-	if inst then
-		if inst.parent ~= self then
+function def:setSelectedFrame(targ, set_new_order)
+	if targ then
+		if targ.parent ~= self then
 			error("can only select among children of the root widget.")
 
-		elseif not inst.frame_is_selectable then
+		elseif not targ.frame_is_selectable then
 			error("cannot select this G2 widget.")
 
-		elseif inst.frame_type == "window" and inst.workspace and inst.workspace ~= self.context.root.workspace then
+		elseif targ.frame_type == "window" and targ.workspace and targ.workspace ~= self.context.root.workspace then
 			error("cannot select a Window Frame whose Workspace is inactive.")
 
-		elseif inst.frame_hidden then
+		elseif targ.frame_hidden then
 			error("cannot select a UI Frame that is hidden.")
 
-		elseif not inst.awake then
+		elseif not targ.awake then
 			error("cannot select a widget that is asleep.")
 		end
 	end
 
 	local old_selected = self.selected_frame
-	self.selected_frame = inst or false
+	self.selected_frame = targ or false
 
-	if inst then
-		if inst.frame_type == "window" then
-			inst:bringWindowToFront()
+	if targ then
+		if targ.frame_type == "window" then
+			targ:bringWindowToFront()
 		else -- frame_type == "workspace"
 			self:sortG2()
 		end
 
-		if old_selected ~= inst then
-			wcUIFrame.tryUnbankingThimble1(inst)
+		if old_selected ~= targ then
+			wcUIFrame.tryUnbankingThimble1(targ)
 
 			if set_new_order then
-				inst.order_id = self:rootCall_getFrameOrderID()
+				targ.order_id = self:rootCall_getFrameOrderID()
 			end
 		end
 	end
@@ -526,11 +526,11 @@ end
 
 
 --- Doctor the context 'current_pressed' field. Intended for use with pop-up menus in some special cases.
--- @param inst The invoking widget.
+-- @param targ The invoking widget.
 -- @param new_pressed The widget that will be assigned to 'current_pressed' if it meets the criteria.
 -- @param press_busy_code If truthy, and we go through with the change, assign this value to 'new_pressed.press_busy'.
-function def:rootCall_doctorCurrentPressed(inst, new_pressed, press_busy_code)
-	--print("rootCall_doctorCurrentPressed", inst, new_pressed, press_busy_code, debug.traceback())
+function def:rootCall_doctorCurrentPressed(targ, new_pressed, press_busy_code)
+	--print("rootCall_doctorCurrentPressed", targ, new_pressed, press_busy_code, debug.traceback())
 
 	-- If this was the result of a click action, doctor the current-pressed state
 	-- to reference the menu, not the clicked widget.
@@ -547,10 +547,10 @@ end
 
 
 --- Set a widget as the current pop-up, destroying any existing pop-up chain first.
--- @param inst The event invoker.
+-- @param targ The event invoker.
 -- @param pop_up The widget to assign as a pop-up.
-function def:rootCall_assignPopUp(inst, pop_up)
-	--print("rootCall_assignPopUp", inst, pop_up, debug.traceback())
+function def:rootCall_assignPopUp(targ, pop_up)
+	--print("rootCall_assignPopUp", targ, pop_up, debug.traceback())
 
 	-- Caller should create and initialize the widget before attaching it to the root here.
 
@@ -560,7 +560,7 @@ function def:rootCall_assignPopUp(inst, pop_up)
 	end
 
 	-- If invoking widget is part of a selectable Window Frame, then bring it to the front.
-	local frame = inst:nodeFindKeyAscending(true, "frame_type", "window")
+	local frame = targ:nodeFindKeyAscending(true, "frame_type", "window")
 	if frame and frame.frame_is_selectable then
 		self:setSelectedFrame(frame, true)
 	end
@@ -572,8 +572,8 @@ function def:rootCall_assignPopUp(inst, pop_up)
 end
 
 
-function def:rootCall_destroyPopUp(inst, reason_code)
-	--print("rootCall_destroyPopUp", inst, self.pop_up_menu, reason_code, debug.traceback())
+function def:rootCall_destroyPopUp(targ, reason_code)
+	--print("rootCall_destroyPopUp", targ, self.pop_up_menu, reason_code, debug.traceback())
 
 	if self.pop_up_menu then
 		clearPopUp(self, reason_code)
@@ -581,31 +581,31 @@ function def:rootCall_destroyPopUp(inst, reason_code)
 end
 
 
-function def:rootCall_setModalFrame(inst)
-	uiAssert.type(1, inst, "table")
+function def:rootCall_setModalFrame(targ)
+	uiAssert.type(1, targ, "table")
 
-	if inst.frame_type ~= "window" then
+	if targ.frame_type ~= "window" then
 		error("only Window Frames can be assigned as modal.")
 
-	elseif inst.workspace then
+	elseif targ.workspace then
 		error("Window Frames that are associated with a Workspace cannot be assigned as modal.")
 	end
 
 	for i, child in ipairs(self.modals) do
-		if child == inst then
+		if child == targ then
 			error("this frame is already in the stack of modals.")
 		end
 	end
 
-	self.modals[#self.modals + 1] = inst
-	self.context.mouse_start = inst
+	self.modals[#self.modals + 1] = targ
+	self.context.mouse_start = targ
 end
 
 
-function def:rootCall_clearModalFrame(inst)
-	uiAssert.type(1, inst, "table")
+function def:rootCall_clearModalFrame(targ)
+	uiAssert.type(1, targ, "table")
 
-	if self.modals[#self.modals] ~= inst then
+	if self.modals[#self.modals] ~= targ then
 		error("tried to clear the modal status of a frame that is not at the top of the 'modals' stack.")
 	end
 
@@ -614,8 +614,8 @@ function def:rootCall_clearModalFrame(inst)
 end
 
 
-function def:rootCall_setDragAndDropState(inst, drop_state)
-	uiAssert.type(1, inst, "table")
+function def:rootCall_setDragAndDropState(targ, drop_state)
+	uiAssert.type(1, targ, "table")
 	uiAssert.type(2, drop_state, "table")
 
 	self.drop_state = drop_state
@@ -652,8 +652,8 @@ function def:newWorkspace()
 end
 
 
-local function _thimbleCheck(self, inst)
-	local wid = inst
+local function _thimbleCheck(self, targ)
+	local wid = targ
 	while wid do
 		if not wid.awake then
 			error("instance is not within an awake part of the widget hierarchy.")
@@ -702,15 +702,15 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 1)
 	-- Bubbled events from children
 	else
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
-		if inst.frame_type == "window" and self.selected_frame == inst then
+		if targ.frame_type == "window" and self.selected_frame == targ then
 			--_printUIFrames(self)
-			self:selectTopFrame(inst)
+			self:selectTopFrame(targ)
 		end
 	end
 end

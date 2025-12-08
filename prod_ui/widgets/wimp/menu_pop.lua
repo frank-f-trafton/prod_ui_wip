@@ -556,8 +556,8 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
+	if self == targ then
 		local root = self:nodeGetRoot()
 
 		if key == "escape" then
@@ -688,8 +688,8 @@ function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
 end
 
 
-function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOn(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		self:tryTakeThimble2()
 	end
 end
@@ -714,8 +714,8 @@ local function pressedAndThimbleHandoff(self, wid)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local rolled = false
 
 		-- Handle press roll-over for menus in Open Mode.
@@ -807,8 +807,8 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local vp = self.vp
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 		local xx = mx + self.scr_x - vp.x
@@ -852,8 +852,8 @@ function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		self.MN_item_hover = false
 
 		-- Only remove the selection if it is not a group that is currently opened.
@@ -864,8 +864,8 @@ function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		local mx, my, ax, ay = self:getRelativePosition(x, y)
 
 		if self.is_blocking_clicks then
@@ -908,11 +908,11 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
---function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
+--function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ then
 		if button == self.context.mouse_pressed_button then
 			self.press_busy = false
 
@@ -947,8 +947,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		-- (Positive Y == rolling wheel upward.)
 		-- Only scroll if we are not at the edge of the scrollable area. Otherwise, the wheel
 		-- event should bubble up.
@@ -1032,8 +1032,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		-- If this widget is part of a chain and currently holds the context pressed and/or thimble state,
 		-- try to transfer it back to the previous menu in the chain.
 		if self.press_busy == "menu-drag" then

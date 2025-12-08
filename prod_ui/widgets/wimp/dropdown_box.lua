@@ -359,8 +359,8 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 end
 
 
-function def:evt_thimble1Release(inst)
-	if self == inst then
+function def:evt_thimble1Release(targ)
+	if self == targ then
 		if self.wid_drawer then
 			-- The pop-up menu should not exist if the dropdown body does not have thimble1.
 			self:_closePopUpMenu(false)
@@ -370,8 +370,8 @@ function def:evt_thimble1Release(inst)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		self:_closePopUpMenu(false)
 
 		widShared.removeViewports(self, 5)
@@ -379,8 +379,8 @@ function def:evt_destroy(inst)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat)
-	if self == inst then
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
+	if self == targ then
 		if not self.wid_drawer then
 			local items = self.MN_items
 			local old_index = self.MN_index
@@ -404,12 +404,12 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
---function def:evt_pointerHoverOn(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
---function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+--function def:evt_pointerHoverOn(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+--function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -432,7 +432,7 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	-- If the cursor overlaps the pop-up drawer while not overlapping the body,
 	-- transfer context pressed state.
 	local wid_drawer = self.wid_drawer
@@ -452,8 +452,8 @@ function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		-- Cycle menu options if the drawer is closed and this widget has top thimble focus.
 		if not self.wid_drawer and self:hasTopThimble() then
 			local check_chosen = false

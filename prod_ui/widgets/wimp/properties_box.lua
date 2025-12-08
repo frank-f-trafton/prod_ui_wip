@@ -467,7 +467,7 @@ local function updateSelectedControl(self, control)
 end
 
 
-function def:evt_keyPressed(inst, key, scancode, isrepeat)
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
 	local items = self.MN_items
 	local old_index = self.MN_index
 	local old_item = items[old_index]
@@ -475,11 +475,11 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat)
 	-- wid_action() is handled in the 'thimbleAction()' callback.
 
 	-- Escape: take thimble1 from embedded child widget
-	if self ~= inst and inst == self.context.thimble1 and key == "escape" then
+	if self ~= targ and targ == self.context.thimble1 and key == "escape" then
 		self:tryTakeThimble1()
 		return true
 
-	elseif self == inst then
+	elseif self == targ then
 		-- NOTE: This code path for 'toggle' MN_mark_mode won't work if the widget can
 		-- take thimble1 (see thimbleAction()).
 		if self.MN_mark_mode == "toggle" and key == "space" then
@@ -513,8 +513,8 @@ function def:evt_keyPressed(inst, key, scancode, isrepeat)
 end
 
 
-function def:evt_keyReleased(inst, keycode, scancode)
-	if self == inst then
+function def:evt_keyReleased(targ, keycode, scancode)
+	if self == targ then
 		-- If there is a selected child widget, forward keyboard events to it first.
 		local item = self.MN_items[self.MN_index]
 		local control = item and item.wid_ref
@@ -525,8 +525,8 @@ function def:evt_keyReleased(inst, keycode, scancode)
 end
 
 
-function def:evt_textInput(inst, text)
-	if self == inst then
+function def:evt_textInput(targ, text)
+	if self == targ then
 		-- If there is a selected child widget, forward keyboard events to it first.
 		local item = self.MN_items[self.MN_index]
 		local control = item and item.wid_ref
@@ -537,8 +537,8 @@ function def:evt_textInput(inst, text)
 end
 
 
-function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 
 		wcScrollBar.widgetProcessHover(self, mx, my)
@@ -602,8 +602,8 @@ function def:evt_pointerHover(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		wcScrollBar.widgetClearHover(self)
 		self.sash_hovered = false
 		self.cursor_hover = nil
@@ -612,18 +612,18 @@ function def:evt_pointerHoverOff(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerPress(inst, x, y, button, istouch, presses)
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self.enabled
 	and button == self.context.mouse_pressed_button
 	then
 		if button <= 3 then
 			-- The user clicked on a child widget
-			if self ~= inst then
-				updateSelectedControl(self, inst)
+			if self ~= targ then
+				updateSelectedControl(self, targ)
 			end
 		end
 
-		if self == inst then
+		if self == targ then
 			if button <= 3 then
 				self:tryTakeThimble1()
 			end
@@ -692,15 +692,15 @@ function def:evt_pointerPress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerPressRepeat(inst, x, y, button, istouch, reps)
-	if self == inst then
+function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
+	if self == targ then
 		wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	end
 end
 
 
-function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.press_busy == "sash" then
 			local x_diff = mouse_x - self.sash_att_x
 			if self.skin.control_side == "left" then
@@ -724,8 +724,8 @@ function def:evt_pointerDrag(inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
-	if self == inst
+function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
+	if self == targ
 	and self.enabled
 	and button == self.context.mouse_pressed_button
 	then
@@ -736,8 +736,8 @@ function def:evt_pointerUnpress(inst, x, y, button, istouch, presses)
 end
 
 
-function def:evt_pointerWheel(inst, x, y)
-	if self == inst then
+function def:evt_pointerWheel(targ, x, y)
+	if self == targ then
 		if widShared.checkScrollWheelScroll(self, x, y) then
 			self:cacheUpdate(false)
 
@@ -747,22 +747,22 @@ function def:evt_pointerWheel(inst, x, y)
 end
 
 
-function def:evt_pointerDragDestRelease(inst, x, y, button, istouch, presses)
-	if self == inst then
+function def:evt_pointerDragDestRelease(targ, x, y, button, istouch, presses)
+	if self == targ then
 		return wcMenu.dragDropReleaseLogic(self)
 	end
 end
 
 
-function def:evt_thimble1Take(inst)
-	if self ~= inst then
-		updateSelectedControl(self, inst)
+function def:evt_thimble1Take(targ)
+	if self ~= targ then
+		updateSelectedControl(self, targ)
 	end
 end
 
 
-function def:evt_thimbleAction(inst, key, scancode, isrepeat)
-	if self == inst
+function def:evt_thimbleAction(targ, key, scancode, isrepeat)
+	if self == targ
 	and self.enabled
 	then
 		-- If there is an active, selected control widget, then try to give it the thimble.
@@ -779,8 +779,8 @@ function def:evt_thimbleAction(inst, key, scancode, isrepeat)
 end
 
 
-function def:evt_thimbleAction2(inst, key, scancode, isrepeat)
-	if self == inst
+function def:evt_thimbleAction2(targ, key, scancode, isrepeat)
+	if self == targ
 	and self.enabled
 	then
 		local item = self.MN_items[self.MN_index]
@@ -835,8 +835,8 @@ function def:evt_update(dt)
 end
 
 
-function def:evt_destroy(inst)
-	if self == inst then
+function def:evt_destroy(targ)
+	if self == targ then
 		widShared.removeViewports(self, 5)
 	end
 end

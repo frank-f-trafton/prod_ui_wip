@@ -318,8 +318,8 @@ end
 
 
 --- Mouse callback for when the cursor overlaps a widget.
-function wcButton.evt_pointerHoverOn(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function wcButton.evt_pointerHoverOn(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = true
 			self.cursor_hover = self.skin.cursor_on
@@ -329,8 +329,8 @@ end
 
 
 --- Mouse callback for when the cursor overlaps a sticky button.
-function wcButton.evt_pointerHoverOnSticky(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function wcButton.evt_pointerHoverOnSticky(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			if not self.pressed then
 				self.hovered = true
@@ -342,8 +342,8 @@ end
 
 
 --- Mouse callback for when the cursor leaves a widget.
-function wcButton.evt_pointerHoverOff(self, inst, mouse_x, mouse_y, mouse_dx, mouse_dy)
-	if self == inst then
+function wcButton.evt_pointerHoverOff(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+	if self == targ then
 		if self.enabled then
 			self.hovered = false
 			self.cursor_hover = nil
@@ -353,8 +353,8 @@ end
 
 
 --- Mouse callback for pressing normal buttons (whose primary actions don't activate upon click-down).
-function wcButton.evt_pointerPress(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerPress(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
@@ -380,8 +380,8 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon first click-down.
-function wcButton.evt_pointerPressActivate(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerPressActivate(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
@@ -410,8 +410,8 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon double-click.
-function wcButton.evt_pointerPressDoubleClick(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerPressDoubleClick(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
@@ -440,8 +440,8 @@ end
 
 
 --- Mouse callback for pressing buttons which activate repeatedly while held down.
-function wcButton.evt_pointerPressRepeat(self, inst, x, y, button, istouch, reps)
-	if self == inst then
+function wcButton.evt_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -457,8 +457,8 @@ end
 
 
 --- Mouse callback for pressing buttons which activate upon first click-down, but which do not have a repeat-held action.
-function wcButton.evt_pointerPressSticky(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerPressSticky(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button <= 3 then
@@ -495,8 +495,8 @@ end
 
 
 --- Mouse callback for releasing buttons which activate upon click-up (while hovered over the widget).
-function wcButton.evt_pointerReleaseActivate(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerReleaseActivate(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -510,8 +510,8 @@ end
 
 
 --- Mouse callback for releasing buttons which do not activate upon click-up.
-function wcButton.evt_pointerRelease(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerRelease(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -524,8 +524,8 @@ end
 
 
 --- Mouse callback for releasing checkboxes, which toggle and activate upon click-up.
-function wcButton.evt_pointerReleaseCheck(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerReleaseCheck(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -539,8 +539,8 @@ function wcButton.evt_pointerReleaseCheck(self, inst, x, y, button, istouch, pre
 end
 
 
-function wcButton.evt_pointerReleaseCheckMulti(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerReleaseCheckMulti(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -555,8 +555,8 @@ end
 
 
 --- Mouse callback for releasing radio buttons. Upon click-up, they turn on, while turning off all siblings with the same group ID.
-function wcButton.evt_pointerReleaseRadio(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerReleaseRadio(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -574,8 +574,8 @@ end
 
 
 --- Mouse callback for releasing normal buttons upon click-up (in general, regardless of the cursor location).
-function wcButton.evt_pointerUnpress(self, inst, x, y, button, istouch, presses)
-	if self == inst then
+function wcButton.evt_pointerUnpress(self, targ, x, y, button, istouch, presses)
+	if self == targ then
 		if self.enabled then
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
@@ -589,8 +589,8 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on normal buttons.
-function wcButton.evt_thimbleAction(self, inst, key, scancode, isrepeat)
-	if self == inst then
+function wcButton.evt_thimbleAction(self, targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			self:wid_buttonAction()
 		end
@@ -599,8 +599,8 @@ end
 
 
 --- Callback for secondary thimble action (ie user presses "application" KeyConstant) on normal buttons.
-function wcButton.evt_thimbleAction2(self, inst, key, scancode, isrepeat)
-	if self == inst then
+function wcButton.evt_thimbleAction2(self, targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			self:wid_buttonAction2()
 		end
@@ -612,8 +612,8 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on checkboxes.
-function wcButton.evt_thimbleActionCheck(self, inst, key, scancode, isrepeat)
-	if self == inst then
+function wcButton.evt_thimbleActionCheck(self, targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			self:setChecked(not self.checked)
 			self:wid_buttonAction()
@@ -623,8 +623,8 @@ end
 
 
 --- Primary thimble action for multi-state checkboxes.
-function wcButton.evt_thimbleActionCheckMulti(self, inst, key, scancode, isrepeat)
-	if self == inst then
+function wcButton.evt_thimbleActionCheckMulti(self, targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			self:rollValue(1)
 			self:wid_buttonAction()
@@ -634,8 +634,8 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on radio buttons.
-function wcButton.evt_thimbleActionRadio(self, inst, key, scancode, isrepeat)
-	if self == inst then
+function wcButton.evt_thimbleActionRadio(self, targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			self:setChecked(true)
 			self:wid_buttonAction()
@@ -645,8 +645,8 @@ end
 
 
 --- Callback for primary thimble action (ie user presses Enter) on sticky buttons.
-function wcButton.evt_thimbleActionSticky(self, inst, key, scancode, isrepeat)
-	if self == inst then
+function wcButton.evt_thimbleActionSticky(self, targ, key, scancode, isrepeat)
+	if self == targ then
 		if self.enabled then
 			if not self.pressed then
 				self.pressed = true
