@@ -782,7 +782,46 @@ _mt_widget.eventTrickle = _eventTrickle -- _mt_widget:eventTrickle(field, a,b,c,
 function _mt_widget:eventCycle(field, a,b,c,d,e,f)
 	--print("eventCycle", self, field, a,b,c,d,e,f)
 
-	return _eventTrickle(self, field, a,b,c,d,e,f) or _eventBubble(self, field, a,b,c,d,e,f)
+	-- Equivalent to:
+	-- return _eventTrickle(self, field, a,b,c,d,e,f) or _eventBubble(self, field, a,b,c,d,e,f)
+
+	-- eventTrickle()
+	if self.parent then
+		local retval = _eventTrickle(self.parent, field, a,b,c,d,e,f)
+		if retval then
+			return retval
+		end
+	end
+	local trickle = self.trickle
+	local var = trickle and trickle[field]
+	if type(var) == "function" then
+		local retval = var(self, a,b,c,d,e,f)
+		if retval then
+			return retval
+		end
+
+	elseif var then
+		errEventBadType(field, var)
+	end
+
+	local wid = self
+
+	-- eventBubble()
+	while wid do
+		if wid[field] then
+			local var = wid[field]
+			if type(var) == "function" then
+				local retval = var(wid, a,b,c,d,e,f)
+				if retval then
+					return retval
+				end
+
+			elseif var then
+				errEventBadType(field, var)
+			end
+		end
+		wid = wid.parent
+	end
 end
 
 
