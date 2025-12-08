@@ -317,41 +317,49 @@ end
 
 
 local function _takeThimble1(self, a, b, c, d)
-	local thimble1, thimble2 = context.thimble1, context.thimble2
-
+	local thimble1 = context.thimble1
 	if thimble1 ~= self then
 		if thimble1 then
 			thimble1:releaseThimble1(a, b, c, d)
 		end
-		context.thimble1 = self
-		self:eventCycle("evt_thimble1Take", self, a, b, c, d)
-		if not thimble2 then
-			self:eventCycle("evt_thimbleTopTake", self, a, b, c, d)
+		if not self._dead then
+			context.thimble1 = self
+			self:eventCycle("evt_thimble1Take", self, a, b, c, d)
 		end
-
+		local thimble2 = context.thimble2
 		if thimble2 then
 			thimble2:eventCycle("evt_thimble1Changed", thimble2, a, b, c, d)
+
+		elseif not self._dead then
+			self:eventCycle("evt_thimbleTopTake", self, a, b, c, d)
 		end
 	end
 end
 
 
 local function _takeThimble2(self, a, b, c, d)
-	local thimble1, thimble2 = context.thimble1, context.thimble2
-
+	local thimble2 = context.thimble2
 	if thimble2 ~= self then
+		local thimble1 = context.thimble1
 		if thimble1 and not thimble2 then
 			thimble1:eventCycle("evt_thimbleTopRelease", thimble1, a, b, c, d)
 		end
 		context.thimble2 = false
-		if thimble2 then
+		if thimble2 and not thimble2._dead then
 			thimble2:eventCycle("evt_thimbleTopRelease", thimble2, a, b, c, d)
-			thimble2:eventCycle("evt_thimble2Release", thimble2, a, b, c, d)
+			if not thimble2._dead then
+				thimble2:eventCycle("evt_thimble2Release", thimble2, a, b, c, d)
+			end
 		end
-		context.thimble2 = self
-		self:eventCycle("evt_thimble2Take", self, a, b, c, d)
-		self:eventCycle("evt_thimbleTopTake", self, a, b, c, d)
+		if not self._dead then
+			context.thimble2 = self
+			self:eventCycle("evt_thimble2Take", self, a, b, c, d)
+		end
+		if not self._dead then
+			self:eventCycle("evt_thimbleTopTake", self, a, b, c, d)
+		end
 
+		thimble1 = context.thimble1
 		if thimble1 then
 			thimble1:eventCycle("evt_thimble2Changed", thimble1, a, b, c, d)
 		end
@@ -417,9 +425,12 @@ function _mt_widget:releaseThimble1(a, b, c, d)
 		if not thimble2 then
 			self:eventCycle("evt_thimbleTopRelease", self, a, b, c, d)
 		end
-		self:eventCycle("evt_thimble1Release", self, a, b, c, d)
+		if not self._dead then
+			self:eventCycle("evt_thimble1Release", self, a, b, c, d)
+		end
+		thimble2 = context.thimble2
 		if thimble2 then
-			thimble2:eventCycle("evt_thimble1Changed", self, a, b, c, d)
+			thimble2:eventCycle("evt_thimble1Changed", thimble2, a, b, c, d)
 		end
 	end
 
@@ -433,10 +444,14 @@ function _mt_widget:releaseThimble2(a, b, c, d)
 	if context.thimble2 == self then
 		context.thimble2 = false
 		self:eventCycle("evt_thimble2Release", self, a, b, c, d)
-		self:eventCycle("evt_thimbleTopRelease", self, a, b, c, d)
-		if thimble1 then
-			thimble1:eventCycle("evt_thimbleTopTake", thimble1, a, b, c, d)
-			thimble1:eventCycle("evt_thimble2Changed", thimble1, a, b, c, d)
+		if not self._dead then
+			self:eventCycle("evt_thimbleTopRelease", self, a, b, c, d)
+		end
+		if context.thimble1 then
+			context.thimble1:eventCycle("evt_thimbleTopTake", context.thimble1, a, b, c, d)
+		end
+		if context.thimble1 then
+			thimble1:eventCycle("evt_thimble2Changed", context.thimble1, a, b, c, d)
 		end
 	end
 
