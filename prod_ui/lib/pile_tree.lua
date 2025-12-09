@@ -1,4 +1,5 @@
--- PILE Tree v2.011
+-- PILE Tree
+-- VERSION: 2.012
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -118,7 +119,7 @@ function M.nodeRemove(self)
 end
 
 
-function M.nodeGetIndex(self, nodes)
+function M.nodeGetIndex(self)
 	local parent = _nodeAssertParent(self)
 	return _nodeAssertIndex(self, parent["nodes"])
 end
