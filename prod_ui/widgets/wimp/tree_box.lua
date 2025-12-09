@@ -26,7 +26,6 @@ local context = select(1, ...)
 
 
 local wcTree = context:getLua("shared/wc/wc_tree")
-local structTree = context:getLua("shared/struct_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -175,7 +174,7 @@ function def:evt_initialize()
 	self.MN_wrap_selection = false
 
 	wcTree.instanceSetup(self)
-	self.tree = structTree.new()
+	self.tree = wcTree.newNode()
 
 	-- State flags.
 	self.enabled = true
