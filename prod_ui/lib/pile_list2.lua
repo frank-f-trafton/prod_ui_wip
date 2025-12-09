@@ -225,7 +225,7 @@ M.nodeInListBackward = _nodeInListBackward
 
 function M.nodeInList(self, check)
 	local prev = self["prev"]
-	return _nodeInListForward(self, check) or (prev and _nodeInListBackward(self, prev))
+	return _nodeInListForward(self, check) or (prev and _nodeInListBackward(prev, check))
 end
 
 
