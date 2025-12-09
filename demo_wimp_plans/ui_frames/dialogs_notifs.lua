@@ -20,7 +20,9 @@ local function _makeFrameBlock2(self)
 		dialog:setFrameTitle("The Frame That Blocks")
 
 		demoShared.makeParagraph(dialog, nil, [[
-This Window Frame should block interaction with the UI Frame that invoked it, until it is dismissed. Other elements ought to remain accessible.]])
+Can't interact with the previous window until this one is dismissed.
+
+(But other things ought to work, like the menu bar.)]])
 
 
 		local button_close = dialog:addChild("base/button")
@@ -110,7 +112,7 @@ function plan.make(panel)
 		btn:setLabel("Modal Dialog Box")
 		btn.wid_buttonAction = function(self)
 			demoShared.makeDialogBox(panel.context, "It's a dialog box", [[
-This frame is modal; while present, it should block interaction with any other part of the interface.
+This window stops you from interacting with the rest of the interface (not including OS-level stuff).
 
 Click a button below (or the 'X' in the header bar) to dismiss it.]]
 )
