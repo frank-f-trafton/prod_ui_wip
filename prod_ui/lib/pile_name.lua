@@ -1,4 +1,5 @@
--- PILE Name Registry v2.011
+-- PILE Name Registry
+-- VERSION: 2.012
 -- https://github.com/frank-f-trafton/pile_base
 
 
