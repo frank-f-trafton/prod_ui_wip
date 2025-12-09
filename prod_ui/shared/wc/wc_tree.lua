@@ -4,18 +4,59 @@
 local context = select(1, ...)
 
 
-local structTree = context:getLua("shared/struct_tree")
+local wcTree = {}
+
+
+local pTree = require(context.conf.prod_ui_req .. "lib.pile_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 
 
-local wcTree = {}
-
-
 local _nm_align = {left=true, center=true, right=true}
 
 
+local _mt_tree = {}
+_mt_tree.__index = _mt_tree
+wcTree.mt_tree = _mt_tree
+
+
+function wcTree.newNode()
+	local self = setmetatable(pTree.nodeNew(), _mt_tree)
+
+	-- When true, the node's children are visible and selectable.
+	-- For root nodes, this should always be true.
+	self.expanded = true
+
+	return self
+end
+
+
+function _mt_tree:nodeAdd(pos)
+	local node = wcTree.newNode()
+	pTree.nodeAttach(self, node, pos)
+	return node
+end
+
+
+_mt_tree.nodeRemove = pTree.nodeRemove
+
+
+function _mt_tree:nodeIsExpanded()
+	local node = self
+
+	while node do
+		if not node.expanded then
+			return false
+		end
+		node = node.parent
+	end
+
+	return true
+end
+
+
+--
 function wcTree.instanceSetup(self)
 	-- X positions and widths of components within menu items.
 	-- The X positions are reversed when right alignment is used.
@@ -93,7 +134,7 @@ end
 
 function methods:addNode(text, parent_node, tree_pos, icon_id, expanded)
 	uiAssert.type(1, text, "string")
-	uiAssert.tableWithMetatableEval(2, parent_node, structTree.mt_tree)
+	uiAssert.tableWithMetatableEval(2, parent_node, wcTree.mt_tree)
 	uiAssert.typeEval(3, tree_pos, "number")
 	uiAssert.typeEval(4, icon_id, "string")
 	-- don't assert 'expanded'
@@ -104,9 +145,9 @@ function methods:addNode(text, parent_node, tree_pos, icon_id, expanded)
 	local font = skin.font
 
 	parent_node = parent_node or self.tree
-	local node = parent_node:addNode(tree_pos)
+	local node = parent_node:nodeAdd(tree_pos)
 
-	node.depth = node:getNodeDepth() - 1
+	node.depth = pTree.nodeGetDepth(node) - 1 -- TODO: check this
 
 	-- Nodes function as menu items.
 	local item = node
@@ -200,17 +241,15 @@ function methods:orderItems()
 end
 
 
-local function _removeNode(self, node, depth)
-	local node_i = node:getNodeIndex()
-	local node_parent = node.parent
-	if not node_parent then
-		error("cannot remove the root tree node")
-	end
+local function _removeNode(self, node, _depth)
+	local node_parent = pTree.nodeAssertParent(node)
+	local nodes = node.nodes
 
 	-- Remove all child nodes first.
-	for i, child_node in ipairs(node.nodes) do
-		self:removeNode(child_node, depth + 1)
-		node:removeNode(node_i)
+	for i = #nodes, 1, -1 do
+		local child = nodes[i]
+		self:removeNode(child, _depth + 1)
+		child:nodeRemove()
 	end
 
 	local item = node.item
