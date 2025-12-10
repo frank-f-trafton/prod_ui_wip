@@ -48,14 +48,6 @@ function plan.make(panel)
 		end
 	end
 
-	local function setWrapMode(tb, enabled)
-		tb:setWrapMode(not not enabled)
-	end
-
-	local function setAlign(tb, align_mode)
-		tb:setTextAlignment(align_mode)
-	end
-
 	local function setColorization(tb, enabled)
 		tb:setColorization(not not enabled)
 		--[[
@@ -97,28 +89,28 @@ function plan.make(panel)
 		["+f5"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
-				setWrapMode(tb, not tb:getWrapMode())
+				tb:setWrapMode(not tb:getWrapMode())
 			end
 			_updateButtons(panel)
 		end,
 		["+f2"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
-				setAlign(tb, "left")
+				tb:setTextAlignment("left")
 			end
 			_updateButtons(panel)
 		end,
 		["+f3"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
-				setAlign(tb, "center")
+				tb:setTextAlignment("center")
 			end
 			_updateButtons(panel)
 		end,
 		["+f4"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_text_box")
 			if tb then
-				setAlign(tb, "right")
+				tb:setTextAlignment("right")
 			end
 			_updateButtons(panel)
 		end,
@@ -145,7 +137,6 @@ function plan.make(panel)
 		end
 	end
 
-
 	local x1, y1 = 16, 16
 	local xx, yy, ww, hh = x1, y1, 160, 32
 	local w2, h2 = 168, 40
@@ -157,7 +148,7 @@ function plan.make(panel)
 	cbox_wrap.wid_buttonAction = function(self)
 		local tb = panel:findTag("demo_text_box")
 		if tb then
-			setWrapMode(tb, self.checked)
+			tb:setWrapMode(self.checked)
 		end
 		_updateButtons(panel)
 	end
@@ -168,7 +159,7 @@ function plan.make(panel)
 	local function radioAlignH(self)
 		local tb = panel:findTag("demo_text_box")
 		if tb then
-			setAlign(tb, self.usr_align)
+			tb:setTextAlignment(self.usr_align)
 		end
 		_updateButtons(panel)
 	end
@@ -217,6 +208,7 @@ function plan.make(panel)
 		:setTabsToSpaces(false)
 		:setAutoIndent(false)
 		--:setAllowReplaceMode(false)
+
 	text_box.LE_ghost_text = "Ghost text"
 
 	-- Debug...

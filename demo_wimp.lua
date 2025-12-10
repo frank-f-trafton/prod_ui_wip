@@ -17,6 +17,7 @@ demo_default_theme = "vacuum_dark"
 -- The first panel to load.
 -- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
+	"widgets.text_box_script",
 	--"widgets.unfinished.dial",
 	"demo_welcome",
 	"widgets.list_box",
@@ -68,7 +69,7 @@ local demo_plan_list = {
 				{plan_id = "widgets.text_box_single", label = "Textbox (Single-Line)"},
 				{plan_id = "widgets.text_box_multi", label = "Textbox (Multi-Line)"},
 				-- Working on it...
-				--{plan_id = "widgets.text_box_script", label = "Script Editor"},
+				{plan_id = "widgets.text_box_script", label = "Script Editor"},
 				{plan_id = "widgets.number_box", label = "Number Box"},
 				{plan_id = "widgets.properties_box", label = "Properties Box"},
 				{plan_id = "widgets.combo_box", label = "Combo Box"},
