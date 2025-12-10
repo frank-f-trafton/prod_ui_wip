@@ -39,6 +39,7 @@ local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcInputM = context:getLua("shared/wc/wc_input_m")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
@@ -60,6 +61,18 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 def.pop_up_proto = wcInputM.pop_up_proto
 
 
+local _nm_illuminate_mode = uiTable.newNamedMapV("IlluminateMode", "never", "always", "no-highlight")
+
+
+function def:setIlluminateCurrentLine(mode)
+	uiAssert.namedMap(1, mode, _nm_illuminate_mode)
+
+	self.illuminate_current_line = mode
+
+	return self
+end
+
+
 function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -76,7 +89,7 @@ function def:evt_initialize()
 
 	wcInputM.setupInstance(self, "script")
 
-	self.illuminate_current_line = true
+	self.illuminate_current_line = "always"
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -382,7 +395,9 @@ def.default_skinner = {
 		--love.graphics.rectangle("fill", vp2.x, vp2.y, vp2.w, vp2.h)
 
 		-- Draw current paragraph illumination, if applicable.
-		if self.illuminate_current_line then
+		if self.illuminate_current_line == "always"
+		or (self.illuminate_current_line == "no-highlight" and not LE:isHighlighted())
+		then
 			love.graphics.setColor(res.color_current_line_illuminate)
 			local paragraph = LE.paragraphs[LE.dcp]
 			local para_y = paragraph[1].y
@@ -390,7 +405,7 @@ def.default_skinner = {
 			local last_sub = paragraph[#paragraph]
 			local para_h = last_sub.y + last_sub.h - para_y
 
-			love.graphics.rectangle("fill", vp2.x, vp.y - self.scr_y + para_y, vp2.w, para_h)
+			love.graphics.rectangle("fill", vp2.x, -self.scr_y + para_y, vp2.w, para_h)
 		end
 
 		love.graphics.push()

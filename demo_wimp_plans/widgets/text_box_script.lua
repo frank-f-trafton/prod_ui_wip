@@ -48,15 +48,6 @@ function plan.make(panel)
 		end
 	end
 
-
-	local function setWrapMode(tb, enabled)
-		tb:setWrapMode(not not enabled)
-	end
-
-	local function setAlign(tb, align_mode)
-		tb:setTextAlignment(align_mode)
-	end
-
 	local function setColorization(tb, enabled)
 		tb:setColorization(not not enabled)
 		--[[
@@ -98,28 +89,28 @@ function plan.make(panel)
 		["+f5"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_script_ed")
 			if tb then
-				setWrapMode(tb, not tb:getWrapMode())
+				tb:setWrapMode(not tb:getWrapMode())
 			end
 			_updateButtons(panel)
 		end,
 		["+f2"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_script_ed")
 			if tb then
-				setAlign(tb, "left")
+				tb:setTextAlignment("left")
 			end
 			_updateButtons(panel)
 		end,
 		["+f3"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_script_ed")
 			if tb then
-				setAlign(tb, "center")
+				tb:setTextAlignment("center")
 			end
 			_updateButtons(panel)
 		end,
 		["+f4"] = function(self, key, scancode, isrepeat)
 			local tb = panel:findTag("demo_script_ed")
 			if tb then
-				setAlign(tb, "right")
+				tb:setTextAlignment("right")
 			end
 			_updateButtons(panel)
 		end,
@@ -146,7 +137,6 @@ function plan.make(panel)
 		end
 	end
 
-
 	local x1, y1 = 16, 16
 	local xx, yy, ww, hh = x1, y1, 160, 32
 	local w2, h2 = 168, 40
@@ -158,7 +148,7 @@ function plan.make(panel)
 	cbox_wrap.wid_buttonAction = function(self)
 		local tb = panel:findTag("demo_script_ed")
 		if tb then
-			setWrapMode(tb, self.checked)
+			tb:setWrapMode(self.checked)
 		end
 		_updateButtons(panel)
 	end
@@ -169,7 +159,7 @@ function plan.make(panel)
 	local function radioAlignH(self)
 		local tb = panel:findTag("demo_script_ed")
 		if tb then
-			setAlign(tb, self.usr_align)
+			tb:setTextAlignment(self.usr_align)
 		end
 		_updateButtons(panel)
 	end
@@ -207,6 +197,34 @@ function plan.make(panel)
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
 
+
+	local function stepperIllumination(self)
+		local tb = panel:findTag("demo_script_ed")
+		if tb then
+			local str = self.options[self.index]
+			if str then
+				tb:setIlluminateCurrentLine(str)
+			end
+		end
+	end
+
+	demoShared.makeLabel(panel, xx, yy, ww, hh, "Line illumination:", "single")
+
+	xx = xx + w2
+
+	local stp_illum = panel:addChild("base/stepper")
+		:geometrySetMode("static", xx, yy, ww * 2, hh)
+		:setTag("demo_illum")
+
+	stp_illum.wid_stepperChanged = stepperIllumination
+
+	stp_illum:insertOption("always")
+	stp_illum:insertOption("never")
+	stp_illum:insertOption("no-highlight")
+
+	xx = x1
+	yy = yy + h2 + math.floor(h2/2)
+
 	local ED_W, ED_H = 496, 350
 
 	local script_ed = panel:addChild("input/script_editor")
@@ -221,10 +239,11 @@ function plan.make(panel)
 		:setTabsToSpaces(false)
 		:setAutoIndent(true)
 		--:setAllowReplaceMode(false)
+		:setIlluminateCurrentLine("always")
 
 	-- Debug...
-	local quickPrint = require("lib.quick_print")
-	script_ed.DEBUG_qp = quickPrint.new()
+	--local quickPrint = require("lib.quick_print")
+	--script_ed.DEBUG_qp = quickPrint.new()
 
 	--[[
 	local str = ""
@@ -233,11 +252,6 @@ function plan.make(panel)
 	end
 	script_ed:setText(str)
 	--]]
-
---[[
-This widget will contain "advanced" input features (ie a column of line numbers)
-that would clutter up the standard multi-line text input box.
---]]
 
 	local demo_text = [=[
 Hmm... this widget does not appear to be finished.]=]
