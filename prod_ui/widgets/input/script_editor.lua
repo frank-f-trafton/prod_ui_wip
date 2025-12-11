@@ -3,8 +3,8 @@
 
 --[[
 
-Line #s    Viewport #1
- ╔══╗╔═════════════════════╗
+ vp3          vp1
+ ╔══╗ ╔════════════════════╗
  ┌──┬────────────────────────┬─┐
  │ 1│ ...................... │^│
  │ 2│ .The quick brown fox . ├─┤
@@ -73,12 +73,34 @@ function def:setIlluminateCurrentLine(mode)
 end
 
 
+function def:getIlluminationMode()
+	return self.illuminate_current_line
+end
+
+
+function def:setLineNumberColumn(enabled)
+	enabled = not not enabled
+	if self.LE_lnc_show ~= enabled then
+		self.LE_lnc_show = enabled
+		self:reshape()
+		self:scrollClampViewport() -- TODO: why is this needed while word wrap is active?
+	end
+
+	return self
+end
+
+
+function def:getLineNumberColumn()
+	return self.LE_lnc_show
+end
+
+
 function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
 
-	widShared.setupViewports(self, 2)
+	widShared.setupViewports(self, 4)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupDoc(self)
 
@@ -87,9 +109,11 @@ function def:evt_initialize()
 	-- State flags (WIP)
 	self.enabled = true
 
-	wcInputM.setupInstance(self, "script")
+	wcInputM.setupInstance(self, "script", true)
 
 	self.illuminate_current_line = "always"
+
+	self.last_line_digits = 0
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -99,9 +123,11 @@ end
 function def:evt_reshapePre()
 	-- Viewport #1 is the scrollable region.
 	-- Viewport #2 includes margins and excludes borders.
+	-- Viewport #3 is the column of line numbers, when active.
+	-- Viewport #4 is the scissor-box region for text (cutting out the line number column)
 
 	local skin = self.skin
-	local vp, vp2 = self.vp, self.vp2
+	local vp, vp2, vp3, vp4 = self.vp, self.vp2, self.vp3, self.vp4
 
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(skin.box.border)
@@ -110,14 +136,38 @@ function def:evt_reshapePre()
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
+
+	if not self.LE_lnc_show then
+		vp3:set(0, 0, 0, 0)
+		self.last_line_digits = 0
+	else
+		local lnc_width = editWidM.getLineNumberColumnWidth(self)
+		self.last_line_digits = editWidM.getLineNumberColumnDigitCount(self)
+		vp:splitLeft(vp3, lnc_width)
+	end
+
+	-- scissor-box for text area
+	vp:copy(vp4)
+
 	vp:reduceT(skin.box.margin)
+
+	editWidM.updateDuringReshape(self)
 
 	self:scrollClampViewport()
 	wcScrollBar.updateScrollState(self)
 
-	editWidM.updateDuringReshape(self)
-
 	return true
+end
+
+
+function def:LE_textChanged()
+	if self.LE_lnc_show then
+		local digs = editWidM.getLineNumberColumnDigitCount(self)
+		if self.last_line_digits ~= digs then
+			self:reshape()
+			return true
+		end
+	end
 end
 
 
@@ -289,7 +339,7 @@ function def:evt_update(dt)
 	wcScrollBar.updateScrollState(self)
 
 	if do_update then
-		editWidM.generalUpdate(self, true, false, false, true, true)
+		editWidM.generalUpdate(self, true, false, false, true, true, false)
 	end
 end
 
@@ -338,12 +388,27 @@ def.default_skinner = {
 		cursor_on = {uiAssert.types, "nil", "string"},
 		paragraph_pad = {uiAssert.integerGE, 0},
 
+		-- 'lnc_' == paremeters for the line number column.
+
+		-- Reserve at least this many digits worth of space.
+		lnc_reserved = {uiAssert.integerGE, 0},
+
+		-- Left, right column padding
+		lnc_x1 = {uiAssert.integerGE, 0},
+		lnc_x2 = {uiAssert.integerGE, 0},
+
+		lnc_color_body = uiAssert.loveColorTuple,
+		lnc_color_text = uiAssert.loveColorTuple,
+
 		res_readwrite = md_res,
 		res_readonly = md_res
 	},
 
 
-	--transform = function(scale, skin)
+	transform = function(scale, skin)
+		uiScale.fieldInteger(scale, skin, "lnc_x1")
+		uiScale.fieldInteger(scale, skin, "lnc_x2")
+	end,
 
 
 	install = function(self, skinner, skin)
@@ -353,6 +418,8 @@ def.default_skinner = {
 			self.LE_text_batch:setFont(skin.font)
 		end
 		self.LE:setParagraphPadding(skin.paragraph_pad)
+		self.LE_lnc_digit_w = skin.font:getWidth("0")
+
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 	end,
@@ -370,7 +437,7 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		local vp, vp2 = self.vp, self.vp2
+		local vp, vp2, vp3, vp4 = self.vp, self.vp2, self.vp3, self.vp4
 		local LE = self.LE
 		local lines = LE.lines
 		local font = LE.font
@@ -408,7 +475,48 @@ def.default_skinner = {
 			love.graphics.rectangle("fill", vp2.x, -self.scr_y + para_y, vp2.w, para_h)
 		end
 
-		love.graphics.push()
+		-- Draw line number column, if active.
+		if self.LE_lnc_show then
+			love.graphics.setColor(skin.lnc_color_body)
+			-- TODO: use a stretched pixel texture
+			love.graphics.rectangle("fill", vp3.x, vp3.y, vp3.w, vp3.h)
+
+			love.graphics.setColor(skin.lnc_color_text)
+			love.graphics.setFont(skin.font)
+
+			local n_digits = editWidM.getLineNumberColumnDigitCount(self)
+			local digits_w = n_digits * self.LE_lnc_digit_w
+
+			love.graphics.push("all")
+
+			--love.graphics.translate(self.LE_align_ox - self.scr_x, -self.scr_y)
+			love.graphics.translate(0, -self.scr_y)
+
+			for i = self.LE_vis_para1, self.LE_vis_para2 do
+				local paragraph = LE.paragraphs[i]
+				local sub_line = paragraph[1]
+				local str = tostring(i)
+				local str_w = font:getWidth(str)
+
+				-- (right alignment, without the risk of love.graphics.printf's wrapping)
+				local xx = skin.lnc_x1 + digits_w - str_w
+
+				love.graphics.print(tostring(i), vp3.x + xx, sub_line.y)
+			end
+
+			love.graphics.pop()
+		end
+
+
+		love.graphics.push("all")
+
+
+		love.graphics.intersectScissor(
+			ox + self.x + vp4.x,
+			oy + self.y + vp4.y,
+			vp4.w,
+			vp4.h
+		)
 
 		-- Translate into core region, with scrolling offsets applied.
 		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.scr_y)
@@ -417,9 +525,9 @@ def.default_skinner = {
 		local color_caret = self.context.window_focus and res.color_insert -- XXX and color_replace
 		wcInputM.draw(self, col_highlight, skin.font_ghost, res.color_text, skin.font, color_caret)
 
-		love.graphics.setScissor(scx, scy, scw, sch)
-
 		love.graphics.pop()
+
+		love.graphics.setScissor(scx, scy, scw, sch)
 
 		wcScrollBar.drawScrollBarsHV(self, skin.data_scroll)
 	end,

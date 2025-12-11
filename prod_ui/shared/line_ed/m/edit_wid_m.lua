@@ -69,9 +69,26 @@ function editWidM.updatePageJumpSteps(self, font)
 end
 
 
+function editWidM.getLineNumberColumnWidth(self)
+	local skin = self.skin
+	local x1, x2 = skin.lnc_x1, skin.lnc_x2
+	local digit_w, reserved = self.LE_lnc_digit_w, skin.lnc_reserved
+	local digits = math.max(reserved, 1 + math.floor(math.log10(#self.LE.lines))) -- ie editWidM.getLineNumberColumnDigitCount()
+	return (digit_w*digits + x1 + x2)
+end
+
+
+function editWidM.getLineNumberColumnDigitCount(self)
+	local LE = self.LE
+	return math.max(self.skin.lnc_reserved, 1 + math.floor(math.log10(#LE.lines)))
+end
+
+
 function editWidM.updateDocumentDimensions(self)
 	local LE = self.LE
 	local vp = self.vp
+
+	-- vp #1 is assumed to be correct here.
 
 	-- height (assumes the final sub-line is current)
 	local last_para = LE.paragraphs[#LE.paragraphs]
@@ -80,8 +97,6 @@ function editWidM.updateDocumentDimensions(self)
 	self.doc_h = last_sub.y + last_sub.h
 
 	-- width
-	LE:setWrapWidth(vp.w)
-
 	-- When not wrapping, the document width is the widest sub-line.
 	if not LE.wrap_mode then
 		local x1, x2 = self.LE:getDisplayXBoundaries()
@@ -120,7 +135,11 @@ function editWidM.scrollGetCaretInBounds(self, immediate)
 end
 
 
-function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, txt)
+function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, batch, text_changed)
+	if text_changed and self.LE_textChanged and self:LE_textChanged() then
+		return
+	end
+
 	if car_shape then
 		editWid.updateCaretShape(self)
 	end
@@ -137,7 +156,7 @@ function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, txt)
 		editWidM.updateVisibleParagraphs(self)
 	end
 
-	if txt and self.LE_text_batch then
+	if batch and self.LE_text_batch then
 		editWidM.updateTextBatch(self)
 	end
 end
@@ -145,14 +164,13 @@ end
 
 function editWidM.updateDuringReshape(self)
 	local LE = self.LE
-
 	local new_wrap = self.vp.w
 
 	if LE.font ~= self.LE_last_font or LE.wrap_w ~= new_wrap then
 		LE:setWrapWidth(new_wrap)
 		LE:updateDisplayText()
 		LE:syncDisplayCaretHighlight()
-		editWidM.generalUpdate(self, true, true, false, true, true)
+		editWidM.generalUpdate(self, true, true, false, true, true, false)
 		editWidM.updatePageJumpSteps(self, self.LE.font)
 		self.LE_last_font = LE.font
 	end
@@ -172,7 +190,7 @@ function editWidM.wrapAction(self, func, ...)
 	--]]
 
 	if ok then
-		editWidM.generalUpdate(self, true, update_widget, caret_in_view, update_widget, update_widget)
+		editWidM.generalUpdate(self, true, update_widget, caret_in_view, update_widget, update_widget, update_widget)
 
 		local hist = self.LE_hist
 		if hist.enabled then

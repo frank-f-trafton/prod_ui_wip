@@ -816,11 +816,6 @@ function _mt_ed_m:setFont(font)
 end
 
 
-function _mt_ed_m:setWrapWidth(w)
-	self.wrap_w = w
-end
-
-
 function _mt_ed_m:setTextColors(text_color, text_h_color)
 	uiAssert.typeEval(1, text_color, "table")
 	uiAssert.typeEval(2, text_h_color, "table")
@@ -839,6 +834,19 @@ function _mt_ed_m:setWrapMode(enabled)
 		self:updateDisplayText()
 		self:syncDisplayCaretHighlight()
 		_updateVerticalCaretHint(self)
+		return true
+	end
+end
+
+
+function _mt_ed_m:setWrapWidth(w)
+	if self.wrap_w ~= w then
+		self.wrap_w = w
+		if self.wrap_mode then
+			self:updateDisplayText()
+			self:syncDisplayCaretHighlight()
+			_updateVerticalCaretHint(self)
+		end
 		return true
 	end
 end

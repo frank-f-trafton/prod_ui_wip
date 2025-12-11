@@ -274,7 +274,7 @@ function def:evt_update(dt)
 	wcScrollBar.updateScrollState(self)
 
 	if do_update then
-		editWidM.generalUpdate(self, true, false, false, true, true)
+		editWidM.generalUpdate(self, true, false, false, true, true, false)
 	end
 end
 

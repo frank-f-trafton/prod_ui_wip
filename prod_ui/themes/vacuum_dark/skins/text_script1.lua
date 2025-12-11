@@ -4,12 +4,18 @@ return {
 	box = "*boxes/input_box_m",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
-	font = "*fonts/p",
-	font_ghost = "*fonts/p",
+	font = "*fonts/code",
+	font_ghost = "*fonts/code",
 
 	cursor_on = "ibeam",
 
 	paragraph_pad = 0,
+
+	lnc_reserved = 4,
+	lnc_x1 = 8,
+	lnc_x2 = 16,
+	lnc_color_body = {0.3, 0.3, 0.3, 1.0},
+	lnc_color_text = {0.8, 0.8, 0.8, 1.0},
 
 	res_readwrite = {
 		color_body = {0.15, 0.15, 0.15, 1.0},

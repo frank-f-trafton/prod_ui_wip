@@ -44,7 +44,7 @@ function wcInputM.setupDef(def)
 end
 
 
-function wcInputM.setupInstance(self, commands)
+function wcInputM.setupInstance(self, commands, with_lnc_state)
 	self.LE_commands = editAct[commands]
 	if not self.LE_commands then
 		error("invalid 'commands' ID")
@@ -156,6 +156,20 @@ function wcInputM.setupInstance(self, commands)
 
 	-- Max number of Unicode characters (not bytes) permitted in the field.
 	self.LE_u_chars_max = 5000
+
+	-- A callback function to run when the widget's text content has changed.
+	-- (e.g. to update the width of the line number column before continuing with other calculations)
+	--self.LE_textChanged
+
+	-- Extra state for line number columns.
+	if with_lnc_state then
+		self.LE_lnc_show = false
+
+		-- width of digits, based on the "0" glyph
+		self.LE_lnc_digit_w = 0
+
+		-- Total column width is: digit_w*max(digits, reserved) + pad_x1 + pad_x2
+	end
 end
 
 
@@ -188,7 +202,7 @@ function wcInputM.textInputLogic(self, text)
 		local written = editFuncM.writeText(self, text, suppress_replace)
 
 		if written then
-			editWidM.generalUpdate(self, true, true, true, true, true)
+			editWidM.generalUpdate(self, true, true, true, true, true, true)
 
 			if clear_input_category then
 				self.LE_input_category = false

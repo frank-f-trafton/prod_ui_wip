@@ -24,6 +24,11 @@ function plan.make(panel)
 				b_wrap:setChecked(tb:getWrapMode())
 			end
 
+			local b_line_no_col = panel:findTag("demo_line_no")
+			if b_line_no_col then
+				b_line_no_col:setChecked(tb:getLineNumberColumn())
+			end
+
 			-- TODO: This is unergonomic, to say the least.
 			local b_align_l = panel:findTag("demo_align_l")
 			if b_align_l then
@@ -43,6 +48,17 @@ function plan.make(panel)
 			if b_align_r then
 				if b_align_r.usr_align == tb:getTextAlignment() then
 					b_align_r:setChecked(true)
+				end
+			end
+
+			local b_illum = panel:findTag("demo_illum")
+			if b_illum then
+				local mode = tb:getIlluminationMode()
+				for i, option in ipairs(b_illum.options) do
+					if option == mode then
+						b_illum:setIndex(i)
+						break
+					end
 				end
 			end
 		end
@@ -90,6 +106,13 @@ function plan.make(panel)
 			local tb = panel:findTag("demo_script_ed")
 			if tb then
 				tb:setWrapMode(not tb:getWrapMode())
+			end
+			_updateButtons(panel)
+		end,
+		["+f6"] = function(self, key, scancode, isrepeat)
+			local tb = panel:findTag("demo_script_ed")
+			if tb then
+				tb:setLineNumberColumn(not tb:getLineNumberColumn())
 			end
 			_updateButtons(panel)
 		end,
@@ -155,6 +178,23 @@ function plan.make(panel)
 
 	xx = x1
 	yy = yy + h2
+
+
+	local cbox_line_no = panel:addChild("base/checkbox")
+		:geometrySetMode("static", xx, yy, ww*2, hh)
+		:setTag("demo_line_no")
+		:setLabel("Show line number column (F6)", "single")
+	cbox_line_no.wid_buttonAction = function(self)
+		local tb = panel:findTag("demo_script_ed")
+		if tb then
+			tb:setLineNumberColumn(self.checked)
+		end
+		_updateButtons(panel)
+	end
+
+	xx = x1
+	yy = yy + h2
+
 
 	local function radioAlignH(self)
 		local tb = panel:findTag("demo_script_ed")
@@ -232,14 +272,16 @@ function plan.make(panel)
 		:setTag("demo_script_ed")
 		:setScrollBars(true, true)
 
-	script_ed.LE_ghost_text = "Ghost text"
+	--script_ed.LE_ghost_text = "Ghost text"
 
 	script_ed:setAllowTab(true)
 		:setAllowUntab(true)
 		:setTabsToSpaces(false)
 		:setAutoIndent(true)
+		:setWrapMode(true)
 		--:setAllowReplaceMode(false)
 		:setIlluminateCurrentLine("always")
+		:setLineNumberColumn(true)
 
 	-- Debug...
 	--local quickPrint = require("lib.quick_print")
@@ -253,8 +295,23 @@ function plan.make(panel)
 	script_ed:setText(str)
 	--]]
 
+
 	local demo_text = [=[
-Hmm... this widget does not appear to be finished.]=]
+-- Returns the sum of a list of numbers.
+local function sum(...)
+	local c = 0
+	for i = 1, select("#", ...) do
+		local v = select(i, ...)
+		if type(v) ~= "number" then
+			error("expected number")
+		end
+		c = c + select(i, ...)
+	end
+	return c
+end
+
+print(sum(1, 2, 3, 4, 5)) --> 15
+]=]
 
 	script_ed:setText(demo_text)
 
