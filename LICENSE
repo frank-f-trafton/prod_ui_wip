@@ -72,6 +72,12 @@ LIBRARIES:
 
 FONTS:
 
+- Noto Sans Mono
+  URL: https://fonts.google.com/noto/specimen/Noto+Sans+Mono
+  License:
+  Copyright notice(s):
+    Copyright 2012 Google Inc. All Rights Reserved.
+
 
 - Noto Sans Regular
   URL: https://fonts.google.com/noto/specimen/Noto+Sans
