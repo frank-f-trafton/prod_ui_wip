@@ -43,8 +43,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self:reshape()
 end
 
 

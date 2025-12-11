@@ -265,8 +265,6 @@ function def:evt_initialize()
 	self:skinInstall()
 
 	self.cursor_press = self.skin.cursor_press
-
-	self:reshape()
 end
 
 
