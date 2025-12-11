@@ -17,37 +17,37 @@ demo_default_theme = "vacuum_dark"
 -- The first panel to load.
 -- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
-	"widgets.text_box_script",
-	--"widgets.unfinished.dial",
+	"widgets.d_text_box_script",
+	--"widgets.unfinished.d_dial",
 	"demo_welcome",
-	"widgets.list_box",
-	"widgets.tree_box",
-	"widgets.text_box_multi",
-	"widgets.text_box_single",
-	"widgets.button_split",
-	"theming_skinning.button_skinners",
-	"widgets.menu_tab",
-	"widgets.button_work",
-	"widgets.dropdown_box",
-	"widgets.number_box",
-	"ui_frames.workspaces",
-	"widgets.properties_box",
-	"layouts.layout_unit",
-	"layouts.layout_sashes",
-	"layouts.layout",
-	"layouts.layout_static",
+	"widgets.d_list_box",
+	"widgets.d_tree_box",
+	"widgets.d_text_box_multi",
+	"widgets.d_text_box_single",
+	"widgets.d_button_split",
+	"theming_skinning.d_button_skinners",
+	"widgets.d_menu_tab",
+	"widgets.d_button_work",
+	"widgets.d_dropdown_box",
+	"widgets.d_number_box",
+	"ui_frames.d_workspaces",
+	"widgets.d_properties_box",
+	"layouts.d_layout_unit",
+	"layouts.d_layout_sashes",
+	"layouts.d_layout",
+	"layouts.d_layout_static",
 	"themes_and_scale",
-	"widgets.progress_bar",
-	"widgets.slider_work",
+	"widgets.d_progress_bar",
+	"widgets.d_slider_work",
 }
 
 
 -- Upon starting the demo, all of these Window Frame plans are instantiated.
 local demo_window_launch = {
-	--"window_frames.wimp_file_select",
-	--"window_frames.frame_unselectable",
-	--"window_frames.wimp_frame",
-	--"window_frames.window_frame_selector",
+	--"window_frames.d_wimp_file_select",
+	--"window_frames.d_frame_unselectable",
+	--"window_frames.d_wimp_frame",
+	--"window_frames.d_window_frame_selector",
 }
 
 
@@ -61,36 +61,35 @@ local demo_plan_list = {
 
 		{
 			label = "Controls", nodes = {
-				{plan_id = "widgets.button_work", label = "Button work"},
-				{plan_id = "theming_skinning.button_skinners", label = "Button Skinners"},
-				{plan_id = "widgets.button_split", label = "Split Button"},
-				{plan_id = "widgets.slider_work", label = "Slider work"},
-				{plan_id = "widgets.stepper", label = "Stepper"},
-				{plan_id = "widgets.text_box_single", label = "Textbox (Single-Line)"},
-				{plan_id = "widgets.text_box_multi", label = "Textbox (Multi-Line)"},
-				-- Working on it...
-				{plan_id = "widgets.text_box_script", label = "Script Editor"},
-				{plan_id = "widgets.number_box", label = "Number Box"},
-				{plan_id = "widgets.properties_box", label = "Properties Box"},
-				{plan_id = "widgets.combo_box", label = "Combo Box"},
-				{plan_id = "widgets.dropdown_box", label = "Dropdown Box"},
-				{plan_id = "widgets.list_box", label = "List Box"},
-				{plan_id = "widgets.tree_box", label = "Tree Box"},
-				{plan_id = "widgets.menu_tab", label = "Tabular Menu"},
-				{plan_id = "widgets.progress_bar", label = "Progress Bar"},
+				{plan_id = "widgets.d_button_work", label = "Button work"},
+				{plan_id = "theming_skinning.d_button_skinners", label = "Button Skinners"},
+				{plan_id = "widgets.d_button_split", label = "Split Button"},
+				{plan_id = "widgets.d_slider_work", label = "Slider work"},
+				{plan_id = "widgets.d_stepper", label = "Stepper"},
+				{plan_id = "widgets.d_text_box_single", label = "Textbox (Single-Line)"},
+				{plan_id = "widgets.d_text_box_multi", label = "Textbox (Multi-Line)"},
+				{plan_id = "widgets.d_text_box_script", label = "Script Editor"},
+				{plan_id = "widgets.d_number_box", label = "Number Box"},
+				{plan_id = "widgets.d_properties_box", label = "Properties Box"},
+				{plan_id = "widgets.d_combo_box", label = "Combo Box"},
+				{plan_id = "widgets.d_dropdown_box", label = "Dropdown Box"},
+				{plan_id = "widgets.d_list_box", label = "List Box"},
+				{plan_id = "widgets.d_tree_box", label = "Tree Box"},
+				{plan_id = "widgets.d_menu_tab", label = "Tabular Menu"},
+				{plan_id = "widgets.d_progress_bar", label = "Progress Bar"},
 			},
 		},
 
 		{
 			label = "Containers, Layouts, Theming",
 			nodes = {
-				{plan_id = "ui_frames.dialogs_notifs", label = "Dialogs and Notifications"},
-				{plan_id = "ui_frames.workspaces", label = "Workspace Frames"},
+				{plan_id = "ui_frames.d_dialogs_notifs", label = "Dialogs and Notifications"},
+				{plan_id = "ui_frames.d_workspaces", label = "Workspace Frames"},
 				{plan_id = "themes_and_scale", label = "Themes and Scale"},
-				{plan_id = "layouts.layout", label = "Layout"},
-				{plan_id = "layouts.layout_static", label = "Layout (Static)"},
-				{plan_id = "layouts.layout_sashes", label = "Layout (Sashes)"},
-				{plan_id = "layouts.layout_unit", label = "Layout (Unit Segments)"},
+				{plan_id = "layouts.d_layout", label = "Layout"},
+				{plan_id = "layouts.d_layout_static", label = "Layout (Static)"},
+				{plan_id = "layouts.d_layout_sashes", label = "Layout (Sashes)"},
+				{plan_id = "layouts.d_layout_unit", label = "Layout (Unit Segments)"},
 			},
 		},
 
@@ -100,8 +99,8 @@ local demo_plan_list = {
 			label = "Test and Debug",
 			collapsed = true,
 			nodes = {
-				{plan_id = "widgets.unfinished.drag_box", label = "Drag Box"},
-				{plan_id = "widgets.unfinished.label_test", label = "Label test"},
+				{plan_id = "widgets.unfinished.d_drag_box", label = "Drag Box"},
+				{plan_id = "widgets.unfinished.d_label_test", label = "Label test"},
 			},
 		},
 		-- [[
@@ -109,8 +108,8 @@ local demo_plan_list = {
 			label = "(Working on it)",
 			collapsed = true,
 			nodes = {
-				{plan_id = "widgets.unfinished.dial", label = "Dials"},
-				{plan_id = "widgets.unfinished.container_work", label = "Container work"},
+				{plan_id = "widgets.unfinished.d_dial", label = "Dials"},
+				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
 
 			},
 		},
@@ -451,15 +450,15 @@ do
 		local proto_demo = P.prototype {
 			P.command()
 				:setText("Video Settings")
-				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.video_settings") end),
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.d_video_settings") end),
 
 			P.command()
 				:setText("Widget Tree View")
-				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.wimp_widget_tree") end),
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.d_wimp_widget_tree") end),
 
 			P.command()
 				:setText("Window Frame Selector")
-				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.window_frame_selector") end),
+				:setCallback(function(client, item) _tryLaunchFrame(client, "window_frames.d_window_frame_selector") end),
 
 			P.separator(),
 
@@ -680,7 +679,7 @@ do
 		demo_tree.wid_select = function(self, item, item_i)
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace and item.plan_id then
-				local plan = require("demo_wimp_plans." .. item.plan_id)
+				local plan = require("demo." .. item.plan_id)
 				local container = _instantiateDemoContainer(workspace)
 
 				plan.make(container)
