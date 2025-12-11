@@ -35,8 +35,6 @@ function def:evt_initialize()
 
 	-- "enabled" affects visual style.
 	self.enabled = true
-
-	self:reshape()
 end
 
 

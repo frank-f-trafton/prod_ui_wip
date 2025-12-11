@@ -340,8 +340,6 @@ function def:evt_initialize()
 	editFuncS.writeHistoryLockedFirst(self)
 
 	self:setTextAlignment(self.skin.text_align)
-
-	self:reshape()
 end
 
 
