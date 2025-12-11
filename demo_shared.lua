@@ -81,7 +81,7 @@ function demoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
 	-- If the frame already exists, just switch to it.
 	local frame = root:findTag("FRAME:" .. plan_id)
 	if not frame then
-		local planWindowFrame = require("demo_wimp_plans." .. plan_id)
+		local planWindowFrame = require("demo." .. plan_id)
 		frame = planWindowFrame.makeWindowFrame(root)
 		frame.tag = "FRAME:" .. plan_id
 	end
