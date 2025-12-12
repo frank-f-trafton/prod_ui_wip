@@ -145,10 +145,6 @@ function wcInputS.setupInstance(self, commands)
 	-- false: disabled.
 	self.LE_ghost_text = false
 
-	-- false: use content text alignment.
-	-- "left", "center", "right", "justify"
-	self.LE_ghost_text_align = false
-
 	self.LE_caret_showing = true
 	self.LE_caret_blink_time = 0
 
@@ -421,14 +417,21 @@ function wcInputS.thimble1Release(self)
 end
 
 
---- Draw the text component.
--- @param color_highlight Table of colors for the text highlight, or nil/false to not draw the highlight.
--- @param font_ghost Font to use for optional "Ghost Text", or nil/false to not draw it.
--- @param color_text Table of colors to use for the body text, or nil/false to not draw it.
--- @param font Font to use when printing the main text (required, even if printing is disabled by color_text being false).
--- @param color_caret Table of colors for the text caret, or nil/false to not draw the caret.
-function wcInputS.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
-	-- Call after setting up the text area scissor box and scrolling, within `love.graphics.push("all")` and `pop()`.
+function wcInputS.shouldShowGhostText(self)
+	if self.LE_ghost_text and #self.LE.line == 0 then
+		local ghost_mode = self.skin.ghost_mode
+		if ghost_mode == "no-text"
+		or (ghost_mode == "no-focus" and self ~= context.thimble1)
+		then
+			return true
+		end
+	end
+	return false
+end
+
+
+function wcInputS.draw(self, is_ghost_text, font, color_highlight, color_text, color_caret)
+	-- Call within a love.graphics push/pop.
 
 	local LE = self.LE
 
@@ -444,33 +447,35 @@ function wcInputS.draw(self, color_highlight, font_ghost, color_text, font, colo
 		)
 	end
 
-	-- Ghost text. XXX: alignment
-	if font_ghost and self.LE_ghost_text and #LE.line == 0 then
-		love.graphics.setFont(font_ghost)
-		love.graphics.print(self.LE_ghost_text, 0, 0)
-	end
+	love.graphics.setColor(color_text)
+
+	-- Ghost text.
+	if is_ghost_text then
+		if self.LE_ghost_text then
+			love.graphics.setFont(font)
+
+			local align = LE.align
+			local text = self.LE_ghost_text
+			local width = font:getWidth(text)
+			local ox = align == "center" and -math.floor(width/2) or align == "right" and -width or 0 -- left
+
+			love.graphics.print(self.LE_ghost_text, ox, 0)
+		end
 
 	-- Display Text.
-	if color_text then
-		love.graphics.setColor(color_text)
+	elseif color_text then
 		if self.LE_text_batch then
 			love.graphics.draw(self.LE_text_batch)
 		else
 			love.graphics.setFont(font)
-			love.graphics.print(LE.disp_text)
+			love.graphics.print(LE.disp_text, 0, 0)
 		end
 	end
 
 	-- Caret.
 	if color_caret and self.LE_caret_showing and self:hasAnyThimble() then
 		love.graphics.setColor(color_caret)
-		love.graphics.rectangle(
-			self.LE_caret_fill,
-			self.LE_caret_x,
-			self.LE_caret_y,
-			self.LE_caret_w,
-			self.LE_caret_h
-		)
+		love.graphics.rectangle(self.LE_caret_fill, self.LE_caret_x, self.LE_caret_y, self.LE_caret_w, self.LE_caret_h)
 	end
 end
 

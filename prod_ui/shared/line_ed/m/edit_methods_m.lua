@@ -608,4 +608,18 @@ function client:getClearInputCategoryOnDeselect()
 end
 
 
+function client:setGhostText(str)
+	uiAssert.typeEval(1, str, "string")
+
+	self.LE_ghost_text = str or false
+
+	return self
+end
+
+
+function client:getGhostText()
+	return self.LE_ghost_text and self.LE_ghost_text
+end
+
+
 return editMethodsM
