@@ -248,10 +248,13 @@ local md_res = uiSchema.newKeysX {
 
 	color_body = uiAssert.loveColorTuple,
 	color_text = uiAssert.loveColorTuple,
+	color_ghost_text = uiAssert.loveColorTuple,
 	color_highlight = uiAssert.loveColorTuple,
 	color_highlight_active = uiAssert.loveColorTuple,
 	color_caret_insert = uiAssert.loveColorTuple,
+	color_caret_insert_not_focused = uiAssert.loveColorTuple,
 	color_caret_replace = uiAssert.loveColorTuple,
+	color_caret_replace_not_focused = uiAssert.loveColorTuple,
 }
 
 
@@ -262,6 +265,7 @@ def.default_skinner = {
 		box = themeAssert.box,
 		font = themeAssert.font,
 		font_ghost = themeAssert.font,
+		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 		text_align = {uiAssert.oneOf, "left", "center", "right"},
@@ -320,19 +324,23 @@ def.default_skinner = {
 		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.LE_align_oy - self.scr_y)
 
 		-- Text editor component.
-		local color_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
-
-		local is_active = self == self.context.thimble1
-		local col_highlight = is_active and res.color_highlight_active or res.color_highlight
-
-		wcInputS.draw(
-			self,
-			col_highlight,
-			skin.font_ghost,
-			res.color_text,
-			LE.font,
-			self.context.window_focus and color_caret
-		)
+		local is_ghost_text = wcInputS.shouldShowGhostText(self)
+		local font, col_text
+		if is_ghost_text then
+			font = skin.font_ghost
+			col_text = res.color_ghost_text
+		else
+			font = self.LE.font
+			col_text = res.color_text
+		end
+		local col_highlight = (self:hasAnyThimble() and context.window_focus) and res.color_highlight_active or res.color_highlight
+		local col_caret
+		if self.context.window_focus then
+			col_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
+		else
+			col_caret = self.LE_replace_mode and res.color_caret_replace_not_focused or res.color_caret_insert_not_focused
+		end
+		wcInputS.draw(self, is_ghost_text, font, col_highlight, col_text, col_caret)
 
 		love.graphics.pop()
 

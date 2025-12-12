@@ -208,8 +208,7 @@ function plan.make(panel)
 		:setTabsToSpaces(false)
 		:setAutoIndent(false)
 		--:setAllowReplaceMode(false)
-
-	text_box.LE_ghost_text = "Ghost text"
+		--:setGhostText("Ghost text")
 
 	-- Debug...
 	local quickPrint = require("lib.quick_print")

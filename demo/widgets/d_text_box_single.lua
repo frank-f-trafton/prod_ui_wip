@@ -141,6 +141,7 @@ function plan.make(panel)
 		:setText("Single-Line Text Box")
 		--:setAllowLineFeed(true)
 		--:setTextAlignment("right")
+		--:setGhostText("Ghost text")
 
 	input_single.wid_action = function(self)
 		print("input_single: The internal text is: " .. self:getText())
@@ -154,6 +155,7 @@ function plan.make(panel)
 		:setTag("demo_text_box_s_masked")
 		:setCharacterMasking(true)
 		:setText("¡Silencio!")
+		--:setGhostText("Ghost text")
 
 	input_s_mask.LE_hist.enabled = false -- TODO: write up an actual method to do this
 	input_s_mask.wid_action = function(self)

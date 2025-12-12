@@ -61,10 +61,6 @@ function wcInputM.setupInstance(self, commands, with_lnc_state)
 	-- the seqString or displayLine sub-objects.
 	self.LE_ghost_text = false
 
-	-- false: use content text alignment.
-	-- "left", "center", "right", "justify"
-	self.LE_ghost_text_align = false
-
 	-- The first and last visible display paragraphs. Used as boundaries for text rendering.
 	-- Update whenever you scroll vertically or modify the text.
 	self.LE_vis_para1 = 1
@@ -449,7 +445,22 @@ function wcInputM.thimble1Release(self)
 end
 
 
-function wcInputM.draw(self, color_highlight, font_ghost, color_text, font, color_caret)
+function wcInputM.shouldShowGhostText(self)
+	if self.LE_ghost_text and self.LE.lines:isEmpty() then
+		local ghost_mode = self.skin.ghost_mode
+		if ghost_mode == "no-text"
+		or (ghost_mode == "no-focus" and self ~= context.thimble1)
+		then
+			return true
+		end
+	end
+	return false
+end
+
+
+function wcInputM.draw(self, is_ghost_text, font, color_highlight, color_text, color_caret)
+	-- Call within a love.graphics push/pop.
+
 	local LE = self.LE
 	local lines = LE.lines
 
@@ -467,43 +478,44 @@ function wcInputM.draw(self, color_highlight, font_ghost, color_text, font, colo
 		end
 	end
 
-	-- Ghost text, if applicable.
-	-- XXX: center and right ghost text alignment modes aren't working correctly.
-	if font_ghost and self.LE_ghost_text and lines:isEmpty() then
-		local align = self.LE_ghost_text_align or LE.align
-
-		love.graphics.setFont(font_ghost)
-
-		local gx, gy
-		if align == "left" then
-			gx, gy = 0, 0
-
-		elseif align == "center" then
-			gx, gy = math.floor(-font:getWidth(self.LE_ghost_text) / 2), 0
-
-		elseif align == "right" then
-			gx, gy = math.floor(-font:getWidth(self.LE_ghost_text)), 0
-		end
-
-		if LE.wrap_mode then
-			love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp.w, align)
-		else
-			love.graphics.print(self.LE_ghost_text, gx, gy)
-		end
-	end
-
-	-- Main text.
 	love.graphics.setColor(color_text)
 
-	if self.LE_text_batch then
-		love.graphics.draw(self.LE_text_batch)
-	else
-		love.graphics.setFont(font)
+	if is_ghost_text then
+		if self.LE_ghost_text then
+			love.graphics.setFont(font)
 
-		for i = self.LE_vis_para1, self.LE_vis_para2 do
-			local paragraph = LE.paragraphs[i]
-			for j, sub_line in ipairs(paragraph) do
-				love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
+			local align = LE.align
+
+			local gx, gy
+			if align == "left" then
+				gx, gy = 0, 0
+
+			elseif align == "center" then
+				gx, gy = math.floor(-font:getWidth(self.LE_ghost_text) / 2), 0
+
+			elseif align == "right" then
+				gx, gy = math.floor(-font:getWidth(self.LE_ghost_text)), 0
+			end
+
+			if LE.wrap_mode then
+				love.graphics.printf(self.LE_ghost_text, -self.LE_align_ox, 0, self.vp.w, align)
+			else
+				love.graphics.print(self.LE_ghost_text, gx, gy)
+			end
+		end
+
+	-- Main text.
+	elseif color_text then
+		if self.LE_text_batch then
+			love.graphics.draw(self.LE_text_batch)
+		else
+			love.graphics.setFont(font)
+
+			for i = self.LE_vis_para1, self.LE_vis_para2 do
+				local paragraph = LE.paragraphs[i]
+				for j, sub_line in ipairs(paragraph) do
+					love.graphics.print(sub_line.colored_text or sub_line.str, sub_line.x, sub_line.y)
+				end
 			end
 		end
 	end

@@ -368,8 +368,10 @@ local md_res = uiSchema.newKeysX {
 	color_text = uiAssert.loveColorTuple,
 	color_readonly = uiAssert.loveColorTuple,
 	color_ghost_text = uiAssert.loveColorTuple,
-	color_insert = uiAssert.loveColorTuple,
-	color_replace = uiAssert.loveColorTuple,
+	color_caret_insert = uiAssert.loveColorTuple,
+	color_caret_insert_not_focused = uiAssert.loveColorTuple,
+	color_caret_replace = uiAssert.loveColorTuple,
+	color_caret_replace_not_focused = uiAssert.loveColorTuple,
 	color_margin = uiAssert.loveColorTuple,
 	color_margin_line_numbers = uiAssert.loveColorTuple
 }
@@ -384,6 +386,7 @@ def.default_skinner = {
 		scr_style = themeAssert.scrollBarStyle,
 		font = themeAssert.font,
 		font_ghost = themeAssert.font,
+		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 		paragraph_pad = {uiAssert.integerGE, 0},
@@ -521,9 +524,24 @@ def.default_skinner = {
 		-- Translate into core region, with scrolling offsets applied.
 		love.graphics.translate(self.LE_align_ox - self.scr_x, -self.scr_y)
 
-		local col_highlight = self:hasAnyThimble() and res.color_highlight_active or res.color_highlight
-		local color_caret = self.context.window_focus and res.color_insert -- XXX and color_replace
-		wcInputM.draw(self, col_highlight, skin.font_ghost, res.color_text, skin.font, color_caret)
+		-- Text editor component.
+		local is_ghost_text = wcInputM.shouldShowGhostText(self)
+		local font, col_text
+		if is_ghost_text then
+			font = skin.font_ghost
+			col_text = res.color_ghost_text
+		else
+			font = self.LE.font
+			col_text = res.color_text
+		end
+		local col_highlight = (self:hasAnyThimble() and context.window_focus) and res.color_highlight_active or res.color_highlight
+		local col_caret
+		if self.context.window_focus then
+			col_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
+		else
+			col_caret = self.LE_replace_mode and res.color_caret_replace_not_focused or res.color_caret_insert_not_focused
+		end
+		wcInputM.draw(self, is_ghost_text, font, col_highlight, col_text, col_caret)
 
 		love.graphics.pop()
 

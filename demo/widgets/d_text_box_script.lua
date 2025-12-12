@@ -271,8 +271,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ED_W, ED_H)
 		:setTag("demo_script_ed")
 		:setScrollBars(true, true)
-
-	--script_ed.LE_ghost_text = "Ghost text"
+		--:setGhostText("Ghost text")
 
 	script_ed:setAllowTab(true)
 		:setAllowUntab(true)
