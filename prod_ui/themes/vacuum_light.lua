@@ -147,26 +147,32 @@ return {
 			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
 				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 			res_pressed = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
 				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 			res_disabled = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
 				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			}
 		},
 		container1 = {
@@ -289,34 +295,42 @@ return {
 			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.9, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
-				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 			res_hover = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.9, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
-				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 			res_pressed = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.9, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
-				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 			res_disabled = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.5, 0.5, 0.5, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.9, 1.0},
-				color_caret_insert = {0.5, 0.5, 0.5, 1.0},
-				color_caret_replace = {0.5, 0.5, 0.5, 1.0}
+				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			}
 		},
 		progress_bar1 = {
@@ -393,24 +407,28 @@ return {
 		text_box_m1 = {
 			res_readwrite = {
 				color_body = {0.9, 0.9, 0.9, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
 				color_readonly = {0.2, 0.2, 0.2, 1.0},
 				color_ghost_text = {0.5, 0.5, 0.5, 1.0},
-				color_insert = {0.1, 0.1, 0.1, 1.0},
-				color_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0},
 				color_margin = {0.8, 0.8, 0.8, 1.0},
 			},
 			res_readonly = {
 				color_body = {0.8, 0.8, 0.8, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
 				color_readonly = {0.2, 0.2, 0.2, 1.0},
 				color_ghost_text = {0.5, 0.5, 0.5, 1.0},
-				color_insert = {0.1, 0.1, 0.1, 1.0},
-				color_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0},
 				color_margin = {0.8, 0.8, 0.8, 1.0},
 			},
 		},
@@ -418,54 +436,64 @@ return {
 			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
-				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 
 			res_hover = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
-				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 
 			res_disabled = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
 				color_text = {0.2, 0.2, 0.2, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
-				color_caret_replace = {0.25, 0.25, 0.25, 1.0}
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0}
 			},
 		},
 		text_script1 = {
 			res_readwrite = {
 				color_body = {0.9, 0.9, 0.9, 1.0},
 				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
 				color_readonly = {0.2, 0.2, 0.2, 1.0},
 				color_ghost_text = {0.5, 0.5, 0.5, 1.0},
-				color_insert = {0.1, 0.1, 0.1, 1.0},
-				color_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0},
 				color_margin = {0.8, 0.8, 0.8, 1.0},
 				color_margin_line_numbers = {0.5, 0.5, 0.5, 1.0}
 			},
 			res_readonly = {
 				color_body = {0.8, 0.8, 0.8, 1.0},
 				color_current_line_illuminate = {0.8, 0.8, 0.8, 1.0},
-				color_highlight = {0.5, 0.5, 0.5, 1.0},
+				color_highlight = {0.7, 0.7, 0.7, 1.0},
 				color_highlight_active = {0.75, 0.75, 0.75, 1.0},
 				color_text = {0.1, 0.1, 0.1, 1.0},
 				color_readonly = {0.2, 0.2, 0.2, 1.0},
 				color_ghost_text = {0.5, 0.5, 0.5, 1.0},
-				color_insert = {0.1, 0.1, 0.1, 1.0},
-				color_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_insert = {0.1, 0.1, 0.1, 1.0},
+				color_caret_insert_not_focused = {0.2, 0.2, 0.2, 1.0},
+				color_caret_replace = {0.25, 0.25, 0.25, 1.0},
+				color_caret_replace_not_focused = {0.30, 0.30, 0.30, 1.0},
 				color_margin = {0.8, 0.8, 0.8, 1.0},
 				color_margin_line_numbers = {0.5, 0.5, 0.5, 1.0}
 			},
