@@ -136,10 +136,6 @@ end
 
 
 function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, batch, text_changed)
-	if text_changed and self.LE_textChanged and self:LE_textChanged() then
-		return
-	end
-
 	if car_shape then
 		editWid.updateCaretShape(self)
 	end
@@ -158,6 +154,10 @@ function editWidM.generalUpdate(self, car_shape, dim, car_view, vis_para, batch,
 
 	if batch and self.LE_text_batch then
 		editWidM.updateTextBatch(self)
+	end
+
+	if text_changed and self.LE_textChanged then
+		self:LE_textChanged()
 	end
 end
 

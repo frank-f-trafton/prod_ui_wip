@@ -100,7 +100,8 @@ function wcInputS.setupInstance(self, commands)
 	-- 'LE_allow_tab' and 'LE_allow_untab' are not supported in the single-line code.
 	-- You can paste in tabs, however.
 
-	-- Max number of Unicode characters (not bytes) permitted in the field.
+	-- Max number of Unicode code points (not bytes, not grapheme clusters) permitted in the field.
+	-- See: Widget:setMaxCodePoints(), Widget:getMaxCodePoints()
 	self.LE_u_chars_max = 5000
 
 	-- Helps with amending vs making new history entries.

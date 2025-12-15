@@ -314,6 +314,8 @@ print(sum(1, 2, 3, 4, 5)) --> 15
 
 	script_ed:setText(demo_text)
 
+	--script_ed:setMaxCodePoints(24) -- Test
+
 	xx = x1
 	yy = yy + h2 + ED_H
 

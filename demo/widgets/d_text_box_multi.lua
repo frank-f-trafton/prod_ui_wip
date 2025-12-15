@@ -229,6 +229,8 @@ The five boxing wizards jump quickly.]=]
 
 	text_box:setText(demo_text)
 
+	--text_box:setMaxCodePoints(24) -- Test
+
 	xx = x1
 	yy = yy + h2 + ED_H
 

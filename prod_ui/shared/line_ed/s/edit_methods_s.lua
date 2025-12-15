@@ -469,4 +469,18 @@ function client:getGhostText()
 end
 
 
+function client:setMaxCodePoints(n)
+	uiAssert.integerGE(1, n, 0)
+
+	editWidS.wrapAction(self, editCommandS.setMaxCodePoints, n)
+
+	return self
+end
+
+
+function client:getMaxCodePoints()
+	return self.LE_u_chars_max
+end
+
+
 return editMethodsS

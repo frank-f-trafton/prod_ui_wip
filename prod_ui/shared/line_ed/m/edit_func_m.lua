@@ -704,6 +704,21 @@ function editFuncM.setText(self, text)
 end
 
 
+function editFuncM.truncateText(self, u_chars)
+	local LE = self.LE
+	local lines = LE.lines
+
+	local l1, b1, u_count = lines:countUChars(1, 1, 1, u_chars)
+	local l2, b2 = lines:countUChars(1, l1, b1, math.huge)
+
+	if not (l1 == l2 and b1 == b2) then
+		LE:deleteText(false, l1, b1, l2, b2)
+	end
+
+	editFuncM.wipeHistoryEntries(self)
+end
+
+
 --- Enables or disables highlight selection mode. When disabling, any current selection is removed. (Should only be
 --	used right after the widget is initialized, because a populated history ledger may contain entries with highlights.)
 -- @param enabled true or false/nil.
