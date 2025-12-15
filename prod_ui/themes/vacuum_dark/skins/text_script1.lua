@@ -12,7 +12,7 @@ return {
 
 	paragraph_pad = 0,
 
-	lnc_reserved = 4,
+	lnc_reserved = 1,
 	lnc_x1 = 8,
 	lnc_x2 = 16,
 	lnc_color_body = {0.3, 0.3, 0.3, 1.0},

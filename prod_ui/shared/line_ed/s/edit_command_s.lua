@@ -34,6 +34,7 @@ local editCommandS = {}
 
 -- ProdUI
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
+local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 
 
 function editCommandS.noOpTrue(self)
@@ -325,9 +326,8 @@ end
 
 function editCommandS.setText(self, text)
 	if self.LE_allow_input then
-		editFuncS.setText(self, text)
+		editFuncS.setText(self, text) -- resets history
 
-		-- Don't write a history entry from here. One has already been set up in editFuncS.setText().
 		return true, true, true
 	end
 end
@@ -486,6 +486,19 @@ function editCommandS.setCharacterMasking(self, enabled)
 	self.LE:setMasked(enabled)
 
 	return true, true
+end
+
+
+function editCommandS.setMaxCodePoints(self, n)
+	if n ~= self.LE_u_chars_max then
+		local LE = self.LE
+
+		self.LE_u_chars_max = n
+		local new_text = textUtil.trimString(LE.line, self.LE_u_chars_max)
+		editFuncS.setText(self, new_text) -- resets history
+
+		return true, true, true
+	end
 end
 
 

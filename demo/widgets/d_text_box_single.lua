@@ -147,6 +147,8 @@ function plan.make(panel)
 		print("input_single: The internal text is: " .. self:getText())
 	end
 
+	--input_single:setMaxCodePoints(24) -- Test
+
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
 

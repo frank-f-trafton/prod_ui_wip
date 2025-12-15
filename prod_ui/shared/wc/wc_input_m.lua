@@ -150,7 +150,8 @@ function wcInputM.setupInstance(self, commands, with_lnc_state)
 	-- next user text input event). ('LE_clear_history_on_deselect' also does this.)
 	self.LE_clear_input_category_on_deselect = true
 
-	-- Max number of Unicode characters (not bytes) permitted in the field.
+	-- Max number of Unicode code points (not bytes, not grapheme clusters) permitted in the field.
+	-- See: Widget:setMaxCodePoints(), Widget:getMaxCodePoints()
 	self.LE_u_chars_max = 5000
 
 	-- A callback function to run when the widget's text content has changed.

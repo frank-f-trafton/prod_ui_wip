@@ -670,9 +670,18 @@ end
 
 function editCommandM.setText(self, text)
 	if self.LE_allow_input then
-		editFuncM.setText(self, text)
+		editFuncM.setText(self, text) -- resets history
 
-		-- Don't write a history entry from here. One has already been set up in editFuncM.setText().
+		return true, true, true
+	end
+end
+
+
+function editCommandM.setMaxCodePoints(self, n)
+	if n ~= self.LE_u_chars_max then
+		self.LE_u_chars_max = n
+		editFuncM.truncateText(self, n) -- resets history
+
 		return true, true, true
 	end
 end
