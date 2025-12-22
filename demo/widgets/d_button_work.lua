@@ -34,12 +34,10 @@ function plan.make(panel)
 	local chk = panel:addChild("base/checkbox")
 	chk:geometrySetMode("static", 160, 0, 256, 64)
 
-	-- Test checkbox text label scissor-box.
-	local silly_string = "CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox CheckBox"
-	chk:setLabel(silly_string, "multi")
+	chk:setLabel("CheckBox", "single")
 
 	chk.wid_buttonAction = function(self)
-		print("Check it!")
+		print("Activated checkbox!")
 	end
 
 
