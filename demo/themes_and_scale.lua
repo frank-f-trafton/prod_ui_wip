@@ -59,6 +59,29 @@ local function _updateScale(self)
 end
 
 
+local function _pollTextureDPIs(tex_path)
+	-- Gets a list of valid texture DPIs by scanning the 'textures' directory
+	-- for subdirectories whose names are made up of digits.
+	local ls = love.filesystem.getDirectoryItems(tex_path)
+	local list = {}
+	for i, name in ipairs(ls) do
+		local info = love.filesystem.getInfo(tex_path .. "/" .. name)
+		if info then
+			if (info.type == "directory") and name:match("^%d+$") and tonumber(name) then
+				table.insert(list, tonumber(name))
+			end
+		end
+	end
+
+	table.sort(list)
+	for i, n in ipairs(list) do
+		list[i] = tostring(n)
+	end
+
+	return list
+end
+
+
 function plan.make(panel)
 	local context = panel.context
 
@@ -68,7 +91,8 @@ function plan.make(panel)
 
 	demoShared.makeTitle(panel, nil, "Themes and Scale")
 
-	demoShared.makeParagraph(panel, nil, "***Work in Progress***")
+	local dpi_list = _pollTextureDPIs(context.conf.prod_ui_path .. "resources/textures")
+	demoShared.makeParagraph(panel, nil, "(Valid DPIs are: " .. table.concat(dpi_list, ", ") .. ")")
 
 	demoShared.makeLabel(panel, 32, 96, 200, 32, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
