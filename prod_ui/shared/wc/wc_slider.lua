@@ -49,11 +49,15 @@ function wcSlider.setup(self)
 	self.slider_allow_changes = true
 
 	-- Slider value state.
-	-- Internally, the slider position ranges from 0 to 'slider_max' in a linear fashion.
 	self.slider_pos = 0
+	self.slider_min = 0
 	self.slider_max = 0
 	self.slider_def = 0 -- default
 	self.slider_home = 0 -- "home" position, usually zero.
+
+	-- Position is locked to steps of this number. zero means no locking.
+	-- As always,the computed position is subject to floating point precision error.
+	self.slider_granularity = 1
 
 	-- Trough and thumb state.
 	self.trough_x = 0
@@ -67,7 +71,6 @@ function wcSlider.setup(self)
 	self.thumb_h = 0
 
 	self.trough_vertical = false
-	self.round_policy = "none" -- "none", "floor", "ceil", "nearest"
 
 	-- false to make sliders count left-to-right or top-to-bottom.
 	-- true to make them count right-to-left or bottom-to-top.
@@ -111,28 +114,12 @@ function wcSlider.reshapeSliderComponent(self, x, y, w, h, thumb_w, thumb_h)
 end
 
 
-function wcSlider.roundPos(self)
-	local mode = self.round_policy
-
-	if mode == "none" then
-		return
-
-	elseif mode == "floor" then
-		self.slider_pos = math.floor(self.slider_pos)
-
-	elseif mode == "ceil" then
-		self.slider_pos = math.ceil(self.slider_pos)
-
-	elseif mode == "nearest" then
-		self.slider_pos = math.floor(0.5 + self.slider_pos)
-
-	else
-		error("invalid round mode: " .. tostring(mode))
+function wcSlider.processPos(self)
+	local grn = self.slider_granularity
+	if grn > 0 then
+		self.slider_pos = pMath.roundGranularInf(self.slider_pos, grn)
 	end
-end
 
-
-function wcSlider.clampPos(self)
 	self.slider_pos = math.max(0, math.min(self.slider_pos, self.slider_max))
 end
 
@@ -178,9 +165,7 @@ function wcSlider.updateSlider(self, vertical)
 	unit_pos = self.count_reverse and (1 - unit_pos) or unit_pos
 
 	self.slider_pos = unit_pos * self.slider_max
-
-	wcSlider.roundPos(self)
-	wcSlider.clampPos(self)
+	wcSlider.processPos(self)
 end
 
 
@@ -219,8 +204,7 @@ end
 
 -- Update after having changed the internal slider position.
 function wcSlider.processMovedSliderPos(self)
-	wcSlider.roundPos(self)
-	wcSlider.clampPos(self)
+	wcSlider.processPos(self)
 	wcSlider.updateThumb(self, not not self.trough_vertical)
 end
 
@@ -373,7 +357,10 @@ function wcSlider.mouseWheelLogic(self, x, y)
 end
 
 
-function wcSlider.widSetSliderPosition(self, pos)
+local methods = {}
+
+
+function methods:sliderSetPosition(pos)
 	uiAssert.numberNotNaN(1, pos)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
@@ -392,7 +379,12 @@ function wcSlider.widSetSliderPosition(self, pos)
 end
 
 
-function wcSlider.widSetSliderMax(self, max)
+function methods:sliderGetPosition()
+	return self.slider_pos
+end
+
+
+function methods:sliderSetMax(max)
 	uiAssert.numberNotNaN(1, max)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
@@ -411,7 +403,12 @@ function wcSlider.widSetSliderMax(self, max)
 end
 
 
-function wcSlider.widSetSliderAxis(self, axis)
+function methods:sliderGetMax()
+	return self.slider_max
+end
+
+
+function methods:sliderSetOrientation(axis)
 	uiAssert.namedMap(1, axis, _slider_axes)
 
 	self.trough_vertical = (axis == "vertical") and true or false
@@ -421,20 +418,93 @@ function wcSlider.widSetSliderAxis(self, axis)
 end
 
 
-function wcSlider.widSetSliderAllowChanges(self, enabled)
+function methods:sliderGetOrientation()
+	return self.trough_vertical and "vertical" or "horizontal"
+end
+
+
+function methods:sliderSetAllowChanges(enabled)
 	self.slider_allow_changes = not not enabled
 
 	return self
 end
 
 
---- Apply Slider Bar methods to a widget definition or instance.
--- @param self The widget def or instance (usually the former).
-function wcSlider.setupMethods(self)
-	self.setSliderPosition = wcSlider.widSetSliderPosition
-	self.setSliderMax = wcSlider.widSetSliderMax
-	self.setSliderAxis = wcSlider.widSetSliderAxis
-	self.setSliderAllowChanges = wcSlider.widSetSliderAllowChanges
+function methods:sliderGetAllowChanges()
+	return self.slider_allow_changes
+end
+
+
+function methods:sliderSetShowUseLine(enabled)
+	self.show_use_line = not not enabled
+
+	return self
+end
+
+
+function methods:sliderGetShowUseLine()
+	return self.show_use_line
+end
+
+
+function methods:sliderSetCountReverse(enabled)
+	self.count_reverse = not not enabled
+
+	return self
+end
+
+
+function methods:sliderGetCountReverse()
+	return self.count_reverse
+end
+
+
+function methods:sliderSetGranularity(n)
+	uiAssert.numberNotNaN(1, n)
+
+	self.slider_granularity = n
+
+	return self
+end
+
+
+function methods:sliderGetGranularity()
+	return self.slider_granularity
+end
+
+
+function methods:sliderSetWheelDirection(n)
+	if n ~= 1 and n ~= -1 then
+		error("argument #1: expected the numbers 1 or -1.")
+	end
+
+	self.wheel_dir = n
+
+	return self
+end
+
+
+function methods:sliderGetWheelDirection()
+	return self.wheel_dir
+end
+
+
+function methods:sliderSetHome(n)
+	uiAssert.numberNotNaN(1, n)
+
+	self.slider_home = n
+
+	return self
+end
+
+
+function methods:sliderGetHome()
+	return self.slider_home
+end
+
+
+function wcSlider.setupMethods(def)
+	uiTable.patch(def, methods)
 end
 
 

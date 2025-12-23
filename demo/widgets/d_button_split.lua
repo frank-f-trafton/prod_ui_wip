@@ -120,7 +120,7 @@ function plan.make(panel)
 		yy = yy + hh
 	end
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, "Aux Side", "single")
+	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Aux Side", "single")
 	yy = yy + hh
 
 	do
@@ -178,7 +178,7 @@ function plan.make(panel)
 	yy = yy + math.floor(hh/2)
 
 	do
-		demoShared.makeLabel(panel, xx, yy, ww, hh, "Aux Size", "single")
+		demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Aux Size", "single")
 
 		yy = yy + hh
 

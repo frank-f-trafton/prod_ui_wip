@@ -209,12 +209,12 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 end
 
 
-function demoShared.makeLabel(parent, x, y, w, h, text, label_mode)
+function demoShared.makeLabel(parent, x, y, w, h, relative, text, label_mode)
 	label_mode = label_mode or "single"
 
 	local label = parent:addChild("base/label")
 	label:setLabel(text, label_mode)
-	label:geometrySetMode("static", x, y, w, h)
+	label:geometrySetMode("static", x, y, w, h, relative)
 
 	return label
 end

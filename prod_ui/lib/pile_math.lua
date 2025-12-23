@@ -58,6 +58,24 @@ function M.roundInf(n)
 end
 
 
+function M.roundGranularInf(n, g)
+	local n2 = n
+	local rem = n2 % g
+	n2 = n2 - rem
+	if n > 0 then
+		if rem*2 >= g then
+			n2 = n2 + g
+		end
+	else
+		if rem*2 > g then
+			n2 = n2 + g
+		end
+	end
+
+	return n2
+end
+
+
 function M.sign(n)
 	return n < 0 and -1 or n > 0 and 1 or 0
 end

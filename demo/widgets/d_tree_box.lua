@@ -75,7 +75,7 @@ function plan.make(panel)
 
 	local wx, wy, ww, wh = 256, 0, 256, 32
 
-	demoShared.makeLabel(panel, wx, wy, ww, wh, "Item Horizontal Alignment", "single")
+	demoShared.makeLabel(panel, wx, wy, ww, wh, false, "Item Horizontal Alignment", "single")
 
 	wy = wy + wh
 
@@ -105,7 +105,7 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		demoShared.makeLabel(panel, wx, wy, ww, wh, "Item Vertical Pad", "single")
+		demoShared.makeLabel(panel, wx, wy, ww, wh, false, "Item Vertical Pad", "single")
 
 		wy = wy + wh
 
@@ -128,7 +128,7 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		demoShared.makeLabel(panel, wx, wy, ww, wh, "Pipe width", "single")
+		demoShared.makeLabel(panel, wx, wy, ww, wh, false, "Pipe width", "single")
 
 		wy = wy + wh
 

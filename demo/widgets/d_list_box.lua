@@ -192,7 +192,7 @@ local function makeListBox1(panel, x, y)
 	end
 
 	local wx, wy, ww, wh = x + 256, y + 0, 128, 32
-	demoShared.makeLabel(panel, wx, wy, ww, wh, "Text Alignment", "single")
+	demoShared.makeLabel(panel, wx, wy, ww, wh, false, "Text Alignment", "single")
 
 	wy = wy + wh
 
@@ -243,7 +243,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
 
-	demoShared.makeLabel(panel, wx, wy, ww, wh, "Icon Side", "single")
+	demoShared.makeLabel(panel, wx, wy, ww, wh, false, "Icon Side", "single")
 
 	wy = wy + wh
 
@@ -276,19 +276,17 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
 
-	demoShared.makeLabel(panel, wx, wy, ww, wh, "skin.pad_text_x (left/right align)")
+	demoShared.makeLabel(panel, wx, wy, ww, wh, false, "skin.pad_text_x (left/right align)")
 	local sld = panel:addChild("base/slider_bar")
 
 	wy = wy + wh
 
 	sld:geometrySetMode("static", wx, wy, ww, wh)
-
-	sld.slider_pos = 0
-	sld.slider_max = 64
-
-	sld.round_policy = "nearest"
-	sld.count_reverse = false
-	sld.wheel_dir = 1
+		--:sliderSetPosition(0)
+		:sliderSetMax(64)
+		:sliderSetGranularity(1)
+		:sliderSetCountReverse(false)
+		:sliderSetWheelDirection(1)
 
 	sld.wid_actionSliderChanged = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
@@ -298,7 +296,7 @@ local function makeListBox1(panel, x, y)
 		end
 	end
 
-	sld:setSliderPosition(list_box.skin.pad_text_x)
+	sld:sliderSetPosition(list_box.skin.pad_text_x)
 end
 
 

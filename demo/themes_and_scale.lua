@@ -94,7 +94,7 @@ function plan.make(panel)
 	local dpi_list = _pollTextureDPIs(context.conf.prod_ui_path .. "resources/textures")
 	demoShared.makeParagraph(panel, nil, "(Valid DPIs are: " .. table.concat(dpi_list, ", ") .. ")")
 
-	demoShared.makeLabel(panel, 32, 96, 200, 32, "Theme", "single")
+	demoShared.makeLabel(panel, 32, 96, 200, 32, false, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
 	list_box:geometrySetMode("static", 32, 96+40, 200, 96)
 	list_box:setTag("themes_list")
@@ -126,7 +126,7 @@ function plan.make(panel)
 	local xx, yy, ww, hh, h_pad = 32, 96+96+40+16, 160, 32, 8
 	local input
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, "Scale:", "single")
+	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Scale:", "single")
 
 	yy = yy + hh + h_pad
 
@@ -139,7 +139,7 @@ function plan.make(panel)
 
 	yy = yy + hh + h_pad
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, "DPI:", "single")
+	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "DPI:", "single")
 
 	yy = yy + hh + h_pad
 
