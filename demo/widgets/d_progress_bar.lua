@@ -106,32 +106,28 @@ function plan.make(panel)
 		end
 	end
 
-	local lbl_pos = demoShared.makeLabel(panel, 256, 160, 256, 32, "Position")
+	local lbl_pos = demoShared.makeLabel(panel, 256, 160, 256, 32, false, "Position")
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
 	sld_pos:geometrySetMode("static", 256, 160+32+8, 256, 32)
-	sld_pos:setTag("position_slider")
-
-	sld_pos.slider_pos = starting_pos
-	sld_pos.slider_max = 100
-
-	sld_pos.round_policy = "nearest"
+		:setTag("position_slider")
+		:sliderSetPosition(starting_pos)
+		:sliderSetMax(100)
+		:sliderSetGranularity(1)
 
 	sld_pos.wid_actionSliderChanged = slider_action
 
 
-	local lbl_max = demoShared.makeLabel(panel, 256, 160+32+8+32, 256, 32, "Maximum")
+	local lbl_max = demoShared.makeLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum")
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")
 	sld_max:geometrySetMode("static", 256, 160+32+8+32+32+8, 256, 32)
-	sld_max:setTag("maximum_slider")
-
-	sld_max.slider_pos = starting_max
-	sld_max.slider_max = 100
-
-	sld_max.round_policy = "nearest"
+		:setTag("maximum_slider")
+		:sliderSetPosition(starting_max)
+		:sliderSetMax(100)
+		:sliderSetGranularity(1)
 
 	sld_max.wid_actionSliderChanged = slider_action
 end

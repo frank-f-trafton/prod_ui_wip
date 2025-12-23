@@ -131,7 +131,7 @@ function plan.make(panel)
 	end
 
 
-	demoShared.makeLabel(panel, 256, 192+48+48+48, 240, 64, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
+	demoShared.makeLabel(panel, 256, 192+48+48+48, 240, 64, false, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
 	local b_secondary = panel:addChild("base/button")
 	b_secondary:geometrySetMode("static", 256, 192+48+48+48+64, 240, 32)
 	b_secondary:setLabel("Alt. Action Button.")

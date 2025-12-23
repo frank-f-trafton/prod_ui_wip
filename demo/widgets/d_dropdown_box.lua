@@ -13,7 +13,7 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	--demoShared.makeLabel(panel, 32, 0, 512, 32, "...", "single")
+	--demoShared.makeLabel(panel, 32, 0, 512, 32, false, "...", "single")
 	local dropdown = panel:addChild("wimp/dropdown_box")
 	dropdown:geometrySetMode("static", 32, 96, 256, 32)
 	dropdown:writeSetting("show_icons", true)

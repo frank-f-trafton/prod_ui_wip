@@ -35,7 +35,7 @@ function plan.makeWindowFrame(root)
 	frame.evt_thimble1Take = _assertNoThimble
 	frame.evt_thimble2Take = _assertNoThimble
 
-	demoShared.makeLabel(frame, 0, 0, 320, 190, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "multi")
+	demoShared.makeLabel(frame, 0, 0, 320, 190, false, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "multi")
 
 	local xx, yy = 0, 200
 	local ww, hh = 224, 64

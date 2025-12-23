@@ -17,8 +17,9 @@ demo_default_theme = "vacuum_dark"
 -- The first panel to load.
 -- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
+	"widgets.d_sliders",
 	"widgets.d_text_box_script",
-	--"widgets.unfinished.d_dial",
+	"widgets.unfinished.d_dial",
 	"demo_welcome",
 	"widgets.d_list_box",
 	"widgets.d_tree_box",
@@ -38,7 +39,6 @@ local demo_panel_launch = {
 	"layouts.d_layout_static",
 	"themes_and_scale",
 	"widgets.d_progress_bar",
-	"widgets.d_slider_work",
 }
 
 
@@ -64,7 +64,7 @@ local demo_plan_list = {
 				{plan_id = "widgets.d_button_work", label = "Button work"},
 				{plan_id = "theming_skinning.d_button_skinners", label = "Button Skinners"},
 				{plan_id = "widgets.d_button_split", label = "Split Button"},
-				{plan_id = "widgets.d_slider_work", label = "Slider work"},
+				{plan_id = "widgets.d_sliders", label = "Slider Bars"},
 				{plan_id = "widgets.d_stepper", label = "Stepper"},
 				{plan_id = "widgets.d_text_box_single", label = "Textbox (Single-Line)"},
 				{plan_id = "widgets.d_text_box_multi", label = "Textbox (Multi-Line)"},
