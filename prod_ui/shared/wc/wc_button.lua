@@ -41,6 +41,7 @@ function wcButton.setupDefPlain(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 
 	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
 	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
@@ -58,6 +59,7 @@ function wcButton.setupDefDoubleClick(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 
 	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
 	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
@@ -75,6 +77,7 @@ function wcButton.setupDefImmediate(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 
 	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
 	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
@@ -92,6 +95,7 @@ function wcButton.setupDefRepeat(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 
 	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
 	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
@@ -110,6 +114,7 @@ function wcButton.setupDefSticky(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabledSticky
+	def.getEnabled = wcButton.getEnabled
 	def.setPressed = wcButton.setPressedSticky
 
 	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOnSticky
@@ -126,7 +131,9 @@ function wcButton.setupDefCheckbox(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 	def.setChecked = wcButton.setChecked
+	def.getChecked = wcButton.getChecked
 
 	def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
 	def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
@@ -144,6 +151,7 @@ function wcButton.setupDefCheckboxMulti(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 	def.setValue = wcButton.setValue
 	def.setMaxValue = wcButton.setMaxValue
 	def.rollValue = wcButton.rollValue
@@ -164,8 +172,10 @@ function wcButton.setupDefRadioButton(def)
 	def.wid_buttonAction3 = wcButton.wid_buttonAction3
 
 	def.setEnabled = wcButton.setEnabled
+	def.getEnabled = wcButton.getEnabled
 	def.setChecked = wcButton.setCheckedRadio
 	def.setCheckedConditional = wcButton.setCheckedRadioConditional
+	def.getChecked = wcButton.getChecked
 	def.uncheckAll = wcButton.uncheckAllRadioSiblings
 	def.setRadioGroup = wcButton.setRadioGroup
 	def.getRadioGroup = wcButton.getRadioGroup
@@ -198,6 +208,11 @@ function wcButton.setEnabled(self, enabled)
 end
 
 
+function wcButton.getEnabled(self)
+	return self.enabled
+end
+
+
 --- Enables or disables a sticky button.
 function wcButton.setEnabledSticky(self, enabled)
 	self.enabled = not not enabled
@@ -224,6 +239,11 @@ function wcButton.setChecked(self, checked)
 	self.checked = not not checked
 
 	return self
+end
+
+
+function wcButton.getChecked(self)
+	return self.checked
 end
 
 

@@ -127,33 +127,26 @@ end
 function wcSlider.updateTroughHome(self)
 	local trough_ext = self.skin.trough_ext
 
+	local home = math.max(0, math.min(self.slider_home, self.slider_max))
+	if self.count_reverse then
+		home = self.slider_max - home
+	end
+
 	-- If the home position is the first or last value, add the trough extension to the trough home point.
 	-- It looks nicer that way.
-	if self.slider_home == 0 then
-		if self.count_reverse then
-			if self.trough_vertical then
-				self.trough_home = self.trough_h + trough_ext
-			else
-				self.trough_home = self.trough_w + trough_ext
-			end
-		else
-			self.trough_home = -trough_ext
-		end
+	if home == 0 then
+		self.trough_home = -trough_ext
 
-	elseif self.slider_home == self.slider_max then
-		if self.count_reverse then
-			self.trough_home = -trough_ext
+	elseif home == self.slider_max then
+		if self.trough_vertical then
+			self.trough_home = self.trough_h + trough_ext
 		else
-			if self.trough_vertical then
-				self.trough_home = self.trough_h + trough_ext
-			else
-				self.trough_home = self.trough_w + trough_ext
-			end
+			self.trough_home = self.trough_w + trough_ext
 		end
 
 	else
 		local trough_length = (self.trough_vertical) and self.trough_h or self.trough_w
-		self.trough_home = math.floor(0.5 + _lerp(0, trough_length, self.slider_home / self.slider_max))
+		self.trough_home = math.floor(0.5 + _lerp(0, trough_length, home / self.slider_max))
 	end
 end
 

@@ -64,7 +64,7 @@ local demo_plan_list = {
 				{plan_id = "widgets.d_button_work", label = "Button work"},
 				{plan_id = "theming_skinning.d_button_skinners", label = "Button Skinners"},
 				{plan_id = "widgets.d_button_split", label = "Split Button"},
-				{plan_id = "widgets.d_sliders", label = "Slider Bars"},
+				{plan_id = "widgets.d_sliders", label = "Slider Bar"},
 				{plan_id = "widgets.d_stepper", label = "Stepper"},
 				{plan_id = "widgets.d_text_box_single", label = "Textbox (Single-Line)"},
 				{plan_id = "widgets.d_text_box_multi", label = "Textbox (Multi-Line)"},

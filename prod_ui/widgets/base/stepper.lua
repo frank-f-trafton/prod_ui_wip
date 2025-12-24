@@ -87,6 +87,11 @@ function def:setOrientation(orientation)
 end
 
 
+function def:getOrientation()
+	return self.vertical and "vertical" or "horizontal"
+end
+
+
 def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
 def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
 def.evt_thimbleAction = wcButton.evt_thimbleAction
@@ -196,6 +201,11 @@ function def:setIndex(index)
 end
 
 
+function def:getIndex()
+	return self.index
+end
+
+
 --- Increments the stepper index.
 -- @param delta The amount to increment or decrement, expected to be -1, 0 or 1. The final index value will wrap around, or be set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
@@ -227,6 +237,11 @@ function def:stepIndex(delta)
 	end
 
 	return self.index
+end
+
+
+function def:getSelectedOption()
+	return self.options[self.index]
 end
 
 
