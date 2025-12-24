@@ -145,6 +145,8 @@ end
 
 function def:setValue(v, preserve_caret)
 	_setTextFromValue(self, v, preserve_caret, true)
+
+	return self
 end
 
 
@@ -264,6 +266,8 @@ function def:setValueMode(mode)
 	uiAssert.namedMap(1, mode, _nm_value_mode)
 
 	self.value_mode = mode
+
+	return self
 end
 
 
@@ -280,6 +284,8 @@ function def:setDefaultValue(v)
 	uiAssert.numberNotNaN(1, v)
 
 	self.value_default = v
+
+	return self
 end
 
 
