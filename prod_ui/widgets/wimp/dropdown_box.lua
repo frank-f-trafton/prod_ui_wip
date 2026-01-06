@@ -47,6 +47,7 @@ local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
@@ -61,7 +62,12 @@ local def = {
 		show_icons = false,
 		text_align_h = "left", -- "left", "center", "right"
 		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	}
+	},
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_chosenSelection",
+		"cb_drawerSelection"
+	)
 }
 
 
@@ -82,24 +88,13 @@ def.movePageUp = wcMenu.widgetMovePageUp
 def.movePageDown = wcMenu.widgetMovePageDown
 
 
-def.wid_buttonAction = uiDummy.func
-def.wid_buttonAction2 = uiDummy.func
-def.wid_buttonAction3 = uiDummy.func
+-- Widget:cb_chosenSelection(index, tbl)
+-- Called when the item choice changes.
+def.cb_chosenSelection = uiDummy.func
 
-
---def.evt_thimbleAction
---def.evt_thimbleAction2
-
-
---- Callback for a change in the item choice.
-function def:wid_chosenSelection(index, tbl)
-	-- ...
-end
-
---- Callback for when the drawer selection changes.
-function def:wid_drawerSelection(drawer, index, tbl)
-	-- ...
-end
+-- Widget:cb_drawerSelection(drawer, index, tbl)
+--- Called when the drawer selection changes.
+def.cb_drawerSelection = uiDummy.func
 
 
 local function _updateTextWidth(self)
@@ -185,7 +180,7 @@ function def:setSelectionByIndex(item_i)
 	_updateTextWidth(self)
 
 	if index_old ~= self.MN_index then
-		self:wid_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
+		self:cb_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
 	end
 end
 
@@ -352,7 +347,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 
 	if check_chosen then
 		if index_old ~= self.MN_index then
-			self:wid_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
+			self:cb_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
 		end
 		return true
 	end
@@ -470,7 +465,7 @@ function def:evt_pointerWheel(targ, x, y)
 
 			if check_chosen then
 				if index_old ~= self.MN_index then
-					self:wid_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
+					self:cb_chosenSelection(self.MN_index, self.MN_items[self.MN_index])
 				end
 				return true
 			end

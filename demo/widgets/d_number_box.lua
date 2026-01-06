@@ -15,9 +15,9 @@ function plan.make(panel)
 
 	local num_box = panel:addChild("wimp/number_box")
 
-	num_box.wid_action = function(self)
+	num_box:userCallbackSet("cb_action", function(self)
 		-- WIP
-	end
+	end)
 
 	num_box:geometrySetMode("static", 32, 96, 256, 32)
 end

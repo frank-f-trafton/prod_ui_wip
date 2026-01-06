@@ -30,6 +30,7 @@ local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
@@ -37,13 +38,18 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "text_box_s1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_action"
+	)
 }
 
 
--- Override to make something happen when the user presses 'return' or 'kpenter' while the
--- widget is active and has keyboard focus. Return true to halt further processing
+-- Widget:cb_action()
+-- Called when the user presses 'return' or 'kpenter' while the widget is active and has keyboard focus.
+-- Return true to halt further processing.
 -- (specifically, the logic to check if users typed literal newlines via 'return' and 'kpenter').
-def.wid_action = uiDummy.func -- args: (self)
+def.cb_action = uiDummy.func
 
 
 widShared.scrollSetMethods(def)
@@ -193,7 +199,7 @@ end
 function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
 	if self == targ then
 		if self.enabled then
-			if (scancode == "return" or scancode == "kpenter") and self:wid_action() then
+			if (scancode == "return" or scancode == "kpenter") and self:cb_action() then
 				return true
 			else
 				return wcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)

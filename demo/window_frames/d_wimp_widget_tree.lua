@@ -176,10 +176,10 @@ function plan.makeWindowFrame(root)
 	chk_highlight:setLabel("Highlight Selected")
 	chk_highlight:setChecked(context.app.dbg_highlight.active)
 
-	chk_highlight.wid_buttonAction = function(self)
+	chk_highlight:userCallbackSet("cb_buttonAction", function(self)
 		local highlight = self.context.app.dbg_highlight
 		highlight.active = not not self.checked
-	end
+	end)
 
 
 	local chk_vp = frame:addChild("base/checkbox")
@@ -189,10 +189,10 @@ function plan.makeWindowFrame(root)
 	chk_vp:setLabel("Show Viewports")
 	chk_vp:setChecked(context.app.dbg_vp.active)
 
-	chk_vp.wid_buttonAction = function(self)
+	chk_vp:userCallbackSet("cb_buttonAction", function(self)
 		local vp = self.context.app.dbg_vp
 		vp.active = not not self.checked
-	end
+	end)
 
 
 	local chk_ly = frame:addChild("base/checkbox")
@@ -202,10 +202,10 @@ function plan.makeWindowFrame(root)
 	chk_ly:setLabel("Show layout nodes")
 	chk_ly:setChecked(context.app.dbg_lo.active)
 
-	chk_ly.wid_buttonAction = function(self)
+	chk_ly:userCallbackSet("cb_buttonAction", function(self)
 		local ly = self.context.app.dbg_lo
 		ly.active = not not self.checked
-	end
+	end)
 
 
 	local chk_exclude = frame:addChild("base/checkbox")
@@ -216,9 +216,9 @@ function plan.makeWindowFrame(root)
 	frame.usr_exclude = true
 	chk_exclude:setChecked(frame.usr_exclude)
 
-	chk_exclude.wid_buttonAction = function(self)
+	chk_exclude:userCallbackSet("cb_buttonAction", function(self)
 		self.parent.usr_exclude = not self.parent.usr_exclude
-	end
+	end)
 
 	frame:layoutSort()
 

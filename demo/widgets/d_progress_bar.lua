@@ -29,9 +29,9 @@ function plan.make(panel)
 
 	p_bar:setLabel("Progress Bar", "single")
 
-	p_bar.wid_barChanged = function(self, old_pos, old_max, new_pos, new_max)
+	p_bar:userCallbackSet("cb_barChanged", function(self, old_pos, old_max, new_pos, new_max)
 		print("wid_barChanged: old / new progress bar values: ", old_pos, old_max, new_pos, new_max)
-	end
+	end)
 
 	p_bar:setActive(true)
 
@@ -39,19 +39,19 @@ function plan.make(panel)
 	btn_active:geometrySetMode("static", 256, 32, 128, 40)
 	btn_active:setLabel("setActive()")
 
-	btn_active.wid_buttonAction = function(self)
+	btn_active:userCallbackSet("cb_buttonAction", function(self)
 		local pb = self:findSiblingTag("demo_prog_bar")
 		if pb then
 			pb:setActive(not pb.active)
 		end
-	end
+	end)
 
 
 	local btn_vertical = panel:addChild("base/button")
 	btn_vertical:geometrySetMode("static", 256, 32+40, 128, 40)
 	btn_vertical:setLabel("Orientation")
 
-	btn_vertical.wid_buttonAction = function(self)
+	btn_vertical:userCallbackSet("cb_buttonAction", function(self)
 		local pb = self:findSiblingTag("demo_prog_bar")
 		if pb then
 			pb.vertical = not pb.vertical
@@ -63,20 +63,20 @@ function plan.make(panel)
 			pb.parent:reshape()
 			print(pb.vertical, pb:geometryGetMode())
 		end
-	end
+	end)
 
 
 	local btn_far_end = panel:addChild("base/button")
 	btn_far_end:geometrySetMode("static", 256, 32+40+40, 128, 40)
 	btn_far_end:setLabel("Near/Far Start")
 
-	btn_far_end.wid_buttonAction = function(self)
+	btn_far_end:userCallbackSet("cb_buttonAction", function(self)
 		local pb = self:findSiblingTag("demo_prog_bar")
 		if pb then
 			pb.far_end = not pb.far_end
 			pb:reshape()
 		end
-	end
+	end)
 
 	-- Two sliders control the demo progress bar's position and maximum value.
 
@@ -116,7 +116,7 @@ function plan.make(panel)
 		:sliderSetMax(100)
 		:sliderSetGranularity(1)
 
-	sld_pos.wid_actionSliderChanged = slider_action
+	sld_pos:userCallbackSet("cb_actionSliderChanged", slider_action)
 
 
 	local lbl_max = demoShared.makeLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum")
@@ -129,7 +129,7 @@ function plan.make(panel)
 		:sliderSetMax(100)
 		:sliderSetGranularity(1)
 
-	sld_max.wid_actionSliderChanged = slider_action
+	sld_max:userCallbackSet("cb_actionSliderChanged", slider_action)
 end
 
 

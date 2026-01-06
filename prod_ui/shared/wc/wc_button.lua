@@ -20,25 +20,35 @@ local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 -- * Widget Action Callbacks *
 
 
+-- Widget:cb_buttonAction()
 -- Called when the user left-clicks on the button or presses 'space', 'return' or 'kpenter' while the button has thimble focus.
--- Args: (<implicit self>)
-wcButton.wid_buttonAction = uiDummy.func
 
 
+-- Widget:cb_buttonAction2()
 -- Called when the user right-clicks on the button, or presses the 'application' KeyConstant while the button has thimble focus.
--- Args: (<implicit self>)
-wcButton.wid_buttonAction2 = uiDummy.func
 
 
+-- Widget:cb_buttonAction3()
 -- Called when the user middle-clicks on the button. There is no built-in keyboard trigger.
--- Args: (<implicit self>)
-wcButton.wid_buttonAction3 = uiDummy.func
+
+
+local function _setupDefaultCallbacks(def)
+	if not def.user_callbacks then
+		error("expected a 'user_callbacks' table in the widget def table.")
+	end
+
+	def.user_callbacks.cb_buttonAction = true
+	def.user_callbacks.cb_buttonAction2 = true
+	def.user_callbacks.cb_buttonAction3 = true
+
+	def.cb_buttonAction = uiDummy.func
+	def.cb_buttonAction2 = uiDummy.func
+	def.cb_buttonAction3 = uiDummy.func
+end
 
 
 function wcButton.setupDefPlain(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -54,9 +64,7 @@ end
 
 
 function wcButton.setupDefDoubleClick(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -72,9 +80,7 @@ end
 
 
 function wcButton.setupDefImmediate(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -90,9 +96,7 @@ end
 
 
 function wcButton.setupDefRepeat(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -109,9 +113,7 @@ end
 
 
 function wcButton.setupDefSticky(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabledSticky
 	def.getEnabled = wcButton.getEnabled
@@ -126,9 +128,7 @@ end
 
 
 function wcButton.setupDefCheckbox(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -146,9 +146,7 @@ end
 
 
 function wcButton.setupDefCheckboxMulti(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -167,9 +165,7 @@ end
 
 
 function wcButton.setupDefRadioButton(def)
-	def.wid_buttonAction = wcButton.wid_buttonAction
-	def.wid_buttonAction2 = wcButton.wid_buttonAction2
-	def.wid_buttonAction3 = wcButton.wid_buttonAction3
+	_setupDefaultCallbacks(def)
 
 	def.setEnabled = wcButton.setEnabled
 	def.getEnabled = wcButton.getEnabled
@@ -387,11 +383,11 @@ function wcButton.evt_pointerPress(self, targ, x, y, button, istouch, presses)
 
 				elseif button == 2 then
 					-- Instant second action.
-					self:wid_buttonAction2()
+					self:cb_buttonAction2()
 
 				elseif button == 3 then
 					-- Instant tertiary action.
-					self:wid_buttonAction3()
+					self:cb_buttonAction3()
 				end
 			end
 		end
@@ -413,15 +409,15 @@ function wcButton.evt_pointerPressActivate(self, targ, x, y, button, istouch, pr
 					self.cursor_press = self.skin.cursor_press
 
 					-- First-press action.
-					self:wid_buttonAction()
+					self:cb_buttonAction()
 
 				elseif button == 2 then
 					-- Instant secondary action.
-					self:wid_buttonAction2()
+					self:cb_buttonAction2()
 
 				elseif button == 3 then
 					-- Instant tertiary action.
-					self:wid_buttonAction3()
+					self:cb_buttonAction3()
 				end
 			end
 		end
@@ -442,16 +438,16 @@ function wcButton.evt_pointerPressDoubleClick(self, targ, x, y, button, istouch,
 					if self.context.cseq_widget == self and self.context.cseq_presses % 2 == 0 then
 
 						-- First-press action.
-						self:wid_buttonAction()
+						self:cb_buttonAction()
 					end
 
 				elseif button == 2 then
 					-- Instant secondary action.
-					self:wid_buttonAction2()
+					self:cb_buttonAction2()
 
 				elseif button == 3 then
 					-- Instant tertiary action.
-					self:wid_buttonAction3()
+					self:cb_buttonAction3()
 				end
 			end
 		end
@@ -466,7 +462,7 @@ function wcButton.evt_pointerPressRepeat(self, targ, x, y, button, istouch, reps
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
 					-- Repeat-press actions
-					self:wid_buttonAction()
+					self:cb_buttonAction()
 				end
 
 				-- Secondary and tertiary actions do not repeat.
@@ -495,18 +491,18 @@ function wcButton.evt_pointerPressSticky(self, targ, x, y, button, istouch, pres
 						self.cursor_hover = nil
 
 						-- Press action
-						self:wid_buttonAction()
+						self:cb_buttonAction()
 					end
 
 				elseif button == 2 then
 					-- Instant secondary action.
 					-- NOTE: This callback runs even if the sticky button is already depressed.
-					self:wid_buttonAction2()
+					self:cb_buttonAction2()
 
 				elseif button == 3 then
 					-- Instant tertiary action.
 					-- NOTE: This callback runs even if the sticky button is already depressed.
-					self:wid_buttonAction3()
+					self:cb_buttonAction3()
 				end
 			end
 		end
@@ -521,7 +517,7 @@ function wcButton.evt_pointerReleaseActivate(self, targ, x, y, button, istouch, 
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
-					self:wid_buttonAction()
+					self:cb_buttonAction()
 				end
 			end
 		end
@@ -551,7 +547,7 @@ function wcButton.evt_pointerReleaseCheck(self, targ, x, y, button, istouch, pre
 				if button == 1 then
 					self.pressed = false
 					self:setChecked(not self.checked)
-					self:wid_buttonAction()
+					self:cb_buttonAction()
 				end
 			end
 		end
@@ -566,7 +562,7 @@ function wcButton.evt_pointerReleaseCheckMulti(self, targ, x, y, button, istouch
 				if button == 1 then
 					self.pressed = false
 					self:rollValue(1)
-					self:wid_buttonAction()
+					self:cb_buttonAction()
 				end
 			end
 		end
@@ -582,7 +578,7 @@ function wcButton.evt_pointerReleaseRadio(self, targ, x, y, button, istouch, pre
 				if button == 1 then
 					self.pressed = false
 					self:setChecked(true)
-					self:wid_buttonAction()
+					self:cb_buttonAction()
 				end
 			end
 		end
@@ -612,7 +608,7 @@ end
 function wcButton.evt_thimbleAction(self, targ, key, scancode, isrepeat)
 	if self == targ then
 		if self.enabled then
-			self:wid_buttonAction()
+			self:cb_buttonAction()
 		end
 	end
 end
@@ -622,7 +618,7 @@ end
 function wcButton.evt_thimbleAction2(self, targ, key, scancode, isrepeat)
 	if self == targ then
 		if self.enabled then
-			self:wid_buttonAction2()
+			self:cb_buttonAction2()
 		end
 	end
 end
@@ -636,7 +632,7 @@ function wcButton.evt_thimbleActionCheck(self, targ, key, scancode, isrepeat)
 	if self == targ then
 		if self.enabled then
 			self:setChecked(not self.checked)
-			self:wid_buttonAction()
+			self:cb_buttonAction()
 		end
 	end
 end
@@ -647,7 +643,7 @@ function wcButton.evt_thimbleActionCheckMulti(self, targ, key, scancode, isrepea
 	if self == targ then
 		if self.enabled then
 			self:rollValue(1)
-			self:wid_buttonAction()
+			self:cb_buttonAction()
 		end
 	end
 end
@@ -658,7 +654,7 @@ function wcButton.evt_thimbleActionRadio(self, targ, key, scancode, isrepeat)
 	if self == targ then
 		if self.enabled then
 			self:setChecked(true)
-			self:wid_buttonAction()
+			self:cb_buttonAction()
 		end
 	end
 end
@@ -670,7 +666,7 @@ function wcButton.evt_thimbleActionSticky(self, targ, key, scancode, isrepeat)
 		if self.enabled then
 			if not self.pressed then
 				self.pressed = true
-				self:wid_buttonAction()
+				self:cb_buttonAction()
 			end
 		end
 	end

@@ -48,9 +48,11 @@ local editWid = context:getLua("shared/line_ed/edit_wid")
 local editWidS = context:getLua("shared/line_ed/s/edit_wid_s")
 local lineEdS = context:getLua("shared/line_ed/s/line_ed_s")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcInputS = context:getLua("shared/wc/wc_input_s")
 local wcMenu = context:getLua("shared/wc/wc_menu")
@@ -62,6 +64,13 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "combo_box1",
 	--TODO: text_align_h = "left", -- "left", "center", "right"
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_inputChanged",
+		"cb_drawerSelection",
+		"cb_action",
+		"cb_thimble1Release"
+	)
 }
 
 
@@ -106,29 +115,21 @@ local function refreshLineEdText(self)
 end
 
 
---- Callback for a change in the ComboBox state.
-function def:wid_inputChanged(str)
-	-- ...
-end
+-- Widget:cb_inputChanged(str)
+-- Called when there is a change in the ComboBox state.
+def.cb_inputChanged = uiDummy.func
 
+-- Widget:cb_drawerSelection(drawer, index, tbl)
+-- Called when the drawer selection changes.
+def.cb_drawerSelection = uiDummy.func
 
---- Callback for when the drawer selection changes.
-function def:wid_drawerSelection(drawer, index, tbl)
-	-- ...
-end
+-- Widget:cb_action(str)
+-- Called when the user types enter. Return true to halt the code that checks for typing literal newlines via enter.
+def.cb_action = uiDummy.func
 
-
--- Callback for when the user types enter. Return true to halt the code that checks for typing
--- literal newlines via enter.
-function def:wid_action(str)
-
-end
-
-
+-- Widget:cb_thimble1Release(str)
 -- Callback for when the user navigates away from this widget
-function def:wid_thimble1Release(str)
-
-end
+def.cb_thimble1Release = uiDummy.func
 
 
 local _mt_item = {selectable=true, x=0, y=0, w=0, h=0}
@@ -201,7 +202,7 @@ function def:setSelectionByIndex(item_i)
 
 	if index_old ~= self.MN_index then
 		refreshLineEdText(self)
-		self:wid_inputChanged(self.LE.line)
+		self:cb_inputChanged(self.LE.line)
 	end
 end
 
@@ -382,7 +383,7 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	if check_chosen then
 		if index_old ~= self.MN_index then
 			refreshLineEdText(self)
-			self:wid_inputChanged(self.LE.line)
+			self:cb_inputChanged(self.LE.line)
 		end
 		return true
 	end
@@ -419,7 +420,7 @@ function def:evt_thimble1Release(targ)
 			self:_closePopUpMenu(false)
 		end
 
-		self:wid_thimble1Release(self.LE.line)
+		self:cb_thimble1Release(self.LE.line)
 	end
 end
 
@@ -449,7 +450,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
 				self:_openPopUpMenu()
 				return true
 
-			elseif (key == "return" or key == "kpenter") and self:wid_action(self.LE.line) then
+			elseif (key == "return" or key == "kpenter") and self:cb_action(self.LE.line) then
 				return true
 
 			elseif self:wid_defaultKeyNav(key, scancode, isrepeat) then
@@ -460,7 +461,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
 				local old_line = self.LE.line
 				local rv = wcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 				if old_line ~= self.LE.line then
-					self:wid_inputChanged(self.LE.line)
+					self:cb_inputChanged(self.LE.line)
 				end
 				return rv
 			end
@@ -474,7 +475,7 @@ function def:evt_textInput(targ, text)
 		local old_line = self.LE.line
 		local rv = wcInputS.textInputLogic(self, text)
 		if old_line ~= self.LE.line then
-			self:wid_inputChanged(self.LE.line)
+			self:cb_inputChanged(self.LE.line)
 		end
 		return rv
 	end
@@ -604,7 +605,7 @@ function def:evt_pointerWheel(targ, x, y)
 			if check_chosen then
 				if index_old ~= self.MN_index then
 					refreshLineEdText(self)
-					self:wid_inputChanged(self.LE.line)
+					self:cb_inputChanged(self.LE.line)
 				end
 				return true
 			end

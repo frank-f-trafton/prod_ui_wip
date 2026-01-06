@@ -24,9 +24,7 @@ function plan.make(panel)
 		:geometrySetMode("static", 400, 16, 64, 64)
 
 	cntr_s.usr_text = "<Simple Container>"
-	cntr_s.wid_pressed = function()
-		cntr_s.usr_text = "I've been clicked!"
-	end
+
 	cntr_s.render = function(self, ox, oy)
 		love.graphics.push("all")
 

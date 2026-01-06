@@ -226,7 +226,7 @@ function wcSlider.checkMousePress(self, x, y, click_anywhere)
 			local slider_pos_old = self.slider_pos
 			wcSlider.processMovedThumb(self)
 			if self.slider_pos ~= slider_pos_old then
-				self:wid_actionSliderChanged()
+				self:cb_actionSliderChanged()
 			end
 
 			return true
@@ -286,7 +286,7 @@ function wcSlider.checkKeyPress(self, key, scancode, isrepeat)
 			wcSlider.processMovedSliderPos(self)
 
 			if self.slider_pos ~= slider_pos_old then
-				self:wid_actionSliderChanged()
+				self:cb_actionSliderChanged()
 			end
 
 			return true
@@ -329,7 +329,7 @@ function wcSlider.mouseWheelLogic(self, x, y)
 			wcSlider.processMovedSliderPos(self)
 
 			if self.slider_pos ~= slider_pos_old then
-				self:wid_actionSliderChanged()
+				self:cb_actionSliderChanged()
 			end
 		end
 
@@ -365,7 +365,7 @@ function methods:sliderSetPosition(pos)
 	wcSlider.processMovedSliderPos(self)
 
 	if self.slider_pos ~= slider_pos_old then
-		self:wid_actionSliderChanged()
+		self:cb_actionSliderChanged()
 	end
 
 	return self
@@ -389,7 +389,7 @@ function methods:sliderSetMax(max)
 	wcSlider.processMovedSliderPos(self)
 
 	if self.slider_pos ~= slider_pos_old then
-		self:wid_actionSliderChanged()
+		self:cb_actionSliderChanged()
 	end
 
 	return self

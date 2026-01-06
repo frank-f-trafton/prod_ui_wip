@@ -31,6 +31,8 @@ local _lerp = pMath.lerp
 
 local def = {
 	skin_id = "checkbox_multi1",
+
+	user_callbacks = {} -- modified by wcButton
 }
 
 

@@ -1309,7 +1309,7 @@ function wcMenu.dragDropReleaseLogic(self)
 	local drop_state = root.drop_state
 
 	if type(drop_state) == "table" then
-		local halt = self:wid_dropped(drop_state)
+		local halt = self:cb_dropped(drop_state)
 		if halt then
 			root.drop_state = false
 			return true
@@ -1374,7 +1374,7 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 						self:menuSetMarkedItemRange(self.MN_mark_state, first, last)
 					end
 
-					self:wid_select(item_t, item_i)
+					self:cb_select(item_t, item_i)
 				end
 			end
 

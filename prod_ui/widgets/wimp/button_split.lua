@@ -33,13 +33,20 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "button_split1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_buttonAction",
+		"cb_buttonAction2",
+		"cb_buttonAction3",
+		"cb_buttonActionAux"
+	)
 }
 
 
-def.wid_buttonAction = wcButton.wid_buttonAction
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = wcButton.wid_buttonAction3
-def.wid_buttonActionAux = function(self) end
+def.cb_buttonAction = wcButton.cb_buttonAction
+def.cb_buttonAction2 = wcButton.cb_buttonAction2
+def.cb_buttonAction3 = wcButton.cb_buttonAction3
+def.cb_buttonActionAux = function(self) end
 
 
 def.setEnabled = wcButton.setEnabled
@@ -109,7 +116,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 							self.cursor_hover = nil
 
 							-- Press action
-							self:wid_buttonActionAux()
+							self:cb_buttonActionAux()
 
 							-- Halt propagation (to prevent snatching the thimble
 							-- from the newly-made pop-up menu).
@@ -120,11 +127,11 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 				elseif not self.aux_pressed then
 					if button == 2 then
 						-- Instant second action.
-						self:wid_buttonAction2()
+						self:cb_buttonAction2()
 
 					elseif button == 3 then
 						-- Instant tertiary action.
-						self:wid_buttonAction3()
+						self:cb_buttonAction3()
 					end
 				end
 			end
@@ -157,7 +164,7 @@ function def:evt_pointerRelease(targ, x, y, button, istouch, presses)
 					local mx, my = self:getRelativePosition(x, y)
 					-- main button part
 					if not self.aux_pressed and not self.vp2:pointOverlap(mx, my) then
-						self:wid_buttonAction()
+						self:cb_buttonAction()
 					end
 				end
 			end

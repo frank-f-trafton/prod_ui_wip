@@ -148,7 +148,7 @@ function plan.make(panel)
 		:sliderSetAllowChanges(true)
 		:setLabel("Slider")
 
-	--slider.wid_actionSliderChanged =
+	--slider:userCallbackSet("cb_actionSliderChanged", nil)
 
 	local xx, yy = controls_x, controls_y
 
@@ -158,9 +158,9 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setValue(5)
 
-	c_max.wid_action = function(self)
+	c_max:userCallbackSet("cb_action", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -170,9 +170,9 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setValue(0)
 
-	c_home.wid_action = function(self)
+	c_home:userCallbackSet("cb_action", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -184,9 +184,9 @@ function plan.make(panel)
 	c_orientation:insertOption("horizontal")
 	c_orientation:insertOption("vertical")
 
-	c_orientation.wid_buttonAction = function(self)
+	c_orientation:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -196,9 +196,9 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setChecked(false)
 
-	c_use_line.wid_buttonAction = function(self)
+	c_use_line:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -208,9 +208,9 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setChecked(false)
 
-	c_reverse.wid_buttonAction = function(self)
+	c_reverse:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -220,9 +220,9 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setValue(1)
 
-	c_gran.wid_action = function(self)
+	c_gran:userCallbackSet("cb_action", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -234,9 +234,9 @@ function plan.make(panel)
 	c_wheel_dir:insertOption("1")
 	c_wheel_dir:insertOption("-1")
 
-	c_wheel_dir.wid_buttonAction = function(self)
+	c_wheel_dir:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -246,9 +246,9 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setChecked(true)
 
-	c_allow_changes.wid_buttonAction = function(self)
+	c_allow_changes:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
-	end
+	end)
 
 	yy = yy + controls_h + controls_spacing_y
 
@@ -257,7 +257,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, controls_w, controls_h, true)
 		:setLabel("Update!", "single")
 
-	c_update.wid_buttonAction = _updateSlider
+	c_update:userCallbackSet("cb_buttonAction", _updateSlider)
 
 	_updateSlider(c_update)
 

@@ -110,7 +110,7 @@ function plan.make(panel)
 		:setRadioGroup("align_h")
 		:setLabel("Align Left (F2)", "single")
 	rdo_align.usr_align = "left"
-	rdo_align.wid_buttonAction = radioAlignH
+	rdo_align:userCallbackSet("cb_buttonAction", radioAlignH)
 
 	xx = xx + w2
 
@@ -120,7 +120,7 @@ function plan.make(panel)
 		:setRadioGroup("align_h")
 		:setLabel("Align Center (F3)", "single")
 	rdo_align.usr_align = "center"
-	rdo_align.wid_buttonAction = radioAlignH
+	rdo_align:userCallbackSet("cb_buttonAction", radioAlignH)
 
 	xx = xx + w2
 
@@ -130,7 +130,7 @@ function plan.make(panel)
 		:setRadioGroup("align_h")
 		:setLabel("Align Right (F4)", "single")
 	rdo_align.usr_align = "right"
-	rdo_align.wid_buttonAction = radioAlignH
+	rdo_align:userCallbackSet("cb_buttonAction", radioAlignH)
 
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
@@ -143,9 +143,9 @@ function plan.make(panel)
 		--:setTextAlignment("right")
 		--:setGhostText("Ghost text")
 
-	input_single.wid_action = function(self)
+	input_single:userCallbackSet("cb_action", function(self)
 		print("input_single: The internal text is: " .. self:getText())
-	end
+	end)
 
 	--input_single:setMaxCodePoints(24) -- Test
 
@@ -160,9 +160,9 @@ function plan.make(panel)
 		--:setGhostText("Ghost text")
 
 	input_s_mask.LE_hist.enabled = false -- TODO: write up an actual method to do this
-	input_s_mask.wid_action = function(self)
+	input_s_mask:userCallbackSet("cb_action", function(self)
 		print("input_s_mask: The unmasked text is: " .. self:getUnmaskedText())
-	end
+	end)
 
 	--demoShared.makeLabel(panel, xx, yy, 512, 96, false, "foobar", "multi")
 

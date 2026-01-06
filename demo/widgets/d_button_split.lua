@@ -97,11 +97,11 @@ function plan.make(panel)
 		:setTag("demo_split_btn")
 		:setLabel("Split Button")
 
-	btn_spl.wid_buttonAction = function(self)
+	btn_spl:userCallbackSet("cb_buttonAction", function(self)
 		print("(Click)")
-	end
-	btn_spl.wid_buttonAction2 = _createPopUpMenu
-	btn_spl.wid_buttonActionAux = _createPopUpMenu
+	end)
+	btn_spl:userCallbackSet("cb_buttonAction2", _createPopUpMenu)
+	btn_spl:userCallbackSet("cb_buttonActionAux", _createPopUpMenu)
 
 	local xx, yy, ww, hh = 256, 0, 256, 48
 
@@ -111,12 +111,12 @@ function plan.make(panel)
 			:setLabel("Aux Enabled")
 			:setChecked(not not btn_spl.aux_enabled)
 
-		chk.wid_buttonAction = function(self)
+		chk:userCallbackSet("cb_buttonAction", function(self)
 			local btn = self:findSiblingTag("demo_split_btn")
 			if btn then
 				btn:setAuxEnabled(self.checked)
 			end
-		end
+		end)
 		yy = yy + hh
 	end
 
@@ -129,7 +129,7 @@ function plan.make(panel)
 			:setRadioGroup("split_placement")
 			:setLabel("Right")
 		rdo.usr_placement = "right"
-		rdo.wid_buttonAction = _radioPlacement
+		rdo:userCallbackSet("cb_buttonAction", _radioPlacement)
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
 		end
@@ -142,7 +142,7 @@ function plan.make(panel)
 			:setRadioGroup("split_placement")
 			:setLabel("Left")
 		rdo.usr_placement = "left"
-		rdo.wid_buttonAction = _radioPlacement
+		rdo:userCallbackSet("cb_buttonAction", _radioPlacement)
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
 		end
@@ -155,7 +155,7 @@ function plan.make(panel)
 			:setRadioGroup("split_placement")
 			:setLabel("Top")
 		rdo.usr_placement = "top"
-		rdo.wid_buttonAction = _radioPlacement
+		rdo:userCallbackSet("cb_buttonAction", _radioPlacement)
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
 		end
@@ -168,7 +168,7 @@ function plan.make(panel)
 			:setRadioGroup("split_placement")
 			:setLabel("Bottom")
 		rdo.usr_placement = "bottom"
-		rdo.wid_buttonAction = _radioPlacement
+		rdo:userCallbackSet("cb_buttonAction", _radioPlacement)
 		if btn_spl.skin.aux_placement == rdo.usr_placement then
 			rdo:setChecked(true)
 		end
@@ -188,13 +188,13 @@ function plan.make(panel)
 		sld.slider_def = btn_spl.skin.aux_size
 		sld.slider_pos = sld.slider_def
 		sld.slider_max = 224
-		sld.wid_actionSliderChanged = function(self)
+		sld:userCallbackSet("cb_actionSliderChanged", function(self)
 			local btn = self:findSiblingTag("demo_split_btn")
 			if btn then
 				btn.skin.aux_size = math.floor(self.slider_pos)
 				btn:reshape()
 			end
-		end
+		end)
 	end
 end
 

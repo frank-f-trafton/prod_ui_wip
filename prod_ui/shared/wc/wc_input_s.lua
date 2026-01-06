@@ -17,7 +17,7 @@ Instead, check for enter (or space) in the widget's 'evt_keyPressed' callback.
 
 Example:
 ----
-if (scancode == "return" or scancode == "kpenter") and self:wid_action() then
+if (scancode == "return" or scancode == "kpenter") and self:cb_action() then
 	return true
 else
 	return wcInputS.keyPressLogic(self, key, scancode, isrepeat)

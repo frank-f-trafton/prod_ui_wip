@@ -45,7 +45,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Small")
 			rad_btn.usr_header_size = "small"
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.header_size == rad_btn.usr_header_size then
@@ -62,7 +62,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Normal")
 			rad_btn.usr_header_size = "normal"
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.header_size == rad_btn.usr_header_size then
@@ -79,7 +79,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_header_size"
 			rad_btn:setLabel("Large")
 			rad_btn.usr_header_size = "large"
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.header_size == rad_btn.usr_header_size then
@@ -98,12 +98,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getResizable()
 		checkbox:setLabel("Resizable frame", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setResizable(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -117,12 +117,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = false
 		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame.DEBUG_show_resize_range = not not self.checked
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -137,12 +137,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getCloseControlVisibility()
 		checkbox:setLabel("Show 'Close' control", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setCloseControlVisibility(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -157,12 +157,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getCloseEnabled()
 		checkbox:setLabel("Enable 'Close'", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setCloseEnabled(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -177,12 +177,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getMaximizeControlVisibility()
 		checkbox:setLabel("Show 'Maximize' control", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setMaximizeControlVisibility(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -197,12 +197,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getMaximizeEnabled()
 		checkbox:setLabel("Enable 'Maximize'", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setMaximizeEnabled(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -217,12 +217,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getHeaderVisible()
 		checkbox:setLabel("Visible header", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setHeaderVisible(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -237,12 +237,12 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = frame:getDraggable()
 		checkbox:setLabel("Draggable header", "single-ul")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if frame then
 				frame:setDraggable(self.checked)
 			end
-		end
+		end)
 		checkbox:reshape()
 
 		yy = yy + hh
@@ -275,7 +275,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Left")
 			rad_btn.usr_button_side = "left"
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.header_button_side == rad_btn.usr_button_side then
@@ -292,7 +292,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_control_side"
 			rad_btn:setLabel("Right")
 			rad_btn.usr_button_side = "right"
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.header_button_side == rad_btn.usr_button_side then
@@ -331,7 +331,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Left")
 			rad_btn.usr_text_align_h = 0
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.skin.header_text_align_h == rad_btn.usr_text_align_h then
@@ -348,7 +348,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Center")
 			rad_btn.usr_text_align_h = 0.5
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.skin.header_text_align_h == rad_btn.usr_text_align_h then
@@ -365,7 +365,7 @@ function plan.makeWindowFrame(root)
 			rad_btn.radio_group = "rg_header_text_align_h"
 			rad_btn:setLabel("Right")
 			rad_btn.usr_text_align_h = 1
-			rad_btn.wid_buttonAction = r_action
+			rad_btn:userCallbackSet("cb_buttonAction", r_action)
 
 			-- initial state
 			if frame.skin.header_text_align_h == rad_btn.usr_text_align_h then
@@ -382,9 +382,9 @@ function plan.makeWindowFrame(root)
 		btn:geometrySetMode("static", xx, yy, ww, hh)
 
 		btn:setLabel("Close (forcefully)")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			self:getUIFrame():closeFrame(true)
-		end
+		end)
 		yy = yy + hh
 	end
 

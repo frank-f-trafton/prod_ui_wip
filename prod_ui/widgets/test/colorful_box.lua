@@ -1,15 +1,15 @@
 -- A non-interactive box with some color options. Used for testing layout code.
 
 
-local def = {}
-
-
 local context = select(1, ...)
 
 
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
+
+
+local def = {}
 
 
 -- For convenience...
