@@ -18,7 +18,7 @@ local function _makeButton(frame, id, label, x, y, w, h)
 	assert(type(label) == "string")
 
 	local bb_btn = frame:addChild("base/button")
-	bb_btn.wid_buttonAction = _button_launchFrame
+	bb_btn:userCallbackSet("cb_buttonAction", _button_launchFrame)
 	bb_btn:geometrySetMode("static", x, y, w, h)
 
 	bb_btn:setLabel(label)
@@ -46,14 +46,14 @@ function plan.makeWindowFrame(root)
 	bb_btn:geometrySetMode("static", xx, yy, ww, hh)
 
 	bb_btn:setLabel("Open all")
-	bb_btn.wid_buttonAction = function(self)
+	bb_btn:userCallbackSet("cb_buttonAction", function(self)
 		local siblings = self:nodeAssertParent().nodes
 		for i, sib in ipairs(siblings) do
 			if sib ~= self and type(sib.usr_plan) == "string" then
 				_button_launchFrame(sib)
 			end
 		end
-	end
+	end)
 
 	yy = yy + hh
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_wimp_file_select", "File Selector", xx, yy, ww, hh)

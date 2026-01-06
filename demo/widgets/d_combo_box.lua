@@ -24,15 +24,15 @@ function plan.make(panel)
 		combo_box:addItem(tostring(i))
 	end
 
-	combo_box.wid_inputChanged = function(self, str)
+	combo_box:userCallbackSet("cb_inputChanged", function(self, str)
 		print("ComboBox: Input changed: " .. str)
-	end
-	combo_box.wid_action = function(self)
+	end)
+	combo_box:userCallbackSet("cb_action", function(self)
 		print("ComboBox: user pressed enter")
-	end
-	combo_box.wid_thimble1Release = function(self)
+	end)
+	combo_box:userCallbackSet("cb_thimble1Release", function(self)
 		print("ComboBox: user navigated away from this widget")
-	end
+	end)
 end
 
 

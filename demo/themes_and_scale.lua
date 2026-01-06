@@ -97,8 +97,8 @@ function plan.make(panel)
 	demoShared.makeLabel(panel, 32, 96, 200, 32, false, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
 	list_box:geometrySetMode("static", 32, 96+40, 200, 96)
-	list_box:setTag("themes_list")
-	list_box.wid_action = _updateScale
+		:setTag("themes_list")
+		:userCallbackSet("cb_action", _updateScale)
 
 	do
 		local theme_ids = context:enumerateThemes()
@@ -134,8 +134,8 @@ function plan.make(panel)
 	input:geometrySetMode("static", xx, yy, ww, hh)
 	_configureInputBox(input)
 	input:setTag("in_scale")
-	input:setText(tostring(context.scale))
-	input.wid_action = _updateScale
+		:setText(tostring(context.scale))
+		:userCallbackSet("cb_action", _updateScale)
 
 	yy = yy + hh + h_pad
 
@@ -147,16 +147,16 @@ function plan.make(panel)
 	input:geometrySetMode("static", xx, yy, ww, hh)
 	_configureInputBox(input)
 	input:setTag("in_dpi")
-	input:setText(tostring(context.dpi))
-	input.wid_action = _updateScale
+		:setText(tostring(context.dpi))
+		:userCallbackSet("cb_action", _updateScale)
 
 	yy = yy + hh + h_pad
 
 	local btn = panel:addChild("base/button")
 	btn:geometrySetMode("static", xx, yy, ww, hh)
-	btn.tag = "btn_crt"
-	btn:setLabel("Update")
-	btn.wid_buttonAction = _updateScale
+		:setTag("btn_crt")
+		:setLabel("Update")
+		:userCallbackSet("cb_buttonAction", _updateScale)
 
 	yy = yy + hh + h_pad
 end

@@ -40,9 +40,11 @@ Trough
 local context = select(1, ...)
 
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")
 local wcLabel = context:getLua("shared/wc/wc_label")
@@ -52,11 +54,15 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "slider1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_actionSliderChanged"
+	)
 }
 
 
 -- Called when the slider state changes.
-function def:wid_actionSliderChanged()
+function def:cb_actionSliderChanged()
 	--print("Slider changed.", self.slider_pos, "/", self.slider_max)
 	--print(self.trough_x, self.trough_y, self.trough_w, self.trough_h)
 	--print(self.thumb_x, self.thumb_y, self.thumb_w, self.thumb_h)
@@ -67,9 +73,15 @@ end
 -- secondary and tertiary actions do not account for the mouse cursor being within the
 -- clickable trough area. (That is, right or middle-clicking anywhere on the widget will
 -- activate actions 2 and 3, respectively).
-def.wid_buttonAction = wcButton.wid_buttonAction
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+-- Widget:cb_buttonAction()
+def.cb_buttonAction = uiDummy.func
+
+-- Widget:cb_buttonAction2()
+def.cb_buttonAction2 = uiDummy.func
+
+-- Widget:cb_buttonAction3()
+def.cb_buttonAction3 = uiDummy.func
 
 
 def.setEnabled = wcButton.setEnabled
@@ -125,7 +137,7 @@ function def:evt_reshapePre()
 	local slider_pos_old = self.slider_pos
 	wcSlider.processMovedSliderPos(self)
 	if self.slider_pos ~= slider_pos_old then
-		self:wid_actionSliderChanged()
+		self:cb_actionSliderChanged()
 	end
 	wcSlider.updateTroughHome(self)
 
@@ -153,11 +165,11 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 				elseif button == 2 then
 					-- Secondary action.
-					self:wid_buttonAction2()
+					self:cb_buttonAction2()
 
 				elseif button == 3 then
 					-- Tertiary action.
-					self:wid_buttonAction3()
+					self:cb_buttonAction3()
 				end
 			end
 		end

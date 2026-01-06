@@ -168,13 +168,13 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww, hh)
 		:setTag("demo_wrap")
 		:setLabel("Wrap (F5)", "single")
-	cbox_wrap.wid_buttonAction = function(self)
+	cbox_wrap:userCallbackSet("cb_buttonAction", function(self)
 		local tb = panel:findTag("demo_script_ed")
 		if tb then
 			tb:setWrapMode(self.checked)
 		end
 		_updateButtons(panel)
-	end
+	end)
 
 	xx = x1
 	yy = yy + h2
@@ -184,13 +184,13 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww*2, hh)
 		:setTag("demo_line_no")
 		:setLabel("Show line number column (F6)", "single")
-	cbox_line_no.wid_buttonAction = function(self)
+	cbox_line_no:userCallbackSet("cb_buttonAction", function(self)
 		local tb = panel:findTag("demo_script_ed")
 		if tb then
 			tb:setLineNumberColumn(self.checked)
 		end
 		_updateButtons(panel)
-	end
+	end)
 
 	xx = x1
 	yy = yy + h2
@@ -212,7 +212,7 @@ function plan.make(panel)
 		:setRadioGroup("align_h")
 		:setLabel("Align Left (F2)", "single")
 	rdo_align.usr_align = "left"
-	rdo_align.wid_buttonAction = radioAlignH
+	rdo_align:userCallbackSet("cb_buttonAction", radioAlignH)
 
 	xx = xx + w2
 
@@ -222,7 +222,7 @@ function plan.make(panel)
 		:setRadioGroup("align_h")
 		:setLabel("Align Center (F3)", "single")
 	rdo_align.usr_align = "center"
-	rdo_align.wid_buttonAction = radioAlignH
+	rdo_align:userCallbackSet("cb_buttonAction", radioAlignH)
 
 	xx = xx + w2
 
@@ -232,7 +232,7 @@ function plan.make(panel)
 		:setRadioGroup("align_h")
 		:setLabel("Align Right (F4)", "single")
 	rdo_align.usr_align = "right"
-	rdo_align.wid_buttonAction = radioAlignH
+	rdo_align:userCallbackSet("cb_buttonAction", radioAlignH)
 
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)
@@ -256,7 +256,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww * 2, hh)
 		:setTag("demo_illum")
 
-	stp_illum.wid_stepperChanged = stepperIllumination
+	stp_illum:userCallbackSet("cb_stepperChanged", stepperIllumination)
 
 	stp_illum:insertOption("always")
 	stp_illum:insertOption("never")

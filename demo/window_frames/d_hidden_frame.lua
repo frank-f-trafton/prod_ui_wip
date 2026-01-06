@@ -27,13 +27,13 @@ function plan.makeWindowFrame(root)
 		btn.usr_time = 0.0
 		btn.usr_time_max = 5.0
 		btn:setLabel("Hide for " .. btn.usr_time_max .. " seconds")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:nodeFindKeyAscending(true, "frame_type", "window")
 			if frame then
 				frame:setFrameHidden(true)
 				self.usr_time = self.usr_time_max
 			end
-		end
+		end)
 
 		local function _asyncUnhide(frame, params, dt)
 			frame:setFrameHidden(false)

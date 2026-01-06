@@ -21,9 +21,11 @@ local context = select(1, ...)
 
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")
 local wcLabel = context:getLua("shared/wc/wc_label")
@@ -35,18 +37,31 @@ local _lerp = pMath.lerp
 
 local def = {
 	skin_id = "dial1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_actionDialChanged",
+		"cb_buttonAction",
+		"cb_buttonAction2",
+		"cb_buttonAction3"
+	)
 }
 
 
-function def:wid_actionDialChanged()
+function def:cb_actionDialChanged()
 	print("Dial changed.", self.dial_pos, self.dial_min, "/", self.dial_max)
 end
 
 
 -- NOTE: The primary button action is activated by keyboard input only.
-def.wid_buttonAction = wcButton.wid_buttonAction
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = wcButton.wid_buttonAction3
+
+-- Widget:cb_buttonAction()
+def.cb_buttonAction = uiDummy.func
+
+-- Widget:cb_buttonAction2()
+def.cb_buttonAction2 = uiDummy.func
+
+-- Widget:cb_buttonAction3()
+def.cb_buttonAction3 = uiDummy.func
 
 
 def.setEnabled = wcButton.setEnabled
@@ -102,7 +117,7 @@ function def:setDialPosition(pos)
 	_processMovedDialPos(self)
 
 	if self.dial_pos ~= pos_old then
-		self:wid_actionDialChanged()
+		self:cb_actionDialChanged()
 	end
 end
 
@@ -118,7 +133,7 @@ function def:setDialParameters(pos, min, max, home, rnd)
 
 	_processMovedDialPos(self)
 	if self.dial_pos ~= pos_old then
-		self:wid_actionDialChanged()
+		self:cb_actionDialChanged()
 	end
 end
 
@@ -135,7 +150,7 @@ function def:setDialMax(max)
 	_processMovedDialPos(self)
 
 	if self.dial_pos ~= pos_old then
-		self:wid_actionDialChanged()
+		self:cb_actionDialChanged()
 	end
 end
 
@@ -230,11 +245,11 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 		elseif button == 2 then
 			-- Secondary action.
-			self:wid_buttonAction2()
+			self:cb_buttonAction2()
 
 		elseif button == 3 then
 			-- Tertiary action.
-			self:wid_buttonAction3()
+			self:cb_buttonAction3()
 		end
 	end
 end
@@ -252,7 +267,7 @@ function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		_processMovedDialPos(self)
 
 		if self.dial_pos ~= pos_old then
-			self:wid_actionDialChanged()
+			self:cb_actionDialChanged()
 		end
 	end
 end
@@ -293,7 +308,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 				self.dial_pos = self.dial_pos + dir * additive
 				_processMovedDialPos(self)
 				if self.dial_pos ~= pos_old then
-					self:wid_actionDialChanged()
+					self:cb_actionDialChanged()
 				end
 				return true
 			end

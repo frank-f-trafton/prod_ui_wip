@@ -29,9 +29,9 @@ function plan.make(panel)
 	end
 	--]]
 
-	dropdown.wid_chosenSelection = function(self, index, tbl)
+	dropdown:userCallbackSet("cb_chosenSelection", function(self, index, tbl)
 		print("Dropdown: New chosen selection: #" .. index .. ", Text: " .. tostring(tbl.text))
-	end
+	end)
 end
 
 

@@ -37,18 +37,18 @@ function plan.make(panel)
 		:setIconsEnabled(true)
 		:setExpandersActive(true)
 
-	tree_box.wid_action = function(self, item, index)
+	tree_box:userCallbackSet("cb_action", function(self, item, index)
 		print("wid_action()", item, index)
-	end
-	tree_box.wid_action2 = function(self, item, index)
+	end)
+	tree_box:userCallbackSet("cb_action2", function(self, item, index)
 		print("wid_action2()", item, index)
-	end
-	tree_box.wid_action3 = function(self, item, index)
+	end)
+	tree_box:userCallbackSet("cb_action3", function(self, item, index)
 		print("wid_action3()", item, index)
-	end
-	tree_box.wid_select = function(self, item, index)
+	end)
+	tree_box:userCallbackSet("cb_select", function(self, item, index)
 		print("wid_select()", item, index)
-	end
+	end)
 
 	tree_box.MN_drag_scroll = true
 	tree_box.MN_drag_select = true
@@ -85,7 +85,7 @@ function plan.make(panel)
 			:setRadioGroup("tb_item_h_align")
 			:setLabel("left")
 		rdo_btn.usr_item_align_h = "left"
-		rdo_btn.wid_buttonAction = rdo_item_align_h_action
+		rdo_btn:userCallbackSet("cb_buttonAction", rdo_item_align_h_action)
 	end
 
 	wy = wy + wh
@@ -96,7 +96,7 @@ function plan.make(panel)
 			:setRadioGroup("tb_item_h_align")
 			:setLabel("right")
 		rdo_btn.usr_item_align_h = "right"
-		rdo_btn.wid_buttonAction = rdo_item_align_h_action
+		rdo_btn:userCallbackSet("cb_buttonAction", rdo_item_align_h_action)
 
 		rdo_btn:setCheckedConditional("usr_item_align_h", tree_box.TR_item_align_h)
 	end
@@ -116,13 +116,13 @@ function plan.make(panel)
 		sld.slider_pos = 0
 		sld.slider_def = tree_box.skin.item_pad_v
 		sld.slider_max = 64
-		sld.wid_actionSliderChanged = function(self)
+		sld:userCallbackSet("cb_actionSliderChanged", function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
 				tb.skin.item_pad_v = math.floor(self.slider_pos)
 				_refreshTreeBox(tb)
 			end
-		end
+		end)
 	end
 
 	wy = wy + wh
@@ -138,13 +138,13 @@ function plan.make(panel)
 		sld.slider_pos = 0
 		sld.slider_def = tree_box.skin.pipe_width
 		sld.slider_max = 64
-		sld.wid_actionSliderChanged = function(self)
+		sld:userCallbackSet("cb_actionSliderChanged", function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
 				tb.skin.pipe_width = math.floor(self.slider_pos)
 				_refreshTreeBox(tb)
 			end
-		end
+		end)
 	end
 
 	wy = wy + wh
@@ -155,13 +155,13 @@ function plan.make(panel)
 			:geometrySetMode("static", wx, wy, ww, wh)
 			:setLabel("Draw pipes")
 			:setChecked(tree_box.skin.draw_pipes)
-		chk.wid_buttonAction = function(self)
+		chk:userCallbackSet("cb_buttonAction", function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
 				tb.skin.draw_pipes = not not self.checked
 				_refreshTreeBox(tb)
 			end
-		end
+		end)
 	end
 
 	wy = wy + wh
@@ -171,13 +171,13 @@ function plan.make(panel)
 			:geometrySetMode("static", wx, wy, ww, wh)
 			:setLabel("Draw icons")
 			:setChecked(tree_box.TR_show_icons)
-		chk.wid_buttonAction = function(self)
+		chk:userCallbackSet("cb_buttonAction", function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
 				tb:setIconsEnabled(not not self.checked)
 				_refreshTreeBox(tb)
 			end
-		end
+		end)
 	end
 
 	wy = wy + wh
@@ -187,13 +187,13 @@ function plan.make(panel)
 			:geometrySetMode("static", wx, wy, ww, wh)
 			:setLabel("Expanders enabled")
 			:setChecked(tree_box.TR_expanders_active)
-		chk.wid_buttonAction = function(self)
+		chk:userCallbackSet("cb_buttonAction", function(self)
 			local tb = self:findSiblingTag("demo_treebox")
 			if tb then
 				tb:setExpandersActive(not not self.checked)
 				_refreshTreeBox(tb)
 			end
-		end
+		end)
 	end
 
 	wy = wy + wh

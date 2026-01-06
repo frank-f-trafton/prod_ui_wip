@@ -16,6 +16,8 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "checkbox1",
+
+	user_callbacks = {} -- modified by wcButton
 }
 
 

@@ -4,6 +4,7 @@ local context = select(1, ...)
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
@@ -20,6 +21,12 @@ local _nm_size_mode = uiTable.newNamedMapV("SizeMode", "h", "v")
 
 local def = {
 	skin_id = "text_block1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_buttonAction",
+		"cb_buttonAction2",
+		"cb_buttonAction3"
+	)
 }
 
 
@@ -28,9 +35,14 @@ local function _openURL(self)
 end
 
 
-def.wid_buttonAction = _openURL
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = _openURL
+-- Widget:cb_buttonAction()
+def.cb_buttonAction = _openURL
+
+-- Widget:cb_buttonAction2()
+def.cb_buttonAction2 = uiDummy.func
+
+-- Widget:cb_buttonAction3()
+def.cb_buttonAction3 = _openURL
 
 
 def.setEnabled = wcButton.setEnabled

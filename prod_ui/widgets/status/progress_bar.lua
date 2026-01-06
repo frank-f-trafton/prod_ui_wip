@@ -5,28 +5,34 @@ XXX gradual update support via evt_update() and a target position.
 --]]
 
 
-local def = {
-	skin_id = "progress_bar1",
-}
-
-
 local context = select(1, ...)
 
 
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcLabel = context:getLua("shared/wc/wc_label")
 local widShared = context:getLua("core/wid_shared")
 
 
+local def = {
+	skin_id = "progress_bar1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_barChanged"
+	)
+}
+
+
+-- Widget:cb_barChanged(old_pos, old_max, new_pos, new_max)
 -- Called when the internal progress counter or maximum value change.
-function def:wid_barChanged(old_pos, old_max, new_pos, new_max)
-	-- Warning: Do not call self:setCounter() or self:setCounterMax() from within this function.
-	-- It will overflow the stack.
-end
+-- Warning: Do not call self:setCounter() or self:setCounterMax() from within this function.
+-- It will overflow the stack.
+def.cb_barChanged = uiDummy.func
 
 
 --- Sets the progress bar's active state.
@@ -56,7 +62,7 @@ function def:setCounter(pos, max)
 	self.pos = math.max(0, math.min(pos, self.max))
 
 	if old_pos ~= self.pos or old_max ~= self.max then
-		self:wid_barChanged(self.pos, self.max, old_pos, old_max)
+		self:cb_barChanged(self.pos, self.max, old_pos, old_max)
 	end
 end
 

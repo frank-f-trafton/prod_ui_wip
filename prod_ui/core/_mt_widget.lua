@@ -1290,4 +1290,30 @@ function _mt_widget:geometryGetOrder()
 end
 
 
+local function _assertValidCallback(self, id)
+	if not self.user_callbacks or not self.user_callbacks[id] then
+		error("invalid user callback '" .. tostring(id) .. "' for widget '" .. tostring(self.id) .. "'", 3)
+	end
+end
+
+
+function _mt_widget:userCallbackSet(id, fn)
+	_assertValidCallback(self, id)
+	uiAssert.typeEval(2, fn, "function")
+
+	self[id] = fn
+
+	return self
+end
+
+
+function _mt_widget:userCallbackGet(id)
+	_assertValidCallback(self, id)
+
+	-- Warning! This method does not return default callbacks that are assigned
+	-- as part of widget definitions.
+	return rawget(self, id) or nil
+end
+
+
 return _mt_widget

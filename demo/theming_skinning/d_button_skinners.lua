@@ -38,7 +38,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww1, hh2)
 		:setLabel("Left")
 	bb_rdo.usr_align = "left"
-	bb_rdo.wid_buttonAction = buttonAlignH
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignH)
 
 	xx = xx + ww1
 
@@ -46,7 +46,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww1, hh2)
 		:setLabel("Center")
 	bb_rdo.usr_align = "center"
-	bb_rdo.wid_buttonAction = buttonAlignH
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignH)
 
 	xx = xx + ww1
 
@@ -54,7 +54,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww1, hh2)
 		:setLabel("Right")
 	bb_rdo.usr_align = "right"
-	bb_rdo.wid_buttonAction = buttonAlignH
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignH)
 
 	xx = 0
 	yy = yy + hh2
@@ -63,7 +63,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww2, hh2)
 		:setLabel("Justify")
 	bb_rdo.usr_align = "justify"
-	bb_rdo.wid_buttonAction = buttonAlignH
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignH)
 
 	yy = yy + hh2
 
@@ -77,7 +77,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww1, hh2)
 		:setLabel("Top")
 	bb_rdo.usr_align = "top"
-	bb_rdo.wid_buttonAction = buttonAlignV
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignV)
 
 	xx = xx + ww1
 
@@ -85,7 +85,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww1, hh2)
 		:setLabel("Middle")
 	bb_rdo.usr_align = "middle"
-	bb_rdo.wid_buttonAction = buttonAlignV
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignV)
 
 	xx = xx + ww1
 
@@ -93,7 +93,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww1, hh2)
 		:setLabel("Bottom")
 	bb_rdo.usr_align = "bottom"
-	bb_rdo.wid_buttonAction = buttonAlignV
+	bb_rdo:userCallbackSet("cb_buttonAction", buttonAlignV)
 
 	xx = xx + ww1
 end

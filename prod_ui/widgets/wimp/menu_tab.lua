@@ -88,8 +88,15 @@ local def = {
 
 	default_settings = {
 		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	}
+	},
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_keyPressed"
+	)
 }
+
+
+def.cb_keyPressed = uiDummy.func
 
 
 wcMenu.attachMenuMethods(def)
@@ -840,7 +847,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 	if self == targ then
 		-- The selected menu item gets a chance to handle keyboard input before the menu widget.
 
-		if self.wid_keyPressed and self:wid_keyPressed(key, scancode, isrepeat) then
+		if self:cb_keyPressed(key, scancode, isrepeat) then
 			return true
 
 		-- Run the default navigation checks.

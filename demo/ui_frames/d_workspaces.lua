@@ -47,12 +47,12 @@ local function _setupWS2(root)
 	btn:geometrySetMode("static", 32, 32, 256, 64)
 	btn:setLabel("Back to Workspace #1")
 
-	btn.wid_buttonAction = function(self)
+	btn:userCallbackSet("cb_buttonAction", function(self)
 		local ws1 = self.context.root:findTag("main_workspace")
 		if ws1 then
 			self.context.root:setActiveWorkspace(ws1)
 		end
-	end
+	end)
 
 	local frame_ws2 = root:newWindowFrame()
 	frame_ws2:setFrameTitle("Associated with Workspace #2")
@@ -154,10 +154,10 @@ function plan.make(panel)
 		btn:geometrySetMode("static", xx, yy, ww, hh)
 		btn.tag = "btn_crt"
 		btn:setLabel("Create Workspace #2")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			_setupWS2(self.context.root)
 			_refreshButtonState(self)
-		end
+		end)
 		yy = yy + hh
 	end
 
@@ -167,12 +167,12 @@ function plan.make(panel)
 		btn:geometrySetMode("static", xx, yy, ww, hh)
 		btn.tag = "btn_act"
 		btn:setLabel("Activate Workspace #2")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			local ws2 = self.context.root:findTag("alt_workspace")
 			if ws2 then
 				self.context.root:setActiveWorkspace(ws2)
 			end
-		end
+		end)
 		yy = yy + hh
 	end
 
@@ -183,7 +183,7 @@ function plan.make(panel)
 		btn:geometrySetMode("static", xx, yy, ww, hh)
 		btn.tag = "btn_dst"
 		btn:setLabel("Destroy Workspace #2")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			local ws1 = self.context.root:findTag("main_workspace")
 			local ws2 = self.context.root:findTag("alt_workspace")
 			if ws2 then
@@ -194,7 +194,7 @@ function plan.make(panel)
 				self.context.root:sortG2()
 				_refreshButtonState(self)
 			end
-		end
+		end)
 		yy = yy + hh
 	end
 

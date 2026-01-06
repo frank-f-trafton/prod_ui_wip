@@ -39,6 +39,18 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "number_box1",
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_action",
+		"cb_inputChanged",
+
+		"cb_incrementButton",
+		"cb_decrementButton",
+		"cb_incrementArrowKey",
+		"cb_decrementArrowKey",
+		"cb_incrementPageKey",
+		"cb_decrementPageKey"
+	)
 }
 
 
@@ -53,15 +65,15 @@ def.updateAlignOffset = wcInputS.method_updateAlignOffset
 def.pop_up_proto = wcInputS.pop_up_proto
 
 
+-- Widget:cb_action()
 -- Called when the user presses 'enter'. Return true to halt the logic that checks for
 -- typing literal newlines with the enter key.
-def.wid_action = uiDummy.func
+def.cb_action = uiDummy.func
 
 
---- Callback for a change in the NumberBox state.
-function def:wid_inputChanged(text)
-	-- ...
-end
+-- Widget:cb_inputChanged(text)
+-- Called when the NumberBox text changes.
+def.cb_inputChanged = uiDummy.func
 
 
 --- Callbacks that control the amount of addition and subtraction of the value.
@@ -69,12 +81,12 @@ end
 -- @param radix The current radix, or base. (10 for decimal, 16 for hex, etc.)
 -- @param reps Number of iterations for held buttons (ie mouse-repeat)
 -- @return The new value to assign.
-function def:wid_incrementButton(v, radix, reps) return v + 1 end
-function def:wid_decrementButton(v, radix, reps) return v - 1 end
-function def:wid_incrementArrowKey(v, radix, reps) return v + 1 end
-function def:wid_decrementArrowKey(v, radix, reps) return v - 1 end
-function def:wid_incrementPageKey(v, radix, reps) return v + radix end
-function def:wid_decrementPageKey(v, radix, reps) return v - radix end
+function def:cb_incrementButton(v, radix, reps) return v + 1 end
+function def:cb_decrementButton(v, radix, reps) return v - 1 end
+function def:cb_incrementArrowKey(v, radix, reps) return v + 1 end
+function def:cb_decrementArrowKey(v, radix, reps) return v - 1 end
+function def:cb_incrementPageKey(v, radix, reps) return v + radix end
+function def:cb_decrementPageKey(v, radix, reps) return v - radix end
 
 
 local _nm_value_mode = uiTable.newNamedMap("ValueMode", {
@@ -461,24 +473,24 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
 			self.rep_sc_count = self.rep_sc_count + 1
 		end
 
-		if (key == "return" or key == "kpenter") and self:wid_action() then
+		if (key == "return" or key == "kpenter") and self:cb_action() then
 			editWid.resetCaretBlink(self)
 			return true
 
 		elseif scancode == "up" then
-			_callback(self, self.wid_incrementArrowKey, self.rep_sc_count + 1)
+			_callback(self, self.cb_incrementArrowKey, self.rep_sc_count + 1)
 			return true
 
 		elseif scancode == "down" then
-			_callback(self, self.wid_decrementArrowKey, self.rep_sc_count + 1)
+			_callback(self, self.cb_decrementArrowKey, self.rep_sc_count + 1)
 			return true
 
 		elseif scancode == "pageup" then
-			_callback(self, self.wid_incrementPageKey, self.rep_sc_count + 1)
+			_callback(self, self.cb_incrementPageKey, self.rep_sc_count + 1)
 			return true
 
 		elseif scancode == "pagedown" then
-			_callback(self, self.wid_decrementPageKey, self.rep_sc_count + 1)
+			_callback(self, self.cb_decrementPageKey, self.rep_sc_count + 1)
 			return true
 
 		-- Standard text box controls (caret navigation, backspace, etc.)
@@ -564,7 +576,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 			if button == 1 then
 				self.btn_rep = 1
 				self.btn_hov = 1
-				_callback(self, self.wid_incrementButton, 1)
+				_callback(self, self.cb_incrementButton, 1)
 				return true
 			end
 
@@ -573,7 +585,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 			if button == 1 then
 				self.btn_rep = 2
 				self.btn_hov = 2
-				_callback(self, self.wid_decrementButton, 1)
+				_callback(self, self.cb_decrementButton, 1)
 				return true
 			end
 		end
@@ -587,11 +599,11 @@ function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 			if button == self.context.mouse_pressed_button then
 				if button == 1 then
 					if self.btn_rep == 1 then
-						_callback(self, self.wid_incrementButton, reps + 1)
+						_callback(self, self.cb_incrementButton, reps + 1)
 						return true
 
 					elseif self.btn_rep == 2 then
-						_callback(self, self.wid_decrementButton, reps + 1)
+						_callback(self, self.cb_decrementButton, reps + 1)
 						return true
 					end
 				end

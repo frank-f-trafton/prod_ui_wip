@@ -1,16 +1,18 @@
 -- A draggable box, written to test cursor capturing.
 
 
-local def = {}
-
-
 local context = select(1, ...)
 
 
--- Called when dragging while captured.
-function def:wid_dragAction()
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 
-end
+
+local def = {}
+
+
+-- Widget:cb_dragAction()
+-- Called when dragging while captured.
+def.cb_dragAction = uiDummy.func
 
 
 function def:evt_initialize()
@@ -101,7 +103,7 @@ function def:cpt_mouseMoved(x, y, dx, dy, istouch)
 	self.x = math.max(self.drag_min_x, math.min(self.x, self.drag_max_x))
 	self.y = math.max(self.drag_min_y, math.min(self.y, self.drag_max_y))
 
-	self:wid_dragAction()
+	self:cb_dragAction()
 end
 
 

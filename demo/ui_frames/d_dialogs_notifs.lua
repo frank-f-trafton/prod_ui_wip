@@ -31,9 +31,9 @@ Can't interact with the previous window until this one is dismissed.
 		button_close.w = 160
 		button_close.h = 32
 		button_close:setLabel("All right, close it")
-		button_close.wid_buttonAction = function(self)
+		button_close:userCallbackSet("cb_buttonAction", function(self)
 			self:getUIFrame():closeFrame(true)
-		end
+		end)
 
 		dialog:center(true, true)
 
@@ -78,9 +78,9 @@ Click the button to make a blocking UI Frame.
 		button_make.w = 160
 		button_make.h = 32
 		button_make:setLabel("Make blocking frame")
-		button_make.wid_buttonAction = function(self)
+		button_make:userCallbackSet("cb_buttonAction", function(self)
 			_makeFrameBlock2(self)
-		end
+		end)
 
 		dialog:center(true, true)
 		local root = dialog:nodeGetRoot()
@@ -110,13 +110,13 @@ function plan.make(panel)
 		local btn = panel:addChild("base/button")
 		btn:geometrySetMode("static", 64, 64, 160, 28)
 		btn:setLabel("Modal Dialog Box")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			demoShared.makeDialogBox(panel.context, "It's a dialog box", [[
 This window stops you from interacting with the rest of the interface (not including OS-level stuff).
 
 Click a button below (or the 'X' in the header bar) to dismiss it.]]
 )
-		end
+		end)
 	end
 
 	-- Frame-blocking test
@@ -124,9 +124,9 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 		local btn = panel:addChild("base/button")
 		btn:geometrySetMode("static", 64, 96, 160, 28)
 		btn:setLabel("Frame-Blocking Test")
-		btn.wid_buttonAction = function(self)
+		btn:userCallbackSet("cb_buttonAction", function(self)
 			_makeFrameBlock1(self)
-		end
+		end)
 	end
 
 
@@ -137,7 +137,7 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 		button_quote:setLabel("Inspiration")
 		button_quote.str_tool_tip = "Click for an inspiring quote."
 
-		button_quote.wid_buttonAction = function(self)
+		button_quote:userCallbackSet("cb_buttonAction", function(self)
 			local frame = self:getUIFrame()
 			if not frame then
 				print("Demo Error: frame not found")
@@ -155,7 +155,7 @@ of it.\
 
 				notif.time = 0.0
 			end
-		end
+		end)
 	end
 end
 

@@ -218,7 +218,7 @@ function def:setSelectionByIndex(item_i)
 
 	if index_old ~= self.MN_index then
 		if self.wid_ref then
-			self.wid_ref:wid_drawerSelection(self, self.MN_index, self.MN_items[self.MN_index])
+			self.wid_ref:cb_drawerSelection(self, self.MN_index, self.MN_items[self.MN_index])
 		end
 	end
 end

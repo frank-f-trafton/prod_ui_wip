@@ -136,8 +136,8 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	text_block:setFontID("p")
 	text_block:setText(text)
 	text_block:setURL(url)
-	text_block.wid_buttonAction = _openURL
-	text_block.wid_buttonAction3 = _openURL
+	text_block:userCallbackSet("cb_buttonAction", _openURL)
+	text_block:userCallbackSet("cb_buttonAction3", _openURL)
 	text_block:geometrySetMode("segment", "top", 32)
 
 	return text_block
@@ -180,16 +180,16 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 
 	local button_n = dialog:addChild("base/button")
 	button_n:setLabel("No")
-	button_n.wid_buttonAction = function(self)
+	button_n:userCallbackSet("cb_buttonAction", function(self)
 		self:getUIFrame():closeFrame(true)
-	end
+	end)
 	button_n:geometrySetMode("segment", "left", 160)
 
 	local button_y = dialog:addChild("base/button")
 	button_y:setLabel("Yes")
-	button_y.wid_buttonAction = function(self)
+	button_y:userCallbackSet("cb_buttonAction", function(self)
 		self:getUIFrame():closeFrame(true)
-	end
+	end)
 	button_y:geometrySetMode("segment", "right", 160)
 
 	local btn_w, btn_h = 96, 32

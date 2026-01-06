@@ -44,7 +44,7 @@ function plan.makeWindowFrame(root)
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("On")
 		rad_btn.usr_vsync_mode = 1
-		rad_btn.wid_buttonAction = r_action
+		rad_btn:userCallbackSet("cb_buttonAction", r_action)
 		if current_vsync == rad_btn.usr_vsync_mode then
 			rad_btn:setChecked(true)
 		end
@@ -57,7 +57,7 @@ function plan.makeWindowFrame(root)
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Adaptive")
 		rad_btn.usr_vsync_mode = -1
-		rad_btn.wid_buttonAction = r_action
+		rad_btn:userCallbackSet("cb_buttonAction", r_action)
 		if current_vsync == rad_btn.usr_vsync_mode then
 			rad_btn:setChecked(true)
 		end
@@ -71,7 +71,7 @@ function plan.makeWindowFrame(root)
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Half")
 		rad_btn.usr_vsync_mode = 2
-		rad_btn.wid_buttonAction = r_action
+		rad_btn:userCallbackSet("cb_buttonAction", r_action)
 		if current_vsync == rad_btn.usr_vsync_mode then
 			rad_btn:setChecked(true)
 		end
@@ -84,7 +84,7 @@ function plan.makeWindowFrame(root)
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Third")
 		rad_btn.usr_vsync_mode = 3
-		rad_btn.wid_buttonAction = r_action
+		rad_btn:userCallbackSet("cb_buttonAction", r_action)
 		if current_vsync == rad_btn.usr_vsync_mode then
 			rad_btn:setChecked(true)
 		end
@@ -97,7 +97,7 @@ function plan.makeWindowFrame(root)
 		rad_btn.radio_group = "rg_vsync"
 		rad_btn:setLabel("Off")
 		rad_btn.usr_vsync_mode = 0
-		rad_btn.wid_buttonAction = r_action
+		rad_btn:userCallbackSet("cb_buttonAction", r_action)
 		if current_vsync == rad_btn.usr_vsync_mode then
 			rad_btn:setChecked(true)
 		end
@@ -114,10 +114,10 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = not not context.app.show_details
 		checkbox:setLabel("Show state details")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local app = self.context.app
 			app.show_details = not not self.checked
-		end
+		end)
 	end
 
 	do
@@ -128,10 +128,10 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = not not context.app.show_perf
 		checkbox:setLabel("Show perf info")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local app = self.context.app
 			app.show_perf = not not self.checked
-		end
+		end)
 	end
 
 	do
@@ -142,10 +142,10 @@ function plan.makeWindowFrame(root)
 		checkbox.checked = not not context.app.show_mouse_cross
 		checkbox:setLabel("Show cross at mouse location")
 
-		checkbox.wid_buttonAction = function(self)
+		checkbox:userCallbackSet("cb_buttonAction", function(self)
 			local app = self.context.app
 			app.show_mouse_cross = not not self.checked
-		end
+		end)
 	end
 	--]====]
 

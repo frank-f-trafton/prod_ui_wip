@@ -314,7 +314,7 @@ function plan.makeWindowFrame(root)
 	menu_tab:sort()
 
 	menu_tab.getDirectoryItems = menu_getDirectoryItems
-	menu_tab.wid_keyPressed = fileSelectorKeyNav
+	menu_tab:userCallbackSet("cb_keyPressed", fileSelectorKeyNav)
 	menu_tab.trySetPath = menu_trySetPath
 
 	menu_tab:trySetPath("")

@@ -26,27 +26,27 @@ function plan.make(panel)
 
 	b_rep.usr_count = 0
 
-	b_rep.wid_buttonAction = function(self)
+	b_rep:userCallbackSet("cb_buttonAction", function(self)
 		self.usr_count = self.usr_count + 1
 		self:setLabel(tostring(self.usr_count))
-	end
+	end)
 
 	local chk = panel:addChild("base/checkbox")
 	chk:geometrySetMode("static", 160, 0, 256, 64)
 
 	chk:setLabel("CheckBox", "single")
 
-	chk.wid_buttonAction = function(self)
+	chk:userCallbackSet("cb_buttonAction", function(self)
 		print("Activated checkbox!")
-	end
+	end)
 
 
 	local chk_m = panel:addChild("base/checkbox_multi")
 	chk_m:geometrySetMode("static", 160, 96, 256, 64)
 	chk_m:setLabel("Multi-State Checkbox", "single")
-	chk_m.wid_buttonAction = function(self)
+	chk_m:userCallbackSet("cb_buttonAction", function(self)
 		print("Multi-Check state: " .. chk_m.value)
-	end
+	end)
 
 	-- Button with a quad graphic
 	local btn_q = panel:addChild("base/button", "button_tq1")
@@ -66,28 +66,28 @@ function plan.make(panel)
 	rdo:geometrySetMode("static", px, py, 192, py_plus)
 	rdo.radio_group = "rg_a"
 	rdo:setLabel("One (Group A)")
-	--rdo.wid_buttonAction
+	--rdo:userCallbackSet("cb_buttonAction", nil)
 
 	py=py+py_plus
 	rdo = panel:addChild("base/radio_button")
 	rdo:geometrySetMode("static", px, py, 192, py_plus)
 	rdo.radio_group = "rg_a"
 	rdo:setLabel("Two (Group A)")
-	--rdo.wid_buttonAction
+	--rdo:userCallbackSet("cb_buttonAction", nil)
 
 	py=py+py_plus
 	rdo = panel:addChild("base/radio_button")
 	rdo:geometrySetMode("static", px, py, 192, py_plus)
 	rdo.radio_group = "rg_b"
 	rdo:setLabel("Three (Group B)")
-	--radio.wid_buttonAction
+	--rdo:userCallbackSet("cb_buttonAction", nil)
 
 	py=py+py_plus
 	rdo = panel:addChild("base/radio_button")
 	rdo:geometrySetMode("static", px, py, 192, py_plus)
 	rdo.radio_group = "rg_b"
 	rdo:setLabel("Four (Group B)")
-	--rdo.wid_buttonAction
+	--rdo:userCallbackSet("cb_buttonAction", nil)
 
 
 	local sticky = panel:addChild("base/button_sticky")
@@ -95,14 +95,14 @@ function plan.make(panel)
 	sticky:setTag("button_sticky")
 	sticky:setLabel("Sticky Button")
 
-	sticky.wid_buttonAction = function(self)
+	sticky:userCallbackSet("cb_buttonAction", function(self)
 		self:setLabel("Stuck! Time: " .. timeFormatted())
 
 		local unsticker = self:findSiblingTag("button_unsticker")
 		if unsticker then
 			unsticker:setEnabled(true)
 		end
-	end
+	end)
 
 
 	local b_unst = panel:addChild("base/button")
@@ -111,7 +111,7 @@ function plan.make(panel)
 	b_unst:setLabel("Unpress Sticky Button")
 	b_unst:setEnabled(false)
 
-	b_unst.wid_buttonAction = function(self)
+	b_unst:userCallbackSet("cb_buttonAction", function(self)
 		local sticky = self:findSiblingTag("button_sticky")
 		if sticky then
 			sticky:setPressed(false)
@@ -119,16 +119,16 @@ function plan.make(panel)
 
 			self:setEnabled(false)
 		end
-	end
+	end)
 
 
 	local b_immediate = panel:addChild("base/button_immediate")
 	b_immediate:geometrySetMode("static", 256, 192+48+48, 240, 32)
 	b_immediate:setLabel("Immediate Action Button.")
 
-	b_immediate.wid_buttonAction = function(self)
+	b_immediate:userCallbackSet("cb_buttonAction", function(self)
 		self:setLabel("Activated! Time: " .. timeFormatted())
-	end
+	end)
 
 
 	demoShared.makeLabel(panel, 256, 192+48+48+48, 240, 64, false, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "multi")
@@ -136,17 +136,17 @@ function plan.make(panel)
 	b_secondary:geometrySetMode("static", 256, 192+48+48+48+64, 240, 32)
 	b_secondary:setLabel("Alt. Action Button.")
 
-	b_secondary.wid_buttonAction = function(self)
+	b_secondary:userCallbackSet("cb_buttonAction", function(self)
 		self:setLabel("Main action triggered.")
-	end
+	end)
 
-	b_secondary.wid_buttonAction2 = function(self)
+	b_secondary:userCallbackSet("cb_buttonAction2", function(self)
 		self:setLabel("Secondary Action! Time: " .. timeFormatted())
-	end
+	end)
 
-	b_secondary.wid_buttonAction3 = function(self)
+	b_secondary:userCallbackSet("cb_buttonAction3", function(self)
 		self:setLabel("Tertiary Action! Time: " .. timeFormatted())
-	end
+	end)
 
 
 	local btn_2c = panel:addChild("base/button_double_click")
@@ -154,9 +154,9 @@ function plan.make(panel)
 	btn_2c.radio_group = "bare1"
 	btn_2c:setLabel("Double-Click button")
 
-	btn_2c.wid_buttonAction = function(self)
+	btn_2c:userCallbackSet("cb_buttonAction", function(self)
 		self:setLabel("Double-clicked! Time: " .. timeFormatted())
-	end
+	end)
 end
 
 

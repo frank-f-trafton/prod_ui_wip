@@ -11,6 +11,7 @@ local context = select(1, ...)
 local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
@@ -24,25 +25,12 @@ local _lerp = pMath.lerp
 
 local def = {
 	skin_id = "checkbox_emb1",
+
+	user_callbacks = {} -- modified by wcButton
 }
 
 
-def.wid_buttonAction = wcButton.wid_buttonAction
-def.wid_buttonAction2 = wcButton.wid_buttonAction2
-def.wid_buttonAction3 = wcButton.wid_buttonAction3
-
-
-def.setEnabled = wcButton.setEnabled
-def.setChecked = wcButton.setChecked
-
-
-def.evt_pointerHoverOn = wcButton.evt_pointerHoverOn
-def.evt_pointerHoverOff = wcButton.evt_pointerHoverOff
-def.evt_pointerPress = wcButton.evt_pointerPress
-def.evt_pointerRelease = wcButton.evt_pointerReleaseCheck
-def.evt_pointerUnpress = wcButton.evt_pointerUnpress
-def.evt_thimbleAction = wcButton.evt_thimbleActionCheck
-def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
+wcButton.setupDefCheckbox(def)
 
 
 function def:evt_initialize()

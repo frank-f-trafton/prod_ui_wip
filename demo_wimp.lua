@@ -676,7 +676,7 @@ do
 			return plan_container
 		end
 
-		demo_tree.wid_select = function(self, item, item_i)
+		demo_tree:userCallbackSet("cb_select", function(self, item, item_i)
 			local workspace = self.context.root:findTag("main_workspace")
 			if workspace and item.plan_id then
 				local plan = require("demo." .. item.plan_id)
@@ -685,7 +685,7 @@ do
 				plan.make(container)
 				workspace:reshape()
 			end
-		end
+		end)
 	end
 
 	--love.mouse.setGrabbed(true)

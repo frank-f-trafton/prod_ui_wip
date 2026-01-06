@@ -29,6 +29,7 @@ local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
@@ -43,7 +44,16 @@ local def = {
 
 	default_settings = {
 		icon_set_id = false -- lookup for 'resources.icons[icon_set_id]'
-	}
+	},
+
+	user_callbacks = uiTable.newLUTV(
+		"cb_action",
+		"cb_action2",
+		"cb_action3",
+		"cb_select",
+		"cb_keyPressed",
+		"cb_dropped"
+	)
 }
 
 
@@ -98,57 +108,52 @@ def.movePageUp = wcMenu.widgetMovePageUp
 def.movePageDown = wcMenu.widgetMovePageDown
 
 
---- Called when user double-clicks on the widget or presses "return" or "kpenter".
---	An active control widget may swallow the events that trigger this callback.
+-- Widget:cb_action(item, item_i)
+-- Called when the user double-clicks on the widget or presses "return" or "kpenter".
+-- An active control widget may swallow the events that trigger this callback.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
-function def:wid_action(item, item_i)
-
-end
+def.cb_action = uiDummy.func
 
 
---- Called when the user right-clicks on the widget or presses "application" or shift+F10.
---	An active control widget may swallow the events that trigger this callback.
+-- Widget:cb_action2(item, item_i)
+-- Called when the user right-clicks on the widget or presses "application" or shift+F10.
+-- An active control widget may swallow the events that trigger this callback.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
-function def:wid_action2(item, item_i)
-
-end
+def.cb_action2 = uiDummy.func
 
 
---- Called when the user middle-clicks on the widget.
---	An active control widget may swallow the events that trigger this callback.
+-- Widget:cb_action3(item, item_i)
+-- Called when the user middle-clicks on the widget.
+-- An active control widget may swallow the events that trigger this callback.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
-function def:wid_action3(item, item_i)
-
-end
+def.cb_action3 = uiDummy.func
 
 
+-- Widget:cb_select(item, item_i)
 -- Called when there is a change in the item selection.
 -- @param item The current selected item, or nil if no item is selected.
 -- @param item_i Index of the current selected item, or zero if no item is selected.
-function def:wid_select(item, item_i)
-	-- XXX This may not be firing when going from a selected item to nothing selected.
-end
+-- XXX This may not be firing when going from a selected item to nothing selected.
+def.cb_select = uiDummy.func
 
 
---- Called in evt_keyPressed() before the default keyboard navigation checks.
+-- Widget:cb_keyPressed(key, scancode, isrepeat)
+-- Called in evt_keyPressed() before the default keyboard navigation checks.
 -- @param key The key code.
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
-function def:wid_keyPressed(key, scancode, isrepeat)
-
-end
+def.cb_keyPressed = uiDummy.func
 
 
+-- Widget:cb_dropped(drop_state)
 --- Called when the mouse drags and drops something onto this widget.
 -- @param drop_state A DropState table that describes the nature of the drag-and-drop action.
 -- @return true to clear the DropState and to stop event bubbling.
-function def:wid_dropped(drop_state)
-
-end
+def.cb_dropped = uiDummy.func
 
 
 --- Called in evt_keyPressed(). Implements basic keyboard navigation.
@@ -462,7 +467,7 @@ local function updateSelectedControl(self, control)
 	end
 
 	if old_item ~= new_item then
-		self:wid_select(new_item, self:menuGetItemIndex(new_item))
+		self:cb_select(new_item, self:menuGetItemIndex(new_item))
 	end
 end
 
@@ -472,7 +477,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 	local old_index = self.MN_index
 	local old_item = items[old_index]
 
-	-- wid_action() is handled in the 'thimbleAction()' callback.
+	-- cb_action() is handled in the 'thimbleAction()' callback.
 
 	-- Escape: take thimble1 from embedded child widget
 	if self ~= targ and targ == self.context.thimble1 and key == "escape" then
@@ -488,7 +493,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 				return true
 			end
 
-		elseif self:wid_keyPressed(key, scancode, isrepeat)
+		elseif self:cb_keyPressed(key, scancode, isrepeat)
 		or self:wid_defaultKeyNav(key, scancode, isrepeat)
 		then
 			local new_item = items[self.MN_index]
@@ -505,7 +510,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 					end
 				end
 
-				self:wid_select(new_item, self.MN_index)
+				self:cb_select(new_item, self.MN_index)
 			end
 			return true
 		end
@@ -659,7 +664,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 							end
 
 							if old_item ~= item_t then
-								self:wid_select(item_t, item_i)
+								self:cb_select(item_t, item_i)
 							end
 						end
 
@@ -673,16 +678,16 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 							and self.context.cseq_widget == self
 							and self.context.cseq_presses % 2 == 0
 							then
-								self:wid_action(item_t, item_i)
+								self:cb_action(item_t, item_i)
 							end
 
 						-- Button 2 clicks invoke action 2.
 						elseif button == 2 then
-							self:wid_action2(item_t, item_i)
+							self:cb_action2(item_t, item_i)
 
 						-- Button 3 -> action 3...
 						elseif button == 3 then
-							self:wid_action3(item_t, item_i)
+							self:cb_action3(item_t, item_i)
 						end
 					end
 				end
@@ -772,7 +777,7 @@ function def:evt_thimbleAction(targ, key, scancode, isrepeat)
 			return true
 		end
 
-		self:wid_action(control, self.MN_index)
+		self:cb_action(control, self.MN_index)
 
 		return true
 	end
@@ -785,7 +790,7 @@ function def:evt_thimbleAction2(targ, key, scancode, isrepeat)
 	then
 		local item = self.MN_items[self.MN_index]
 		local control = item and item.wid_ref
-		self:wid_action2(control, self.MN_index)
+		self:cb_action2(control, self.MN_index)
 
 		return true
 	end
