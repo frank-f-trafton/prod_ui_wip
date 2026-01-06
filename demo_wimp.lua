@@ -409,15 +409,6 @@ do
 			:setTag("root_menu_bar")
 			:geometrySetMode("segment", "top", 32)
 
-		-- Test the (normally commented out) debug render user event.
-		--[[
-		menu_bar.userDebugRender = function(self, os_x, os_y)
-			love.graphics.setScissor()
-			love.graphics.setColor(1,1,1,1)
-			love.graphics.print("Hello world!")
-		end
-		--]]
-
 
 		local function cb_hide_menu(client, item)
 			local root = client:nodeGetRoot()

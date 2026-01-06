@@ -281,13 +281,6 @@ local function drawLoop(context, wid, os_x, os_y, thimble1, thimble2)
 
 			love.graphics.pop() --[]
 		end
-
-		-- Uncomment to enable a user event for debug rendering.
-		--[[
-		if wid.userDebugRender then
-			wid:_runUserEvent("userDebugRender", os_x, os_y)
-		end
-		--]]
 	end -- / if wid.visible
 	-- [[DBG]] print("drawLoop " .. wid.id .. ": End")
 end
