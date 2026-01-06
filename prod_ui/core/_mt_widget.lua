@@ -601,7 +601,6 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 	end
 
 	child:evt_initialize(...)
-	child:_runUserEvent("userInitialize")
 
 	return child
 end
