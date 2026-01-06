@@ -198,7 +198,7 @@ end
 
 
 function def.trickle:evt_keyPressed(targ, key, scancode, isrepeat)
-	if #self.modals == 0 then
+	if #self.modals == 0 and not context.root.pop_up_menu then
 		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
 			return true
 		end
@@ -207,7 +207,7 @@ end
 
 
 function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
-	if #self.modals == 0 then
+	if #self.modals == 0 and not context.root.pop_up_menu then
 		if self.KH_key_pressed(self, key, scancode, isrepeat) then
 			return true
 		end
@@ -277,7 +277,7 @@ end
 
 
 function def:evt_keyReleased(targ, key, scancode)
-	if #self.modals == 0 then
+	if #self.modals == 0 and not context.root.pop_up_menu then
 		if self.KH_key_released(self, key, scancode) then
 			return true
 		end
@@ -286,7 +286,7 @@ end
 
 
 function def.trickle:evt_keyReleased(targ, key, scancode)
-	if #self.modals == 0 then
+	if #self.modals == 0 and not context.root.pop_up_menu then
 		if self.KH_trickle_key_released(self, key, scancode) then
 			return true
 		end

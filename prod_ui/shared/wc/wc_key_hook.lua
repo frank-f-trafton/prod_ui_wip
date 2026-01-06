@@ -10,8 +10,8 @@
 
 	(trickle) love.keypressed -> self.KH_trickle_key_pressed
 	(trickle) love.keyreleased -> self.KH_trickle_key_released
-	(bubble, direct) love.keypressed -> self.KH_key_pressed
-	(bubble, direct) love.keyreleased -> self.KH_key_released
+	(bubble) love.keypressed -> self.KH_key_pressed
+	(bubble) love.keyreleased -> self.KH_key_released
 
 	Each keyhook entry is a function that takes the widget as its first argument, followed by the standard arguments
 	provided by the LÖVE callback. See source comments for parameter lists.
@@ -21,6 +21,8 @@
 
 	-- keyPressed: self.KH_key_pressed(wid, key, scancode, isrepeat)
 	-- keyReleased: self.KH_key_released(wid, key, scancode)
+
+	NOTE: These keyboard shortcuts are not processed while any pop-up menu exists.
 --]]
 
 

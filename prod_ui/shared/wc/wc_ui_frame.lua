@@ -172,8 +172,10 @@ function wcUIFrame.logic_keyPressed(self, targ, key, scancode, isrepeat)
 		return
 	end
 
-	if self.KH_key_pressed(self, key, scancode, isrepeat) then
-		return true
+	if not context.root.pop_up_menu then
+		if self.KH_key_pressed(self, key, scancode, isrepeat) then
+			return true
+		end
 	end
 end
 
@@ -183,8 +185,10 @@ function wcUIFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat)
 		return
 	end
 
-	if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
-		return true
+	if not context.root.pop_up_menu then
+		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
+			return true
+		end
 	end
 end
 
@@ -194,8 +198,10 @@ function wcUIFrame.logic_keyReleased(self, targ, key, scancode)
 		return
 	end
 
-	if self.KH_key_released(self, key, scancode) then
-		return true
+	if not context.root.pop_up_menu then
+		if self.KH_key_released(self, key, scancode) then
+			return true
+		end
 	end
 end
 
@@ -205,8 +211,10 @@ function wcUIFrame.logic_trickleKeyReleased(self, targ, key, scancode)
 		return
 	end
 
-	if self.KH_trickle_key_released(self, key, scancode) then
-		return true
+	if not context.root.pop_up_menu then
+		if self.KH_trickle_key_released(self, key, scancode) then
+			return true
+		end
 	end
 end
 
