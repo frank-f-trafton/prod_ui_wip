@@ -989,7 +989,6 @@ function _mt_context:addRoot(id, skin_id, ...)
 	self.root = root
 
 	root:evt_initialize(...)
-	root:_runUserEvent("userInitialize")
 
 	return root
 end
