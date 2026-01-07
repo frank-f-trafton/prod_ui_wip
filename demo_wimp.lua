@@ -463,6 +463,7 @@ do
 			P.command()
 				:setText("_Q_uit")
 				:setTextShortcut("Ctrl+Q")
+				:setKeyMnemonic("q")
 				:setCallback(cb_quit)
 		}
 

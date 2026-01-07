@@ -247,6 +247,8 @@ local function _makeCommand(self, info)
 		text = info.text,
 		text_int = "",
 		text_shortcut = info.text_shortcut or false,
+		key_mnemonic = info.key_mnemonic or false,
+		key_shortcut = info.key_shortcut or false,
 		icon_id = info.icon_id or false,
 
 		selectable = true,
@@ -276,6 +278,7 @@ local function _makeGroup(self, info)
 		x = 0, y = 0, w = 0, h = 0,
 		type = "group",
 		text = info.text,
+		key_mnemonic = info.key_mnemonic or false,
 		text_int = "",
 		icon_id = info.icon_id or false,
 
@@ -639,7 +642,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 		end
 
 		local mod = self.context.key_mgr.mod
-		if not mod["ctrl"] then
+		if not mod["ctrl"] and not mod["alt"] and not mod["shift"] then
 			-- Finally, check for key mnemonics.
 			local item_i, item = keyMnemonicSearch(self.MN_items, key)
 			if item and item.selectable then
@@ -665,26 +668,6 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 	-- menu to the root menu.
 	-- It might break other things, though.
 	return true -- XXX
-end
-
-
-function def:widCall_mnemonicFromOpenMenuBar(key) -- XXX: Unused?
-	local item_i, item = keyMnemonicSearch(self.MN_items, key)
-	if item and item.selectable then
-		self:menuSetSelectedIndex(item_i)
-		if item.actionable then
-			if item.type == "group" then
-				if item.group_prototype then
-					activateGroup(self, item, true)
-					return true
-				end
-
-			elseif item.type == "command" then
-				activateCommand(self, item)
-				return true
-			end
-		end
-	end
 end
 
 
