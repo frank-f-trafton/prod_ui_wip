@@ -58,7 +58,7 @@ function plan.makeWindowFrame(root)
 	yy = yy + hh
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_wimp_file_select", "File Selector", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_wimp_g_list", "List of Globals", xx, yy, ww, hh)
-	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_test_destroy_frame_from_user_update", "Test: destroy in userUpdate()", xx, yy, ww, hh)
+	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_test_destroy_frame_from_user_update", "Test: destroy in cb_update()", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_wimp_frame", "WIMP Window Frame", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_test_canvas_layer", "Canvas Layering Test", xx, yy, ww, hh)
 	--[[ ]] yy = yy + hh; bb_btn = _makeButton(frame, "window_frames.d_frame_unselectable", "Unselectable Window Frame", xx, yy, ww, hh)

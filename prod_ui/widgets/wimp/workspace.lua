@@ -3,10 +3,12 @@ local context = select(1, ...)
 
 local debug = context:getLua("core/wid/debug")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
-local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
 local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
@@ -17,8 +19,15 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "workspace1",
-	trickle = {}
+	trickle = {},
+	user_callbacks = uiTable.newLUTV(
+		"cb_workspaceRender"
+	)
 }
+
+
+-- Widget:cb_workspaceRender(ox, oy)
+def.cb_workspaceRender = uiDummy.func
 
 
 def.setScrollBars = wcScrollBar.setScrollBars
@@ -285,9 +294,7 @@ def.default_skinner = {
 			love.graphics.pop()
 		end
 
-		if self.userRender then
-			self:userRender(ox, oy)
-		end
+		self:cb_workspaceRender(ox, oy)
 	end,
 
 

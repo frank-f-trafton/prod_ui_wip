@@ -41,7 +41,7 @@ function plan.makeWindowFrame(root)
 
 	frame.usr_time = 0.0
 
-	frame.userUpdate = function(self, dt)
+	frame:userCallbackSet("cb_update", function(self, dt)
 
 		--[[
 		self.ly_x = self.w/2
@@ -53,7 +53,7 @@ function plan.makeWindowFrame(root)
 		self.usr_time = self.usr_time + dt
 		self.ly_a = 0.5 + math.sin(self.usr_time) / 2
 		--self.ly_sx = self.usr_time / 10
-	end
+	end)
 
 	frame:reshape()
 	frame:center(true, true)

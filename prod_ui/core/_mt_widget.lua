@@ -51,6 +51,24 @@ _mt_widget.nodeFindKeyDescending = pTree.nodeFindKeyDescending
 _mt_widget.nodeFindKeyAscending = pTree.nodeFindKeyAscending
 
 
+-- User callbacks that are valid for any and every widget.
+local _default_user_callbacks = uiTable.newLUTV(
+	"cb_update",
+	"cb_destroy"
+)
+
+
+_mt_widget.cb_update = uiDummy.func
+_mt_widget.cb_destroy = uiDummy.func
+
+
+local function _assertValidUserCallback(self, id)
+	if not _default_user_callbacks[id] and not (self.user_callbacks and self.user_callbacks[id]) then
+		error("invalid user callback '" .. tostring(id) .. "' for widget '" .. tostring(self.id) .. "'", 3)
+	end
+end
+
+
 local function _errNoDescendants()
 	error("widget is not configured to have descendants.", 2)
 end
@@ -89,7 +107,7 @@ _mt_widget.scr_y = 0
 _mt_widget.thimble_mode = 0
 
 
--- Affects ticking (evt_update, userUpdate), mouse events, and various kinds of selection (ie thimble handoff).
+-- Affects ticking (evt_update, cb_update), mouse events, and various kinds of selection (ie thimble handoff).
 _mt_widget.awake = true
 
 
@@ -237,30 +255,6 @@ end
 function _mt_widget:ui_evaluatePress(mx, my, os_x, os_y, button, istouch, presses)
 	local wx, wy = self.x + os_x, self.y + os_y
 	return mx >= wx and my >= wy and mx < wx + self.w and my < wy + self.h
-end
-
-
---- Check for and run user events attached to a widget. Internal use.
--- @param wid The widget to check.
--- @param id The User Event string ID to run.
--- @param a, b, c, d Generic arguments. Usage depends on the ID.
-function _mt_widget:_runUserEvent(id, a, b, c, d)
-	local user_event = self[id]
-
-	if user_event == nil then
-		-- Do nothing.
-
-	elseif type(user_event) == "function" then
-		user_event(self, a, b, c, d)
-
-	elseif type(user_event) == "table" then
-		for i, func in ipairs(user_event) do
-			func(self, a, b, c, d)
-		end
-
-	else
-		error("bad type for user event (expected function, table or nil, got: " .. type(user_event) .. ")")
-	end
 end
 
 
@@ -649,7 +643,7 @@ function _mt_widget:destroy()
 		self:uncaptureFocus()
 	end
 
-	self:_runUserEvent("userDestroy")
+	self:cb_destroy()
 	self:eventBubble("evt_destroy", self)
 
 	-- If parent exists, find and destroy self from parent's 1) children and 2) layout
@@ -1289,15 +1283,8 @@ function _mt_widget:geometryGetOrder()
 end
 
 
-local function _assertValidCallback(self, id)
-	if not self.user_callbacks or not self.user_callbacks[id] then
-		error("invalid user callback '" .. tostring(id) .. "' for widget '" .. tostring(self.id) .. "'", 3)
-	end
-end
-
-
 function _mt_widget:userCallbackSet(id, fn)
-	_assertValidCallback(self, id)
+	_assertValidUserCallback(self, id)
 	uiAssert.typeEval(2, fn, "function")
 
 	self[id] = fn
@@ -1307,7 +1294,7 @@ end
 
 
 function _mt_widget:userCallbackGet(id)
-	_assertValidCallback(self, id)
+	_assertValidUserCallback(self, id)
 
 	-- Warning! This method does not return default callbacks that are assigned
 	-- as part of widget definitions.
