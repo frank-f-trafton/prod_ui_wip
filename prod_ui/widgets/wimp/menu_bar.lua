@@ -873,11 +873,14 @@ function def:evt_update(dt)
 	local uline_draw = context.settings.wimp.menu_bar.draw_underlines
 	local mod = self.context.key_mgr.mod
 
-	if uline_draw == "always" then
-		self.show_underlines = true
+	if uline_draw == "idle" then
+		self.show_underlines = (not self["next"]) and true or false
 
-	elseif uline_draw == "when-active" then
-		self.show_underlines = (self["next"] or mod["alt"]) and true or false
+	elseif uline_draw == "alt" then
+		self.show_underlines = (mod["alt"] and not self["next"]) and true or false
+
+	elseif uline_draw == "always" then
+		self.show_underlines = true
 
 	else -- "never"
 		self.show_underlines = false
