@@ -872,12 +872,13 @@ function def:evt_update(dt)
 	-- Set underline render state
 	local uline_draw = context.settings.wimp.menu_bar.draw_underlines
 	local mod = self.context.key_mgr.mod
+	local pop_up = context.root.pop_up_menu
 
 	if uline_draw == "idle" then
-		self.show_underlines = (not self["next"]) and true or false
+		self.show_underlines = (not pop_up) and true or false
 
 	elseif uline_draw == "alt" then
-		self.show_underlines = (mod["alt"] and not self["next"]) and true or false
+		self.show_underlines = (mod["alt"] and not pop_up) and true or false
 
 	elseif uline_draw == "always" then
 		self.show_underlines = true
