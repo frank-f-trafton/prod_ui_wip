@@ -86,7 +86,7 @@ local function _buildTree(tree_box, root)
 end
 
 
-local function tree_userUpdate(self, dt)
+local function tree_update(self, dt)
 	local context = self.context
 	local root = self:nodeGetRoot()
 
@@ -121,7 +121,7 @@ local function tree_userUpdate(self, dt)
 end
 
 
-local function tree_userDestroy(self)
+local function tree_destroy(self)
 	-- unsets the debug-highlight reference
 	local highlight = self.context.app.dbg_highlight
 	if highlight then
@@ -164,8 +164,8 @@ function plan.makeWindowFrame(root)
 	-- User code
 	tree_box.usr_timer_max = 0.5
 	tree_box.usr_timer = tree_box.usr_timer_max
-	tree_box.userUpdate = tree_userUpdate
-	tree_box.userDestroy = tree_userDestroy
+	tree_box:userCallbackSet("cb_update", tree_update)
+	tree_box:userCallbackSet("cb_destroy", tree_destroy)
 	-- Also reads 'self.parent.usr_exclude'
 
 

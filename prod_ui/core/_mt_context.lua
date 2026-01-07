@@ -45,9 +45,7 @@ local function _updateLoop(wid, dt, locks)
 	if wid.awake then
 		local skip_children
 
-		if wid.userUpdate then
-			wid:_runUserEvent("userUpdate", dt)
-		end
+		wid:cb_update(dt)
 
 		if wid.evt_update then
 			skip_children = wid:evt_update(dt)

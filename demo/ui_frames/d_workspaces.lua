@@ -97,7 +97,7 @@ Other Window Frames in this demo are "unassociated", and may appear in any Works
 		snow[i] = {x=love.math.random(cw), y=love.math.random(ch), dx=love.math.random(d_min, d_max), dy=love.math.random(d_min, d_max)}
 	end
 
-	ws2.userUpdate = function(self, dt)
+	ws2:userCallbackSet("cb_update", function(self, dt)
 		for i, s in ipairs(snow) do
 			s.dx = math.max(d_min, math.min(d_max, s.dx + love.math.random(-0.1, 0.1) * dt))
 			s.dy = math.max(d_min, math.min(d_max, s.dy + love.math.random(-0.1, 0.1) * dt))
@@ -105,9 +105,9 @@ Other Window Frames in this demo are "unassociated", and may appear in any Works
 			s.x = (s.x + s.dx * dt) % cw
 			s.y = (s.y + s.dy * dt) % ch
 		end
-	end
+	end)
 
-	ws2.userRender = function(self, ox, oy)
+	ws2:userCallbackSet("cb_workspaceRender", function(self, ox, oy)
 		love.graphics.push("all")
 		love.graphics.reset()
 		love.graphics.setCanvas(canvas)
@@ -129,7 +129,7 @@ Other Window Frames in this demo are "unassociated", and may appear in any Works
 		--love.graphics.rectangle("line", 0, 0, cw, ch)
 		love.graphics.pop()
 		love.graphics.draw(canvas, quad, 0, 0)
-	end
+	end)
 
 	ws2:reshape()
 	frame_ws2:reshape()

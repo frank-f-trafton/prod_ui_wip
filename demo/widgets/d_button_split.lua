@@ -65,7 +65,7 @@ local function _createPopUpMenu(self)
 
 		pop_up:tryTakeThimble2()
 
-		pop_up.userDestroy = _popUpDestroy
+		pop_up:userCallbackSet("cb_destroy", _popUpDestroy)
 
 		-- Halt propagation
 		return true

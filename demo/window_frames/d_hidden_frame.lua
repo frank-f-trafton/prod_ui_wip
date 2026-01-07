@@ -41,14 +41,14 @@ function plan.makeWindowFrame(root)
 			frame.context.root:setSelectedFrame(frame)
 		end
 
-		btn.userUpdate = function(self, dt)
+		btn:userCallbackSet("cb_update", function(self, dt)
 			if self.usr_time > 0 then
 				self.usr_time = self.usr_time - dt
 				if self.usr_time <= 0 then
 					self.context:appendAsyncAction(frame, _asyncUnhide)
 				end
 			end
-		end
+		end)
 
 		yy = yy + hh
 	end

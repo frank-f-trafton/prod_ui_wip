@@ -27,11 +27,13 @@ function plan.makeWindowFrame(root)
 	frame:containerSetScrollRangeMode("auto")
 	frame:setScrollBars(false, false)
 
-	frame.userUpdate = function(self, dt)
+	frame:userCallbackSet("cb_update", function(self, dt)
 		if self.context.root.selected_frame == self then
 			error("this frame should not be selectable.")
 		end
-	end
+	end)
+
+	-- For demonstration purposes, raise an error if this Window Frame ever takes a focus thimble.
 	frame.evt_thimble1Take = _assertNoThimble
 	frame.evt_thimble2Take = _assertNoThimble
 
