@@ -497,6 +497,8 @@ function def:evt_initialize()
 	-- Timer to delay the opening and closing of sub-menus.
 	self.open_time = 0.0
 
+	self.show_underlines = false
+
 	-- When this is a sub-menu, include a reference to the item in parent that was used to spawn it.
 	--self.origin_item =
 
@@ -1012,6 +1014,18 @@ function def:evt_update(dt)
 	if needs_update then
 		self:cacheUpdate(true)
 	end
+
+	-- Set underline render state
+	local uline_draw = context.settings.wimp.pop_up_menu.draw_underlines
+	if uline_draw == "always" then
+		self.show_underlines = true
+
+	elseif uline_draw == "thimble" then
+		self.show_underlines = context.thimble2 == self and true or false
+
+	else -- "never"
+		self.show_underlines = false
+	end
 end
 
 
@@ -1188,18 +1202,20 @@ def.default_skinner = {
 		local text_y = skin.pad_text_y1
 
 		-- Underlines
-		for i = items_first, items_last do
-			local item = items[i]
-			if item.ul_on then
-				local res = _getRes(item, self, skin)
-				love.graphics.setColor(res.col_label)
-				uiGraphics.quad1x1(
-					tq_px,
-					text_x + item.ul_x,
-					item.y + skin.pad_text_y1 + item.ul_y,
-					item.ul_w,
-					skin.underline_width
-				)
+		if self.show_underlines then
+			for i = items_first, items_last do
+				local item = items[i]
+				if item.ul_on then
+					local res = _getRes(item, self, skin)
+					love.graphics.setColor(res.col_label)
+					uiGraphics.quad1x1(
+						tq_px,
+						text_x + item.ul_x,
+						item.y + skin.pad_text_y1 + item.ul_y,
+						item.ul_w,
+						skin.underline_width
+					)
+				end
 			end
 		end
 

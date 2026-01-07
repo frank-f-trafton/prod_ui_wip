@@ -29,22 +29,27 @@ return {
 			page_viewport_factor = 1.0,
 		},
 
+		menu_bar = {
+			-- Draw underlines for key mnemonics: "never", "idle", "alt", "always"
+			-- idle: only when there are no pop-up menus.
+			-- alt: only when 1) there are no pop-up menus and 2) the user is holding the alt key.
+			draw_underlines = "alt",
+		},
+
 		pop_up_menu = {
 			-- When clicking outside of a pop-up menu, this stops the user from clicking
 			-- any other widget that is behind the base menu.
 			-- May prevent accidental clicks, though some people (ahem) hate it.
 			block_1st_click_out = false,
+
+			-- Draw underlines for key mnemonics: "never", "thimble", "always"
+			-- thimble: only when this pop-up menu has thimble2 (input focus).
+			draw_underlines = "thimble"
 		},
 
 		window_frame = {
 			-- "all" or "active"
 			render_shadow = "all",
-		},
-
-		menu_bar = {
-			-- Draw shortcut underlines: "never", "when-active", "always"
-			-- "when-active" == when a menu bar drawer is open, or the user is holding the 'alt' key.
-			draw_underlines = "always",
 		},
 
 		text_input = {
