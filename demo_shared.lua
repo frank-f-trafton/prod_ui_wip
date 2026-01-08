@@ -33,14 +33,6 @@ function demoShared.loadThemeDuplicateSkins(context, id)
 		end
 	end
 
-	-- * For the scroll bar demo
-	local sbs = theme.scroll_bar_styles
-	if sbs then
-		if sbs.norm then
-			sbs.norm_DEMO = pTable.deepCopy(sbs.norm)
-		end
-	end
-
 	return theme
 end
 
