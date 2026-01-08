@@ -46,6 +46,16 @@ function _methods:containerSetScrollRangeMode(mode)
 end
 
 
+function _methods:containerSetDocumentDimensions(w, h)
+	uiAssert.numberGE(1, w, 0)
+	uiAssert.numberGE(1, h, 0)
+
+	self.doc_w, self.doc_h = w, h
+
+	return self
+end
+
+
 function _methods:containerGetScrollRangeMode()
 	return self.scroll_range_mode
 end

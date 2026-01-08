@@ -16,17 +16,28 @@ end
 function demoShared.loadThemeDuplicateSkins(context, id)
 	local theme = context:loadTheme(id)
 
-	-- Duplicate skins so that demo widgets can be tweaked without
-	-- affecting the rest of the program.
-	if theme.skins then
+	-- Duplicate some data for demo purposes.
+	-- This wouldn't be done in a normal application.
+
+	-- * Skins
+	local skins = theme.skins
+	if skins then
 		local dupes = {}
-		for k, v in pairs(theme.skins) do
+		for k, v in pairs(skins) do
 			if not dupes[k .. "_DEMO"] then
 				dupes[k .. "_DEMO"] = pTable.deepCopy(v)
 			end
 		end
 		for k, v in pairs(dupes) do
-			theme.skins[k] = v
+			skins[k] = v
+		end
+	end
+
+	-- * For the scroll bar demo
+	local sbs = theme.scroll_bar_styles
+	if sbs then
+		if sbs.norm then
+			sbs.norm_DEMO = pTable.deepCopy(sbs.norm)
 		end
 	end
 
