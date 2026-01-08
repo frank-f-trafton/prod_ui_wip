@@ -17,6 +17,7 @@ demo_default_theme = "vacuum_dark"
 -- The first panel to load.
 -- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
+	"theming_skinning.d_scroll_bars",
 	"widgets.d_sliders",
 	"widgets.d_text_box_script",
 	"widgets.unfinished.d_dial",
@@ -86,6 +87,7 @@ local demo_plan_list = {
 				{plan_id = "ui_frames.d_dialogs_notifs", label = "Dialogs and Notifications"},
 				{plan_id = "ui_frames.d_workspaces", label = "Workspace Frames"},
 				{plan_id = "themes_and_scale", label = "Themes and Scale"},
+				{plan_id = "theming_skinning.d_scroll_bars", label = "Scroll Bars"},
 				{plan_id = "layouts.d_layout", label = "Layout"},
 				{plan_id = "layouts.d_layout_static", label = "Layout (Static)"},
 				{plan_id = "layouts.d_layout_sashes", label = "Layout (Sashes)"},

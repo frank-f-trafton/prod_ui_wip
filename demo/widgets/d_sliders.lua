@@ -52,7 +52,7 @@ function plan.make(panel)
 	_determineSliderCoords(default_vertical)
 
 	local function _updateSlider(self)
-		-- NOTE: 'self' could be any of the sibling controls.
+		-- NOTE: 'self' is any of the sibling controls.
 
 		local sld = self:findSiblingTag("demo_sld")
 		if not sld then

@@ -69,6 +69,8 @@ function def:setColor(fill, outline, text_color)
 	if text_color then
 		self.text_color = self.colors[text_color] or error(err_str_col)
 	end
+
+	return self
 end
 
 
@@ -80,6 +82,8 @@ function def:setText(text)
 	if text then
 		self.text_lines = textUtil.countStringPatterns(text, "\n", true) + 1
 	end
+
+	return self
 end
 
 
