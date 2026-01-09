@@ -195,9 +195,6 @@ function def:addItem(text, pos, icon_id)
 	uiAssert.integerEval(2, pos, "number")
 	uiAssert.typeEval(3, icon_id, "string")
 
-	local skin = self.skin
-	local font = skin.font
-
 	local items = self.MN_items
 
 	local item = {}
