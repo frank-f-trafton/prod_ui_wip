@@ -74,10 +74,10 @@ function plan.make(panel)
 
 	local count_max = 1.0 -- count of time between turns
 	local time = 0.0
-	local count = count_max
+	local count = 0.0
 
 	local function runTurn()
-		msg_log:appendItem("Time: " .. tostring(time))
+		msg_log:appendItem("Time: " .. tostring(time) .. ": " .. (love.math.random() >= 0.001 and "Nothing happened." or "You bumped your head on a stalactite."))
 	end
 
 	panel:userCallbackSet("cb_update", function(self, dt)
