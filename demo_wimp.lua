@@ -17,6 +17,7 @@ demo_default_theme = "vacuum_dark"
 -- The first panel to load.
 -- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
+	"widgets.d_message_log",
 	"widgets.d_sliders",
 	"widgets.d_text_box_script",
 	"widgets.unfinished.d_dial",
@@ -106,10 +107,11 @@ local demo_plan_list = {
 		-- [[
 		{
 			label = "(Working on it)",
-			collapsed = true,
+			collapsed = false,
 			nodes = {
 				{plan_id = "widgets.unfinished.d_dial", label = "Dials"},
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
+				{plan_id = "widgets.d_message_log", label = "Message Log"},
 
 			},
 		},
