@@ -15,7 +15,6 @@ demo_default_theme = "vacuum_dark"
 
 
 -- The first panel to load.
--- TODO: can't choose a panel whose tree item is collapsed and not presented.
 local demo_panel_launch = {
 	"widgets.d_message_log",
 	"widgets.d_sliders",
@@ -107,7 +106,7 @@ local demo_plan_list = {
 		-- [[
 		{
 			label = "(Working on it)",
-			collapsed = false,
+			collapsed = true,
 			nodes = {
 				{plan_id = "widgets.unfinished.d_dial", label = "Dials"},
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
@@ -118,6 +117,36 @@ local demo_plan_list = {
 		--]]
 	}
 }
+
+
+-- Auto-expand nodes, such that the first panel to be loaded is not hidden in the tree selection.
+do
+	local id = demo_panel_launch[1]
+	if id then
+		local stack = {}
+		local function findPlan(node)
+			table.insert(stack, node)
+			if node.plan_id == id then
+				return true
+			end
+			if node.nodes then
+				for _, child in ipairs(node.nodes) do
+					if findPlan(child) then
+						return true
+					end
+				end
+			end
+			table.remove(stack)
+		end
+
+		findPlan(demo_plan_list)
+		for i = #stack, 1, -1 do
+			if stack[i].collapsed then
+				stack[i].collapsed = false
+			end
+		end
+	end
+end
 
 
 -- ProdUI programs should start with text input disabled.
