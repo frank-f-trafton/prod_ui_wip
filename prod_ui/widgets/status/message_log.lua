@@ -204,24 +204,36 @@ function def:appendItem(text, icon_id)
 	item.x, item.y = 0, 0
 	_shapeItem(self, item)
 
-	local had_last_item_selected = (self.MN_index == #self.MN_items)
+	local had_last_item_selected = (self.MN_index == #items)
 	local n_culled = _cullEntries(items, self.max_entries - 1)
 
 	table.insert(items, #items + 1, item)
+
+	local scrolled_near_bottom
 
 	if n_culled > 0 then
 		self:arrangeItems(1, #items)
 		if not had_last_item_selected and self.MN_index > 0 then
 			self:setSelectionByIndex(math.max(0, self.MN_index - n_culled))
+			self:selectionInView(true)
 		end
 	else
+		local vp = self.vp
+		local last_item = items[#items]
+
+		scrolled_near_bottom = (self.scr_ty >= self.doc_h - vp.h - vp.y - math.min(vp.h/2, last_item.h/2))
+
 		if had_last_item_selected and self.MN_index > 0 then
-			self:setSelectionByIndex(#self.MN_items)
+			self:setSelectionByIndex(#items)
 		end
 		self:arrangeItems(#items, #items)
 	end
 
-	self:reshape()
+	self:cacheUpdate(true)
+
+	if scrolled_near_bottom then
+		self:scrollV(math.huge, true)
+	end
 
 	return item
 end
@@ -310,7 +322,7 @@ function def:evt_initialize()
 	self.col_text_x = 0
 	self.col_text_w = 0
 
-	self.max_entries = 10
+	self.max_entries = 100
 
 	-- State flags.
 	self.enabled = true
@@ -335,6 +347,11 @@ function def:evt_reshapePre()
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 	vp:reduceT(skin.box.margin)
+
+	for i, item in ipairs(self.MN_items) do
+		_shapeItem(self, item)
+	end
+	self:arrangeItems()
 
 	self:scrollClampViewport()
 	wcScrollBar.updateScrollState(self)
