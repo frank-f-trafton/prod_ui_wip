@@ -30,7 +30,7 @@ function plan.make(panel)
 	p_bar:setLabel("Progress Bar", "single")
 
 	p_bar:userCallbackSet("cb_barChanged", function(self, old_pos, old_max, new_pos, new_max)
-		print("wid_barChanged: old / new progress bar values: ", old_pos, old_max, new_pos, new_max)
+		print("cb_barChanged: old / new progress bar values: ", old_pos, old_max, new_pos, new_max)
 	end)
 
 	p_bar:setActive(true)

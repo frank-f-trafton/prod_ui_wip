@@ -967,7 +967,7 @@ function def:evt_update(dt)
 		needs_update = true
 	end
 
-	--print("wid_update", "open_time", self.open_time)
+	--print("evt_update()", "open_time", self.open_time)
 
 	local selected = self.MN_items[self.MN_index]
 
