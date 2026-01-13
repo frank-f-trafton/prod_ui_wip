@@ -291,6 +291,13 @@ return {
 				color_text = {0.1, 0.1, 0.1, 1.0}
 			}
 		},
+		message_log1 = {
+			color_body = {1.0, 1.0, 1.0, 1.0},
+			color_item_text = {0.1, 0.1, 0.1, 1.0},
+			color_item_icon = {1.0, 1.0, 1.0, 1.0},
+			color_select_glow = {1.0, 1.0, 1.0, 0.33},
+			color_hover_glow = {0.3, 0.3, 0.3, 0.16}
+		},
 		number_box1 = {
 			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},
