@@ -753,9 +753,10 @@ function methods:applyTheme(theme)
 	local skin_errors = {}
 
 	for k, v in pairs(resources.skins) do
-		local skinner = context.skinners[v.skinner_id]
+		local skinner_id = v.skinner_id
+		local skinner = context.skinners[skinner_id]
 		if not skinner then
-			error("no skinner with ID: " .. tostring(v.skinner_id))
+			error(tostring(k) .. ": no skinner with ID: " .. tostring(skinner_id))
 		end
 
 		if skinner.validate then

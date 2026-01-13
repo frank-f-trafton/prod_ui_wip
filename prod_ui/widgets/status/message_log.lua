@@ -186,15 +186,20 @@ local function _cullEntries(items, max)
 end
 
 
+local _mt_item = {
+	selectable=true,
+}
+_mt_item.__index = _mt_item
+
+
 function def:appendItem(text, icon_id)
 	uiAssert.loveStringOrColoredText(1, text)
 	uiAssert.typeEval(2, icon_id, "string")
 
 	local items = self.MN_items
 
-	local item = {}
+	local item = setmetatable({}, _mt_item)
 
-	item.selectable = true
 	item.marked = false -- multi-select
 
 	item.text = text
@@ -250,7 +255,6 @@ function def:replaceLastItem(text, icon_id)
 	if not item then
 		self:appendItem(text, icon_id)
 	else
-		item.selectable = true
 		item.marked = false -- multi-select
 
 		item.text = text

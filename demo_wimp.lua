@@ -69,6 +69,7 @@ local demo_plan_list = {
 				{plan_id = "widgets.d_text_box_single", label = "Textbox (Single-Line)"},
 				{plan_id = "widgets.d_text_box_multi", label = "Textbox (Multi-Line)"},
 				{plan_id = "widgets.d_text_box_script", label = "Script Editor"},
+				{plan_id = "widgets.d_message_log", label = "Message Log"},
 				{plan_id = "widgets.d_number_box", label = "Number Box"},
 				{plan_id = "widgets.d_properties_box", label = "Properties Box"},
 				{plan_id = "widgets.d_combo_box", label = "Combo Box"},
@@ -110,8 +111,6 @@ local demo_plan_list = {
 			nodes = {
 				{plan_id = "widgets.unfinished.d_dial", label = "Dials"},
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
-				{plan_id = "widgets.d_message_log", label = "Message Log"},
-
 			},
 		},
 		--]]
