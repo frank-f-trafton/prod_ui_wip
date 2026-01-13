@@ -178,7 +178,6 @@ return {
 		container1 = {
 			color_body = {1.0, 1.0, 1.0, 1.0}
 		},
-		dial1 = {}, -- TODO: unfinished widget
 		dropdown_box1 = {
 			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},

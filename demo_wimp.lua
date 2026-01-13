@@ -19,7 +19,6 @@ local demo_panel_launch = {
 	"widgets.d_message_log",
 	"widgets.d_sliders",
 	"widgets.d_text_box_script",
-	"widgets.unfinished.d_dial",
 	"demo_welcome",
 	"widgets.d_list_box",
 	"widgets.d_tree_box",
@@ -109,7 +108,6 @@ local demo_plan_list = {
 			label = "(Working on it)",
 			collapsed = true,
 			nodes = {
-				{plan_id = "widgets.unfinished.d_dial", label = "Dials"},
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
 			},
 		},
