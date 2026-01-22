@@ -11,7 +11,7 @@ LIBRARIES:
   URL: https://github.com/frank-f-trafton/prod_ui_wip
   License: MIT
   Copyright notice(s):
-    Copyright (c) 2023 - 2025 RBTS / Frank F. Trafton
+    Copyright (c) 2023 - 2026 RBTS / Frank F. Trafton
 
 
 - AtlasB
@@ -48,15 +48,13 @@ LIBRARIES:
   URL: https://github.com/frank-f-trafton/pile_base
   License: MIT
   Copyright notice(s):
-    Copyright (c) 2024 - 2025 PILE Contributors
+    Copyright (c) 2024 - 2026 PILE Contributors
 
-    PILE Base uses code from these libraries:
-      PILE Tree:
-        LUIGI
-          Copyright (c) 2015 airstruck
-            License: MIT
-            https://github.com/airstruck/luigi
+    LUIGI code: Copyright (c) 2015 airstruck
+      https://github.com/airstruck/luigi
 
+    lume code: Copyright (c) 2020 rxi
+      https://github.com/rxi/lume
 
 - T2S2
   URL: https://github.com/frank-f-trafton/t2s2

@@ -127,12 +127,22 @@ local tasks_export = {
 		shared.recursiveDelete(out_path)
 		nativefs.createDirectory(out_path .. "/png")
 
-		-- Grab and scale quadslice coordinates, if applicable.
+		-- Grab and scale coordinates and measurements related to textures.
 		if nativefs.getInfo(arg_src_path .. "/base_data.lua") then
 			base_data = shared.nfsLoadLuaFile(arg_src_path .. "/base_data.lua")
 			no_scale = {}
 			for i, v in ipairs(base_data.no_scale) do
 				no_scale[v] = true
+			end
+
+			print("Scaling quad info -> base_data.lua -> tbl.quads")
+			if base_data.quads then
+				for k, v in pairs(base_data.quads) do
+					if not no_scale[k] then
+						v.ox = tryScaleCoord(v.ox, arg_dpi) or 0
+						v.oy = tryScaleCoord(v.oy, arg_dpi) or 0
+					end
+				end
 			end
 
 			print("Scaling quadslice coords -> base_data.lua -> tbl.slice_coords")
@@ -151,13 +161,7 @@ local tasks_export = {
 					v.oy1 = tryScaleCoord(v.oy1, arg_dpi)
 					v.ox2 = tryScaleCoord(v.ox2, arg_dpi)
 					v.oy2 = tryScaleCoord(v.oy2, arg_dpi)
-					assertAllOrNone("draw offsets", v.ox1, v.oy1, v.ox2, v.oy2)
-
-					v.bx1 = tryScaleCoord(v.bx1, arg_dpi)
-					v.by1 = tryScaleCoord(v.by1, arg_dpi)
-					v.bx2 = tryScaleCoord(v.bx2, arg_dpi)
-					v.by2 = tryScaleCoord(v.by2, arg_dpi)
-					assertAllOrNone("border offsets", v.bx1, v.by1, v.bx2, v.by2)
+					--assertAllOrNone("draw offsets", v.ox1, v.oy1, v.ox2, v.oy2)
 				end
 			end
 			local out_str = t2s2.serialize(base_data)
@@ -199,7 +203,8 @@ local tasks_export = {
 
 
 function love.update(dt)
-	if love.keyboard.isDown("escape") then
+	if false then
+	--if love.keyboard.isDown("escape") then
 		print("*** Cancelled ***")
 		love.event.quit(1)
 

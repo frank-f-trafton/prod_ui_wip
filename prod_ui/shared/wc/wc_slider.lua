@@ -117,7 +117,7 @@ end
 function wcSlider.processPos(self)
 	local grn = self.slider_granularity
 	if grn > 0 then
-		self.slider_pos = pMath.roundGranularInf(self.slider_pos, grn)
+		self.slider_pos = pMath.roundInfIncrement(self.slider_pos, grn)
 	end
 
 	self.slider_pos = math.max(0, math.min(self.slider_pos, self.slider_max))

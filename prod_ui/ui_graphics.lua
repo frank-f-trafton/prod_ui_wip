@@ -6,6 +6,7 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 local auxColor = require(REQ_PATH .. "graphics.aux_color")
 uiGraphics.auxColor = auxColor
+local pMath = require(REQ_PATH .. "lib.pile_math")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 uiGraphics.quadSlice = quadSlice
 
@@ -17,177 +18,47 @@ local love_major, love_minor = love.getVersion()
 uiGraphics.newTextBatch = (love_major <= 11) and love.graphics.newText or love.graphics.newTextBatch
 
 
--- * Color *
-
-
---[[
-Wrapper for love.graphics.setColor() which sets a mix of RGBA values plus a table of colors.
-
-Usage: uiGraphics.mixVT(r, g, b, a, color_table)
-
-Note that this does not correctly handle premultiplied colors.
---]]
-uiGraphics.mixVT = auxColor.mixVT
-
-
---[[
-Wrapper for love.graphics.setColor() that handles premultiplying colors.
-
-Notes:
-
-* LÖVE text and shape primitives (love.graphics.rectangle, etc.) typically use alphamultiply mode.
-
-* Canvases, when drawn to the screen or another canvas, typically use premultiplied mode.
-
-* Some blend modes require the use of premultiplied mode.
-
-
-More info:
-
-https://love2d.org/wiki/love.graphics.setBlendMode
-https://love2d.org/wiki/BlendMode
-https://love2d.org/wiki/BlendAlphaMode
-https://love2d.org/wiki/BlendMode_Formulas
---]]
-
-
-uiGraphics.setColorCorrected = {}
-uiGraphics.setColorCorrected["alphamultiply"] = love.graphics.setColor
-
-uiGraphics.setColorCorrected["premultiplied"] = function(r, g, b, a)
-
-	if type(r) == "table" then
-		r, g, b, a = r[1], r[2], r[3], r[4]
-		r, g, b = love.math.gammaToLinear(r, g, b)
-		r, g, b = r * a, g * a, b * a
-		r, g, b = love.math.linearToGamma(r, g, b)
-	else
-		r, g, b = love.math.gammaToLinear(r, g, b)
-		r, g, b = r * a, g * a, b * a
-		r, g, b = love.math.linearToGamma(r, g, b)
-	end
-	love.graphics.setColor(r, g, b, a)
-end
-
-
-uiGraphics.setColorCorrectedV = {}
-uiGraphics.setColorCorrectedV["alphamultiply"] = love.graphics.setColor
-
-uiGraphics.setColorCorrectedV["premultiplied"] = function(r, g, b, a)
-	r, g, b = love.math.gammaToLinear(r, g, b)
-	r, g, b = r * a, g * a, b * a
-	r, g, b = love.math.linearToGamma(r, g, b)
-
-	love.graphics.setColor(r, g, b, a)
-end
-
-
-uiGraphics.setColorCorrectedT = {}
-uiGraphics.setColorCorrectedT["alphamultiply"] = love.graphics.setColor
-
-uiGraphics.setColorCorrectedT["premultiplied"] = function(t)
-	local r, g, b, a = t[1], t[2], t[3], t[4]
-	r, g, b = love.math.gammaToLinear(r, g, b)
-	r, g, b = r * a, g * a, b * a
-	r, g, b = love.math.linearToGamma(r, g, b)
-
-	love.graphics.setColor(r, g, b, a)
-end
-
-
-uiGraphics.setColorUncorrected = {}
-uiGraphics.setColorUncorrected["alphamultiply"] = love.graphics.setColor
-
-uiGraphics.setColorUncorrected["premultiplied"] = function(r, g, b, a)
-	if type(r) == "table" then
-		local a = r[4]
-		love.graphics.setColor(r[1] * a, r[2] * a, r[3] * a, a)
-	else
-		love.graphics.setColor(r * a, g * a, b * a, a)
-	end
-end
-
-
-uiGraphics.setColorUncorrectedV = {}
-uiGraphics.setColorUncorrectedV["alphamultiply"] = love.graphics.setColor
-
-uiGraphics.setColorUncorrectedV["premultiplied"] = function(r, g, b, a)
-	love.graphics.setColor(r * a, g * a, b * a, a)
-end
-
-
-uiGraphics.setColorUncorrectedT = {}
-uiGraphics.setColorUncorrectedT["alphamultiply"] = love.graphics.setColor
-
-uiGraphics.setColorUncorrectedT["premultiplied"] = function(t)
-	local a = t[4]
-	love.graphics.setColor(t[1] * a, t[2] * a, t[3] * a, a)
-end
-
-
-if love.graphics.isGammaCorrect() then
-	uiGraphics.setColor = uiGraphics.setColorCorrected
-	uiGraphics.setColorV = uiGraphics.setColorCorrectedV
-	uiGraphics.setColorT = uiGraphics.setColorCorrectedT
-else
-	uiGraphics.setColor = uiGraphics.setColorUncorrected
-	uiGraphics.setColorV = uiGraphics.setColorUncorrectedV
-	uiGraphics.setColorT = uiGraphics.setColorUncorrectedT
-end
-
-
 -- * Scissor Wrappers *
 
 
--- LÖVE's scissorbox functions will raise an error if the provided width or height are less than zero.
+-- LÖVE's scissorbox functions will raise an error if the width or height are less than zero.
+
+
+local lg = love.graphics
+local _draw, _setBlendMode, _getBlendMode = lg.draw, lg.setBlendMode, lg.getBlendMode
+local _setScissor, _intersectScissor = lg.setScissor, lg.intersectScissor
 
 
 function uiGraphics.setScissor(x, y, w, h)
-	love.graphics.setScissor(x, y, math.max(0, w), math.max(0, h))
+	_setScissor(x, y, math.max(0, w), math.max(0, h))
 end
 
 
 function uiGraphics.intersectScissor(x, y, w, h)
-	love.graphics.intersectScissor(x, y, math.max(0, w), math.max(0, h))
+	_intersectScissor(x, y, math.max(0, w), math.max(0, h))
 end
 
 
 -- * Drawing *
 
 
---- Draws a whole texture.
-function uiGraphics.texture(tex_def, x, y, w, h)
-	--print("uiGraphics.texture()", "blend_mode", love.graphics.getBlendMode())
-
-	local texture = tex_def.texture
-	love.graphics.draw(texture, x, y, 0, texture:getWidth() / w, texture:getHeight() / h)
+-- Quad at point:
+function uiGraphics.quad(tex_quad, x, y)
+	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y, 0, 1, 1, tex_quad.ox, tex_quad.oy)
 end
 
 
---- Draws a whole texture. (Checks blend mode.)
-function uiGraphics.textureB(tex_def, x, y, w, h)
-	local blend_mode, alpha_mode = love.graphics.getBlendMode()
-	love.graphics.setBlendMode(tex_def.blend_mode, tex_def.alpha_mode)
-	--print("uiGraphics.textureB()", "blend_mode", love.graphics.getBlendMode())
-
-	local texture = tex_def.texture
-	love.graphics.draw(texture, x, y, 0, texture:getWidth() / w, texture:getHeight() / h)
-
-	love.graphics.setBlendMode(blend_mode, alpha_mode)
+function uiGraphics.quadXYWH(tex_quad, x, y, w, h)
+	_draw(tex_quad.texture, tex_quad.quad, x, y, 0, w / tex_quad.w, h / tex_quad.h)
 end
 
 
---- Draws a textured 9-Slice.
 function uiGraphics.drawSlice(tex_slice, x, y, w, h)
-	--print("uiGraphics.drawSlice()", "blend_mode", love.graphics.getBlendMode())
-
 	tex_slice.slice:draw(tex_slice.texture, x, y, w, h)
 end
 
 
---- Draws a textured 9-Slice with offsetting. The slice must have the fields ox1, oy1, ox2, and oy2 configured.
 function uiGraphics.drawSliceWithOffsets(tex_slice, x, y, w, h)
-	--print("uiGraphics.drawSliceOffset()", "blend_mode", love.graphics.getBlendMode())
 	local slice = tex_slice.slice
 
 	slice:draw(
@@ -200,58 +71,6 @@ function uiGraphics.drawSliceWithOffsets(tex_slice, x, y, w, h)
 end
 
 
---- Draws a textured 9-Slice. (Checks blend mode.)
-function uiGraphics.drawSliceB(tex_slice, x, y, w, h)
-	local blend_mode, alpha_mode = love.graphics.getBlendMode()
-	love.graphics.setBlendMode(tex_slice.blend_mode, tex_slice.alpha_mode)
-	--print("uiGraphics.drawSliceB()", "blend_mode", love.graphics.getBlendMode())
-
-	tex_slice.slice:draw(tex_slice.texture, x, y, w, h)
-
-	love.graphics.setBlendMode(blend_mode, alpha_mode)
-end
-
-
---- Draws a textured quad.
-function uiGraphics.quadXY(tex_quad, x, y)
-	--print("uiGraphics.quadXY()", "blend_mode", love.graphics.getBlendMode())
-
-	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y)
-end
-
-
---- Draws a textured quad. (Checks blend mode.)
-function uiGraphics.quadXYB(tex_quad, x, y)
-	local blend_mode, alpha_mode = love.graphics.getBlendMode()
-	love.graphics.setBlendMode(tex_quad.blend_mode, tex_quad.alpha_mode)
-	--print("uiGraphics.quadXY()", "blend_mode", love.graphics.getBlendMode())
-
-	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y)
-
-	love.graphics.setBlendMode(blend_mode, alpha_mode)
-end
-
-
---- Draws a textured quad, stretched to an arbitrary width and height.
-function uiGraphics.quadXYWH(tex_quad, x, y, w, h)
-	--print("uiGraphics.quadXYWH()", "blend_mode", love.graphics.getBlendMode())
-
-	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y, 0, w / tex_quad.w, h / tex_quad.h)
-end
-
-
---- Draws a textured quad, stretched to an arbitrary width and height. (Checks blend mode.)
-function uiGraphics.quadXYWHB(tex_quad, x, y, w, h)
-	local blend_mode, alpha_mode = love.graphics.getBlendMode()
-	love.graphics.setBlendMode(tex_quad.blend_mode, tex_quad.alpha_mode)
-	--print("uiGraphics.quadXYWH()", "blend_mode", love.graphics.getBlendMode())
-
-	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y, 0, w / tex_quad.w, h / tex_quad.h)
-
-	love.graphics.setBlendMode(blend_mode, alpha_mode)
-end
-
-
 --- Draws a textured quad. If the requested size is smaller than the quad, the image is reduced. If the size is greater, the image is centered.
 function uiGraphics.quadShrinkOrCenterXYWH(tex_quad, x, y, w, h)
 	local sx = math.max(0, math.min(1, w / tex_quad.w))
@@ -260,89 +79,270 @@ function uiGraphics.quadShrinkOrCenterXYWH(tex_quad, x, y, w, h)
 	local ox = math.floor((w - tex_quad.w * sx) * 0.5)
 	local oy = math.floor((h - tex_quad.h * sy) * 0.5)
 
-	love.graphics.draw(
-		tex_quad.texture,
-		tex_quad.quad,
-		x + ox,
-		y + oy,
-		0,
-		sx,
-		sy
-	)
+	_draw(tex_quad.texture, tex_quad.quad, x + ox, y + oy, 0, sx, sy)
 end
 
 
 --- Draws a textured quad, stretched to an arbitrary width and height. Assumes the quad is a 1x1 pixel.
 function uiGraphics.quad1x1(tex_quad, x, y, w, h)
-	--print("uiGraphics.quad1x1()", "blend_mode", love.graphics.getBlendMode())
-
-	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y, 0, w, h)
+	_draw(tex_quad.texture, tex_quad.quad, x, y, 0, w, h)
 end
 
 
---- Draws a textured quad, stretched to an arbitrary width and height. Assumes the quad is a 1x1 pixel. (Checks blend mode.)
-function uiGraphics.quad1x1B(tex_quad, x, y, w, h)
-	local blend_mode, alpha_mode = love.graphics.getBlendMode()
-	love.graphics.setBlendMode(tex_quad.blend_mode, tex_quad.alpha_mode)
-	--print("uiGraphics.quad1x1()", "blend_mode", love.graphics.getBlendMode())
+-- Draws a stretched quad as a line segment between two points. The quad def's Y offset is used for centering.
+function uiGraphics.quadLine(tex_quad, cross_scale, x1, y1, x2, y2)
+	-- (This may not scale well with many calls.)
+	local r = math.atan2(y2 - y1, x2 - x1)
+	local sx = pMath.dist(x1, y1, x2, y2) / tex_quad.w
 
-	love.graphics.draw(tex_quad.texture, tex_quad.quad, x, y, 0, w, h)
-
-	love.graphics.setBlendMode(blend_mode, alpha_mode)
+	_draw(tex_quad.texture, tex_quad.quad, x1, y1, r, sx, cross_scale, 0, tex_quad.oy)
 end
 
 
---- Draws a simple rectangular frame. The coordinates specify the outer edge of the frame. Rounded corners are not
---	supported.
--- @param tex_quad The texture + quad def to use. Assumes the quad is a 1x1 pixel.
--- @param breadth The thickness of the frame outline. Avoid values that are less than 0 or greater than half the width
---	or height of the frame.
-function uiGraphics.rectangleFrame(tex_quad, breadth, x, w, y, h)
-	--[[
-	-- Draw position and order:
-	1112
-	4  2
-	4  2
-	4333
-	--]]
-
-	--print("uiGraphics.rectangleFrame()", "blend_mode", love.graphics.getBlendMode())
-
-	local tex, quad = tex_quad.texture, tex_quad.quad
-
-	love.graphics.draw(tex, quad, x, y, 0, w - breadth, breadth)
-	love.graphics.draw(tex, quad, x + w - breadth, y, 0, breadth, h - breadth)
-	love.graphics.draw(tex, quad, x + breadth, y + h - breadth, 0, w - breadth, breadth)
-	love.graphics.draw(tex, quad, x, y + breadth, 0, breadth, h - breadth)
+-- Draws a stretched quad as a horizontal line segment. The quad def's Y offset is used for vertical centering.
+function uiGraphics.quadBarH(tex_quad, cross_scale, x, y, len)
+	_draw(tex_quad.texture, tex_quad.quad, x, y, 0, len / tex_quad.w, cross_scale, 0, tex_quad.oy)
 end
 
 
---- Draws a simple rectangular frame. The coordinates specify the outer edge of the frame. Rounded corners are not
---	supported. (Checks blend mode.)
--- @param tex_quad The texture + quad def to use. Assumes the quad is a 1x1 pixel.
--- @param breadth The thickness of the frame outline. Avoid values that are less than 0 or greater than half the width
---	or height of the frame.
-function uiGraphics.rectangleFrameB(tex_quad, breadth, x, w, y, h)
-	--[[
-	-- Draw position and order:
-	1112
-	4  2
-	4  2
-	4333
-	--]]
+-- Draws a stretched quad as a vertical line segment. The quad def's X offset is used for horizontal centering.
+function uiGraphics.quadBarV(tex_quad, cross_scale, x, y, len)
+	_draw(tex_quad.texture, tex_quad.quad, x, y, 0, cross_scale, len / tex_quad.h, tex_quad.ox)
+end
 
-	local blend_mode, alpha_mode = love.graphics.getBlendMode()
-	love.graphics.setBlendMode(tex_quad.blend_mode, tex_quad.alpha_mode)
-	--print("uiGraphics.rectangleFrame()", "blend_mode", love.graphics.getBlendMode())
 
-	local tex, quad = tex_quad.texture, tex_quad.quad
+function uiGraphics.pipeHorizontal(ps, x, y, len)
+	local pad_x = ps.pad_x
 
-	love.graphics.draw(tex, quad, x, y, 0, w - breadth, breadth)
-	love.graphics.draw(tex, quad, x + w - breadth, y, 0, breadth, h - breadth)
-	love.graphics.draw(tex, quad, x + breadth, y + h - breadth, 0, w - breadth, breadth)
-	love.graphics.draw(tex, quad, x, y + breadth, 0, breadth, h - breadth)
+	uiGraphics.quadBarH(ps.l_h, 1, x + pad_x, y, len - pad_x*2)
 
-	love.graphics.setBlendMode(blend_mode, alpha_mode)
+	uiGraphics.quad(ps.t_l, x, y)
+	uiGraphics.quad(ps.t_r, x + len, y)
+end
+
+
+function uiGraphics.pipeVertical(ps, x, y, len)
+	local pad_y = ps.pad_y
+
+	uiGraphics.quadBarV(ps.l_v, 1, x, y + pad_y, len - pad_y*2)
+
+	uiGraphics.quad(ps.t_t, x, y)
+	uiGraphics.quad(ps.t_b, x, y + len)
+end
+
+
+function uiGraphics.pipeRectangle(ps, x, y, w, h)
+	local x2, y2 = x + w, y + h
+
+	local pad_x, pad_y = ps.pad_x, ps.pad_y
+
+	uiGraphics.quadBarH(ps.l_h, 1, x + pad_x,  y, w - pad_x*2)
+	uiGraphics.quadBarH(ps.l_h, 1, x + pad_x, y2, w - pad_x*2)
+
+	uiGraphics.quadBarV(ps.l_v, 1, x,  y + pad_y, h - pad_y*2)
+	uiGraphics.quadBarV(ps.l_v, 1, x2, y + pad_y, h - pad_y*2)
+
+	uiGraphics.quad(ps.j_tl,  x, y)
+	uiGraphics.quad(ps.j_tr, x2, y)
+	uiGraphics.quad(ps.j_bl,  x, y2)
+	uiGraphics.quad(ps.j_br, x2, y2)
+end
+
+
+function uiGraphics.pipePointsV(ps, cap1, cap2, ...)
+	local n_args = select("#", ...)
+
+	if n_args < 2 then
+		return
+
+	elseif n_args % 2 ~= 0 then
+		error("expected even number of variadic arguments")
+	end
+
+	-- start cap
+	if cap1 then
+		local x1, y1, x2, y2 = select(1, ...)
+		if y1 == y2 then
+			local id = (x1 < x2) and "t_l" or "t_r"
+			uiGraphics.quad(ps[id], x1, y1)
+		else
+			local id = (y1 < y2) and "t_t" or "t_b"
+			uiGraphics.quad(ps[id], x1, y1)
+		end
+	end
+
+	local pad_x, pad_y = ps.pad_x, ps.pad_y
+
+	-- legs
+	for i = 1, n_args - 2, 2 do
+		local x1, y1, x2, y2, x3, y3 = select(i, ...)
+
+		-- horizontal
+		if y1 == y2 then
+			local xx1, xx2
+			if x1 < x2 then
+				xx1, xx2 = x1, x2
+			else
+				xx1, xx2 = x2, x1
+			end
+
+			uiGraphics.quadBarH(ps.l_h, 1, xx1 + pad_x, y1, (xx2-xx1) - pad_x*2)
+
+			-- joints
+			if x3 then
+				if x2 > x1 then
+					if y3 > y2 then
+						uiGraphics.quad(ps.j_tr, x2, y2)
+					else
+						uiGraphics.quad(ps.j_br, x2, y2)
+					end
+				else
+					if y3 > y2 then
+						uiGraphics.quad(ps.j_tl, x2, y2)
+					else
+						uiGraphics.quad(ps.j_bl, x2, y2)
+					end
+				end
+			end
+		-- vertical
+		else
+			local yy1, yy2
+			if y1 < y2 then
+				yy1, yy2 = y1, y2
+			else
+				yy1, yy2 = y2, y1
+			end
+
+			uiGraphics.quadBarV(ps.l_v, 1, x1, yy1 + pad_y, (yy2-yy1) - pad_y*2)
+
+			-- joints
+			if y3 then
+				if y2 > y1 then
+					if x3 > x2 then
+						uiGraphics.quad(ps.j_bl, x2, y2)
+					else
+						uiGraphics.quad(ps.j_br, x2, y2)
+					end
+				else
+					if x3 > x2 then
+						uiGraphics.quad(ps.j_tl, x2, y2)
+					else
+						uiGraphics.quad(ps.j_tr, x2, y2)
+					end
+				end
+			end
+		end
+	end
+
+	-- end cap
+	if cap2 then
+		local x1, y1, x2, y2 = select(n_args - 3, ...)
+		if y1 == y2 then
+			local id = (x1 < x2) and "t_r" or "t_l"
+			uiGraphics.quad(ps[id], x2, y2)
+		else
+			local id = (y1 < y2) and "t_b" or "t_t"
+			uiGraphics.quad(ps[id], x2, y2)
+		end
+	end
+end
+
+
+function uiGraphics.pipePointsT(ps, cap1, cap2, arr)
+	local n_args = #arr
+	if n_args < 2 then
+		return
+
+	elseif n_args % 2 ~= 0 then
+		error("expected even number of variadic arguments")
+	end
+
+	-- start cap
+	if cap1 then
+		local x1, y1, x2, y2 = arr[1], arr[2], arr[3], arr[4]
+		if y1 == y2 then
+			local id = (x1 < x2) and "t_l" or "t_r"
+			uiGraphics.quad(ps[id], x1, y1)
+		else
+			local id = (y1 < y2) and "t_t" or "t_b"
+			uiGraphics.quad(ps[id], x1, y1)
+		end
+	end
+
+	local pad_x, pad_y = ps.pad_x, ps.pad_y
+
+	-- legs
+	for i = 1, n_args - 2, 2 do
+		local x1, y1, x2, y2, x3, y3 = arr[i], arr[i + 1], arr[i + 2], arr[i + 3], arr[i + 4], arr[i + 5]
+
+		-- horizontal
+		if y1 == y2 then
+			local xx1, xx2
+			if x1 < x2 then
+				xx1, xx2 = x1, x2
+			else
+				xx1, xx2 = x2, x1
+			end
+
+			uiGraphics.quadBarH(ps.l_h, 1, xx1 + pad_x, y1, (xx2-xx1) - pad_x*2)
+
+			-- joints
+			if x3 then
+				if x2 > x1 then
+					if y3 > y2 then
+						uiGraphics.quad(ps.j_tr, x2, y2)
+					else
+						uiGraphics.quad(ps.j_br, x2, y2)
+					end
+				else
+					if y3 > y2 then
+						uiGraphics.quad(ps.j_tl, x2, y2)
+					else
+						uiGraphics.quad(ps.j_bl, x2, y2)
+					end
+				end
+			end
+		-- vertical
+		else
+			local yy1, yy2
+			if y1 < y2 then
+				yy1, yy2 = y1, y2
+			else
+				yy1, yy2 = y2, y1
+			end
+
+			uiGraphics.quadBarV(ps.l_v, 1, x1, yy1 + pad_y, (yy2-yy1) - pad_y*2)
+
+			-- joints
+			if y3 then
+				if y2 > y1 then
+					if x3 > x2 then
+						uiGraphics.quad(ps.j_bl, x2, y2)
+					else
+						uiGraphics.quad(ps.j_br, x2, y2)
+					end
+				else
+					if x3 > x2 then
+						uiGraphics.quad(ps.j_tl, x2, y2)
+					else
+						uiGraphics.quad(ps.j_tr, x2, y2)
+					end
+				end
+			end
+		end
+	end
+
+	-- end cap
+	if cap2 then
+		local x1, y1, x2, y2 = arr[n_args - 3], arr[n_args - 2], arr[n_args - 1], arr[n_args]
+		if y1 == y2 then
+			local id = (x1 < x2) and "t_r" or "t_l"
+			uiGraphics.quad(ps[id], x2, y2)
+		else
+			local id = (y1 < y2) and "t_b" or "t_t"
+			uiGraphics.quad(ps[id], x2, y2)
+		end
+	end
 end
 
 

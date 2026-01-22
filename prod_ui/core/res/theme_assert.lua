@@ -140,6 +140,11 @@ function themeAssert.labelStyleEval(n, v)
 end
 
 
+function themeAssert.pipeStyle(n, v)
+	_assertLinkedResource("pipe_styles", "PipeStyle", v)
+end
+
+
 function themeAssert.sashStyle(n, v)
 	_assertLinkedResource("sash_styles", "SashStyle", v)
 end

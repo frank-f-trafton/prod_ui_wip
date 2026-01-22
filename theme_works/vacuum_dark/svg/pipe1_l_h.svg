@@ -2,12 +2,12 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="24"
-   height="24"
-   viewBox="0 0 24 24"
+   width="2"
+   height="2"
+   viewBox="0 0 2 2"
    version="1.1"
    id="svg13547"
-   sodipodi:docname="group_perimeter_a.svg"
+   sodipodi:docname="outline_lh.svg"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    inkscape:export-filename="checkmark_on.png"
    inkscape:export-xdpi="96"
@@ -27,13 +27,13 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="22.627417"
-     inkscape:cx="9.1260969"
-     inkscape:cy="12.374369"
+     inkscape:zoom="128"
+     inkscape:cx="1.4296875"
+     inkscape:cy="1.9492187"
      inkscape:window-width="1920"
-     inkscape:window-height="957"
+     inkscape:window-height="1007"
      inkscape:window-x="0"
-     inkscape:window-y="32"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
      showguides="false">
@@ -69,8 +69,8 @@
     <rect
        style="font-variation-settings:'wght' 700;fill:#636363;fill-opacity:1;stroke:none;stroke-width:1.99937;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
        id="rect1"
-       width="24"
-       height="24"
+       width="48"
+       height="48"
        x="0"
        y="0"
        ry="0" />
@@ -81,8 +81,9 @@
      id="layer1">
     <path
        style="font-variation-settings:'wght' 700;fill:none;stroke:#ffffff;stroke-width:1.999;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
-       d="M 3,4 V 21 H 21 V 4"
+       d="M -0.00636795,0.99972665 0.99363185,1.0002733 2.0063682,0.99972665"
        id="path2"
-       sodipodi:nodetypes="cccc" />
+       sodipodi:nodetypes="ccc"
+       inkscape:label="path2" />
   </g>
 </svg>

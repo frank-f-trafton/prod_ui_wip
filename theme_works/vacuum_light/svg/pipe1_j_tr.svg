@@ -2,12 +2,12 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="24"
-   height="24"
-   viewBox="0 0 24 24"
+   width="2"
+   height="2"
+   viewBox="0 0 2 2"
    version="1.1"
    id="svg13547"
-   sodipodi:docname="arrow_down.svg"
+   sodipodi:docname="pipe1_j_tr.svg"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    inkscape:export-filename="checkmark_on.png"
    inkscape:export-xdpi="96"
@@ -27,15 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="32"
-     inkscape:cx="10.21875"
-     inkscape:cy="11.546875"
+     inkscape:zoom="128"
+     inkscape:cx="2.265625"
+     inkscape:cy="2.9257812"
      inkscape:window-width="1920"
      inkscape:window-height="1007"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg13547"
+     inkscape:current-layer="layer1"
      showguides="false">
     <inkscape:grid
        type="xygrid"
@@ -61,17 +61,29 @@
   </sodipodi:namedview>
   <defs
      id="defs13544" />
-  <rect
-     style="font-variation-settings:'wght' 700;display:none;fill:#666666;fill-opacity:1;stroke:none;stroke-width:1;stroke-linecap:square;stroke-linejoin:round"
-     id="rect63178"
-     width="23.999998"
-     height="24"
-     x="0"
-     y="0"
-     inkscape:label="hide_me" />
-  <path
-     style="display:inline;fill:#dedede;fill-opacity:1;stroke:#ffffff;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-     d="m 4,8 8,8 8,-8 z"
-     id="path21713"
-     inkscape:label="arrow_down" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="hide_me"
+     style="display:none">
+    <rect
+       style="font-variation-settings:'wght' 700;fill:#636363;fill-opacity:1;stroke:none;stroke-width:1.99937;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       id="rect1"
+       width="48"
+       height="48"
+       x="0"
+       y="0"
+       ry="0" />
+  </g>
+  <g
+     inkscape:label="perimeter"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="font-variation-settings:'wght' 700;fill:none;stroke:#1a1a1a;stroke-width:1.999;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       d="M 1,1.9995 V 0.99949998 H 0"
+       id="path2"
+       sodipodi:nodetypes="ccc"
+       inkscape:label="path2" />
+  </g>
 </svg>
