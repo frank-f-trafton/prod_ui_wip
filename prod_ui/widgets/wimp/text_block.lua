@@ -65,6 +65,10 @@ function def:setFontID(id)
 	end
 
 	self.font_id = id
+
+	self:reshape()
+
+	return self
 end
 
 
@@ -79,6 +83,8 @@ function def:setText(text)
 	self.text = text
 
 	self:reshape()
+
+	return self
 end
 
 
@@ -108,6 +114,8 @@ function def:setURL(url)
 	end
 
 	self.thimble_mode = self.url and 1 or 0
+
+	return self
 end
 
 
@@ -120,6 +128,8 @@ function def:setAlign(align)
 	uiAssert.namedMap(1, align, _nm_align)
 
 	self.align = align
+
+	return self
 end
 
 
@@ -132,6 +142,8 @@ function def:setVerticalAlign(v)
 	uiAssert.type(1, v, "number")
 
 	self.align_v = math.max(0, math.min(v, 1))
+
+	return self
 end
 
 
@@ -144,6 +156,10 @@ function def:setAutoSize(mode)
 	uiAssert.namedMapEval(1, mode, _nm_size_mode)
 
 	self.auto_size = mode
+
+	self:reshape()
+
+	return self
 end
 
 
@@ -154,6 +170,10 @@ end
 
 function def:setWrapping(enabled)
 	self.wrap = not not enabled
+
+	self:reshape()
+
+	return self
 end
 
 
