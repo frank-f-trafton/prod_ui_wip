@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"themes_and_scale",
 	"widgets.d_group",
 	"widgets.d_message_log",
 	"widgets.d_sliders",
@@ -37,7 +38,6 @@ local demo_panel_launch = {
 	"layouts.d_layout_sashes",
 	"layouts.d_layout",
 	"layouts.d_layout_static",
-	"themes_and_scale",
 	"widgets.d_progress_bar",
 }
 
@@ -243,7 +243,7 @@ local function newWimpContext()
 	local context = ui.context.newContext("prod_ui", app_settings)
 
 	context:setScale(1.0)
-	context:setDPI(96)
+	context:setTextureScale(1)
 
 	-- Config/settings specific to this demo.
 	context.app = {
@@ -386,10 +386,10 @@ function love.keypressed(kc, sc, rep)
 	-- [====[
 	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
 		if context:getScale() > 1 then
-			demoShared.executeThemeUpdate(context, 1.0, context:getDPI(), context:getThemeID())
+			demoShared.executeThemeUpdate(context, 1.0, context:getTextureScale(), context:getThemeID())
 		else
 			--demoShared.executeThemeUpdate(context, 1.5, 192)
-			demoShared.executeThemeUpdate(context, 1.5, context:getDPI(), context:getThemeID())
+			demoShared.executeThemeUpdate(context, 1.5, context:getTextureScale(), context:getThemeID())
 		end
 	end
 

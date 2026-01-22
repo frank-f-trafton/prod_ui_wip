@@ -603,7 +603,7 @@ return {
 	},
 	textures = {
 		atlas = {
-			path = "%resources%/textures/%dpi%/vacuum_light.png"
+			path = "%resources%/textures/%tex_scale%/vacuum_light.png"
 		}
 	}
 }

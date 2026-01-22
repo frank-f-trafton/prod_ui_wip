@@ -20,11 +20,6 @@ return {
 		alpha_mode = "alphamultiply",
 	},
 
-	-- Textures which should not be scaled when rendering out.
-	no_scale = {
-		"pixel"
-	},
-
 	--[[
 	QuadSlice coordinates. Hash keys correspond to image filenames without extensions.
 	x,y: Offset to the upper-left.
@@ -236,8 +231,11 @@ return {
 	},
 
 	-- 'quads' will be fully populated after the atlas is built.
-	-- Center offsets ('ox', 'oy') may be specified here.
+	-- Center offsets ('ox', 'oy') and scale flags ('no_scale', 'no_scale_x', 'no_scale_y') may be specified here.
 	quads = {
+		["pixel"] = {
+			no_scale = true
+		},
 		["arrow_down"] = {
 			ox = 12, oy = 12,
 		},

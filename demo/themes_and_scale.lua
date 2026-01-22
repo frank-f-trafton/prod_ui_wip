@@ -13,6 +13,16 @@ local function _configureInputBox(self)
 end
 
 
+local function _message(self, str)
+	local block = self.parent:findTag("err_msg")
+	if block then
+		block:setText(str)
+	else
+		print(str)
+	end
+end
+
+
 local function _updateScale(self)
 	local context = self.context
 	local btn = self.parent:findTag("btn_crt")
@@ -20,15 +30,15 @@ local function _updateScale(self)
 		return
 	end
 
-	local scale, dpi, theme_id
+	local scale, tex_scale, theme_id
 
 	local in_scale = self.parent:findTag("in_scale")
 	if in_scale then
 		scale = tonumber(in_scale:getText())
 	end
-	local in_dpi = self.parent:findTag("in_dpi")
-	if in_dpi then
-		dpi = tonumber(in_dpi:getText())
+	local in_tex_scale = self.parent:findTag("in_tex_scale")
+	if in_tex_scale then
+		tex_scale = tonumber(in_tex_scale:getText())
 	end
 
 	local list_box = self.parent:findTag("themes_list")
@@ -40,27 +50,27 @@ local function _updateScale(self)
 	end
 
 	if not scale then
-		btn:setLabel("Bad scale")
+		_message(self, "Error: bad UI Scale")
 
-	elseif not dpi then
-		btn:setLabel("Bad DPI")
+	elseif not tex_scale then
+		_message(self, "Error: bad Texture Scale")
 
 	elseif not theme_id then
-		btn:setLabel("Bad/No theme")
+		_message(self, "Error: theme is broken or missing")
 
 	else
-		local result = demoShared.executeThemeUpdate(context, scale, dpi, theme_id)
+		local result = demoShared.executeThemeUpdate(context, scale, tex_scale, theme_id)
 		if result == false then
-			btn:setLabel("Unprovisioned DPI")
+			_message(self, "Error: unprovisioned Texture Scale")
 		else
-			btn:setLabel("Update")
+			_message(self, "OK")
 		end
 	end
 end
 
 
-local function _pollTextureDPIs(tex_path)
-	-- Gets a list of valid texture DPIs by scanning the 'textures' directory
+local function _pollTextureScales(tex_path)
+	-- Gets a list of valid texture scales by scanning the 'textures' directory
 	-- for subdirectories whose names are made up of digits.
 	local ls = love.filesystem.getDirectoryItems(tex_path)
 	local list = {}
@@ -91,8 +101,8 @@ function plan.make(panel)
 
 	demoShared.makeTitle(panel, nil, "Themes and Scale")
 
-	local dpi_list = _pollTextureDPIs(context.conf.prod_ui_path .. "resources/textures")
-	demoShared.makeParagraph(panel, nil, "(Valid DPIs are: " .. table.concat(dpi_list, ", ") .. ")")
+	local tex_scale_list = _pollTextureScales(context.conf.prod_ui_path .. "resources/textures")
+	demoShared.makeParagraph(panel, nil, "(Valid Texture Scales are: " .. table.concat(tex_scale_list, ", ") .. ")")
 
 	demoShared.makeLabel(panel, 32, 96, 200, 32, false, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
@@ -139,15 +149,15 @@ function plan.make(panel)
 
 	yy = yy + hh + h_pad
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "DPI:", "single")
+	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Texture Scale:", "single")
 
 	yy = yy + hh + h_pad
 
 	input = panel:addChild("input/text_box_single")
 	input:geometrySetMode("static", xx, yy, ww, hh)
 	_configureInputBox(input)
-	input:setTag("in_dpi")
-		:setText(tostring(context.dpi))
+	input:setTag("in_tex_scale")
+		:setText(tostring(context.tex_scale))
 		:userCallbackSet("cb_action", _updateScale)
 
 	yy = yy + hh + h_pad
@@ -159,6 +169,9 @@ function plan.make(panel)
 		:userCallbackSet("cb_buttonAction", _updateScale)
 
 	yy = yy + hh + h_pad
+
+	local error_paragraph = demoShared.makeParagraph(panel, "err_msg", "(Messages go here)")
+		:geometrySetMode("static", xx, yy + hh, 400, 64)
 end
 
 

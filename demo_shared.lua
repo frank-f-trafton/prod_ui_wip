@@ -52,20 +52,19 @@ local function _reskin(self)
 end
 
 
--- @return true on successful change, nil if the scale and dpi are not different from existing values, false if the
+-- @return true on successful change, nil if the scale and Texture Scale are not different from existing values, false if the
 --	change failed.
-function demoShared.executeThemeUpdate(context, scale, dpi, id)
+function demoShared.executeThemeUpdate(context, scale, tex_scale, id)
 	-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
-	-- TODO: Probably need to declare valid DPI numbers somewhere.
-	local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(dpi), "directory")
+	local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(tex_scale), "directory")
 	if not tex_dir then
 		return false
 	else
-		local old_scale, old_dpi, old_id = context:getScale(), context:getDPI(), context:getThemeID()
+		local old_scale, old_tex_scale, old_id = context:getScale(), context:getTextureScale(), context:getThemeID()
 		print("id", id, "old_id", old_id)
-		if not (scale == old_scale and dpi == old_dpi and id == old_id) then
+		if not (scale == old_scale and tex_scale == old_tex_scale and id == old_id) then
 			context:setScale(scale)
-			context:setDPI(dpi)
+			context:setTextureScale(tex_scale)
 
 			local theme = demoShared.loadThemeDuplicateSkins(context, id)
 
@@ -114,6 +113,7 @@ end
 
 function demoShared.makeParagraph(self, tag, text)
 	local text_block = self:addChild("wimp/text_block")
+
 	if tag then
 		text_block.tag = tag
 	end

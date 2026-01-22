@@ -1,9 +1,9 @@
 # Stop on error
 set -e
 
-./build.sh --theme vacuum_dark --dpi 96
-./build.sh --theme vacuum_dark --dpi 192
-./build.sh --theme vacuum_dark --dpi 288
-./build.sh --theme vacuum_light --dpi 96
-./build.sh --theme vacuum_light --dpi 192
-./build.sh --theme vacuum_light --dpi 288
+./build.sh --theme vacuum_dark --tex-scale 1
+./build.sh --theme vacuum_dark --tex-scale 2
+./build.sh --theme vacuum_dark --tex-scale 3
+./build.sh --theme vacuum_light --tex-scale 1
+./build.sh --theme vacuum_light --tex-scale 2
+./build.sh --theme vacuum_light --tex-scale 3

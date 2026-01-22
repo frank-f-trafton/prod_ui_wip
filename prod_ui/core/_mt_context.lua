@@ -1119,16 +1119,16 @@ function _mt_context:getScale()
 end
 
 
-function _mt_context:setDPI(dpi)
-	uiAssert.numberNotNaN(1, dpi)
+function _mt_context:setTextureScale(tex_scale)
+	uiAssert.numberNotNaN(1, tex_scale)
 
-	self.dpi = math.max(1, dpi)
-	self.path_symbols.dpi = tostring(self.dpi)
+	self.tex_scale = math.max(1, math.floor(tex_scale))
+	self.path_symbols.tex_scale = tostring(self.tex_scale)
 end
 
 
-function _mt_context:getDPI()
-	return self.dpi
+function _mt_context:getTextureScale()
+	return self.tex_scale
 end
 
 
