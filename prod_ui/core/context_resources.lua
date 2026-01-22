@@ -309,9 +309,9 @@ local function _scaleBox(box, scale)
 end
 
 
-local function _scalePipeStyle(ps, scale, dpi_scale)
-	uiScale.fieldInteger(dpi_scale, ps, "pad_x", 0)
-	uiScale.fieldInteger(dpi_scale, ps, "pad_y", 0)
+local function _scalePipeStyle(ps, scale, tex_scale)
+	uiScale.fieldInteger(tex_scale, ps, "pad_x", 0)
+	uiScale.fieldInteger(tex_scale, ps, "pad_y", 0)
 end
 
 
@@ -679,8 +679,7 @@ function methods:applyTheme(theme)
 		return
 	end
 
-	-- Texture coords and measurements must be scaled by DPI.
-	local dpi_scale = math.max(1, math.floor(context:getDPI()/96))
+	local tex_scale = math.max(1, context:getTextureScale())
 
 	self.theme_id = theme.info.theme_ids[1]
 	if type(self.theme_id) ~= "string" then
@@ -764,7 +763,7 @@ function methods:applyTheme(theme)
 		_deepCopyFields(theme.pipe_styles, resources.pipe_styles)
 
 		for k, ps in pairs(resources.pipe_styles) do
-			_scalePipeStyle(ps, scale, dpi_scale)
+			_scalePipeStyle(ps, scale, tex_scale)
 		end
 	end
 

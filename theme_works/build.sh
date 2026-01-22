@@ -1,21 +1,21 @@
 
 # NOTE: This is a quick-and-dirty script.
-# It requires the following aliases:
-# LÖVE 12 -> 'love12d'
-# Inkscape 1.3.2 -> 'inkscape132'
+# It requires following programs:
+# * LÖVE 12, aliased to 'love12d'
+# * rsvg-convert
 
 
 # Stop script at the first failed command.
 set -e
 
 # Config
-dpi=96
+tex_scale=96
 theme=vacuum_dark
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
-		--dpi)
-			dpi="$2";
+		--tex-scale)
+			tex_scale="$2";
 			shift
 			shift
 		;;
@@ -33,17 +33,17 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-echo DPI: $dpi
+echo Scale: $tex_scale
 echo Running svg2png...
 
-love12d svg2png.lua --source $theme --dpi $dpi
+love12d svg2png.lua --source $theme --tex-scale $tex_scale
 echo Running atlas_build...
-love12d atlas_build.lua --png-dir output/$theme/$dpi/png --dest output/$theme/$dpi --bleed 1
+love12d atlas_build.lua --png-dir output/$theme/$tex_scale/png --dest output/$theme/$tex_scale --bleed 1
 
 echo Copying output to themes directory...
-mkdir -p ../prod_ui/resources/textures/$dpi
-rm -rf ../prod_ui/resources/textures/$dpi/$theme.*
-cp output/$theme/$dpi/atlas.lua ../prod_ui/resources/textures/$dpi/$theme.lua
-cp output/$theme/$dpi/atlas.png ../prod_ui/resources/textures/$dpi/$theme.png
+mkdir -p ../prod_ui/resources/textures/$tex_scale
+rm -rf ../prod_ui/resources/textures/$tex_scale/$theme.*
+cp output/$theme/$tex_scale/atlas.lua ../prod_ui/resources/textures/$tex_scale/$theme.lua
+cp output/$theme/$tex_scale/atlas.png ../prod_ui/resources/textures/$tex_scale/$theme.png
 
 echo Done.

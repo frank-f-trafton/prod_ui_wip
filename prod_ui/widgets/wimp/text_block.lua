@@ -77,6 +77,8 @@ function def:setText(text)
 	uiAssert.type(1, text, "string")
 
 	self.text = text
+
+	self:reshape()
 end
 
 

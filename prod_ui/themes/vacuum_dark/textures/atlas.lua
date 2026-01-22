@@ -1,3 +1,3 @@
 return {
-	path = "%resources%/textures/%dpi%/vacuum_dark.png"
+	path = "%resources%/textures/%tex_scale%/vacuum_dark.png"
 }

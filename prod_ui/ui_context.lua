@@ -141,9 +141,10 @@ function uiContext.newContext(prod_ui_path, settings)
 	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
 	self.scale = 1.0
 
-	-- DPI class. Determines which set of textures and associated metadata to load.
-	-- Should be an integer.
-	self.dpi = 96
+	-- Texture Scale. Determines which set of textures and associated metadata to load.
+	-- Some coordinates and measurements are scaled by this, rather than the main UI scale.
+	-- Should always be an integer >= 1.
+	self.tex_scale = 1
 
 	-- When false, no theme is loaded.
 	self.theme_id = false
@@ -152,7 +153,7 @@ function uiContext.newContext(prod_ui_path, settings)
 		[""] = "%", -- escapes '%%' to '%'
 		produi = prod_ui_path:sub(1, -2),
 		resources = prod_ui_path .. "resources",
-		dpi = tostring(self.dpi),
+		tex_scale = tostring(self.tex_scale),
 	}
 
 	-- Context config table. Internal use.

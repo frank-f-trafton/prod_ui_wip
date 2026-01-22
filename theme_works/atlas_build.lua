@@ -217,7 +217,6 @@ local tasks_build = {
 			quads = {},
 			slices = {},
 		}
-		-- (base_data.no_scale is dropped here.)
 
 		-- Produce quad tables.
 		print("#boxes: " .. #atl.boxes)
@@ -230,6 +229,8 @@ local tasks_build = {
 			quad_t.h = box.ih
 			quad_t.ox = quad_base.ox or 0
 			quad_t.oy = quad_base.oy or 0
+
+			-- ('no_scale', 'no_scale_x', and 'no_scale_y' are dropped here.)
 
 			out_base_data.quads[box.id] = quad_t
 		end

@@ -1,11 +1,17 @@
 require("lib.strict")
 
 --[[
-clear && love12d svg2png.lua --source vacuum_dark --dpi 96
+clear && love12d svg2png.lua --source vacuum_dark --tex-scale 1
 
-* Requires Inkscape 1.3.2 to be aliased to 'inkscape132'
+* Requires the utility 'rsvg-convert', which is part of GNOME librsvg:
+  https://gitlab.gnome.org/GNOME/librsvg
+
+  Debian:
+  $ sudo apt install librsvg2-bin
 --]]
-local example_usage = [[love svg2png.lua --source <input_path> --dpi <number>]]
+
+local example_usage = [[love svg2png.lua --source <input_path> --tex-scale <number>]]
+
 
 local love_major, love_minor = love.getVersion()
 if love_major < 12 then
@@ -22,14 +28,13 @@ local t2s2 = require("lib.t2s2.t2s2")
 
 
 local arg_src_path -- theme name
-local arg_dpi
+local arg_scale
 
 
 local svg_info
 local svg_i = 1
 
 local base_data
-local no_scale
 
 local out_path
 
@@ -44,10 +49,28 @@ local function checkArgSourcePath()
 end
 
 
-local function checkArgDPI()
-	if not arg_dpi then
-		error("missing argument: DPI")
+local function checkArgScale()
+	if not arg_scale then
+		error("missing argument: tex-scale")
 	end
+end
+
+
+local function getQuadScaling(id)
+	local scale_x, scale_y = arg_scale, arg_scale
+	if base_data.quads then
+		local quad = base_data.quads[id]
+		if quad then
+			if quad.no_scale or quad.no_scale_x then
+				scale_x = 1
+			end
+			if quad.no_scale or quad.no_scale_y then
+				scale_y = 1
+			end
+		end
+	end
+
+	return scale_x, scale_y
 end
 
 
@@ -66,10 +89,10 @@ function love.load(arguments)
 			checkArgSourcePath()
 			i = i + 1
 
-		elseif argument == "--dpi" then
+		elseif argument == "--tex-scale" then
 			i = i + 1
-			arg_dpi = tonumber(arguments[i])
-			checkArgDPI()
+			arg_scale = tonumber(arguments[i])
+			checkArgScale()
 			i = i + 1
 
 		else
@@ -79,14 +102,14 @@ function love.load(arguments)
 end
 
 
-local function scaleCoord(value, dpi)
-	return math.floor(0.5 + value * (dpi / 96))
+local function scaleCoord(value, tex_scale)
+	return math.floor(0.5 + value * tex_scale)
 end
 
 
-local function tryScaleCoord(value, dpi)
+local function tryScaleCoord(value, tex_scale)
 	if value ~= nil then
-		return scaleCoord(value, dpi)
+		return scaleCoord(value, tex_scale)
 	else
 		return value
 	end
@@ -114,7 +137,7 @@ local tasks_export = {
 	-- 1
 	function()
 		checkArgSourcePath()
-		checkArgDPI()
+		checkArgScale()
 
 		task_i = task_i + 1
 		return true
@@ -122,7 +145,7 @@ local tasks_export = {
 
 	-- 2
 	function()
-		out_path = "output/" .. arg_src_path .. "/" .. arg_dpi
+		out_path = "output/" .. arg_src_path .. "/" .. arg_scale
 		nativefs.createDirectory(out_path)
 		shared.recursiveDelete(out_path)
 		nativefs.createDirectory(out_path .. "/png")
@@ -130,42 +153,37 @@ local tasks_export = {
 		-- Grab and scale coordinates and measurements related to textures.
 		if nativefs.getInfo(arg_src_path .. "/base_data.lua") then
 			base_data = shared.nfsLoadLuaFile(arg_src_path .. "/base_data.lua")
-			no_scale = {}
-			for i, v in ipairs(base_data.no_scale) do
-				no_scale[v] = true
-			end
+
+			base_data.quads = base_data.quads or {}
 
 			print("Scaling quad info -> base_data.lua -> tbl.quads")
-			if base_data.quads then
-				for k, v in pairs(base_data.quads) do
-					if not no_scale[k] then
-						v.ox = tryScaleCoord(v.ox, arg_dpi) or 0
-						v.oy = tryScaleCoord(v.oy, arg_dpi) or 0
-					end
-				end
+			for k, v in pairs(base_data.quads) do
+				local x_scale, y_scale = getQuadScaling(k)
+
+				v.ox = tryScaleCoord(v.ox, x_scale) or 0
+				v.oy = tryScaleCoord(v.oy, y_scale) or 0
 			end
 
 			print("Scaling quadslice coords -> base_data.lua -> tbl.slice_coords")
 			for k, v in pairs(base_data.slice_coords) do
-				if not no_scale[k] then
-					v.x = scaleCoord(v.x, arg_dpi)
-					v.y = scaleCoord(v.y, arg_dpi)
-					v.w1 = scaleCoord(v.w1, arg_dpi)
-					v.h1 = scaleCoord(v.h1, arg_dpi)
-					v.w2 = scaleCoord(v.w2, arg_dpi)
-					v.h2 = scaleCoord(v.h2, arg_dpi)
-					v.w3 = scaleCoord(v.w3, arg_dpi)
-					v.h3 = scaleCoord(v.h3, arg_dpi)
+				local x_scale, y_scale = getQuadScaling(k)
 
-					v.ox1 = tryScaleCoord(v.ox1, arg_dpi)
-					v.oy1 = tryScaleCoord(v.oy1, arg_dpi)
-					v.ox2 = tryScaleCoord(v.ox2, arg_dpi)
-					v.oy2 = tryScaleCoord(v.oy2, arg_dpi)
-					--assertAllOrNone("draw offsets", v.ox1, v.oy1, v.ox2, v.oy2)
-				end
+				v.x = scaleCoord(v.x, x_scale)
+				v.y = scaleCoord(v.y, y_scale)
+				v.w1 = scaleCoord(v.w1, x_scale)
+				v.h1 = scaleCoord(v.h1, y_scale)
+				v.w2 = scaleCoord(v.w2, x_scale)
+				v.h2 = scaleCoord(v.h2, y_scale)
+				v.w3 = scaleCoord(v.w3, x_scale)
+				v.h3 = scaleCoord(v.h3, y_scale)
+
+				v.ox1 = tryScaleCoord(v.ox1, x_scale)
+				v.oy1 = tryScaleCoord(v.oy1, y_scale)
+				v.ox2 = tryScaleCoord(v.ox2, x_scale)
+				v.oy2 = tryScaleCoord(v.oy2, y_scale)
 			end
 			local out_str = t2s2.serialize(base_data)
-			shared.nfsWrite("output/" .. arg_src_path .. "/" .. arg_dpi .. "/base_data.lua", out_str .. "\n")
+			shared.nfsWrite("output/" .. arg_src_path .. "/" .. arg_scale .. "/base_data.lua", out_str .. "\n")
 		end
 
 		svg_info = nativefs.getDirectoryItemsInfo(arg_src_path .. "/svg")
@@ -181,13 +199,14 @@ local tasks_export = {
 				local file_no_ext = string.sub(item.name, 1, -5)
 				local ext = string.sub(item.name, -4)
 				if string.lower(ext) == ".svg" then
-					local dpi_out = no_scale[file_no_ext] and 96 or arg_dpi
+					local x_scale, y_scale = getQuadScaling(file_no_ext)
 					local out_file_path = out_path .. "/png/" .. file_no_ext .. ".png"
 					print("export: " .. out_file_path)
 					print("OUT_PATH", out_path)
 					local ok = os.execute(
-						"inkscape132 --export-filename=" .. out_file_path
-						.. " --export-dpi=" .. dpi_out
+						"rsvg-convert --format=png"
+						.. " --x-zoom=" .. x_scale .. " --y-zoom=" .. y_scale
+						.. " --output=" .. out_file_path
 						.. " " .. arg_src_path .. "/svg/" .. item.name
 					)
 				end
