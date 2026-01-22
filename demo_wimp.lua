@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.d_group",
 	"widgets.d_message_log",
 	"widgets.d_sliders",
 	"widgets.d_text_box_script",
@@ -109,6 +110,7 @@ local demo_plan_list = {
 			collapsed = true,
 			nodes = {
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
+				{plan_id = "widgets.d_group", label = "Groups"},
 			},
 		},
 		--]]

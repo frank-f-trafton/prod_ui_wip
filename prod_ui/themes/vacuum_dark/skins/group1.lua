@@ -1,32 +1,19 @@
---[[
-QuadSlice layout:
-Slice B       Slice C
-  3x1           3x1
-┌─┬─┬─┐       ┌─┬─┬─┐
-│1│2│3│ Label │1│2│3│
-└─┴─┴─┘       └─┴─┴─┘
-┌─┐               ┌─┐
-│4│       5       │6│
-│ │    (hollow)   │ │
-├─┼───────────────┼─┤
-│7│      8        │9│
-└─┴───────────────┴─┘
-       Slice A
-         3x2
-(TODO: move this diagram somewhere more appropriate.)
---]]
 return {
-	skinner_id = "wimp/group",
+	skinner_id = "base/group",
 
-	box = "*boxes/wimp_group",
+	box = "*boxes/group",
+
 	font = "*fonts/p",
 
-	show_perimeter = true,
+	label_side = "center",
+	label_pad_far = 16,
 
-	slc_perimeter_a = "*slices/group_perimeter_a",
-	slc_perimeter_b = "*slices/group_perimeter_b",
-	slc_perimeter_c = "*slices/group_perimeter_c",
+	label_pad_x1 = 4,
+	label_pad_x2 = 4,
+	label_pad_y = 0,
 
-	color_text = {1, 1, 1, 1},
-	color_perimeter = {1, 1, 1, 1},
+	color_text = {1.0, 1.0, 1.0, 1.0},
+	color_pipe = {1.0, 1.0, 1.0, 1.0},
+
+	pipe_style = "*pipe_styles/norm"
 }

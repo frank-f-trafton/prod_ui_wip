@@ -1,21 +1,18 @@
 -- PILE Hook
--- VERSION: 2.012
+-- VERSION: 2.022
 -- https://github.com/frank-f-trafton/pile_base
 
 
 --[[
 MIT License
 
-Copyright (c) 2024 - 2025 PILE Contributors
+Copyright (c) 2024 - 2026 PILE Contributors
 
-PILE Base uses code from these libraries:
-
-PILE Tree:
-  LUIGI
-  Copyright (c) 2015 airstruck
-  License: MIT
+LUIGI code: Copyright (c) 2015 airstruck
   https://github.com/airstruck/luigi
 
+lume code: Copyright (c) 2020 rxi
+  https://github.com/rxi/lume
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -73,23 +73,6 @@ return {
 	               +oy2
 	                v
 
-	bx1,by1, bx2,by2: Optional border offsets. These have no direct impact on drawing, and are intended for reference
-	by other parts of your application.
-
-	For example, picture a message box with thick borders. The safe text rendering area could be calculated by
-	applying the QuadSlice's border offsets to the drawn rectangular area.
-
-	NOTE: Border offsets do not automatically account for drawing offsets (ox1,oy1, ox2,oy2).
-
-	            v
-	  ┌────────────────────┐
-	  │  ┌──── +by1 ────┐  │
-	  │  ╵              ╵  │
-	> │+bx1           +bx2 │ <
-	  │  ╷              ╷  │
-	  │  └──── +by2 ────┘  │
-	  └────────────────────┘
-	            ^
 	--]]
 
 	slice_coords = {
@@ -125,22 +108,6 @@ return {
 		},
 		["dropdown_drawer"] = {
 			x = 0, y = 0, w1 = 6, h1 = 6, w2 = 4, h2 = 4, w3 = 6, h3 = 6,
-		},
-		["group_perimeter_unbroken"] = { -- XXX: untested.
-			draw_fn_id = 0b111101111,
-			x = 2, y = 2, w1 = 4, h1 = 4, w2 = 12, h2 = 12, w3 = 4, h3 = 4,
-		},
-		["group_perimeter_a"] = {
-			draw_fn_id = 0b111101111, -- XXX: 3x2 mosaic with a hollow middle.
-			x = 2, y = 2, w1 = 4, h1 = 0, w2 = 12, h2 = 16, w3 = 4, h3 = 4,
-		},
-		["group_perimeter_b"] = {
-			draw_fn_id = 0b000000111,
-			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
-		},
-		["group_perimeter_c"] = {
-			draw_fn_id = 0b000000111,
-			x = 1, y = 1, w1 = 2, h1 = 2, w2 = 5, h2 = 0, w3 = 2, h3 = 0,
 		},
 		["input_box"] = {
 			x = 0, y = 0, w1 = 4, h1 = 4, w2 = 16, h2 = 16, w3 = 4, h3 = 4,
@@ -268,5 +235,41 @@ return {
 		},
 	},
 
-	-- 'quads' will be populated after the atlas is built.
+	-- 'quads' will be fully populated after the atlas is built.
+	-- Center offsets ('ox', 'oy') may be specified here.
+	quads = {
+		["arrow_down"] = {
+			ox = 12, oy = 12,
+		},
+		["pipe1_j_bl"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_j_br"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_j_tl"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_j_tr"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_l_h"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_l_v"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_t_b"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_t_l"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_t_r"] = {
+			ox = 1, oy = 1,
+		},
+		["pipe1_t_t"] = {
+			ox = 1, oy = 1,
+		}
+	}
 }

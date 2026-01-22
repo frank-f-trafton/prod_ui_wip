@@ -51,6 +51,7 @@ context.resources = {
 	icons = pName.set({}, "icons"),
 	info = pName.set({}, "info"),
 	labels = pName.set({}, "labels"),
+	pipe_styles = pName.set({}, "pipe_styles"),
 	sash_styles = pName.set({}, "sash_syles"),
 	scroll_bar_data = pName.set({}, "scroll_bar_data"),
 	scroll_bar_styles = pName.set({}, "scroll_bar_styles"),
@@ -83,11 +84,39 @@ models.labelStyle = uiSchema.newKeysX {
 }
 
 
+models.pipeStyle = uiSchema.newKeysX {
+	-- legs, horizontal and vertical
+	l_h = themeAssert.quad,
+	l_v = themeAssert.quad,
+
+	-- joints (right-angle connectors)
+	j_bl = themeAssert.quad,
+	j_br = themeAssert.quad,
+	j_tl = themeAssert.quad,
+	j_tr = themeAssert.quad,
+
+	-- terminators (end-caps)
+	t_b = themeAssert.quad,
+	t_l = themeAssert.quad,
+	t_r = themeAssert.quad,
+	t_t = themeAssert.quad,
+
+	-- Offsets that shorten legs relative to joints and terminators. These
+	-- are relative to the quad 'ox' and 'oy' offsets; refer to the theme's
+	-- 'base_data.lua'.
+	pad_x = uiAssert.numberNotNaN,
+	pad_y = uiAssert.numberNotNaN
+}
+
+
 models.quad = uiSchema.newKeysX {
 	x = uiAssert.numberNotNaN,
 	y = uiAssert.numberNotNaN,
 	w = uiAssert.numberNotNaN,
 	h = uiAssert.numberNotNaN,
+
+	ox = uiAssert.numberNotNaN,
+	oy = uiAssert.numberNotNaN,
 
 	texture = {uiAssert.loveTypes, "Canvas", "Image", "Texture"},
 	quad = {uiAssert.loveType, "Quad"},
@@ -280,6 +309,13 @@ local function _scaleBox(box, scale)
 end
 
 
+local function _scalePipeStyle(ps, scale, dpi_scale)
+	uiScale.fieldInteger(dpi_scale, ps, "pad_x", 0)
+	uiScale.fieldInteger(dpi_scale, ps, "pad_y", 0)
+end
+
+
+
 local function _scaleScrollBarStyle(sbs, scale)
 	uiScale.fieldInteger(scale, sbs, "bar_size", 0)
 	uiScale.fieldInteger(scale, sbs, "button_size", 0)
@@ -432,6 +468,8 @@ local function _initTexture(texture, metadata)
 					y = v.y,
 					w = v.w,
 					h = v.h,
+					ox = v.ox,
+					oy = v.oy,
 					texture = tex_info.texture,
 					quad = love.graphics.newQuad(v.x, v.y, v.w, v.h, tex_info.texture),
 					blend_mode = tex_info.blend_mode,
@@ -641,6 +679,9 @@ function methods:applyTheme(theme)
 		return
 	end
 
+	-- Texture coords and measurements must be scaled by DPI.
+	local dpi_scale = math.max(1, math.floor(context:getDPI()/96))
+
 	self.theme_id = theme.info.theme_ids[1]
 	if type(self.theme_id) ~= "string" then
 		error("invalid Theme ID")
@@ -717,6 +758,14 @@ function methods:applyTheme(theme)
 		_deepCopyFields(theme.labels, resources.labels)
 
 		-- TODO
+	end
+
+	if theme.pipe_styles then
+		_deepCopyFields(theme.pipe_styles, resources.pipe_styles)
+
+		for k, ps in pairs(resources.pipe_styles) do
+			_scalePipeStyle(ps, scale, dpi_scale)
+		end
 	end
 
 	if theme.sash_styles then

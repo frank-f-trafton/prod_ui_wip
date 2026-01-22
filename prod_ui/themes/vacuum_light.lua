@@ -205,7 +205,7 @@ return {
 		},
 		group1 = {
 			color_text = {0.1, 0.1, 0.1, 1.0},
-			color_perimeter = {1.0, 1.0, 1.0, 1.0}
+			color_pipe = {1.0, 1.0, 1.0, 1.0}
 		},
 		icon_box1 = {}, -- TODO: unfinished widget
 		label1 = {

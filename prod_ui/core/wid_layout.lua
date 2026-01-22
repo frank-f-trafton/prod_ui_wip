@@ -15,6 +15,7 @@ widLayout._nm_layout_base = uiTable.newNamedMapV("LayoutBase",
 	"zero",
 	"self",
 	"viewport",
+	"viewport-full",
 	"viewport-width",
 	"viewport-height",
 	"unbounded"

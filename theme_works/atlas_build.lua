@@ -208,6 +208,7 @@ local tasks_build = {
 
 		local out_data = {}
 		local base_data = shared.nfsLoadLuaFile(arg_dest_path .. "/base_data.lua")
+		local base_quads = base_data.quads
 		local slice_coords = base_data.slice_coords
 
 		local out_base_data = {
@@ -221,7 +222,16 @@ local tasks_build = {
 		-- Produce quad tables.
 		print("#boxes: " .. #atl.boxes)
 		for i, box in ipairs(atl.boxes) do
-			out_base_data.quads[box.id] = {x = box.x, y = box.y, w = box.iw, h = box.ih}
+			local quad_t = {}
+			local quad_base = base_quads[box.id] or {}
+			quad_t.x = box.x
+			quad_t.y = box.y
+			quad_t.w = box.iw
+			quad_t.h = box.ih
+			quad_t.ox = quad_base.ox or 0
+			quad_t.oy = quad_base.oy or 0
+
+			out_base_data.quads[box.id] = quad_t
 		end
 
 		-- Copy the slice tables made by svg2png.
@@ -243,7 +253,8 @@ local tasks_build = {
 
 
 function love.update(dt)
-	if love.keyboard.isDown("escape") then
+	if false then
+	--if love.keyboard.isDown("escape") then
 		print("*** Cancelled ***")
 		love.event.quit(1)
 

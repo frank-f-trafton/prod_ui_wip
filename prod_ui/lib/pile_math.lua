@@ -1,21 +1,18 @@
 -- PILE Math
--- VERSION: 2.012
+-- VERSION: 2.022
 -- https://github.com/frank-f-trafton/pile_base
 
 
 --[[
 MIT License
 
-Copyright (c) 2024 - 2025 PILE Contributors
+Copyright (c) 2024 - 2026 PILE Contributors
 
-PILE Base uses code from these libraries:
-
-PILE Tree:
-  LUIGI
-  Copyright (c) 2015 airstruck
-  License: MIT
+LUIGI code: Copyright (c) 2015 airstruck
   https://github.com/airstruck/luigi
 
+lume code: Copyright (c) 2020 rxi
+  https://github.com/rxi/lume
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,63 +34,74 @@ SOFTWARE.
 --]]
 
 
-local M = {}
+local _ceil, _floor, _max, _min, _sqrt = math.ceil, math.floor, math.max, math.min, math.sqrt
 
 
-local _ceil, _floor, _max, _min = math.ceil, math.floor, math.max, math.min
-
-
-function M.clamp(n, a, b)
+local function clamp(n, a, b)
 	return _max(a, _min(n, b))
 end
 
 
-function M.lerp(a, b, v)
+-- [lume]
+local function dist(x1, y1, x2, y2)
+	local dx, dy = x1 - x2, y1 - y2
+	return _sqrt(dx*dx + dy*dy)
+end
+
+-- [lume]
+local function distSq(x1, y1, x2, y2)
+	local dx, dy = x1 - x2, y1 - y2
+	return dx*dx + dy*dy
+end
+
+
+local function lerp(a, b, v)
 	return (1 - v) * a + v * b
 end
 
 
-function M.roundInf(n)
+-- [lume]
+local function roundInf(n)
 	return n > 0 and _floor(n + .5) or _ceil(n - .5)
 end
+local _roundInf = roundInf
 
 
-function M.roundGranularInf(n, g)
-	local n2 = n
-	local rem = n2 % g
-	n2 = n2 - rem
-	if n > 0 then
-		if rem*2 >= g then
-			n2 = n2 + g
-		end
-	else
-		if rem*2 > g then
-			n2 = n2 + g
-		end
-	end
-
-	return n2
+-- [lume]
+local function roundInfIncrement(n, incr)
+	return _roundInf(n / incr) * incr
 end
 
 
-function M.sign(n)
+local function sign(n)
 	return n < 0 and -1 or n > 0 and 1 or 0
 end
 
 
-function M.signN(n)
+local function signN(n)
 	return n <= 0 and -1 or 1
 end
 
 
-function M.signP(n)
+local function signP(n)
 	return n < 0 and -1 or 1
 end
 
 
-function M.wrap1(n, max)
+local function wrap1(n, max)
 	return ((n - 1) % max) + 1
 end
 
 
-return M
+return {
+	clamp = clamp,
+	dist = dist,
+	distSq = distSq,
+	lerp = lerp,
+	roundInf = roundInf,
+	roundInfIncrement = roundInfIncrement,
+	sign = sign,
+	signN = signN,
+	signP = signP,
+	wrap1 = wrap1
+}
