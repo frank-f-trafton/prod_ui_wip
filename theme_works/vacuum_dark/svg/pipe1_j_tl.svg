@@ -2,12 +2,12 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="2"
-   height="2"
-   viewBox="0 0 2 2"
+   width="4"
+   height="4"
+   viewBox="0 0 4 4"
    version="1.1"
    id="svg13547"
-   sodipodi:docname="fence_j_tl.svg"
+   sodipodi:docname="pipe1_j_tl.svg"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    inkscape:export-filename="checkmark_on.png"
    inkscape:export-xdpi="96"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="128"
-     inkscape:cx="2.265625"
-     inkscape:cy="2.9257812"
+     inkscape:zoom="90.509668"
+     inkscape:cx="0.28726213"
+     inkscape:cy="0.60214562"
      inkscape:window-width="1920"
      inkscape:window-height="1007"
      inkscape:window-x="0"
@@ -80,8 +80,8 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="font-variation-settings:'wght' 700;fill:none;stroke:#ffffff;stroke-width:1.999;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
-       d="M 1.9995,0.99949998 H 0.99949998 V 1.9995"
+       style="font-variation-settings:'wght' 700;fill:none;stroke:#ffffff;stroke-width:0.99925;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       d="M 4.5,1.5 1.499875,1.499875 1.5,4.5"
        id="path2"
        sodipodi:nodetypes="ccc"
        inkscape:label="path2" />

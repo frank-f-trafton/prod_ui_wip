@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="2"
-   height="2"
-   viewBox="0 0 2 2"
+   width="4"
+   height="4"
+   viewBox="0 0 4 4"
    version="1.1"
    id="svg13547"
    sodipodi:docname="pipe1_t_b.svg"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="181.01934"
-     inkscape:cx="1.4142135"
-     inkscape:cy="0.94741258"
+     inkscape:zoom="90.50967"
+     inkscape:cx="0.19887378"
+     inkscape:cy="3.3863785"
      inkscape:window-width="1920"
      inkscape:window-height="1007"
      inkscape:window-x="0"
@@ -80,10 +80,9 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="font-variation-settings:'wght' 700;fill:none;stroke:#1a1a1a;stroke-width:1.99937;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
-       d="M 0.99578,-0.9999911 C 0.9963203,-0.8720813 0.99935,-0.149112 1,0"
+       style="fill:#f9f9f9;stroke:#1a1a1a;stroke-linecap:round;stroke-opacity:1"
+       d="M 1.5,-0.1191145 V 1"
        id="path2"
-       sodipodi:nodetypes="cc"
-       inkscape:label="path2" />
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>

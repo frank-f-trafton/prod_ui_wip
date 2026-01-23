@@ -236,38 +236,39 @@ return {
 		["pixel"] = {
 			no_scale = true
 		},
-		["arrow_down"] = {
-			ox = 12, oy = 12,
-		},
-		["pipe1_j_bl"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_j_br"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_j_tl"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_j_tr"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_l_h"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_l_v"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_t_b"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_t_l"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_t_r"] = {
-			ox = 1, oy = 1,
-		},
-		["pipe1_t_t"] = {
-			ox = 1, oy = 1,
-		}
+		["arrow_down"] = {ox = 12, oy = 12},
+
+		["pipe1_j_bl"] = {ox =  2, oy =  2},
+		["pipe1_j_br"] = {ox =  2, oy =  2},
+		["pipe1_j_tl"] = {ox =  2, oy =  2},
+		["pipe1_j_tr"] = {ox =  2, oy =  2},
+		["pipe1_l_h"]  = {ox =  2, oy =  2},
+		["pipe1_l_v"]  = {ox =  2, oy =  2},
+		["pipe1_t_b"]  = {ox =  2, oy =  2},
+		["pipe1_t_l"]  = {ox =  2, oy =  2},
+		["pipe1_t_r"]  = {ox =  2, oy =  2},
+		["pipe1_t_t"]  = {ox =  2, oy =  2},
+
+		["pipe2_j_bl"] = {ox =  1, oy =  1},
+		["pipe2_j_br"] = {ox =  1, oy =  1},
+		["pipe2_j_tl"] = {ox =  1, oy =  1},
+		["pipe2_j_tr"] = {ox =  1, oy =  1},
+		["pipe2_l_h"]  = {ox =  1, oy =  1},
+		["pipe2_l_v"]  = {ox =  1, oy =  1},
+		["pipe2_t_b"]  = {ox =  1, oy =  1},
+		["pipe2_t_l"]  = {ox =  1, oy =  1},
+		["pipe2_t_r"]  = {ox =  1, oy =  1},
+		["pipe2_t_t"]  = {ox =  1, oy =  1},
+
+		["pipe3_j_bl"] = {ox =  2, oy =  2},
+		["pipe3_j_br"] = {ox =  2, oy =  2},
+		["pipe3_j_tl"] = {ox =  2, oy =  2},
+		["pipe3_j_tr"] = {ox =  2, oy =  2},
+		["pipe3_l_h"]  = {ox =  2, oy =  2},
+		["pipe3_l_v"]  = {ox =  2, oy =  2},
+		["pipe3_t_b"]  = {ox =  2, oy =  2},
+		["pipe3_t_l"]  = {ox =  2, oy =  2},
+		["pipe3_t_r"]  = {ox =  2, oy =  2},
+		["pipe3_t_t"]  = {ox =  2, oy =  2},
 	}
 }

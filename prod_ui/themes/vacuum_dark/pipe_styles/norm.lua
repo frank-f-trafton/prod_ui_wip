@@ -12,6 +12,6 @@ return {
 	t_r = "*quads/pipe1_t_r",
 	t_t = "*quads/pipe1_t_t",
 
-	pad_x = 1,
-	pad_y = 1
+	pad_x = 2,
+	pad_y = 2
 }
