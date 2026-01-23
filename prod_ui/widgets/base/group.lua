@@ -195,6 +195,7 @@ def.default_skinner = {
 		local p_st = skin.pipe_style
 		local pad_x, pad_y = p_st.pad_x, p_st.pad_y
 
+		--love.graphics.setColor(1,1,1,0.5)
 		uiGraphics.pipePointsV(p_st, true, true,
 			vp3.x, y1,
 			x1, y1,

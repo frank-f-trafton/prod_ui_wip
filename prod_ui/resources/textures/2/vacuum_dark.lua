@@ -391,46 +391,126 @@ return {
       y = 217
     },
     pipe1_j_bl = {
-      h = 4,
-      ox = 2,
-      oy = 2,
-      w = 4,
-      x = 231,
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 389,
       y = 51
     },
     pipe1_j_br = {
-      h = 4,
-      ox = 2,
-      oy = 2,
-      w = 4,
-      x = 225,
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 379,
       y = 51
     },
     pipe1_j_tl = {
-      h = 4,
-      ox = 2,
-      oy = 2,
-      w = 4,
-      x = 219,
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 369,
       y = 51
     },
     pipe1_j_tr = {
-      h = 4,
-      ox = 2,
-      oy = 2,
-      w = 4,
-      x = 213,
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 359,
       y = 51
     },
     pipe1_l_h = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 349,
+      y = 51
+    },
+    pipe1_l_v = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 339,
+      y = 51
+    },
+    pipe1_t_b = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 329,
+      y = 51
+    },
+    pipe1_t_l = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 319,
+      y = 51
+    },
+    pipe1_t_r = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 309,
+      y = 51
+    },
+    pipe1_t_t = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 299,
+      y = 51
+    },
+    pipe2_j_bl = {
       h = 4,
       ox = 2,
       oy = 2,
       w = 4,
-      x = 207,
+      x = 431,
       y = 51
     },
-    pipe1_l_v = {
+    pipe2_j_br = {
+      h = 4,
+      ox = 2,
+      oy = 2,
+      w = 4,
+      x = 425,
+      y = 51
+    },
+    pipe2_j_tl = {
+      h = 4,
+      ox = 2,
+      oy = 2,
+      w = 4,
+      x = 419,
+      y = 51
+    },
+    pipe2_j_tr = {
+      h = 4,
+      ox = 2,
+      oy = 2,
+      w = 4,
+      x = 413,
+      y = 51
+    },
+    pipe2_l_h = {
+      h = 4,
+      ox = 2,
+      oy = 2,
+      w = 4,
+      x = 407,
+      y = 51
+    },
+    pipe2_l_v = {
       h = 4,
       ox = 2,
       oy = 2,
@@ -438,7 +518,7 @@ return {
       x = 505,
       y = 45
     },
-    pipe1_t_b = {
+    pipe2_t_b = {
       h = 4,
       ox = 2,
       oy = 2,
@@ -446,7 +526,7 @@ return {
       x = 499,
       y = 45
     },
-    pipe1_t_l = {
+    pipe2_t_l = {
       h = 4,
       ox = 2,
       oy = 2,
@@ -454,7 +534,7 @@ return {
       x = 507,
       y = 39
     },
-    pipe1_t_r = {
+    pipe2_t_r = {
       h = 4,
       ox = 2,
       oy = 2,
@@ -462,13 +542,93 @@ return {
       x = 507,
       y = 33
     },
-    pipe1_t_t = {
+    pipe2_t_t = {
       h = 4,
       ox = 2,
       oy = 2,
       w = 4,
       x = 507,
       y = 27
+    },
+    pipe3_j_bl = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 289,
+      y = 51
+    },
+    pipe3_j_br = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 279,
+      y = 51
+    },
+    pipe3_j_tl = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 269,
+      y = 51
+    },
+    pipe3_j_tr = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 259,
+      y = 51
+    },
+    pipe3_l_h = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 249,
+      y = 51
+    },
+    pipe3_l_v = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 239,
+      y = 51
+    },
+    pipe3_t_b = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 229,
+      y = 51
+    },
+    pipe3_t_l = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 219,
+      y = 51
+    },
+    pipe3_t_r = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 209,
+      y = 51
+    },
+    pipe3_t_t = {
+      h = 8,
+      ox = 4,
+      oy = 4,
+      w = 8,
+      x = 199,
+      y = 51
     },
     pixel = {
       h = 1,
@@ -603,7 +763,7 @@ return {
       ox = 0,
       oy = 0,
       w = 6,
-      x = 199,
+      x = 399,
       y = 51
     },
     slider_thumb1 = {
