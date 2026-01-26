@@ -17,7 +17,7 @@ function plan.make(panel)
 	panel:setScrollBars(false, true)
 
 	local group = panel:addChild("base/group")
-		:geometrySetMode("static", 0, 0, 256, 256, true)
+		:geometrySetMode("relative", 0, 0, 256, 256)
 		:setText("Group")
 
 

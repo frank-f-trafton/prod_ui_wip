@@ -217,7 +217,8 @@ function demoShared.makeLabel(parent, x, y, w, h, relative, text, label_mode)
 
 	local label = parent:addChild("base/label")
 	label:setLabel(text, label_mode)
-	label:geometrySetMode("static", x, y, w, h, relative)
+	local g_mode = relative and "relative" or "static"
+	label:geometrySetMode(g_mode, x, y, w, h)
 
 	return label
 end

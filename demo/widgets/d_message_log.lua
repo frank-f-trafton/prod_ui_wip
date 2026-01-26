@@ -53,7 +53,7 @@ function plan.make(panel)
 
 	local c_remove_all = panel:addChild("base/button")
 		:setTag("d_msg_log_remove_all")
-		:geometrySetMode("static", xx, yy, ww, hh, true)
+		:geometrySetMode("relative", xx, yy, ww, hh)
 		:setLabel("Remove All Items", "single")
 		:userCallbackSet("cb_buttonAction", _removeAllItems)
 
@@ -67,7 +67,7 @@ function plan.make(panel)
 	end
 
 	local c_replace_last = panel:addChild("input/text_box_single")
-		:geometrySetMode("static", xx, yy, ww*2, hh, true)
+		:geometrySetMode("relative", xx, yy, ww*2, hh)
 		:setTag("d_msg_log_replace_last")
 		:setClearHistoryOnDeselect(true)
 		:setGhostText("Replace the last item's text")
