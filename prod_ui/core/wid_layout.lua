@@ -54,12 +54,19 @@ widLayout._nm_seg_edge = uiTable.newNamedMapV("SegmentEdge", "left", "right", "t
 		unit: (number) The desired portion of the segment, from 0.0 to 1.0. This is a percentage of the original
 			parent layout space along the segment's axis.
 
+	"relative":
+		x: (integer) Position and dimensions. Always scaled.
+		y: ^
+		w: ^
+		h: ^
+		flip_x: (boolean) When true, the position is against the other side of the layout space.
+		flip_y: (boolean) ^
+
 	"static":
 		x: (integer) Position and dimensions. Always scaled.
 		y: ^
 		w: ^
 		h: ^
-		relative: (boolean) Use parent node's remaining layout space (true) or the original space (false).
 		flip_x: (boolean) When true, the position is against the other side of the layout space.
 		flip_y: (boolean) ^
 --]]
@@ -144,12 +151,31 @@ widLayout.mode_setters = {
 		return self
 	end,
 
-	static = function(self, x, y, w, h, relative, flip_x, flip_y)
+	relative = function(self, x, y, w, h, flip_x, flip_y)
 		uiAssert.numberNotNaN(1, x)
 		uiAssert.numberNotNaN(2, y)
 		uiAssert.numberNotNaN(3, w)
 		uiAssert.numberNotNaN(4, h)
-		-- don't assert 'relative', 'flip_x' or 'flip_y'
+		-- don't assert 'flip_x' or 'flip_y'
+
+		local GE = _initGE(self, "relative")
+
+		GE.x = x
+		GE.y = y
+		GE.w = math.max(0, w)
+		GE.h = math.max(0, h)
+		GE.flip_x = not not flip_x
+		GE.flip_y = not not flip_y
+
+		return self
+	end,
+
+	static = function(self, x, y, w, h, flip_x, flip_y)
+		uiAssert.numberNotNaN(1, x)
+		uiAssert.numberNotNaN(2, y)
+		uiAssert.numberNotNaN(3, w)
+		uiAssert.numberNotNaN(4, h)
+		-- don't assert 'flip_x' or 'flip_y'
 
 		local GE = _initGE(self, "static")
 
@@ -157,7 +183,6 @@ widLayout.mode_setters = {
 		GE.y = y
 		GE.w = math.max(0, w)
 		GE.h = math.max(0, h)
-		GE.relative = not not relative
 		GE.flip_x = not not flip_x
 		GE.flip_y = not not flip_y
 
@@ -325,15 +350,30 @@ widLayout.handlers = {
 		end
 	end,
 
+	relative = function(np, nc, GE, orig_x, orig_y, org_w, orig_h)
+		local scale = context.scale
+
+		local px, py, pw, ph = np.LO_x, np.LO_y, np.LO_w, np.LO_h
+
+		nc.w = math.floor(GE.w * scale)
+		nc.x = math.floor(GE.x * scale)
+		if GE.flip_x then
+			nc.x = pw - nc.w - nc.x
+		end
+		nc.x = nc.x + px
+
+		nc.h = math.floor(GE.h * scale)
+		nc.y = math.floor(GE.y * scale)
+		if GE.flip_y then
+			nc.y = ph - nc.h - nc.y
+		end
+		nc.y = nc.y + py
+	end,
+
 	static = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)
 		local scale = context.scale
 
-		local px, py, pw, ph
-		if GE.relative then
-			px, py, pw, ph = np.LO_x, np.LO_y, np.LO_w, np.LO_h
-		else
-			px, py, pw, ph = orig_x, orig_y, orig_w, orig_h
-		end
+		local px, py, pw, ph = orig_x, orig_y, orig_w, orig_h
 
 		nc.w = math.floor(GE.w * scale)
 		nc.x = math.floor(GE.x * scale)
