@@ -13,5 +13,10 @@ return {
 	t_t = "*quads/pipe2_t_t",
 
 	pad_x = 1,
-	pad_y = 1
+	pad_y = 1,
+
+	sep_t = 4,
+	sep_b = 4,
+	sep_l = 4,
+	sep_r = 4
 }

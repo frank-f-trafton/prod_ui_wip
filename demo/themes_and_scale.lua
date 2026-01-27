@@ -101,8 +101,11 @@ function plan.make(panel)
 
 	demoShared.makeTitle(panel, nil, "Themes and Scale")
 
+	demoShared.makeParagraphSpacer(panel, "p", 0.5)
+
 	local tex_scale_list = _pollTextureScales(context.conf.prod_ui_path .. "resources/textures")
 	demoShared.makeParagraph(panel, nil, "(Valid Texture Scales are: " .. table.concat(tex_scale_list, ", ") .. ")")
+	demoShared.makeParagraphSpacer(panel, "p", 0.5)
 
 	demoShared.makeLabel(panel, 32, 96, 200, 32, false, "Theme", "single")
 	local list_box = panel:addChild("wimp/list_box")
@@ -172,6 +175,7 @@ function plan.make(panel)
 
 	local error_paragraph = demoShared.makeParagraph(panel, "err_msg", "(Messages go here)")
 		:geometrySetMode("static", xx, yy + hh, 400, 64)
+
 end
 
 
