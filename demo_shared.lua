@@ -128,6 +128,16 @@ function demoShared.makeParagraph(self, tag, text)
 end
 
 
+function demoShared.makeParagraphSpacer(self, font_id, space)
+	local empty = self:addChild("wimp/text_space")
+		:setFontID(font_id)
+		:setSpacing(space)
+		:geometrySetMode("segment", "top", 0)
+
+	return empty
+end
+
+
 function demoShared.makeHyperlink(self, tag, text, url)
 	local text_block = self:addChild("wimp/text_block")
 	if tag then

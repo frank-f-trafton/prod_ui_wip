@@ -105,7 +105,13 @@ models.pipeStyle = uiSchema.newKeysX {
 	-- are relative to the quad 'ox' and 'oy' offsets; refer to the theme's
 	-- 'base_data.lua'.
 	pad_x = uiAssert.numberNotNaN,
-	pad_y = uiAssert.numberNotNaN
+	pad_y = uiAssert.numberNotNaN,
+
+	-- Offsets to shorten pipes that function as horizontal or vertical separators.
+	sep_t = uiAssert.numberNotNaN,
+	sep_b = uiAssert.numberNotNaN,
+	sep_l = uiAssert.numberNotNaN,
+	sep_r = uiAssert.numberNotNaN,
 }
 
 
@@ -312,8 +318,12 @@ end
 local function _scalePipeStyle(ps, scale, tex_scale)
 	uiScale.fieldInteger(tex_scale, ps, "pad_x", 0)
 	uiScale.fieldInteger(tex_scale, ps, "pad_y", 0)
-end
 
+	uiScale.fieldInteger(scale, ps, "sep_t", 0)
+	uiScale.fieldInteger(scale, ps, "sep_b", 0)
+	uiScale.fieldInteger(scale, ps, "sep_l", 0)
+	uiScale.fieldInteger(scale, ps, "sep_r", 0)
+end
 
 
 local function _scaleScrollBarStyle(sbs, scale)

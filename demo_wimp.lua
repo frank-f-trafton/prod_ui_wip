@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.d_separator",
 	"themes_and_scale",
 	"widgets.d_group",
 	"widgets.d_message_log",
@@ -111,6 +112,7 @@ local demo_plan_list = {
 			nodes = {
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
 				{plan_id = "widgets.d_group", label = "Groups"},
+				{plan_id = "widgets.d_separator", label = "Spacers & Separators"},
 			},
 		},
 		--]]

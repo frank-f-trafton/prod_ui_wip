@@ -40,6 +40,9 @@ uiTheme.named_maps = {
 	label_align_v = uiTable.newNamedMapV("LabelAlignVertical", "top", "middle", "bottom"),
 	quad_align_h = uiTable.newNamedMapV("QuadAlignHorizontal", "left", "center", "right"),
 	quad_align_v = uiTable.newNamedMapV("QuadAlignVertical", "top", "middle", "bottom"),
+
+	-- In general
+	axis_2d = uiTable.newNamedMapV("Axis2D", "x", "y"),
 }
 local named_maps = uiTheme.named_maps
 
