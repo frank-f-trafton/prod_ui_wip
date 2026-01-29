@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"layouts.d_layout_wallet",
 	"widgets.d_separator",
 	"themes_and_scale",
 	"widgets.d_group",
@@ -92,6 +93,7 @@ local demo_plan_list = {
 				{plan_id = "layouts.d_layout_static", label = "Layout (Static)"},
 				{plan_id = "layouts.d_layout_sashes", label = "Layout (Sashes)"},
 				{plan_id = "layouts.d_layout_unit", label = "Layout (Unit Segments)"},
+				{plan_id = "layouts.d_layout_wallet", label = "Layout (Wallet)"},
 			},
 		},
 

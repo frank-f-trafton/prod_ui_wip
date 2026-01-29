@@ -163,6 +163,10 @@ _mt_widget.GE_order = 0
 _mt_widget.GE_outpad_x1, _mt_widget.GE_outpad_y1, _mt_widget.GE_outpad_x2, _mt_widget.GE_outpad_y2 = 0, 0, 0, 0
 
 
+-- The function that executes layout updates.
+_mt_widget._applyLayout = widLayout.applyLayout
+
+
 --[[
 These fields are set in widLayout.setupLayoutList(). They apply to parents.
 
@@ -175,7 +179,18 @@ These fields are set in widLayout.setupLayoutList(). They apply to parents.
 
 .LO_margin_x1, .LO_margin_y1, .LO_margin_x2, .LO_margin_y2: Layout margin for parents.
 
-.LO_grid_rows, .LO_grid_cols: The number of columns and rows in a parent's grid.
+
+These fields are set with widget methods.
+
+.LO_grid: A state table for the 'grid' widget geometry.
+	cols, rows: The number of columns and rows in a parent's grid.
+
+.LO_wallet: A state table for the 'wallet' widget geometry.
+	card_w, card_h: Dimensions of the wallet cards.
+	cols, rows: Number of rows and columns in the wallet.
+	x, y: Current position in the wallet (from 0 to [cols|rows] - 1)
+	dx, dy: Increment vector, to get to the next card position.
+	main_axis: The primary increment axis: "x" or "y".
 --]]
 
 
@@ -1007,7 +1022,7 @@ function _mt_widget:reshape()
 	end
 
 	if self.LO_list then
-		widLayout.applyLayout(self, 1)
+		self:_applyLayout()
 	end
 
 	for i, child in ipairs(self.nodes) do
@@ -1225,7 +1240,7 @@ end
 
 
 function _mt_widget:geometrySetMode(mode, ...)
-	local setter = widLayout.mode_setters[mode]
+	local setter = widLayout.geometry_setters[mode]
 	if setter then
 		setter(self, ...)
 	else
