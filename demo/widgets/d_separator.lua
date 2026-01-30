@@ -43,7 +43,7 @@ function plan.make(panel)
 
 	wid = panel:addChild("base/separator")
 		:geometrySetMode("relative", xx, yy, ww, h_sep)
-		:setPipeStyle("norm")
+		:pipeSetStyle("norm")
 		:setAxis("x")
 
 	yy = yy + h_sep
@@ -56,7 +56,7 @@ function plan.make(panel)
 
 	wid = panel:addChild("base/separator")
 		:geometrySetMode("relative", xx, yy, ww, h_sep)
-		:setPipeStyle("double")
+		:pipeSetStyle("double")
 		:setAxis("x")
 
 	yy = yy + h_sep
@@ -70,7 +70,7 @@ function plan.make(panel)
 
 	wid = panel:addChild("base/separator")
 		:geometrySetMode("relative", xx, 0, h_sep, yy)
-		:setPipeStyle("thick")
+		:pipeSetStyle("thick")
 		:setAxis("y")
 
 	xx = xx + h_sep

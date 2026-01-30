@@ -145,6 +145,13 @@ function themeAssert.pipeStyle(n, v)
 end
 
 
+function themeAssert.pipeStyleID(n, v)
+	if not context.resources.pipe_styles[v] then
+		error("unprovisioned PipeStyle: " .. tostring(v))
+	end
+end
+
+
 function themeAssert.sashStyle(n, v)
 	_assertLinkedResource("sash_styles", "SashStyle", v)
 end

@@ -20,8 +20,12 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcPipe = context:getLua("shared/wc/wc_pipe")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+
+
+local pipe_styles = context.resources.pipe_styles
 
 
 local def = {
@@ -32,7 +36,54 @@ local def = {
 local _nm_group_label_side = uiTable.newNamedMapV("GroupLabelSide", "left", "center", "right")
 
 
+local _nm_group_deco_style = uiTable.newNamedMapV("GroupDecorationStyle",
+	"none",
+	"outline",
+	"outline-label",
+	"header",
+	"header-label",
+	"underline-label",
+	"underline-label-wide",
+	"label"
+)
+
+
+wcPipe.attachMethods(def)
+
+
 widLayout.setupContainerDef(def)
+
+
+function def:setDecorationStyle(style)
+	uiAssert.namedMap(1, style, _nm_group_deco_style)
+
+	self.deco_style = style or false
+
+	self:reshape()
+
+	return self
+end
+
+
+function def:getDecorationStyle()
+	return self.deco_style
+end
+
+
+function def:setLabelSide(side)
+	uiAssert.namedMap(1, side, _nm_group_label_side)
+
+	self.label_side = side
+
+	self:reshape()
+
+	return self
+end
+
+
+function def:getLabelSide()
+	return self.label_side
+end
 
 
 function def:setText(text)
@@ -60,6 +111,10 @@ function def:evt_initialize()
 
 	self.text = ""
 	self.enabled = true
+
+	self.PIPE_id = "norm"
+	self.deco_style = "outline-label"
+	self.label_side = "center"
 
 	self.text_x, self.text_w = 0, 0
 
@@ -92,7 +147,7 @@ function def:evt_reshapePre()
 
 	self.text_w = font:getWidth(self.text)
 
-	local label_side = skin.label_side
+	local label_side = self.label_side
 	if label_side == "left" then
 		self.text_x = vp2.x + skin.label_pad_far
 
@@ -135,6 +190,154 @@ function def:evt_destroy(targ)
 end
 
 
+-- args: (self, ox, oy)
+local _style_renderers = {
+	["none"] = function()
+		-- n/a
+	end,
+
+	["outline"] = function(self)
+		local skin, vp2 = self.skin, self.vp2
+
+		love.graphics.setColor(skin.color_pipe)
+
+		local pipe_id = self.PIPE_id
+		if pipe_id then
+			local p_st = pipe_styles[pipe_id]
+			if not p_st then
+				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
+			end
+
+			uiGraphics.pipeRectangle(p_st, vp2.x, vp2.y, vp2.w, vp2.h)
+		end
+	end,
+
+	["outline-label"] = function(self)
+		local skin, vp2, vp3 = self.skin, self.vp2, self.vp3
+
+		love.graphics.setColor(skin.color_pipe)
+
+		local x1, y1, w, h = vp2.x, vp2.y, vp2.w, vp2.h
+		local x2, y2 = x1 + w, y1 + h
+
+		local pipe_id = self.PIPE_id
+		if pipe_id then
+			local p_st = pipe_styles[pipe_id]
+			if not p_st then
+				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
+			end
+
+			uiGraphics.pipePointsV(p_st, true, true,
+				vp3.x, y1,
+				x1, y1,
+				x1, y2,
+				x2, y2,
+				x2, y1,
+				vp3.x + vp3.w, y1
+			)
+		end
+
+		love.graphics.setFont(skin.font)
+		love.graphics.setColor(skin.color_text)
+		love.graphics.print(self.text, self.text_x, vp3.y)
+	end,
+
+	["header"] = function(self)
+		local skin, vp2, vp3 = self.skin, self.vp2, self.vp3
+
+		love.graphics.setColor(skin.color_pipe)
+
+		local x, y, w = vp2.x, vp2.y, vp2.w
+
+		local pipe_id = self.PIPE_id
+		if pipe_id then
+			local p_st = pipe_styles[pipe_id]
+			if not p_st then
+				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
+			end
+
+			uiGraphics.pipeHorizontal(p_st, x, y, w)
+		end
+	end,
+
+	["header-label"] = function(self)
+		local skin, vp2, vp3 = self.skin, self.vp2, self.vp3
+
+		love.graphics.setColor(skin.color_pipe)
+
+		local y = vp2.y
+		local w2 = vp2.x + vp2.w - (vp3.x + vp3.w)
+
+		local pipe_id = self.PIPE_id
+		if pipe_id then
+			local p_st = pipe_styles[pipe_id]
+			if not p_st then
+				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
+			end
+
+			uiGraphics.pipeHorizontal(p_st, vp2.x, y, vp3.x - vp2.x)
+			uiGraphics.pipeHorizontal(p_st, vp3.x + vp3.w, y, w2)
+		end
+
+		love.graphics.setFont(skin.font)
+		love.graphics.setColor(skin.color_text)
+		love.graphics.print(self.text, self.text_x, vp3.y)
+	end,
+
+	["underline-label"] = function(self)
+		local skin, vp2, vp3 = self.skin, self.vp2, self.vp3
+
+		love.graphics.setColor(skin.color_pipe)
+
+		local x, y, w = self.text_x, vp3.y + vp3.h, self.text_w
+
+		local pipe_id = self.PIPE_id
+		if pipe_id then
+			local p_st = pipe_styles[pipe_id]
+			if not p_st then
+				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
+			end
+
+			uiGraphics.pipeHorizontal(p_st, x, y, w)
+		end
+
+		love.graphics.setFont(skin.font)
+		love.graphics.setColor(skin.color_text)
+		love.graphics.print(self.text, self.text_x, vp3.y)
+	end,
+
+	["underline-label-wide"] = function(self)
+		local skin, vp2, vp3 = self.skin, self.vp2, self.vp3
+
+		love.graphics.setColor(skin.color_pipe)
+
+		local x, y, w = vp2.x, vp3.y + vp3.h, vp2.w
+
+		local pipe_id = self.PIPE_id
+		if pipe_id then
+			local p_st = pipe_styles[pipe_id]
+			if not p_st then
+				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
+			end
+
+			uiGraphics.pipeHorizontal(p_st, x, y, w)
+		end
+
+		love.graphics.setFont(skin.font)
+		love.graphics.setColor(skin.color_text)
+		love.graphics.print(self.text, self.text_x, vp3.y)
+	end,
+
+	["label"] = function(self)
+		local skin, vp3 = self.skin, self.vp3
+
+		love.graphics.setFont(skin.font)
+		love.graphics.setColor(skin.color_text)
+		love.graphics.print(self.text, self.text_x, vp3.y)
+	end
+}
+
+
 local themeAssert = context:getLua("core/res/theme_assert")
 
 
@@ -144,8 +347,6 @@ def.default_skinner = {
 
 		box = themeAssert.box,
 		font = themeAssert.font,
-
-		label_side = {uiAssert.namedMap, _nm_group_label_side},
 
 		-- Padding when label_side is "left" or "right".
 		-- Not used with "center"
@@ -157,8 +358,6 @@ def.default_skinner = {
 
 		color_text = uiAssert.loveColorTuple,
 		color_pipe = uiAssert.loveColorTuple,
-
-		pipe_style = themeAssert.pipeStyle,
 	},
 
 
@@ -180,34 +379,9 @@ def.default_skinner = {
 
 
 	render = function(self, ox, oy)
-		local vp2, vp3 = self.vp2, self.vp3
-		local skin = self.skin
-
 		love.graphics.push("all")
 
-		love.graphics.setColor(skin.color_pipe)
-		--love.graphics.setColor(1, 1, 1, 0.5)
-
-		local x1, y1 = vp2.x, vp2.y
-		local w, h = vp2.w, vp2.h
-		local x2, y2 = x1 + w, y1 + h
-
-		local p_st = skin.pipe_style
-		local pad_x, pad_y = p_st.pad_x, p_st.pad_y
-
-		--love.graphics.setColor(1,1,1,0.5)
-		uiGraphics.pipePointsV(p_st, true, true,
-			vp3.x, y1,
-			x1, y1,
-			x1, y2,
-			x2, y2,
-			x2, y1,
-			vp3.x + vp3.w, y1
-		)
-
-		love.graphics.setFont(skin.font)
-		love.graphics.setColor(skin.color_text)
-		love.graphics.print(self.text, self.text_x, vp3.y)
+		_style_renderers[self.deco_style](self, ox, oy)
 
 		love.graphics.pop()
 	end,
