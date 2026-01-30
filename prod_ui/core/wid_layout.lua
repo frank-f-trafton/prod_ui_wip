@@ -27,9 +27,8 @@ widLayout._nm_layout_base = uiTable.newNamedMapV("LayoutBase",
 
 
 widLayout._nm_seg_edge = uiTable.newNamedMapV("SegmentEdge", "left", "right", "top", "bottom")
-
-
-widLayout._nm_card_mode = uiTable.newNamedMapV("CardSizeMode", "pixel", "unit")
+widLayout._nm_card_measure = uiTable.newNamedMapV("CardSizeMeasure", "pixel", "unit")
+widLayout._nm_stack_len_measure = uiTable.newNamedMapV("StackLengthMeasure", "pixel", "unit")
 
 
 --[[
@@ -43,6 +42,10 @@ The parameters of each geometry mode:
 "null":
 	(No parameters.)
 
+"relative":
+	x, y, w, h: (integer) Position and dimensions. Always scaled.
+	flip_x, flip_y: (boolean) When true, the position is against the other side of the layout space.
+
 "remaining":
 	(No paremeters.)
 
@@ -52,31 +55,23 @@ The parameters of each geometry mode:
 	len_min: (integer) The preferred (not guaranteed) minimum and maximum segment length.
 	len_max: ^
 	sash_style (string|false/nil) When a string, this segment has a sash on the opposite edge.
-	sash_x: (integer) Position and dimensions of the sash bounding box. Internal use.
-	sash_y: ^
-	sash_w: ^
-	sash_h: ^
+	sash_x, sash_y, sash_w, sash_h: (integer) Position and dimensions of the sash bounding box. Internal use.
 
 "segment-unit":
 	edge: (_nm_seg_edge)
 	unit: (number) The desired portion of the segment, from 0.0 to 1.0. This is a percentage of the original
 		parent layout space along the segment's axis.
 
-"relative":
-	x: (integer) Position and dimensions. Always scaled.
-	y: ^
-	w: ^
-	h: ^
-	flip_x: (boolean) When true, the position is against the other side of the layout space.
-	flip_y: (boolean) ^
+"stack":
+	len: Desired length of the widget (height in vertical stacks, width in horizontal stacks). When false,
+		the parent provides a default length.
+	measure: How 'len' should be interpreted: "pixel" for (scaled) pixels, "unit" for a portion of the
+		parent's remaining layout space. When false, the parent provides a default value.
+	(Refer also the parent's 'LO_stack' table.)
 
 "static":
-	x: (integer) Position and dimensions. Always scaled.
-	y: ^
-	w: ^
-	h: ^
-	flip_x: (boolean) When true, the position is against the other side of the layout space.
-	flip_y: (boolean) ^
+	x, y, w, h: (integer) Position and dimensions. Always scaled.
+	flip_x, flip_y: (boolean) When true, the position is against the other side of the layout space.
 
 "wallet":
 	(No parameters. Refer to the parent's 'LO_wallet' table.)
@@ -126,6 +121,25 @@ widLayout.geometry_setters = {
 		return self
 	end,
 
+	relative = function(self, x, y, w, h, flip_x, flip_y)
+		uiAssert.numberNotNaN(1, x)
+		uiAssert.numberNotNaN(2, y)
+		uiAssert.numberNotNaN(3, w)
+		uiAssert.numberNotNaN(4, h)
+		-- don't assert 'flip_x' or 'flip_y'
+
+		local GE = _initGE(self, "relative")
+
+		GE.x = x
+		GE.y = y
+		GE.w = math.max(0, w)
+		GE.h = math.max(0, h)
+		GE.flip_x = not not flip_x
+		GE.flip_y = not not flip_y
+
+		return self
+	end,
+
 	remaining = function(self)
 		self.GE = widLayout.geo_remaining
 
@@ -163,21 +177,23 @@ widLayout.geometry_setters = {
 		return self
 	end,
 
-	relative = function(self, x, y, w, h, flip_x, flip_y)
-		uiAssert.numberNotNaN(1, x)
-		uiAssert.numberNotNaN(2, y)
-		uiAssert.numberNotNaN(3, w)
-		uiAssert.numberNotNaN(4, h)
-		-- don't assert 'flip_x' or 'flip_y'
+	stack = function(self, measure, len)
+		uiAssert.namedMapEval(1, measure, widLayout._nm_stack_len_measure)
+		uiAssert.numberGEEval(1, len, 0)
 
-		local GE = _initGE(self, "relative")
+		local GE = _initGE(self, "stack")
 
-		GE.x = x
-		GE.y = y
-		GE.w = math.max(0, w)
-		GE.h = math.max(0, h)
-		GE.flip_x = not not flip_x
-		GE.flip_y = not not flip_y
+		if not measure then
+			GE.measure = false
+			GE.len = false
+		else
+			if measure == "unit" then
+				len = math.min(1.0, len)
+			end
+
+			GE.measure = measure
+			GE.len = len
+		end
 
 		return self
 	end,
@@ -281,6 +297,26 @@ widLayout.handlers = {
 		-- do nothing
 	end,
 
+	relative = function(np, nc, GE)
+		local scale = context.scale
+
+		local px, py, pw, ph = np.LO_x, np.LO_y, np.LO_w, np.LO_h
+
+		nc.w = math.floor(GE.w * scale)
+		nc.x = math.floor(GE.x * scale)
+		if GE.flip_x then
+			nc.x = pw - nc.w - nc.x
+		end
+		nc.x = nc.x + px
+
+		nc.h = math.floor(GE.h * scale)
+		nc.y = math.floor(GE.y * scale)
+		if GE.flip_y then
+			nc.y = ph - nc.h - nc.y
+		end
+		nc.y = nc.y + py
+	end,
+
 	remaining = function(np, nc)
 		nc.x, nc.y, nc.w, nc.h = np.LO_x, np.LO_y, np.LO_w, np.LO_h
 	end,
@@ -377,24 +413,61 @@ widLayout.handlers = {
 		end
 	end,
 
-	relative = function(np, nc, GE, orig_x, orig_y, org_w, orig_h)
+	stack = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)
 		local scale = context.scale
 
-		local px, py, pw, ph = np.LO_x, np.LO_y, np.LO_w, np.LO_h
+		-- TODO: raise an error here if the table is missing (or don't?)
 
-		nc.w = math.floor(GE.w * scale)
-		nc.x = math.floor(GE.x * scale)
-		if GE.flip_x then
-			nc.x = pw - nc.w - nc.x
+		local stk = np.LO_stack
+		if not stk then
+			nc.x, nc.y, nc.w, nc.h = 0, 0, 0, 0
+			return
 		end
-		nc.x = nc.x + px
 
-		nc.h = math.floor(GE.h * scale)
-		nc.y = math.floor(GE.y * scale)
-		if GE.flip_y then
-			nc.y = ph - nc.h - nc.y
+		local axis, dir = stk.axis, stk.dir
+
+		local measure, len
+		if GE.measure then
+			measure, len = GE.measure, GE.len
+		else
+			measure, len = stk.default_measure, stk.default_len
 		end
-		nc.y = nc.y + py
+
+		if stk.axis == "x" then
+			if measure == "unit" then
+				len = math.floor(np.LO_h * len)
+			else -- measure == "pixel"
+				len = math.floor(len * scale)
+			end
+
+			len = math.min(len, np.LO_w)
+			nc.y, nc.h = np.LO_y, np.LO_h
+
+			if dir == 1 then
+				nc.x, nc.w = np.LO_x, len
+				np.LO_x, np.LO_w = np.LO_x + len, math.max(0, np.LO_w - len)
+			else -- dir == -1
+				nc.x, nc.w = np.LO_x + np.LO_w - len, len
+				np.LO_w = math.max(0, np.LO_w - len)
+			end
+		else -- axis == "x"
+			if measure == "unit" then
+				len = math.floor(np.LO_w * len)
+			else -- measure == "pixel"
+				len = math.floor(len * scale)
+			end
+
+			len = math.min(len, np.LO_h)
+			nc.x, nc.w = np.LO_x, np.LO_w
+
+			if dir == 1 then
+				nc.y, nc.h = np.LO_y, len
+				np.LO_y, np.LO_h = np.LO_y + len, math.max(0, np.LO_h - len)
+			else -- dir == -1
+				nc.y, nc.h = np.LO_y + np.LO_h - len, len
+				np.LO_h = math.max(0, np.LO_h - len)
+			end
+		end
 	end,
 
 	static = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)
@@ -428,17 +501,17 @@ widLayout.handlers = {
 			return
 		end
 
-		local mode_x, mode_y = wal.mode_x, wal.mode_y
+		local meas_x, meas_y = wal.meas_x, wal.meas_y
 		local cw, ch
-		if mode_x == "pixel" then
+		if meas_x == "pixel" then
 			cw = math.floor(wal.card_w * scale)
-		else -- mode_x == "unit"
+		else -- meas_x == "unit"
 			cw = math.floor(np.LO_w * wal.card_w)
 		end
 
-		if mode_y == "pixel" then
+		if meas_y == "pixel" then
 			ch = math.floor(wal.card_h * scale)
-		else -- mode_y == "unit"
+		else -- meas_y == "unit"
 			ch = math.floor(np.LO_h * wal.card_h)
 		end
 
@@ -550,7 +623,7 @@ function methods:layoutGetMargin()
 end
 
 
--- parent.LO_grid: A state table for the 'grid' widget geometry.
+-- parent.LO_grid
 local _mt_grid = {
 	-- The numbers of columns and rows in the grid.
 	cols = 0,
@@ -585,7 +658,7 @@ function methods:layoutGetGridDimensions(cols, rows)
 end
 
 
--- parent.LO_wallet: A state table for the 'wallet' widget geometry.
+-- parent.LO_wallet
 local _mt_wallet = {
 	-- Dimensions of the wallet cards. Must be zero or greater.
 	card_w=0, card_h=0,
@@ -593,14 +666,14 @@ local _mt_wallet = {
 	-- How to measure cards along each axis.
 	-- pixel: as (scaled) pixels
 	-- unit: as a portion of the layout space, from 0.0 to 1.0.
-	mode_x="pixel", mode_y="pixel",
+	meas_x="pixel", meas_y="pixel",
 
 	-- Number of items per line (along the main axis). Must be zero or greater; when
 	-- zero, the limit is based on the layout space.
 	cards_per_line=0,
 
 	-- Increment vector, to get to the next card position.
-	dx=0, dy=0,
+	dx=1, dy=1,
 
 	-- Which axis increments first: "x" or "y".
 	main_axis="x",
@@ -621,24 +694,24 @@ local function _checkWalletTable(self)
 end
 
 
-function methods:layoutSetWalletCardSize(mode_x, mode_y, card_w, card_h)
-	uiAssert.namedMap(1, mode_x, widLayout._nm_card_mode)
-	uiAssert.namedMap(2, mode_y, widLayout._nm_card_mode)
+function methods:layoutSetWalletCardSize(meas_x, meas_y, card_w, card_h)
+	uiAssert.namedMap(1, meas_x, widLayout._nm_card_measure)
+	uiAssert.namedMap(2, meas_y, widLayout._nm_card_measure)
 	uiAssert.numberGE(3, card_w, 0)
 	uiAssert.numberGE(4, card_h, 0)
 
-	if mode_x == "unit" then
+	if meas_x == "unit" then
 		card_w = math.min(card_w, 1.0)
 	end
 
-	if mode_y == "unit" then
+	if meas_y == "unit" then
 		card_h = math.min(card_h, 1.0)
 	end
 
 	local LO_wallet = _checkWalletTable(self)
 
-	LO_wallet.mode_x = mode_x
-	LO_wallet.mode_y = mode_y
+	LO_wallet.meas_x = meas_x
+	LO_wallet.meas_y = meas_y
 	LO_wallet.card_w = card_w
 	LO_wallet.card_h = card_h
 
@@ -649,7 +722,7 @@ end
 function methods:layoutGetWalletCardSize()
 	local LO_wallet = _checkWalletTable(self)
 
-	return LO_wallet.mode_x, LO_wallet.mode_y, LO_wallet.card_w, LO_wallet.card_h
+	return LO_wallet.meas_x, LO_wallet.meas_y, LO_wallet.card_w, LO_wallet.card_h
 end
 
 
@@ -690,6 +763,74 @@ function methods:layoutGetWalletFlow()
 	local LO_wallet = _checkWalletTable(self)
 
 	return LO_wallet.main_axis, LO_wallet.dx, LO_wallet.dy
+end
+
+
+-- parent.LO_stack
+local _mt_stack = {
+	-- The primary axis: "x" or "y".
+	axis="x",
+
+	-- Step direction: -1 (up/left) or 1 (down/right).
+	dir=1,
+
+	-- Default widget length and measurement.
+	-- "pixel": (scaled) pixels.
+	-- "unit": A portion of the remaining layout space on the primary axis, from 0.0 to 1.0.
+	default_len=0,
+	default_meas="pixel",
+}
+_mt_stack.__index = _mt_stack
+
+
+local function _checkStackTable(self)
+	self.LO_stack = self.LO_stack or setmetatable({}, _mt_stack)
+
+	return self.LO_stack
+end
+
+
+function methods:layoutSetStackFlow(axis, dir)
+	uiAssert.namedMap(1, axis, _nm_axis2d)
+	uiAssert.oneOf(2, dir, -1, 1)
+
+	local LO_stack = _checkStackTable(self)
+
+	LO_stack.axis = axis
+	LO_stack.dir = dir
+
+	return self
+end
+
+
+function methods:layoutGetStackFlow()
+	local LO_stack = _checkStackTable(self)
+
+	return LO_stack.axis, LO_stack.dir
+end
+
+
+function methods:layoutSetStackDefaultWidgetSize(default_meas, default_len)
+	uiAssert.namedMap(1, default_meas, widLayout._nm_stack_len_measure)
+	uiAssert.numberGE(2, default_len, 0)
+
+	if default_meas == "unit" then
+		default_len = math.min(default_len, 1.0)
+	end
+
+	local LO_stack = _checkStackTable(self)
+
+	LO_stack.default_meas = default_meas
+	LO_stack.default_len = default_len
+
+	return self
+end
+
+
+function methods:layoutGetStackDefaultWidgetSize()
+	local LO_stack = _checkStackTable(self)
+
+	return LO_stack.default_meas, LO_stack.default_len
 end
 
 
@@ -760,12 +901,20 @@ function widLayout.applyLayout(self)
 
 	local orig_x, orig_y, orig_w, orig_h = self.LO_x, self.LO_y, self.LO_w, self.LO_h
 
-	-- Initialize wallet state
 	local LO_wallet = self.LO_wallet
 	if LO_wallet then
 		LO_wallet.x = (LO_wallet.dx == 1) and self.LO_x or self.LO_x + self.LO_w - LO_wallet.card_w
 		LO_wallet.y = (LO_wallet.dy == 1) and self.LO_y or self.LO_y + self.LO_h - LO_wallet.card_h
 		LO_wallet.count = 0
+	end
+
+	local LO_stack = self.LO_stack
+	if LO_stack then
+		if LO_stack.axis == "x" then
+			LO_stack.p = (LO_stack.dir == 1) and self.LO_x or self.LO_x + self.LO_w
+		else -- axis == "y"
+			LO_stack.p = (LO_stack.dir == 1) and self.LO_y or self.LO_y + self.LO_h
+		end
 	end
 
 	for i, child in ipairs(self.LO_list) do
