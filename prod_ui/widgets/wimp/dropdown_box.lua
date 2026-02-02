@@ -503,6 +503,8 @@ def.default_skinner = {
 		-- The SkinDef ID for pop-ups made by this widget.
 		skin_id_pop = {uiAssert.type, "string"},
 
+		-- border: overall content padding
+		-- margin: text padding
 		box = themeAssert.box,
 		font = themeAssert.font,
 
@@ -594,9 +596,13 @@ def.default_skinner = {
 
 		-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
 		if not self.wid_drawer and self.context.thimble1 == self then
-			love.graphics.setColor(res.color_highlight)
+			love.graphics.push("all")
+
 			love.graphics.setScissor()
+			love.graphics.setColor(res.color_highlight)
 			love.graphics.rectangle("fill", vp2.x, vp2.y, vp2.w, vp2.h)
+
+			love.graphics.pop()
 		end
 
 		local chosen = self.MN_items[self.MN_index]

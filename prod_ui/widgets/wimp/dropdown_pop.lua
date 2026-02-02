@@ -84,17 +84,17 @@ local function _updateDocumentHeight(self)
 end
 
 
-local function _updateDocumentWidth(self, w)
-	self.doc_w = math.max(self.doc_w, w)
+local function _updateItemsWidth(self, w)
+	self.items_w = math.max(self.items_w, w)
 end
 
 
-local function _recalculateDocumentWidth(self)
+local function _recalculateItemsWidth(self)
 	local max_w = 0
 	for i, item in ipairs(self.MN_items) do
 		max_w = math.max(max_w, item.w)
 	end
-	self.doc_w = max_w
+	self.items_w = max_w
 end
 
 
@@ -161,7 +161,7 @@ function def:addItem(text, pos, icon_id, suppress_select)
 
 	_shapeItem(self, item)
 	self:arrangeItems(1, pos, #items)
-	_updateDocumentWidth(self, item.w)
+	_updateItemsWidth(self, item.w)
 	_updateDocumentHeight(self)
 
 	if not suppress_select then
@@ -194,7 +194,7 @@ function def:removeItemByIndex(item_i)
 
 	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
 
-	_recalculateDocumentWidth(self)
+	_recalculateItemsWidth(self)
 	_updateDocumentHeight(self)
 
 	return removed_item
@@ -232,7 +232,7 @@ function def:menuChangeCleanup()
 		_shapeItem(self, item)
 	end
 	self:arrangeItems()
-	_recalculateDocumentWidth(self)
+	_recalculateItemsWidth(self)
 	_updateDocumentHeight(self)
 
 	self:menuSetSelectionStep(0, false)
@@ -279,7 +279,8 @@ function def:evt_initialize(wid_ref)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 5)
 
-	self.widest_width = 0
+	-- The widest of all items.
+	self.items_w = 0
 
 	self.press_busy = false
 
@@ -311,7 +312,7 @@ function def:evt_reshapePre()
 
 	-- We assume that the root widget's dimensions match the display area.
 
-	self.w = math.min(root.w, math.max(wid_ref.w, self.doc_w))
+	self.w = math.min(root.w, math.max(wid_ref.w, self.items_w + vp.x))
 	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.MN_items)))
 
 	self:keepInBounds()
@@ -641,7 +642,6 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
-
 		-- Fix item dimensions, icon references, etc.
 		self:menuChangeCleanup()
 	end,

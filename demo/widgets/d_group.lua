@@ -91,7 +91,7 @@ function plan.make(panel)
 		local i6 = lb:addItem("Decoration: Underlined Label")
 		i6.usr_deco_id = "underline-label"
 
-		local i7 = lb:addItem("Decoration: Underlined Lbl 2")
+		local i7 = lb:addItem("Decoration: Underlined Label 2")
 		i7.usr_deco_id = "underline-label-wide"
 
 		local i8 = lb:addItem("Decoration: Label")
