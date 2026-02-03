@@ -312,8 +312,15 @@ function def:evt_reshapePre()
 
 	-- We assume that the root widget's dimensions match the display area.
 
-	self.w = math.min(root.w, math.max(wid_ref.w, self.items_w + vp.x))
-	self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.MN_items)))
+	if #self.MN_items == 0 then
+		self.w = wid_ref.w
+		self.h = skin.item_height
+	else
+		self.w = math.min(root.w, math.max(wid_ref.w, self.items_w + vp.x))
+		self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.MN_items)))
+	end
+
+
 
 	self:keepInBounds()
 

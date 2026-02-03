@@ -111,6 +111,7 @@ function plan.make(panel)
 			end
 		end
 
+
 		local lb = group:addChild("wimp/dropdown_box")
 			:geometrySetMode("stack", "pixel", 32)
 			:userCallbackSet("cb_chosenSelection", cb_selectLabelSide)
@@ -118,8 +119,10 @@ function plan.make(panel)
 		local i1 = lb:addItem("Label Side: Left")
 		i1.usr_side_id = "left"
 
+
 		local i2 = lb:addItem("Label Side: Center")
 		i2.usr_side_id = "center"
+
 
 		local i3 = lb:addItem("Label Side: Right")
 		i3.usr_side_id = "right"
