@@ -735,13 +735,11 @@ end
 
 
 --- Logic for the client that positions scroll bars and implements auto-hide. The client's viewport #1 needs to be
---  set to a default size and position, from which the scroll bars will carve out space. Scroll bar shapes must then
---  be updated.
+--  set to a default size and position, from which the space will be carved out for the scroll bars.
+-- Scroll bar shapes must then be updated.
 -- @param self The widget to modify.
 function wcScrollBar.arrangeScrollBars(self)
-	local vp = self.vp
-	local scr_h = self.scr_h
-	local scr_v = self.scr_v
+	local vp, scr_h, scr_v = self.vp, self.scr_h, self.scr_v
 
 	-- Determine auto-hide flags for scroll bars.
 	-- as*1 -> Content exceeds view on this axis.
