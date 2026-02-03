@@ -1282,7 +1282,7 @@ end
 function wcMenu.pointerPressScrollBars(self, x, y, button)
 	-- Check for pressing on scroll bar components.
 	if button == 1 then
-		local fixed_step = 24 -- XXX style/config
+		local fixed_step = context.settings.wimp.navigation.scroll_button_click
 		if wcScrollBar.widgetScrollPress(self, x, y, fixed_step) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 			self.context:clearClickSequence()
@@ -1298,7 +1298,7 @@ function wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	and button == 1
 	and button == self.context.mouse_pressed_button
 	then
-		local fixed_step = 24 -- XXX style/config
+		local fixed_step = context.settings.wimp.navigation.scroll_button_hold
 		wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 	end
 end

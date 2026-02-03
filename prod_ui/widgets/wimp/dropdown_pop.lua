@@ -493,7 +493,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 		-- Check for pressing on scroll bar components.
 		if button == 1 then
-			local fixed_step = 24 -- XXX style/config
+			local fixed_step = context.settings.wimp.navigation.scroll_button_click
 			handled_scroll_bars = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 		end
 

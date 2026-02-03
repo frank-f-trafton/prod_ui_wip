@@ -272,7 +272,7 @@ end
 function wcUIFrame.logic_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
 	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
-			local fixed_step = 24 -- [XXX 2] style/config
+			local fixed_step = context.settings.wimp.navigation.scroll_button_click
 
 			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
 		end

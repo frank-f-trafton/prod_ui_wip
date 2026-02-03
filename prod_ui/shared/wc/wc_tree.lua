@@ -303,7 +303,7 @@ function wcTree.keyForward(self, dir)
 		self:cacheUpdate(true)
 
 	else
-		self:scrollDeltaH(32 * dir) -- XXX config
+		self:scrollDeltaHKeyStep(dir)
 	end
 	return true
 end
@@ -325,7 +325,7 @@ function wcTree.keyBackward(self, dir)
 		self:cacheUpdate(true)
 
 	else
-		self:scrollDeltaH(32 * dir) -- XXX config
+		self:scrollDeltaHKeyStep(dir)
 	end
 	return true
 end

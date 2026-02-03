@@ -171,11 +171,11 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "left" then
-		self:scrollDeltaH(-self.context.settings.wimp.navigation.key_scroll_h)
+		self:scrollDeltaHKeyStep(-1)
 		return true
 
 	elseif scancode == "right" then
-		self:scrollDeltaH(self.context.settings.wimp.navigation.key_scroll_h)
+		self:scrollDeltaHKeyStep(1)
 		return true
 	end
 end
