@@ -79,8 +79,8 @@ def.movePageDown = wcMenu.widgetMovePageDown
 
 local function _updateDocumentHeight(self)
 	local last_item = self.MN_items[#self.MN_items]
-
 	self.doc_h = last_item and last_item.y + last_item.h or 0
+	-- keep 'doc_x' at zero to eliminate horizontal scrolling.
 end
 
 
@@ -282,6 +282,9 @@ function def:evt_initialize(wid_ref)
 	-- The widest of all items.
 	self.items_w = 0
 
+	-- The uniform height of each item. Set in the skin install script.
+	self.item_h = 0
+
 	self.press_busy = false
 
 	wcMenu.setup(self)
@@ -310,44 +313,53 @@ function def:evt_reshapePre()
 		return true
 	end
 
-	-- We assume that the root widget's dimensions match the display area.
+	local icon_spacing = self.show_icons and skin.icon_spacing or 0
+	local margin, border = skin.box.margin, skin.box.border
+	local box_pad_x = margin.x1 + margin.x2 + border.x1 + border.x2 + icon_spacing
+	local box_pad_y = margin.y1 + margin.y2 + border.y1 + border.y2
 
 	if #self.MN_items == 0 then
 		self.w = wid_ref.w
-		self.h = skin.item_height
+		self.h = self.item_h
 	else
-		self.w = math.min(root.w, math.max(wid_ref.w, self.items_w + vp.x))
-		self.h = math.min(root.h, (skin.item_height * math.min(skin.max_visible_items, #self.MN_items)))
+		-- Assume the root widget's dimensions match the display area.
+
+		self.w = math.min(root.w, math.max(wid_ref.w, self.items_w + box_pad_x))
+		self.h = math.min(root.h, self.item_h * math.min(skin.max_visible_items, #self.MN_items) + box_pad_y)
+		--+ skin.item_pad_v
 	end
 
-
-
-	self:keepInBounds()
+	-- TODO: rewrite scroll bar arrangement code so that this doesn't have to be called twice.
+	vp:set(0, 0, self.w, self.h)
+	wcScrollBar.arrangeScrollBars(self)
+	local scr_v = self.scr_v
+	if scr_v and scr_v.active then
+		self.w = self.w + scr_v.bar_size
+	end
 
 	vp:set(0, 0, self.w, self.h)
-
-	-- Border and scroll bars.
-	vp:reduceT(skin.box.border)
-	wcScrollBar.arrangeScrollBars(self)
+	vp:reduceT(border)
 
 	-- 'Okay-to-click' rectangle.
 	vp:copy(vp2)
 
-	-- Margin.
-	vp:reduceT(skin.box.margin)
+	wcScrollBar.arrangeScrollBars(self)
+
+	--vp:reduceT(margin)
 
 	-- Dimensions and horizontal position for one menu item.
-	vp3:set(vp.x, 0, vp.w, skin.item_height)
+	vp3:set(vp.x, 0, vp.w, self.item_h)
 
 	-- Area for text
 	vp3:copy(vp4)
 
 	-- Area for the icon
-	local icon_spacing = self.show_icons and skin.icon_spacing or 0
 	vp4:splitOrOverlay(vp5, skin.icon_side, icon_spacing)
 
 	-- Additional text padding
-	vp4:reduceT(skin.box.margin)
+	vp4:reduceT(margin)
+
+	self:keepInBounds()
 
 	self:scrollClampViewport()
 	wcScrollBar.updateScrollState(self)
@@ -623,7 +635,7 @@ def.default_skinner = {
 		icon_side = {uiAssert.oneOf, "left", "right"},
 		icon_spacing = {uiAssert.integerGE, 0},
 
-		item_height = {uiAssert.integerGE, 0},
+		-- Item height is determined by the font height + line height and 'item_pad_v'.
 		item_pad_v = {uiAssert.integerGE, 0},
 
 		-- The drawer's maximum height, as measured by the number of visible items (plus margins).
@@ -640,7 +652,6 @@ def.default_skinner = {
 
 	transform = function(scale, skin)
 		uiScale.fieldInteger(scale, skin, "icon_spacing")
-		uiScale.fieldInteger(scale, skin, "item_height")
 		uiScale.fieldInteger(scale, skin, "item_pad_v")
 	end,
 
@@ -649,6 +660,10 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
+
+		local font = skin.font
+		self.item_h = math.floor(font:getHeight() * font:getLineHeight() + skin.item_pad_v)
+
 		-- Fix item dimensions, icon references, etc.
 		self:menuChangeCleanup()
 	end,
@@ -723,13 +738,21 @@ def.default_skinner = {
 		love.graphics.pop()
 
 		-- Debug: draw viewports
+		--[===[
 		--[[
+		-- Widget body:
+		love.graphics.push("all")
+		love.graphics.setColor(1, 0, 0, 0.5)
+		love.graphics.rectangle("fill", 0, 0, self.w, self.h)
+		love.graphics.pop()
+		--]]
+
 		widShared.debug.debugDrawViewport(self, 1)
 		widShared.debug.debugDrawViewport(self, 2)
-		widShared.debug.debugDrawViewport(self, 3)
-		widShared.debug.debugDrawViewport(self, 4)
-		widShared.debug.debugDrawViewport(self, 5)
-		--]]
+		--widShared.debug.debugDrawViewport(self, 3)
+		--widShared.debug.debugDrawViewport(self, 4)
+		--widShared.debug.debugDrawViewport(self, 5)
+		--]===]
 	end,
 
 

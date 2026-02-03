@@ -91,7 +91,7 @@ function plan.make(panel)
 		local i6 = lb:addItem("Decoration: Underlined Label")
 		i6.usr_deco_id = "underline-label"
 
-		local i7 = lb:addItem("Decoration: Underlined Label 2")
+		local i7 = lb:addItem("Decoration: Underlined Label (full breadth)")
 		i7.usr_deco_id = "underline-label-wide"
 
 		local i8 = lb:addItem("Decoration: Label")
@@ -111,7 +111,6 @@ function plan.make(panel)
 			end
 		end
 
-
 		local lb = group:addChild("wimp/dropdown_box")
 			:geometrySetMode("stack", "pixel", 32)
 			:userCallbackSet("cb_chosenSelection", cb_selectLabelSide)
@@ -119,13 +118,18 @@ function plan.make(panel)
 		local i1 = lb:addItem("Label Side: Left")
 		i1.usr_side_id = "left"
 
-
 		local i2 = lb:addItem("Label Side: Center")
 		i2.usr_side_id = "center"
 
-
 		local i3 = lb:addItem("Label Side: Right")
 		i3.usr_side_id = "right"
+
+		-- Test varying item widths...
+		--[[
+		for i = 1, 64 do
+			lb:addItem(string.rep("a", i))
+		end
+		--]]
 
 		lb:setSelection(i2)
 	end

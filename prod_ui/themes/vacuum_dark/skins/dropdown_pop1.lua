@@ -14,7 +14,6 @@ return {
 	icon_side = "left",
 	icon_spacing = 24,
 
-	item_height = 22,
 	item_pad_v = 2,
 
 	max_visible_items = 16,
