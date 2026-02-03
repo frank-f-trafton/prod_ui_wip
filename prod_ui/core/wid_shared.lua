@@ -262,8 +262,13 @@ end
 
 
 function widShared.scrollUpdate(self, dt)
-	local nav = self.context.settings.wimp.navigation
-	local spd_snap, spd_min, spd_mul = nav.scroll_snap, nav.scroll_speed_min, nav.scroll_speed_mul
+	local scale = context.scale
+	local nav = context.settings.wimp.navigation
+
+	local spd_snap = nav.scroll_snap * scale
+	local spd_min = nav.scroll_speed_min * scale
+	local spd_mul = nav.scroll_speed_mul * scale
+
 	self.scr_fx = widShared.scrollTargetUpdate(self.scr_fx, self.scr_tx, spd_snap, spd_min, spd_mul, dt)
 	self.scr_fy = widShared.scrollTargetUpdate(self.scr_fy, self.scr_ty, spd_snap, spd_min, spd_mul, dt)
 
@@ -336,6 +341,11 @@ function widShared.scrollDeltaH(self, dx, immediate)
 end
 
 
+function widShared.scrollDeltaHKeyStep(self, steps, immediate)
+	widShared.scrollDeltaH(self, steps * context.settings.wimp.navigation.key_scroll_h * context.scale, immediate)
+end
+
+
 function widShared.scrollV(self, y, immediate)
 	self.scr_ty = -self.vp.y + y
 	if immediate then
@@ -353,6 +363,11 @@ function widShared.scrollDeltaV(self, dy, immediate)
 	end
 
 	widShared.scrollClampViewport(self)
+end
+
+
+function widShared.scrollDeltaVKeyStep(self, steps, immediate)
+	widShared.scrollDeltaV(self, steps * context.settings.wimp.navigation.key_scroll_v * context.scale, immediate)
 end
 
 
@@ -379,6 +394,14 @@ function widShared.scrollDeltaHV(self, dx, dy, immediate)
 	end
 
 	widShared.scrollClampViewport(self)
+end
+
+
+function widShared.scrollDeltaHVKeyStep(self, step_x, step_y, immediate)
+	local dx = context.scale * context.settings.wimp.navigation.key_scroll_h
+	local dy = context.scale * context.settings.wimp.navigation.key_scroll_v
+
+	widShared.scrollDeltaHV(self, dx, dy, immediate)
 end
 
 
@@ -409,12 +432,15 @@ function widShared.scrollSetMethods(self)
 
 	self.scrollH = widShared.scrollH
 	self.scrollDeltaH = widShared.scrollDeltaH
+	self.scrollDeltaHKeyStep = widShared.scrollDeltaHKeyStep
 
 	self.scrollV = widShared.scrollV
 	self.scrollDeltaV = widShared.scrollDeltaV
+	self.scrollDeltaVKeyStep = widShared.scrollDeltaVKeyStep
 
 	self.scrollHV = widShared.scrollHV
 	self.scrollDeltaHV = widShared.scrollDeltaHV
+	self.scrollDeltaHVKeyStep = widShared.scrollDeltaHVKeyStep
 
 	self.scrollGetXY = widShared.scrollGetXY
 	self.scrollGetX = widShared.scrollGetX
@@ -529,16 +555,13 @@ function widShared.dragToScroll(self, dt)
 	my = my - vp.y
 
 	-- Drag-to-scroll
-	local mouse_drag_x = (mx < 0) and mx or (mx >= vp.w) and mx - vp.w or 0
-	local mouse_drag_y = (my < 0) and my or (my >= vp.h) and my - vp.h or 0
+	local m_drag_x = (mx < 0) and mx or (mx >= vp.w) and mx - vp.w or 0
+	local m_drag_y = (my < 0) and my or (my >= vp.h) and my - vp.h or 0
 
-	if mouse_drag_x ~= 0 or mouse_drag_y ~= 0 then
-		-- XXX style/config
-		self:scrollDeltaHV(
-			mouse_drag_x * dt * 4,
-			mouse_drag_y * dt * 4,
-			true
-		)
+	local m_drag = context.settings.wimp.navigation.mouse_drag_speed * context.scale
+
+	if m_drag_x ~= 0 or m_drag_y ~= 0 then
+		self:scrollDeltaHV(m_drag_x*m_drag*dt, m_drag_y*m_drag*dt, true)
 		return true
 	end
 end
@@ -627,8 +650,8 @@ function widShared.checkScrollWheelScroll(self, x, y)
 	then
 		local old_scr_tx, old_scr_ty = self.scr_tx, self.scr_ty
 
-		local wheel_scale = self.context.settings.wimp.navigation.mouse_wheel_move_size_v
-		self:scrollDeltaHV(-x * wheel_scale, -y * wheel_scale)
+		local wheel_scale = context.scale * self.context.settings.wimp.navigation.mouse_wheel_move_size_v
+		self:scrollDeltaHV(-x*wheel_scale, -y*wheel_scale)
 
 		return self.scr_ty ~= self.scr_y or old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty
 	end

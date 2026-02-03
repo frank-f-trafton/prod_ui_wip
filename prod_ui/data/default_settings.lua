@@ -14,15 +14,27 @@ return {
 			scroll_speed_min = 800,
 			scroll_speed_mul = 8.0,
 
-			-- How many pixels to scroll in WIMP widgets when pressing the arrow
-			-- keys.
+			-- Pixels to scroll in WIMP widgets when pressing the arrow keys,
+			-- in the general case when there are no better measurements available.
 			key_scroll_h = 32,
+			key_scroll_v = 32,
 
-			-- How many pixels to scroll per one discrete mouse-wheel motion event.
+			-- Pixels to scroll per one discrete click of the scroll bar buttons.
+			scroll_button_click = 24,
+
+			-- Pixels to scroll per repeat-action while pressing and holding
+			-- down a scroll bar button.
+			scroll_button_hold = 24,
+
+			-- Pixels to scroll per one discrete mouse-wheel motion event.
 			-- XXX: SDL3 / LÖVE 12 is changing this to distance scrolled.
 			-- XXX: for now, this is also used with horizontal wheel movement. As of
 			-- this writing, I don't have a mouse with a horizontal wheel.
 			mouse_wheel_move_size_v = 64,
+			mouse_wheel_move_size_h = 64,
+
+			-- Drag scroll rate (per frame: mouse_distance * mouse_drag_speed * delta_time).
+			mouse_drag_speed = 4,
 
 			-- How much of a "page" to jump when pressing pageup or pagedown in a
 			-- menu. 1.0 is one whole span of the viewport, 0.5 is half, etc.
@@ -48,7 +60,7 @@ return {
 		},
 
 		window_frame = {
-			-- "all" or "active"
+			-- "all", "active", or "never".
 			render_shadow = "all",
 		},
 

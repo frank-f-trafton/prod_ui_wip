@@ -112,12 +112,10 @@ function def:setHeaderSize(size)
 
 	if self.header_size ~= size then
 		local sx, sy = self:scrollGetXY()
-		--local vp_y_old = self.vp.y
+
 		self:writeSetting("header_size", size)
 		self:reshape()
 		self:scrollHV(sx, sy, true)
-		--print("vp_y_old", vp_y_old, "self.vp.y", self.vp.y)
-		--widShared.scrollDeltaV(self, vp_y_old - self.vp.y, true)
 	end
 end
 
@@ -579,7 +577,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 			-- Since this widget can accept mouse events that are out of bounds, we must
 			-- perform an additional intersection check.
 			if mx >= 0 and my >= 0 and mx < self.w and my < self.h then
-				local fixed_step = 24 -- [XXX 2] style/config
+				local fixed_step = context.settings.wimp.navigation.scroll_button_click
 				handled = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 			end
 
