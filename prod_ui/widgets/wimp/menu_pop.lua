@@ -557,6 +557,14 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 	elseif key == "down" or (key == "tab" and not mod["shift"]) then
 		self:moveNext(1, true, isrepeat)
 		return true
+
+	elseif key == "pageup" or key == "home" then
+		self:moveFirst(true)
+		return true
+
+	elseif key == "pagedown" or key == "end" then
+		self:moveLast(true)
+		return true
 	end
 end
 
