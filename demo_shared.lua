@@ -234,4 +234,15 @@ function demoShared.makeLabel(parent, x, y, w, h, relative, text, label_mode)
 end
 
 
+function demoShared.makeControlLabel(parent, x, y, w, h, relative, text)
+	local geo_mode = relative and "relative" or "static"
+
+	local c_label = parent:addChild("base/control_label")
+		:geometrySetMode(geo_mode, x, y, w, h)
+		:setText(text)
+
+	return c_label
+end
+
+
 return demoShared

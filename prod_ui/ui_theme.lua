@@ -43,6 +43,8 @@ uiTheme.named_maps = {
 
 	-- In general
 	axis_2d = uiTable.newNamedMapV("Axis2D", "x", "y"),
+	text_align_x = uiTable.newNamedMap("HorizontalTextAlignment", {["left"]=0.0, ["center"]=0.5, ["right"]=1.0}),
+	text_align_y = uiTable.newNamedMap("VerticalTextAlignment", {["top"]=0.0, ["middle"]=0.5, ["bottom"]=1.0})
 }
 local named_maps = uiTheme.named_maps
 
