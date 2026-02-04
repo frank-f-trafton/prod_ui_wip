@@ -178,6 +178,10 @@ return {
 		container1 = {
 			color_body = {1.0, 1.0, 1.0, 1.0}
 		},
+		control_label1 = {
+			color_active = {0.1, 0.1, 0.1, 1.0},
+			color_disabled = {0.5, 0.5, 0.5, 1.0}
+		},
 		dropdown_box1 = {
 			res_idle = {
 				color_body = {1.0, 1.0, 1.0, 1.0},

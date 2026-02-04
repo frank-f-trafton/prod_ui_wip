@@ -22,12 +22,11 @@ function plan.make(panel)
 
 	local group = panel:addChild("base/group")
 		:setTag("demo_group")
-		:geometrySetMode("relative", 0, 0, 256, 256)
+		:geometrySetMode("relative", 0, 0, 256, 288)
 		:layoutSetMargin(4, 4, 4, 4)
 		:layoutSetStackFlow("y", 1)
 		:layoutSetStackDefaultWidgetSize("pixel", 40)
 		:setText("Group")
-
 
 	do
 		local function cb_selectStyle(self, item_i, item)
@@ -37,21 +36,25 @@ function plan.make(panel)
 			end
 		end
 
+		local c_label = group:addChild("base/control_label")
+			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
+			:setText("PipeStyle:")
+
 		local lb = group:addChild("wimp/dropdown_box")
 			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
 			:geometrySetPadding(0, 0, 0, WID_PAD_Y)
 			:userCallbackSet("cb_chosenSelection", cb_selectStyle)
 
-		local i1 = lb:addItem("PipeStyle: None")
+		local i1 = lb:addItem("None")
 		i1.usr_pipe_id = false
 
-		local i2 = lb:addItem("PipeStyle: Norm")
+		local i2 = lb:addItem("Norm")
 		i2.usr_pipe_id = "norm"
 
-		local i3 = lb:addItem("PipeStyle: Double")
+		local i3 = lb:addItem("Double")
 		i3.usr_pipe_id = "double"
 
-		local i4 = lb:addItem("PipeStyle: Thick")
+		local i4 = lb:addItem("Thick")
 		i4.usr_pipe_id = "thick"
 
 		lb:setSelection(i2)
@@ -68,33 +71,37 @@ function plan.make(panel)
 			end
 		end
 
+		local c_label = group:addChild("base/control_label")
+			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
+			:setText("Decoration:")
+
 		local lb = group:addChild("wimp/dropdown_box")
 			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
 			:geometrySetPadding(0, 0, 0, WID_PAD_Y)
 			:userCallbackSet("cb_chosenSelection", cb_selectDeco)
 
-		local i1 = lb:addItem("Decoration: None")
+		local i1 = lb:addItem("None")
 		i1.usr_deco_id = "none"
 
-		local i2 = lb:addItem("Decoration: Outline")
+		local i2 = lb:addItem("Outline")
 		i2.usr_deco_id = "outline"
 
-		local i3 = lb:addItem("Decoration: Outline + Label")
+		local i3 = lb:addItem("Outline + Label")
 		i3.usr_deco_id = "outline-label"
 
-		local i4 = lb:addItem("Decoration: Header")
+		local i4 = lb:addItem("Header")
 		i4.usr_deco_id = "header"
 
-		local i5 = lb:addItem("Decoration: Header + Label")
+		local i5 = lb:addItem("Header + Label")
 		i5.usr_deco_id = "header-label"
 
-		local i6 = lb:addItem("Decoration: Underlined Label")
+		local i6 = lb:addItem("Underlined Label")
 		i6.usr_deco_id = "underline-label"
 
-		local i7 = lb:addItem("Decoration: Underlined Label (full breadth)")
+		local i7 = lb:addItem("Underlined Label (full breadth)")
 		i7.usr_deco_id = "underline-label-wide"
 
-		local i8 = lb:addItem("Decoration: Label")
+		local i8 = lb:addItem("Just the label")
 		i8.usr_deco_id = "label"
 
 		lb:setSelection(i3)
@@ -111,25 +118,22 @@ function plan.make(panel)
 			end
 		end
 
+		local c_label = group:addChild("base/control_label")
+			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
+			:setText("Label Alignment:")
+
 		local lb = group:addChild("wimp/dropdown_box")
 			:geometrySetMode("stack", "pixel", 32)
 			:userCallbackSet("cb_chosenSelection", cb_selectLabelSide)
 
-		local i1 = lb:addItem("Label Side: Left")
+		local i1 = lb:addItem("Left")
 		i1.usr_side_id = "left"
 
-		local i2 = lb:addItem("Label Side: Center")
+		local i2 = lb:addItem("Center")
 		i2.usr_side_id = "center"
 
-		local i3 = lb:addItem("Label Side: Right")
+		local i3 = lb:addItem("Right")
 		i3.usr_side_id = "right"
-
-		-- Test varying item widths...
-		--[[
-		for i = 1, 64 do
-			lb:addItem(string.rep("a", i))
-		end
-		--]]
 
 		lb:setSelection(i2)
 	end

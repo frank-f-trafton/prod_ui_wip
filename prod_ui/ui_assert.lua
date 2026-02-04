@@ -107,6 +107,11 @@ function uiAssert.loveColorTupleEval(n, v)
 end
 
 
+function uiAssert.loveFont(n, v)
+	uiAssert.loveType(n, v, "Font")
+end
+
+
 -- Strings, or arrays of strings and LÖVE color tables
 function uiAssert.loveStringOrColoredText(n, v)
 	if type(v) ~= "string" and type(v) ~= "table" then
