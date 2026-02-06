@@ -318,22 +318,27 @@ function def:evt_reshapePre()
 	local box_pad_x = margin.x1 + margin.x2 + border.x1 + border.x2 + icon_spacing
 	local box_pad_y = margin.y1 + margin.y2 + border.y1 + border.y2
 
+	local temp_width = self.items_w + box_pad_x
+
 	if #self.MN_items == 0 then
 		self.w = wid_ref.w
 		self.h = self.item_h
 	else
 		-- Assume the root widget's dimensions match the display area.
 
-		self.w = math.min(root.w, math.max(wid_ref.w, self.items_w + box_pad_x))
+		self.w = math.min(root.w, math.max(wid_ref.w, temp_width))
 		self.h = math.min(root.h, self.item_h * math.min(skin.max_visible_items, #self.MN_items) + box_pad_y)
 		--+ skin.item_pad_v
 	end
 
-	-- TODO: rewrite scroll bar arrangement code so that this doesn't have to be called twice.
 	vp:set(0, 0, self.w, self.h)
+
+	-- TODO: rewrite scroll bar arrangement code so that this doesn't have to be called twice.
 	wcScrollBar.arrangeScrollBars(self)
+
+	-- If the item content is so wide that the scroll bar would hide it, increase widget width.
 	local scr_v = self.scr_v
-	if scr_v and scr_v.active then
+	if scr_v and scr_v.active and temp_width + scr_v.bar_size >= self.w then
 		self.w = self.w + scr_v.bar_size
 	end
 
