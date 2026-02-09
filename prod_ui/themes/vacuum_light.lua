@@ -212,18 +212,6 @@ return {
 			color_pipe = {1.0, 1.0, 1.0, 1.0}
 		},
 		icon_box1 = {}, -- TODO: unfinished widget
-		label1 = {
-			res_idle = {
-				-- [[optional]] sl_body = "*slices/label",
-				-- [[optional]] color_body = {1.0, 1.0, 1.0, 1.0},
-				color_label = {0.1, 0.1, 0.1, 1.0}
-			},
-			res_disabled = {
-				-- [[optional]] sl_body = "*slices/label_disabled",
-				-- [[optional]] color_body = {1.0, 1.0, 1.0, 1.0},
-				color_label = {0.5, 0.5, 0.5, 1.0}
-			}
-		},
 		list_box1 = {
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_item_text = {0.1, 0.1, 0.1, 1.0},

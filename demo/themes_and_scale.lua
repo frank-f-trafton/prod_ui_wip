@@ -107,11 +107,20 @@ function plan.make(panel)
 	demoShared.makeParagraph(panel, nil, "(Valid Texture Scales are: " .. table.concat(tex_scale_list, ", ") .. ")")
 	demoShared.makeParagraphSpacer(panel, "p", 0.5)
 
-	demoShared.makeLabel(panel, 32, 96, 200, 32, false, "Theme", "single")
+	local xx, yy, ww, hh = 32, 96, 200, 32
+	local h_pad = 16
+	local list_box_h = 96
+
+	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Theme:", "left", "bottom", false)
+
+	yy = yy + hh
+
 	local list_box = panel:addChild("wimp/list_box")
-	list_box:geometrySetMode("static", 32, 96+40, 200, 96)
+	list_box:geometrySetMode("static", xx, yy, ww, list_box_h)
 		:setTag("themes_list")
 		:userCallbackSet("cb_action", _updateScale)
+
+	yy = yy + hh + list_box_h
 
 	do
 		local theme_ids = context:enumerateThemes()
@@ -136,12 +145,11 @@ function plan.make(panel)
 		end
 	end
 
-	local xx, yy, ww, hh, h_pad = 32, 96+96+40+16, 160, 32, 8
 	local input
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Scale:", "single")
+	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Scale:", "left", "bottom", false)
 
-	yy = yy + hh + h_pad
+	yy = yy + hh
 
 	input = panel:addChild("input/text_box_single")
 	input:geometrySetMode("static", xx, yy, ww, hh)
@@ -150,11 +158,11 @@ function plan.make(panel)
 		:setText(tostring(context.scale))
 		:userCallbackSet("cb_action", _updateScale)
 
-	yy = yy + hh + h_pad
+	yy = yy + hh
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Texture Scale:", "single")
+	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Texture Scale:", "left", "bottom", false)
 
-	yy = yy + hh + h_pad
+	yy = yy + hh
 
 	input = panel:addChild("input/text_box_single")
 	input:geometrySetMode("static", xx, yy, ww, hh)
@@ -163,7 +171,7 @@ function plan.make(panel)
 		:setText(tostring(context.tex_scale))
 		:userCallbackSet("cb_action", _updateScale)
 
-	yy = yy + hh + h_pad
+	yy = yy + hh*2
 
 	local btn = panel:addChild("base/button")
 	btn:geometrySetMode("static", xx, yy, ww, hh)
@@ -171,10 +179,14 @@ function plan.make(panel)
 		:setLabel("Update")
 		:userCallbackSet("cb_buttonAction", _updateScale)
 
-	yy = yy + hh + h_pad
+	yy = yy + hh*2
 
-	local error_paragraph = demoShared.makeParagraph(panel, "err_msg", "(Messages go here)")
-		:geometrySetMode("static", xx, yy + hh, 400, 64)
+	local grp_messages = panel:addChild("base/group")
+		:geometrySetMode("static", xx, yy, 400, 96)
+		:setText("Messages")
+
+	local error_paragraph = demoShared.makeParagraph(grp_messages, "err_msg", "...")
+		:geometrySetMode("remaining")
 
 end
 

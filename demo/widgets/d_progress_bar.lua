@@ -96,17 +96,17 @@ function plan.make(panel)
 
 			local l_pos = self:findSiblingTag("position_label")
 			if l_pos then
-				l_pos:setLabel("Position: " .. tostring(p_bar.pos))
+				l_pos:setText("Position: " .. tostring(p_bar.pos))
 			end
 
 			local l_max = self:findSiblingTag("maximum_label")
 			if l_max then
-				l_max:setLabel("Maximum: " .. tostring(p_bar.max))
+				l_max:setText("Maximum: " .. tostring(p_bar.max))
 			end
 		end
 	end
 
-	local lbl_pos = demoShared.makeLabel(panel, 256, 160, 256, 32, false, "Position")
+	local lbl_pos = demoShared.makeControlLabel(panel, 256, 160, 256, 32, false, "Position:", "left", "middle", false)
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
@@ -119,7 +119,7 @@ function plan.make(panel)
 	sld_pos:userCallbackSet("cb_actionSliderChanged", slider_action)
 
 
-	local lbl_max = demoShared.makeLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum")
+	local lbl_max = demoShared.makeControlLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum:", "left", "middle", false)
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")

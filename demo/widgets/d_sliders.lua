@@ -24,14 +24,15 @@ function plan.make(panel)
 
 	local shx, shy, shw, shh = 0, 0, 0, 0
 
+	local labels_w = 200
 
-	local controls_x = 400
+	local controls_x = s_box_x + s_box_w + labels_w --400
 	local controls_y = 0
 	local controls_w = 188
 	local controls_h = 32
 	local controls_spacing_y = 8
 
-	local labels_w = 200
+
 	local labels_x = controls_x - labels_w
 
 
@@ -152,7 +153,7 @@ function plan.make(panel)
 
 	local xx, yy = controls_x, controls_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Max", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Max: ", "right", "middle", false)
 	local c_max = panel:addChild("wimp/number_box")
 		:setTag("demo_sld_max")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -164,7 +165,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "'Home' position", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "'Home' position: ", "right", "middle", false)
 	local c_home = panel:addChild("wimp/number_box")
 		:setTag("demo_sld_home")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -176,7 +177,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Orientation", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Orientation: ", "right", "middle", false)
 	local c_orientation = panel:addChild("base/stepper")
 		:setTag("demo_sld_orientation")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -190,7 +191,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Show 'use' line", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Show 'use' line: ", "right", "middle", false)
 	local c_use_line = panel:addChild("base/checkbox")
 		:setTag("demo_sld_use_line")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -202,7 +203,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Reverse count", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Reverse count: ", "right", "middle", false)
 	local c_reverse = panel:addChild("base/checkbox")
 		:setTag("demo_sld_reverse")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -214,7 +215,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Granularity", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Granularity: ", "right", "middle", false)
 	local c_gran = panel:addChild("wimp/number_box")
 		:setTag("demo_sld_granularity")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -226,7 +227,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Wheel scroll dir", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Wheel scroll dir: ", "right", "middle", false)
 	local c_wheel_dir = panel:addChild("base/stepper")
 		:setTag("demo_sld_wheel")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -240,7 +241,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeLabel(panel, labels_x, yy, labels_w, controls_h, true, "Allow user changes", "single")
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Allow user changes: ", "right", "middle", false)
 	local c_allow_changes = panel:addChild("base/checkbox")
 		:setTag("demo_sld_allow_changes")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)

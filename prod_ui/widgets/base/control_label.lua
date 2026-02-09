@@ -47,30 +47,60 @@ end
 
 
 function def:setHorizontalAlignment(align_x)
-	uiAssert.namedMap(1, align_x, _nm_text_align_x)
+	uiAssert.namedMapEval(1, align_x, _nm_text_align_x)
 
-	self.text_align_x = align_x
+	local old_align_x = self.text_align_x
+	self.S_text_align_x = align_x
+	self.text_align_x = align_x or self.skin.default_align_x
+
+	if self.text_align_x ~= old_align_x then
+		self:reshape()
+	end
 
 	return self
 end
 
 
 function def:getHorizontalAlignment()
-	return self.text_align_x
+	return self.S_text_align_x
 end
 
 
 function def:setVerticalAlignment(align_y)
-	uiAssert.namedMap(1, align_y, _nm_text_align_y)
+	uiAssert.namedMapEval(1, align_y, _nm_text_align_y)
 
-	self.text_align_y = align_y
+	local old_align_y = self.text_align_y
+	self.S_text_align_y = align_y
+	self.text_align_y = align_y or self.skin.default_align_y
+
+	if self.text_align_y ~= old_align_y then
+		self:reshape()
+	end
 
 	return self
 end
 
 
 function def:getVerticalAlignment()
-	return self.text_align_y
+	return self.S_text_align_y
+end
+
+
+function def:setWrapMode(enabled)
+	local old_wrap = self.wrap_mode
+
+	self.wrap_mode = not not enabled
+
+	if self.wrap_mode ~= old_wrap then
+		self:reshape()
+	end
+
+	return self
+end
+
+
+function def:getWrapMode()
+	return self.wrap_mode
 end
 
 
@@ -104,7 +134,13 @@ end
 
 
 function def:setEnabled(enabled)
+	local old_enabled = self.enabled
+
 	self.enabled = not not enabled
+
+	if self.enabled ~= old_enabled then
+		self:reshape()
+	end
 
 	return self
 end
@@ -121,9 +157,15 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 1)
 
 	self.text = "Label"
-	self.text_align_x = false
-	self.text_align_y = false
+
 	self.font_id = false
+	self.wrap_mode = false
+
+	self.S_text_align_x = false
+	self.S_text_align_y = false
+
+	self.text_align_x = "center"
+	self.text_align_y = "middle"
 
 	self.font = false -- see: _updateFontReference()
 	self.text_x = 0
@@ -137,6 +179,9 @@ function def:evt_initialize()
 end
 
 
+local dummy = {}
+
+
 function def:evt_reshapePre()
 	local skin = self.skin
 	local vp = self.vp
@@ -145,14 +190,26 @@ function def:evt_reshapePre()
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(skin.box.border)
 
-	local align_x = _nm_text_align_x[self.text_align_x or skin.default_align_x]
-	local align_y = _nm_text_align_y[self.text_align_y or skin.default_align_y]
+	local align_x = _nm_text_align_x[self.text_align_x]
+	local align_y = _nm_text_align_y[self.text_align_y]
 
-	local text_width = font:getWidth(self.text)
-	local text_height = font:getHeight()
+	local text_width, text_height
+	if not self.wrap_mode then
+		text_width = font:getWidth(self.text)
+		text_height = font:getHeight()
 
-	self.text_x = math.floor(.5 + _lerp(vp.x, vp.x + vp.w - text_width, align_x))
-	self.text_y = math.floor(.5 + _lerp(vp.y, vp.y + vp.h - text_height, align_y))
+		self.text_x = math.floor(.5 + _lerp(vp.x, vp.x + vp.w - text_width, align_x))
+		self.text_y = math.floor(.5 + _lerp(vp.y, vp.y + vp.h - text_height, align_y))
+	else
+		local width, wrapped = font:getWrap(self.text, vp.w)
+		wrapped = wrapped or dummy
+
+		text_width = width
+		text_height = math.floor(font:getHeight() * font:getLineHeight() * #wrapped)
+
+		self.text_x = vp.x
+		self.text_y = math.floor(.5 + _lerp(vp.y, vp.y + vp.h - text_height, align_y))
+	end
 
 	return true
 end
@@ -212,10 +269,13 @@ def.default_skinner = {
 		love.graphics.push("all")
 
 		love.graphics.setColor(self.enabled and skin.color_active or skin.color_disabled)
-		--uiGraphics.intersectScissor(vp.x, vp.y, vp.w, vp.h)
-		love.graphics.setScissor() -- DEBUG
+		uiGraphics.intersectScissor(ox + self.x + vp.x, oy + self.y + vp.y, vp.w, vp.h)
 		love.graphics.setFont(font)
-		love.graphics.print(self.text, self.text_x, self.text_y)
+		if not self.wrap_mode then
+			love.graphics.print(self.text, self.text_x, self.text_y)
+		else
+			love.graphics.printf(self.text, self.text_x, self.text_y, vp.w, self.text_align_x)
+		end
 
 		love.graphics.pop()
 	end,

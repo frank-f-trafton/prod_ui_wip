@@ -164,8 +164,6 @@ function plan.make(panel)
 		print("input_s_mask: The unmasked text is: " .. self:getUnmaskedText())
 	end)
 
-	--demoShared.makeLabel(panel, xx, yy, 512, 96, false, "foobar", "multi")
-
 	_updateButtons(panel)
 end
 

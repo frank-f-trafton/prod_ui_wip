@@ -248,7 +248,7 @@ function plan.make(panel)
 		end
 	end
 
-	demoShared.makeLabel(panel, xx, yy, ww, hh, false, "Line illumination:", "single")
+	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Line illumination:", "left", "middle", false)
 
 	xx = xx + w2
 

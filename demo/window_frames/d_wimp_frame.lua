@@ -24,10 +24,7 @@ function plan.makeWindowFrame(root)
 
 	-- Radio Buttons: Header size
 	do
-		local text1 = frame:addChild("wimp/text_block")
-		-- XXX work on syncing padding with embedded widget labels
-		text1:geometrySetMode("static", xx + 9, yy, ww, hh)
-		text1:setText("Header size")
+		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "Header size:", "left", "middle", false)
 		yy = yy + hh
 
 		local r_action = function(self)
@@ -252,11 +249,7 @@ function plan.makeWindowFrame(root)
 	-- Radio Buttons: Control placement
 	do
 		yy = yy + hh
-		local text1 = frame:addChild("wimp/text_block")
-		-- XXX work on syncing padding with embedded widget labels
-		text1:geometrySetMode("static", xx + 9, yy, ww, hh)
-
-		text1:setText("Control Placement")
+		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "Control Placement:", "left", "middle", false)
 		yy = yy + hh
 
 		local r_action = function(self)
@@ -306,12 +299,7 @@ function plan.makeWindowFrame(root)
 
 	-- Radio Buttons: Header text alignment
 	do
-		local text1 = frame:addChild("wimp/text_block")
-		text1.font = context.resources.fonts.p
-		-- XXX work on syncing padding with embedded widget labels
-		text1:geometrySetMode("static", xx + 9, yy, ww, hh)
-
-		text1:setText("Header Text Alignment")
+		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "Header Text Alignment:", "left", "middle", false)
 		yy = yy + hh
 
 		local r_action = function(self)

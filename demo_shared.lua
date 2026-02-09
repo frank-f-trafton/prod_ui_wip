@@ -222,23 +222,14 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 end
 
 
-function demoShared.makeLabel(parent, x, y, w, h, relative, text, label_mode)
-	label_mode = label_mode or "single"
-
-	local label = parent:addChild("base/label")
-	label:setLabel(text, label_mode)
-	local g_mode = relative and "relative" or "static"
-	label:geometrySetMode(g_mode, x, y, w, h)
-
-	return label
-end
-
-
-function demoShared.makeControlLabel(parent, x, y, w, h, relative, text)
+function demoShared.makeControlLabel(parent, x, y, w, h, relative, text, align_x, align_y, wrap)
 	local geo_mode = relative and "relative" or "static"
 
 	local c_label = parent:addChild("base/control_label")
 		:geometrySetMode(geo_mode, x, y, w, h)
+		:setHorizontalAlignment(align_x)
+		:setVerticalAlignment(align_y)
+		:setWrapMode(wrap)
 		:setText(text)
 
 	return c_label
