@@ -236,7 +236,7 @@ The five boxing wizards jump quickly.]=]
 
 	_updateButtons(panel)
 
-	--demoShared.makeLabel(panel, 0, 800, 500, 64, false, "(make this page scroll)", "single")
+	--demoShared.makeControlLabel(panel, 0, 800, 500, 64, false, "(make this page scroll)", "center", "middle", false)
 end
 
 

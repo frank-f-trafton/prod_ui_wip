@@ -8,20 +8,62 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	-- Single-Line.
-	local lbl1 = panel:addChild("base/label")
-	lbl1.x, lbl1.y, lbl1.w, lbl1.h = 0, 0, 240, 32
-	lbl1:setLabel("Single-Line Label", "single")
+	local xx, yy, ww, hh = 0, 0, 256, 32
 
-	-- Single-Line with underline.
-	local lbl2 = panel:addChild("base/label")
-	lbl2.x, lbl2.y, lbl2.w, lbl2.h = 0, 64, 240, 32
-	lbl2:setLabel("Single-Line Plus _Underline_", "single-ul")
+	local grp = panel:addChild("base/group")
+		:geometrySetMode("relative", 0, 0, 256, 256)
+		:layoutSetStackFlow("y", 1)
+		:layoutSetStackDefaultWidgetSize("pixel", 32)
+		:setText("Control Labels")
 
-	-- Multi-Line
-	local lbl3 = panel:addChild("base/label")
-	lbl3.x, lbl3.y, lbl3.w, lbl3.h = 0, 96, 240, 64
-	lbl3:setLabel("Multi-Line Multi-Line Multi-Line Multi-Line Multi-Line", "multi")
+	do
+		local lbl1 = grp:addChild("base/control_label")
+			:geometrySetMode("stack")
+			:setHorizontalAlignment("left")
+			:setText("Left")
+
+		yy = yy + hh
+	end
+
+	do
+		local lbl1 = grp:addChild("base/control_label")
+			:geometrySetMode("stack")
+			:setHorizontalAlignment("center")
+			:setText("Center")
+
+		yy = yy + hh
+	end
+
+	do
+		local lbl1 = grp:addChild("base/control_label")
+			:geometrySetMode("stack")
+			:setHorizontalAlignment("right")
+			:setText("Right")
+
+		yy = yy + hh
+	end
+
+	do
+		local font_id = "code"
+		local lbl1 = grp:addChild("base/control_label")
+			:geometrySetMode("stack")
+			:setHorizontalAlignment("left")
+			:setFontID(font_id)
+			:setText("setFontID(\"" .. font_id .. "\")")
+
+		yy = yy + hh
+	end
+
+	do
+		local enabled = false
+		local lbl1 = grp:addChild("base/control_label")
+			:geometrySetMode("stack")
+			:setHorizontalAlignment("left")
+			:setEnabled(enabled)
+			:setText("setEnabled(" .. tostring(enabled) ..")")
+
+		yy = yy + hh
+	end
 end
 
 

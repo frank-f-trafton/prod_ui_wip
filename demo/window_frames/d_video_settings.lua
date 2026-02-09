@@ -21,12 +21,9 @@ function plan.makeWindowFrame(root)
 		-- Additionally, it's possible for the user and/or video drivers to override VSync settings.
 		local current_vsync = love.window.getVSync()
 
-		local yy, hh = 32, 32
+		local xx, yy, ww, hh = 16, 16, 192, 32
 
-		local text_vsync = frame:addChild("wimp/text_block")
-		-- XXX work on syncing padding with embedded widget labels
-		text_vsync:geometrySetMode("static", 64 + 9, yy, 192, hh)
-		text_vsync:setText("VSync Mode")
+		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "VSync Mode:", "left", "middle", false)
 
 
 		local r_action = function(self)
@@ -36,9 +33,10 @@ function plan.makeWindowFrame(root)
 
 		local rad_btn
 
-		yy=yy+hh
+		yy = yy + hh
+
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:geometrySetMode("static", 64, yy, 192, hh)
+		rad_btn:geometrySetMode("static", xx, yy, ww, hh)
 
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -49,9 +47,10 @@ function plan.makeWindowFrame(root)
 			rad_btn:setChecked(true)
 		end
 
-		yy=yy+hh
+		yy = yy + hh
+
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:geometrySetMode("static", 64, yy, 192, hh)
+		rad_btn:geometrySetMode("static", xx, yy, ww, hh)
 
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -63,9 +62,11 @@ function plan.makeWindowFrame(root)
 		end
 
 		-- A VSync number of 2 or larger will wait that many frames before syncing.
-		yy=yy+hh
+
+		yy = yy + hh
+
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:geometrySetMode("static", 64, yy, 192, hh)
+		rad_btn:geometrySetMode("static", xx, yy, ww, hh)
 
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -76,9 +77,10 @@ function plan.makeWindowFrame(root)
 			rad_btn:setChecked(true)
 		end
 
-		yy=yy+hh
+		yy = yy + hh
+
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:geometrySetMode("static", 64, yy, 192, hh)
+		rad_btn:geometrySetMode("static", xx, yy, ww, hh)
 
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
@@ -89,9 +91,10 @@ function plan.makeWindowFrame(root)
 			rad_btn:setChecked(true)
 		end
 
-		yy=yy+hh
+		yy = yy + hh
+
 		rad_btn = frame:addChild("base/radio_button")
-		rad_btn:geometrySetMode("static", 64, yy, 192, hh)
+		rad_btn:geometrySetMode("static", xx, yy, ww, hh)
 
 		rad_btn.checked = false
 		rad_btn.radio_group = "rg_vsync"
