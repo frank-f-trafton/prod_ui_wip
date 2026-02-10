@@ -45,7 +45,7 @@ function plan.make(panel)
 			:geometrySetPadding(0, 0, 0, WID_PAD_Y)
 			:userCallbackSet("cb_chosenSelection", cb_selectStyle)
 
-		local i1 = lb:addItem("None")
+		local i1 = lb:addItem("(Skin Default)")
 		i1.usr_pipe_id = false
 
 		local i2 = lb:addItem("Norm")
@@ -65,9 +65,7 @@ function plan.make(panel)
 		local function cb_selectDeco(self, item_i, item)
 			local group = self:nodeFindKeyAscending(true, "tag", "demo_group")
 			if group then
-				if item.usr_deco_id then
-					group:setDecorationStyle(item.usr_deco_id)
-				end
+				group:setDecorationStyle(item.usr_deco_id)
 			end
 		end
 
@@ -79,6 +77,9 @@ function plan.make(panel)
 			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
 			:geometrySetPadding(0, 0, 0, WID_PAD_Y)
 			:userCallbackSet("cb_chosenSelection", cb_selectDeco)
+
+		local i0 = lb:addItem("(Skin Default)")
+		i0.usr_deco_id = false
 
 		local i1 = lb:addItem("None")
 		i1.usr_deco_id = "none"
@@ -112,9 +113,7 @@ function plan.make(panel)
 		local function cb_selectLabelSide(self, item_i, item)
 			local group = self:nodeFindKeyAscending(true, "tag", "demo_group")
 			if group then
-				if item.usr_side_id then
-					group:setLabelSide(item.usr_side_id)
-				end
+				group:setLabelSide(item.usr_side_id)
 			end
 		end
 
@@ -125,6 +124,9 @@ function plan.make(panel)
 		local lb = group:addChild("wimp/dropdown_box")
 			:geometrySetMode("stack", "pixel", 32)
 			:userCallbackSet("cb_chosenSelection", cb_selectLabelSide)
+
+		local i0 = lb:addItem("(Skin Default)")
+		i0.usr_side_id = false
 
 		local i1 = lb:addItem("Left")
 		i1.usr_side_id = "left"

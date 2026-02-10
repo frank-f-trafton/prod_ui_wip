@@ -25,9 +25,6 @@ local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
-local pipe_styles = context.resources.pipe_styles
-
-
 local def = {
 	skin_id = "group1"
 }
@@ -55,9 +52,10 @@ widLayout.setupContainerDef(def)
 
 
 function def:setDecorationStyle(style)
-	uiAssert.namedMap(1, style, _nm_group_deco_style)
+	uiAssert.namedMapEval(1, style, _nm_group_deco_style)
 
-	self.deco_style = style or false
+	self.S_deco_style = style or false
+	self.deco_style = self.S_deco_style or self.skin.default_deco_style
 
 	self:reshape()
 
@@ -66,14 +64,15 @@ end
 
 
 function def:getDecorationStyle()
-	return self.deco_style
+	return self.S_deco_style
 end
 
 
 function def:setLabelSide(side)
-	uiAssert.namedMap(1, side, _nm_group_label_side)
+	uiAssert.namedMapEval(1, side, _nm_group_label_side)
 
-	self.label_side = side
+	self.S_label_side = side or false
+	self.label_side = self.S_label_side or self.skin.default_label_side
 
 	self:reshape()
 
@@ -82,7 +81,7 @@ end
 
 
 function def:getLabelSide()
-	return self.label_side
+	return self.S_label_side
 end
 
 
@@ -109,10 +108,14 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 3)
 	widLayout.setupLayoutList(self)
 
-	self.text = ""
-	self.enabled = true
+	wcPipe.setupInstance(self) -- S_PIPE_id, PIPE_id, PIPE_style
 
-	self.PIPE_id = "norm"
+	self.S_deco_style = false
+	self.S_label_side = false
+
+	self.text = ""
+	self.enabled = true -- TODO
+
 	self.deco_style = "outline-label"
 	self.label_side = "center"
 
@@ -201,15 +204,8 @@ local _style_renderers = {
 
 		love.graphics.setColor(skin.color_pipe)
 
-		local pipe_id = self.PIPE_id
-		if pipe_id then
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
-
-			uiGraphics.pipeRectangle(p_st, vp2.x, vp2.y, vp2.w, vp2.h)
-		end
+		local p_st = self.PIPE_style
+		uiGraphics.pipeRectangle(p_st, vp2.x, vp2.y, vp2.w, vp2.h)
 	end,
 
 	["outline-label"] = function(self)
@@ -220,22 +216,15 @@ local _style_renderers = {
 		local x1, y1, w, h = vp2.x, vp2.y, vp2.w, vp2.h
 		local x2, y2 = x1 + w, y1 + h
 
-		local pipe_id = self.PIPE_id
-		if pipe_id then
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
-
-			uiGraphics.pipePointsV(p_st, true, true,
-				vp3.x, y1,
-				x1, y1,
-				x1, y2,
-				x2, y2,
-				x2, y1,
-				vp3.x + vp3.w, y1
-			)
-		end
+		local p_st = self.PIPE_style
+		uiGraphics.pipePointsV(p_st, true, true,
+			vp3.x, y1,
+			x1, y1,
+			x1, y2,
+			x2, y2,
+			x2, y1,
+			vp3.x + vp3.w, y1
+		)
 
 		love.graphics.setFont(skin.font)
 		love.graphics.setColor(skin.color_text)
@@ -249,15 +238,8 @@ local _style_renderers = {
 
 		local x, y, w = vp2.x, vp2.y, vp2.w
 
-		local pipe_id = self.PIPE_id
-		if pipe_id then
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
-
-			uiGraphics.pipeHorizontal(p_st, x, y, w)
-		end
+		local p_st = self.PIPE_style
+		uiGraphics.pipeHorizontal(p_st, x, y, w)
 	end,
 
 	["header-label"] = function(self)
@@ -268,16 +250,9 @@ local _style_renderers = {
 		local y = vp2.y
 		local w2 = vp2.x + vp2.w - (vp3.x + vp3.w)
 
-		local pipe_id = self.PIPE_id
-		if pipe_id then
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
-
-			uiGraphics.pipeHorizontal(p_st, vp2.x, y, vp3.x - vp2.x)
-			uiGraphics.pipeHorizontal(p_st, vp3.x + vp3.w, y, w2)
-		end
+		local p_st = self.PIPE_style
+		uiGraphics.pipeHorizontal(p_st, vp2.x, y, vp3.x - vp2.x)
+		uiGraphics.pipeHorizontal(p_st, vp3.x + vp3.w, y, w2)
 
 		love.graphics.setFont(skin.font)
 		love.graphics.setColor(skin.color_text)
@@ -291,15 +266,8 @@ local _style_renderers = {
 
 		local x, y, w = self.text_x, vp3.y + vp3.h, self.text_w
 
-		local pipe_id = self.PIPE_id
-		if pipe_id then
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
-
-			uiGraphics.pipeHorizontal(p_st, x, y, w)
-		end
+		local p_st = self.PIPE_style
+		uiGraphics.pipeHorizontal(p_st, x, y, w)
 
 		love.graphics.setFont(skin.font)
 		love.graphics.setColor(skin.color_text)
@@ -313,15 +281,8 @@ local _style_renderers = {
 
 		local x, y, w = vp2.x, vp3.y + vp3.h, vp2.w
 
-		local pipe_id = self.PIPE_id
-		if pipe_id then
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
-
-			uiGraphics.pipeHorizontal(p_st, x, y, w)
-		end
+		local p_st = self.PIPE_style
+		uiGraphics.pipeHorizontal(p_st, x, y, w)
 
 		love.graphics.setFont(skin.font)
 		love.graphics.setColor(skin.color_text)
@@ -348,6 +309,10 @@ def.default_skinner = {
 		box = themeAssert.box,
 		font = themeAssert.font,
 
+		PIPE_default_id = themeAssert.pipeStyleID,
+		default_deco_style = {uiAssert.namedMap, _nm_group_deco_style},
+		default_label_side = {uiAssert.namedMap, _nm_group_label_side},
+
 		-- Padding when label_side is "left" or "right".
 		-- Not used with "center"
 		label_pad_far = {uiAssert.numberGE, 0},
@@ -366,6 +331,13 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		-- wcPipe
+		uiTheme.checkDefault(self, "S_PIPE_id", "PIPE_id", skin.PIPE_default_id)
+		wcPipe.refreshReferences(self)
+
+		uiTheme.checkDefault(self, "S_deco_style", "deco_style", skin.default_deco_style)
+		uiTheme.checkDefault(self, "S_label_side", "label_side", skin.default_label_side)
 	end,
 
 

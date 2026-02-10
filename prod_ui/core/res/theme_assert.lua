@@ -54,7 +54,20 @@ local function _assertLinkedResource(collection_id, label, v, eval)
 			error("expected this leading path: " .. collection_id)
 		end
 		if not context.resources[collection_id][part2] then
-			error("unprovisioned " .. label .. " resource: " .. tostring(v))
+			error("unprovisioned " .. label .. ": " .. tostring(v))
+		end
+	end
+end
+
+
+local function _assertResourceID(collection_id, label, v, eval)
+	if not eval or (eval and v) then
+		local collection = context.resources[collection_id]
+		if not collection then
+			error("missing resource collection: " .. tostring(collection_id))
+
+		elseif not collection[v] then
+			error("unprovisioned " .. label .. ": " .. tostring(v))
 		end
 	end
 end
@@ -97,6 +110,16 @@ end
 
 function themeAssert.fontEval(n, v)
 	_assertLinkedResource("fonts", "Font", v, true)
+end
+
+
+function themeAssert.fontID(n, v)
+	_assertResourceID("fonts", "Font", v)
+end
+
+
+function themeAssert.fontIDEval(n, v)
+	_assertResourceID("fonts", "Font", v, true)
 end
 
 
@@ -146,9 +169,7 @@ end
 
 
 function themeAssert.pipeStyleID(n, v)
-	if not context.resources.pipe_styles[v] then
-		error("unprovisioned PipeStyle: " .. tostring(v))
-	end
+	_assertResourceID("pipe_styles", "PipeStyle", v)
 end
 
 

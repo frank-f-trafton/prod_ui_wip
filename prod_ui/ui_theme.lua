@@ -89,4 +89,22 @@ function uiTheme.skinnerClearData(self)
 end
 
 
+-- For widgets which must distinguish between the user's desired setting and the actual current setting.
+--[[
+For example: consider a widget with text that can be aligned left, right, center, or to a default setting
+which is signaled by false/nil.
+
+'self.S_align' can be "left", "center", "right", or false
+'self.align' *must* be "left", "center", or "right".
+
+Only 'self.align' should be used as an argument in love.graphics.printf(), but the user may need to recall the
+requested setting, which has been preserved in 'self.S_align'.
+--]]
+function uiTheme.checkDefault(tbl, S_name, name, default_value)
+	if not tbl[S_name] then
+		tbl[name] = default_value
+	end
+end
+
+
 return uiTheme
