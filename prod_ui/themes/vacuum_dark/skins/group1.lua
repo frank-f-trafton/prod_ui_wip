@@ -5,6 +5,10 @@ return {
 
 	font = "*fonts/p",
 
+	PIPE_default_id = "norm",
+	default_deco_style = "outline-label",
+	default_label_side = "center",
+
 	label_pad_far = 16,
 
 	label_pad_x1 = 8,

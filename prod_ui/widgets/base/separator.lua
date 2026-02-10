@@ -9,9 +9,6 @@ local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcPipe = context:getLua("shared/wc/wc_pipe")
 
 
-local pipe_styles = context.resources.pipe_styles
-
-
 local def = {
 	skin_id = "separator1",
 }
@@ -40,6 +37,8 @@ end
 function def:evt_initialize()
 	self.visible = true
 
+	wcPipe.setupInstance(self) -- S_PIPE_id, PIPE_id, PIPE_style
+
 	self.axis = "x"
 
 	-- Updated during reshape:
@@ -49,25 +48,21 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-
-	self.PIPE_id = self.skin.default_pipe_id
 end
 
 
 function def:evt_reshapePre()
 	local skin = self.skin
-	local p_st = pipe_styles[self.PIPE_id]
+	local p_st = self.PIPE_style
 
-	if p_st then
-		if self.axis == "x" then
-			self.x1 = p_st.sep_l
-			self.y1 = math.floor(self.h / 2)
-			self.len = math.floor(self.w - p_st.sep_l - p_st.sep_r)
-		else -- axis == "y"
-			self.x1 = math.floor(self.w / 2)
-			self.y1 = p_st.sep_t
-			self.len = math.floor(self.h - p_st.sep_t - p_st.sep_b)
-		end
+	if self.axis == "x" then
+		self.x1 = p_st.sep_l
+		self.y1 = math.floor(self.h / 2)
+		self.len = math.floor(self.w - p_st.sep_l - p_st.sep_r)
+	else -- axis == "y"
+		self.x1 = math.floor(self.w / 2)
+		self.y1 = p_st.sep_t
+		self.len = math.floor(self.h - p_st.sep_t - p_st.sep_b)
 	end
 end
 
@@ -79,7 +74,9 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		default_pipe_id = themeAssert.pipeStyleID,
+		-- wcPipe
+		PIPE_default_id = themeAssert.pipeStyleID,
+
 		pipe_color = uiAssert.loveColorTuple
 	},
 
@@ -89,6 +86,9 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		uiTheme.checkDefault(self, "S_PIPE_id", "PIPE_id", skin.PIPE_default_id)
+		wcPipe.refreshReferences(self)
 	end,
 
 
@@ -105,10 +105,7 @@ def.default_skinner = {
 		local pipe_id = self.PIPE_id
 		if pipe_id then
 			local skin = self.skin
-			local p_st = pipe_styles[pipe_id]
-			if not p_st then
-				error("missing or invalid PipeStyle: " .. tostring(pipe_id))
-			end
+			local p_st = self.PIPE_style
 
 			local r, g, b, a  = love.graphics.getColor()
 			love.graphics.setColor(skin.pipe_color)

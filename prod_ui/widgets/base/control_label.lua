@@ -106,22 +106,20 @@ end
 
 local function _updateFontReference(self)
 	local id = self.font_id
-	if not id then
-		self.font = self.skin.default_font
-	else
-		local font = fonts[id]
-		if not font then
-			error("invalid Font ID:" .. tostring(id))
-		end
-		self.font = font
+	local font = fonts[id]
+	if not font then
+		error("invalid Font ID:" .. tostring(id))
 	end
+	self.font = font
 end
 
 
 function def:setFontID(id)
 	uiAssert.typeEval(1, id, "string")
 
-	self.font_id = id or false
+	self.S_font_id = id or false
+	self.font_id = self.S_font_id or self.skin.default_font_id
+
 	_updateFontReference(self)
 
 	return self
@@ -129,7 +127,7 @@ end
 
 
 function def:getFontID()
-	return self.font_id
+	return self.S_font_id
 end
 
 
@@ -158,12 +156,13 @@ function def:evt_initialize()
 
 	self.text = "Label"
 
-	self.font_id = false
 	self.wrap_mode = false
 
+	self.S_font_id = false
 	self.S_text_align_x = false
 	self.S_text_align_y = false
 
+	self.font_id = "p"
 	self.text_align_x = "center"
 	self.text_align_y = "middle"
 
@@ -232,7 +231,7 @@ def.default_skinner = {
 		box = themeAssert.box,
 		tq_px = themeAssert.quad,
 
-		default_font = themeAssert.font,
+		default_font_id = themeAssert.fontID,
 
 		default_align_x = {uiAssert.namedMap, uiTheme.named_maps.text_align_x},
 		default_align_y = {uiAssert.namedMap, uiTheme.named_maps.text_align_y},
@@ -247,6 +246,10 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		uiTheme.checkDefault(self, "S_font_id", "font_id", skin.default_font_id)
+		uiTheme.checkDefault(self, "S_text_align_x", "text_align_x", skin.default_align_x)
+		uiTheme.checkDefault(self, "S_text_align_y", "text_align_y", skin.default_align_y)
 
 		_updateFontReference(self)
 	end,
