@@ -1,18 +1,15 @@
 return {
 	skinner_id = "wimp/list_box",
 
-	-- settings
-	icon_side = nil,
-	show_icons = nil,
-	text_align_h = nil,
-	icon_set_id = "bureau",
-	-- /settings
-
 	box = "*boxes/panel",
 	tq_px = "*quads/pixel",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
+
+	default_icon_side = "left",
+	default_text_align = "left",
+	default_icon_set_id = "bureau",
 
 	item_pad_v = 2,
 

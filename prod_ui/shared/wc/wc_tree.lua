@@ -10,7 +10,7 @@ local wcTree = {}
 local pTree = require(context.conf.prod_ui_req .. "lib.pile_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
-local wcMenu = context:getLua("shared/wc/wc_menu")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 
 
 local _nm_align = {left=true, center=true, right=true}
@@ -56,7 +56,6 @@ function _mt_tree:nodeIsExpanded()
 end
 
 
---
 function wcTree.instanceSetup(self)
 	-- X positions and widths of components within menu items.
 	-- The X positions are reversed when right alignment is used.
@@ -67,6 +66,12 @@ function wcTree.instanceSetup(self)
 	self.TR_icon_w = 0
 
 	self.TR_text_x = 0
+
+	self.TR_expanders_active = false
+
+	self.S_TR_item_align_h = false
+
+	self.TR_item_align_h = "left"
 end
 
 
@@ -99,24 +104,38 @@ function methods:setNodeExpanded(item, exp)
 
 	-- TODO: deal with having two calls to cacheUpdate().
 	self:cacheUpdate(true)
+
+	return self
 end
 
 
 function methods:setIconsEnabled(enabled)
-	self:writeSetting("TR_show_icons", not not enabled)
-	self:cacheUpdate(true)
-	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	if uiTable.set(self, "TR_show_icons", not not enabled) then
+		self:cacheUpdate(true)
+		wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	end
 
 	return self
 end
 
 
+function methods:getIconsEnabled()
+	return self.TR_show_icons
+end
+
+
 function methods:setExpandersActive(active)
-	self:writeSetting("TR_expanders_active", not not active)
-	self:cacheUpdate(true)
-	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	if uiTable.set(self, "TR_expanders_active", not not active) then
+		self:cacheUpdate(true)
+		wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	end
 
 	return self
+end
+
+
+function methods:getExpandersActive()
+	return self.TR_expanders_active
 end
 
 
@@ -124,11 +143,18 @@ function methods:setItemAlignment(align)
 	if not _nm_align[align] then
 		error("invalid alignment setting.")
 	end
-	self:writeSetting("TR_item_align_h", align)
-	self:cacheUpdate(true)
-	wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+
+	if uiTable.setDouble(self, "S_TR_item_align_h", "TR_item_align_h", align, self.skin.default_item_align) then
+		self:cacheUpdate(true)
+		wcTree.updateAllItemDimensions(self, self.skin, self.tree)
+	end
 
 	return self
+end
+
+
+function methods:getItemAlignment()
+	return self.S_TR_item_align_h
 end
 
 
@@ -163,7 +189,7 @@ function methods:addNode(text, parent_node, tree_pos, icon_id, expanded)
 
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+	item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 
 	item.x, item.y = 0, 0
 	wcTree.updateItemDimensions(self, skin, item)
@@ -397,7 +423,7 @@ end
 
 function wcTree.updateAllIconReferences(self, skin, node)
 	for i, item in ipairs(node.nodes) do
-		item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+		item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 		if #item.nodes > 0 then
 			wcTree.updateAllIconReferences(self, skin, item)
 		end

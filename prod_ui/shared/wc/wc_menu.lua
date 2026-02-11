@@ -1384,28 +1384,6 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 end
 
 
-function wcMenu.getIconQuad(icon_set_id, icon_id)
-	if icon_id then
-		local icon_set = context.resources.icons[icon_set_id]
-		if icon_set then
-			return icon_set[icon_id]
-		end
-	end
-end
-
-
-function wcMenu.setIconSetID(self, icon_set_id) -- TODO: untested
-	uiAssert.type(1, icon_set_id, "string")
-
-	self:writeSetting("icon_set_id", icon_set_id)
-end
-
-
-function wcMenu.getIconSetID(self) -- TODO: untested
-	return self.icon_set_id
-end
-
-
 function wcMenu.removeItemIndexCleanup(self, item_i, id)
 	-- Removed item was the last in the list, and was selected:
 	if self[id] > #self.MN_items then

@@ -1,5 +1,5 @@
 -- PILE Table
--- VERSION: 2.022
+-- VERSION: 2.023 (Modified)
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -430,6 +430,15 @@ function M.assignIfNilOrFalse(t, k, ...)
 end
 
 
+function M.set(t, field, v)
+	if t[field] ~= v then
+		t[field] = v
+		return true
+	end
+	return false
+end
+
+
 lang.err_res_bad_s = "argument #$1: expected a non-empty string"
 lang.err_res_field_empty = "cannot resolve an empty field"
 function M.resolve(t, str, raw)
@@ -517,6 +526,33 @@ M.mt_restrict = {
 		error(interp(lang.undeclared, k))
 	end
 }
+
+
+lang.doub_bad_field = "the resolved value for '$1' cannot be false/nil."
+function M.setDouble(t, setting, field, v, default)
+	local old_v = t[field]
+
+	t[setting] = v
+	t[field] = t[setting] or default
+
+	if not t[field] then
+		error(interp(lang.doub_bad_field, field))
+	end
+
+	return t[field] ~= old_v
+end
+
+
+lang.doub_bad_default = "the default value for '$1' cannot be false/nil."
+function M.updateDouble(t, setting, field, default)
+	if not default then
+		error(interp(lang.doub_bad_default, field))
+	end
+
+	if not t[setting] then
+		t[field] = default
+	end
+end
 
 
 return M

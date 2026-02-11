@@ -255,8 +255,7 @@ function plan.makeWindowFrame(root)
 		local r_action = function(self)
 			local frame = self:getUIFrame()
 			if frame then
-				frame:writeSetting("header_button_side", self.usr_button_side)
-				frame:reshape()
+				frame:setHeaderButtonSide(self.usr_button_side)
 			end
 		end
 

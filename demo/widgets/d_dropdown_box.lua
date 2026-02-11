@@ -81,7 +81,7 @@ function plan.make(panel)
 
 		local dropdown = panel:addChild("wimp/dropdown_box")
 		dropdown:geometrySetMode("relative", xx, yy, ww, hh)
-		dropdown:writeSetting("show_icons", true)
+			:setShowIcons(true)
 
 		dropdown:addItem("foo", nil, "file")
 		dropdown:addItem("bar", nil, "folder")

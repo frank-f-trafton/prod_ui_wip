@@ -49,6 +49,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 local widShared = context:getLua("core/wid_shared")
@@ -57,13 +58,6 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "dropdown_box1",
 
-	default_settings = {
-		icon_side = "left", -- "left", "right"
-		show_icons = false,
-		text_align_h = "left", -- "left", "center", "right"
-		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	},
-
 	user_callbacks = uiTable.newLUTV(
 		"cb_chosenSelection",
 		"cb_drawerSelection"
@@ -71,6 +65,7 @@ local def = {
 }
 
 
+wcIconsAndText.attachMethods(def)
 wcMenu.attachMenuMethods(def)
 
 
@@ -123,7 +118,7 @@ function def:addItem(text, pos, icon_id)
 
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+	item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 
 	table.insert(items, pos, item)
 
@@ -185,16 +180,14 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setIconSetID = wcMenu.setIconSetID
-def.getIconSetID = wcMenu.getIconSetID
-
-
 function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 1
 
 	widShared.setupViewports(self, 5)
+
+	wcIconsAndText.setupInstance(self)
 
 	wcMenu.setup(self)
 	self.MN_page_jump_size = 4
@@ -210,7 +203,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 
@@ -236,7 +228,7 @@ function def:evt_reshapePre()
 
 	local icon_spacing = self.show_icons and skin.icon_spacing or 0
 
-	vp3:splitOrOverlay(vp4, skin.icon_side, icon_spacing)
+	vp3:splitOrOverlay(vp4, self.icon_side, icon_spacing)
 
 	-- Additional text padding
 	vp3:reduceT(skin.box.margin)
@@ -260,7 +252,7 @@ function def:_openPopUpMenu()
 		self.wid_drawer = drawer
 		self["next"] = drawer
 		drawer["prev"] = self
-		drawer:writeSetting("show_icons", self.show_icons)
+		drawer:setShowIcons(self.show_icons)
 		drawer:setIconSetID(self.icon_set_id)
 
 		for i, item in ipairs(self.MN_items) do
@@ -495,11 +487,6 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		-- settings
-		icon_set_id = {uiAssert.types, "nil", "string"},
-		show_icons = {uiAssert.types, "nil", "boolean"},
-		-- /settings
-
 		-- The SkinDef ID for pop-ups made by this widget.
 		skin_id_pop = {uiAssert.type, "string"},
 
@@ -508,6 +495,10 @@ def.default_skinner = {
 		box = themeAssert.box,
 		font = themeAssert.font,
 
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
+		default_icon_side = {uiAssert.oneOf, "left", "right"},
+		default_text_align = {uiAssert.oneOf, "left", "center", "right"},
+
 		-- Horizontal size of the decorative button.
 		-- "auto": use Viewport #2's height.
 		button_spacing = {uiAssert.numberGEOrOneOf, 0, "auto"},
@@ -515,10 +506,7 @@ def.default_skinner = {
 		-- Placement of the decorative button.
 		button_placement = {uiAssert.oneOf, "left", "right"},
 
-		icon_side = {uiAssert.oneOf, "left", "right"},
 		icon_spacing = {uiAssert.numberGE, 0},
-
-		text_align = {uiAssert.oneOf, "left", "center", "right"},
 
 		tq_deco_glyph = themeAssert.quad,
 
@@ -546,10 +534,8 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
-		-- Update the icons of any existing items.
-		for i, item in ipairs(self.MN_items) do
-			item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
-		end
+		wcIconsAndText.checkShadow(self)
+		wcIconsAndText.refreshIconReferences(self)
 	end,
 
 
@@ -619,7 +605,7 @@ def.default_skinner = {
 			-- Chosen item text.
 			love.graphics.setFont(font)
 			love.graphics.setColor(res.color_text)
-			local xx = vp3.x + textUtil.getAlignmentOffset(chosen.text, font, skin.text_align, vp3.w)
+			local xx = vp3.x + textUtil.getAlignmentOffset(chosen.text, font, self.text_align, vp3.w)
 			local yy = math.floor(0.5 + vp3.y + (vp3.h - font:getHeight()) / 2)
 			love.graphics.print(chosen.text, xx, yy)
 		end

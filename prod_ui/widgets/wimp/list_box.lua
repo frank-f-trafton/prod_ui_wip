@@ -32,6 +32,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
@@ -39,13 +40,6 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "list_box1",
-
-	default_settings = {
-		icon_side = "left", -- "left", "right"
-		show_icons = false,
-		text_align_h = "left", -- "left", "center", "right"
-		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	},
 
 	user_callbacks = uiTable.newLUTV(
 		"cb_action",
@@ -57,7 +51,7 @@ local def = {
 	)
 }
 
-
+wcIconsAndText.attachMethods(def)
 wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
 def.setScrollBars = wcScrollBar.setScrollBars
@@ -204,7 +198,7 @@ function def:addItem(text, pos, icon_id)
 
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
+	item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id) or false
 
 	item.x, item.y = 0, 0
 	_shapeItem(self, item)
@@ -271,10 +265,6 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setIconSetID = wcMenu.setIconSetID
-def.getIconSetID = wcMenu.getIconSetID
-
-
 function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -286,6 +276,7 @@ function def:evt_initialize()
 
 	self.press_busy = false
 
+	wcIconsAndText.setupInstance(self)
 	wcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
 
 	self.MN_wrap_selection = false
@@ -302,7 +293,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 
@@ -642,19 +632,16 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		-- Settings
-		icon_side = {uiAssert.oneOfEval, "left", "right"},
-		show_icons = {uiAssert.types, "nil", "boolean"},
-		text_align_h = {uiAssert.oneOfEval, "left", "center", "right"},
-		icon_set_id = {uiAssert.types, "nil", "string"},
-		-- / Settings
-
 		box = themeAssert.box,
 		tq_px = themeAssert.quad,
 		data_scroll = themeAssert.scrollBarData,
 		scr_style = themeAssert.scrollBarStyle,
 
 		font = themeAssert.font,
+
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
+		default_icon_side = {uiAssert.oneOf, "left", "right"},
+		default_text_align = {uiAssert.oneOf, "left", "center", "right"},
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
 		item_pad_v = uiAssert.integer,
@@ -692,7 +679,7 @@ def.default_skinner = {
 
 		-- Update shapes, positions, and icons of any existing items
 		for i, item in ipairs(self.MN_items) do
-			item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+			item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 			_shapeItem(self, item)
 		end
 
@@ -790,13 +777,13 @@ def.default_skinner = {
 			if item.text then
 				-- Need to align manually to prevent long lines from wrapping.
 				local text_x
-				if self.text_align_h == "left" then
+				if self.text_align == "left" then
 					text_x = self.col_text_x + skin.pad_text_x
 
-				elseif self.text_align_h == "center" then
+				elseif self.text_align == "center" then
 					text_x = self.col_text_x + math.floor((self.col_text_w - item.w) * 0.5)
 
-				elseif self.text_align_h == "right" then
+				elseif self.text_align == "right" then
 					text_x = self.col_text_x + math.floor(self.col_text_w - item.w - skin.pad_text_x)
 				end
 

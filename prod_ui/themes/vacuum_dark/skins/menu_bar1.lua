@@ -1,9 +1,7 @@
 return {
 	skinner_id = "wimp/menu_bar",
 
-	-- settings
-	icon_set_id = "bureau",
-	-- /settings
+	default_icon_set_id = "bureau",
 
 	box = "*boxes/menu_bar",
 	tq_px = "*quads/pixel",

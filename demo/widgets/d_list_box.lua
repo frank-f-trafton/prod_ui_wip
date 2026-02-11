@@ -122,7 +122,7 @@ local function makeListBox1(panel, x, y)
 	local list_box = panel:addChild(wid_id, skin_id)
 		:geometrySetMode("static", x, y, 224, 256)
 		:setTag("demo_listbox")
-		:writeSetting("show_icons", true)
+		:setShowIcons(true)
 
 	list_box:userCallbackSet("cb_action", function(self, item, index)
 		print("cb_action()", item, index)
@@ -186,8 +186,7 @@ local function makeListBox1(panel, x, y)
 	local rdo_align_action = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb:writeSetting("text_align_h", self.usr_align)
-			lb:reshape()
+			lb:setTextAlignment(self.usr_align)
 		end
 	end
 
@@ -222,7 +221,7 @@ local function makeListBox1(panel, x, y)
 	rdo_btn.usr_align = "right"
 	rdo_btn:userCallbackSet("cb_buttonAction", rdo_align_action)
 
-	rdo_btn:setCheckedConditional("usr_align", list_box.text_align_h)
+	rdo_btn:setCheckedConditional("usr_align", list_box.text_align)
 
 	wy = wy + wh
 	wy = wy + wh
@@ -234,8 +233,7 @@ local function makeListBox1(panel, x, y)
 	chk:userCallbackSet("cb_buttonAction", function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb:writeSetting("show_icons", not not self.checked)
-			lb:reshape()
+			lb:setShowIcons(self.checked)
 		end
 	end)
 
@@ -250,8 +248,7 @@ local function makeListBox1(panel, x, y)
 	local rdo_icon_side_action = function(self)
 		local lb = self:findSiblingTag("demo_listbox")
 		if lb then
-			lb:writeSetting("icon_side", self.usr_icon_side)
-			lb:reshape()
+			lb:setIconSide(self.usr_icon_side)
 		end
 	end
 
@@ -310,8 +307,7 @@ local function makeListBox2(panel, x, y)
 	list_box:userCallbackSet("cb_action3", function(self, item, index) print("[2] wid_action3()", item, index) end)
 	list_box:userCallbackSet("cb_select", function(self, item, index) print("[2] wid_select()", item, index) end)
 
-
-	list_box:writeSetting("show_icons", true)
+	list_box:setShowIcons(true)
 
 	list_box.MN_drag_scroll = true
 	--list_box.MN_drag_select = true
@@ -346,7 +342,7 @@ local function makeListBox3(panel, x, y)
 	lb1:userCallbackSet("cb_action3", function(self, item, index) print("[3a] wid_action3()", item, index) end)
 	lb1:userCallbackSet("cb_select", function(self, item, index) print("[3a] wid_select()", item, index) end)
 
-	lb1:writeSetting("show_icons", true)
+	lb1:setShowIcons(true)
 
 	lb1.MN_drag_scroll = true
 	lb1.MN_drag_select = true
@@ -400,7 +396,7 @@ local function makeListBox4(panel, x, y)
 	lb1:userCallbackSet("cb_action3", function(self, item, index) print("[4a] wid_action3()", item, index) end)
 	lb1:userCallbackSet("cb_select", function(self, item, index) print("[4a] wid_select()", item, index) end)
 
-	lb1:writeSetting("show_icons", true)
+	lb1:setShowIcons(true)
 
 	lb1.MN_drag_scroll = true
 	lb1.MN_drag_select = true
@@ -457,7 +453,7 @@ local function makeListBox4(panel, x, y)
 	lb2:userCallbackSet("cb_action3", function(self, item, index) print("[4b] wid_action3()", item, index) end)
 	lb2:userCallbackSet("cb_select", function(self, item, index) print("[4b] wid_select()", item, index) end)
 
-	lb2:writeSetting("show_icons", true)
+	lb2:setShowIcons(true)
 
 	lb2.MN_drag_scroll = true
 	lb2.MN_drag_select = true

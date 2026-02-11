@@ -32,6 +32,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
@@ -39,13 +40,6 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "tree_box1",
-
-	default_settings = {
-		TR_item_align_h = "left", -- start edge for the tree root. "left", "right"
-		TR_expanders_active = false,
-		TR_show_icons = false,
-		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	},
 
 	user_callbacks = uiTable.newLUTV(
 		"cb_action",
@@ -56,6 +50,10 @@ local def = {
 		"cb_dropped"
 	)
 }
+
+
+def.setIconSetID = wcIconsAndText.methods.setIconSetID
+def.getIconSetID = wcIconsAndText.methods.getIconSetID
 
 
 wcMenu.attachMenuMethods(def)
@@ -160,10 +158,6 @@ function def:setSelectionByIndex(item_i)
 end
 
 
-def.setIconSetID = wcMenu.setIconSetID
-def.getIconSetID = wcMenu.getIconSetID
-
-
 function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
@@ -174,6 +168,12 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 2)
 
 	self.press_busy = false
+
+	-- partial wcIconsAndText stuff
+	self.S_icon_set_id = false
+
+	self.icon_set_id = "bureau"
+	-- / wcIconsAndText
 
 	wcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
 	self.MN_wrap_selection = false
@@ -186,7 +186,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 
@@ -557,13 +556,6 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		-- settings
-		TR_item_align_h = {uiAssert.oneOfEval, "left", "right"},
-		TR_expanders_active = {uiAssert.types, "nil", "boolean"},
-		TR_show_icons = {uiAssert.types, "nil", "boolean"},
-		icon_set_id = {uiAssert.types, "nil", "string"},
-		-- /settings
-
 		box = themeAssert.box,
 		tq_px = themeAssert.quad,
 		data_scroll = themeAssert.scrollBarData,
@@ -571,6 +563,9 @@ def.default_skinner = {
 		font = themeAssert.font,
 
 		tq_px = themeAssert.quad,
+
+		default_item_align = {uiAssert.oneOfEval, "left", "right"},
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
 		tq_expander_up = themeAssert.quad,
 		tq_expander_down = themeAssert.quad,
@@ -632,6 +627,8 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		uiTable.updateDouble(self, "S_icon_set_id", "icon_set_id", self.skin.default_icon_set_id)
 
 		--wcTree.updateAllItemDimensions(self, self.skin, self.tree)
 		wcTree.updateAllIconReferences(self, self.skin, self.tree)

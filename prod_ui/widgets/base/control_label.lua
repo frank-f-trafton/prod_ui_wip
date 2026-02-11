@@ -11,6 +11,7 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widShared = context:getLua("core/wid_shared")
 
@@ -247,9 +248,9 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
-		uiTheme.checkDefault(self, "S_font_id", "font_id", skin.default_font_id)
-		uiTheme.checkDefault(self, "S_text_align_x", "text_align_x", skin.default_align_x)
-		uiTheme.checkDefault(self, "S_text_align_y", "text_align_y", skin.default_align_y)
+		uiTable.updateDouble(self, "S_font_id", "font_id", skin.default_font_id)
+		uiTable.updateDouble(self, "S_text_align_x", "text_align_x", skin.default_align_x)
+		uiTable.updateDouble(self, "S_text_align_y", "text_align_y", skin.default_align_y)
 
 		_updateFontReference(self)
 	end,

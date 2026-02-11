@@ -6,6 +6,7 @@ local wcPipe = {}
 
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
+local widShared = context:getLua("core/wid_shared")
 
 
 local pipe_styles = context.resources.pipe_styles
@@ -37,15 +38,8 @@ end
 function methods:pipeSetStyle(pipe_id)
 	uiAssert.typeEval(1, pipe_id, "string")
 
-	local old_pipe_id = self.PIPE_id
-
-	self.S_PIPE_id = pipe_id or false
-	self.PIPE_id = self.S_PIPE_id or self.skin.PIPE_default_id
-	assert(self.PIPE_id, "invalid or missing 'skin.PIPE_default_id'")
-
-	wcPipe.refreshReferences(self)
-
-	if old_pipe_id ~= self.PIPE_id then
+	if uiTable.setDouble(self, "S_PIPE_id", "PIPE_id", pipe_id, self.skin.PIPE_default_id) then
+		wcPipe.refreshReferences(self)
 		self:reshape()
 	end
 

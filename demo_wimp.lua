@@ -16,6 +16,9 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.d_menu_tab",
+	"widgets.d_list_box",
+	"widgets.d_combo_box",
 	"widgets.unfinished.d_label_test",
 	"widgets.d_dropdown_box",
 	"widgets.d_group",
@@ -27,13 +30,11 @@ local demo_panel_launch = {
 	"widgets.d_sliders",
 	"widgets.d_text_box_script",
 	"demo_welcome",
-	"widgets.d_list_box",
 	"widgets.d_tree_box",
 	"widgets.d_text_box_multi",
 	"widgets.d_text_box_single",
 	"widgets.d_button_split",
 	"theming_skinning.d_button_skinners",
-	"widgets.d_menu_tab",
 	"widgets.d_button_work",
 	"widgets.d_number_box",
 	"ui_frames.d_workspaces",

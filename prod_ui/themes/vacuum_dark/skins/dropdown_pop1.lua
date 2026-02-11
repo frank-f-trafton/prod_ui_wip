@@ -1,9 +1,6 @@
 return {
 	skinner_id = "wimp/dropdown_pop",
 
-	-- settings
-	-- /settings
-
 	box = "*boxes/dropdown_pop",
 	font = "*fonts/p",
 	data_scroll = "*scroll_bar_data/scroll_bar1",

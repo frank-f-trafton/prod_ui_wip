@@ -81,7 +81,9 @@ local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 local widShared = context:getLua("core/wid_shared")
@@ -92,12 +94,13 @@ local L = uiAssert.L
 
 local def = {
 	skin_id = "menu_pop1",
-
-	default_settings = {
-		show_icons = true, -- WIP
-		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	}
 }
+
+
+def.setShowIcons = wcIconsAndText.methods.setShowIcons
+def.getShowIcons = wcIconsAndText.methods.getShowIcons
+def.setIconSetID = wcIconsAndText.methods.setIconSetID
+def.getIconSetID = wcIconsAndText.methods.getIconSetID
 
 
 wcMenu.attachMenuMethods(def)
@@ -334,6 +337,7 @@ end
 
 --- Sets the correct widget dimensions for the menu, updating its internal contents along the way.
 function def:updateDimensions()
+	print("updateDimensions", "show_icons", self.show_icons)
 	local skin = self.skin
 	local items = self.MN_items
 	local font = skin.font_item
@@ -359,7 +363,7 @@ function def:updateDimensions()
 		end
 
 		if item.type ~= "separator" then
-			item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+			item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 
 			-- Underline state
 			local temp_str, x, w = textUtil.processUnderline(item.text, font)
@@ -476,6 +480,15 @@ function def:evt_initialize()
 
 	self.press_busy = false
 
+	-- partial wcIconsAndText stuff
+	self.show_icons = true -- TODO: this setting needs work.
+
+	self.S_icon_set_id = false
+
+	self.icon_set_id = "bureau"
+
+	-- / wcIconsAndText
+
 	wcMenu.setup(self)
 	self.MN_default_deselect = true
 
@@ -504,7 +517,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 
 	self:reshape()
 	self:menuChangeCleanup()
@@ -1071,11 +1083,12 @@ def.default_skinner = {
 		skinner_id = {uiAssert.type, "string"},
 
 		box = themeAssert.box,
-		icon_set_id = {uiAssert.types, "nil", "string"},
 		font_item = themeAssert.font,
 		slc_body = themeAssert.slice,
 		tq_px = themeAssert.quad,
 		tq_arrow = themeAssert.quad,
+
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
 		-- Height of horizontal separator items.
 		separator_item_height = {uiAssert.integerGE, 0},
@@ -1154,6 +1167,8 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		uiTable.updateDouble(self, "S_icon_set_id", "icon_set_id", self.skin.default_icon_set_id)
 
 		self:updateDimensions()
 	end,

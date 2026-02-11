@@ -69,6 +69,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local wcWimp = context:getLua("shared/wc/wc_wimp")
@@ -86,10 +87,6 @@ local _nm_cell_icon_side = uiTable.newNamedMapV("IconSide", "left", "right")
 local def = {
 	skin_id = "menu_tab1",
 
-	default_settings = {
-		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	},
-
 	user_callbacks = uiTable.newLUTV(
 		"cb_keyPressed"
 	)
@@ -97,6 +94,10 @@ local def = {
 
 
 def.cb_keyPressed = uiDummy.func
+
+
+def.setIconSetID = wcIconsAndText.methods.setIconSetID
+def.getIconSetID = wcIconsAndText.methods.getIconSetID
 
 
 wcMenu.attachMenuMethods(def)
@@ -239,7 +240,7 @@ end
 
 local function _refreshCell(self, item, cell)
 	cell.text_w = self.skin.cell_font:getWidth(cell.text)
-	cell.tq_icon = wcMenu.getIconQuad(self.icon_set_id, cell.icon_id)
+	cell.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, cell.icon_id)
 end
 
 
@@ -605,7 +606,7 @@ function _mt_cell:setIconID(icon_id)
 	uiAssert.typeEval(2, icon_id, "string")
 
 	self.icon_id = icon_id or false
-	self.tq_icon = wcMenu.getIconQuad(self.item.owner.icon_set_id, self.icon_id) -- ie _refreshCell()
+	self.tq_icon = wcIconsAndText.getIconQuad(self.item.owner.icon_set_id, self.icon_id) -- ie _refreshCell()
 
 	return self
 end
@@ -700,6 +701,12 @@ function def:evt_initialize()
 
 	self.press_busy = false
 
+	-- partial wcIconsAndText stuff
+	self.S_icon_set_id = false
+
+	self.icon_set_id = "bureau"
+	-- / wcIconsAndText
+
 	wcMenu.setup(self)
 
 	-- Array of header category columns.
@@ -739,7 +746,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 
 	self.header_text_y = 0
 end
@@ -1492,15 +1498,13 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		-- settings
-		icon_set_id = {uiAssert.types, "nil", "string"},
-		-- /settings
-
 		box = themeAssert.box,
 		tq_px = themeAssert.quad,
 		data_scroll = themeAssert.scrollBarData,
 		scr_style = themeAssert.scrollBarStyle,
 		font = themeAssert.font,
+
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
 		column_min_w = {uiAssert.integerGE, 0},
 		column_def_w = {uiAssert.integerGE, 0},
@@ -1583,6 +1587,9 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		uiTable.updateDouble(self, "S_icon_set_id", "icon_set_id", self.skin.default_icon_set_id)
+
 		-- Update the scroll bar style
 		self:setScrollBars(self.scr_h, self.scr_v)
 
