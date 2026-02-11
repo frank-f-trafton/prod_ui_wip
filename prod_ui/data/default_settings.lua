@@ -62,6 +62,11 @@ return {
 		window_frame = {
 			-- "all", "active", or "never".
 			render_shadow = "all",
+
+			-- Claw back any out-of-bounds window frames by this amount of (scaled) pixels.
+			-- (When a Window Frame has a visible header, the top boundary is based on the
+			-- header height rather than this number.)
+			out_of_bounds_limit = 48
 		},
 
 		text_input = {
