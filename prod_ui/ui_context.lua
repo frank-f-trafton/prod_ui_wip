@@ -229,6 +229,10 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.mouse_x = 0
 	self.mouse_y = 0
 
+	-- Mouse drag acceleration when at the edge of the screen.
+	self.drag_edge_dx = 0
+	self.drag_edge_dy = 0
+
 	-- When true, 'wheelmoved' events target the current top thimble rather than the
 	-- currently hovered widget.
 	self.wheelmoved_to_thimble = false

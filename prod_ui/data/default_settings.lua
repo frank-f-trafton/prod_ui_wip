@@ -36,6 +36,13 @@ return {
 			-- Drag scroll rate (per frame: mouse_distance * mouse_drag_speed * delta_time).
 			mouse_drag_speed = 4,
 
+			-- Accelarates drag speed when the mouse is at the edge of the application window.
+			drag_edge_enabled = true,
+			drag_edge_size = 4,
+			drag_edge_accel = 350,
+			drag_edge_accel_max = 1600,
+			drag_edge_decay = 3200,
+
 			-- How much of a "page" to jump when pressing pageup or pagedown in a
 			-- menu. 1.0 is one whole span of the viewport, 0.5 is half, etc.
 			page_viewport_factor = 1.0,
