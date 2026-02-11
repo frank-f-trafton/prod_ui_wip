@@ -558,7 +558,14 @@ function widShared.dragToScroll(self, dt)
 	local m_drag_x = (mx < 0) and mx or (mx >= vp.w) and mx - vp.w or 0
 	local m_drag_y = (my < 0) and my or (my >= vp.h) and my - vp.h or 0
 
-	local m_drag = context.settings.wimp.navigation.mouse_drag_speed * context.scale
+	local navigation = context.settings.wimp.navigation
+
+	if navigation.drag_edge_enabled then
+		m_drag_x = m_drag_x + context.drag_edge_dx
+		m_drag_y = m_drag_y + context.drag_edge_dy
+	end
+
+	local m_drag = navigation.mouse_drag_speed * context.scale
 
 	if m_drag_x ~= 0 or m_drag_y ~= 0 then
 		self:scrollDeltaHV(m_drag_x*m_drag*dt, m_drag_y*m_drag*dt, true)

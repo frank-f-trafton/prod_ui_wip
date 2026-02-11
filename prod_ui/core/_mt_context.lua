@@ -100,8 +100,8 @@ local function event_mousemoved(self, x, y, dx, dy, istouch)
 	self.mouse_x = x
 	self.mouse_y = y
 
-	-- Update click-sequence origin if the mouse is being held.
 	if self.mouse_pressed_button then
+		-- Update click-sequence origin if the mouse is being held.
 		self.cseq_x = x
 		self.cseq_y = y
 	end
@@ -150,9 +150,12 @@ end
 
 
 function _mt_context:love_update(dt)
-	-- Make virtual input events here.
-	-- Mouse
-	if self.mouse_pressed_button then
+	if not self.mouse_pressed_button then
+		-- Stop edge drag
+		self.drag_edge_dx = 0
+		self.drag_edge_dy = 0
+	else
+		-- Mouse virtual input events
 		self.mouse_pressed_dt_acc = self.mouse_pressed_dt_acc + dt
 		self.mouse_pressed_ticks = self.mouse_pressed_ticks + 1
 
@@ -172,6 +175,47 @@ function _mt_context:love_update(dt)
 				false,
 				self.mouse_pressed_rep_n
 			)
+		end
+
+		-- Edge dragging acceleration and decay
+		local navigation = self.settings.wimp.navigation
+		if navigation.drag_edge_enabled then
+			local zone_size = navigation.drag_edge_size
+			local ww, wh = love.graphics.getDimensions()
+			local x, y = self.mouse_x, self.mouse_y
+
+			if x <= zone_size then
+				self.drag_edge_dx = math.min(0, self.drag_edge_dx - navigation.drag_edge_accel*dt)
+
+			elseif x > ww - zone_size then
+				self.drag_edge_dx = math.max(0, self.drag_edge_dx + navigation.drag_edge_accel*dt)
+
+			else
+				local decay = navigation.drag_edge_decay * dt
+				if pMath.signP(self.drag_edge_dx) == 1 then
+					self.drag_edge_dx = math.max(0, self.drag_edge_dx - decay)
+				else
+					self.drag_edge_dx = math.min(0, self.drag_edge_dx + decay)
+				end
+			end
+
+			if y <= zone_size then
+				self.drag_edge_dy = math.min(0, self.drag_edge_dy - navigation.drag_edge_accel*dt)
+
+			elseif y > wh - zone_size then
+				self.drag_edge_dy = math.max(0, self.drag_edge_dy + navigation.drag_edge_accel*dt)
+
+			else
+				local decay = navigation.drag_edge_decay * dt
+				if pMath.signP(self.drag_edge_dy) == 1 then
+					self.drag_edge_dy = math.max(0, self.drag_edge_dy - decay)
+				else
+					self.drag_edge_dy = math.min(0, self.drag_edge_dy + decay)
+				end
+			end
+
+			self.drag_edge_dx = pMath.clamp(self.drag_edge_dx, -navigation.drag_edge_accel_max, navigation.drag_edge_accel_max)
+			self.drag_edge_dy = pMath.clamp(self.drag_edge_dy, -navigation.drag_edge_accel_max, navigation.drag_edge_accel_max)
 		end
 	end
 
