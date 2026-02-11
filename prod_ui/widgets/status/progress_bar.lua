@@ -39,6 +39,8 @@ def.cb_barChanged = uiDummy.func
 -- @param active True to be active, false/nil to be inactive.
 function def:setActive(active)
 	self.active = not not active
+
+	return self
 end
 
 
@@ -64,6 +66,8 @@ function def:setCounter(pos, max)
 	if old_pos ~= self.pos or old_max ~= self.max then
 		self:cb_barChanged(self.pos, self.max, old_pos, old_max)
 	end
+
+	return self
 end
 
 

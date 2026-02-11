@@ -21,19 +21,15 @@ function plan.make(panel)
 	local v_bar_width, v_bar_height = 100, 160
 
 	local p_bar = panel:addChild("status/progress_bar")
-	p_bar:geometrySetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
-	p_bar:setTag("demo_prog_bar")
+		:geometrySetMode("static", bar_x, bar_y, h_bar_width, h_bar_height)
+		:setTag("demo_prog_bar")
+		:setLabel("Progress Bar", "single")
+		:setActive(true)
+		:setCounter(starting_pos, starting_max)
+		:userCallbackSet("cb_barChanged", function(self, old_pos, old_max, new_pos, new_max)
+			print("cb_barChanged: old / new progress bar values: ", old_pos, old_max, new_pos, new_max)
+		end)
 
-	p_bar.pos = starting_pos
-	p_bar.max = starting_max
-
-	p_bar:setLabel("Progress Bar", "single")
-
-	p_bar:userCallbackSet("cb_barChanged", function(self, old_pos, old_max, new_pos, new_max)
-		print("cb_barChanged: old / new progress bar values: ", old_pos, old_max, new_pos, new_max)
-	end)
-
-	p_bar:setActive(true)
 
 	local btn_active = panel:addChild("base/button")
 	btn_active:geometrySetMode("static", 256, 32, 128, 40)
@@ -112,11 +108,10 @@ function plan.make(panel)
 	local sld_pos = panel:addChild("base/slider_bar")
 	sld_pos:geometrySetMode("static", 256, 160+32+8, 256, 32)
 		:setTag("position_slider")
-		:sliderSetPosition(starting_pos)
 		:sliderSetMax(100)
+		:sliderSetPosition(starting_pos)
 		:sliderSetGranularity(1)
-
-	sld_pos:userCallbackSet("cb_actionSliderChanged", slider_action)
+		:userCallbackSet("cb_actionSliderChanged", slider_action)
 
 
 	local lbl_max = demoShared.makeControlLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum:", "left", "middle", false)
@@ -125,11 +120,10 @@ function plan.make(panel)
 	local sld_max = panel:addChild("base/slider_bar")
 	sld_max:geometrySetMode("static", 256, 160+32+8+32+32+8, 256, 32)
 		:setTag("maximum_slider")
-		:sliderSetPosition(starting_max)
 		:sliderSetMax(100)
+		:sliderSetPosition(starting_max)
 		:sliderSetGranularity(1)
-
-	sld_max:userCallbackSet("cb_actionSliderChanged", slider_action)
+		:userCallbackSet("cb_actionSliderChanged", slider_action)
 end
 
 

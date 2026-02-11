@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.d_progress_bar",
 	"widgets.d_menu_tab",
 	"widgets.d_list_box",
 	"widgets.d_combo_box",
@@ -43,7 +44,6 @@ local demo_panel_launch = {
 	"layouts.d_layout_sashes",
 	"layouts.d_layout",
 	"layouts.d_layout_static",
-	"widgets.d_progress_bar",
 }
 
 
