@@ -308,11 +308,6 @@ local function getCursorCode(a_x, a_y)
 	or ((a_y == 1 and a_x == 1) or (a_y == -1 and a_x == -1)) and "sizenwse" -- \
 	or ((a_y == -1 and a_x == 1) or (a_y == 1 and a_x == -1)) and "sizenesw" -- /
 	or false -- unknown
-
-	-- [XXX 16] on Fedora 36/37 + GNOME, a different cursor design is used for diagonal resize
-	-- which has four orientations (up-left, up-right, down-left, down-right) instead
-	-- of just two. It looks a bit incorrect when resizing a window from the bottom-left
-	-- or bottom-right corners.
 end
 
 
