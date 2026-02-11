@@ -286,22 +286,6 @@ function def:setFrameWorkspace(workspace)
 end
 
 
-function def:setDefaultBounds()
-	-- Allow the Window Frame to be moved partially out of bounds, but not
-	-- so much that the mouse wouldn't be able to drag it back.
-
-	local header_h = self.vp5.h
-
-	-- XXX: theme/scale
-	self.p_bounds_x1 = -48
-	self.p_bounds_x2 = -48
-	self.p_bounds_y1 = -self.h + math.max(4, math.floor(header_h/4))
-	self.p_bounds_y2 = -48
-
-	return self
-end
-
-
 local function getCursorCode(a_x, a_y)
 	return (a_y == 0 and a_x ~= 0) and "sizewe" -- -
 	or (a_y ~= 0 and a_x == 0) and "sizens" -- |
@@ -311,7 +295,7 @@ local function getCursorCode(a_x, a_y)
 end
 
 
-function def:initiateResizeMode(axis_x, axis_y)
+local function _initiateResizeMode(self, axis_x, axis_y)
 	if axis_x == 0 and axis_y == 0 then
 		error("invalid resize mode (0, 0).")
 	end
@@ -356,7 +340,7 @@ local function frame_wid_patchPressed(self, x, y, button, istouch, presses)
 			-- [XXX 14] support scroll bars on left or top side of container
 			if content.scr_h and content.scr_h.active and content.scr_v and content.scr_v.active
 			and mx >= content.vp.x + content.vp.w and my >= content.vp.y + content.vp.h then
-				self:initiateResizeMode(1, 1)
+				_initiateResizeMode(self, 1, 1)
 			end
 		end
 	end
@@ -478,12 +462,6 @@ function def:evt_initialize(unselectable, view_level)
 	-- Offsets from mouse when resizing.
 	self.adjust_ox = 0
 	self.adjust_oy = 0
-
-	-- How far past the parent bounds this Window Frame is permitted to go.
-	self.p_bounds_x1 = 0
-	self.p_bounds_y1 = 0
-	self.p_bounds_x2 = 0
-	self.p_bounds_y2 = 0
 
 	-- Used when unmaximizing as a result of dragging.
 	self.adjust_mouse_orig_a_x = 0
@@ -685,7 +663,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 			then
 				local axis_x, axis_y = _getCursorAxisInfo(self, mx, my)
 				if not (axis_x == 0 and axis_y == 0) then
-					self:initiateResizeMode(axis_x, axis_y)
+					_initiateResizeMode(self, axis_x, axis_y)
 				end
 			end
 		end
@@ -733,8 +711,9 @@ function def.trickle:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 			if self.press_busy == "resize" or self.press_busy == "drag" then
 				-- Hack: clamp frame to parent. This isn't handled while resizing because the
 				-- width and height can go haywire when resizing against the bounds of the
-				-- screen (see the 'p_bounds_*' fields).
-				widShared.keepInBoundsExtended(self, self.parent.vp, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+				-- screen.
+				local bx1, by1, bx2, by2 = self:calculateWindowPlacementBoundaries()
+				widShared.keepInBoundsExtended(self, self.parent.vp, bx1, by1, bx2, by2)
 
 			elseif x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h then
 				local mx, my = self:getRelativePosition(x, y)
@@ -847,6 +826,27 @@ local function _measureButtonShortenPort(self, sensor, skin, res, right, w, h)
 end
 
 
+function def:calculateWindowPlacementBoundaries()
+	local scale = context.scale
+	local bound = context.settings.wimp.window_frame.out_of_bounds_limit
+
+	-- Allow the Window Frame to be moved partially out of bounds, but not
+	-- so much that the mouse wouldn't be able to drag it back.
+
+	local header_h = self.vp5.h
+	local bound_y1
+	if self.header_visible then
+		bound_y1 = -self.h + math.max(4, math.floor(header_h/4))
+	else
+		bound_y1 = -bound
+	end
+
+	bound = math.floor(bound * scale)
+
+	return -bound, bound_y1, -bound, -bound
+end
+
+
 function def:evt_reshapePre()
 	--print("window_frame: evt_reshapePre")
 
@@ -940,12 +940,11 @@ function def:evt_reshapePre()
 	widShared.setClipScissorToViewport(self, vp2)
 	widShared.setClipHoverToViewport(self, vp2)
 
-	-- Needs to happen after shaping the header bar, as the header height factors into the default bounds.
-	self:setDefaultBounds()
-
 	-- Hacky way of not interfering with the user resizing the frame. Call keepInBounds* before exiting the resize mode.
 	if self.press_busy ~= "resize" then
-		widShared.keepInBoundsExtended(self, parent.vp, self.p_bounds_x1, self.p_bounds_x2, self.p_bounds_y1, self.p_bounds_y2)
+		-- (Needs to happen after shaping the header bar, as the header height factors into the default bounds.)
+		local bx1, by1, bx2, by2 = self:calculateWindowPlacementBoundaries()
+		widShared.keepInBoundsExtended(self, parent.vp, bx1, by1, bx2, by2)
 	end
 
 	widLayout.resetLayoutSpace(self)

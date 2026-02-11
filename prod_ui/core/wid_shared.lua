@@ -51,20 +51,20 @@ end
 
 
 --[[
-function widShared.keepInBounds(self)
+function widShared.keepInBounds(self, x1, y1, x2, y2)
 	local parent = self.parent
 	if not parent then
 		return
 	end
 
-	self.x = math.max(-self.w - self.p_bounds_x1, math.min(self.x, parent.w + self.p_bounds_x2))
-	self.y = math.max(-self.h - self.p_bounds_y1, math.min(self.y, parent.h + self.p_bounds_y2))
+	self.x = math.max(-self.w - x1, math.min(self.x, parent.w + x2))
+	self.y = math.max(-self.h - y1, math.min(self.y, parent.h + y2))
 end
 --]]
 
 
 --[[
-function widShared.keepInBoundsPort2(self)
+function widShared.keepInBoundsPort2(self, x1, y1, x2, y2)
 	local parent = self.parent
 	if not parent then
 		return
@@ -72,8 +72,8 @@ function widShared.keepInBoundsPort2(self)
 
 	local pvp2 = parent.vp2
 
-	self.x = math.max(-self.w - self.p_bounds_x1 + pvp2.x, math.min(self.x, pvp2.w + self.p_bounds_x2))
-	self.y = math.max(-self.h - self.p_bounds_y1 + pvp2.y, math.min(self.y, pvp2.h + self.p_bounds_y2))
+	self.x = math.max(-self.w - x1 + pvp2.x, math.min(self.x, pvp2.w + x2))
+	self.y = math.max(-self.h - y1 + pvp2.y, math.min(self.y, pvp2.h + y2))
 end
 --]]
 
@@ -99,8 +99,8 @@ end
 -- TODO: document spill-out behavior.
 -- @param self The widget.
 -- @param vp The viewport to use. Leave `nil` to use the parent's width and height.
--- @param x1, x2, y1, y2 How much of the widget must remain within the parent's boundaries on each side.
-function widShared.keepInBoundsExtended(self, vp, x1, x2, y1, y2)
+-- @param x1, y1, x2, y2 How much of the widget must remain within the parent's boundaries on each side.
+function widShared.keepInBoundsExtended(self, vp, x1, y1, x2, y2)
 	local parent = self.parent
 	if not parent then
 		return
