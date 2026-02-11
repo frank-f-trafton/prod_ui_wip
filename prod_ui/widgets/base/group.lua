@@ -54,10 +54,9 @@ widLayout.setupContainerDef(def)
 function def:setDecorationStyle(style)
 	uiAssert.namedMapEval(1, style, _nm_group_deco_style)
 
-	self.S_deco_style = style or false
-	self.deco_style = self.S_deco_style or self.skin.default_deco_style
-
-	self:reshape()
+	if uiTable.setDouble(self, "S_deco_style", "deco_style", style, self.skin.default_deco_style) then
+		self:reshape()
+	end
 
 	return self
 end
@@ -71,10 +70,9 @@ end
 function def:setLabelSide(side)
 	uiAssert.namedMapEval(1, side, _nm_group_label_side)
 
-	self.S_label_side = side or false
-	self.label_side = self.S_label_side or self.skin.default_label_side
-
-	self:reshape()
+	if uiTable.setDouble(self, "S_label_side", "label_side", side, self.skin.default_label_side) then
+		self:reshape()
+	end
 
 	return self
 end
@@ -333,11 +331,11 @@ def.default_skinner = {
 		uiTheme.skinnerCopyMethods(self, skinner)
 
 		-- wcPipe
-		uiTheme.checkDefault(self, "S_PIPE_id", "PIPE_id", skin.PIPE_default_id)
+		uiTable.updateDouble(self, "S_PIPE_id", "PIPE_id", skin.PIPE_default_id)
 		wcPipe.refreshReferences(self)
 
-		uiTheme.checkDefault(self, "S_deco_style", "deco_style", skin.default_deco_style)
-		uiTheme.checkDefault(self, "S_label_side", "label_side", skin.default_label_side)
+		uiTable.updateDouble(self, "S_deco_style", "deco_style", skin.default_deco_style)
+		uiTable.updateDouble(self, "S_label_side", "label_side", skin.default_label_side)
 	end,
 
 

@@ -31,6 +31,7 @@ local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
@@ -42,10 +43,6 @@ local _lerp = pMath.lerp
 local def = {
 	skin_id = "properties_box1",
 
-	default_settings = {
-		icon_set_id = false -- lookup for 'resources.icons[icon_set_id]'
-	},
-
 	user_callbacks = uiTable.newLUTV(
 		"cb_action",
 		"cb_action2",
@@ -55,6 +52,10 @@ local def = {
 		"cb_dropped"
 	)
 }
+
+
+def.setIconSetID = wcIconsAndText.methods.setIconSetID
+def.getIconSetID = wcIconsAndText.methods.getIconSetID
 
 
 wcMenu.attachMenuMethods(def)
@@ -227,7 +228,7 @@ function def:addItem(wid_id, text, pos, icon_id)
 	item.x, item.y, item.w, item.h = 0, 0, 0, 0
 	item.text = text
 	item.icon_id = icon_id
-	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
+	item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id) or false
 
 	pos = pos or #items + 1
 
@@ -327,6 +328,12 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 5)
 
 	self.press_busy = false
+
+	-- partial wcIconsAndText stuff
+	self.S_icon_set_id = false
+
+	self.icon_set_id = "bureau"
+	-- / wcIconsAndText
 
 	wcMenu.setup(self, nil, true, true) -- with mark and drag+drop state
 	self.MN_wrap_selection = false
@@ -854,16 +861,14 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		-- Settings
-		icon_set_id = {uiAssert.types, "nil", "string"},
-		-- / Settings
-
 		box = themeAssert.box,
 		tq_px = themeAssert.quad,
 		data_scroll = themeAssert.scrollBarData,
 		scr_style = themeAssert.scrollBarStyle,
 		sash_style = themeAssert.sashStyle,
 		font = themeAssert.font,
+
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
 		item_h = {uiAssert.integerGE, 0},
 
@@ -921,7 +926,7 @@ def.default_skinner = {
 
 		-- Update shapes, positions, and icons of any existing items
 		for i, item in ipairs(self.MN_items) do
-			item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+			item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 			updateItemDimensions(self, item)
 		end
 

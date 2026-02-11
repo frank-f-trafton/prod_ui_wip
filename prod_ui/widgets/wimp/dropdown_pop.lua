@@ -19,7 +19,9 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
@@ -29,15 +31,14 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "dropdown_pop1",
 
-	default_settings = {
-		icon_side = "left", -- "left", "right"
-		show_icons = false,
-		text_align_h = "left", -- "left", "center", "right"
-		icon_set_id = false, -- lookup for 'resources.icons[icon_set_id]'
-	},
-
 	trickle = {}
 }
+
+
+def.setShowIcons = wcIconsAndText.methods.setShowIcons
+def.getShowIcons = wcIconsAndText.methods.getShowIcons
+def.setIconSetID = wcIconsAndText.methods.setIconSetID
+def.getIconSetID = wcIconsAndText.methods.getIconSetID
 
 
 wcMenu.attachMenuMethods(def)
@@ -104,7 +105,7 @@ local function _shapeItem(self, item)
 
 	item.w = font:getWidth(item.text)
 	item.h = math.floor((font:getHeight() * font:getLineHeight()) + skin.item_pad_v)
-	item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id)
+	item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 end
 
 
@@ -256,10 +257,6 @@ function def:centerSelectedItem(immediate)
 end
 
 
-def.setIconSetID = wcMenu.setIconSetID
-def.getIconSetID = wcMenu.getIconSetID
-
-
 -- @param wid_ref The widget that owns this drawer.
 function def:evt_initialize(wid_ref)
 	context:assertWidget(wid_ref)
@@ -286,6 +283,14 @@ function def:evt_initialize(wid_ref)
 	self.item_h = 0
 
 	self.press_busy = false
+
+	-- partial wcIconsAndText stuff
+	self.show_icons = false
+
+	self.S_icon_set_id = false
+
+	self.icon_set_id = "bureau"
+	-- / wcIconsAndText
 
 	wcMenu.setup(self)
 	self.MN_wrap_selection = false

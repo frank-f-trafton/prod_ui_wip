@@ -22,24 +22,13 @@ local _viewport_keys = context:getLua("core/wid/viewport_keys")
 
 
 local _nm_header_sizes = uiTable.newNamedMapV("HeaderSize", "small", "normal", "large")
+local _nm_header_button_side = uiTable.newNamedMapV("HeaderButtonSide", "left", "right")
 
 
 local def = {
 	skin_id = "window_frame1",
-	trickle = {},
 
-	default_settings = {
-		allow_close = true,
-		allow_drag_move = true,
-		allow_maximize = true, -- depends on 'allow_resize' being true
-		allow_resize = true,
-		header_visible = true,
-		header_button_side = "right", -- "left", "right"
-		header_show_close_button = true,
-		header_show_max_button = true,
-		header_text = "",
-		header_size = "normal" -- _nm_header_sizes
-	}
+	trickle = {},
 }
 
 
@@ -90,14 +79,13 @@ end
 
 
 function def:setHeaderVisible(enabled)
-	local old_visible = not not self.header_visible
-	enabled = not not enabled
-	self:writeSetting("header_visible", enabled)
-	if old_visible ~= self.header_visible then
+	if uiTable.set(self, "header_visible", not not enabled) then
 		local sx, sy = self:scrollGetXY()
 		self:reshape()
 		self:scrollHV(sx, sy, true)
 	end
+
+	return self
 end
 
 
@@ -107,16 +95,16 @@ end
 
 
 function def:setHeaderSize(size)
-	size = size and size
-	uiAssert.namedMapEval(1, size, _nm_header_sizes)
+	size = size or "normal"
+	uiAssert.namedMap(1, size, _nm_header_sizes)
 
-	if self.header_size ~= size then
+	if uiTable.set(self, "header_size", size) then
 		local sx, sy = self:scrollGetXY()
-
-		self:writeSetting("header_size", size)
 		self:reshape()
 		self:scrollHV(sx, sy, true)
 	end
+
+	return self
 end
 
 
@@ -127,8 +115,10 @@ end
 
 -- (Resizable by the user.)
 function def:setResizable(enabled)
-	self:writeSetting("allow_resize", not not enabled)
+	self.allow_resize = not not enabled
 	self.b_max.enabled = self.allow_resize and self.allow_maximize and true or false
+
+	return self
 end
 
 
@@ -138,7 +128,9 @@ end
 
 
 function def:setDraggable(enabled)
-	self:writeSetting("allow_drag_move", not not enabled)
+	self.allow_drag_move = not not enabled
+
+	return self
 end
 
 
@@ -148,8 +140,11 @@ end
 
 
 function def:setCloseControlVisibility(visible)
-	self:writeSetting("header_show_close_button", not not visible)
-	self:reshape()
+	if uiTable.set(self, "header_show_close_button", not not visible) then
+		self:reshape()
+	end
+
+	return self
 end
 
 
@@ -159,8 +154,11 @@ end
 
 
 function def:setMaximizeControlVisibility(visible)
-	self:writeSetting("header_show_max_button", not not visible)
-	self:reshape()
+	if uiTable.set(self, "header_show_max_button", not not visible) then
+		self:reshape()
+	end
+
+	return self
 end
 
 
@@ -170,8 +168,10 @@ end
 
 
 function def:setCloseEnabled(enabled)
-	self:writeSetting("allow_close", not not enabled)
+	self.allow_close = not not enabled
 	self.b_close.enabled = self.allow_close
+
+	return self
 end
 
 
@@ -181,8 +181,10 @@ end
 
 
 function def:setMaximizeEnabled(enabled)
-	self:writeSetting("allow_maximize", not not enabled)
+	self.allow_maximize = not not enabled
 	self.b_max.enabled = self.allow_resize and self.allow_maximize and true or false
+
+	return self
 end
 
 
@@ -199,6 +201,8 @@ function def:setWindowViewLevel(view_level)
 	self.view_level = view_level
 	self.sort_id = wcUIFrame.view_levels[view_level]
 	self.context.root:sortG2()
+
+	return self
 end
 
 
@@ -210,7 +214,10 @@ end
 function def:setFrameTitle(text)
 	uiAssert.type(1, text, "string", "nil")
 
-	self:writeSetting("header_text", text)
+	self.header_text = text
+	-- TODO: reshape?
+
+	return self
 end
 
 
@@ -219,9 +226,27 @@ function def:getFrameTitle()
 end
 
 
+function def:setHeaderButtonSide(side)
+	uiAssert.namedMap(1, side, _nm_header_button_side)
+
+	if uiTable.set(self, "header_button_side", side) then
+		self:reshape()
+	end
+
+	return self
+end
+
+
+function def:getHeaderButtonSide()
+	return self.header_button_side
+end
+
+
 function def:bringWindowToFront()
 	self:reorder(math.huge)
 	self.context.root:sortG2()
+
+	return self
 end
 
 
@@ -238,6 +263,8 @@ function def:_refreshWorkspaceState()
 		self.allow_hover = false
 		self.sort_id = 1
 	end
+
+	return self
 end
 
 
@@ -254,6 +281,8 @@ function def:setFrameWorkspace(workspace)
 
 	self:_refreshWorkspaceState()
 	self.context.root:sortG2()
+
+	return self
 end
 
 
@@ -268,6 +297,8 @@ function def:setDefaultBounds()
 	self.p_bounds_x2 = -48
 	self.p_bounds_y1 = -self.h + math.max(4, math.floor(header_h/4))
 	self.p_bounds_y2 = -48
+
+	return self
 end
 
 
@@ -302,6 +333,8 @@ function def:initiateResizeMode(axis_x, axis_y)
 	self.adjust_oy = axis_y < 0 and ay - my or axis_y > 0 and ay + self.h - my or 0
 
 	--print("adjust_ox", self.adjust_ox, "adjust_oy", self.adjust_oy)
+
+	return self
 end
 
 
@@ -352,10 +385,12 @@ function def:setFrameBlock(target)
 
 	self.ref_block_prev = target
 	target.ref_block_next = self
+
+	return self
 end
 
 
-function def:clearFrameBlock()
+function def:popFrameBlock()
 	-- Frame-blocking state must be popped last-to-first.
 	if self.ref_block_next then
 		error("this frame still has a blocking reference (self.ref_block_next).")
@@ -397,6 +432,17 @@ function def:evt_initialize(unselectable, view_level)
 
 	self.visible = true
 	self.allow_hover = true
+
+	self.allow_close = true
+	self.allow_drag_move = true
+	self.allow_maximize = true -- depends on 'allow_resize' being true
+	self.allow_resize = true
+	self.header_visible = true
+	self.header_button_side = "right" -- "left", "right"
+	self.header_show_close_button = true
+	self.header_show_max_button = true
+	self.header_text = ""
+	self.header_size = "normal" -- _nm_header_sizes
 
 	self.scroll_range_mode = "zero"
 	self.halt_reshape = false
@@ -476,7 +522,6 @@ function def:evt_initialize(unselectable, view_level)
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 
@@ -930,7 +975,7 @@ function def:evt_destroy(targ)
 		-- Clean up any existing frame-blocking connection. Note that this function will raise an error if another frame
 		-- is still blocking this frame.
 		if self.ref_block_prev then
-			local target = self:clearFrameBlock()
+			local target = self:popFrameBlock()
 
 			-- Clean up the target's focus a bit.
 			--[[
@@ -1026,10 +1071,6 @@ local md_res = uiSchema.newKeysX {
 def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
-
-		-- settings
-		-- TODO
-		-- /settings
 
 		box = themeAssert.box,
 		data_scroll = themeAssert.scrollBarData,

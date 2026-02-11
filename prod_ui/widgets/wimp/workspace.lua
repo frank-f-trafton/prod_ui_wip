@@ -19,7 +19,9 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "workspace1",
+
 	trickle = {},
+
 	user_callbacks = uiTable.newLUTV(
 		"cb_workspaceRender"
 	)
@@ -71,7 +73,6 @@ function def:evt_initialize(unselectable)
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 

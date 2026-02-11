@@ -234,7 +234,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 
@@ -305,7 +304,8 @@ function def:_openPopUpMenu()
 		self.wid_drawer = drawer
 		self["next"] = drawer
 		drawer["prev"] = self
-		drawer:writeSetting("show_icons", false)
+		-- no icon support from here.
+		drawer:setShowIcons(false)
 
 		for i, item in ipairs(self.MN_items) do
 			local new_item = drawer:addItem(item.text, nil, item.icon_id, true)

@@ -2,21 +2,17 @@ return {
 	skinner_id = "wimp/dropdown_box",
 	skin_id_pop = "dropdown_pop1",
 
-	-- settings
-	icon_set_id = "bureau",
-	show_icons = false,
-	-- /settings
-
 	box = "*boxes/dropdown_box",
 	font = "*fonts/p",
+
+	default_icon_set_id = "bureau",
+	default_icon_side = "left",
+	default_text_align = "left",
 
 	button_spacing = 24,
 	button_placement = "right",
 
-	icon_side = "left",
 	icon_spacing = 24,
-
-	text_align = "left",
 
 	tq_deco_glyph = "*quads/arrow_down",
 

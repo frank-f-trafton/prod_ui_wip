@@ -1178,55 +1178,6 @@ function _mt_widget:skinUpdate(dt)
 end
 
 
-local function _applySetting(self, k, default_settings, skin, settings)
-	if settings[k] ~= nil then
-		self[k] = settings[k]
-
-	elseif skin and skin[k] ~= nil then
-		self[k] = skin[k]
-
-	else
-		self[k] = default_settings[k]
-	end
-end
-
-
-function _mt_widget:applySetting(key)
-	if self.default_settings[key] == nil then
-		error("invalid setting.")
-	end
-
-	_applySetting(self, key, self.default_settings, self.skin, self.settings)
-
-	return self
-end
-
-
-function _mt_widget:applyAllSettings()
-	local settings, skin, default_settings = self.settings, self.skin, self.default_settings
-
-	for k, v in pairs(default_settings) do
-		_applySetting(self, k, default_settings, skin, settings)
-	end
-
-	return self
-end
-
-
-function _mt_widget:writeSetting(key, val)
-	local settings, skin, default_settings = self.settings, self.skin, self.default_settings
-
-	if default_settings[key] == nil then
-		error("invalid setting.")
-	end
-
-	settings[key] = val
-	_applySetting(self, key, default_settings, skin, settings)
-
-	return self
-end
-
-
 function _mt_widget:isAwake()
 	local wid = self
 	while wid do

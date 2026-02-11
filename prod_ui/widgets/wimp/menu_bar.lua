@@ -23,7 +23,9 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")
 local wcMenu = context:getLua("shared/wc/wc_menu")
 local wcWimp = context:getLua("shared/wc/wc_wimp")
 local widShared = context:getLua("core/wid_shared")
@@ -31,11 +33,13 @@ local widShared = context:getLua("core/wid_shared")
 
 local def = {
 	skin_id = "menu_bar1",
-
-	default_settings = {
-		icon_set_id = false -- lookup for 'resources.icons[icon_set_id]'
-	}
 }
+
+
+--def.setShowIcons = wcIconsAndText.methods.setShowIcons
+--def.getShowIcons = wcIconsAndText.methods.getShowIcons
+def.setIconSetID = wcIconsAndText.methods.setIconSetID
+def.getIconSetID = wcIconsAndText.methods.getIconSetID
 
 
 wcMenu.attachMenuMethods(def)
@@ -222,7 +226,7 @@ function def:updateCategory(item, text, key_mnemonic, icon_id, pop_up_proto, sel
 	--print("icon_id", icon_id)
 	if icon_id ~= nil then
 		item.icon_id = icon_id or false
-		item.tq_icon = wcMenu.getIconQuad(self.icon_set_id, item.icon_id) or false
+		item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id) or false
 		--print("self.icon_set_id", self.icon_set_id)
 		--print("new tq_icon", item.tq_icon)
 	end
@@ -352,6 +356,14 @@ function def:evt_initialize()
 	-- Used to determine if a new pop-up menu needs to be invoked.
 	self.last_open = false
 
+	--partial wcIconsAndText stuff
+	self.show_icons = false
+
+	self.S_icon_set_id = false
+
+	self.icon_set_id = "bureau"
+	-- / wcIconsAndText
+
 	wcMenu.setup(self) -- XXX clean up assignments below.
 
 	-- Ref to currently-hovered item, or false if not hovering over any items.
@@ -381,7 +393,6 @@ function def:evt_initialize()
 
 	self:skinSetRefs()
 	self:skinInstall()
-	self:applyAllSettings()
 end
 
 
@@ -913,9 +924,7 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		-- settings
-		icon_set_id = {uiAssert.type, "string"},
-		-- /settings
+		default_icon_set_id = {uiAssert.type, "string"},
 
 		-- NOTE: Very large box borders will interfere with clicking on menu items.
 		box = themeAssert.box,
@@ -954,6 +963,8 @@ def.default_skinner = {
 
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
+
+		uiTable.updateDouble(self, "S_icon_set_id", "icon_set_id", self.skin.default_icon_set_id)
 
 		if skin.base_height == "auto" then
 			self.base_height = math.floor(skin.font_item:getHeight() * skin.height_mult) + skin.box.border.y1 + skin.box.border.y2

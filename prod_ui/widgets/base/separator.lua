@@ -7,6 +7,7 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcPipe = context:getLua("shared/wc/wc_pipe")
+local widShared = context:getLua("core/wid_shared")
 
 
 local def = {
@@ -87,7 +88,7 @@ def.default_skinner = {
 	install = function(self, skinner, skin)
 		uiTheme.skinnerCopyMethods(self, skinner)
 
-		uiTheme.checkDefault(self, "S_PIPE_id", "PIPE_id", skin.PIPE_default_id)
+		uiTable.updateDouble(self, "S_PIPE_id", "PIPE_id", skin.PIPE_default_id)
 		wcPipe.refreshReferences(self)
 	end,
 

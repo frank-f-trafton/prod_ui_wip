@@ -1,12 +1,9 @@
 return {
 	skinner_id = "status/message_log",
 
-	-- settings
-	icon_side = nil,
-	show_icons = nil,
-	text_align_h = nil,
-	icon_set_id = "bureau",
-	-- /settings
+	default_icon_side = "left",
+	default_icon_set_id = "bureau",
+	default_text_align = "left",
 
 	box = "*boxes/panel",
 	tq_px = "*quads/pixel",

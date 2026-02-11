@@ -1,18 +1,14 @@
 return {
 	skinner_id = "wimp/tree_box",
 
-	-- settings
-	--TR_item_align_h = "left",
-	--TR_expanders_active = false,
-	--TR_show_icons = false,
-	icon_set_id = "bureau",
-	-- /settings
-
 	box = "*boxes/panel",
 	tq_px = "*quads/pixel",
 	data_scroll = "*scroll_bar_data/scroll_bar1",
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
+
+	default_icon_set_id = "bureau",
+	default_item_align = "left",
 
 	tq_expander_up = "*quads/arrow2_up",
 	tq_expander_down = "*quads/arrow2_down",
