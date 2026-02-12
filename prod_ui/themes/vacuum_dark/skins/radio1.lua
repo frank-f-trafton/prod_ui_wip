@@ -8,6 +8,8 @@ return {
 	cursor_on = "hand",
 	cursor_press = "hand",
 
+	default_height = 32,
+
 	bijou_w = 24,
 	bijou_h = 24,
 	bijou_spacing = 40,

@@ -9,6 +9,8 @@ return {
 
 	default_icon_set_id = "bureau",
 
+	default_height = 80,
+
 	column_min_w = 4,
 	column_def_w = 128,
 	column_bar_height = 32,

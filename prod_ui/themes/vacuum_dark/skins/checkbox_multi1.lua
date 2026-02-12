@@ -6,6 +6,8 @@ return {
 	label_style = "*labels/norm",
 	tq_px = "*quads/pixel",
 
+	default_height = 32,
+
 	cursor_on = "hand",
 	cursor_press = "hand",
 

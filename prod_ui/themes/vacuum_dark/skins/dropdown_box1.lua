@@ -5,6 +5,8 @@ return {
 	box = "*boxes/dropdown_box",
 	font = "*fonts/p",
 
+	default_height = 32,
+
 	default_icon_set_id = "bureau",
 	default_icon_side = "left",
 	default_text_align = "left",

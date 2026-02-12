@@ -51,7 +51,8 @@ The parameters of each geometry mode:
 
 "segment":
 	edge: (_nm_seg_edge)
-	len: (integer) The desired length of the segment. The final length may be reduced to make room for a sash.
+	len: (integer or false/nil) The desired length of the segment. The final length may be reduced to make room
+		for a sash. When false, the widget is queried for a default length. Zero is used as a last resort.
 	len_min: (integer) The preferred (not guaranteed) minimum and maximum segment length.
 	len_max: ^
 	sash_style (string|false/nil) When a string, this segment has a sash on the opposite edge.
@@ -148,7 +149,7 @@ widLayout.geometry_setters = {
 
 	segment = function(self, edge, len, sash_style, len_min, len_max)
 		uiAssert.namedMap(1, edge, widLayout._nm_seg_edge)
-		uiAssert.numberNotNaN(2, len)
+		uiAssert.numberNotNaNEval(2, len)
 		uiAssert.typeEval(3, sash_style, "string")
 		uiAssert.numberNotNaNEval(4, len_min)
 		uiAssert.numberNotNaNEval(5, len_max)
@@ -158,7 +159,7 @@ widLayout.geometry_setters = {
 		GE.edge = edge
 		GE.len_min = len_min and math.max(0, len_min) or 0
 		GE.len_max = len_max and math.max(0, len_max) or math.huge
-		GE.len = math.max(GE.len_min, math.min(len, GE.len_max))
+		GE.len = len and math.max(GE.len_min, math.min(len, GE.len_max)) or false
 		GE.sash_style = sash_style or nil
 		GE.sash_x, GE.sash_y, GE.sash_w, GE.sash_h = 0, 0, 0, 0 -- internal use
 
@@ -225,7 +226,7 @@ widLayout.geometry_setters = {
 }
 
 
-local function _calculateSegment(len, sash_half, layout_len, do_scale)
+local function _calculateSegment(len, sash_half, layout_len, do_scale) -- TODO: just scale beforehand?
 	layout_len = math.max(0, layout_len - sash_half*2)
 	len = math.max(0, len - sash_half)
 	local scale = do_scale and context.scale or 1.0
@@ -234,12 +235,17 @@ local function _calculateSegment(len, sash_half, layout_len, do_scale)
 end
 
 
-local function _querySegmentLength(wid, GE, x_axis, cross_length)
-	local a, b = wid:evt_getSegmentLength(x_axis, cross_length)
-	if a then
-		return a, b
+local function _querySegmentLength(wid, GE, x_axis, cross_length) -- TODO: just scale beforehand?
+	if GE.len then
+		return GE.len, true -- len, do_scale
 	end
-	return GE.len, true -- len, do_scale
+
+	local len, do_scale = wid:evt_getGrowAxisLength(x_axis, cross_length)
+	if len then
+		return len, do_scale
+	end
+
+	return 0, true
 end
 
 
@@ -942,6 +948,27 @@ function widLayout.applyLayout(self)
 
 	--print("widLayout.applyLayout(): end")
 end
+
+
+--[[
+function widLayout.getFlowLength(self, x_axis, cross_length)
+	local GE = self.GE
+	if GE.mode == "segment" and GE.edge == "top" or GE.edge == "bottom" then
+		if GE.len then
+			return math.floor(GE.len * context.scale)
+		else
+			local len, do_scale = wid:evt_getGrowAxisLength(x_axis, cross_length)
+			if len then
+				if do_scale then
+					len = len * context.scale
+				end
+				return len
+			end
+		end
+	end
+end
+--]]
+
 
 
 return widLayout

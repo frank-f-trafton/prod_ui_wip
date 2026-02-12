@@ -5,6 +5,8 @@ return {
 	label_style = "*labels/norm",
 	tq_px = "*quads/pixel",
 
+	default_height = 40,
+
 	label_align_h = "center",
 	label_align_v = "middle",
 

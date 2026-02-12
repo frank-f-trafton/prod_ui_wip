@@ -52,6 +52,13 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_reshapePre()
 	local skin = self.skin
 	local p_st = self.PIPE_style
@@ -74,6 +81,8 @@ local themeAssert = context:getLua("core/res/theme_assert")
 def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
+
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
 
 		-- wcPipe
 		PIPE_default_id = themeAssert.pipeStyleID,

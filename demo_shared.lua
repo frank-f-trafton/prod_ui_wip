@@ -105,7 +105,7 @@ function demoShared.makeTitle(self, tag, text)
 	text_block:setAutoSize("v")
 	text_block:setFontID("h1")
 	text_block:setText(text)
-	text_block:geometrySetMode("segment", "top", 32)
+	text_block:geometrySetMode("segment", "top")
 
 	return text_block
 end
@@ -122,7 +122,7 @@ function demoShared.makeParagraph(self, tag, text)
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
-	text_block:geometrySetMode("segment", "top", 32)
+	text_block:geometrySetMode("segment", "top")
 
 	return text_block
 end
@@ -132,7 +132,7 @@ function demoShared.makeParagraphSpacer(self, font_id, space)
 	local empty = self:addChild("wimp/text_space")
 		:setFontID(font_id)
 		:setSpacing(space)
-		:geometrySetMode("segment", "top", 0)
+		:geometrySetMode("segment", "top")
 
 	return empty
 end
@@ -151,7 +151,7 @@ function demoShared.makeHyperlink(self, tag, text, url)
 	text_block:setURL(url)
 	text_block:userCallbackSet("cb_buttonAction", _openURL)
 	text_block:userCallbackSet("cb_buttonAction3", _openURL)
-	text_block:geometrySetMode("segment", "top", 32)
+	text_block:geometrySetMode("segment", "top")
 
 	return text_block
 end
@@ -189,7 +189,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	text_block:setWrapping(true)
 	text_block:setFontID("p")
 	text_block:setText(text)
-	text_block:geometrySetMode("segment", "top", 32)
+	text_block:geometrySetMode("segment", "top")
 
 	local button_n = dialog:addChild("base/button")
 	button_n:setLabel("No")

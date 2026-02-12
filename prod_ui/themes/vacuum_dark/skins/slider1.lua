@@ -5,6 +5,8 @@ return {
 	label_style = "*labels/norm",
 	tq_px = "*quads/pixel",
 
+	default_height = 40,
+
 	-- NOTE: this default skin isn't really designed to accommodate labels.
 	label_spacing = 0,
 	label_placement = "left",

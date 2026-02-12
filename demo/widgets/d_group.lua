@@ -22,12 +22,13 @@ function plan.make(panel)
 
 	local group = panel:addChild("base/group")
 		:setTag("demo_group")
-		:geometrySetMode("relative", 0, 0, 256, 288)
+		:geometrySetMode("segment", "top")
 		:layoutSetMargin(4, 4, 4, 4)
 		:layoutSetStackFlow("y", 1)
 		:layoutSetStackDefaultWidgetSize("pixel", 40)
 		:setText("Group")
 
+	-- [=[
 	do
 		local function cb_selectStyle(self, item_i, item)
 			local group = self:nodeFindKeyAscending(true, "tag", "demo_group")
@@ -37,12 +38,11 @@ function plan.make(panel)
 		end
 
 		local c_label = group:addChild("base/control_label")
-			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
+			:geometrySetMode("segment", "top")
 			:setText("PipeStyle:")
 
 		local lb = group:addChild("wimp/dropdown_box")
-			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
-			:geometrySetPadding(0, 0, 0, WID_PAD_Y)
+			:geometrySetMode("segment", "top")
 			:userCallbackSet("cb_chosenSelection", cb_selectStyle)
 
 		local i1 = lb:addItem("(Skin Default)")
@@ -59,8 +59,10 @@ function plan.make(panel)
 
 		lb:setSelection(i2)
 	end
+	--]=]
 
 
+	-- [=[
 	do
 		local function cb_selectDeco(self, item_i, item)
 			local group = self:nodeFindKeyAscending(true, "tag", "demo_group")
@@ -70,12 +72,11 @@ function plan.make(panel)
 		end
 
 		local c_label = group:addChild("base/control_label")
-			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
+			:geometrySetMode("segment", "top")
 			:setText("Decoration:")
 
 		local lb = group:addChild("wimp/dropdown_box")
-			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
-			:geometrySetPadding(0, 0, 0, WID_PAD_Y)
+			:geometrySetMode("segment", "top")
 			:userCallbackSet("cb_chosenSelection", cb_selectDeco)
 
 		local i0 = lb:addItem("(Skin Default)")
@@ -107,8 +108,9 @@ function plan.make(panel)
 
 		lb:setSelection(i3)
 	end
+	--]=]
 
-
+	-- [=[
 	do
 		local function cb_selectLabelSide(self, item_i, item)
 			local group = self:nodeFindKeyAscending(true, "tag", "demo_group")
@@ -118,11 +120,11 @@ function plan.make(panel)
 		end
 
 		local c_label = group:addChild("base/control_label")
-			:geometrySetMode("stack", "pixel", 32 + WID_PAD_Y)
+			:geometrySetMode("segment", "top")
 			:setText("Label Alignment:")
 
 		local lb = group:addChild("wimp/dropdown_box")
-			:geometrySetMode("stack", "pixel", 32)
+			:geometrySetMode("segment", "top")
 			:userCallbackSet("cb_chosenSelection", cb_selectLabelSide)
 
 		local i0 = lb:addItem("(Skin Default)")
@@ -139,6 +141,7 @@ function plan.make(panel)
 
 		lb:setSelection(i2)
 	end
+	--]=]
 end
 
 

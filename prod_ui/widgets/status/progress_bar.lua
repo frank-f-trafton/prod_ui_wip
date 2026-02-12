@@ -105,6 +105,13 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_reshapePre()
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 is the progress bar drawing rectangle.
@@ -150,6 +157,8 @@ def.default_skinner = {
 		box = themeAssert.box,
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
+
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
 
 		-- Alignment of label text in Viewport #1.
 		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},

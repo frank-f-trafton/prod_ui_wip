@@ -182,6 +182,24 @@ end
 local dummy = {}
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		local font = self.font
+
+		if not self.wrap_mode then
+			return math.floor(font:getHeight() * font:getLineHeight())
+		else
+			local border = self.skin.box.border
+			local limit = cross_length - border.x1 - border.x2
+			local width, wrapped = font:getWrap(self.text, limit)
+			wrapped = wrapped or dummy
+
+			return math.floor(font:getHeight() * font:getLineHeight() * #wrapped), false
+		end
+	end
+end
+
+
 function def:evt_reshapePre()
 	local skin = self.skin
 	local vp = self.vp
@@ -196,7 +214,7 @@ function def:evt_reshapePre()
 	local text_width, text_height
 	if not self.wrap_mode then
 		text_width = font:getWidth(self.text)
-		text_height = font:getHeight()
+		text_height = math.floor(font:getHeight() * font:getLineHeight())
 
 		self.text_x = math.floor(.5 + _lerp(vp.x, vp.x + vp.w - text_width, align_x))
 		self.text_y = math.floor(.5 + _lerp(vp.y, vp.y + vp.h - text_height, align_y))

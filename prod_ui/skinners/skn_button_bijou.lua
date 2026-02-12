@@ -34,6 +34,8 @@ return {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
+
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},
 		cursor_press = {uiAssert.types, "nil", "string"},

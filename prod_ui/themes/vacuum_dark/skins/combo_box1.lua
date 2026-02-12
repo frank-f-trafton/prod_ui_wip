@@ -7,6 +7,8 @@ return {
 	font_ghost = "*fonts/p",
 	ghost_mode = "no-focus",
 
+	default_height = 32,
+
 	cursor_on = "ibeam",
 	text_align = "left",
 	text_align_v = 0.5,

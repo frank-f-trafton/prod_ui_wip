@@ -751,6 +751,13 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_reshapePre()
 	-- Viewport #1 is the scrollable tabular content (excluding the column header).
 	-- Viewport #2 separates embedded controls (scroll bars) from the content.
@@ -1505,6 +1512,9 @@ def.default_skinner = {
 		font = themeAssert.font,
 
 		default_icon_set_id = {uiAssert.types, "nil", "string"},
+
+		-- TODO: probably better to specify a default number of visible lines, plus the header.
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
 
 		column_min_w = {uiAssert.integerGE, 0},
 		column_def_w = {uiAssert.integerGE, 0},
