@@ -405,6 +405,13 @@ function widShared.scrollDeltaHVKeyStep(self, step_x, step_y, immediate)
 end
 
 
+function widShared.scrollDirect(self, x, y)
+	self.scr_fx, self.scr_fy = x, y
+	self.scr_tx, self.scr_ty = x, y
+	self.scr_x, self.scr_y = math.floor(.5 + x), math.floor(.5 + y)
+end
+
+
 function widShared.scrollGetXY(self)
 	local vp = self.vp
 

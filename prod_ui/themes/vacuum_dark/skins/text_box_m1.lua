@@ -8,6 +8,8 @@ return {
 	font_ghost = "*fonts/p",
 	ghost_mode = "no-focus",
 
+	default_height = 80,
+
 	cursor_on = "ibeam",
 
 	paragraph_pad = 0,

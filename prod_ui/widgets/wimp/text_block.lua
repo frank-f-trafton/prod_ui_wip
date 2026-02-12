@@ -238,7 +238,7 @@ local function _determineTextDimensions(self, wrap_limit)
 end
 
 
-function def:evt_getSegmentLength(x_axis, cross_length)
+function def:evt_getGrowAxisLength(x_axis, cross_length)
 	if not x_axis and self.auto_size == "v" then
 		_determineTextDimensions(self, cross_length)
 		local border = self.skin.box.border

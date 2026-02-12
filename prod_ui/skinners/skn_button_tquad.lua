@@ -38,6 +38,8 @@ return {
 		-- TODO
 		-- graphic
 
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
+
 		-- Quad (graphic) alignment within Viewport #1.
 		quad_align_h = {uiAssert.namedMap, uiTheme.named_maps.quad_align_h},
 		quad_align_v = {uiAssert.namedMap, uiTheme.named_maps.quad_align_v},

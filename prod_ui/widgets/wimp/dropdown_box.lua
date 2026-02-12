@@ -206,6 +206,13 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_reshapePre()
 	-- Viewport #1 is the main content area.
 	-- Viewport #2 is the item area.
@@ -494,6 +501,8 @@ def.default_skinner = {
 		-- margin: text padding
 		box = themeAssert.box,
 		font = themeAssert.font,
+
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
 
 		default_icon_set_id = {uiAssert.types, "nil", "string"},
 		default_icon_side = {uiAssert.oneOf, "left", "right"},

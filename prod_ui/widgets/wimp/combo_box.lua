@@ -262,6 +262,13 @@ function def:evt_reshapePre()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_update(dt)
 	editWid.updateCaretBlink(self, dt)
 
@@ -650,6 +657,8 @@ def.default_skinner = {
 		font = themeAssert.font,
 		font_ghost = themeAssert.font,
 		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
+
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 

@@ -55,7 +55,7 @@ function def:evt_initialize()
 end
 
 
-function def:evt_getSegmentLength(x_axis, cross_length)
+function def:evt_getGrowAxisLength(x_axis, cross_length)
 	if not x_axis then
 		local font = self.skin.fonts[self.font_id]
 		return math.floor(self.space * font:getHeight() * font:getLineHeight()), false

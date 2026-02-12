@@ -296,6 +296,13 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_reshapePre()
 	-- Viewport #1 is the label bounding box.
 	-- Viewport #2 is the "prev" button component.
@@ -465,6 +472,8 @@ def.default_skinner = {
 		box = themeAssert.box,
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
+
+		default_height = {uiAssert.numberGE, 0}, -- unscaled
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},

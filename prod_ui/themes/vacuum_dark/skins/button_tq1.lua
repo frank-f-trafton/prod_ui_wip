@@ -6,6 +6,8 @@ return {
 	cursor_on = "hand",
 	cursor_press = "hand",
 
+	default_height = 48,
+
 	-- graphic =
 
 	quad_align_h = "center",

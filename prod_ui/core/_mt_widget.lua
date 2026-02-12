@@ -247,11 +247,11 @@ function _mt_widget:evt_reshapePre()
 end
 
 
---- Called when the layout system requests a segment length from a widget.
--- @param x_axis True if the segment is horizontal, false if vertical.
+--- Called when the layout system requests a length (along one grow axis) from a widget.
+-- @param x_axis True if the axis is horizontal, false if vertical.
 -- @param cross_length The length of available space on the other axis.
--- @return 1) the length and 2) true/false/nil, indicating whether the value should be scaled or not, or nothing.
-function _mt_widget:evt_getSegmentLength(x_axis, cross_length)
+-- @return Either 1) the length and true/false/nil, indicating whether the value should be scaled or not, or 2) nothing.
+function _mt_widget:evt_getGrowAxisLength(x_axis, cross_length)
 
 end
 

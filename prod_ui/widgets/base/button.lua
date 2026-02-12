@@ -50,6 +50,13 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		return self.skin.default_height, true
+	end
+end
+
+
 function def:evt_reshapePre()
 	-- Viewport #1 is the text bounding box.
 	-- Viewport #2 is the graphic drawing rectangle.

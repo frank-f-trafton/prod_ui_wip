@@ -16,13 +16,13 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"widgets.d_group",
 	"widgets.d_dropdown_box",
 	"widgets.d_progress_bar",
 	"widgets.d_menu_tab",
 	"widgets.d_list_box",
 	"widgets.d_combo_box",
 	"widgets.unfinished.d_label_test",
-	"widgets.d_group",
 	"layouts.d_layout_stack",
 	"layouts.d_layout_wallet",
 	"widgets.d_separator",
@@ -445,7 +445,7 @@ do
 		-- Construct the application menu bar.
 		local menu_bar = wimp_root:addChild("wimp/menu_bar")
 			:setTag("root_menu_bar")
-			:geometrySetMode("segment", "top", 32)
+			:geometrySetMode("segment", "top")
 
 
 		local function cb_hide_menu(client, item)

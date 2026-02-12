@@ -1,6 +1,7 @@
 --[[
 A basic styled container, intended to hold control widgets.
-Does not scroll, handle direct user input, or accept thimble focus.
+Does not scroll (except to offset children against viewport 1), handle direct user input,
+or accept thimble focus.
 
 ┌──── Group Name ────┐
 │ ( ) Radio 1        │
@@ -119,14 +120,54 @@ function def:evt_initialize()
 
 	self.text_x, self.text_w = 0, 0
 
-	self:layoutSetBase("viewport-full")
+	self:layoutSetBase("viewport")
 
 	self:skinSetRefs()
 	self:skinInstall()
 end
 
 
+local TEST_grow = true
+
+
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis and TEST_grow then
+		local scale = context.scale
+		local skin = self.skin
+		local font = skin.font
+
+		local h = 0
+
+		for i, child in ipairs(self.LO_list) do
+			print("i", i, "h", h)
+			if child.GE.mode == "stack" then
+
+			end
+
+			local len, do_scale = child:evt_getGrowAxisLength(x_axis, cross_length)
+			if len then
+				scale = do_scale and scale or 1.0
+				h = h + len * scale
+			end
+		end
+
+		local box = self.skin.box
+		local border, margin = box.border, box.margin
+		local my1, my2 = self.LO_margin_y1, self.LO_margin_y2
+		local more_padding = font:getHeight() + skin.label_pad_y
+		print("border", border.y1, border.y2, "margin", margin.y1, margin.y2)
+		print("my1,my2", my1, my2)
+		print("more_padding", more_padding)
+		h = h + border.y1 + border.y2 + margin.y1 + margin.y2 + my1 + my2 + more_padding
+
+		return h, false
+	end
+end
+
+
 function def:evt_reshapePre()
+	print("group height", self.h) -- WIP
+
 	-- Viewport #1 is for widget controls.
 	-- Viewport #2 represents the outline of the graphical border.
 	-- Viewport #3 represents the edges of the border against the label text,
@@ -162,6 +203,8 @@ function def:evt_reshapePre()
 	vp3.x, vp3.w = self.text_x - skin.label_pad_x1, self.text_w + skin.label_pad_x1 + skin.label_pad_x2
 
 	widLayout.resetLayoutSpace(self)
+
+	widShared.scrollDirect(self, -vp.x, -vp.y)
 end
 
 
