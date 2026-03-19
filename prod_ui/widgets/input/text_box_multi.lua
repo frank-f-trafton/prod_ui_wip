@@ -329,10 +329,10 @@ def.default_skinner = {
 		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
 		-- TODO: probably better to specify a default number of visible lines.
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		cursor_on = {uiAssert.types, "nil", "string"},
-		paragraph_pad = {uiAssert.integerGE, 0},
+		paragraph_pad = {uiAssert.integerGe, 0},
 
 		res_readwrite = md_res,
 		res_readonly = md_res

@@ -470,7 +470,7 @@ end
 
 
 function client:setMaxCodePoints(n)
-	uiAssert.integerGE(1, n, 0)
+	uiAssert.integerGe(1, n, 0)
 
 	editWidS.wrapAction(self, editCommandS.setMaxCodePoints, n)
 

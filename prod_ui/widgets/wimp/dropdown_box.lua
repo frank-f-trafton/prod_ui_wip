@@ -58,7 +58,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "dropdown_box1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_chosenSelection",
 		"cb_drawerSelection"
 	)
@@ -140,7 +140,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -166,7 +166,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local index_old = self.MN_index
 
@@ -502,7 +502,7 @@ def.default_skinner = {
 		box = themeAssert.box,
 		font = themeAssert.font,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		default_icon_set_id = {uiAssert.types, "nil", "string"},
 		default_icon_side = {uiAssert.oneOf, "left", "right"},
@@ -510,12 +510,12 @@ def.default_skinner = {
 
 		-- Horizontal size of the decorative button.
 		-- "auto": use Viewport #2's height.
-		button_spacing = {uiAssert.numberGEOrOneOf, 0, "auto"},
+		button_spacing = {uiAssert.numberGeOrOneOf, 0, "auto"},
 
 		-- Placement of the decorative button.
 		button_placement = {uiAssert.oneOf, "left", "right"},
 
-		icon_spacing = {uiAssert.numberGE, 0},
+		icon_spacing = {uiAssert.numberGe, 0},
 
 		tq_deco_glyph = themeAssert.quad,
 

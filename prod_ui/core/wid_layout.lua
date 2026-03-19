@@ -101,10 +101,10 @@ end
 
 widLayout.geometry_setters = {
 	grid = function(self, x, y, w, h)
-		uiAssert.numberNotNaN(1, x)
-		uiAssert.numberNotNaN(2, y)
-		uiAssert.numberNotNaNEval(3, w)
-		uiAssert.numberNotNaNEval(4, h)
+		uiAssert.numberNotNan(1, x)
+		uiAssert.numberNotNan(2, y)
+		uiAssert.numberNotNanEval(3, w)
+		uiAssert.numberNotNanEval(4, h)
 
 		local GE = _initGE(self, "grid")
 
@@ -123,10 +123,10 @@ widLayout.geometry_setters = {
 	end,
 
 	relative = function(self, x, y, w, h, flip_x, flip_y)
-		uiAssert.numberNotNaN(1, x)
-		uiAssert.numberNotNaN(2, y)
-		uiAssert.numberNotNaN(3, w)
-		uiAssert.numberNotNaN(4, h)
+		uiAssert.numberNotNan(1, x)
+		uiAssert.numberNotNan(2, y)
+		uiAssert.numberNotNan(3, w)
+		uiAssert.numberNotNan(4, h)
 		-- don't assert 'flip_x' or 'flip_y'
 
 		local GE = _initGE(self, "relative")
@@ -149,10 +149,10 @@ widLayout.geometry_setters = {
 
 	segment = function(self, edge, len, sash_style, len_min, len_max)
 		uiAssert.namedMap(1, edge, widLayout._nm_seg_edge)
-		uiAssert.numberNotNaNEval(2, len)
+		uiAssert.numberNotNanEval(2, len)
 		uiAssert.typeEval(3, sash_style, "string")
-		uiAssert.numberNotNaNEval(4, len_min)
-		uiAssert.numberNotNaNEval(5, len_max)
+		uiAssert.numberNotNanEval(4, len_min)
+		uiAssert.numberNotNanEval(5, len_max)
 
 		local GE = _initGE(self, "segment")
 
@@ -168,7 +168,7 @@ widLayout.geometry_setters = {
 
 	["segment-unit"] = function(self, edge, unit)
 		uiAssert.namedMap(1, edge, widLayout._nm_seg_edge)
-		uiAssert.numberNotNaN(2, unit)
+		uiAssert.numberNotNan(2, unit)
 
 		local GE = _initGE(self, "segment-unit")
 
@@ -180,7 +180,7 @@ widLayout.geometry_setters = {
 
 	stack = function(self, measure, len)
 		uiAssert.namedMapEval(1, measure, widLayout._nm_stack_len_measure)
-		uiAssert.numberGEEval(1, len, 0)
+		uiAssert.numberGeEval(1, len, 0)
 
 		local GE = _initGE(self, "stack")
 
@@ -200,10 +200,10 @@ widLayout.geometry_setters = {
 	end,
 
 	static = function(self, x, y, w, h, flip_x, flip_y)
-		uiAssert.numberNotNaN(1, x)
-		uiAssert.numberNotNaN(2, y)
-		uiAssert.numberNotNaN(3, w)
-		uiAssert.numberNotNaN(4, h)
+		uiAssert.numberNotNan(1, x)
+		uiAssert.numberNotNan(2, y)
+		uiAssert.numberNotNan(3, w)
+		uiAssert.numberNotNan(4, h)
 		-- don't assert 'flip_x' or 'flip_y'
 
 		local GE = _initGE(self, "static")
@@ -602,12 +602,12 @@ end
 
 
 function methods:layoutSetMargin(x1, y1, x2, y2)
-	uiAssert.numberNotNaN(1, x1)
+	uiAssert.numberNotNan(1, x1)
 
 	if y1 then
-		uiAssert.numberNotNaN(2, y1)
-		uiAssert.numberNotNaN(3, x2)
-		uiAssert.numberNotNaN(4, y2)
+		uiAssert.numberNotNan(2, y1)
+		uiAssert.numberNotNan(3, x2)
+		uiAssert.numberNotNan(4, y2)
 
 		self.LO_margin_x1 = math.max(0, x1)
 		self.LO_margin_y1 = math.max(0, y1)
@@ -645,8 +645,8 @@ end
 
 
 function methods:layoutSetGridDimensions(cols, rows)
-	uiAssert.numberNotNaN(1, cols)
-	uiAssert.numberNotNaN(2, rows)
+	uiAssert.numberNotNan(1, cols)
+	uiAssert.numberNotNan(2, rows)
 
 	local LO_grid = _checkGridTable(self)
 
@@ -703,8 +703,8 @@ end
 function methods:layoutSetWalletCardSize(meas_x, meas_y, card_w, card_h)
 	uiAssert.namedMap(1, meas_x, widLayout._nm_card_measure)
 	uiAssert.namedMap(2, meas_y, widLayout._nm_card_measure)
-	uiAssert.numberGE(3, card_w, 0)
-	uiAssert.numberGE(4, card_h, 0)
+	uiAssert.numberGe(3, card_w, 0)
+	uiAssert.numberGe(4, card_h, 0)
 
 	if meas_x == "unit" then
 		card_w = math.min(card_w, 1.0)
@@ -733,7 +733,7 @@ end
 
 
 function methods:layoutSetWalletCardsPerLine(cards_per_line)
-	uiAssert.numberGE(1, cards_per_line, 0)
+	uiAssert.numberGe(1, cards_per_line, 0)
 
 	local LO_wallet = _checkWalletTable(self)
 
@@ -818,7 +818,7 @@ end
 
 function methods:layoutSetStackDefaultWidgetSize(default_meas, default_len)
 	uiAssert.namedMap(1, default_meas, widLayout._nm_stack_len_measure)
-	uiAssert.numberGE(2, default_len, 0)
+	uiAssert.numberGe(2, default_len, 0)
 
 	if default_meas == "unit" then
 		default_len = math.min(default_len, 1.0)

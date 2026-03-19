@@ -14,7 +14,7 @@ local utf8 = require("utf8")
 -- ProdUI
 local edCom = context:getLua("shared/line_ed/ed_com")
 local code_groups = context:getLua("shared/line_ed/code_groups")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pTable = require(context.conf.prod_ui_req .. "lib.p_table")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local edComM = context:getLua("shared/line_ed/m/ed_com_m")
 

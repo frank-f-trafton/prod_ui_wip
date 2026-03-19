@@ -74,7 +74,7 @@ Horizontal item padding (not including widget margins):
 local context = select(1, ...)
 
 
-local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
+local pList2 = require(context.conf.prod_ui_req .. "lib.p_list2")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -1091,44 +1091,44 @@ def.default_skinner = {
 		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
 		-- Height of horizontal separator items.
-		separator_item_height = {uiAssert.integerGE, 0},
+		separator_item_height = {uiAssert.integerGe, 0},
 
 		-- Height of the line graphic within separators.
-		separator_graphic_height = {uiAssert.integerGE, 0},
+		separator_graphic_height = {uiAssert.integerGe, 0},
 
 		-- Used when underlining shortcut key letters in menu items.
-		underline_width = {uiAssert.integerGE, 0},
+		underline_width = {uiAssert.integerGe, 0},
 
 		-- (Pop up menus do not render hover-glow.)
 
 		-- (While pop-up menus can scroll if needed, they do not have explicit scroll bars.)
 
 		-- Padding values.
-		pad_x1 = {uiAssert.integerGE, 0},
-		pad_x2 = {uiAssert.integerGE, 0},
+		pad_x1 = {uiAssert.integerGe, 0},
+		pad_x2 = {uiAssert.integerGe, 0},
 
-		pad_icon_x1 = {uiAssert.integerGE, 0},
-		pad_icon_x2 = {uiAssert.integerGE, 0},
-		pad_icon_y1 = {uiAssert.integerGE, 0},
-		pad_icon_y2 = {uiAssert.integerGE, 0},
+		pad_icon_x1 = {uiAssert.integerGe, 0},
+		pad_icon_x2 = {uiAssert.integerGe, 0},
+		pad_icon_y1 = {uiAssert.integerGe, 0},
+		pad_icon_y2 = {uiAssert.integerGe, 0},
 
 		-- Drawing offsets and size for icon quads.
-		icon_draw_w = {uiAssert.integerGE, 0},
-		icon_draw_h = {uiAssert.integerGE, 0},
+		icon_draw_w = {uiAssert.integerGe, 0},
+		icon_draw_h = {uiAssert.integerGe, 0},
 
 		-- Padding above and below text and icons in items.
 		-- The tallest of the two components determines the item's height.
-		pad_text_x1 = {uiAssert.integerGE, 0},
-		pad_text_x2 = {uiAssert.integerGE, 0},
-		pad_text_y1 = {uiAssert.integerGE, 0},
-		pad_text_y2 = {uiAssert.integerGE, 0},
+		pad_text_x1 = {uiAssert.integerGe, 0},
+		pad_text_x2 = {uiAssert.integerGe, 0},
+		pad_text_y1 = {uiAssert.integerGe, 0},
+		pad_text_y2 = {uiAssert.integerGe, 0},
 
-		arrow_draw_w = {uiAssert.integerGE, 0},
-		arrow_draw_h = {uiAssert.integerGE, 0},
+		arrow_draw_w = {uiAssert.integerGe, 0},
+		arrow_draw_h = {uiAssert.integerGe, 0},
 
 		-- NOTE: Group arrows share padding with shortcuts.
-		pad_shortcut_x1 = {uiAssert.integerGE, 0},
-		pad_shortcut_x2 = {uiAssert.integerGE, 0},
+		pad_shortcut_x1 = {uiAssert.integerGe, 0},
+		pad_shortcut_x2 = {uiAssert.integerGe, 0},
 
 		color_separator = uiAssert.loveColorTuple,
 		color_select_glow = uiAssert.loveColorTuple,

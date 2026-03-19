@@ -65,7 +65,7 @@ local def = {
 	skin_id = "combo_box1",
 	--TODO: text_align_h = "left", -- "left", "center", "right"
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_inputChanged",
 		"cb_drawerSelection",
 		"cb_action",
@@ -169,7 +169,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -194,7 +194,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local index_old = self.MN_index
 
@@ -658,7 +658,7 @@ def.default_skinner = {
 		font_ghost = themeAssert.font,
 		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 
@@ -667,12 +667,12 @@ def.default_skinner = {
 
 		-- Horizontal size of the expander button.
 		-- "auto": use Viewport #2's height.
-		button_spacing = {uiAssert.numberGEOrOneOf, 0, "auto"},
+		button_spacing = {uiAssert.numberGeOrOneOf, 0, "auto"},
 
 		-- Placement of the expander button.
 		button_placement = {uiAssert.oneOf, "left", "right"},
 
-		item_pad_v = {uiAssert.integerGE, 0},
+		item_pad_v = {uiAssert.integerGe, 0},
 
 		res_idle = md_res,
 		res_pressed = md_res,

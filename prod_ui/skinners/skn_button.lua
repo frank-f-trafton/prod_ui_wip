@@ -30,7 +30,7 @@ return {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},
@@ -51,7 +51,7 @@ return {
 		graphic_placement = {uiAssert.namedMap, uiTheme.named_maps.graphic_placement},
 
 		-- How much space to assign the graphic when not using "overlay" placement.
-		graphic_spacing = {uiAssert.numberGE, 0},
+		graphic_spacing = {uiAssert.numberGe, 0},
 
 		res_idle = md_res,
 		res_hover = md_res,

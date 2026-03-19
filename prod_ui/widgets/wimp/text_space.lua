@@ -31,7 +31,7 @@ end
 
 
 function def:setSpacing(space)
-	uiAssert.numberNotNaN(1, space)
+	uiAssert.numberNotNan(1, space)
 
 	self.space = math.max(space, 0.0)
 

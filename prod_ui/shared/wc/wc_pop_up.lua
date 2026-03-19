@@ -13,7 +13,7 @@ local context = select(1, ...)
 local wcPopUp = {}
 
 
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pTable = require(context.conf.prod_ui_req .. "lib.p_table")
 
 
 function wcPopUp.blocking_ui_evaluateHover(self, mx, my, os_x, os_y)

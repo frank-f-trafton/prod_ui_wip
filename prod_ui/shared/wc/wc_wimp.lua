@@ -7,7 +7,7 @@ local context = select(1, ...)
 local wcWimp = {}
 
 
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
+local pTable = require(context.conf.prod_ui_req .. "lib.p_table")
 local wcPopUp = context:getLua("shared/wc/wc_pop_up")
 
 

@@ -4,8 +4,8 @@ local uiAssert = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pAssert = require(PATH .. "lib.pile_assert")
-local pName = require(PATH .. "lib.pile_name")
+local pAssert = require(PATH .. "lib.p_assert")
+local pName = require(PATH .. "lib.p_name")
 local uiTable = require(PATH .. "ui_table")
 
 
@@ -121,7 +121,7 @@ end
 
 
 -- TODO: replace instances of this.
-function uiAssert.numberGEOrOneOf(n, v, min, ...)
+function uiAssert.numberGeOrOneOf(n, v, min, ...)
 	if type(v) == "number" then
 		if not min or v >= min then
 			return

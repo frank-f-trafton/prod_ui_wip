@@ -55,7 +55,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "slider1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_actionSliderChanged"
 	)
 }
@@ -244,24 +244,24 @@ def.default_skinner = {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Label placement and spacing.
-		label_spacing = {uiAssert.integerGE, 0},
+		label_spacing = {uiAssert.integerGe, 0},
 		label_placement = {uiAssert.oneOf, "left", "right", "top", "bottom", "overlay"},
 
 		-- For the empty part.
-		trough_breadth = {uiAssert.integerGE, 0},
+		trough_breadth = {uiAssert.integerGe, 0},
 
 		-- For the in-use part.
-		trough_breadth2 = {uiAssert.integerGE, 0},
+		trough_breadth2 = {uiAssert.integerGe, 0},
 
 		-- When true, engage thumb-moving state even if the user clicked outside of the trough area.
 		trough_click_anywhere = {uiAssert.types, "nil", "boolean"},
 
 		-- Thumb visual dimensions. The size may be reduced if it does not fit into the trough.
-		thumb_w = {uiAssert.integerGE, 0},
-		thumb_h = {uiAssert.integerGE, 0},
+		thumb_w = {uiAssert.integerGe, 0},
+		thumb_h = {uiAssert.integerGe, 0},
 
 		-- Thumb visual offsets.
 		thumb_ox = uiAssert.integer,

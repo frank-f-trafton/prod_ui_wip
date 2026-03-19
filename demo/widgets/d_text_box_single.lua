@@ -2,7 +2,7 @@
 -- ProdUI
 local demoShared = require("demo_shared")
 local uiKeyboard = require("prod_ui.ui_keyboard")
-local pTable = require("prod_ui.lib.pile_table")
+local pTable = require("prod_ui.lib.p_table")
 
 
 local plan = {}
@@ -86,7 +86,7 @@ function plan.make(panel)
 	panel:userCallbackSet("cb_destroy", function(self)
 		local ui_frame = panel:getUIFrame()
 		if ui_frame then
-			pTable.removeElement(ui_frame.KH_trickle_key_pressed, hook_pressed)
+			pTable.removeValueFromArray(ui_frame.KH_trickle_key_pressed, hook_pressed)
 		end
 	end)
 

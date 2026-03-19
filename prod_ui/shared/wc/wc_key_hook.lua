@@ -32,7 +32,7 @@ local context = select(1, ...)
 local wcKeyHook = {}
 
 
-local pHook = require(context.conf.prod_ui_req .. "lib.pile_hook")
+local pHook = require(context.conf.prod_ui_req .. "lib.p_hook")
 
 
 local function _filter(self)

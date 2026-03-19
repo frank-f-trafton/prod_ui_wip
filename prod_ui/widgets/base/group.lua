@@ -356,11 +356,11 @@ def.default_skinner = {
 
 		-- Padding when label_side is "left" or "right".
 		-- Not used with "center"
-		label_pad_far = {uiAssert.numberGE, 0},
+		label_pad_far = {uiAssert.numberGe, 0},
 
-		label_pad_x1 = {uiAssert.numberGE, 0},
-		label_pad_x2 = {uiAssert.numberGE, 0},
-		label_pad_y = {uiAssert.numberGE, 0},
+		label_pad_x1 = {uiAssert.numberGe, 0},
+		label_pad_x2 = {uiAssert.numberGe, 0},
+		label_pad_y = {uiAssert.numberGe, 0},
 
 		color_text = uiAssert.loveColorTuple,
 		color_pipe = uiAssert.loveColorTuple,

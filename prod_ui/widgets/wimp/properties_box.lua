@@ -23,7 +23,7 @@ Optional icons (bijoux)  │
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -43,7 +43,7 @@ local _lerp = pMath.lerp
 local def = {
 	skin_id = "properties_box1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_action",
 		"cb_action2",
 		"cb_action3",
@@ -263,7 +263,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.numberNotNaN(1, item_i)
+	uiAssert.numberNotNan(1, item_i)
 
 	local items = self.MN_items
 	local item_t = items[item_i]
@@ -297,7 +297,7 @@ end
 
 
 function def:setSelectionByIndex(wid_i)
-	uiAssert.integerGE(1, wid_i, 0)
+	uiAssert.integerGe(1, wid_i, 0)
 
 	self:menuSetSelectedIndex(wid_i)
 end
@@ -870,23 +870,23 @@ def.default_skinner = {
 
 		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
-		item_h = {uiAssert.integerGE, 0},
+		item_h = {uiAssert.integerGe, 0},
 
 		-- The minimum preferred label column width
-		col_1_min_w = {uiAssert.integerGE, 0},
+		col_1_min_w = {uiAssert.integerGe, 0},
 
 		-- The default label column width
-		col_1_def_w = {uiAssert.integerGE, 0},
+		col_1_def_w = {uiAssert.integerGe, 0},
 
 		-- The minimum preferred control column width.
 		-- Used when clamping the width of the label column.
-		col_2_min_w = {uiAssert.integerGE, 0},
+		col_2_min_w = {uiAssert.integerGe, 0},
 
 		-- Which side to place the label column: "left", "right"
 		control_side = {uiAssert.oneOf, "left", "right"},
 
-		sash_margin_1 = {uiAssert.integerGE, 0},
-		sash_margin_2 = {uiAssert.integerGE, 0},
+		sash_margin_1 = {uiAssert.integerGe, 0},
+		sash_margin_2 = {uiAssert.integerGe, 0},
 
 		sl_body = themeAssert.slice,
 
@@ -895,11 +895,11 @@ def.default_skinner = {
 		-- Vertical text alignment is centered.
 
 		-- Property name icon column width and positioning, if active.
-		icon_spacing = {uiAssert.integerGE, 0},
+		icon_spacing = {uiAssert.integerGe, 0},
 		icon_side = {uiAssert.oneOf, "left", "right"},
 
 		-- Additional padding for left or right-aligned text. No effect with center alignment.
-		pad_text_x = {uiAssert.integerGE, 0},
+		pad_text_x = {uiAssert.integerGe, 0},
 
 		color_item_text = uiAssert.loveColorTuple,
 		color_select_glow = uiAssert.loveColorTuple,

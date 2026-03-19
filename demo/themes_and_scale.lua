@@ -2,7 +2,7 @@ local plan = {}
 
 
 local demoShared = require("demo_shared")
-local pPath = require("prod_ui.lib.pile_path")
+local pPath = require("prod_ui.lib.p_path")
 
 
 local function _configureInputBox(self)

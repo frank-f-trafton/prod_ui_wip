@@ -1,7 +1,7 @@
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -22,7 +22,7 @@ local _nm_size_mode = uiTable.newNamedMapV("SizeMode", "h", "v")
 local def = {
 	skin_id = "text_block1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_buttonAction",
 		"cb_buttonAction2",
 		"cb_buttonAction3"

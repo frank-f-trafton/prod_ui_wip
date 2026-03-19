@@ -1,7 +1,7 @@
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
@@ -1041,10 +1041,10 @@ local md_res = uiSchema.newKeysX {
 	header_box = themeAssert.box,
 	header_slc_body = themeAssert.slice,
 	header_font = themeAssert.font,
-	header_h = {uiAssert.integerGE, 0},
-	button_pad_w = {uiAssert.integerGE, 0},
-	button_w = {uiAssert.integerGE, 0},
-	button_h = {uiAssert.integerGE, 0},
+	header_h = {uiAssert.integerGe, 0},
+	button_pad_w = {uiAssert.integerGe, 0},
+	button_w = {uiAssert.integerGe, 0},
+	button_h = {uiAssert.integerGe, 0},
 
 	-- From 0 (top) to 1 (bottom)
 	button_align_v = {uiAssert.numberRange, 0.0, 1.0},
@@ -1071,8 +1071,8 @@ def.default_skinner = {
 		scr_style = themeAssert.scrollBarStyle,
 
 		-- Padding when scrolling to put a widget into view.
-		in_view_pad_x = {uiAssert.integerGE, 0},
-		in_view_pad_y = {uiAssert.integerGE, 0},
+		in_view_pad_x = {uiAssert.integerGe, 0},
+		in_view_pad_y = {uiAssert.integerGe, 0},
 
 		slc_body = themeAssert.slice,
 		slc_shadow = themeAssert.slice,
@@ -1081,16 +1081,16 @@ def.default_skinner = {
 		header_text_align_v = {uiAssert.numberRange, 0.0, 1.0},
 
 		-- How many pixels to extend / pad resize sensors.
-		sensor_resize_pad = {uiAssert.integerGE, 0},
+		sensor_resize_pad = {uiAssert.integerGe, 0},
 
 		-- How much to extend the diagonal parts of the resize area.
-		sensor_resize_diagonal = {uiAssert.integerGE, 0},
+		sensor_resize_diagonal = {uiAssert.integerGe, 0},
 
 		-- How far to allow resizing a widget outside the bounds of its parent.
 		-- Used to prevent stretching frames too far outside the LÖVE application window.
-		frame_outbound_limit = {uiAssert.integerGE, 0},
+		frame_outbound_limit = {uiAssert.integerGe, 0},
 
-		shadow_extrude = {uiAssert.integerGE, 0},
+		shadow_extrude = {uiAssert.integerGe, 0},
 
 		-- Alignment of textures within control sensors
 		-- 0.0: left, 0.5: middle, 1.0: right

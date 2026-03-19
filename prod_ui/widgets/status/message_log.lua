@@ -38,7 +38,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "message_log1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_action",
 		"cb_action2",
 		"cb_action3",
@@ -285,7 +285,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)

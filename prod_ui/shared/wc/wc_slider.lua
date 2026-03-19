@@ -16,7 +16,7 @@ local context = select(1, ...)
 local wcSlider = {}
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
@@ -354,7 +354,7 @@ local methods = {}
 
 
 function methods:sliderSetPosition(pos)
-	uiAssert.numberNotNaN(1, pos)
+	uiAssert.numberNotNan(1, pos)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
@@ -378,7 +378,7 @@ end
 
 
 function methods:sliderSetMax(max)
-	uiAssert.numberNotNaN(1, max)
+	uiAssert.numberNotNan(1, max)
 
 	-- Does not check `self.enabled` or `self.slider_allow_changes`.
 
@@ -453,7 +453,7 @@ end
 
 
 function methods:sliderSetGranularity(n)
-	uiAssert.numberNotNaN(1, n)
+	uiAssert.numberNotNan(1, n)
 
 	self.slider_granularity = n
 
@@ -483,7 +483,7 @@ end
 
 
 function methods:sliderSetHome(n)
-	uiAssert.numberNotNaN(1, n)
+	uiAssert.numberNotNan(1, n)
 
 	self.slider_home = n
 

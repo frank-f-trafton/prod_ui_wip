@@ -6,7 +6,7 @@ local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 local auxColor = require(REQ_PATH .. "graphics.aux_color")
 uiGraphics.auxColor = auxColor
-local pMath = require(REQ_PATH .. "lib.pile_math")
+local pMath = require(REQ_PATH .. "lib.p_math")
 local quadSlice = require(REQ_PATH .. "graphics.quad_slice")
 uiGraphics.quadSlice = quadSlice
 

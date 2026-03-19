@@ -1,5 +1,5 @@
--- PILE Tree
--- VERSION: 2.022
+-- PILE Base: pTree
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -40,8 +40,7 @@ local M = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local interp = require(PATH .. "pile_interp")
-local pAssert = require(PATH .. "pile_assert")
+local pAssert = require(PATH .. "p_assert")
 
 
 local ipairs, table, type = ipairs, table, type
@@ -51,6 +50,7 @@ local _pAssert_integerEval = pAssert.integerEval
 local _pAssert_integerRangeEval = pAssert.integerRangeEval
 local _pAssert_notNil = pAssert.notNil
 local _pAssert_type = pAssert.type
+local _pAssert_typeEval = pAssert.typeEval
 
 
 M.lang = {
@@ -59,6 +59,12 @@ M.lang = {
 	node_attach_self = "tried to attach a node to itself",
 	node_no_index = "couldn't find node in list of siblings",
 	node_no_parent = "corrupt or missing 'parent' link. (Tried to run on a root node?)",
+	res_empty_path = "empty path",
+	res_end_escape = "partial character escape at end of path string",
+	res_simple_anchor = "can't anchor to root in simple search mode",
+	res_bad_id = "invalid node ID",
+	res_no_parent = "missing parent node",
+	res_match_fail = "failed to match Node ID"
 }
 local lang = M.lang
 
@@ -463,6 +469,68 @@ function M.nodeFindKeyAscending(self, inclusive, k, v)
 
 		node = node["parent"]
 	end
+end
+
+
+function M.nodeResolvePath(self, path, key_id, simple)
+	_pAssert_type("path", path, "string")
+
+	if #path == 0 then
+		return nil, lang.res_empty_path, 1
+
+	elseif path:sub(-1) == "\\" then
+		return nil, lang.res_end_escape, 1
+	end
+
+	local p, node = 1, self
+
+	if path:sub(1, 1) == "/" then
+		if simple then
+			return nil, lang.res_simple_anchor, 1
+		else
+			node = M.nodeGetRoot(node)
+			p = 2
+		end
+	end
+
+	while p <= #path do
+		local _, j = path:find("[^\\]/", p)
+		j = j or #path + 1
+		local id = path:sub(p, j - 1)
+
+		if id == "" then
+			return nil, lang.res_bad_id, p
+		end
+
+		if not simple and id == "." then
+			-- do nothing
+
+		elseif not simple and id == ".." then
+			node = node["parent"]
+			if not node then
+				return nil, lang.res_no_parent, p
+			end
+
+		else
+			id = id:gsub("\\(.)", "%1")
+
+			local ok
+			for _, child in ipairs(node.nodes) do
+				if child[key_id] == id then
+					node = child
+					ok = true
+					break
+				end
+			end
+			if not ok then
+				return nil, lang.res_match_fail, p
+			end
+		end
+
+		p = j + 1
+	end
+
+	return node
 end
 
 

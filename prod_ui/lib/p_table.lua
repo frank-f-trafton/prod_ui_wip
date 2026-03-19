@@ -1,5 +1,5 @@
--- PILE Table
--- VERSION: 2.023 (Modified)
+-- PILE Base: pTable
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -44,9 +44,9 @@ M.lang = {}
 local lang = M.lang
 
 
-local interp = require(PATH .. "pile_interp")
-local pAssert = require(PATH .. "pile_assert")
-local pName = require(PATH .. "pile_name")
+local pAssert = require(PATH .. "p_assert")
+local pInterp = require(PATH .. "p_interp")
+local pName = require(PATH .. "p_name")
 
 
 local ipairs, math, pairs, rawget, rawset, select, table, type = ipairs, math, pairs, rawget, rawset, select, table, type
@@ -302,7 +302,7 @@ function M.arrayHasDuplicateValues(t)
 end
 
 
-function M.newLUT(t)
+function M.newLut(t)
 	local lut = {}
 	for i, v in ipairs(t) do
 		lut[v] = true
@@ -311,7 +311,7 @@ function M.newLUT(t)
 end
 
 
-function M.newLUTV(...)
+function M.newLutV(...)
 	local lut = {}
 	for i = 1, select("#", ...) do
 		lut[select(i, ...)] = true
@@ -321,7 +321,7 @@ end
 
 
 lang.err_dupe = "duplicate values in source table"
-function M.invertLUT(t)
+function M.invertKeysAndValues(t)
 	local lut = {}
 	for k, v in pairs(t) do
 		if lut[v] then
@@ -333,7 +333,7 @@ function M.invertLUT(t)
 end
 
 
-function M.arrayOfHashKeys(t)
+function M.makeArrayFromKeys(t)
 	local a = {}
 	for k in pairs(t) do
 		a[#a + 1] = k
@@ -372,7 +372,7 @@ function M.reverseArray(t)
 end
 
 
-function M.removeElement(t, v, n)
+function M.removeValueFromArray(t, v, n)
 	n = n or math.huge
 	local c = 0
 	for i = #t, 1, -1 do
@@ -388,7 +388,7 @@ function M.removeElement(t, v, n)
 end
 
 
-function M.valueInArray(t, v, i)
+function M.isValueInArray(t, v, i)
 	for p = i or 1, #t do
 		if t[p] == v then
 			return p
@@ -430,9 +430,9 @@ function M.assignIfNilOrFalse(t, k, ...)
 end
 
 
-function M.set(t, field, v)
-	if t[field] ~= v then
-		t[field] = v
+function M.set(t, f, v)
+	if t[f] ~= v then
+		t[f] = v
 		return true
 	end
 	return false
@@ -444,7 +444,7 @@ lang.err_res_field_empty = "cannot resolve an empty field"
 function M.resolve(t, str, raw)
 	pAssert.type(1, t, "table")
 	if type(str) ~= "string" or #str == 0 then
-		error(interp(lang.err_res_bad_s, 2))
+		error(pInterp(lang.err_res_bad_s, 2))
 	end
 
 	local val = t
@@ -475,7 +475,7 @@ lang.err_res_assert = "value resolution failed. String: $1, failed at token #$2.
 function M.assertResolve(t, str, raw)
 	local ret, count = M.resolve(t, str, raw)
 	if ret == nil then
-		error(interp(lang.err_res_assert, str, count))
+		error(pInterp(lang.err_res_assert, str, count))
 	end
 	return ret, count
 end
@@ -512,18 +512,18 @@ end
 
 
 function M.newNamedMapV(name, ...)
-	return M.newNamedMap(name, M.newLUTV(...))
+	return M.newNamedMap(name, M.newLutV(...))
 end
 
 
 lang.undeclared = "undeclared field: '$1'"
 M.mt_restrict = {
 	__index = function(t, k)
-		error(interp(lang.undeclared, k))
+		error(pInterp(lang.undeclared, k))
 	end,
 
 	__newindex = function(t, k, v)
-		error(interp(lang.undeclared, k))
+		error(pInterp(lang.undeclared, k))
 	end
 }
 
@@ -536,7 +536,7 @@ function M.setDouble(t, setting, field, v, default)
 	t[field] = t[setting] or default
 
 	if not t[field] then
-		error(interp(lang.doub_bad_field, field))
+		error(pInterp(lang.doub_bad_field, field))
 	end
 
 	return t[field] ~= old_v
@@ -546,7 +546,7 @@ end
 lang.doub_bad_default = "the default value for '$1' cannot be false/nil."
 function M.updateDouble(t, setting, field, default)
 	if not default then
-		error(interp(lang.doub_bad_default, field))
+		error(pInterp(lang.doub_bad_default, field))
 	end
 
 	if not t[setting] then

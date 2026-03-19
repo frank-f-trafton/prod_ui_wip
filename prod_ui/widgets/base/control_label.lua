@@ -6,7 +6,7 @@ A rewrite of the label widget.
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")

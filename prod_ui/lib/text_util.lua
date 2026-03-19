@@ -13,7 +13,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local pUTF8 = require(REQ_PATH .. "pile_utf8")
+local pUTF8 = require(REQ_PATH .. "p_utf8")
 
 
 textUtil.proxy_code_points = {

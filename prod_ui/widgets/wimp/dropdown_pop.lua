@@ -183,7 +183,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -211,7 +211,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local index_old = self.MN_index
 
@@ -643,10 +643,10 @@ def.default_skinner = {
 		text_align = {uiAssert.oneOf, "left", "center", "right"},
 
 		icon_side = {uiAssert.oneOf, "left", "right"},
-		icon_spacing = {uiAssert.integerGE, 0},
+		icon_spacing = {uiAssert.integerGe, 0},
 
 		-- Item height is determined by the font height + line height and 'item_pad_v'.
-		item_pad_v = {uiAssert.integerGE, 0},
+		item_pad_v = {uiAssert.integerGe, 0},
 
 		-- The drawer's maximum height, as measured by the number of visible items (plus margins).
 		-- Drawer height is limited by the size of the application window.

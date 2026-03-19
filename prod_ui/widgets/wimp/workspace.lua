@@ -22,7 +22,7 @@ local def = {
 
 	trickle = {},
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_workspaceRender"
 	)
 }
@@ -257,8 +257,8 @@ def.default_skinner = {
 		background_color = uiAssert.loveColorTupleEval,
 
 		-- Padding when scrolling to put a widget into view.
-		in_view_pad_x = {uiAssert.integerGE, 0},
-		in_view_pad_y = {uiAssert.integerGE, 0}
+		in_view_pad_x = {uiAssert.integerGe, 0},
+		in_view_pad_y = {uiAssert.integerGe, 0}
 	},
 
 

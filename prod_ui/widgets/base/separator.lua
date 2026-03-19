@@ -82,7 +82,7 @@ def.default_skinner = {
 	validate = uiSchema.newKeysX {
 		skinner_id = {uiAssert.type, "string"},
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- wcPipe
 		PIPE_default_id = themeAssert.pipeStyleID,

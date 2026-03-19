@@ -8,9 +8,9 @@ local context = select(1, ...)
 
 
 local fontCache = context:getLua("core/res/font_cache")
-local pName = require(context.conf.prod_ui_req .. "lib.pile_name")
-local pString = require(context.conf.prod_ui_req .. "lib.pile_string")
-local pPath =  require(context.conf.prod_ui_req .. "lib.pile_path")
+local pName = require(context.conf.prod_ui_req .. "lib.p_name")
+local pString = require(context.conf.prod_ui_req .. "lib.p_string")
+local pPath =  require(context.conf.prod_ui_req .. "lib.p_path")
 local quadSlice = require(context.conf.prod_ui_req .. "graphics.quad_slice")
 local themeAssert = context:getLua("core/res/theme_assert")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
@@ -80,7 +80,7 @@ models.box = uiSchema.newModel {
 models.labelStyle = uiSchema.newKeysX {
 	font = themeAssert.font,
 	ul_color = uiAssert.loveColorTupleEval,
-	ul_h = {uiAssert.numberGE, 0}
+	ul_h = {uiAssert.numberGe, 0}
 }
 
 
@@ -104,25 +104,25 @@ models.pipeStyle = uiSchema.newKeysX {
 	-- Offsets that shorten legs relative to joints and terminators. These
 	-- are relative to the quad 'ox' and 'oy' offsets; refer to the theme's
 	-- 'base_data.lua'.
-	pad_x = uiAssert.numberNotNaN,
-	pad_y = uiAssert.numberNotNaN,
+	pad_x = uiAssert.numberNotNan,
+	pad_y = uiAssert.numberNotNan,
 
 	-- Offsets to shorten pipes that function as horizontal or vertical separators.
-	sep_t = uiAssert.numberNotNaN,
-	sep_b = uiAssert.numberNotNaN,
-	sep_l = uiAssert.numberNotNaN,
-	sep_r = uiAssert.numberNotNaN,
+	sep_t = uiAssert.numberNotNan,
+	sep_b = uiAssert.numberNotNan,
+	sep_l = uiAssert.numberNotNan,
+	sep_r = uiAssert.numberNotNan,
 }
 
 
 models.quad = uiSchema.newKeysX {
-	x = uiAssert.numberNotNaN,
-	y = uiAssert.numberNotNaN,
-	w = uiAssert.numberNotNaN,
-	h = uiAssert.numberNotNaN,
+	x = uiAssert.numberNotNan,
+	y = uiAssert.numberNotNan,
+	w = uiAssert.numberNotNan,
+	h = uiAssert.numberNotNan,
 
-	ox = uiAssert.numberNotNaN,
-	oy = uiAssert.numberNotNaN,
+	ox = uiAssert.numberNotNan,
+	oy = uiAssert.numberNotNan,
 
 	texture = {uiAssert.loveTypes, "Canvas", "Image", "Texture"},
 	quad = {uiAssert.loveType, "Quad"},
@@ -137,18 +137,18 @@ models.quadSlice = uiSchema.newModel {
 	metatable = {uiAssert.tableWithMetatable, quadSlice._mt_slice},
 
 	keys = {
-		x = uiAssert.numberNotNaN,
-		y = uiAssert.numberNotNaN,
-		w = uiAssert.numberNotNaN,
-		h = uiAssert.numberNotNaN,
-		w1 = uiAssert.numberNotNaN,
-		h1 = uiAssert.numberNotNaN,
-		w2 = uiAssert.numberNotNaN,
-		h2 = uiAssert.numberNotNaN,
-		w3 = uiAssert.numberNotNaN,
-		h3 = uiAssert.numberNotNaN,
-		iw = uiAssert.numberNotNaN,
-		ih = uiAssert.numberNotNaN,
+		x = uiAssert.numberNotNan,
+		y = uiAssert.numberNotNan,
+		w = uiAssert.numberNotNan,
+		h = uiAssert.numberNotNan,
+		w1 = uiAssert.numberNotNan,
+		h1 = uiAssert.numberNotNan,
+		w2 = uiAssert.numberNotNan,
+		h2 = uiAssert.numberNotNan,
+		w3 = uiAssert.numberNotNan,
+		h3 = uiAssert.numberNotNan,
+		iw = uiAssert.numberNotNan,
+		ih = uiAssert.numberNotNan,
 
 		mirror_h = {uiAssert.type, "boolean"},
 		mirror_v = {uiAssert.type, "boolean"},
@@ -209,10 +209,10 @@ models.scrollBarStyle = uiSchema.newKeysX {
 	trough_enabled = {uiAssert.typeEval, "boolean"},
 	thumb_enabled = {uiAssert.typeEval, "boolean"},
 
-	bar_size = {uiAssert.integerGEEval, 0},
-	button_size = {uiAssert.integerGEEval, 0},
-	thumb_size_min = {uiAssert.integerGEEval, 0},
-	thumb_size_max = {uiAssert.integerGEEval, 0},
+	bar_size = {uiAssert.integerGeEval, 0},
+	button_size = {uiAssert.integerGeEval, 0},
+	thumb_size_min = {uiAssert.integerGeEval, 0},
+	thumb_size_max = {uiAssert.integerGeEval, 0},
 
 	v_near_side = {uiAssert.typeEval, "boolean"},
 	v_auto_hide = {uiAssert.typeEval, "boolean"},
@@ -237,16 +237,16 @@ models.thimbleInfo = uiSchema.newKeysX {
 	mode = {uiAssert.namedMap, uiTheme.named_maps.DrawMode},
 	color = uiAssert.colorTuple,
 	line_style = {uiAssert.namedMap, uiTheme.named_maps.LineStyle},
-	line_width = {uiAssert.integerGE, 0},
+	line_width = {uiAssert.integerGe, 0},
 	line_join = {uiAssert.namedMap, uiTheme.named_maps.LineJoin},
-	corner_rx = {uiAssert.numberGE, 0},
-	corner_ry = {uiAssert.numberGE, 0},
+	corner_rx = {uiAssert.numberGe, 0},
+	corner_ry = {uiAssert.numberGe, 0},
 
 	-- Pushes the thimble outline out from the widget rectangle.
 	-- This is overridden if the widget contains 'self.thimble_x(|y|w|h)'.
-	outline_pad = {uiAssert.integerGE, 0},
+	outline_pad = {uiAssert.integerGe, 0},
 
-	segments = {uiAssert.numberGEEval, 0}
+	segments = {uiAssert.numberGeEval, 0}
 }
 
 
@@ -260,20 +260,20 @@ models.sashStyleRes = uiSchema.newKeysX {
 
 models.sashStyle = uiSchema.newKeysX {
 	-- Width of tall sashes; height of wide sashes.
-	breadth_half = {uiAssert.integerGE, 0},
+	breadth_half = {uiAssert.integerGe, 0},
 
 	-- Reduces the intersection box when checking for the mouse *entering* a sash.
 	-- NOTE: overly large values will make the sash unclickable.
-	contract_x = {uiAssert.integerGE, 0},
-	contract_y = {uiAssert.integerGE, 0},
+	contract_x = {uiAssert.integerGe, 0},
+	contract_y = {uiAssert.integerGe, 0},
 
 	-- Increases the intersection box when checking for the mouse *leaving* a sash.
 	-- NOTES:
 	-- * Overly large values will prevent the user from clicking on widgets that
 	--   are descendants of the container.
 	-- * The expansion does not go beyond the container's body.
-	expand_x = {uiAssert.integerGE, 0},
-	expand_y = {uiAssert.integerGE, 0},
+	expand_x = {uiAssert.integerGe, 0},
+	expand_y = {uiAssert.integerGe, 0},
 
 	-- To apply a graphical margin to a sash mosaic, please bake the margin into the texture.
 
