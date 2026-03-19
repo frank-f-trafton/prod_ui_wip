@@ -15,7 +15,7 @@ local context = select(1, ...)
 local wcContainer = {}
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
@@ -47,8 +47,8 @@ end
 
 
 function _methods:containerSetDocumentDimensions(w, h)
-	uiAssert.numberGE(1, w, 0)
-	uiAssert.numberGE(1, h, 0)
+	uiAssert.numberGe(1, w, 0)
+	uiAssert.numberGe(1, h, 0)
 
 	self.doc_w, self.doc_h = w, h
 

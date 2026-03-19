@@ -14,8 +14,8 @@ _mt_widget.context = context
 
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 --local pools = context:getLua("core/res/pools")
-local pTable = require(context.conf.prod_ui_req .. "lib.pile_table")
-local pTree = require(context.conf.prod_ui_req .. "lib.pile_tree")
+local pTable = require(context.conf.prod_ui_req .. "lib.p_table")
+local pTree = require(context.conf.prod_ui_req .. "lib.p_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
@@ -52,7 +52,7 @@ _mt_widget.nodeFindKeyAscending = pTree.nodeFindKeyAscending
 
 
 -- User callbacks that are valid for any and every widget.
-local _default_user_callbacks = uiTable.newLUTV(
+local _default_user_callbacks = uiTable.newLutV(
 	"cb_update",
 	"cb_destroy"
 )
@@ -582,9 +582,9 @@ end
 -- @param [...] Additional arguments for the widget's evt_initialize() callback.
 -- @return New instance table. An error is raised if there is a problem.
 function _mt_widget:addChild(id, skin_id, pos, ...)
-	uiAssert.notNilNotFalseNotNaN(1, id)
+	uiAssert.notNilNotFalseNotNan(1, id)
 	uiAssert.typeEval(2, skin_id, "string")
-	uiAssert.numberNotNaNEval(3, pos)
+	uiAssert.numberNotNanEval(3, pos)
 
 	local children = self.nodes
 	pos = pos or #children + 1
@@ -663,12 +663,12 @@ function _mt_widget:destroy()
 
 	-- If parent exists, find and destroy self from parent's 1) children and 2) layout
 	if parent then
-		if uiTable.removeElement(parent.nodes, self) == 0 then
+		if uiTable.removeValueFromArray(parent.nodes, self) == 0 then
 			error("widget can't find itself in parent's list of children.")
 		end
 
 		if parent.LO_list then
-			uiTable.removeElement(parent.LO_list, self)
+			uiTable.removeValueFromArray(parent.LO_list, self)
 		end
 
 		self.parent = false
@@ -932,7 +932,7 @@ end
 -- @param var The new position. This value is clamped, so you may pass 0 for the first position and math.huge for the last.
 -- @return self (for chaining).
 function _mt_widget:reorder(var)
-	uiAssert.numberNotNaN(1, var)
+	uiAssert.numberNotNan(1, var)
 
 	if context.locks[self.parent] then
 		coreErr.errLockedParent("reorder")
@@ -1208,12 +1208,12 @@ end
 
 
 function _mt_widget:geometrySetPadding(x1, y1, x2, y2)
-	uiAssert.numberNotNaN(1, x1)
+	uiAssert.numberNotNan(1, x1)
 
 	if y1 then
-		uiAssert.numberNotNaN(2, y1)
-		uiAssert.numberNotNaN(3, x2)
-		uiAssert.numberNotNaN(4, y2)
+		uiAssert.numberNotNan(2, y1)
+		uiAssert.numberNotNan(3, x2)
+		uiAssert.numberNotNan(4, y2)
 
 		self.GE_outpad_x1 = math.max(0, x1)
 		self.GE_outpad_y1 = math.max(0, y1)
@@ -1236,7 +1236,7 @@ end
 
 
 function _mt_widget:geometrySetOrder(n)
-	uiAssert.numberNotNaN(1, n)
+	uiAssert.numberNotNan(1, n)
 
 	self.GE_order = n
 

@@ -4,7 +4,7 @@ local uiDummy = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pTable = require(PATH .. "lib.pile_table")
+local pTable = require(PATH .. "lib.p_table")
 
 
 uiDummy.func = function() end

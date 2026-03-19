@@ -1,7 +1,7 @@
 local demoShared = {}
 
 
-local pTable = require("prod_ui.lib.pile_table")
+local pTable = require("prod_ui.lib.p_table")
 local uiAssert = require("prod_ui.ui_assert")
 local uiRes = require("prod_ui.ui_res")
 

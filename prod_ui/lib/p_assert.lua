@@ -1,5 +1,5 @@
--- PILE Assert
--- VERSION: 2.022
+-- PILE Base: pAssert
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -40,8 +40,8 @@ local M = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local interp = require(PATH .. "pile_interp")
-local pName = require(PATH .. "pile_name")
+local pInterp = require(PATH .. "p_interp")
+local pName = require(PATH .. "p_name")
 
 
 local error, ipairs, select, table, tostring, type = error, ipairs, select, table, tostring, type
@@ -59,9 +59,9 @@ M.L = setmetatable({}, {__mode="kv"})
 
 function M._n(n)
 	local typ = type(n)
-	return typ == "number" and interp(lang.argument, n)
+	return typ == "number" and pInterp(lang.argument, n)
 		or typ == "string" and n .. ": "
-		or typ == "table" and interp(lang.field, n[1], n[2])
+		or typ == "table" and pInterp(lang.field, n[1], n[2])
 		or typ == "function" and n() .. ": "
 		or ""
 end
@@ -80,7 +80,7 @@ end
 lang.type = "bad type (expected $1, got $2)"
 function M.type(n, v, e)
 	if type(v) ~= e then
-		error(_n(n) .. interp(lang.type, e, type(v)), 2)
+		error(_n(n) .. pInterp(lang.type, e, type(v)), 2)
 	end
 end
 
@@ -88,7 +88,7 @@ end
 lang.type_eval = "bad type (expected false/nil or $1, got $2)"
 function M.typeEval(n, v, e)
 	if v and type(v) ~= e then
-		error(_n(n) .. interp(lang.type_eval, e, type(v)), 2)
+		error(_n(n) .. pInterp(lang.type_eval, e, type(v)), 2)
 	end
 end
 
@@ -101,7 +101,7 @@ function M.types(n, v, ...)
 			return
 		end
 	end
-	error(_n(n) .. interp(lang.types, table.concat({...}, ", "), typ), 2)
+	error(_n(n) .. pInterp(lang.types, table.concat({...}, ", "), typ), 2)
 end
 
 
@@ -114,7 +114,7 @@ function M.typesEval(n, v, ...)
 				return
 			end
 		end
-		error(_n(n) .. interp(lang.types_eval, table.concat({...}, ", "), typ), 2)
+		error(_n(n) .. pInterp(lang.types_eval, table.concat({...}, ", "), typ), 2)
 	end
 end
 
@@ -126,7 +126,7 @@ function M.oneOf(n, v, ...)
 			return
 		end
 	end
-	error(_n(n) .. interp(lang.bad_one_of, _safeConcat({...}, ", ")), 2)
+	error(_n(n) .. pInterp(lang.bad_one_of, _safeConcat({...}, ", ")), 2)
 end
 
 
@@ -138,16 +138,16 @@ function M.oneOfEval(n, v, ...)
 				return
 			end
 		end
-		error(_n(n) .. interp(lang.bad_one_of_eval, _safeConcat({...}, ", ")), 2)
+		error(_n(n) .. pInterp(lang.bad_one_of_eval, _safeConcat({...}, ", ")), 2)
 	end
 end
 
 
 lang.nan_a = "expected non-NaN number, got $1"
 lang.nan_b = "expected non-NaN number, got NaN"
-function M.numberNotNaN(n, v)
+function M.numberNotNan(n, v)
 	if type(v) ~= "number" then
-		error(_n(n) .. interp(lang.nan_a, type(v)), 2)
+		error(_n(n) .. pInterp(lang.nan_a, type(v)), 2)
 
 	elseif v ~= v then
 		error(_n(n) .. lang.nan_b, 2)
@@ -157,10 +157,10 @@ end
 
 lang.nan_eval_a = "expected false/nil or non-NaN number, got $1"
 lang.nan_eval_b = "expected false/nil or non-NaN number, got NaN"
-function M.numberNotNaNEval(n, v)
+function M.numberNotNanEval(n, v)
 	if v then
 		if type(v) ~= "number" then
-			error(_n(n) .. interp(lang.nan_eval_a, type(v)), 2)
+			error(_n(n) .. pInterp(lang.nan_eval_a, type(v)), 2)
 
 		elseif v ~= v then
 			error(_n(n) .. lang.nan_eval_b, 2)
@@ -170,17 +170,17 @@ end
 
 
 lang.num_ge = "expected number greater or equal to $1"
-function M.numberGE(n, v, min)
+function M.numberGe(n, v, min)
 	if type(v) ~= "number" or v ~= v or v < min then
-		error(_n(n) .. interp(lang.num_ge, min), 2)
+		error(_n(n) .. pInterp(lang.num_ge, min), 2)
 	end
 end
 
 
 lang.num_ge_eval = "expected false/nil or number greater or equal to $1"
-function M.numberGEEval(n, v, min)
+function M.numberGeEval(n, v, min)
 	if v and (type(v) ~= "number" or v ~= v or v < min) then
-		error(_n(n) .. interp(lang.num_ge_eval, min), 2)
+		error(_n(n) .. pInterp(lang.num_ge_eval, min), 2)
 	end
 end
 
@@ -188,7 +188,7 @@ end
 lang.num_range_a = "expected number, got $1"
 lang.num_range_b = "number is out of range"
 function M.numberRange(n, v, min, max)
-	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_a, type(v)), 2)
+	if type(v) ~= "number" then error(_n(n) .. pInterp(lang.int_range_a, type(v)), 2)
 	elseif v ~= v or v < min or v > max then error(_n(n) .. lang.int_range_b, 2) end
 end
 
@@ -197,7 +197,7 @@ lang.num_range_eval_a = "expected false/nil or number, got $1"
 lang.num_range_eval_b = "number is out of range"
 function M.numberRangeEval(n, v, min, max)
 	if v then
-		if type(v) ~= "number" then error(_n(n) .. interp(lang.num_range_eval_a, type(v)), 2)
+		if type(v) ~= "number" then error(_n(n) .. pInterp(lang.num_range_eval_a, type(v)), 2)
 		elseif v ~= v or v < min or v > max then error(_n(n) .. lang.num_range_eval_b, 2) end
 	end
 end
@@ -220,17 +220,17 @@ end
 
 
 lang.int_ge = "expected integer greater or equal to $1"
-function M.integerGE(n, v, min)
+function M.integerGe(n, v, min)
 	if type(v) ~= "number" or math.floor(v) ~= v or v < min then
-		error(_n(n) .. interp(lang.int_ge, min), 2)
+		error(_n(n) .. pInterp(lang.int_ge, min), 2)
 	end
 end
 
 
 lang.int_ge_eval = "expected false/nil or integer greater or equal to $1"
-function M.integerGEEval(n, v, min)
+function M.integerGeEval(n, v, min)
 	if v and (type(v) ~= "number" or math.floor(v) ~= v or v < min) then
-		error(_n(n) .. interp(lang.int_ge_eval, min), 2)
+		error(_n(n) .. pInterp(lang.int_ge_eval, min), 2)
 	end
 end
 
@@ -239,7 +239,7 @@ lang.int_range_a = "expected integer, got $1"
 lang.int_range_b = "got non-integer number"
 lang.int_range_c = "integer is out of range"
 function M.integerRange(n, v, min, max)
-	if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_a, type(v)), 2)
+	if type(v) ~= "number" then error(_n(n) .. pInterp(lang.int_range_a, type(v)), 2)
 	elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_b, 2)
 	elseif v < min or v > max then error(_n(n) .. lang.int_range_c, 2) end
 end
@@ -250,7 +250,7 @@ lang.int_range_eval_b = "got non-integer number"
 lang.int_range_eval_c = "integer is out of range"
 function M.integerRangeEval(n, v, min, max)
 	if v then
-		if type(v) ~= "number" then error(_n(n) .. interp(lang.int_range_eval_a, type(v)), 2)
+		if type(v) ~= "number" then error(_n(n) .. pInterp(lang.int_range_eval_a, type(v)), 2)
 		elseif math.floor(v) ~= v then error(_n(n) .. lang.int_range_eval_b, 2)
 		elseif v < min or v > max then error(_n(n) .. lang.int_range_eval_c, 2) end
 	end
@@ -260,14 +260,14 @@ end
 lang.bad_named_map = "invalid $1"
 function M.namedMap(n, v, map)
 	if not map[v] then
-		error(_n(n) .. interp(lang.bad_named_map, pName.safeGet(map, "NamedMap")), 2)
+		error(_n(n) .. pInterp(lang.bad_named_map, pName.safeGet(map, "NamedMap")), 2)
 	end
 end
 
 
 function M.namedMapEval(n, v, map)
 	if v and not map[v] then
-		error(_n(n) .. interp(lang.bad_named_map, pName.safeGet(map, "NamedMap")), 2)
+		error(_n(n) .. pInterp(lang.bad_named_map, pName.safeGet(map, "NamedMap")), 2)
 	end
 end
 
@@ -282,7 +282,7 @@ end
 
 lang.not_nil_not_nan_a = "expected non-nil, non-NaN value, got nil"
 lang.not_nil_not_nan_b = "expected non-nil, non-NaN value, got NaN"
-function M.notNilNotNaN(n, v)
+function M.notNilNotNan(n, v)
 	if v == nil then
 		error(_n(n) .. lang.not_nil_not_nan_a, 2)
 
@@ -302,7 +302,7 @@ end
 
 lang.not_nil_not_false_not_nan_a = "expected non-nil, non-false, non-NaN value, got false/nil"
 lang.not_nil_not_false_not_nan_b = "expected non-nil, non-false, non-NaN value, got NaN"
-function M.notNilNotFalseNotNaN(n, v)
+function M.notNilNotFalseNotNan(n, v)
 	if not v then
 		error(_n(n) .. lang.not_nil_not_false_not_nan_a, 2)
 
@@ -313,7 +313,7 @@ end
 
 
 lang.not_nan = "expected non-NaN value"
-function M.notNaN(n, v)
+function M.notNan(n, v)
 	if v ~= v then
 		error(_n(n) .. lang.not_nan, 2)
 	end
@@ -332,7 +332,7 @@ function M.tableWithMetatable(n, v, mt)
 		error(_n(n) .. lang.mt_bad_mt, 2)
 	end
 	if this_mt ~= mt then
-		error(_n(n) .. interp(lang.mt_bad_match, pName.safeGet(mt)), 2)
+		error(_n(n) .. pInterp(lang.mt_bad_match, pName.safeGet(mt)), 2)
 	end
 end
 
@@ -350,7 +350,7 @@ function M.tableWithMetatableEval(n, v, mt)
 			error(_n(n) .. lang.mt_bad_mt_eval, 2)
 		end
 		if this_mt ~= mt then
-			error(_n(n) .. interp(lang.mt_bad_match_eval, pName.safeGet(mt)), 2)
+			error(_n(n) .. pInterp(lang.mt_bad_match_eval, pName.safeGet(mt)), 2)
 		end
 	end
 end

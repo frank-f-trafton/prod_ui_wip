@@ -1,5 +1,5 @@
--- PILE Pool
--- VERSION: 2.022
+-- PILE Base: pHook
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -40,81 +40,63 @@ local M = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pAssert = require(PATH .. "pile_assert")
+local pAssert = require(PATH .. "p_assert")
 
 
-local _mt_pool = {}
-_mt_pool.__index = _mt_pool
-M._mt_pool = _mt_pool
-
-
-local table = table
-
-
-function M.new(popping, pushing, threshold)
-	pAssert.typeEval(1, popping, "function")
-	pAssert.typeEval(2, pushing, "function")
-	pAssert.numberNotNaNEval(3, threshold)
-
-	return setmetatable({
-		popping = popping or nil,
-		pushing = pushing or nil,
-		threshold = threshold or 0,
-		stack = {},
-		c = 0,
-	}, _mt_pool)
-end
-
-
-function _mt_pool:pop()
-	local stack, len, r = self.stack, self.c
-	r, stack[len] = stack[len], nil
-	if self.c > 0 then
-		self.c = len - 1
-	end
-	local popping = self.popping
-	if popping then
-		r = popping(r)
-	end
-
-	return r
-end
-
-
-function _mt_pool:push(r)
-	local pushing = self.pushing
-	if pushing then
-		r = pushing(r)
-	end
-	local len = self.c
-	if len < self.threshold then
-		self.stack[len + 1], self.c = r, self.c + 1
-	end
-end
-
-
-function _mt_pool:setThreshold(threshold)
-	pAssert.numberNotNaNEval(1, threshold)
-
-	self.threshold = threshold
-	self:reduceStack(threshold)
-end
-
-
-function _mt_pool:getThreshold()
-	return self.threshold
-end
-
-
-function _mt_pool:reduceStack(n)
-	pAssert.numberNotNaNEval(1, n)
-
-	n = n and math.max(0, n) or 0
-	for i = #self.stack, n + 1, -1 do
-		self:pop()
-		if i > self.threshold then
-			self.stack[i] = nil
+local function _callHooks(hl, ...)
+	if not hl[0] or hl[0](...) then
+		for i = 1, #hl do
+			local a,b,c,d = hl[i](...)
+			if a ~= nil then
+				return a,b,c,d
+			end
 		end
+	end
+end
+
+
+local function _callHooksBack(hl, ...)
+	if not hl[0] or hl[0](...) then
+		for i = #hl, 1, -1 do
+			local a,b,c,d = hl[i](...)
+			if a ~= nil then
+				return a,b,c,d
+			end
+		end
+	end
+end
+
+
+local _mt_hooks = {__call = _callHooks}
+_mt_hooks.__index = _mt_hooks
+
+
+local _mt_hooks_back = {__call = _callHooksBack}
+_mt_hooks_back.__index = _mt_hooks_back
+
+
+function M.newHookList(back, filter)
+	pAssert.typeEval(2, filter, "function")
+
+	local hl = setmetatable({}, back and _mt_hooks_back or _mt_hooks)
+
+	if filter then
+		hl[0] = filter
+	end
+
+	return hl
+end
+
+
+M.callHooks = _callHooks
+M.callHooksBack = _callHooksBack
+
+
+function M.wrap(hl)
+	pAssert.type(1, hl, "table")
+
+	return function(...)
+		return hl(...)
 	end
 end
 

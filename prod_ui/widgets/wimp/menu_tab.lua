@@ -59,8 +59,8 @@ Widget
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
-local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
+local pRect = require(context.conf.prod_ui_req .. "lib.p_rect")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -87,7 +87,7 @@ local _nm_cell_icon_side = uiTable.newNamedMapV("IconSide", "left", "right")
 local def = {
 	skin_id = "menu_tab1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_keyPressed"
 	)
 }
@@ -245,7 +245,7 @@ end
 
 
 function def:setReorderLimit(limit)
-	uiAssert.numberNotNaNEval(1, limit)
+	uiAssert.numberNotNanEval(1, limit)
 
 	self.reorder_limit = limit
 end
@@ -274,7 +274,7 @@ _mt_column.__index = _mt_column
 
 function def:newColumn(id, pos)
 	uiAssert.types(1, id, "string", "number")
-	uiAssert.numberNotNaNEval(2, pos)
+	uiAssert.numberNotNanEval(2, pos)
 
 	pos = pos or #self.columns + 1
 	pos = math.floor(pos)
@@ -395,7 +395,7 @@ end
 
 
 function _mt_column:setWidth(w, prescaled)
-	uiAssert.numberNotNaN(1, w)
+	uiAssert.numberNotNan(1, w)
 	-- don't check 'prescaled'
 
 	local old_base_w = self.base_w
@@ -486,7 +486,7 @@ _mt_item.__index = _mt_item
 
 
 function def:newRow(pos)
-	uiAssert.numberNotNaNEval(1, pos)
+	uiAssert.numberNotNanEval(1, pos)
 
 	pos = pos and math.floor(pos) or #self.MN_items + 1
 	if pos < 1 or pos > #self.MN_items + 1 then
@@ -518,7 +518,7 @@ end
 
 
 function def:removeRowByIndex(row_i) -- TODO: untested
-	uiAssert.numberNotNaN(1, row_i)
+	uiAssert.numberNotNan(1, row_i)
 
 	local items = self.MN_items
 	local removed_item = items[row_i]
@@ -1514,11 +1514,11 @@ def.default_skinner = {
 		default_icon_set_id = {uiAssert.types, "nil", "string"},
 
 		-- TODO: probably better to specify a default number of visible lines, plus the header.
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
-		column_min_w = {uiAssert.integerGE, 0},
-		column_def_w = {uiAssert.integerGE, 0},
-		column_bar_height = {uiAssert.integerGE, 0},
+		column_min_w = {uiAssert.integerGe, 0},
+		column_def_w = {uiAssert.integerGe, 0},
+		column_bar_height = {uiAssert.integerGe, 0},
 
 		col_def_text_align = {uiAssert.namedMap, _nm_text_align},
 		content_def_text_align = {uiAssert.namedMap, _nm_text_align},
@@ -1526,24 +1526,24 @@ def.default_skinner = {
 		col_arrow_show = {uiAssert.type, "boolean"},
 		col_arrow_side = {uiAssert.namedMap, _nm_header_arrow_side},
 
-		item_h = {uiAssert.integerGE, 0},
+		item_h = {uiAssert.integerGe, 0},
 
 		-- Width of the "drag to resize" sensor on column bars.
-		drag_threshold = {uiAssert.integerGE, 0},
+		drag_threshold = {uiAssert.integerGe, 0},
 
 		-- Half square range of where row sorting is permitted by clicking on column squares.
-		col_click_threshold = {uiAssert.integerGE, 0},
+		col_click_threshold = {uiAssert.integerGe, 0},
 
-		column_sep_width = {uiAssert.integerGE, 0},
+		column_sep_width = {uiAssert.integerGe, 0},
 
 		cell_font = themeAssert.font,
 
 		cell_icon_side = {uiAssert.namedMap, _nm_cell_icon_side},
-		cell_icon_w = {uiAssert.integerGE, 0},
-		cell_icon_h = {uiAssert.integerGE, 0},
+		cell_icon_w = {uiAssert.integerGe, 0},
+		cell_icon_h = {uiAssert.integerGe, 0},
 
-		header_icon_w = {uiAssert.integerGE, 0},
-		header_icon_h = {uiAssert.integerGE, 0},
+		header_icon_w = {uiAssert.integerGe, 0},
+		header_icon_h = {uiAssert.integerGe, 0},
 
 		tq_arrow_up = themeAssert.quad,
 		tq_arrow_down = themeAssert.quad,

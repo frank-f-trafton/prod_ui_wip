@@ -1,7 +1,7 @@
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local themeAssert = context:getLua("core/res/theme_assert")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -34,7 +34,7 @@ return {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},

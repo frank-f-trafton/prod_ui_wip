@@ -3,7 +3,7 @@ local context = select(1, ...)
 
 local hndStep = context:getLua("shared/hnd_step")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
-local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
+local pList2 = require(context.conf.prod_ui_req .. "lib.p_list2")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local wcKeyHook = context:getLua("shared/wc/wc_key_hook")

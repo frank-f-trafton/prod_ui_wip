@@ -7,8 +7,8 @@ local uiRes = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pPath = require(REQ_PATH .. "lib.pile_path")
-local pTable = require(REQ_PATH .. "lib.pile_table")
+local pPath = require(REQ_PATH .. "lib.p_path")
+local pTable = require(REQ_PATH .. "lib.p_table")
 local uiAssert = require(REQ_PATH .. "ui_assert")
 
 
@@ -140,7 +140,7 @@ function uiRes.enumerate(path, ext, recursive, depth)
 	uiAssert.type(1, path, "string")
 	uiAssert.typesEval(2, ext, "string", "table")
 	-- don't assert 'recursive'
-	uiAssert.integerGEEval(4, depth, 1)
+	uiAssert.integerGeEval(4, depth, 1)
 
 	depth = depth or 1000
 

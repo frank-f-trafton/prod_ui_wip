@@ -34,7 +34,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "button_split1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_buttonAction",
 		"cb_buttonAction2",
 		"cb_buttonAction3",
@@ -273,7 +273,7 @@ def.default_skinner = {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},
@@ -293,7 +293,7 @@ def.default_skinner = {
 
 		-- Aux part size (width for 'left' and 'right' placement; height for 'top' and 'bottom' placement)
 		-- "auto": size is based on Viewport #2
-		aux_size = {uiAssert.numberGEOrOneOf, 0, "auto"},
+		aux_size = {uiAssert.numberGeOrOneOf, 0, "auto"},
 
 		-- Quad (graphic) alignment within Viewport #2.
 		quad_align_h = {uiAssert.namedMap, uiTheme.named_maps.quad_align_h},
@@ -303,7 +303,7 @@ def.default_skinner = {
 		graphic_placement = {uiAssert.namedMap, uiTheme.named_maps.graphic_placement},
 
 		-- How much space to assign the graphic when not using "overlay" placement.
-		graphic_spacing = {uiAssert.numberGE, 0},
+		graphic_spacing = {uiAssert.numberGe, 0},
 
 		res_idle = md_res,
 		res_hover = md_res,

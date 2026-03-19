@@ -40,7 +40,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "number_box1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_action",
 		"cb_inputChanged",
 
@@ -293,7 +293,7 @@ end
 
 
 function def:setDefaultValue(v)
-	uiAssert.numberNotNaN(1, v)
+	uiAssert.numberNotNan(1, v)
 
 	self.value_default = v
 
@@ -672,7 +672,7 @@ def.default_skinner = {
 		font_ghost = themeAssert.font,
 		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 		text_align = {uiAssert.oneOf, "left", "center", "right"},
@@ -680,7 +680,7 @@ def.default_skinner = {
 
 		-- Horizontal size of the increment and decrement buttons.
 		-- "auto": use Viewport #1's height.
-		button_spacing = {uiAssert.numberGEOrOneOf, 0, "auto"},
+		button_spacing = {uiAssert.numberGeOrOneOf, 0, "auto"},
 
 		-- Inc/dec button positioning
 		button_placement = {uiAssert.oneOf, "left", "right"},

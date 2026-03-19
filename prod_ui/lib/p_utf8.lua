@@ -1,5 +1,5 @@
--- PILE UTF-8
--- VERSION: 2.022
+-- PILE Base: pUtf8
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -56,8 +56,8 @@ local lang = {
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local interp = require(PATH .. "pile_interp")
-local pAssert = require(PATH .. "pile_assert")
+local pInterp = require(PATH .. "p_interp")
+local pAssert = require(PATH .. "p_assert")
 
 
 local _argType, _argInt, _argIntRange = pAssert.type, pAssert.integer, pAssert.integerRange
@@ -92,11 +92,11 @@ local function _cont(b, pos)
 	-- Checks bytes 2-4 in a multi-byte code point
 	-- Do not call on the first byte
 	if not b then
-		return true, interp(lang.byte_nil, pos)
+		return true, pInterp(lang.byte_nil, pos)
 
 	-- Verify "following" byte mark
 	elseif b < 0x80 or b >= 0xc0 then
-		return true, interp(lang.byte_cont_oob, pos, _0x(b))
+		return true, pInterp(lang.byte_cont_oob, pos, _0x(b))
 	end
 end
 
@@ -141,7 +141,7 @@ local function _checkCode(c, len)
 	if len then
 		local range = min_max[len]
 		if c < range[1] or c > range[2] then
-			return true, interp(lang.len_mismatch, len, _0x(c), _0x(range[1]), _0x(range[2]))
+			return true, pInterp(lang.len_mismatch, len, _0x(c), _0x(range[1]), _0x(range[2]))
 		end
 	end
 end
@@ -239,7 +239,7 @@ local function codeFromString(s, i)
 	_argType(1, s, "string")
 	i = i == nil and 1 or i
 	_argInt(2, i, "number")
-	if i < 1 or i > #s then error(interp(lang.str_i_oob)) end
+	if i < 1 or i > #s then error(pInterp(lang.str_i_oob)) end
 
 	local c, len = _codeFromStr(s, i)
 
@@ -291,7 +291,7 @@ local function _codes(s, i)
 	end
 	local c, s2 = codeFromString(s, i)
 	if not c then
-		error(interp(lang.err_iter_codes, i, s2))
+		error(pInterp(lang.err_iter_codes, i, s2))
 	end
 	return i + #s2, c, s2
 end
@@ -309,7 +309,7 @@ local function concatCodes(...)
 	for i = 1, #t do
 		local s, err = stringFromCode(t[i])
 		if not s then
-			error(interp(lang.var_i_err, i, err))
+			error(pInterp(lang.var_i_err, i, err))
 		end
 		t[i] = s
 	end

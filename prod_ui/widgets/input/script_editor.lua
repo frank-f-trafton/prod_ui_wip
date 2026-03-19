@@ -396,19 +396,19 @@ def.default_skinner = {
 		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
 		-- TODO: probably better to specify a default number of visible lines.
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		cursor_on = {uiAssert.types, "nil", "string"},
-		paragraph_pad = {uiAssert.integerGE, 0},
+		paragraph_pad = {uiAssert.integerGe, 0},
 
 		-- 'lnc_' == paremeters for the line number column.
 
 		-- Reserve at least this many digits worth of space.
-		lnc_reserved = {uiAssert.integerGE, 0},
+		lnc_reserved = {uiAssert.integerGe, 0},
 
 		-- Left, right column padding
-		lnc_x1 = {uiAssert.integerGE, 0},
-		lnc_x2 = {uiAssert.integerGE, 0},
+		lnc_x1 = {uiAssert.integerGe, 0},
+		lnc_x2 = {uiAssert.integerGe, 0},
 
 		lnc_color_body = uiAssert.loveColorTuple,
 		lnc_color_text = uiAssert.loveColorTuple,

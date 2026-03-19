@@ -1,5 +1,5 @@
--- PILE Interp
--- VERSION: 2.022
+-- PILE Base: pMath
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -34,28 +34,74 @@ SOFTWARE.
 --]]
 
 
-local min, pairs, select, tostring = math.min, pairs, select, tostring
+local _ceil, _floor, _max, _min, _sqrt = math.ceil, math.floor, math.max, math.min, math.sqrt
 
 
-local v = {}
-
-
-local function c()
-	for k in pairs(v) do
-		v[k] = nil
-	end
-	v["$"] = "$"
+local function clamp(n, a, b)
+	return _max(a, _min(n, b))
 end
 
 
-c()
-
-
-return function(s, ...)
-	for i = 1, min(10, select("#", ...)) do
-		v[tostring(i)] = tostring(select(i, ...))
-	end
-	local r = tostring(s):gsub("%$(.)", v)
-	c()
-	return r
+-- [lume]
+local function dist(x1, y1, x2, y2)
+	local dx, dy = x1 - x2, y1 - y2
+	return _sqrt(dx*dx + dy*dy)
 end
+
+-- [lume]
+local function distSq(x1, y1, x2, y2)
+	local dx, dy = x1 - x2, y1 - y2
+	return dx*dx + dy*dy
+end
+
+
+local function lerp(a, b, v)
+	return (1 - v) * a + v * b
+end
+
+
+-- [lume]
+local function roundInf(n)
+	return n > 0 and _floor(n + .5) or _ceil(n - .5)
+end
+local _roundInf = roundInf
+
+
+-- [lume]
+local function roundInfIncrement(n, incr)
+	return _roundInf(n / incr) * incr
+end
+
+
+local function sign(n)
+	return n < 0 and -1 or n > 0 and 1 or 0
+end
+
+
+local function signN(n)
+	return n <= 0 and -1 or 1
+end
+
+
+local function signP(n)
+	return n < 0 and -1 or 1
+end
+
+
+local function wrap1(n, max)
+	return ((n - 1) % max) + 1
+end
+
+
+return {
+	clamp = clamp,
+	dist = dist,
+	distSq = distSq,
+	lerp = lerp,
+	roundInf = roundInf,
+	roundInfIncrement = roundInfIncrement,
+	sign = sign,
+	signN = signN,
+	signP = signP,
+	wrap1 = wrap1
+}

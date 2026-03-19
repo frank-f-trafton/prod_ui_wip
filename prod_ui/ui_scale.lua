@@ -4,8 +4,8 @@ local uiScale = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pScale = require(REQ_PATH .. "lib.pile_scale")
-local pTable = require(REQ_PATH .. "lib.pile_table")
+local pScale = require(REQ_PATH .. "lib.p_scale")
+local pTable = require(REQ_PATH .. "lib.p_table")
 
 
 pTable.patch(uiScale, pScale)

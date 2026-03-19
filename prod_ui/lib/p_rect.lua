@@ -1,5 +1,5 @@
--- PILE Rectangle
--- VERSION: 2.022
+-- PILE Base: pRect
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -40,8 +40,8 @@ local M = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pMath = require(PATH .. "pile_math")
-local pAssert = require(PATH .. "pile_assert")
+local pAssert = require(PATH .. "p_assert")
+local pMath = require(PATH .. "p_math")
 
 
 local _lerp, _roundInf = pMath.lerp, pMath.roundInf
@@ -56,10 +56,10 @@ local L = pAssert.L
 local function _checkRectangle(r, name)
 	pAssert.type(nil, r, "table")
 	L[1] = name
-	L[2] = "x"; pAssert.numberNotNaN(L, r.x)
-	L[2] = "y"; pAssert.numberNotNaN(L, r.y)
-	L[2] = "w"; pAssert.numberNotNaN(L, r.w)
-	L[2] = "h"; pAssert.numberNotNaN(L, r.h)
+	L[2] = "x"; pAssert.numberNotNan(L, r.x)
+	L[2] = "y"; pAssert.numberNotNan(L, r.y)
+	L[2] = "w"; pAssert.numberNotNan(L, r.w)
+	L[2] = "h"; pAssert.numberNotNan(L, r.h)
 end
 
 
@@ -82,10 +82,10 @@ end
 local function _checkSideDelta(sd, name)
 	pAssert.type(nil, sd, "table")
 	L[1] = name
-	L[2] = "x1"; pAssert.numberNotNaN(L, sd.x1)
-	L[2] = "y1"; pAssert.numberNotNaN(L, sd.y1)
-	L[2] = "x2"; pAssert.numberNotNaN(L, sd.x2)
-	L[2] = "y2"; pAssert.numberNotNaN(L, sd.y2)
+	L[2] = "x1"; pAssert.numberNotNan(L, sd.x1)
+	L[2] = "y1"; pAssert.numberNotNan(L, sd.y1)
+	L[2] = "x2"; pAssert.numberNotNan(L, sd.x2)
+	L[2] = "y2"; pAssert.numberNotNan(L, sd.y2)
 end
 --]]
 
@@ -93,10 +93,10 @@ end
 function M.set(r, x, y, w, h)
 	--[[ASSERT
 	pAssert.type(1, r, "table")
-	pAssert.numberNotNaN(2, x)
-	pAssert.numberNotNaN(3, y)
-	pAssert.numberNotNaN(4, w)
-	pAssert.numberNotNaN(5, h)
+	pAssert.numberNotNan(2, x)
+	pAssert.numberNotNan(3, y)
+	pAssert.numberNotNan(4, w)
+	pAssert.numberNotNan(5, h)
 	--]]
 
 	r.x, r.y, r.w, r.h = x, y, _max(0, w), _max(0, h)
@@ -108,8 +108,8 @@ end
 function M.setPosition(r, x, y)
 	--[[ASSERT
 	pAssert.type(1, r, "table")
-	pAssert.numberNotNaN(2, x)
-	pAssert.numberNotNaN(3, y)
+	pAssert.numberNotNan(2, x)
+	pAssert.numberNotNan(3, y)
 	--]]
 
 	r.x, r.y = x, y
@@ -121,8 +121,8 @@ end
 function M.setDimensions(r, w, h)
 	--[[ASSERT
 	pAssert.type(1, r, "table")
-	pAssert.numberNotNaN(2, w)
-	pAssert.numberNotNaN(3, h)
+	pAssert.numberNotNan(2, w)
+	pAssert.numberNotNan(3, h)
 	--]]
 
 	r.w, r.h = w, h
@@ -146,10 +146,10 @@ end
 function M.expand(r, x1, y1, x2, y2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x1)
-	pAssert.numberNotNaN(3, y1)
-	pAssert.numberNotNaN(4, x2)
-	pAssert.numberNotNaN(5, y2)
+	pAssert.numberNotNan(2, x1)
+	pAssert.numberNotNan(3, y1)
+	pAssert.numberNotNan(4, x2)
+	pAssert.numberNotNan(5, y2)
 	--]]
 
 	r.x = r.x - x1
@@ -164,10 +164,10 @@ end
 function M.reduce(r, x1, y1, x2, y2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x1)
-	pAssert.numberNotNaN(3, y1)
-	pAssert.numberNotNaN(4, x2)
-	pAssert.numberNotNaN(5, y2)
+	pAssert.numberNotNan(2, x1)
+	pAssert.numberNotNan(3, y1)
+	pAssert.numberNotNan(4, x2)
+	pAssert.numberNotNan(5, y2)
 	--]]
 
 	r.x = r.x + x1
@@ -212,8 +212,8 @@ end
 function M.expandHorizontal(r, x1, x2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x1)
-	pAssert.numberNotNaN(3, x2)
+	pAssert.numberNotNan(2, x1)
+	pAssert.numberNotNan(3, x2)
 	--]]
 
 	r.x = r.x - x1
@@ -226,8 +226,8 @@ end
 function M.reduceHorizontal(r, x1, x2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x1)
-	pAssert.numberNotNaN(3, x2)
+	pAssert.numberNotNan(2, x1)
+	pAssert.numberNotNan(3, x2)
 	--]]
 
 	r.x = r.x + x1
@@ -240,8 +240,8 @@ end
 function M.expandVertical(r, y1, y2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, y1)
-	pAssert.numberNotNaN(3, y2)
+	pAssert.numberNotNan(2, y1)
+	pAssert.numberNotNan(3, y2)
 	--]]
 
 	r.y = r.y - y1
@@ -254,8 +254,8 @@ end
 function M.reduceVertical(r, y1, y2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, y1)
-	pAssert.numberNotNaN(3, y2)
+	pAssert.numberNotNan(2, y1)
+	pAssert.numberNotNan(3, y2)
 	--]]
 
 	r.y = r.y + y1
@@ -268,7 +268,7 @@ end
 function M.expandLeft(r, x1)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x1)
+	pAssert.numberNotNan(2, x1)
 	--]]
 
 	r.x = r.x - x1
@@ -281,7 +281,7 @@ end
 function M.reduceLeft(r, x1)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x1)
+	pAssert.numberNotNan(2, x1)
 	--]]
 
 	r.x = r.x + x1
@@ -294,7 +294,7 @@ end
 function M.expandRight(r, x2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x2)
+	pAssert.numberNotNan(2, x2)
 	--]]
 
 	r.w = _max(0, r.w + x2)
@@ -306,7 +306,7 @@ end
 function M.reduceRight(r, x2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, x2)
+	pAssert.numberNotNan(2, x2)
 	--]]
 
 	r.w = _max(0, r.w - x2)
@@ -318,7 +318,7 @@ end
 function M.expandTop(r, y1)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, y1)
+	pAssert.numberNotNan(2, y1)
 	--]]
 
 	r.y = r.y - y1
@@ -331,7 +331,7 @@ end
 function M.reduceTop(r, y1)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, y1)
+	pAssert.numberNotNan(2, y1)
 	--]]
 
 	r.y = r.y + y1
@@ -344,7 +344,7 @@ end
 function M.expandBottom(r, y2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, y2)
+	pAssert.numberNotNan(2, y2)
 	--]]
 
 	r.h = _max(0, r.h + y2)
@@ -356,7 +356,7 @@ end
 function M.reduceBottom(r, y2)
 	--[[ASSERT
 	_checkRectangle(r, "r")
-	pAssert.numberNotNaN(2, y2)
+	pAssert.numberNotNan(2, y2)
 	--]]
 
 	r.h = _max(0, r.h - y2)
@@ -369,7 +369,7 @@ function M.splitLeft(a, b, len)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, len)
+	pAssert.numberNotNan(3, len)
 	--]]
 
 	len = _min(len, a.w)
@@ -388,7 +388,7 @@ function M.splitRight(a, b, len)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, len)
+	pAssert.numberNotNan(3, len)
 	--]]
 
 	len = _min(len, a.w)
@@ -406,7 +406,7 @@ function M.splitTop(a, b, len)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, len)
+	pAssert.numberNotNan(3, len)
 	--]]
 
 	len = _min(len, a.h)
@@ -425,7 +425,7 @@ function M.splitBottom(a, b, len)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, len)
+	pAssert.numberNotNan(3, len)
 	--]]
 
 	len = _min(len, a.h)
@@ -452,7 +452,7 @@ function M.split(a, b, placement, len)
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
 	-- don't assert 'placement'.
-	pAssert.numberNotNaN(4, len)
+	pAssert.numberNotNan(4, len)
 	--]]
 
 	local fn = _split_sides[placement]
@@ -472,7 +472,7 @@ function M.splitOrOverlay(a, b, placement, len)
 	_checkRectangle(b, "b")
 	-- don't assert 'placement'.
 	if placement ~= "overlay" then
-		pAssert.numberNotNaN(4, len)
+		pAssert.numberNotNan(4, len)
 	end
 	--]]
 
@@ -495,8 +495,8 @@ function M.placeInner(a, b, ux, uy)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, ux)
-	pAssert.numberNotNaN(4, uy)
+	pAssert.numberNotNan(3, ux)
+	pAssert.numberNotNan(4, uy)
 	--]]
 
 	b.x = _roundInf(_lerp(a.x, a.x + a.w - b.w, ux))
@@ -510,7 +510,7 @@ function M.placeInnerHorizontal(a, b, ux)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, ux)
+	pAssert.numberNotNan(3, ux)
 	--]]
 
 	b.x = _roundInf(_lerp(a.x, a.x + a.w - b.w, ux))
@@ -523,7 +523,7 @@ function M.placeInnerVertical(a, b, uy)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(4, uy)
+	pAssert.numberNotNan(4, uy)
 	--]]
 
 	b.y = _roundInf(_lerp(a.y, a.y + a.h - b.h, uy))
@@ -536,8 +536,8 @@ function M.placeMidpoint(a, b, ux, uy)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, ux)
-	pAssert.numberNotNaN(4, uy)
+	pAssert.numberNotNan(3, ux)
+	pAssert.numberNotNan(4, uy)
 	--]]
 
 	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
@@ -551,7 +551,7 @@ function M.placeMidpointHorizontal(a, b, ux)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, ux)
+	pAssert.numberNotNan(3, ux)
 	--]]
 
 	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
@@ -564,7 +564,7 @@ function M.placeMidpointVertical(a, b, uy)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(4, uy)
+	pAssert.numberNotNan(4, uy)
 	--]]
 
 	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
@@ -577,8 +577,8 @@ function M.placeOuter(a, b, ux, uy)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, ux)
-	pAssert.numberNotNaN(4, uy)
+	pAssert.numberNotNan(3, ux)
+	pAssert.numberNotNan(4, uy)
 	--]]
 
 	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
@@ -592,7 +592,7 @@ function M.placeOuterHorizontal(a, b, ux)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(3, ux)
+	pAssert.numberNotNan(3, ux)
 	--]]
 
 	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
@@ -605,7 +605,7 @@ function M.placeOuterVertical(a, b, uy)
 	--[[ASSERT
 	_checkRectangle(a, "a")
 	_checkRectangle(b, "b")
-	pAssert.numberNotNaN(4, uy)
+	pAssert.numberNotNan(4, uy)
 	--]]
 
 	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
@@ -680,8 +680,8 @@ end
 function M.pointOverlap(r, x, y)
 	--[[ASSERT
 	pAssert.type(1, r, "table")
-	pAssert.numberNotNaN(2, x)
-	pAssert.numberNotNaN(3, y)
+	pAssert.numberNotNan(2, x)
+	pAssert.numberNotNan(3, y)
 	--]]
 
 	return x >= r.x and x < r.x + r.w and y >= r.y and y < r.y + r.h

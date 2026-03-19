@@ -1,5 +1,5 @@
--- PILE Path
--- VERSION: 2.022
+-- PILE Base: pInterp
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -34,23 +34,28 @@ SOFTWARE.
 --]]
 
 
-local M = {}
+local min, pairs, select, tostring = math.min, pairs, select, tostring
 
 
-function M.getExtension(path)
-	return (path:match("/?([^/]-)$"):match("%.[^%.]-$")) or ""
+local v = {}
+
+
+local function c()
+	for k in pairs(v) do
+		v[k] = nil
+	end
+	v["$"] = "$"
 end
 
 
-function M.join(a, b)
-	return (a:match("^/*(.*)$"):match("^(.-)/*$") .. (a ~= "" and "/" or "") .. b:match("^/*(.*)$")):match("^(.-)/*$")
+c()
+
+
+return function(s, ...)
+	for i = 1, min(10, select("#", ...)) do
+		v[tostring(i)] = tostring(select(i, ...))
+	end
+	local r = tostring(s):gsub("%$(.)", v)
+	c()
+	return r
 end
-
-
-function M.splitPathAndExtension(path)
-	local e = M.getExtension(path)
-	return path:sub(1, -(#e + 1)), e
-end
-
-
-return M

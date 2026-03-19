@@ -17,7 +17,7 @@ The menu bar may act strangely if it becomes too narrow to display all categorie
 local context = select(1, ...)
 
 
-local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
+local pList2 = require(context.conf.prod_ui_req .. "lib.p_list2")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -254,7 +254,7 @@ end
 
 
 function def:removeCategoryByIndex(item_i)
-	uiAssert.numberNotNaN(1, item_i)
+	uiAssert.numberNotNan(1, item_i)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -938,14 +938,14 @@ def.default_skinner = {
 		color_hover_glow = uiAssert.loveColorTuple,
 		color_item_icon = uiAssert.loveColorTuple,
 
-		base_height = {uiAssert.numberGEOrOneOf, 0, "auto"},
-		underline_width = {uiAssert.integerGE, 1},
-		height_mult = {uiAssert.numberGE, 1.0},
+		base_height = {uiAssert.numberGeOrOneOf, 0, "auto"},
+		underline_width = {uiAssert.integerGe, 1},
+		height_mult = {uiAssert.numberGe, 1.0},
 
-		icon_pad_x = {uiAssert.integerGE, 0},
-		icon_w = {uiAssert.integerGE, 0},
-		icon_h = {uiAssert.integerGE, 0},
-		text_pad_x = {uiAssert.integerGE, 0}
+		icon_pad_x = {uiAssert.integerGe, 0},
+		icon_w = {uiAssert.integerGe, 0},
+		icon_h = {uiAssert.integerGe, 0},
+		text_pad_x = {uiAssert.integerGe, 0}
 	},
 
 

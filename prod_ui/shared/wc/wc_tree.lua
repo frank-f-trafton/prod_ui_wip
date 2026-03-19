@@ -7,7 +7,7 @@ local context = select(1, ...)
 local wcTree = {}
 
 
-local pTree = require(context.conf.prod_ui_req .. "lib.pile_tree")
+local pTree = require(context.conf.prod_ui_req .. "lib.p_tree")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcIconsAndText = context:getLua("shared/wc/wc_icons_and_text")

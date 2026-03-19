@@ -50,7 +50,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "stepper1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_stepperChanged",
 		"cb_buttonAction",
 		"cb_buttonAction2",
@@ -190,7 +190,7 @@ end
 -- @param index The new index number. The value is clamped between 1 and the number of options, or is set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:setIndex(index)
-	uiAssert.numberNotNaN(1, index)
+	uiAssert.numberNotNan(1, index)
 
 	index = math.floor(index)
 
@@ -223,7 +223,7 @@ end
 -- @param delta The amount to increment or decrement, expected to be -1, 0 or 1. The final index value will wrap around, or be set to zero if there are no options specified. Must not be NaN.
 -- @return The new index, which may be different than the index requested.
 function def:stepIndex(delta)
-	uiAssert.numberNotNaN(1, delta)
+	uiAssert.numberNotNan(1, delta)
 
 	delta = math.floor(delta)
 
@@ -473,7 +473,7 @@ def.default_skinner = {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},
@@ -490,8 +490,8 @@ def.default_skinner = {
 		gfx_next_align_v = {uiAssert.oneOf, "top", "middle", "bottom"},
 
 		-- How much space to assign the next+prev buttons when not using "overlay" placement.
-		prev_spacing = {uiAssert.integerGE, 0},
-		next_spacing = {uiAssert.integerGE, 0},
+		prev_spacing = {uiAssert.integerGe, 0},
+		next_spacing = {uiAssert.integerGe, 0},
 
 		-- Arrow quad mappings:
 		--

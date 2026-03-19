@@ -1,5 +1,5 @@
--- PILE Schema
--- VERSION: 2.022
+-- PILE Base: pSchema
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -40,8 +40,8 @@ local M = {}
 local PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local interp = require(PATH .. "pile_interp")
-local pAssert = require(PATH .. "pile_assert")
+local pAssert = require(PATH .. "p_assert")
+local pInterp = require(PATH .. "p_interp")
 
 
 local ipairs, pairs, type = ipairs, pairs, type
@@ -112,14 +112,14 @@ local function _unpackRef(k, v)
 
 		-- handler
 		elseif type(ref) ~= "function" then
-			error(interp(lang.bad_ref_fn, k))
+			error(pInterp(lang.bad_ref_fn, k))
 		end
 
 		return ref, opts
 
 	-- invalid
 	else
-		error(interp(lang.bad_ref_type, k))
+		error(pInterp(lang.bad_ref_type, k))
 	end
 end
 
@@ -151,7 +151,7 @@ local function _doRef(state, k, v, ref, opts)
 
 	-- invalid
 	else
-		_failure(state, interp(lang.missing_handler, k))
+		_failure(state, pInterp(lang.missing_handler, k))
 	end
 
 	table.remove(state.labels)
@@ -183,13 +183,13 @@ _validateModel = function(state, md, tbl)
 		local len, arr_len, arr_min, arr_max = #tbl, md.array_len, md.array_min, md.array_max
 
 		if arr_len and len ~= arr_len then
-			_failure(state, interp(lang.mismatch_len, arr_len, len))
+			_failure(state, pInterp(lang.mismatch_len, arr_len, len))
 
 		elseif arr_min and len < arr_min then
-			_failure(state, interp(lang.mismatch_min_len, len, arr_min))
+			_failure(state, pInterp(lang.mismatch_min_len, len, arr_min))
 
 		elseif arr_max and len > arr_max then
-			_failure(state, interp(lang.mismatch_max_len, len, arr_max))
+			_failure(state, pInterp(lang.mismatch_max_len, len, arr_max))
 
 		else
 			for i, v in ipairs(tbl) do
@@ -210,14 +210,14 @@ _validateModel = function(state, md, tbl)
 
 	if md.reject_unhandled and next(pend) then
 		for k in pairs(pend) do
-			_failure(state, interp(lang.unhandled_k, k))
+			_failure(state, pInterp(lang.unhandled_k, k))
 		end
 	end
 end
 
 
 function M.setMaxMessages(n)
-	pAssert.integerGEEval(1, n, 1)
+	pAssert.integerGeEval(1, n, 1)
 
 	M.max_messages = n or _default_max_msg
 end

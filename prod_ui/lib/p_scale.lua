@@ -1,5 +1,5 @@
--- PILE Scale
--- VERSION: 2.022
+-- PILE Base: pScale
+-- VERSION: 2.105
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -40,14 +40,14 @@ local M = {}
 local REQ_PATH = ... and (...):match("(.-)[^%.]+$") or ""
 
 
-local pAssert = require(REQ_PATH .. "pile_assert")
+local pAssert = require(REQ_PATH .. "p_assert")
 
 
 function M.number(scale, v, min, max)
-	pAssert.numberNotNaN(1, scale)
-	pAssert.numberNotNaN(2, v)
-	pAssert.numberNotNaNEval(3, min)
-	pAssert.numberNotNaNEval(4, max)
+	pAssert.numberNotNan(1, scale)
+	pAssert.numberNotNan(2, v)
+	pAssert.numberNotNanEval(3, min)
+	pAssert.numberNotNanEval(4, max)
 
 	min, max = min or -math.huge, max or math.huge
 
@@ -56,10 +56,10 @@ end
 
 
 function M.integer(scale, v, min, max)
-	pAssert.numberNotNaN(1, scale)
-	pAssert.numberNotNaN(2, v)
-	pAssert.numberNotNaNEval(3, min)
-	pAssert.numberNotNaNEval(4, max)
+	pAssert.numberNotNan(1, scale)
+	pAssert.numberNotNan(2, v)
+	pAssert.numberNotNanEval(3, min)
+	pAssert.numberNotNanEval(4, max)
 
 	min, max = min or -math.huge, max or math.huge
 
@@ -68,14 +68,14 @@ end
 
 
 function M.fieldNumber(scale, t, k, min, max)
-	pAssert.numberNotNaN(1, scale)
+	pAssert.numberNotNan(1, scale)
 	pAssert.type(2, t, "table")
 	-- don't assert 'k'
-	pAssert.numberNotNaNEval(4, min)
-	pAssert.numberNotNaNEval(5, max)
+	pAssert.numberNotNanEval(4, min)
+	pAssert.numberNotNanEval(5, max)
 
 	local v = t[k]
-	pAssert.numberNotNaN("t[k]", v)
+	pAssert.numberNotNan("t[k]", v)
 
 	min, max = min or -math.huge, max or math.huge
 
@@ -84,14 +84,14 @@ end
 
 
 function M.fieldInteger(scale, t, k, min, max)
-	pAssert.numberNotNaN(1, scale)
+	pAssert.numberNotNan(1, scale)
 	pAssert.type(2, t, "table")
 	-- don't assert 'k'
-	pAssert.numberNotNaNEval(4, min)
-	pAssert.numberNotNaNEval(5, max)
+	pAssert.numberNotNanEval(4, min)
+	pAssert.numberNotNanEval(5, max)
 
 	local v = t[k]
-	pAssert.numberNotNaN("t[k]", v)
+	pAssert.numberNotNan("t[k]", v)
 
 	min, max = min or -math.huge, max or math.huge
 

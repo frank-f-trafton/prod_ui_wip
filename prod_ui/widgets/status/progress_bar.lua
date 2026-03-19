@@ -22,7 +22,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "progress_bar1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_barChanged"
 	)
 }
@@ -51,8 +51,8 @@ def.setLabel = wcLabel.widSetLabel
 -- @param pos The position value. Clamped between 0 and max.
 -- @param max The maximum value. Clamped to 0 on the low end.
 function def:setCounter(pos, max)
-	uiAssert.numberNotNaN(1, pos)
-	uiAssert.numberNotNaNEval(2, max)
+	uiAssert.numberNotNan(1, pos)
+	uiAssert.numberNotNanEval(2, max)
 
 	local old_pos = self.pos
 	local old_max = self.max
@@ -158,7 +158,7 @@ def.default_skinner = {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Alignment of label text in Viewport #1.
 		label_align_h = {uiAssert.namedMap, uiTheme.named_maps.label_align_h},

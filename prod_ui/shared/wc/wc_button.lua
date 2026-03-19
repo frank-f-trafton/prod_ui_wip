@@ -265,7 +265,7 @@ end
 
 --- Sets the maximum value for multi-state checkboxes.
 function wcButton.setMaxValue(self, max)
-	uiAssert.integerGE(1, max, 1)
+	uiAssert.integerGe(1, max, 1)
 
 	self.value_max = max
 

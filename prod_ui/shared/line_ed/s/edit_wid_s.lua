@@ -12,7 +12,7 @@ local utf8 = require("utf8")
 
 local editFuncS = context:getLua("shared/line_ed/s/edit_func_s")
 local editWid = context:getLua("shared/line_ed/edit_wid")
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local widShared = context:getLua("core/wid_shared")
 
 

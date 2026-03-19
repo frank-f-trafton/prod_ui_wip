@@ -41,7 +41,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "list_box1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_action",
 		"cb_action2",
 		"cb_action3",
@@ -228,7 +228,7 @@ end
 
 
 function def:removeItemByIndex(item_i)
-	uiAssert.numberNotNaN(1, item_i)
+	uiAssert.numberNotNan(1, item_i)
 
 	local items = self.MN_items
 	local removed_item = items[item_i]
@@ -255,7 +255,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)

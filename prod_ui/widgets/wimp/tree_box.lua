@@ -41,7 +41,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "tree_box1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_action",
 		"cb_action2",
 		"cb_action3",
@@ -148,7 +148,7 @@ end
 
 
 function def:setSelectionByIndex(item_i)
-	uiAssert.integerGE(1, item_i, 0)
+	uiAssert.integerGe(1, item_i, 0)
 
 	local old_index = self.MN_index
 	self:menuSetSelectedIndex(item_i)
@@ -573,34 +573,34 @@ def.default_skinner = {
 		tq_expander_right = themeAssert.quad,
 
 		-- Item height is calculated as: math.floor((font:getHeight() * font:getLineHeight()) + item_pad_v)
-		item_pad_v = {uiAssert.integerGE, 0},
+		item_pad_v = {uiAssert.integerGe, 0},
 
 		sl_body = themeAssert.slice,
 
 		-- Vertical text alignment is centered.
 
 		-- Spacing for expanders, and half the initial width for the first pipe indentation.
-		first_col_spacing = {uiAssert.integerGE, 0},
+		first_col_spacing = {uiAssert.integerGe, 0},
 
 		-- The amount to indent child nodes.
-		indent = {uiAssert.integerGE, 0},
+		indent = {uiAssert.integerGe, 0},
 
 		-- Draw vertical pipes that show the indentation of each node.
 		draw_pipes = {uiAssert.types, "nil", "boolean"},
-		pipe_width = {uiAssert.integerGE, 0},
+		pipe_width = {uiAssert.integerGe, 0},
 
 		-- Icon column width and positioning, if active.
-		icon_spacing = {uiAssert.integerGE, 0},
+		icon_spacing = {uiAssert.integerGe, 0},
 
 		-- Item components are always placed in these orders:
 		-- Left alignment: pipe decoration, expander, icon, text.
 		-- Right alignment: text, icon, expander, pipe decoration
 
 		-- Additional padding for icons.
-		pad_icon_x = {uiAssert.integerGE, 0},
+		pad_icon_x = {uiAssert.integerGe, 0},
 
 		-- Additional padding for text.
-		pad_text_x = {uiAssert.integerGE, 0},
+		pad_text_x = {uiAssert.integerGe, 0},
 
 		color_body = uiAssert.loveColorTuple,
 		color_item_text = uiAssert.loveColorTuple,

@@ -10,9 +10,9 @@ local widShared = {}
 widShared.debug = context:getLua("core/wid/debug")
 
 
-local pList2 = require(context.conf.prod_ui_req .. "lib.pile_list2")
+local pList2 = require(context.conf.prod_ui_req .. "lib.p_list2")
 local pools = context:getLua("core/res/pools")
-local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
+local pRect = require(context.conf.prod_ui_req .. "lib.p_rect")
 
 
 local _viewport_keys = context:getLua("core/wid/viewport_keys")

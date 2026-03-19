@@ -9,8 +9,8 @@ local context = select(1, ...)
 local pools = {}
 
 
-local pPool = require(context.conf.prod_ui_req .. "lib.pile_pool")
-local pRect = require(context.conf.prod_ui_req .. "lib.pile_rectangle")
+local pPool = require(context.conf.prod_ui_req .. "lib.p_pool")
+local pRect = require(context.conf.prod_ui_req .. "lib.p_rect")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 
 

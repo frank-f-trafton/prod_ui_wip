@@ -39,7 +39,7 @@ local widShared = context:getLua("core/wid_shared")
 local def = {
 	skin_id = "text_box_s1",
 
-	user_callbacks = uiTable.newLUTV(
+	user_callbacks = uiTable.newLutV(
 		"cb_action"
 	)
 }
@@ -280,7 +280,7 @@ def.default_skinner = {
 		font_ghost = themeAssert.font,
 		ghost_mode = {uiAssert.namedMap, editWid._nm_ghost_mode},
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		cursor_on = {uiAssert.types, "nil", "string"},
 		text_align = {uiAssert.oneOf, "left", "center", "right"},

@@ -14,7 +14,7 @@
 local context = select(1, ...)
 
 
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -127,18 +127,18 @@ def.default_skinner = {
 		label_style = themeAssert.labelStyle,
 		tq_px = themeAssert.quad,
 
-		default_height = {uiAssert.numberGE, 0}, -- unscaled
+		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- Cursor IDs for hover and press states.
 		cursor_on = {uiAssert.types, "nil", "string"},
 		cursor_press = {uiAssert.types, "nil", "string"},
 
 		-- Checkbox (quad) render size.
-		bijou_w = {uiAssert.numberGE, 0},
-		bijou_h = {uiAssert.numberGE, 0},
+		bijou_w = {uiAssert.numberGe, 0},
+		bijou_h = {uiAssert.numberGe, 0},
 
 		-- Horizontal spacing between checkbox area and text label.
-		bijou_spacing = {uiAssert.numberGE, 0},
+		bijou_spacing = {uiAssert.numberGe, 0},
 
 		-- Checkbox horizontal placement.
 		bijou_side_h = {uiAssert.namedMap, uiTheme.named_maps.bijou_side_h},

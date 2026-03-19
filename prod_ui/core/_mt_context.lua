@@ -17,8 +17,8 @@ local contextResources = context:getLua("core/context_resources")
 local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
 --local pools = context:getLua("core/res/pools")
-local pMath = require(context.conf.prod_ui_req .. "lib.pile_math")
-local pUTF8 = require(context.conf.prod_ui_req .. "lib.pile_utf8")
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
+local pUTF8 = require(context.conf.prod_ui_req .. "lib.p_utf8")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
@@ -869,7 +869,7 @@ end
 --	chunk.
 function _mt_context:loadWidgetDefFromFunction(chunk, id, def_conf)
 	uiAssert.type(1, chunk, "function")
-	uiAssert.notNilNotFalseNotNaN(2, id)
+	uiAssert.notNilNotFalseNotNan(2, id)
 
 	if self.widget_defs[id] then
 		error("widget ID " .. id .. " is already loaded.")
@@ -910,7 +910,7 @@ end
 -- @return The def table or fab function. Raises a Lua error if there's an issue with file-handling or parsing and executing the Lua chunk.
 function _mt_context:loadWidgetDef(file_path, id, def_conf)
 	uiAssert.type(1, file_path, "string")
-	uiAssert.notNilNotFalseNotNaN(2, id)
+	uiAssert.notNilNotFalseNotNan(2, id)
 
 	local chunk = uiRes.assertLoad(file_path)
 
@@ -980,7 +980,7 @@ end
 -- @param id The widget definition ID. Cannot be NaN.
 -- @return the definition table, or nil if nothing is registered by that ID.
 function _mt_context:getWidgetDef(id)
-	uiAssert.notNilNotFalseNotNaN(1, id)
+	uiAssert.notNilNotFalseNotNan(1, id)
 
 	return self.widget_defs[id]
 end
@@ -1017,7 +1017,7 @@ end
 -- @param [...] Additional arguments for the root's evt_initialize() callback.
 -- @return A reference to the new root instance.
 function _mt_context:addRoot(id, skin_id, ...)
-	uiAssert.notNilNotFalseNotNaN(1, id)
+	uiAssert.notNilNotFalseNotNan(1, id)
 	uiAssert.typeEval(2, skin_id, "string")
 
 	if self.locked then
@@ -1152,7 +1152,7 @@ end
 
 
 function _mt_context:setScale(scale)
-	uiAssert.numberNotNaN(1, scale)
+	uiAssert.numberNotNan(1, scale)
 
 	self.scale = math.max(0.1, math.min(scale, 10.0))
 end
@@ -1164,7 +1164,7 @@ end
 
 
 function _mt_context:setTextureScale(tex_scale)
-	uiAssert.numberNotNaN(1, tex_scale)
+	uiAssert.numberNotNan(1, tex_scale)
 
 	self.tex_scale = math.max(1, math.floor(tex_scale))
 	self.path_symbols.tex_scale = tostring(self.tex_scale)
