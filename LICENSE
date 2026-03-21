@@ -56,15 +56,10 @@ LIBRARIES:
     lume code: Copyright (c) 2020 rxi
       https://github.com/rxi/lume
 
-- T2S2
-  URL: https://github.com/frank-f-trafton/t2s2
+- Serpent
+  URL: https://github.com/pkulchenko/serpent
   License: MIT
   Copyright notice(s):
-    Copyright (c) 2022 - 2024 RBTS
-
-    T2S2 uses code from Serpent by by Paul Kulchenko:
-    https://github.com/pkulchenko/serpent
-
     Copyright (c) 2012-2018 Paul Kulchenko (paul@kulchenko.com)
 
 

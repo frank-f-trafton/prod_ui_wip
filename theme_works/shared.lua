@@ -2,6 +2,7 @@ local shared = {}
 
 
 local nativefs = require("lib.nativefs")
+local serpent = require("lib.serpent.serpent")
 
 
 -- * Filesystem wrappers * --
@@ -95,6 +96,22 @@ function shared.nfsLoadLuaFile(...)
 	local retval = chunk(...)
 
 	return retval
+end
+
+
+local serpent_opts = {
+	comment=false,
+	fatal=true,
+	fixradix=true,
+	indent="  ",
+	metatostring=false,
+	nocode=true,
+	sortkeys=true
+}
+
+
+function shared.serializeTable(t)
+	return "return " .. serpent.block(t, serpent_opts)
 end
 
 
