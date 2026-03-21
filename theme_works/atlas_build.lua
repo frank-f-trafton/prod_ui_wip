@@ -25,7 +25,6 @@ local shared = require("shared")
 local atlasB = require("lib.atlas_b.atlas_b")
 local idops = require("lib.idops.idops")
 local nativefs = require("lib.nativefs")
-local t2s2 = require("lib.t2s2.t2s2")
 
 
 local arg_png_path
@@ -244,7 +243,7 @@ local tasks_build = {
 			out_base_data.slices[k] = v
 		end
 
-		local atlas_box_str = t2s2.serialize(out_base_data)
+		local atlas_box_str = shared.serializeTable(out_base_data)
 		shared.nfsWrite(arg_dest_path .. "/atlas.lua", atlas_box_str)
 
 		task_i = task_i + 1

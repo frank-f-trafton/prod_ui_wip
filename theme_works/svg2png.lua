@@ -24,7 +24,6 @@ local shared = require("shared")
 
 -- Libraries
 local nativefs = require("lib.nativefs")
-local t2s2 = require("lib.t2s2.t2s2")
 
 
 local arg_src_path -- theme name
@@ -182,7 +181,8 @@ local tasks_export = {
 				v.ox2 = tryScaleCoord(v.ox2, x_scale)
 				v.oy2 = tryScaleCoord(v.oy2, y_scale)
 			end
-			local out_str = t2s2.serialize(base_data)
+
+			local out_str = shared.serializeTable(base_data)
 			shared.nfsWrite("output/" .. arg_src_path .. "/" .. arg_scale .. "/base_data.lua", out_str .. "\n")
 		end
 
