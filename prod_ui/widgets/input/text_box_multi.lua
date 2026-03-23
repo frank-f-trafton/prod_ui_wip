@@ -426,7 +426,7 @@ def.default_skinner = {
 		end
 		wcInputM.draw(self, is_ghost_text, font, col_highlight, col_text, col_caret)
 
-		love.graphics.setScissor(scx, scy, scw, sch)
+		uiGraphics.setScissor(scx, scy, scw, sch)
 
 		love.graphics.pop()
 
