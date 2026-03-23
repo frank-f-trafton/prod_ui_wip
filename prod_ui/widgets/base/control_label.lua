@@ -291,7 +291,7 @@ def.default_skinner = {
 		love.graphics.push("all")
 
 		love.graphics.setColor(self.enabled and skin.color_active or skin.color_disabled)
-		uiGraphics.intersectScissor(ox + self.x + vp.x, oy + self.y + vp.y, vp.w, vp.h)
+		uiGraphics.intersectScissor(ox + self.x, oy + self.y, self.w, self.h)
 		love.graphics.setFont(font)
 		if not self.wrap_mode then
 			love.graphics.print(self.text, self.text_x, self.text_y)
