@@ -1403,6 +1403,13 @@ function wcMenu.removeItemIndexCleanup(self, item_i, id)
 end
 
 
+function wcMenu.addItemIndexCleanup(self, item_i, id)
+	if self[id] <= item_i then
+		self[id] = self[id] + 1
+	end
+end
+
+
 --- Picks the first selectable item, but only if there is currently no selection.
 -- The widget must have the method 'setSelectionByIndex'.
 function wcMenu.trySelectIfNothingSelected(self)

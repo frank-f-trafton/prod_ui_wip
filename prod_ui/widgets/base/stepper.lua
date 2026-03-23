@@ -44,6 +44,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcButton = context:getLua("shared/wc/wc_button")
 local wcLabel = context:getLua("shared/wc/wc_label")
+local wcMenu = context:getLua("shared/wc/wc_menu")
 local widShared = context:getLua("core/wid_shared")
 
 
@@ -51,7 +52,7 @@ local def = {
 	skin_id = "stepper1",
 
 	user_callbacks = uiTable.newLutV(
-		"cb_stepperChanged",
+		"cb_select",
 		"cb_buttonAction",
 		"cb_buttonAction2",
 		"cb_buttonAction3"
@@ -59,10 +60,21 @@ local def = {
 }
 
 
--- Widget:cb_stepperChanged(index)
+wcMenu.attachMenuMethods(def)
+def.movePrev = wcMenu.widgetMovePrev
+def.moveNext = wcMenu.widgetMoveNext
+
+
+def.setEnabled = wcButton.setEnabled
+def.setLabel = wcLabel.widSetLabel
+
+
+-- Widget:cb_select(item, item_i)
 -- Called when the stepper value changes.
--- @param index The current index.
-def.cb_stepperChanged = uiDummy.func
+-- @param item The selected item, or nil if nothing is selected.
+-- @param item_i The item's index, or 0 if nothing is selected.
+-- @param The current index.
+def.cb_select = uiDummy.func
 
 -- NOTE: The primary button action is activated by keyboard input only. Click-activated
 -- secondary and tertiary actions do not consider the location of the mouse cursor.
@@ -77,8 +89,16 @@ def.cb_buttonAction2 = uiDummy.func
 def.cb_buttonAction3 = uiDummy.func
 
 
-def.setEnabled = wcButton.setEnabled
-def.setLabel = wcLabel.widSetLabel
+local function _updateTextLabel(self)
+	local item = self:menuGetSelectedItem()
+
+	if not item then
+		self:setLabel("", "single")
+	else
+		local label_text = item.text or ""
+		self:setLabel(label_text, "single")
+	end
+end
 
 
 function def:setOrientation(orientation)
@@ -111,150 +131,91 @@ def.evt_thimbleAction = wcButton.evt_thimbleAction
 def.evt_thimbleAction2 = wcButton.evt_thimbleAction2
 
 
-local function wrapSetLabel(self)
-	if self.index == 0 then
-		self:setLabel("", "single")
-	else
-		local option = self.options[self.index]
-		local label_text = (type(option) == "string" and option or type(option) == "table" and option.text)
-		label_text = label_text or ""
+function def:addItem(text, pos)
+	uiAssert.type(1, text, "string")
+	uiAssert.integerEval(2, pos, "number")
 
-		self:setLabel(label_text, "single")
+	local items = self.MN_items
+	local old_len = #items
+
+	local item = {}
+
+	item.selectable = true
+	item.marked = false -- multi-select
+
+	item.text = text
+
+	pos = pos or #items + 1
+
+	if pos < 1 or pos > #items + 1 then
+		error("position is out of range")
 	end
-end
 
+	table.insert(items, pos, item)
 
---- Adds an option to the stepper. If the stepper options array is empty, then this option is selected as the current index.
--- @param option The option data to use. Can either be a string (which will be used as the label text when selected) or
--- a table (where tbl.text is used for the label text).
--- @param i (#options + 1) where to insert the option in the array. Must be between 1 and #options + 1. If not specified, the option will be added to the end of the array.
--- @return The index of the newly-added option.
-function def:insertOption(option, i)
-	uiAssert.types(1, option, "string", "table")
-	uiAssert.integerRangeEval(2, i, 1, #self.options + 1)
-
-	i = i or #self.options + 1
-
-	local old_len = #self.options
-
-	table.insert(self.options, i, option)
-
-	-- Array was empty: select this option.
 	if old_len == 0 then
-		self:setIndex(1)
-
-	-- Increment the current index if the option was inserted before it.
-	elseif self.index >= i then
-		self.index = self.index + 1
-	end
-
-	return i
-end
-
-
---- Removes an option from the stepper. If this removes the last option, then the index is set to zero.
--- @param i *(#options)* Index of the option to remove in the array. Must be between 1 and #options. If not specified, the last option in the array will be removed.
--- @return The removed option value.
-function def:removeOption(i)
-	uiAssert.integerRangeEval(1, i, 1, #self.options)
-
-	i = i or #self.options
-
-	local removed_option = table.remove(self.options, i)
-
-	-- Array is now empty:
-	if #self.options == 0 then
-		self:setIndex(0)
-
-	-- Decrement index if the removed option came before it.
-	elseif self.index > i then
-		self.index = self.index - 1
-
-	-- The current option was deleted:
-	elseif i == self.index then
-		-- Deleted the last option:
-		if i > #self.options then
-			self:setIndex(#self.options)
-
-		-- Deleted an option that isn't the last:
-		else
-			self:stepIndex(0)
-		end
-	end
-
-	return removed_option
-end
-
-
---- Sets the stepper index.
--- @param index The new index number. The value is clamped between 1 and the number of options, or is set to zero if there are no options specified. Must not be NaN.
--- @return The new index, which may be different than the index requested.
-function def:setIndex(index)
-	uiAssert.numberNotNan(1, index)
-
-	index = math.floor(index)
-
-	local old_index = self.index
-
-	-- Empty options list
-	if #self.options == 0 then
-		self.index = 0
-		wrapSetLabel(self)
+		wcMenu.trySelectIfNothingSelected(self)
+		_updateTextLabel(self)
 	else
-		self.index = math.max(1, math.min(index, #self.options))
-		local option = self.options[self.index]
-		wrapSetLabel(self)
+		wcMenu.addItemIndexCleanup(self, pos, "MN_index")
 	end
 
-	if old_index ~= self.index then
-		self:cb_stepperChanged(self.index)
-	end
-
-	return self.index
+	return item
 end
 
 
-function def:getIndex()
-	return self.index
+function def:removeItem(item_t)
+	uiAssert.type(1, item_t, "table")
+
+	local item_i = self:menuGetItemIndex(item_t)
+
+	local removed_item = self:removeItemByIndex(item_i)
+
+	return removed_item
 end
 
 
---- Increments the stepper index.
--- @param delta The amount to increment or decrement, expected to be -1, 0 or 1. The final index value will wrap around, or be set to zero if there are no options specified. Must not be NaN.
--- @return The new index, which may be different than the index requested.
-function def:stepIndex(delta)
-	uiAssert.numberNotNan(1, delta)
+function def:removeItemByIndex(item_i)
+	uiAssert.numberNotNan(1, item_i)
 
-	delta = math.floor(delta)
+	local items = self.MN_items
 
-	local old_index = self.index
+	local removing_current = (item_i == self.MN_index)
 
-	-- Empty options list
-	if #self.options == 0 then
-		self.index = 0
-		wrapSetLabel(self)
-	else
-		self.index = self.index + delta
-		if self.index < 1 then
-			self.index = #self.options
-
-		elseif self.index > #self.options then
-			self.index = 1
-		end
-
-		wrapSetLabel(self)
+	local removed_item = items[item_i]
+	if not removed_item then
+		error("no item to remove at index: " .. tostring(item_i))
 	end
 
-	if old_index ~= self.index then
-		self:cb_stepperChanged(self.index)
+	table.remove(items, item_i)
+
+	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+
+	if removing_current then
+		_updateTextLabel(self)
 	end
 
-	return self.index
+	return removed_item
 end
 
 
-function def:getSelectedOption()
-	return self.options[self.index]
+function def:setSelection(item_t)
+	uiAssert.type(1, item_t, "table")
+
+	local item_i = self:menuGetItemIndex(item_t)
+	self:setSelectionByIndex(item_i)
+end
+
+
+function def:setSelectionByIndex(item_i)
+	uiAssert.integerGe(1, item_i, 0)
+
+	local old_index = self.MN_index
+	self:menuSetSelectedIndex(item_i)
+	if old_index ~= self.MN_index then
+		_updateTextLabel(self)
+		self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+	end
 end
 
 
@@ -266,6 +227,10 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 3)
 
 	wcLabel.setup(self)
+
+	wcMenu.setup(self)
+
+	self.MN_wrap_selection = true
 
 	-- State flags
 	self.enabled = true
@@ -282,12 +247,6 @@ function def:evt_initialize()
 	-- Enabled state for the 'prev' and 'next' buttons.
 	self.b_prev_enabled = true
 	self.b_next_enabled = true
-
-	-- An array of strings which represent each selectable option.
-	self.options = {}
-
-	-- The current selection. It should be 0 if there are no options.
-	self.index = 0
 
 	self:skinSetRefs()
 	self:skinInstall()
@@ -324,6 +283,7 @@ function def:evt_reshapePre()
 	vp:reduceT(skin.box.border)
 	vp:reduceT(skin.box.margin)
 
+	_updateTextLabel(self)
 	wcLabel.reshapeLabel(self)
 
 	return true
@@ -345,12 +305,17 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 					if self.b_prev_enabled and self.vp2:pointOverlap(x, y) then
 						self.b_pressing = "prev"
-						self:stepIndex(-1)
+						self:menuSetPrev(1, true, "MN_index")
+						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+						_updateTextLabel(self)
+
 
 					elseif self.b_next_enabled and self.vp3:pointOverlap(x, y) then
 
 						self.b_pressing = "next"
-						self:stepIndex(1)
+						self:menuSetNext(1, true, "MN_index")
+						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+						_updateTextLabel(self)
 					end
 
 				elseif button == 2 then
@@ -375,10 +340,14 @@ function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 					x, y = self:getRelativePosition(x, y)
 
 					if self.b_pressing == "prev" and self.vp2:pointOverlap(x, y) then
-						self:stepIndex(-1)
+						self:menuSetPrev(1, true, "MN_index")
+						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+						_updateTextLabel(self)
 
 					elseif self.b_pressing == "next" and self.vp3:pointOverlap(x, y) then
-						self:stepIndex(1)
+						self:menuSetNext(1, true, "MN_index")
+						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+						_updateTextLabel(self)
 					end
 				end
 			end
@@ -413,10 +382,14 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 			end
 
 			if self.b_prev_enabled and (scancode == key_prev) then
-				self:stepIndex(-1)
+				self:menuSetPrev(1, true, "MN_index")
+				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+				_updateTextLabel(self)
 
 			elseif self.b_next_enabled and (scancode == key_next) then
-				self:stepIndex(1)
+				self:menuSetNext(1, true, "MN_index")
+				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+				_updateTextLabel(self)
 			end
 		end
 	end
@@ -427,10 +400,14 @@ function def:evt_pointerWheel(targ, x, y)
 	if self == targ then
 		if self.enabled then
 			if self.b_prev_enabled and y > 0 then
-				self:stepIndex(-1)
+				self:menuSetPrev(1, true, "MN_index")
+				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+				_updateTextLabel(self)
 
 			elseif self.b_next_enabled and y < 0 then
-				self:stepIndex(1)
+				self:menuSetNext(1, true, "MN_index")
+				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
+				_updateTextLabel(self)
 			end
 		end
 	end
