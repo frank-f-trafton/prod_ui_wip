@@ -54,9 +54,10 @@ function plan.make(panel)
 			local b_illum = panel:findTag("demo_illum")
 			if b_illum then
 				local mode = tb:getIlluminationMode()
-				for i, option in ipairs(b_illum.options) do
-					if option == mode then
-						b_illum:setIndex(i)
+				for i, option in ipairs(b_illum.MN_items) do
+					print(i, option, option.text)
+					if option.text == mode then
+						b_illum:setSelectionByIndex(i)
 						break
 					end
 				end
@@ -238,12 +239,15 @@ function plan.make(panel)
 	yy = yy + h2 + math.floor(h2/2)
 
 
-	local function stepperIllumination(self)
-		local tb = panel:findTag("demo_script_ed")
-		if tb then
-			local str = self.options[self.index]
-			if str then
-				tb:setIlluminateCurrentLine(str)
+	local function stepperIllumination(self, item, item_i)
+		if item then
+			local tb = panel:findTag("demo_script_ed")
+			if tb then
+				local str = item.text
+				if str then
+					print("???", str)
+					tb:setIlluminateCurrentLine(str)
+				end
 			end
 		end
 	end
@@ -256,11 +260,11 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, ww * 2, hh)
 		:setTag("demo_illum")
 
-	stp_illum:userCallbackSet("cb_stepperChanged", stepperIllumination)
+	stp_illum:userCallbackSet("cb_select", stepperIllumination)
 
-	stp_illum:insertOption("always")
-	stp_illum:insertOption("never")
-	stp_illum:insertOption("no-highlight")
+	stp_illum:addItem("always")
+	stp_illum:addItem("never")
+	stp_illum:addItem("no-highlight")
 
 	xx = x1
 	yy = yy + h2 + math.floor(h2/2)

@@ -83,9 +83,9 @@ function plan.make(panel)
 
 		local c_orientation = sld:findSiblingTag("demo_sld_orientation")
 		if c_orientation then
-			local orientation = c_orientation:getSelectedOption()
+			local orientation = c_orientation:menuGetSelectedItem()
 			if orientation then
-				sld:sliderSetOrientation(orientation)
+				sld:sliderSetOrientation(orientation.text)
 			else
 				print("WARNING: couldn't read slider 'orientation' from control")
 			end
@@ -115,7 +115,11 @@ function plan.make(panel)
 
 		local c_wheel_dir = sld:findSiblingTag("demo_sld_wheel")
 		if c_wheel_dir then
-			local wheel_dir = tonumber(c_wheel_dir:getSelectedOption())
+			local item = c_wheel_dir:menuGetSelectedItem()
+			local wheel_dir
+			if item then
+				wheel_dir = tonumber(item.text)
+			end
 			if wheel_dir then
 				sld:sliderSetWheelDirection(wheel_dir)
 			else
@@ -182,8 +186,8 @@ function plan.make(panel)
 		:setTag("demo_sld_orientation")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
 
-	c_orientation:insertOption("horizontal")
-	c_orientation:insertOption("vertical")
+	c_orientation:addItem("horizontal")
+	c_orientation:addItem("vertical")
 
 	c_orientation:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
@@ -232,8 +236,8 @@ function plan.make(panel)
 		:setTag("demo_sld_wheel")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
 
-	c_wheel_dir:insertOption("1")
-	c_wheel_dir:insertOption("-1")
+	c_wheel_dir:addItem("1")
+	c_wheel_dir:addItem("-1")
 
 	c_wheel_dir:userCallbackSet("cb_buttonAction", function(self)
 		_updateSlider(self)
