@@ -1193,7 +1193,7 @@ def.default_skinner = {
 
 				love.graphics.print(self.header_text_disp, self.header_text_ox, self.header_text_oy)
 
-				love.graphics.setScissor(sx, sy, sw, sh)
+				uiGraphics.setScissor(sx, sy, sw, sh)
 			end
 
 			-- Header buttons
@@ -1244,7 +1244,7 @@ def.default_skinner = {
 					qw, qh)
 			end
 
-			love.graphics.setScissor(sx, sy, sw, sh)
+			uiGraphics.setScissor(sx, sy, sw, sh)
 		end
 
 		love.graphics.pop()

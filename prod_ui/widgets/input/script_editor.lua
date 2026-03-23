@@ -523,8 +523,7 @@ def.default_skinner = {
 
 		love.graphics.push("all")
 
-
-		love.graphics.intersectScissor(
+		uiGraphics.intersectScissor(
 			ox + self.x + vp4.x,
 			oy + self.y + vp4.y,
 			vp4.w,
@@ -555,7 +554,7 @@ def.default_skinner = {
 
 		love.graphics.pop()
 
-		love.graphics.setScissor(scx, scy, scw, sch)
+		uiGraphics.setScissor(scx, scy, scw, sch)
 
 		wcScrollBar.drawScrollBarsHV(self, skin.data_scroll)
 	end,

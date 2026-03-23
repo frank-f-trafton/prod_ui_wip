@@ -1384,7 +1384,7 @@ local function drawWholeColumn(self, col, backfill, ox, oy)
 	-- Header box text.
 	love.graphics.push("all")
 
-	love.graphics.intersectScissor(
+	uiGraphics.intersectScissor(
 		ox + col.x - self.scr_x + rht.x + res.offset_x,
 		oy + col.y + rht.y + res.offset_y,
 		rht.w,

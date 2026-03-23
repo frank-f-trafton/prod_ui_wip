@@ -73,12 +73,15 @@ function debugPanel.new(w, font)
 end
 
 
+local _max = math.max
+
+
 function _mt_debug_panel:draw()
 	local qp = self.qp
 
 	love.graphics.push("all")
 
-	love.graphics.setScissor(self.x, self.y, self.w + self.x_pad*2, qp.y2 + self.y_pad*2)
+	love.graphics.setScissor(self.x, self.y, _max(0, self.w + self.x_pad*2), _max(0, qp.y2 + self.y_pad*2))
 
 	love.graphics.setColor(self.r1, self.g1, self.b1, self.a1)
 	love.graphics.rectangle("fill", self.x, self.y, self.w + self.x_pad*2, qp.y2 + self.y_pad*2, self.corner_radius, self.corner_radius)
