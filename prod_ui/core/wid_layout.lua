@@ -47,7 +47,7 @@ The parameters of each geometry mode:
 	flip_x, flip_y: (boolean) When true, the position is against the other side of the layout space.
 
 "remaining":
-	(No paremeters.)
+	(No parameters.)
 
 "segment":
 	edge: (_nm_seg_edge)
