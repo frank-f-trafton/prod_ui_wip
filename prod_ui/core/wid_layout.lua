@@ -419,7 +419,7 @@ widLayout.handlers = {
 		end
 	end,
 
-	stack = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)
+	stack = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h, i, list_len)
 		local scale = context.scale
 
 		-- TODO: raise an error here if the table is missing (or don't?)
@@ -431,6 +431,7 @@ widLayout.handlers = {
 		end
 
 		local axis, dir = stk.axis, stk.dir
+		local b_space = (i < list_len) and stk.between_spacing or 0
 
 		local measure, len
 		if GE.measure then
@@ -451,10 +452,10 @@ widLayout.handlers = {
 
 			if dir == 1 then
 				nc.x, nc.w = np.LO_x, len
-				np.LO_x, np.LO_w = np.LO_x + len, math.max(0, np.LO_w - len)
+				np.LO_x, np.LO_w = np.LO_x + len + b_space, math.max(0, np.LO_w - len - b_space)
 			else -- dir == -1
 				nc.x, nc.w = np.LO_x + np.LO_w - len, len
-				np.LO_w = math.max(0, np.LO_w - len)
+				np.LO_w = math.max(0, np.LO_w - len - b_space)
 			end
 		else -- axis == "x"
 			if measure == "unit" then
@@ -468,10 +469,10 @@ widLayout.handlers = {
 
 			if dir == 1 then
 				nc.y, nc.h = np.LO_y, len
-				np.LO_y, np.LO_h = np.LO_y + len, math.max(0, np.LO_h - len)
+				np.LO_y, np.LO_h = np.LO_y + len + b_space, math.max(0, np.LO_h - len - b_space)
 			else -- dir == -1
 				nc.y, nc.h = np.LO_y + np.LO_h - len, len
-				np.LO_h = math.max(0, np.LO_h - len)
+				np.LO_h = math.max(0, np.LO_h - len - b_space)
 			end
 		end
 	end,
@@ -785,6 +786,10 @@ local _mt_stack = {
 	-- "unit": A portion of the remaining layout space on the primary axis, from 0.0 to 1.0.
 	default_len=0,
 	default_meas="pixel",
+
+	-- Spacing between widgets. Always scaled.
+	-- (The handler applies spacing if this widget is not the last entry in the layout.)
+	between_spacing=0,
 }
 _mt_stack.__index = _mt_stack
 
@@ -837,6 +842,24 @@ function methods:layoutGetStackDefaultWidgetSize()
 	local LO_stack = _checkStackTable(self)
 
 	return LO_stack.default_meas, LO_stack.default_len
+end
+
+
+function methods:layoutSetStackBetweenSpacing(between_spacing)
+	uiAssert.numberGe(1, between_spacing, 0)
+
+	local LO_stack = _checkStackTable(self)
+
+	LO_stack.between_spacing = between_spacing
+
+	return self
+end
+
+
+function methods:layoutGetStackBetweenSpacing()
+	local LO_stack = _checkStackTable(self)
+
+	return LO_stack.between_spacing
 end
 
 
@@ -914,25 +937,19 @@ function widLayout.applyLayout(self)
 		LO_wallet.count = 0
 	end
 
-	local LO_stack = self.LO_stack
-	if LO_stack then
-		if LO_stack.axis == "x" then
-			LO_stack.p = (LO_stack.dir == 1) and self.LO_x or self.LO_x + self.LO_w
-		else -- axis == "y"
-			LO_stack.p = (LO_stack.dir == 1) and self.LO_y or self.LO_y + self.LO_h
-		end
-	end
+	local LO_list = self.LO_list
+	local LO_list_len = #LO_list
 
-	for i, child in ipairs(self.LO_list) do
+	for i, child in ipairs(LO_list) do
 		local GE = child.GE
 		local handler = widLayout.handlers[GE.mode]
 		if not handler then
 			error("invalid or missing layout handler: " .. tostring(GE.mode))
 		end
 
-		--print("old self XYWH", self.x, self.y, self.w, self.h)
-		handler(self, child, GE, orig_x, orig_y, orig_w, orig_h)
-		--print("new self XYWH", self.x, self.y, self.w, self.h)
+		--print("old self XYWH", self.x, self.y, self.w, self.h, i, LO_list_len)
+		handler(self, child, GE, orig_x, orig_y, orig_w, orig_h, i, LO_list_len)
+		--print("new self XYWH", self.x, self.y, self.w, self.h, i, LO_list_len)
 
 		-- Outpad reduction
 		local ox1 = math.floor(child.GE_outpad_x1 * scale)
@@ -968,7 +985,6 @@ function widLayout.getFlowLength(self, x_axis, cross_length)
 	end
 end
 --]]
-
 
 
 return widLayout
