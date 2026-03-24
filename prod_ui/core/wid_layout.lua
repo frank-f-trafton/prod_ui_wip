@@ -967,24 +967,4 @@ function widLayout.applyLayout(self)
 end
 
 
---[[
-function widLayout.getFlowLength(self, x_axis, cross_length)
-	local GE = self.GE
-	if GE.mode == "segment" and GE.edge == "top" or GE.edge == "bottom" then
-		if GE.len then
-			return math.floor(GE.len * context.scale)
-		else
-			local len, do_scale = wid:evt_getGrowAxisLength(x_axis, cross_length)
-			if len then
-				if do_scale then
-					len = len * context.scale
-				end
-				return len
-			end
-		end
-	end
-end
---]]
-
-
 return widLayout
