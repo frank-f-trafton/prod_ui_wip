@@ -401,7 +401,7 @@ def.default_skinner = {
 		cursor_on = {uiAssert.types, "nil", "string"},
 		paragraph_pad = {uiAssert.integerGe, 0},
 
-		-- 'lnc_' == paremeters for the line number column.
+		-- 'lnc_' == parameters for the line number column.
 
 		-- Reserve at least this many digits worth of space.
 		lnc_reserved = {uiAssert.integerGe, 0},
