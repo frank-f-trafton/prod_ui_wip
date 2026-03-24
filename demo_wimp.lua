@@ -16,6 +16,7 @@ demo_default_theme = "vacuum_dark"
 
 -- The first panel to load.
 local demo_panel_launch = {
+	"layouts.d_layout_stack",
 	"widgets.d_sliders",
 	"widgets.d_text_box_script",
 	"widgets.d_stepper",
@@ -26,7 +27,6 @@ local demo_panel_launch = {
 	"widgets.d_list_box",
 	"widgets.d_combo_box",
 	"widgets.unfinished.d_label_test",
-	"layouts.d_layout_stack",
 	"layouts.d_layout_wallet",
 	"widgets.d_separator",
 	"themes_and_scale",

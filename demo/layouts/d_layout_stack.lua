@@ -39,6 +39,7 @@ function plan.make(panel)
 		:layoutSetMargin(4, 4, 4, 4)
 		:layoutSetStackFlow("y", 1)
 		:layoutSetStackDefaultWidgetSize("pixel", 32)
+		:layoutSetStackBetweenSpacing(4)
 
 	for i = 1, 15 do
 		local label, mode, len
