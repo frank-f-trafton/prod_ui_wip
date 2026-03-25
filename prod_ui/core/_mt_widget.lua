@@ -164,7 +164,7 @@ _mt_widget.GE_outpad_x1, _mt_widget.GE_outpad_y1, _mt_widget.GE_outpad_x2, _mt_w
 
 
 -- The function that executes layout updates.
-_mt_widget._applyLayout = widLayout.applyLayout
+_mt_widget.evt_applyLayout = widLayout.applyLayout
 
 
 --[[
@@ -1022,7 +1022,7 @@ function _mt_widget:reshape()
 	end
 
 	if self.LO_list then
-		self:_applyLayout()
+		self:evt_applyLayout()
 	end
 
 	for i, child in ipairs(self.nodes) do
