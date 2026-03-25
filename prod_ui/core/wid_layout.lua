@@ -332,6 +332,8 @@ widLayout.handlers = {
 		local sash_half = _getSashBreadth(sash_style)
 		-- NOTE: the sash box is placed on the opposite side of 'edge'.
 
+		-- TODO: floor (or ceil) 'len'?
+
 		if edge == "left" then
 			nc.y, nc.h = np.LO_y, np.LO_h
 			local len, do_scale = _querySegmentLength(nc, GE, true, nc.h)
