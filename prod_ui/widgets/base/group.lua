@@ -139,26 +139,24 @@ function def:evt_getGrowAxisLength(x_axis, cross_length)
 		local h = 0
 
 		for i, child in ipairs(self.LO_list) do
-			print("i", i, "h", h)
-			if child.GE.mode == "stack" then
-
-			end
-
 			local len, do_scale = child:evt_getGrowAxisLength(x_axis, cross_length)
 			if len then
-				scale = do_scale and scale or 1.0
-				h = h + len * scale
+				local this_scale = do_scale and scale or 1.0
+				h = h + len * this_scale
 			end
+			--print("i", i, "h", h)
 		end
 
 		local box = self.skin.box
 		local border, margin = box.border, box.margin
 		local my1, my2 = self.LO_margin_y1, self.LO_margin_y2
 		local more_padding = font:getHeight() + skin.label_pad_y
-		print("border", border.y1, border.y2, "margin", margin.y1, margin.y2)
-		print("my1,my2", my1, my2)
-		print("more_padding", more_padding)
+		--print("border", border.y1, border.y2, "margin", margin.y1, margin.y2)
+		--print("my1,my2", my1, my2)
+		--print("more_padding", more_padding)
 		h = h + border.y1 + border.y2 + margin.y1 + margin.y2 + my1 + my2 + more_padding
+
+		--print("final h", h)
 
 		return h, false
 	end
@@ -166,8 +164,6 @@ end
 
 
 function def:evt_reshapePre()
-	print("group height", self.h) -- WIP
-
 	-- Viewport #1 is for widget controls.
 	-- Viewport #2 represents the outline of the graphical border.
 	-- Viewport #3 represents the edges of the border against the label text,
@@ -177,6 +173,8 @@ function def:evt_reshapePre()
 	local box = skin.box
 	local vp, vp2, vp3 = self.vp, self.vp2, self.vp3
 	local font = skin.font
+
+	--print("group height", self.h)
 
 	vp:set(0, 0, self.w, self.h)
 	vp:reduceT(box.border)
