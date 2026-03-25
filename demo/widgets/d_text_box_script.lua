@@ -308,7 +308,7 @@ local function sum(...)
 		if type(v) ~= "number" then
 			error("expected number")
 		end
-		c = c + select(i, ...)
+		c = c + v
 	end
 	return c
 end
