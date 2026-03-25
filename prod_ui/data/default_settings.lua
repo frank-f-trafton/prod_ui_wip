@@ -33,6 +33,10 @@ return {
 			mouse_wheel_move_size_v = 64,
 			mouse_wheel_move_size_h = 64,
 
+			-- How many "cells" in a widget to scroll per mouse-wheel motion event.
+			mouse_wheel_move_rows = 4,
+			mouse_wheel_move_cols = 4,
+
 			-- Drag scroll rate (per frame: mouse_distance * mouse_drag_speed * delta_time).
 			mouse_drag_speed = 4,
 
