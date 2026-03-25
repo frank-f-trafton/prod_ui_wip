@@ -211,7 +211,7 @@ return {
 			color_text = {0.1, 0.1, 0.1, 1.0},
 			color_pipe = {1.0, 1.0, 1.0, 1.0}
 		},
-		icon_box1 = {}, -- TODO: unfinished widget
+		card_box1 = {},
 		list_box1 = {
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_item_text = {0.1, 0.1, 0.1, 1.0},
