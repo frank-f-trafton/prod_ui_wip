@@ -127,11 +127,8 @@ function def:evt_initialize()
 end
 
 
-local TEST_grow = true
-
-
 function def:evt_getGrowAxisLength(x_axis, cross_length)
-	if not x_axis and TEST_grow then
+	if not x_axis then
 		local scale = context.scale
 		local skin = self.skin
 		local font = skin.font

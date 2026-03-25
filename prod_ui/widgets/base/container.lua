@@ -70,6 +70,36 @@ function def:evt_initialize()
 end
 
 
+function def:evt_getGrowAxisLength(x_axis, cross_length)
+	if not x_axis then
+		local scale = context.scale
+		local skin = self.skin
+
+		local h = 0
+
+		for i, child in ipairs(self.LO_list) do
+			local len, do_scale = child:evt_getGrowAxisLength(x_axis, cross_length)
+			if len then
+				local this_scale = do_scale and scale or 1.0
+				h = h + len * this_scale
+			end
+			--print("i", i, "h", h)
+		end
+
+		local box = self.skin.box
+		local border, margin = box.border, box.margin
+		local my1, my2 = self.LO_margin_y1, self.LO_margin_y2
+		--print("border", border.y1, border.y2, "margin", margin.y1, margin.y2)
+		--print("my1,my2", my1, my2)
+		h = h + border.y1 + border.y2 + margin.y1 + margin.y2 + my1 + my2
+
+		--print("final h", h)
+
+		return h, false
+	end
+end
+
+
 function def:evt_reshapePre()
 	--print("container: evt_reshapePre")
 
