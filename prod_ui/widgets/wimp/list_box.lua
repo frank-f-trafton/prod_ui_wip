@@ -51,6 +51,7 @@ local def = {
 	)
 }
 
+
 wcIconsAndText.attachMethods(def)
 wcMenu.attachMenuMethods(def)
 widShared.scrollSetMethods(def)
@@ -700,12 +701,8 @@ def.default_skinner = {
 
 
 	render = function(self, ox, oy)
-		local skin = self.skin
-		local vp2 = self.vp2
-
-		local tq_px = skin.tq_px
-		local sl_body = skin.sl_body
-
+		local skin, vp2 = self.skin, self.vp2
+		local tq_px, sl_body = skin.tq_px, skin.sl_body
 		local items = self.MN_items
 		local rr, gg, bb, aa = love.graphics.getColor()
 

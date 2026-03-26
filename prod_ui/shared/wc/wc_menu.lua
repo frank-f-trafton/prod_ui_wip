@@ -753,6 +753,13 @@ end
 --]]
 
 
+local function xprint(self, ...) -- XXX: Testing!
+	if self.id == "wimp/card_box" then
+		print(...)
+	end
+end
+
+
 wcMenu.arrangers = {
 	-- list, top-to-bottom
 	["list-tb"] = function(self, vp, rel_zero, i1, i2)
@@ -813,7 +820,7 @@ wcMenu.arrangers = {
 		local xx = vx
 		local item_prev = items[i1 - 1]
 		if item_prev then
-			xx = item_prev.x + item_prev.x
+			xx = item_prev.x + item_prev.w
 		end
 		for i = i1, i2 do
 			local item = items[i]
