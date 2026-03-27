@@ -92,6 +92,7 @@ local demo_plan_list = {
 			label = "Containers, Layouts, Theming",
 			nodes = {
 				{plan_id = "ui_frames.d_dialogs_notifs", label = "Dialogs and Notifications"},
+				{plan_id = "widgets.d_group", label = "Groups"},
 				{plan_id = "ui_frames.d_workspaces", label = "Workspace Frames"},
 				{plan_id = "themes_and_scale", label = "Themes and Scale"},
 				{plan_id = "layouts.d_layout", label = "Layout"},
@@ -120,7 +121,6 @@ local demo_plan_list = {
 			nodes = {
 				{plan_id = "widgets.d_card_box", label = "CardBox"},
 				{plan_id = "widgets.unfinished.d_container_work", label = "Container work"},
-				{plan_id = "widgets.d_group", label = "Groups"},
 				{plan_id = "widgets.d_separator", label = "Spacers & Separators"},
 			},
 		},
