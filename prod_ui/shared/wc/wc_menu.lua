@@ -115,12 +115,9 @@ end
 
 
 --- Get the current selected item table. Equivalent to `local item_t = self.MN_items[self.MN_index]`.
--- @param id ("MN_index") The index key.
 -- @return The selected item, or nil if there is no current selection.
-function menuMethods:menuGetSelectedItem(id)
-	id = id or "MN_index"
-
-	return self.MN_items[self[id]]
+function menuMethods:menuGetSelectedItem()
+	return self.MN_items[self.MN_index]
 end
 
 
@@ -273,18 +270,15 @@ function menuMethods:menuHasItem(item_t)
 end
 
 
---- Sets the current menu selection. If the index is invalid or the item cannot be selected, raises a Lua error.
+--- Sets the current menu selection. If the index is invalid or the item cannot be selected, raises an error.
 -- @param index The index of the menu item to select.
--- @param id ("index") Specify an alternative table key, if applicable.
-function menuMethods:menuSetSelectedIndex(index, id)
-	id = id or "MN_index"
-
+function menuMethods:menuSetSelectedIndex(index)
 	local ok, err = self:menuCanSelect(index)
 	if not ok then
 		error(err)
 	end
 
-	self[id] = index
+	self.MN_index = index
 
 	return self
 end
@@ -292,19 +286,18 @@ end
 
 --- Sets the menu selection by item table; a wrapper for menuGetItemIndex() and menuSetSelectedIndex().
 -- @param item_t The item table to select. It must be present in the menu items array.
--- @param id ("index") Specify an alternative table key, if applicable.
-function menuMethods:menuSetSelectedItem(item_t, id)
+function menuMethods:menuSetSelectedItem(item_t)
 	local item_i = self:menuGetItemIndex(item_t)
-	self:menuSetSelectedIndex(item_i, id)
+	self:menuSetSelectedIndex(item_i)
 
 	return self
 end
 
 
 --- Sets the current menu selection to the default.
-function menuMethods:menuSetDefaultSelection(id)
+function menuMethods:menuSetDefaultSelection()
 	local i, tbl = self:menuGetDefaultSelection()
-	self:menuSetSelectedIndex(i, id)
+	self:menuSetSelectedIndex(i)
 
 	return self
 end
@@ -313,51 +306,40 @@ end
 --- Move the current menu selection index.
 -- @param delta The direction to move in. 1 == forward, -1 == backward, 0 == stay put (and do the clamping and landing checks). You can move more than one step at a time.
 -- @param wrap (boolean) When true, wrap around the list when at the first or last selectable item.
--- @param id ("index") Key ID for the index. Specify when using additional index variables.
-function menuMethods:menuSetSelectionStep(delta, wrap, id)
-	id = id or "MN_index"
-
-	self[id] = self:menuGetSelectionStep(self[id], delta, wrap)
+function menuMethods:menuSetSelectionStep(delta, wrap)
+	self.MN_index = self:menuGetSelectionStep(self.MN_index, delta, wrap)
 
 	return self
 end
 
 
-function menuMethods:menuSetFirstSelectableIndex(id)
-	id = id or "MN_index"
-
-	self[id] = self:menuGetFirstSelectableIndex()
+function menuMethods:menuSetFirstSelectableIndex()
+	self.MN_index = self:menuGetFirstSelectableIndex()
 
 	return self
 end
 
 
-function menuMethods:menuSetLastSelectableIndex(id)
-	id = id or "MN_index"
-
-	self[id] = self:menuGetLastSelectableIndex()
+function menuMethods:menuSetLastSelectableIndex()
+	self.MN_index = self:menuGetLastSelectableIndex()
 
 	return self
 end
 
 
 --- Move to the previous selectable menu item.
-function menuMethods:menuSetPrev(n, wrap, id)
-	id = id or "MN_index"
-
+function menuMethods:menuSetPrev(n, wrap)
 	n = n and math.max(math.floor(n), 1) or 1
-	self:menuSetSelectionStep(-n, wrap, id)
+	self:menuSetSelectionStep(-n, wrap)
 
 	return self
 end
 
 
 --- Move to the next selectable menu item.
-function menuMethods:menuSetNext(n, wrap, id)
-	id = id or "MN_index"
-
+function menuMethods:menuSetNext(n, wrap)
 	n = n and math.max(math.floor(n), 1) or 1
-	self:menuSetSelectionStep(n, wrap, id)
+	self:menuSetSelectionStep(n, wrap)
 
 	return self
 end
@@ -755,11 +737,13 @@ end
 --]]
 
 
-local function xprint(self, ...) -- XXX: Testing!
-	if self.id == "wimp/card_box" then
+--[[
+local function _testPrint(self, ...)
+	if self.id == "put-widget-id-here" then
 		print(...)
 	end
 end
+--]]
 
 
 wcMenu.arrangers = {
@@ -787,6 +771,7 @@ wcMenu.arrangers = {
 	--[[
 	123
 	456
+	789
 	…
 	--]]
 	["list-lrtb"] = function(self, vp, rel_zero, i1, i2, sp_x, sp_y)
@@ -833,9 +818,9 @@ wcMenu.arrangers = {
 
 	-- list, top-to-bottom then left-to-right
 	--[[
-	14…
-	25
-	36
+	147…
+	258
+	369
 	--]]
 	["list-tblr"] = function(self, vp, rel_zero, i1, i2, sp_x, sp_y)
 		local items = self.MN_items
@@ -890,9 +875,8 @@ end
 -- @param n (1) How many steps to move.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param is_repeat True if the source event is considered a repeating action (like holding down a keyboard key).
--- @param id ("MN_index") Optional alternative index key to change.
-function wcMenu.widgetMovePrev(self, n, immediate, is_repeat, id)
-	self:menuSetPrev(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection), id)
+function wcMenu.widgetMovePrev(self, n, immediate, is_repeat)
+	self:menuSetPrev(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection))
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -911,9 +895,8 @@ end
 -- @param n (1) How many steps to move.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
 -- @param is_repeat True if the source event is considered a repeating action (like holding down a keyboard key).
--- @param id ("MN_index") Optional alternative index key to change.
-function wcMenu.widgetMoveNext(self, n, immediate, is_repeat, id)
-	self:menuSetNext(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection), id)
+function wcMenu.widgetMoveNext(self, n, immediate, is_repeat)
+	self:menuSetNext(n, _checkAllowWrap(is_repeat, self.MN_wrap_selection))
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -930,9 +913,8 @@ end
 --  update scrolling such that the selection is in view, and update the widget's visual cache.
 -- @param self The widget hosting the menu table.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
--- @param id ("MN_index") Optional alternative index key to change.
-function wcMenu.widgetMoveFirst(self, immediate, id)
-	self:menuSetFirstSelectableIndex(id)
+function wcMenu.widgetMoveFirst(self, immediate)
+	self:menuSetFirstSelectableIndex()
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -949,9 +931,8 @@ end
 --  update scrolling such that the selection is in view, and update the widget's visual cache.
 -- @param self The widget hosting the menu table.
 -- @param immediate Passed to selectionInView(). Skips scrolling animation.
--- @param id ("MN_index") Optional alternative index key to change.
-function wcMenu.widgetMoveLast(self, immediate, id)
-	self:menuSetLastSelectableIndex(id)
+function wcMenu.widgetMoveLast(self, immediate)
+	self:menuSetLastSelectableIndex()
 
 	if self.selectionInView then
 		self:selectionInView(immediate)
@@ -1014,15 +995,14 @@ end
 
 --- Move the widget menu selection up, preferring an item that is the distance of one "page" from the current
 --	selection. Viewport #1's height is used for the page size.
-function wcMenu.widgetMovePageUp(self, immediate, id)
-	id = id or "MN_index"
-	if self[id] == 0 then
-		wcMenu.widgetMoveFirst(self, immediate, id)
+function wcMenu.widgetMovePageUp(self, immediate)
+	if self.MN_index == 0 then
+		wcMenu.widgetMoveFirst(self, immediate)
 		return
 	end
 
 	local dist = self.vp.h * self.context.settings.wimp.navigation.page_viewport_factor
-	local new_selection = _pageStep(self, self[id], true, -1, dist)
+	local new_selection = _pageStep(self, self.MN_index, true, -1, dist)
 
 	if new_selection then
 		self:menuSetSelectedItem(new_selection)
@@ -1040,15 +1020,14 @@ end
 
 --- Move the widget menu selection down, preferring an item that is the distance of one "page" from the current
 --	selection. Viewport #1's height is used for the page size.
-function wcMenu.widgetMovePageDown(self, immediate, id)
-	id = id or "MN_index"
-	if self[id] == 0 then
-		wcMenu.widgetMoveFirst(self, immediate, id)
+function wcMenu.widgetMovePageDown(self, immediate)
+	if self.MN_index == 0 then
+		wcMenu.widgetMoveFirst(self, immediate)
 		return
 	end
 
 	local dist = self.vp.h * self.context.settings.wimp.navigation.page_viewport_factor
-	local new_selection = _pageStep(self, self[id], true, 1, dist)
+	local new_selection = _pageStep(self, self.MN_index, true, 1, dist)
 	if new_selection then
 		self:menuSetSelectedItem(new_selection)
 		if self.selectionInView then
@@ -1074,23 +1053,22 @@ end
 --- Default key navigation for top-to-bottom menus.
 -- @param self The widget.
 -- @param key, scancode, isrepeat Values from the LÖVE event.
--- @param id ("MN_index") Optional alternative index key to change.
 -- @param the isrepeat
-function wcMenu.keyNavTB(self, key, scancode, isrepeat, id)
+function wcMenu.keyNavTB(self, key, scancode, isrepeat)
 	if scancode == "up" then
-		self:movePrev(1, nil, isrepeat, id)
+		self:movePrev(1, nil, isrepeat)
 		return true
 
 	elseif scancode == "down" then
-		self:moveNext(1, nil, isrepeat, id)
+		self:moveNext(1, nil, isrepeat)
 		return true
 
 	elseif scancode == "home" then
-		self:moveFirst(id)
+		self:moveFirst()
 		return true
 
 	elseif scancode == "end" then
-		self:moveLast(id)
+		self:moveLast()
 		return true
 
 	elseif scancode == "pageup" then
@@ -1105,21 +1083,21 @@ end
 
 
 --- Default key navigation for left-to-right menus.
-function wcMenu.keyNavLR(self, key, scancode, isrepeat, id)
+function wcMenu.keyNavLR(self, key, scancode, isrepeat)
 	if scancode == "left" then
-		self:movePrev(1, nil, isrepeat, id)
+		self:movePrev(1, nil, isrepeat)
 		return true
 
 	elseif scancode == "right" then
-		self:moveNext(1, nil, isrepeat, id)
+		self:moveNext(1, nil, isrepeat)
 		return true
 
 	elseif scancode == "home" then
-		self:moveFirst(id)
+		self:moveFirst()
 		return true
 
 	elseif scancode == "end" then
-		self:moveLast(id)
+		self:moveLast()
 		return true
 
 	elseif scancode == "pageup" then
@@ -1393,28 +1371,28 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 end
 
 
-function wcMenu.removeItemIndexCleanup(self, item_i, id)
+function wcMenu.removeItemIndexCleanup(self, item_i)
 	-- Removed item was the last in the list, and was selected:
-	if self[id] > #self.MN_items then
+	if self.MN_index > #self.MN_items then
 		local landing_i = self:menuFindSelectableLanding(#self.MN_items, -1)
-		self:setSelectionByIndex(landing_i or 0, id)
+		self:setSelectionByIndex(landing_i or 0)
 
 	-- Removed item was not selected, and the selected item appears after the removed item in the list:
-	elseif self[id] > item_i then
-		self[id] = self[id] - 1
+	elseif self.MN_index > item_i then
+		self.MN_index = self.MN_index - 1
 	end
 
 	-- Handle the current selection being removed.
-	if self[id] == item_i then
+	if self.MN_index == item_i then
 		local landing_i = self:menuFindSelectableLanding(#self.MN_items, -1) or self:menuFindSelectableLanding(#self.MN_items, 1)
-		self[id] = landing_i or 0
+		self.MN_index = landing_i or 0
 	end
 end
 
 
-function wcMenu.addItemIndexCleanup(self, item_i, id)
-	if self[id] <= item_i then
-		self[id] = self[id] + 1
+function wcMenu.addItemIndexCleanup(self, item_i)
+	if self.MN_index <= item_i then
+		self.MN_index = self.MN_index + 1
 	end
 end
 

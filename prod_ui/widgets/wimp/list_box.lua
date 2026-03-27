@@ -239,7 +239,7 @@ function def:removeItemByIndex(item_i)
 
 	table.remove(items, item_i)
 
-	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i)
 
 	self:arrangeItems(item_i, #items)
 

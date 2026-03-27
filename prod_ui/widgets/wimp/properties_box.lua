@@ -280,7 +280,7 @@ function def:removeItemByIndex(item_i)
 	end
 	item_t.wid_ref = false
 
-	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i)
 
 	self:arrangeItems(1, item_i, #items)
 

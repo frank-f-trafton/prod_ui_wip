@@ -157,7 +157,7 @@ function def:addItem(text, pos)
 		wcMenu.trySelectIfNothingSelected(self)
 		_updateTextLabel(self)
 	else
-		wcMenu.addItemIndexCleanup(self, pos, "MN_index")
+		wcMenu.addItemIndexCleanup(self, pos)
 	end
 
 	return item
@@ -189,7 +189,7 @@ function def:removeItemByIndex(item_i)
 
 	table.remove(items, item_i)
 
-	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i)
 
 	if removing_current then
 		_updateTextLabel(self)
@@ -305,7 +305,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 					if self.b_prev_enabled and self.vp2:pointOverlap(x, y) then
 						self.b_pressing = "prev"
-						self:menuSetPrev(1, true, "MN_index")
+						self:menuSetPrev(1, true)
 						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 						_updateTextLabel(self)
 
@@ -313,7 +313,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 					elseif self.b_next_enabled and self.vp3:pointOverlap(x, y) then
 
 						self.b_pressing = "next"
-						self:menuSetNext(1, true, "MN_index")
+						self:menuSetNext(1, true)
 						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 						_updateTextLabel(self)
 					end
@@ -340,12 +340,12 @@ function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 					x, y = self:getRelativePosition(x, y)
 
 					if self.b_pressing == "prev" and self.vp2:pointOverlap(x, y) then
-						self:menuSetPrev(1, true, "MN_index")
+						self:menuSetPrev(1, true)
 						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 						_updateTextLabel(self)
 
 					elseif self.b_pressing == "next" and self.vp3:pointOverlap(x, y) then
-						self:menuSetNext(1, true, "MN_index")
+						self:menuSetNext(1, true)
 						self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 						_updateTextLabel(self)
 					end
@@ -382,12 +382,12 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 			end
 
 			if self.b_prev_enabled and (scancode == key_prev) then
-				self:menuSetPrev(1, true, "MN_index")
+				self:menuSetPrev(1, true)
 				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 				_updateTextLabel(self)
 
 			elseif self.b_next_enabled and (scancode == key_next) then
-				self:menuSetNext(1, true, "MN_index")
+				self:menuSetNext(1, true)
 				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 				_updateTextLabel(self)
 			end
@@ -400,12 +400,12 @@ function def:evt_pointerWheel(targ, x, y)
 	if self == targ then
 		if self.enabled then
 			if self.b_prev_enabled and y > 0 then
-				self:menuSetPrev(1, true, "MN_index")
+				self:menuSetPrev(1, true)
 				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 				_updateTextLabel(self)
 
 			elseif self.b_next_enabled and y < 0 then
-				self:menuSetNext(1, true, "MN_index")
+				self:menuSetNext(1, true)
 				self:cb_select(self.MN_items[self.MN_index], self.MN_index)
 				_updateTextLabel(self)
 			end

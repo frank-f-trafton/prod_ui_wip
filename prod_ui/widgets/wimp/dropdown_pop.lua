@@ -193,7 +193,7 @@ function def:removeItemByIndex(item_i)
 
 	local removed = table.remove(items, item_i)
 
-	wcMenu.removeItemIndexCleanup(self, item_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, item_i)
 
 	_recalculateItemsWidth(self)
 	_updateDocumentHeight(self)

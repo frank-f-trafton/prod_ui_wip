@@ -528,7 +528,7 @@ function def:removeRowByIndex(row_i) -- TODO: untested
 
 	table.remove(items, row_i)
 
-	wcMenu.removeItemIndexCleanup(self, row_i, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, row_i)
 
 	_refreshRows(self, row_i)
 
