@@ -73,7 +73,7 @@ function def:arrangeItems(first, last)
 end
 
 
-def.getInBounds = wcMenu.getItemInBoundsY
+def.getInBounds = wcMenu.getItemInBoundsRect
 def.selectionInView = wcMenu.selectionInView
 def.getItemAtPoint = wcMenu.widgetGetItemAtPoint -- (self, px, py, first, last)
 def.trySelectItemAtPoint = wcMenu.widgetTrySelectItemAtPoint -- (self, x, y, first, last)
