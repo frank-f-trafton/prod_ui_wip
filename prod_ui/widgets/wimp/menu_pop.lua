@@ -1262,15 +1262,16 @@ def.default_skinner = {
 			end
 
 			local arrow_x = self.group_arrow_x
+			local arrow_y = math.floor((item.h - skin.arrow_draw_h) * .5)
 			if item.type == "group" then
 				local res = _getRes(item, self, skin)
 				love.graphics.setColor(res.col_arrow)
 				uiGraphics.quadXYWH(
 					tq_arrow,
 					arrow_x,
-					item.y + skin.pad_text_y1,
-					tq_arrow.w,
-					tq_arrow.h
+					item.y + arrow_y,
+					skin.arrow_draw_w,
+					skin.arrow_draw_h
 				)
 			end
 		end
