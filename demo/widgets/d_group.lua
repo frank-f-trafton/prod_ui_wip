@@ -12,7 +12,6 @@ local WID_PAD_Y = 8
 
 function plan.make(panel)
 	demoShared.makeTitle(panel, nil, "Groups of Controls")
-	demoShared.makeParagraph(panel, nil, "\n***Under Construction***\n")
 
 	local context = panel.context
 
