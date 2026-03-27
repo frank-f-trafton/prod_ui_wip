@@ -118,6 +118,7 @@ local function destroySubMenus(self)
 		widShared.chainDestroyPost(self)
 		self.last_open_group = false
 	end
+	self:tryTakeThimble2()
 end
 
 
