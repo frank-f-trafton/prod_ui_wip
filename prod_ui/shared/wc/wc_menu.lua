@@ -750,6 +750,8 @@ end
 	rel_zero: when true, the function does not account for viewport positions. This is desirable
 	when the menu items are placed in a scrolling widget relative to Viewport #1 (where position
 	0,0 is offset a bit from the edge, due to margins).
+
+	sp_x, sp_y: Spacing between items. Both values are not always used, but supply some numbers anyway.
 --]]
 
 
@@ -762,7 +764,7 @@ end
 
 wcMenu.arrangers = {
 	-- list, top-to-bottom
-	["list-tb"] = function(self, vp, rel_zero, i1, i2)
+	["list-tb"] = function(self, vp, rel_zero, i1, i2, sp_x, sp_y)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
@@ -772,12 +774,12 @@ wcMenu.arrangers = {
 		local yy = vy
 		local item_prev = items[i1 - 1]
 		if item_prev then
-			yy = item_prev.y + item_prev.h
+			yy = item_prev.y + item_prev.h + sp_y
 		end
 		for i = i1, i2 do
 			local item = items[i]
 			item.x, item.y = vx, yy
-			yy = item.y + item.h
+			yy = item.y + item.h + sp_y
 		end
 	end,
 
@@ -787,7 +789,7 @@ wcMenu.arrangers = {
 	456
 	…
 	--]]
-	["list-lrtb"] = function(self, vp, rel_zero, i1, i2)
+	["list-lrtb"] = function(self, vp, rel_zero, i1, i2, sp_x, sp_y)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
@@ -797,20 +799,20 @@ wcMenu.arrangers = {
 		local xx, yy = vx, vy
 		local item_prev = items[i1 - 1]
 		if item_prev then
-			xx, yy = item_prev.x + item_prev.w, item_prev.y
+			xx, yy = item_prev.x + item_prev.w + sp_x, item_prev.y + sp_y
 		end
 		for i = i1, i2 do
 			local item = items[i]
 			if xx + item.w > vw then
-				xx, yy = vx, yy + item.h
+				xx, yy = vx, yy + item.h + sp_y
 			end
 			item.x, item.y = xx, yy
-			xx = item.x + item.w
+			xx = item.x + item.w + sp_x
 		end
 	end,
 
 	-- list, left-to-right
-	["list-lr"] = function(self, vp, rel_zero, i1, i2)
+	["list-lr"] = function(self, vp, rel_zero, i1, i2, sp_x, sp_y)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
@@ -820,12 +822,12 @@ wcMenu.arrangers = {
 		local xx = vx
 		local item_prev = items[i1 - 1]
 		if item_prev then
-			xx = item_prev.x + item_prev.w
+			xx = item_prev.x + item_prev.w + sp_x
 		end
 		for i = i1, i2 do
 			local item = items[i]
 			item.x, item.y = xx, vy
-			xx = item.x + item.w
+			xx = item.x + item.w + sp_x
 		end
 	end,
 
@@ -835,7 +837,7 @@ wcMenu.arrangers = {
 	25
 	36
 	--]]
-	["list-tblr"] = function(self, vp, rel_zero, i1, i2)
+	["list-tblr"] = function(self, vp, rel_zero, i1, i2, sp_x, sp_y)
 		local items = self.MN_items
 		i1, i2 = i1 or 1, i2 or #items
 		if #items == 0 or i1 > i2 then
@@ -846,15 +848,15 @@ wcMenu.arrangers = {
 		local item_prev = items[i1 - 1]
 		if item_prev then
 			xx = item_prev.x
-			yy = item_prev.y + item_prev.w
+			yy = item_prev.y + item_prev.h + sp_y
 		end
 		for i = i1, i2 do
 			local item = items[i]
 			if yy + item.h > vh then
-				xx, yy = xx + item.w, vy
+				xx, yy = xx + item.w + sp_x, vy
 			end
 			item.x, item.y = xx, yy
-			yy = item.y + item.h
+			yy = item.y + item.h + sp_y
 		end
 	end
 }

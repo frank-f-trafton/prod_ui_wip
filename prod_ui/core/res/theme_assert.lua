@@ -153,6 +153,16 @@ function themeAssert.infoEval(n, v)
 end
 
 
+function themeAssert.cardBoxStyle(n, v)
+	_assertLinkedResource("card_box_styles", "CardBoxStyle", v)
+end
+
+
+function themeAssert.cardBoxStyleEval(n, v)
+	_assertLinkedResource("card_box_styles", "CardBoxStyle", v, true)
+end
+
+
 function themeAssert.labelStyle(n, v)
 	_assertLinkedResource("labels", "LabelStyle", v)
 end

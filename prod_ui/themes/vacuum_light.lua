@@ -211,7 +211,15 @@ return {
 			color_text = {0.1, 0.1, 0.1, 1.0},
 			color_pipe = {1.0, 1.0, 1.0, 1.0}
 		},
-		card_box1 = {},
+		card_box1 = {
+			color_body = {1.0, 1.0, 1.0, 1.0},
+			color_item_text = {0.1, 0.1, 0.1, 1.0},
+			color_item_icon = {1.0, 1.0, 1.0, 1.0},
+			color_select_glow = {0.55, 0.55, 0.55, 0.5},
+			color_hover_glow = {1.0, 1.0, 1.0, 0.16},
+			color_active_glow = {0.5, 0.5, 0.5, 0.5},
+			color_item_marked = {0.0, 0.0, 1.0, 0.33}
+		},
 		list_box1 = {
 			color_body = {1.0, 1.0, 1.0, 1.0},
 			color_item_text = {0.1, 0.1, 0.1, 1.0},
