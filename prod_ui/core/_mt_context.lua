@@ -997,7 +997,6 @@ function _mt_context:_prepareWidgetInstance(id, parent, skin_id)
 
 	local inst = setmetatable({
 		parent = parent,
-		settings = def.default_settings and {},
 		skin_id = skin_id and skin_id
 	}, def._inst_mt)
 
