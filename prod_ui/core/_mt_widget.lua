@@ -143,20 +143,20 @@ _mt_widget.GE = widLayout.geo_null
 
 
 --[[
-The sorting order for a widget in a layout. Can be any number (besides NaN).
+The sorting order for a widget in a layout. Can be any number (besides NaN) or false/nil.
 
-The default 'GE_order' is the widget's number of siblings plus one at its time of creation. This
-default is sufficient for the common case of widgets being arranged in the same order in which they
+When 'GE_order' is false/nil, the widget's index in its table of siblings is used. This default
+is sufficient for the common case of widgets being arranged in the same order in which they
 were made. For more complicated situations, widgets can be ordered at the beginning or end of the
 list by using negative numbers or very big numbers (bigger than the plausible number of siblings),
 respectively.
 
-If you specify custom 'GE_order' values at all in a layout, you must call 'wid:sortLayout()' in the
-parent container afterwards.
+If you specify custom 'GE_order' values at all in a layout, you must call the parent container's
+'wid:sortLayout()' method afterwards.
 
 The sorting order of widgets with the same 'GE_order' values is undefined.
 --]]
-_mt_widget.GE_order = 0
+_mt_widget.GE_order = false
 
 
 -- Outer padding for children in a layout.
@@ -601,8 +601,6 @@ function _mt_widget:addChild(id, skin_id, pos, ...)
 
 	local child = context:_prepareWidgetInstance(id, self, skin_id)
 	table.insert(children, pos, child)
-
-	child.GE_order = #children
 
 	local LO_list = self.LO_list
 	if LO_list then
@@ -1195,9 +1193,9 @@ end
 
 
 function _mt_widget:geometrySetOrder(n)
-	uiAssert.numberNotNan(1, n)
+	uiAssert.numberNotNanEval(1, n)
 
-	self.GE_order = n
+	self.GE_order = n or nil
 
 	return self
 end
