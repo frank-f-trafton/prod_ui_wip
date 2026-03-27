@@ -1696,8 +1696,7 @@ def.default_skinner = {
 	--renderLast = function(self, ox, oy) end,
 
 
-	-- Don't render thimble focus.
-	renderThimble = uiDummy.func,
+	renderThimble = wcMenu.renderThimbleNoSelection
 }
 
 

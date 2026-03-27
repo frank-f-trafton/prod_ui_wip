@@ -1056,48 +1056,7 @@ function _mt_widget:renderLast(os_x, os_y)
 end
 
 
--- Info for the default thimble render function.
-local _thimble_info = {
-	mode = "line",
-	color = {0.2, 0.2, 1.0, 1.0},
-	line_style = "smooth",
-	line_width = 2,
-	line_join = "miter",
-	corner_rx = 1,
-	corner_ry = 1,
-	outline_pad = 0,
-	segments = nil,
-}
-
-
---- The default renderer for when widgets have the thimble.
-function _mt_widget:renderThimble()
-	local thimble_t = self.thimble_info or context.resources.info.thimble_info or _thimble_info
-
-	love.graphics.setColor(thimble_t.color)
-
-	if thimble_t.mode == "line" then
-		love.graphics.setLineStyle(thimble_t.line_style)
-		love.graphics.setLineWidth(thimble_t.line_width)
-		love.graphics.setLineJoin(thimble_t.line_join)
-	end
-
-	local x, y, w, h
-	if self.thimble_x then
-		x = self.thimble_x
-		y = self.thimble_y
-		w = self.thimble_w
-		h = self.thimble_h
-
-	else
-		x = -thimble_t.outline_pad
-		y = -thimble_t.outline_pad
-		w = self.w + thimble_t.outline_pad
-		h = self.h + thimble_t.outline_pad
-	end
-
-	love.graphics.rectangle(thimble_t.mode, 0.5 + x, 0.5 + y, w - 1, h - 1, thimble_t.corner_rx, thimble_t.corner_ry, thimble_t.segments)
-end
+_mt_widget.renderThimble = widShared.renderThimble
 
 
 --- Check if a widget is currently locked by the context (for the update loop).

@@ -347,7 +347,7 @@ def.default_skinner = {
 
 
 	-- Don't highlight when holding the UI thimble.
-	renderThimble = widShared.dummy,
+	renderThimble = uiDummy.func
 }
 
 

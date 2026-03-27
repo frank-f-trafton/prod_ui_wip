@@ -3,6 +3,7 @@ local context = select(1, ...)
 
 local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
@@ -1278,7 +1279,7 @@ def.default_skinner = {
 	end,
 
 	-- Don't highlight when holding the UI thimble.
-	renderThimble = widShared.dummy
+	renderThimble = uiDummy.func
 }
 
 
