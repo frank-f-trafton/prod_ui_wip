@@ -270,7 +270,7 @@ function def:removeAllItems()
 		table.remove(items, i)
 	end
 
-	wcMenu.removeItemIndexCleanup(self, 1, "MN_index")
+	wcMenu.removeItemIndexCleanup(self, 1)
 
 	self:arrangeItems()
 end
