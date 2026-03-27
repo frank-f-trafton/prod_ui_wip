@@ -886,8 +886,11 @@ def.default_skinner = {
 		--]====]
 	end,
 
+
 	--renderLast = function(self, ox, oy) end,
-	--renderThimble = function(self, ox, oy) end,
+
+
+	renderThimble = wcMenu.renderThimbleNoSelection
 }
 
 

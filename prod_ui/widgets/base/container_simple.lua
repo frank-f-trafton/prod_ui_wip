@@ -4,6 +4,7 @@
 local context = select(1, ...)
 
 
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -22,7 +23,7 @@ function def:evt_initialize()
 	widLayout.setupLayoutList(self)
 
 	-- Don't highlight when holding the UI thimble.
-	self.renderThimble = widShared.dummy
+	self.renderThimble = uiDummy.func
 end
 
 

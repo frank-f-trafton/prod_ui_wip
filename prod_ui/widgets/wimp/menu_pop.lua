@@ -79,6 +79,7 @@ local textUtil = require(context.conf.prod_ui_req .. "lib.text_util")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
 local uiPopUpMenu = require(context.conf.prod_ui_req .. "ui_pop_up_menu")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiScale = require(context.conf.prod_ui_req .. "ui_scale")
 local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
@@ -1311,9 +1312,7 @@ def.default_skinner = {
 	--renderLast = function(self, ox, oy) end,
 
 
-	renderThimble = function(self, ox, oy)
-		-- nothing
-	end,
+	renderThimble = uiDummy.func
 }
 
 

@@ -843,8 +843,11 @@ def.default_skinner = {
 		love.graphics.pop()
 	end,
 
+
 	--renderLast = function(self, ox, oy) end,
-	renderThimble = uiDummy.func,
+
+
+	renderThimble = wcMenu.renderThimbleNoSelection
 }
 
 

@@ -1431,4 +1431,12 @@ function wcMenu.trySelectIfNothingSelected(self)
 end
 
 
+--- Renders the thimble glow effect only if no item is selected.
+function wcMenu.renderThimbleNoSelection(self, ox, oy)
+	if self.MN_index <= 0 then
+		widShared.renderThimble(self, ox, oy)
+	end
+end
+
+
 return wcMenu
