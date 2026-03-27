@@ -581,7 +581,7 @@ local methods = {}
 
 
 local function _hof_sortLayoutList(a, b)
-	return a.GE_order < b.GE_order
+	return (a.GE_order or a:nodeGetIndex()) < (b.GE_order or b:nodeGetIndex())
 end
 
 
