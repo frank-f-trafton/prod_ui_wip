@@ -68,7 +68,8 @@ local _arrangers = {
 
 
 function def:arrangeItems(first, last)
-	_arrangers[self.arrange_mode](self, self.vp, true, first, last)
+	local cbs = self.skin.card_box_style
+	_arrangers[self.arrange_mode](self, self.vp, true, first, last, cbs.spacing_x, cbs.spacing_y)
 end
 
 
@@ -131,21 +132,89 @@ def.cb_keyPressed = uiDummy.func
 def.cb_dropped = uiDummy.func
 
 
+local _nm_arrange_mode = uiTable.newNamedMapV("ArrangeMode", "tb", "lr", "lrtb", "tblr")
+
+
+function def:setArrangeMode(mode)
+	uiAssert.namedMap(1, mode, _nm_arrange_mode)
+
+	self.arrange_mode = mode
+
+	self:reshape()
+
+	return self
+end
+
+
+function def:getArrangeMode()
+	return self.arrange_mode
+end
+
+
+local function _countColumns(self)
+	local cbs = self.skin.card_box_style
+	local span = self.vp.w
+	local item_width = cbs.card_w + cbs.spacing_x
+
+	return math.floor(span / item_width)
+end
+
+
+local function _countRows(self)
+	local cbs = self.skin.card_box_style
+	local span = self.vp.h
+	local item_height = cbs.card_h + cbs.spacing_y
+
+	return math.floor(span / item_height)
+end
+
+
 --- Called in evt_keyPressed(). Implements basic keyboard navigation.
 -- @param key The key code.
 -- @param scancode The scancode.
 -- @param isrepeat Whether this is a key-repeat event.
 -- @return true to halt keynav and further bubbling of the keyPressed event.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
+	local a_mode = self.arrange_mode
 	if scancode == "up" then
-		-- TODO: move up
-		self:movePrev(1, true, isrepeat)
-		return true
+		if a_mode == "tb" or a_mode == "lr" or a_mode == "tblr" then
+			self:movePrev(1, true, isrepeat)
+			return true
+
+		elseif a_mode == "lrtb" then
+			self:movePrev(_countColumns(self), true, isrepeat)
+			return true
+		end
 
 	elseif scancode == "down" then
-		-- TODO: move down
-		self:moveNext(1, true, isrepeat)
-		return true
+		if a_mode == "tb" or a_mode == "lr" or a_mode == "tblr" then
+			self:moveNext(1, true, isrepeat)
+			return true
+
+		elseif a_mode == "lrtb" then
+			self:moveNext(_countColumns(self), true, isrepeat)
+			return true
+		end
+
+	elseif scancode == "left" then
+		if a_mode == "lr" or a_mode == "tb" or a_mode == "lrtb" then
+			self:movePrev(1, true, isrepeat)
+			return true
+
+		elseif a_mode == "tblr" then
+			self:movePrev(_countRows(self), true, isrepeat)
+			return true
+		end
+
+	elseif scancode == "right" then
+		if a_mode == "lr" or a_mode == "tb" or a_mode == "lrtb" then
+			self:moveNext(1, true, isrepeat)
+			return true
+
+		elseif a_mode == "tblr" then
+			self:moveNext(_countRows(self), true, isrepeat)
+			return true
+		end
 
 	elseif scancode == "home" then
 		self:moveFirst(true)
@@ -156,31 +225,28 @@ function def:wid_defaultKeyNav(key, scancode, isrepeat)
 		return true
 
 	elseif scancode == "pageup" then
-		self:movePageUp(true)
-		return true
+		-- TODO: horizontal paging
+		if a_mode == "tb" or a_mode == "lrtb" then
+			self:movePageUp(true)
+			return true
+		end
 
 	elseif scancode == "pagedown" then
-		self:movePageDown(true)
-		return true
-
-	elseif scancode == "left" then
-		-- TODO: move left
-		--self:scrollDeltaHKeyStep(-1)
-		return true
-
-	elseif scancode == "right" then
-		-- TODO: move right
-		--self:scrollDeltaHKeyStep(1)
-		return true
+		-- TODO: horizontal paging
+		if a_mode == "tb" or a_mode == "lrtb" then
+			self:movePageDown(true)
+			return true
+		end
 	end
 end
 
 
 local function _shapeItem(self, item)
-	local scale = context.scale
+	--local scale = context.scale
+	local cbs = self.skin.card_box_style
 
-	item.w = math.floor(self.card_w * scale)
-	item.h = math.floor(self.card_h * scale)
+	item.w = cbs.card_w
+	item.h = cbs.card_h
 end
 
 
@@ -282,8 +348,8 @@ function def:evt_initialize()
 	self.MN_wrap_selection = false
 
 	self.arrange_mode = "lrtb"
-	self.card_w = 32 -- TODO: scaling
-	self.card_h = 32 -- TODO: scaling
+
+	self.show_icons = true
 
 	-- State flags.
 	self.enabled = true
@@ -323,6 +389,7 @@ end
 -- @return Nothing.
 function def:cacheUpdate(refresh_dimensions)
 	local skin = self.skin
+	local cbs = self.skin.card_box_style
 
 	if refresh_dimensions then
 		local vp = self.vp
@@ -334,12 +401,12 @@ function def:cacheUpdate(refresh_dimensions)
 
 		if last_item then
 			if self.arrange_mode == "tb" then
-				doc_w = self.card_w
+				doc_w = cbs.card_w
 				doc_h = last_item.y + last_item.h
 
 			elseif self.arrange_mode == "lr" then
 				doc_w = last_item.x + last_item.w
-				doc_h = self.card_h
+				doc_h = cbs.card_h
 
 			elseif self.arrange_mode == "lrtb" then
 				for i, item in ipairs(items) do
@@ -651,6 +718,10 @@ def.default_skinner = {
 
 		font = themeAssert.font,
 
+		card_box_style = themeAssert.cardBoxStyle,
+
+		default_icon_set_id = {uiAssert.types, "nil", "string"},
+
 		sl_body = themeAssert.slice,
 
 		color_body = uiAssert.loveColorTuple,
@@ -671,7 +742,7 @@ def.default_skinner = {
 
 		-- Update shapes, positions, and icons of any existing items
 		for i, item in ipairs(self.MN_items) do
-			--item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
+			item.tq_icon = wcIconsAndText.getIconQuad(self.icon_set_id, item.icon_id)
 			_shapeItem(self, item)
 		end
 
@@ -695,6 +766,9 @@ def.default_skinner = {
 		local skin, vp2 = self.skin, self.vp2
 		local tq_px, sl_body = skin.tq_px, skin.sl_body
 		local items = self.MN_items
+
+		local cbs = skin.card_box_style
+
 		local rr, gg, bb, aa = love.graphics.getColor()
 
 		love.graphics.push("all")
@@ -709,6 +783,24 @@ def.default_skinner = {
 		-- Scissor, scroll offsets for content.
 		uiGraphics.intersectScissor(ox + self.x + vp2.x, oy + self.y + vp2.y, vp2.w, vp2.h)
 		love.graphics.translate(-self.scr_x, -self.scr_y)
+
+		-- Menu items.
+		local font = skin.font
+		love.graphics.setFont(font)
+		local font_h = font:getHeight()
+
+		local first = math.max(self.MN_items_first, 1)
+		local last = math.min(self.MN_items_last, #items)
+
+		-- Item bodies
+		local slc_item_body = cbs.body_slc
+		if slc_item_body then
+			love.graphics.setColor(cbs.color_body)
+			for i = first, last do
+				local item = items[i]
+				uiGraphics.drawSlice(slc_item_body, item.x, item.y, item.w, item.h)
+			end
+		end
 
 		-- Hover glow.
 		local item_hover = self.MN_item_hover
@@ -726,15 +818,7 @@ def.default_skinner = {
 			uiGraphics.quadXYWH(tq_px, sel_item.x, sel_item.y, sel_item.w, sel_item.h)
 		end
 
-		-- Menu items.
-		local font = skin.font
-		love.graphics.setFont(font)
-		local font_h = font:getHeight()
-
-		local first = math.max(self.MN_items_first, 1)
-		local last = math.min(self.MN_items_last, #items)
-
-		-- 1: Item markings
+		-- Item markings
 		love.graphics.setColor(skin.color_item_marked)
 		for i = first, last do
 			local item = items[i]
@@ -743,29 +827,63 @@ def.default_skinner = {
 			end
 		end
 
-
-		-- 2: Item icons, if enabled
+		-- Item icons, if enabled
 		if self.show_icons then
 			love.graphics.setColor(skin.color_item_icon)
 			for i = first, last do
 				local item = items[i]
 				local tq_icon = item.tq_icon
 				if tq_icon then
-					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, self.col_icon_x, item.y, self.col_icon_w, item.h)
+					uiGraphics.quadShrinkOrCenterXYWH(tq_icon, item.x + cbs.icon_x, item.y + cbs.icon_y, cbs.icon_w, cbs.icon_h)
 				end
 			end
 		end
 
-		-- 3: Text labels
+		-- Text labels
+		local text_crop = cbs.text_crop
+		local sc_x = ox + self.x - self.scr_x + cbs.text_x
+		local sc_y = oy + self.y - self.scr_y + cbs.text_y
+		local xx, yy, ww, hh = love.graphics.getScissor()
+
 		love.graphics.setColor(skin.color_item_text)
 		for i = first, last do
 			local item = items[i]
 			if item.text then
-				love.graphics.printf(item.text, item.x, item.y + math.floor(item.h - font_h) * 0.5, item.w, "center")
+				if text_crop then
+					uiGraphics.intersectScissor(sc_x + item.x, sc_y + item.y, cbs.text_w, cbs.text_h)
+				end
+
+				love.graphics.printf(
+					item.text,
+					item.x + cbs.text_x,
+					item.y + cbs.text_y,
+					cbs.text_w,
+					cbs.text_align_x
+				)
+
+				if text_crop then
+					love.graphics.setScissor(xx, yy, ww, hh)
+				end
 			end
 		end
 
 		love.graphics.pop()
+
+		--[====[
+		-- Debug: show text and icon regions
+		love.graphics.push("all")
+
+		love.graphics.setColor(1, 0, 0, 0.5)
+		love.graphics.rectangle("fill", 0, 0, cbs.card_w, cbs.card_h)
+
+		love.graphics.setColor(0, 1, 0, 0.5)
+		love.graphics.rectangle("fill", cbs.icon_x, cbs.icon_y, cbs.icon_w, cbs.icon_h)
+
+		love.graphics.setColor(0, 0, 1, 0.5)
+		love.graphics.rectangle("fill", cbs.text_x, cbs.text_y, cbs.text_w, cbs.text_h)
+
+		love.graphics.pop()
+		--]====]
 	end,
 
 	--renderLast = function(self, ox, oy) end,

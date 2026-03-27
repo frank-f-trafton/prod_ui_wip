@@ -7,9 +7,9 @@ return {
 	scr_style = "*scroll_bar_styles/norm",
 	font = "*fonts/p",
 
-	--default_icon_side = "left",
-	--default_text_align = "left",
-	--default_icon_set_id = "bureau",
+	card_box_style = "*card_box_styles/norm",
+
+	default_icon_set_id = "bureau",
 
 	sl_body = "*slices/list_box_body",
 

@@ -109,7 +109,7 @@ widShared.scrollSetMethods(def)
 
 local _arrange_tb = wcMenu.arrangers["list-tb"]
 function def:arrangeItems(first, last)
-	_arrange_tb(self, self.vp, true, first, last)
+	_arrange_tb(self, self.vp, true, first, last, 0, 0)
 end
 
 

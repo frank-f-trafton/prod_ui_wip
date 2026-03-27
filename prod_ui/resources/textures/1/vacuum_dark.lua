@@ -19,7 +19,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 27,
+      x = 53,
       y = 139
     },
     arrow2_left = {
@@ -27,7 +27,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 1,
+      x = 27,
       y = 139
     },
     arrow2_right = {
@@ -35,15 +35,15 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 209,
-      y = 113
+      x = 1,
+      y = 139
     },
     arrow2_up = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 183,
+      x = 209,
       y = 113
     },
     arrow_down = {
@@ -51,7 +51,7 @@ return {
       ox = 12,
       oy = 12,
       w = 24,
-      x = 157,
+      x = 183,
       y = 113
     },
     arrow_left = {
@@ -59,7 +59,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 131,
+      x = 157,
       y = 113
     },
     arrow_right = {
@@ -67,7 +67,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 105,
+      x = 131,
       y = 113
     },
     arrow_up = {
@@ -75,7 +75,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 79,
+      x = 105,
       y = 113
     },
     button = {
@@ -83,7 +83,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 53,
+      x = 79,
       y = 113
     },
     button_disabled = {
@@ -91,7 +91,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 27,
+      x = 53,
       y = 113
     },
     button_hover = {
@@ -99,7 +99,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 1,
+      x = 27,
       y = 113
     },
     button_minor = {
@@ -107,7 +107,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 71,
+      x = 113,
       y = 179
     },
     button_minor_disabled = {
@@ -115,7 +115,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 57,
+      x = 99,
       y = 179
     },
     button_minor_hover = {
@@ -123,7 +123,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 43,
+      x = 85,
       y = 179
     },
     button_minor_press = {
@@ -131,7 +131,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 29,
+      x = 71,
       y = 179
     },
     button_press = {
@@ -139,15 +139,15 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 209,
-      y = 87
+      x = 1,
+      y = 113
     },
     checkbox_off = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 183,
+      x = 209,
       y = 87
     },
     checkbox_off_hover = {
@@ -155,7 +155,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 157,
+      x = 183,
       y = 87
     },
     checkbox_off_press = {
@@ -163,7 +163,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 131,
+      x = 157,
       y = 87
     },
     checkbox_on = {
@@ -171,7 +171,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 105,
+      x = 131,
       y = 87
     },
     checkbox_on_hover = {
@@ -179,7 +179,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 79,
+      x = 105,
       y = 87
     },
     checkbox_on_press = {
@@ -187,7 +187,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 53,
+      x = 79,
       y = 87
     },
     checkbox_tri = {
@@ -195,7 +195,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 27,
+      x = 53,
       y = 87
     },
     checkbox_tri_hover = {
@@ -203,7 +203,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 1,
+      x = 27,
       y = 87
     },
     checkbox_tri_press = {
@@ -211,15 +211,15 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 209,
-      y = 61
+      x = 1,
+      y = 87
     },
     container_body1 = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 183,
+      x = 209,
       y = 61
     },
     dropdown_body = {
@@ -227,7 +227,7 @@ return {
       ox = 0,
       oy = 0,
       w = 16,
-      x = 179,
+      x = 229,
       y = 139
     },
     dropdown_drawer = {
@@ -235,15 +235,23 @@ return {
       ox = 0,
       oy = 0,
       w = 16,
-      x = 161,
+      x = 211,
       y = 139
+    },
+    icon_big_file = {
+      h = 32,
+      ox = 0,
+      oy = 0,
+      w = 32,
+      x = 103,
+      y = 1
     },
     icon_file = {
       h = 16,
       ox = 0,
       oy = 0,
       w = 16,
-      x = 143,
+      x = 193,
       y = 139
     },
     icon_folder = {
@@ -251,7 +259,7 @@ return {
       ox = 0,
       oy = 0,
       w = 16,
-      x = 125,
+      x = 175,
       y = 139
     },
     icon_symlink_overlay = {
@@ -259,7 +267,7 @@ return {
       ox = 0,
       oy = 0,
       w = 16,
-      x = 107,
+      x = 157,
       y = 139
     },
     ind_decrement = {
@@ -267,7 +275,7 @@ return {
       ox = 0,
       oy = 0,
       w = 8,
-      x = 151,
+      x = 177,
       y = 179
     },
     ind_increment = {
@@ -275,7 +283,7 @@ return {
       ox = 0,
       oy = 0,
       w = 8,
-      x = 141,
+      x = 167,
       y = 179
     },
     input_box = {
@@ -283,7 +291,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 157,
+      x = 183,
       y = 61
     },
     input_box_disabled = {
@@ -291,7 +299,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 131,
+      x = 157,
       y = 61
     },
     input_box_hover = {
@@ -299,7 +307,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 105,
+      x = 131,
       y = 61
     },
     input_gamepad_face_button = {
@@ -323,7 +331,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 15,
+      x = 57,
       y = 179
     },
     label_disabled = {
@@ -331,7 +339,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 1,
+      x = 43,
       y = 179
     },
     list_box_body = {
@@ -339,7 +347,7 @@ return {
       ox = 0,
       oy = 0,
       w = 16,
-      x = 89,
+      x = 139,
       y = 139
     },
     menu_bar_body = {
@@ -347,15 +355,15 @@ return {
       ox = 0,
       oy = 0,
       w = 4,
-      x = 85,
-      y = 179
+      x = 247,
+      y = 139
     },
     menu_check_off = {
       h = 16,
       ox = 0,
       oy = 0,
       w = 16,
-      x = 71,
+      x = 121,
       y = 139
     },
     menu_check_on = {
@@ -363,7 +371,7 @@ return {
       ox = 0,
       oy = 0,
       w = 16,
-      x = 53,
+      x = 103,
       y = 139
     },
     menu_pop_body = {
@@ -395,15 +403,15 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 220,
-      y = 27
+      x = 235,
+      y = 79
     },
     pipe1_j_br = {
       h = 4,
       ox = 2,
       oy = 2,
       w = 4,
-      x = 214,
+      x = 248,
       y = 27
     },
     pipe1_j_tl = {
@@ -411,7 +419,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 208,
+      x = 242,
       y = 27
     },
     pipe1_j_tr = {
@@ -419,7 +427,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 202,
+      x = 236,
       y = 27
     },
     pipe1_l_h = {
@@ -427,7 +435,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 196,
+      x = 230,
       y = 27
     },
     pipe1_l_v = {
@@ -435,7 +443,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 190,
+      x = 224,
       y = 27
     },
     pipe1_t_b = {
@@ -443,7 +451,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 184,
+      x = 218,
       y = 27
     },
     pipe1_t_l = {
@@ -451,7 +459,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 178,
+      x = 212,
       y = 27
     },
     pipe1_t_r = {
@@ -459,7 +467,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 172,
+      x = 206,
       y = 27
     },
     pipe1_t_t = {
@@ -467,7 +475,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 166,
+      x = 200,
       y = 27
     },
     pipe2_j_bl = {
@@ -475,10 +483,50 @@ return {
       ox = 1,
       oy = 1,
       w = 2,
+      x = 246,
+      y = 79
+    },
+    pipe2_j_br = {
+      h = 2,
+      ox = 1,
+      oy = 1,
+      w = 2,
+      x = 253,
+      y = 73
+    },
+    pipe2_j_tl = {
+      h = 2,
+      ox = 1,
+      oy = 1,
+      w = 2,
+      x = 253,
+      y = 69
+    },
+    pipe2_j_tr = {
+      h = 2,
+      ox = 1,
+      oy = 1,
+      w = 2,
+      x = 253,
+      y = 65
+    },
+    pipe2_l_h = {
+      h = 2,
+      ox = 1,
+      oy = 1,
+      w = 2,
+      x = 253,
+      y = 61
+    },
+    pipe2_l_v = {
+      h = 2,
+      ox = 1,
+      oy = 1,
+      w = 2,
       x = 251,
       y = 57
     },
-    pipe2_j_br = {
+    pipe2_t_b = {
       h = 2,
       ox = 1,
       oy = 1,
@@ -486,7 +534,7 @@ return {
       x = 247,
       y = 57
     },
-    pipe2_j_tl = {
+    pipe2_t_l = {
       h = 2,
       ox = 1,
       oy = 1,
@@ -494,7 +542,7 @@ return {
       x = 243,
       y = 57
     },
-    pipe2_j_tr = {
+    pipe2_t_r = {
       h = 2,
       ox = 1,
       oy = 1,
@@ -502,7 +550,7 @@ return {
       x = 239,
       y = 57
     },
-    pipe2_l_h = {
+    pipe2_t_t = {
       h = 2,
       ox = 1,
       oy = 1,
@@ -510,52 +558,12 @@ return {
       x = 235,
       y = 57
     },
-    pipe2_l_v = {
-      h = 2,
-      ox = 1,
-      oy = 1,
-      w = 2,
-      x = 250,
-      y = 27
-    },
-    pipe2_t_b = {
-      h = 2,
-      ox = 1,
-      oy = 1,
-      w = 2,
-      x = 246,
-      y = 27
-    },
-    pipe2_t_l = {
-      h = 2,
-      ox = 1,
-      oy = 1,
-      w = 2,
-      x = 242,
-      y = 27
-    },
-    pipe2_t_r = {
-      h = 2,
-      ox = 1,
-      oy = 1,
-      w = 2,
-      x = 238,
-      y = 27
-    },
-    pipe2_t_t = {
-      h = 2,
-      ox = 1,
-      oy = 1,
-      w = 2,
-      x = 234,
-      y = 27
-    },
     pipe3_j_bl = {
       h = 4,
       ox = 2,
       oy = 2,
       w = 4,
-      x = 160,
+      x = 194,
       y = 27
     },
     pipe3_j_br = {
@@ -563,7 +571,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 154,
+      x = 188,
       y = 27
     },
     pipe3_j_tl = {
@@ -571,7 +579,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 148,
+      x = 182,
       y = 27
     },
     pipe3_j_tr = {
@@ -579,7 +587,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 142,
+      x = 176,
       y = 27
     },
     pipe3_l_h = {
@@ -587,7 +595,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 136,
+      x = 170,
       y = 27
     },
     pipe3_l_v = {
@@ -595,7 +603,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 130,
+      x = 164,
       y = 27
     },
     pipe3_t_b = {
@@ -603,7 +611,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 124,
+      x = 158,
       y = 27
     },
     pipe3_t_l = {
@@ -611,7 +619,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 118,
+      x = 152,
       y = 27
     },
     pipe3_t_r = {
@@ -619,7 +627,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 112,
+      x = 146,
       y = 27
     },
     pipe3_t_t = {
@@ -627,7 +635,7 @@ return {
       ox = 2,
       oy = 2,
       w = 4,
-      x = 106,
+      x = 140,
       y = 27
     },
     pixel = {
@@ -635,15 +643,15 @@ return {
       ox = 0,
       oy = 0,
       w = 1,
-      x = 254,
-      y = 27
+      x = 250,
+      y = 79
     },
     progress_back = {
       h = 8,
       ox = 0,
       oy = 0,
       w = 8,
-      x = 131,
+      x = 157,
       y = 179
     },
     progress_ichor = {
@@ -651,23 +659,23 @@ return {
       ox = 0,
       oy = 0,
       w = 3,
-      x = 161,
-      y = 179
+      x = 251,
+      y = 15
     },
     progress_overlay = {
       h = 22,
       ox = 0,
       oy = 0,
       w = 22,
-      x = 233,
-      y = 1
+      x = 79,
+      y = 139
     },
     radio_off = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 79,
+      x = 105,
       y = 61
     },
     radio_off_hover = {
@@ -675,7 +683,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 53,
+      x = 79,
       y = 61
     },
     radio_off_press = {
@@ -683,7 +691,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 27,
+      x = 53,
       y = 61
     },
     radio_on = {
@@ -691,7 +699,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 1,
+      x = 27,
       y = 61
     },
     radio_on_hover = {
@@ -699,15 +707,15 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 209,
-      y = 35
+      x = 1,
+      y = 61
     },
     radio_on_press = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 183,
+      x = 209,
       y = 35
     },
     sash_lr = {
@@ -715,7 +723,7 @@ return {
       ox = 0,
       oy = 0,
       w = 8,
-      x = 121,
+      x = 147,
       y = 179
     },
     sash_tb = {
@@ -723,7 +731,7 @@ return {
       ox = 0,
       oy = 0,
       w = 8,
-      x = 111,
+      x = 137,
       y = 179
     },
     scroll_button = {
@@ -731,31 +739,31 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 239,
-      y = 165
+      x = 29,
+      y = 179
     },
     scroll_button_disabled = {
       h = 12,
       ox = 0,
       oy = 0,
       w = 12,
-      x = 225,
-      y = 165
+      x = 15,
+      y = 179
     },
     scroll_button_hover = {
       h = 12,
       ox = 0,
       oy = 0,
       w = 12,
-      x = 211,
-      y = 165
+      x = 1,
+      y = 179
     },
     scroll_button_press = {
       h = 12,
       ox = 0,
       oy = 0,
       w = 12,
-      x = 197,
+      x = 239,
       y = 165
     },
     scroll_trough = {
@@ -763,15 +771,15 @@ return {
       ox = 0,
       oy = 0,
       w = 3,
-      x = 226,
-      y = 27
+      x = 241,
+      y = 79
     },
     slider_thumb1 = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 157,
+      x = 183,
       y = 35
     },
     slider_thumb2 = {
@@ -779,7 +787,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 131,
+      x = 157,
       y = 35
     },
     slider_trough_active = {
@@ -787,7 +795,7 @@ return {
       ox = 0,
       oy = 0,
       w = 8,
-      x = 101,
+      x = 127,
       y = 179
     },
     slider_trough_empty = {
@@ -795,15 +803,15 @@ return {
       ox = 0,
       oy = 0,
       w = 8,
-      x = 91,
-      y = 179
+      x = 241,
+      y = 15
     },
     slider_trough_tick_major = {
       h = 5,
       ox = 0,
       oy = 0,
       w = 1,
-      x = 103,
+      x = 137,
       y = 27
     },
     slider_trough_tick_minor = {
@@ -811,7 +819,7 @@ return {
       ox = 0,
       oy = 0,
       w = 1,
-      x = 231,
+      x = 254,
       y = 27
     },
     stepper_body = {
@@ -819,7 +827,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 105,
+      x = 131,
       y = 35
     },
     tabular_category_body = {
@@ -827,7 +835,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 183,
+      x = 225,
       y = 165
     },
     tabular_category_body_hover = {
@@ -835,7 +843,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 169,
+      x = 211,
       y = 165
     },
     tabular_category_body_press = {
@@ -843,7 +851,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 155,
+      x = 197,
       y = 165
     },
     win_body = {
@@ -851,7 +859,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 79,
+      x = 105,
       y = 35
     },
     win_shadow = {
@@ -859,7 +867,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 53,
+      x = 79,
       y = 35
     },
     winbutton_large_disabled = {
@@ -867,7 +875,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 27,
+      x = 53,
       y = 35
     },
     winbutton_large_hover = {
@@ -875,7 +883,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 1,
+      x = 27,
       y = 35
     },
     winbutton_large_idle = {
@@ -883,15 +891,15 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 207,
-      y = 1
+      x = 1,
+      y = 35
     },
     winbutton_large_press = {
       h = 24,
       ox = 0,
       oy = 0,
       w = 24,
-      x = 181,
+      x = 215,
       y = 1
     },
     winbutton_normal_disabled = {
@@ -899,7 +907,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 141,
+      x = 183,
       y = 165
     },
     winbutton_normal_hover = {
@@ -907,7 +915,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 127,
+      x = 169,
       y = 165
     },
     winbutton_normal_idle = {
@@ -915,7 +923,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 113,
+      x = 155,
       y = 165
     },
     winbutton_normal_press = {
@@ -923,7 +931,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 99,
+      x = 141,
       y = 165
     },
     winbutton_small_disabled = {
@@ -931,7 +939,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 85,
+      x = 127,
       y = 165
     },
     winbutton_small_hover = {
@@ -939,7 +947,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 71,
+      x = 113,
       y = 165
     },
     winbutton_small_idle = {
@@ -947,7 +955,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 57,
+      x = 99,
       y = 165
     },
     winbutton_small_press = {
@@ -955,7 +963,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 43,
+      x = 85,
       y = 165
     },
     wingraphic_large_close = {
@@ -971,7 +979,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 155,
+      x = 189,
       y = 1
     },
     wingraphic_large_unmaximize = {
@@ -979,7 +987,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 129,
+      x = 163,
       y = 1
     },
     wingraphic_normal_close = {
@@ -987,7 +995,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 29,
+      x = 71,
       y = 165
     },
     wingraphic_normal_maximize = {
@@ -995,7 +1003,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 15,
+      x = 57,
       y = 165
     },
     wingraphic_normal_unmaximize = {
@@ -1003,7 +1011,7 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 1,
+      x = 43,
       y = 165
     },
     wingraphic_small_close = {
@@ -1011,24 +1019,24 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 239,
-      y = 139
+      x = 29,
+      y = 165
     },
     wingraphic_small_maximize = {
       h = 12,
       ox = 0,
       oy = 0,
       w = 12,
-      x = 225,
-      y = 139
+      x = 15,
+      y = 165
     },
     wingraphic_small_unmaximize = {
       h = 12,
       ox = 0,
       oy = 0,
       w = 12,
-      x = 211,
-      y = 139
+      x = 1,
+      y = 165
     },
     winheader_large = {
       h = 32,
@@ -1043,7 +1051,7 @@ return {
       ox = 0,
       oy = 0,
       w = 24,
-      x = 103,
+      x = 137,
       y = 1
     },
     winheader_small = {
@@ -1051,8 +1059,8 @@ return {
       ox = 0,
       oy = 0,
       w = 12,
-      x = 197,
-      y = 139
+      x = 241,
+      y = 1
     }
   },
   slices = {

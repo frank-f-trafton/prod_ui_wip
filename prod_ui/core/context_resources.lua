@@ -47,6 +47,7 @@ repeated lookups through context.resources.
 
 context.resources = {
 	boxes = pName.set({}, "boxes"),
+	card_box_styles = pName.set({}, "card_box_styles"),
 	fonts = pName.set({}, "fonts"),
 	icons = pName.set({}, "icons"),
 	info = pName.set({}, "info"),
@@ -74,6 +75,39 @@ models.box = uiSchema.newModel {
 		y1 = {uiAssert.type, "number"},
 		y2 = {uiAssert.type, "number"}
 	}
+}
+
+
+models.cardBoxStyle = uiSchema.newKeysX {
+	card_w = {uiAssert.numberGe, 0},
+	card_h = {uiAssert.numberGe, 0},
+
+	-- Spacing between cards.
+	spacing_x = {uiAssert.numberGe, 0},
+	spacing_y = {uiAssert.numberGe, 0},
+
+	-- Icon and text positions are relative to the card top-left.
+
+	icon_x = {uiAssert.type, "number"},
+	icon_y = {uiAssert.type, "number"},
+	icon_w = {uiAssert.numberGe, 0},
+	icon_h = {uiAssert.numberGe, 0},
+
+	text_x = {uiAssert.type, "number"},
+	text_y = {uiAssert.type, "number"},
+	text_w = {uiAssert.numberGe, 0},
+	text_h = {uiAssert.numberGe, 0},
+
+	text_align_x = {uiAssert.namedMap, uiTheme.named_maps.text_align_x},
+	text_align_y = {uiAssert.namedMap, uiTheme.named_maps.text_align_y},
+	text_crop = {uiAssert.typeEval, "boolean"},
+	font = themeAssert.font,
+
+	body_slc = themeAssert.sliceEval,
+
+	color_icon = uiAssert.loveColorTuple,
+	color_text = uiAssert.loveColorTuple,
+	color_body = uiAssert.loveColorTuple
 }
 
 
@@ -304,6 +338,11 @@ models.sash_styles_collection = uiSchema.newModel {
 }
 
 
+models.card_box_styles_collection = uiSchema.newModel {
+	remaining = models.cardBoxStyle
+}
+
+
 local function _scaleBox(box, scale)
 	for k, v in pairs(box) do
 		for k2, v2 in pairs(v) do
@@ -312,6 +351,25 @@ local function _scaleBox(box, scale)
 			end
 		end
 	end
+end
+
+
+local function _scaleCardBoxStyle(cbs, scale)
+	uiScale.fieldInteger(scale, cbs, "card_w", 0)
+	uiScale.fieldInteger(scale, cbs, "card_h", 0)
+
+	uiScale.fieldInteger(scale, cbs, "spacing_x", 0)
+	uiScale.fieldInteger(scale, cbs, "spacing_y", 0)
+
+	uiScale.fieldInteger(scale, cbs, "icon_x", 0)
+	uiScale.fieldInteger(scale, cbs, "icon_y", 0)
+	uiScale.fieldInteger(scale, cbs, "icon_w", 0)
+	uiScale.fieldInteger(scale, cbs, "icon_h", 0)
+
+	uiScale.fieldInteger(scale, cbs, "text_x", 0)
+	uiScale.fieldInteger(scale, cbs, "text_y", 0)
+	uiScale.fieldInteger(scale, cbs, "text_w", 0)
+	uiScale.fieldInteger(scale, cbs, "text_h", 0)
 end
 
 
@@ -767,6 +825,15 @@ function methods:applyTheme(theme)
 		_deepCopyFields(theme.labels, resources.labels)
 
 		-- TODO
+	end
+
+	if theme.card_box_styles then
+		_deepCopyFields(theme.card_box_styles, resources.card_box_styles)
+		uiSchema.validate(models.card_box_styles_collection, resources.card_box_styles, "resources.card_box_styles")
+
+		for k, cbs in pairs(resources.card_box_styles) do
+			_scaleCardBoxStyle(cbs, scale)
+		end
 	end
 
 	if theme.pipe_styles then
