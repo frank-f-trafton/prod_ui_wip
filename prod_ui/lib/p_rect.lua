@@ -1,5 +1,5 @@
 -- PILE Base: pRect
--- VERSION: 2.105
+-- VERSION: 2.106
 -- https://github.com/frank-f-trafton/pile_base
 
 
@@ -581,8 +581,8 @@ function M.placeOuter(a, b, ux, uy)
 	pAssert.numberNotNan(4, uy)
 	--]]
 
-	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
-	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
+	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w, ux))
+	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h, uy))
 
 	return a
 end
@@ -595,7 +595,7 @@ function M.placeOuterHorizontal(a, b, ux)
 	pAssert.numberNotNan(3, ux)
 	--]]
 
-	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w + b.w, ux))
+	b.x = _roundInf(_lerp(a.x - b.w, a.x + a.w, ux))
 
 	return a
 end
@@ -608,7 +608,7 @@ function M.placeOuterVertical(a, b, uy)
 	pAssert.numberNotNan(4, uy)
 	--]]
 
-	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h + b.h, uy))
+	b.y = _roundInf(_lerp(a.y - b.h, a.y + a.h, uy))
 
 	return a
 end

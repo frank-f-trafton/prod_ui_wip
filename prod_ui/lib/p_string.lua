@@ -1,5 +1,5 @@
 -- PILE Base: pString
--- VERSION: 2.105
+-- VERSION: 2.106
 -- https://github.com/frank-f-trafton/pile_base
 
 
