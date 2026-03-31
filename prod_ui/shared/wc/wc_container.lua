@@ -114,7 +114,7 @@ function _methods:getSashesEnabled()
 end
 
 
-function wcContainer.getSashCursorID(edge, is_drag)
+function wcContainer.getSashCursorId(edge, is_drag)
 	if is_drag then
 		return (edge == "left" or edge == "right") and "cursor_drag_h" or "cursor_drag_v"
 	else
@@ -153,7 +153,7 @@ function wcContainer.sashHoverLogic(self, mouse_x, mouse_y)
 
 		if wid then
 			self.SA_hover = wid
-			local cursor_id = wcContainer.getSashCursorID(wid.GE.edge, false)
+			local cursor_id = wcContainer.getSashCursorId(wid.GE.edge, false)
 			self.cursor_hover = sash_style[cursor_id]
 			return true
 		else
@@ -214,7 +214,7 @@ function wcContainer.sashPressLogic(self, x, y, button)
 					self.SA_drag_max = self.LO_h
 				end
 
-				local cursor_id = wcContainer.getSashCursorID(GE.edge, true)
+				local cursor_id = wcContainer.getSashCursorId(GE.edge, true)
 				local sash_style = widLayout.getSashStyleTable(GE.sash_style)
 				self.cursor_press = sash_style[cursor_id]
 

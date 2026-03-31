@@ -85,7 +85,7 @@ def.default_skinner = {
 		default_height = {uiAssert.numberGe, 0}, -- unscaled
 
 		-- wcPipe
-		PIPE_default_id = themeAssert.pipeStyleID,
+		PIPE_default_id = themeAssert.pipeStyleId,
 
 		pipe_color = uiAssert.loveColorTuple
 	},

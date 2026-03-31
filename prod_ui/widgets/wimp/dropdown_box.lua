@@ -260,7 +260,7 @@ function def:_openPopUpMenu()
 		self["next"] = drawer
 		drawer["prev"] = self
 		drawer:setShowIcons(self.show_icons)
-		drawer:setIconSetID(self.icon_set_id)
+		drawer:setIconSetId(self.icon_set_id)
 
 		for i, item in ipairs(self.MN_items) do
 			local new_item = drawer:addItem(item.text, nil, item.icon_id, true)

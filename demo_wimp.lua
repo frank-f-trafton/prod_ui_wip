@@ -337,10 +337,10 @@ function love.keypressed(kc, sc, rep)
 	-- [====[
 	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
 		if context:getScale() > 1 then
-			demoShared.executeThemeUpdate(context, 1.0, context:getTextureScale(), context:getThemeID())
+			demoShared.executeThemeUpdate(context, 1.0, context:getTextureScale(), context:getThemeId())
 		else
 			--demoShared.executeThemeUpdate(context, 1.5, 192)
-			demoShared.executeThemeUpdate(context, 1.5, context:getTextureScale(), context:getThemeID())
+			demoShared.executeThemeUpdate(context, 1.5, context:getTextureScale(), context:getThemeId())
 		end
 	end
 

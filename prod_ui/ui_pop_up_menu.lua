@@ -70,7 +70,7 @@ local function _getKeyShortcut(self)
 end
 
 
-local function _setIconID(self, text)
+local function _setIconId(self, text)
 	uiAssert.typeEval(1, text, "string")
 
 	self.icon_id = text or nil
@@ -79,7 +79,7 @@ local function _setIconID(self, text)
 end
 
 
-local function _getIconID(self)
+local function _getIconId(self)
 	return self.icon_id
 end
 
@@ -175,8 +175,8 @@ _mt_command = {
 	getKeyMnemonic = _getKeyMnemonic,
 	setKeyShortcut = _setKeyShortcut,
 	getKeyShortcut = _getKeyShortcut,
-	setIconID = _setIconID,
-	getIconID = _getIconID,
+	setIconId = _setIconId,
+	getIconId = _getIconId,
 	setCallback = _setCallback,
 	getCallback = _getCallback,
 	setConfig = _setConfig,
@@ -207,8 +207,8 @@ _mt_group = {
 	getText = _getText,
 	setKeyMnemonic = _setKeyMnemonic,
 	getKeyMnemonic = _getKeyMnemonic,
-	setIconID = _setIconID,
-	getIconID = _getIconID,
+	setIconId = _setIconId,
+	getIconId = _getIconId,
 	setGroupPrototype = _setGroupPrototype,
 	getGroupPrototype = _getGroupPrototype,
 	setConfig = _setConfig,

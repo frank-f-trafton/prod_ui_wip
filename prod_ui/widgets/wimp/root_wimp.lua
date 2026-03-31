@@ -308,7 +308,7 @@ function def:evt_windowResize(w, h)
 end
 
 
-function def:dispenseFrameOrderID()
+function def:dispenseFrameOrderId()
 	self.frame_order_counter = self.frame_order_counter + 1
 	return self.frame_order_counter
 end
@@ -395,7 +395,7 @@ function def:setSelectedFrame(targ, set_new_order)
 			wcUIFrame.tryUnbankingThimble1(targ)
 
 			if set_new_order then
-				targ.order_id = self:dispenseFrameOrderID()
+				targ.order_id = self:dispenseFrameOrderId()
 			end
 		end
 	end

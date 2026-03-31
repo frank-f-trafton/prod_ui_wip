@@ -271,7 +271,7 @@ end
 
 --- Get the cursor ID in a given slot.
 -- @param slot_n (#self.slots)
-function _mt_mgr_cursor:getCursorID(slot_n)
+function _mt_mgr_cursor:getCursorId(slot_n)
 	-- Defaults
 	slot_n = slot_n or #self.slots
 
@@ -402,7 +402,7 @@ end
 
 --- Use this if you want to assert that a cursor ID is populated without changing the manager state.
 -- @param id The cursor ID to assert.
-function _mt_mgr_cursor:assertCursorID(id)
+function _mt_mgr_cursor:assertCursorId(id)
 	if not self.cursor_defs[self.cursor_id] then
 		error("context is missing cursor: " .. tostring(self.cursor_id))
 	end

@@ -126,7 +126,7 @@ def.movePageDown = wcMenu.widgetMovePageDown
 --local column = self.columns_rev[cell.id]
 
 
-local function _getColumnByID(self, id)
+local function _getColumnById(self, id)
 	for i, column in ipairs(self.columns) do
 		if column.id == id then
 			return i, column
@@ -137,10 +137,10 @@ local function _getColumnByID(self, id)
 end
 
 
-function def:getColumnByID(id)
+function def:getColumnById(id)
 	uiAssert.types(1, id, "string", "number")
 
-	return _getColumnByID(self, id)
+	return _getColumnById(self, id)
 end
 
 
@@ -191,7 +191,7 @@ local function _updateColumnSize(self, col)
 end
 
 
-local function _checkColumnID(self, id, ignore)
+local function _checkColumnId(self, id, ignore)
 	local col = self.columns_rev[id]
 	if col and ignore ~= col then
 		error("duplicate column ID: " .. tostring(id))
@@ -282,7 +282,7 @@ function def:newColumn(id, pos)
 		error("position is out of range")
 	end
 
-	_checkColumnID(self, id, nil)
+	_checkColumnId(self, id, nil)
 
 	local skin = self.skin
 
@@ -321,7 +321,7 @@ function def:removeColumn(id)
 
 	-- The caller is responsible for cleaning up cells associated with this column ID.
 
-	local i, col = _getColumnByID(self, id)
+	local i, col = _getColumnById(self, id)
 	col.owner = nil
 	table.remove(self.columns, i)
 	self.columns_rev[id] = nil
@@ -330,10 +330,10 @@ function def:removeColumn(id)
 end
 
 
-function _mt_column:setID(id)
+function _mt_column:setId(id)
 	uiAssert.types(1, id, "string", "number")
 
-	_checkColumnID(self.owner, id, self)
+	_checkColumnId(self.owner, id, self)
 	if self.id ~= id then
 		self.id = id
 	end
@@ -342,7 +342,7 @@ function _mt_column:setID(id)
 end
 
 
-function _mt_column:getID()
+function _mt_column:getId()
 	return self.id
 end
 
@@ -602,7 +602,7 @@ function _mt_cell:getText()
 end
 
 
-function _mt_cell:setIconID(icon_id)
+function _mt_cell:setIconId(icon_id)
 	uiAssert.typeEval(2, icon_id, "string")
 
 	self.icon_id = icon_id or false
@@ -612,7 +612,7 @@ function _mt_cell:setIconID(icon_id)
 end
 
 
-function _mt_cell:getIconID()
+function _mt_cell:getIconId()
 	return self.icon_id
 end
 
@@ -633,7 +633,7 @@ local function _makePopUpPrototype(self)
 
 	for i, column in ipairs(self.columns) do
 		local command = P.command()
-			:setIconID(column.visible and "check_on" or "check_off")
+			:setIconId(column.visible and "check_on" or "check_off")
 			:setText(column.header_text ~= "" and column.header_text or "(Column #" .. i .. ")")
 			:setActionable(not column.lock_visibility)
 			:setCallback(callback_toggleCategoryVisibility)
