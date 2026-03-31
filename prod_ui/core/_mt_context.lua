@@ -1193,6 +1193,11 @@ function _mt_context:assertWidget(wid)
 end
 
 
+function _mt_context:isWindowVisible()
+	return self.window_visible
+end
+
+
 uiTable.patch(_mt_context, contextResources.methods, true)
 
 

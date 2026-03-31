@@ -1,17 +1,38 @@
+--love.window.setVSync(0)
+
+
 require("lib.test.strict")
 
 
+--[[
+-- Debug: finds the origin of printed console text.
+local oldPrint = print
+print = function(...)
+	oldPrint(...)
+	oldPrint(debug.traceback())
+end
+--]]
+
+
+-- LÖVE Setup
+love.graphics.setDefaultFilter("nearest", "nearest")
+love.keyboard.setKeyRepeat(true)
+love.keyboard.setTextInput(false) -- ProdUI programs should start with text input disabled.
+
+
+-- Modules
+local debugPanel = require("lib.debug_panel")
 local demoShared = require("demo_shared")
 local inspect = require("lib.test.inspect")
+local prodUi = require("prod_ui")
 local uiPopUpMenu = require("prod_ui.ui_pop_up_menu")
 
 
-print("Start WIMP Demo.")
+local love_major = love.getVersion()
 
 
-local demo_default_theme
---demo_default_theme = "vacuum_light"
-demo_default_theme = "vacuum_dark"
+--local demo_default_theme = "vacuum_light"
+local demo_default_theme = "vacuum_dark"
 
 
 -- The first panel to load.
@@ -112,6 +133,7 @@ local demo_plan_list = {
 			nodes = {
 				{plan_id = "widgets.unfinished.d_drag_box", label = "Drag Box"},
 				{plan_id = "widgets.unfinished.d_label_test", label = "Label test"},
+				{plan_id = "events.d_evt_quit", label = "evt_quit"},
 			},
 		},
 		-- [[
@@ -159,31 +181,7 @@ do
 end
 
 
--- ProdUI programs should start with text input disabled.
-love.keyboard.setTextInput(false)
-
-
-local love_major = love.getVersion()
-
-
---[[
--- Finds the origin of printed console text.
-local oldPrint = print
-print = function(...)
-	oldPrint(...)
-	oldPrint(debug.traceback())
-end
---]]
-
-
--- ProdUI
-local ui = require("prod_ui")
-
-
--- Libs: QuickPrint / DebugPanel
-local debugPanel = require("lib.debug_panel")
-
-
+-- Set up the debug panel.
 local dpanel = debugPanel.new(320, love.graphics.getFont()) -- the font will be updated later.
 local dpanel_side_pad = 32
 dpanel.x = dpanel_side_pad
@@ -194,64 +192,23 @@ local dpanel_cool_max = 0.33
 local dpanel_tabs = {0, 24, 160}
 
 
--- * Demo State *
-
-
+-- Demo State
 local demo_perf -- assigned near love.draw
-
-
 local demo_zoom = 1.0
 local demo_canvas
-
 
 -- When true, center the mouse cursor when zooming.
 -- When false/nil, the mouse cursor rests over the same pixel as it would without zooming.
 local demo_zoom_center = false
 
 
--- * / Demo State *
+local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.lua")
+--default_settings.wimp.pop_up_menu.block_1st_click_out = true
 
 
--- LÖVE Setup
-
-love.graphics.setDefaultFilter("nearest", "nearest")
-
-love.keyboard.setKeyRepeat(true)
-
-love.filesystem.setSymlinksEnabled(true)
-
---love.graphics.setLineStyle("rough")
-
---love.window.setVSync(0)
-
-local font_sz = 14
-local font_test
-local function reloadFont()
-	local old_font = font_test
-	font_test = love.graphics.newFont(font_sz)
-	dpanel.qp.text_object:setFont(font_test)
-
-	-- Release the old font object and collect garbage twice to prevent
-	-- a buildup of rapidly-discarded fonts.
-	if old_font then
-		old_font:release()
-		collectgarbage("collect")
-		collectgarbage("collect")
-	end
-
-end
-reloadFont()
-
-
--- / LÖVE Setup
-
-
-local app_settings = require("prod_ui.data.default_settings")
---app_settings.wimp.pop_up_menu.block_1st_click_out = true
-
-
-local function newWimpContext()
-	local context = ui.context.newContext("prod_ui", app_settings)
+local context, wimp_root
+do
+	context = prodUi.context.newContext("prod_ui", default_settings)
 
 	context:setScale(1.0)
 	context:setTextureScale(1)
@@ -300,29 +257,8 @@ local function newWimpContext()
 	local theme = demoShared.loadThemeDuplicateSkins(context, demo_default_theme)
 	context:applyTheme(theme)
 
-	local wid_root = context:addRoot("wimp/root_wimp")
-	wid_root.w, wid_root.h = love.graphics.getDimensions()
-
-	-- Test...
-	--[[
-	local counter = 0
-
-	wid_root.evt_quit = function(self)
-		counter = counter + 1
-		print("counter (allow quitting at 3):", counter)
-		if counter >= 3 then
-			return false
-		end
-
-		return true
-	end
-	--]]
-
-	return context, wid_root
+	wimp_root = context:addRoot("wimp/root_wimp")
 end
-
-
-local context, wimp_root = newWimpContext()
 
 
 local function updateDPanelX(dpanel)
@@ -347,13 +283,11 @@ end
 
 
 function love.mousefocus(focus)
-	--print("love.mousefocus()", focus)
 	context:love_mousefocus(focus)
 end
 
 
 function love.focus(focus)
-	--print("love.focus()", focus)
 	context:love_focus(focus)
 end
 
@@ -624,7 +558,7 @@ do
 				local key_mgr = self.context.key_mgr
 				local mod = key_mgr.mod
 
-				local input_str = ui.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
+				local input_str = prodUi.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
 				if shortcuts[input_str] then
 					shortcuts[input_str](self, key, scancode, isrepeat)
 					return true
@@ -766,24 +700,6 @@ function love.update(dt)
 
 	context:love_update(dt)
 
-	--[[
-	if love.keyboard.isDown("lctrl") then
-		local sz_old = font_sz
-		if love.keyboard.isDown("down") then
-			font_sz = font_sz + 1
-
-		elseif love.keyboard.isDown("up") then
-			font_sz = font_sz - 1
-		end
-
-		local old_sz = font_sz
-		font_sz = math.max(1, font_sz)
-		if old_sz ~= font_sz then
-			reloadFont()
-		end
-	end
-	--]]
-
 	--print(collectgarbage("count"))
 
 	-- Crappy hack intended to demonstrate a toast system, without having yet
@@ -899,7 +815,7 @@ end
 function love.draw()
 	-- NOTE: Any persistent canvas work (draw once, display multiple times) needs to be handled
 	-- in love.update() or before this clause.
-	if not context.window_visible then
+	if not context:isWindowVisible() then
 		return
 	end
 
