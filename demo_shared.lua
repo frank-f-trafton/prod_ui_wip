@@ -99,7 +99,7 @@ end
 function demoShared.makeTitle(self, tag, text)
 	local text_block = self:addChild("wimp/text_block")
 	if tag then
-		text_block.tag = tag
+		text_block:setTag(tag)
 	end
 
 	text_block:setAutoSize("v")

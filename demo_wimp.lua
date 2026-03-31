@@ -1,3 +1,6 @@
+love.window.setTitle("ProdUI: WIMP Demo")
+
+
 --love.window.setVSync(0)
 
 
