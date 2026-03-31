@@ -4,9 +4,13 @@ local context = select(1, ...)
 local widLayout = {}
 
 
+local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
+
+
+local _roundInf, _lerp = pMath.roundInf, pMath.lerp
 
 
 local sash_styles = context.resources.sash_styles
@@ -29,6 +33,8 @@ widLayout._nm_layout_base = uiTable.newNamedMapV("LayoutBase",
 widLayout._nm_seg_edge = uiTable.newNamedMapV("SegmentEdge", "left", "right", "top", "bottom")
 widLayout._nm_card_measure = uiTable.newNamedMapV("CardSizeMeasure", "pixel", "unit")
 widLayout._nm_stack_len_measure = uiTable.newNamedMapV("StackLengthMeasure", "pixel", "unit")
+widLayout._nm_unit_mode = uiTable.newNamedMapV("UnitMode", "in", "mid", "out") -- or false/nil
+
 
 
 --[[
@@ -43,8 +49,14 @@ The parameters of each geometry mode:
 	(No parameters.)
 
 "relative":
-	x, y, w, h: (integer) Position and dimensions. Always scaled.
+	x, y: (number) Position. These are scaled integers when the associated 'unit_' paremeters are false. Otherwise, a
+		number from 0.0 to 1.0.
+	w, h: (integer) Dimensions. Always scaled.
 	flip_x, flip_y: (boolean) When true, the position is against the other side of the layout space.
+	unit_x, unit_y: (false/nil, "in", "mid", "out") When non-false, the widget is placed based on the widget
+		dimensions and the layout dimensions (where x 0.5, y 0.5 is dead center). The strings control how far out the
+		widget is placed: "in" to place the widget just within the layout edge, "mid" to place the widget mid-point
+		on the layout edge, and "out" to place the widget just outside the layout edge.
 
 "remaining":
 	(No parameters.)
@@ -53,8 +65,7 @@ The parameters of each geometry mode:
 	edge: (_nm_seg_edge)
 	len: (integer or false/nil) The desired length of the segment. The final length may be reduced to make room
 		for a sash. When false, the widget is queried for a default length. Zero is used as a last resort.
-	len_min: (integer) The preferred (not guaranteed) minimum and maximum segment length.
-	len_max: ^
+	len_min, len_max: (integer) The preferred (not guaranteed) minimum and maximum segment length.
 	sash_style (string|false/nil) When a string, this segment has a sash on the opposite edge.
 	sash_x, sash_y, sash_w, sash_h: (integer) Position and dimensions of the sash bounding box. Internal use.
 
@@ -71,8 +82,14 @@ The parameters of each geometry mode:
 	(Refer also the parent's 'LO_stack' table.)
 
 "static":
-	x, y, w, h: (integer) Position and dimensions. Always scaled.
+	x, y: (number) Position. These are scaled integers when the associated 'unit_' paremeters are false. Otherwise, a
+		number from 0.0 to 1.0.
+	w, h: (integer) Dimensions. Always scaled.
 	flip_x, flip_y: (boolean) When true, the position is against the other side of the layout space.
+	unit_x, unit_y: (false/nil, "in", "mid", "out") When non-false, the widget is placed based on the widget
+		dimensions and the layout dimensions (where x 0.5, y 0.5 is dead center). The strings control how far out the
+		widget is placed: "in" to place the widget just within the layout edge, "mid" to place the widget mid-point
+		on the layout edge, and "out" to place the widget just outside the layout edge.
 
 "wallet":
 	(No parameters. Refer to the parent's 'LO_wallet' table.)
@@ -122,12 +139,15 @@ widLayout.geometry_setters = {
 		return self
 	end,
 
-	relative = function(self, x, y, w, h, flip_x, flip_y)
+	relative = function(self, x, y, w, h, flip_x, flip_y, unit_x, unit_y)
 		uiAssert.numberNotNan(1, x)
 		uiAssert.numberNotNan(2, y)
 		uiAssert.numberNotNan(3, w)
 		uiAssert.numberNotNan(4, h)
-		-- don't assert 'flip_x' or 'flip_y'
+		-- don't assert 'flip_x'
+		-- don't assert 'flip_y'
+		uiAssert.namedMapEval(7, unit_x, widLayout._nm_unit_mode)
+		uiAssert.namedMapEval(8, unit_y, widLayout._nm_unit_mode)
 
 		local GE = _initGE(self, "relative")
 
@@ -137,6 +157,8 @@ widLayout.geometry_setters = {
 		GE.h = math.max(0, h)
 		GE.flip_x = not not flip_x
 		GE.flip_y = not not flip_y
+		GE.unit_x = unit_x or nil
+		GE.unit_y = unit_y or nil
 
 		return self
 	end,
@@ -199,12 +221,15 @@ widLayout.geometry_setters = {
 		return self
 	end,
 
-	static = function(self, x, y, w, h, flip_x, flip_y)
+	static = function(self, x, y, w, h, flip_x, flip_y, unit_x, unit_y)
 		uiAssert.numberNotNan(1, x)
 		uiAssert.numberNotNan(2, y)
 		uiAssert.numberNotNan(3, w)
 		uiAssert.numberNotNan(4, h)
-		-- don't assert 'flip_x' or 'flip_y'
+		-- don't assert 'flip_x'
+		-- don't assert 'flip_y'
+		uiAssert.namedMapEval(7, unit_x, widLayout._nm_unit_mode)
+		uiAssert.namedMapEval(8, unit_y, widLayout._nm_unit_mode)
 
 		local GE = _initGE(self, "static")
 
@@ -214,6 +239,8 @@ widLayout.geometry_setters = {
 		GE.h = math.max(0, h)
 		GE.flip_x = not not flip_x
 		GE.flip_y = not not flip_y
+		GE.unit_x = unit_x or nil
+		GE.unit_y = unit_y or nil
 
 		return self
 	end,
@@ -277,6 +304,31 @@ local function _calculateSegmentUnit(unit, layout_len, original_layout_len)
 end
 
 
+local function _staticPlaceOneAxis(nx, nw, px, pw, gx, gw, scale, flip, unit)
+	nw = math.floor(gw * scale)
+
+	if unit == "in" then
+		nx = _roundInf(_lerp(0, pw - nw, gx))
+
+	elseif unit == "mid" then
+		nx = _roundInf(_lerp(-nw*.5, pw - nw*.5, gx))
+
+	elseif unit == "out" then
+		nx = _roundInf(_lerp(-nw, pw, gx))
+
+	else
+		nx = math.floor(gx * scale)
+	end
+
+	if flip then
+		nx = pw - nw - nx
+	end
+	nx = nx + px
+
+	return nx, nw
+end
+
+
 -- arguments: np (parent), nc (child, to be resized), GE (child's geometry table), orig_x, orig_y, orig_w, orig_h
 widLayout.handlers = {
 	grid = function(np, nc, GE)
@@ -308,19 +360,8 @@ widLayout.handlers = {
 
 		local px, py, pw, ph = np.LO_x, np.LO_y, np.LO_w, np.LO_h
 
-		nc.w = math.floor(GE.w * scale)
-		nc.x = math.floor(GE.x * scale)
-		if GE.flip_x then
-			nc.x = pw - nc.w - nc.x
-		end
-		nc.x = nc.x + px
-
-		nc.h = math.floor(GE.h * scale)
-		nc.y = math.floor(GE.y * scale)
-		if GE.flip_y then
-			nc.y = ph - nc.h - nc.y
-		end
-		nc.y = nc.y + py
+		nc.x, nc.w = _staticPlaceOneAxis(nc.x, nc.w, px, pw, GE.x, GE.w, scale, GE.flip_x, GE.unit_x)
+		nc.y, nc.h = _staticPlaceOneAxis(nc.y, nc.h, py, ph, GE.y, GE.h, scale, GE.flip_y, GE.unit_y)
 	end,
 
 	remaining = function(np, nc)
@@ -484,19 +525,10 @@ widLayout.handlers = {
 
 		local px, py, pw, ph = orig_x, orig_y, orig_w, orig_h
 
-		nc.w = math.floor(GE.w * scale)
-		nc.x = math.floor(GE.x * scale)
-		if GE.flip_x then
-			nc.x = pw - nc.w - nc.x
-		end
-		nc.x = nc.x + px
+		nc.x, nc.w = _staticPlaceOneAxis(nc.x, nc.w, px, pw, GE.x, GE.w, scale, GE.flip_x, GE.unit_x)
+		nc.y, nc.h = _staticPlaceOneAxis(nc.y, nc.h, py, ph, GE.y, GE.h, scale, GE.flip_y, GE.unit_y)
 
-		nc.h = math.floor(GE.h * scale)
-		nc.y = math.floor(GE.y * scale)
-		if GE.flip_y then
-			nc.y = ph - nc.h - nc.y
-		end
-		nc.y = nc.y + py
+		print("new XYWH", nc.x, nc.y, nc.w, nc.h)
 	end,
 
 	wallet = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)

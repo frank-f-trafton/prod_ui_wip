@@ -1,10 +1,8 @@
 jit.off()
 
 function love.conf(t)
-	t.window.title = "ProdUI: Loading..."
-	t.window.width = 1024
-	t.window.height = 768
-	t.window.resizable = true
+	-- Demos are responsible for setting up the window and video mode. See: love.window.setMode()
+	t.window = nil
 
 	--t.gammacorrect = true
 end

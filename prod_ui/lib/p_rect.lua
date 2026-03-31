@@ -540,8 +540,8 @@ function M.placeMidpoint(a, b, ux, uy)
 	pAssert.numberNotNan(4, uy)
 	--]]
 
-	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
-	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
+	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w - b.w*.5, ux))
+	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h - b.h*.5, uy))
 
 	return a
 end
@@ -554,7 +554,7 @@ function M.placeMidpointHorizontal(a, b, ux)
 	pAssert.numberNotNan(3, ux)
 	--]]
 
-	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w + b.w*.5, ux))
+	b.x = _roundInf(_lerp(a.x - b.w*.5, a.x + a.w - b.w*.5, ux))
 
 	return a
 end
@@ -567,7 +567,7 @@ function M.placeMidpointVertical(a, b, uy)
 	pAssert.numberNotNan(4, uy)
 	--]]
 
-	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h + b.h*.5, uy))
+	b.y = _roundInf(_lerp(a.y - b.h*.5, a.y + a.h - b.h*.5, uy))
 
 	return a
 end
