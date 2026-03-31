@@ -60,6 +60,15 @@ function uiRes.loadLuaFile(path, env, ...)
 end
 
 
+function uiRes.loadLuaTable(path, env, ...)
+	local v = uiRes.loadLuaFile(path, env, ...)
+	if type(v) ~= "table" then
+		error("expected return value to be a table (got: " .. type(v) .. ")")
+	end
+	return v
+end
+
+
 --- Given a path and a substring that is anchored to the end, Strips the first part of a path.
 -- @param base_dir The initial part of the path. Any forward slash on the end is omitted.
 -- @param path The path to be shortened.

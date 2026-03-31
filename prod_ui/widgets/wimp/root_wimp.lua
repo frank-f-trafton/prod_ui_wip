@@ -44,6 +44,8 @@ end
 
 
 function def:evt_initialize()
+	self.w, self.h = love.graphics.getDimensions()
+
 	self.allow_hover = true
 	self.thimble_mode = 0
 	self.allow_focus_capture = false
