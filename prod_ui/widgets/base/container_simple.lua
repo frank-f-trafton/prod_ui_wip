@@ -4,9 +4,7 @@
 local context = select(1, ...)
 
 
-local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local widLayout = context:getLua("core/wid_layout")
-local widShared = context:getLua("core/wid_shared")
 
 
 local def = {}
@@ -18,30 +16,14 @@ widLayout.setupContainerDef(def)
 function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
-	self.thimble_mode = 0
 
 	widLayout.setupLayoutList(self)
-
-	-- Don't highlight when holding the UI thimble.
-	self.renderThimble = uiDummy.func
-end
-
-
-function def:evt_pointerPress(targ, x, y, button, istouch, presses)
-	if self == targ then
-		if button == self.context.mouse_pressed_button then
-			if button <= 3 then
-				self:tryTakeThimble1()
-			end
-		end
-	end
 end
 
 
 function def:evt_getGrowAxisLength(x_axis, cross_length)
 	if not x_axis then
 		local scale = context.scale
-		local skin = self.skin
 
 		local h = 0
 
@@ -63,6 +45,25 @@ end
 
 function def:evt_reshapePre()
 	widLayout.resetLayoutSpace(self)
+end
+
+
+function def:evt_pointerPress(targ, x, y, button, istouch, presses)
+	if self == targ then
+		-- Try directing thimble1 to the container's UI Frame ancestor.
+		if button <= 3 then
+			local wid = self
+			while wid do
+				if wid.frame_type then
+					break
+				end
+				wid = wid.parent
+			end
+			if wid then
+				wid:tryTakeThimble1()
+			end
+		end
+	end
 end
 
 

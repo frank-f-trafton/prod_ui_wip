@@ -1,10 +1,13 @@
-love.window.setTitle("ProdUI: WIMP Demo")
-
-
---love.window.setVSync(0)
-
-
 require("lib.test.strict")
+
+
+love.window.setMode(1024, 768, {
+	resizable=true,
+	minwidth=1,
+	minheight=1,
+	--vsync=0
+})
+love.window.setTitle("ProdUI: WIMP Demo")
 
 
 --[[

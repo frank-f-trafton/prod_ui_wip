@@ -103,6 +103,16 @@ function themeAssert.sliceEval(n, v)
 end
 
 
+function themeAssert.sliceID(n, v)
+	_assertResourceID("slices", "Slice", v)
+end
+
+
+function themeAssert.sliceIDEval(n, v)
+	_assertResourceID("slices", "Slice", v, true)
+end
+
+
 function themeAssert.font(n, v)
 	_assertLinkedResource("fonts", "Font", v)
 end

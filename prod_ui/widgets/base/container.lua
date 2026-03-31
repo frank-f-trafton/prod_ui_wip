@@ -295,8 +295,6 @@ def.default_skinner = {
 	transform = function(scale, skin)
 		uiScale.fieldInteger(scale, skin, "in_view_pad_x")
 		uiScale.fieldInteger(scale, skin, "in_view_pad_y")
-
-		-- TODO
 	end,
 
 

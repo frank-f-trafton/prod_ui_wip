@@ -1,8 +1,21 @@
-love.window.setTitle("ProdUI: Hello World")
-
-
 -- Catches undeclared globals.
 require("lib.test.strict")
+
+
+-- * Set up the window and title.
+
+--[[
+Normally, this stuff can be specified in the LÖVE project's 'conf.lua' file. In this
+case, there are multiple demos with different windowing requirements, so it makes
+more sense to do the setup here.
+--]]
+
+love.window.setMode(640, 480, {
+	resizable=true,
+	minwidth=512,
+	minheight=256
+})
+love.window.setTitle("ProdUI: Hello World")
 
 
 -- LÖVE Setup
@@ -48,22 +61,42 @@ end
 -- * Construct the "Hello World!" scene.
 
 do
+	-- Make a container with a panel-like background.
+	local panel = workspace:addChild("base/container_panel")
+		:geometrySetMode("static", 0.5, 0.5, 512, 256, false, false, "in", "in")
+
 	-- Make some text.
-	local text_block = workspace:addChild("wimp/text_block")
-		:setText("Hello world!")
+	local text_block = panel:addChild("wimp/text_block")
+		:geometrySetMode("static", 0.5, 0.5, 488, 128, false, false, "in", "in")
+		:setText("Hello, world!")
 		:setFontID("h1")
-		:geometrySetMode("segment", "top")
+		:setAlign("center")
 		:setAutoSize("v")
 
 	-- Make a button to close the program.
-	local btn = workspace:addChild("base/button")
+	local btn = panel:addChild("base/button")
+		:geometrySetMode("relative", 0.5, 32, 240, 56, false, true, "in", nil)
 		:setLabel("OK", "single")
-		:geometrySetMode("relative", 0, 16, 250, 64)
 		:userCallbackSet("cb_buttonAction", function(self) love.event.quit() end)
 
 	-- Assign keyboard focus to the button.
 	btn:tryTakeThimble1()
 end
+
+
+--[[
+We now have a widget tree that looks like this:
+
+    [Root]
+      |
+  [Workspace]
+      |
+    [Panel]
+      |
+   +--+----+
+   |       |
+[Text]  [Button]
+--]]
 
 
 -- * Reshape the Root.
