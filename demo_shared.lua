@@ -60,7 +60,7 @@ function demoShared.executeThemeUpdate(context, scale, tex_scale, id)
 	if not tex_dir then
 		return false
 	else
-		local old_scale, old_tex_scale, old_id = context:getScale(), context:getTextureScale(), context:getThemeID()
+		local old_scale, old_tex_scale, old_id = context:getScale(), context:getTextureScale(), context:getThemeId()
 		print("id", id, "old_id", old_id)
 		if not (scale == old_scale and tex_scale == old_tex_scale and id == old_id) then
 			context:setScale(scale)
@@ -103,7 +103,7 @@ function demoShared.makeTitle(self, tag, text)
 	end
 
 	text_block:setAutoSize("v")
-	text_block:setFontID("h1")
+	text_block:setFontId("h1")
 	text_block:setText(text)
 	text_block:geometrySetMode("segment", "top")
 
@@ -120,7 +120,7 @@ function demoShared.makeParagraph(self, tag, text)
 
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
-	text_block:setFontID("p")
+	text_block:setFontId("p")
 	text_block:setText(text)
 	text_block:geometrySetMode("segment", "top")
 
@@ -130,7 +130,7 @@ end
 
 function demoShared.makeParagraphSpacer(self, font_id, space)
 	local empty = self:addChild("wimp/text_space")
-		:setFontID(font_id)
+		:setFontId(font_id)
 		:setSpacing(space)
 		:geometrySetMode("segment", "top")
 
@@ -146,7 +146,7 @@ function demoShared.makeHyperlink(self, tag, text, url)
 
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
-	text_block:setFontID("p")
+	text_block:setFontId("p")
 	text_block:setText(text)
 	text_block:setURL(url)
 	text_block:userCallbackSet("cb_buttonAction", _openURL)
@@ -187,7 +187,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	local text_block = dialog:addChild("wimp/text_block")
 	text_block:setAutoSize("v")
 	text_block:setWrapping(true)
-	text_block:setFontID("p")
+	text_block:setFontId("p")
 	text_block:setText(text)
 	text_block:geometrySetMode("segment", "top")
 

@@ -115,7 +115,7 @@ local function _updateFontReference(self)
 end
 
 
-function def:setFontID(id)
+function def:setFontId(id)
 	uiAssert.typeEval(1, id, "string")
 
 	self.S_font_id = id or false
@@ -127,7 +127,7 @@ function def:setFontID(id)
 end
 
 
-function def:getFontID()
+function def:getFontId()
 	return self.S_font_id
 end
 
@@ -250,7 +250,7 @@ def.default_skinner = {
 		box = themeAssert.box,
 		tq_px = themeAssert.quad,
 
-		default_font_id = themeAssert.fontID,
+		default_font_id = themeAssert.fontId,
 
 		default_align_x = {uiAssert.namedMap, uiTheme.named_maps.text_align_x},
 		default_align_y = {uiAssert.namedMap, uiTheme.named_maps.text_align_y},

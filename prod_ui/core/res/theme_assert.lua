@@ -60,7 +60,7 @@ local function _assertLinkedResource(collection_id, label, v, eval)
 end
 
 
-local function _assertResourceID(collection_id, label, v, eval)
+local function _assertResourceId(collection_id, label, v, eval)
 	if not eval or (eval and v) then
 		local collection = context.resources[collection_id]
 		if not collection then
@@ -103,13 +103,13 @@ function themeAssert.sliceEval(n, v)
 end
 
 
-function themeAssert.sliceID(n, v)
-	_assertResourceID("slices", "Slice", v)
+function themeAssert.sliceId(n, v)
+	_assertResourceId("slices", "Slice", v)
 end
 
 
 function themeAssert.sliceIDEval(n, v)
-	_assertResourceID("slices", "Slice", v, true)
+	_assertResourceId("slices", "Slice", v, true)
 end
 
 
@@ -123,13 +123,13 @@ function themeAssert.fontEval(n, v)
 end
 
 
-function themeAssert.fontID(n, v)
-	_assertResourceID("fonts", "Font", v)
+function themeAssert.fontId(n, v)
+	_assertResourceId("fonts", "Font", v)
 end
 
 
 function themeAssert.fontIDEval(n, v)
-	_assertResourceID("fonts", "Font", v, true)
+	_assertResourceId("fonts", "Font", v, true)
 end
 
 
@@ -188,8 +188,8 @@ function themeAssert.pipeStyle(n, v)
 end
 
 
-function themeAssert.pipeStyleID(n, v)
-	_assertResourceID("pipe_styles", "PipeStyle", v)
+function themeAssert.pipeStyleId(n, v)
+	_assertResourceId("pipe_styles", "PipeStyle", v)
 end
 
 

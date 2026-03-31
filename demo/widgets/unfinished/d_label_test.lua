@@ -48,8 +48,8 @@ function plan.make(panel)
 		local lbl1 = grp:addChild("base/control_label")
 			:geometrySetMode("stack")
 			:setHorizontalAlignment("left")
-			:setFontID(font_id)
-			:setText("setFontID(\"" .. font_id .. "\")")
+			:setFontId(font_id)
+			:setText("setFontId(\"" .. font_id .. "\")")
 
 		yy = yy + hh
 	end

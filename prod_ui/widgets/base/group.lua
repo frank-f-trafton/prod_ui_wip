@@ -345,7 +345,7 @@ def.default_skinner = {
 		box = themeAssert.box,
 		font = themeAssert.font,
 
-		PIPE_default_id = themeAssert.pipeStyleID,
+		PIPE_default_id = themeAssert.pipeStyleId,
 		default_deco_style = {uiAssert.namedMap, _nm_group_deco_style},
 		default_label_side = {uiAssert.namedMap, _nm_group_label_side},
 

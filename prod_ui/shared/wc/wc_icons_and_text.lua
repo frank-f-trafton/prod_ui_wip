@@ -88,7 +88,7 @@ function wcIconsAndText.refreshIconReferences(self)
 end
 
 
-function methods:setIconSetID(icon_set_id)
+function methods:setIconSetId(icon_set_id)
 	uiAssert.typeEval(1, icon_set_id, "string")
 
 	if uiTable.setDouble(self, "S_icon_set_id", "icon_set_id", icon_set_id, self.skin.default_icon_set_id) then
@@ -99,7 +99,7 @@ function methods:setIconSetID(icon_set_id)
 end
 
 
-function methods:getIconSetID()
+function methods:getIconSetId()
 	return self.S_icon_set_id
 end
 

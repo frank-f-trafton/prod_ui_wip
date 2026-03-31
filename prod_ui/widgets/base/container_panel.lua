@@ -140,7 +140,7 @@ def.default_skinner = {
 
 		box = themeAssert.box,
 
-		default_slc_id = themeAssert.sliceID,
+		default_slc_id = themeAssert.sliceId,
 		color_body = uiAssert.loveColorTuple,
 	},
 

@@ -69,7 +69,7 @@ do
 	local text_block = panel:addChild("wimp/text_block")
 		:geometrySetMode("static", 0.5, 0.5, 488, 128, false, false, "in", "in")
 		:setText("Hello, world!")
-		:setFontID("h1")
+		:setFontId("h1")
 		:setAlign("center")
 		:setAutoSize("v")
 

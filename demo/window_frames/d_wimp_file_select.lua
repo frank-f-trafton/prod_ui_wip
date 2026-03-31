@@ -183,7 +183,7 @@ local function setupMenuItem(self, source)
 
 	local c_name = item:provisionCell("name")
 	c_name:setText(text_name)
-		:setIconID(name_icon_id)
+		:setIconId(name_icon_id)
 
 	local c_size = item:provisionCell("size")
 	c_size:setText(text_size)

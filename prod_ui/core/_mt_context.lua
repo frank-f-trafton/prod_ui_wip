@@ -18,6 +18,7 @@ local coreErr = require(context.conf.prod_ui_req .. "core.core_err")
 local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
 --local pools = context:getLua("core/res/pools")
 local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
+local pTree = require(context.conf.prod_ui_req .. "lib.p_tree")
 local pUTF8 = require(context.conf.prod_ui_req .. "lib.p_utf8")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
@@ -936,20 +937,6 @@ function _mt_context:loadWidgetDefsInDirectory(dir_path, recursive, id_prepend, 
 end
 
 
-local function _unloadFindWidgetByID(wid, id)
-	if wid.id == id then
-		return wid
-	else
-		for i, child in ipairs(wid.nodes) do
-			local found = findWidgetByID(child, id)
-			if found then
-				return found
-			end
-		end
-	end
-end
-
-
 --- Unloads (unregisters) a widget def from the UI Context. It's an error if any instances exist within the context at
 --	the time of calling.
 -- @param id The widget def to unload.
@@ -959,7 +946,8 @@ function _mt_context:_unloadWidgetDef(id)
 		error("no widget definition with this ID: " .. tostring(id))
 	end
 
-	if self.root and _unloadFindWidgetByID(self.root, id) then
+	local root = self.root
+	if root and root:nodeFindKeyDescending(true, "id", id) then
 		error("attempt to unload widget def which still has live instances in this context. ID: " .. tostring(id))
 	end
 
@@ -1175,7 +1163,7 @@ function _mt_context:getTextureScale()
 end
 
 
-function _mt_context:getThemeID()
+function _mt_context:getThemeId()
 	return self.theme_id
 end
 

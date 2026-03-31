@@ -10,7 +10,7 @@ local def = {
 }
 
 
-function def:setFontID(id)
+function def:setFontId(id)
 	local skin = self.skin
 
 	if not skin.fonts[id] then
@@ -25,7 +25,7 @@ function def:setFontID(id)
 end
 
 
-function def:getFontID()
+function def:getFontId()
 	return self.font_id
 end
 
