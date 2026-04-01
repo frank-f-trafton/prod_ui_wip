@@ -20,7 +20,6 @@ end
 --]]
 
 
--- LÖVE Setup
 love.graphics.setDefaultFilter("nearest", "nearest")
 love.keyboard.setKeyRepeat(true)
 love.keyboard.setTextInput(false) -- ProdUI programs should start with text input disabled.
