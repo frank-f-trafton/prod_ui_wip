@@ -49,11 +49,23 @@ local app = {
 
 
 local function _updateTimerText()
+	-- Grab a reference to the timer text widget.
+	--[[
+	If we created the widget before this point, we could now access it through an upvalue.
+	Care must be taken in that case, because such an upvalue can become a dangling reference
+	if the widget is destroyed.
+
+	In any case, the findTag() method can allow far-flung callback logic to locate pertinent
+	controls and labels.
+	--]]
 	local timer_text = wid_root:findTag("timer-text")
+
 	if timer_text then
+		-- Format to 'H:MM:SS.S'
 		local fmt = string.format
-		local s = tostring
-		timer_text:setText(fmt("%01d", app.hours) .. ":" .. fmt("%02d", app.minutes) .. ":" .. fmt("%04.1f", app.seconds))
+		local str = fmt("%01d", app.hours) .. ":" .. fmt("%02d", app.minutes) .. ":" .. fmt("%04.1f", app.seconds)
+
+		timer_text:setText(str)
 	end
 end
 
@@ -103,12 +115,11 @@ end
 
 -- * Construct the timer scene.
 
-local panel, timer_text
 do
-	panel = workspace:addChild("base/container_panel")
+	local panel = workspace:addChild("base/container_panel")
 		:geometrySetMode("remaining")
 
-	timer_text = panel:addChild("wimp/text_block")
+	local timer_text = panel:addChild("wimp/text_block")
 		:geometrySetMode("static", 0.5, 0.5, 488, 128, false, false, "in", "in")
 		:setTag("timer-text")
 		:setText("This text should be replaced before the first frame is drawn.")
