@@ -1,0 +1,24 @@
+local plan = {}
+
+
+local demoShared = require("demo.demo_shared")
+
+
+function plan.make(panel)
+	--title("Number Box")
+
+	panel:layoutSetBase("viewport-width")
+	panel:containerSetScrollRangeMode("zero")
+	panel:setScrollBars(false, false)
+
+	local num_box = panel:addChild("wimp/number_box")
+
+	num_box:userCallbackSet("cb_action", function(self)
+		-- WIP
+	end)
+
+	num_box:geometrySetMode("static", 32, 96, 256, 32)
+end
+
+
+return plan
