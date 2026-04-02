@@ -52,8 +52,8 @@ local def = {
 }
 
 
-def.setIconSetID = wcIconsAndText.methods.setIconSetID
-def.getIconSetID = wcIconsAndText.methods.getIconSetID
+def.setIconSetId = wcIconsAndText.methods.setIconSetId
+def.getIconSetId = wcIconsAndText.methods.getIconSetId
 
 
 wcMenu.attachMenuMethods(def)

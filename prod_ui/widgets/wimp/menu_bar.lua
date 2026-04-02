@@ -38,8 +38,8 @@ local def = {
 
 --def.setShowIcons = wcIconsAndText.methods.setShowIcons
 --def.getShowIcons = wcIconsAndText.methods.getShowIcons
-def.setIconSetID = wcIconsAndText.methods.setIconSetID
-def.getIconSetID = wcIconsAndText.methods.getIconSetID
+def.setIconSetId = wcIconsAndText.methods.setIconSetId
+def.getIconSetId = wcIconsAndText.methods.getIconSetId
 
 
 wcMenu.attachMenuMethods(def)
