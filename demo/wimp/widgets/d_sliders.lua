@@ -1,0 +1,271 @@
+local plan = {}
+
+
+local demoShared = require("demo.demo_shared")
+
+
+function plan.make(panel)
+	demoShared.makeTitle(panel, nil, "Slider Bar")
+
+	panel:layoutSetBase("viewport-width")
+	panel:containerSetScrollRangeMode("zero")
+	panel:setScrollBars(false, false)
+
+	local slider_breadth = 40
+
+	local s_box_x = 16
+	local s_box_y = 16
+	local s_box_w = 200
+	local s_box_h = 200
+
+	local default_vertical = false
+
+	local shx, shy, shw, shh = 0, 0, 0, 0
+
+	local labels_w = 200
+
+	local controls_x = s_box_x + s_box_w + labels_w --400
+	local controls_y = 0
+	local controls_w = 188
+	local controls_h = 32
+	local controls_spacing_y = 8
+
+
+	local labels_x = controls_x - labels_w
+
+
+	local function _determineSliderCoords(vert)
+		if vert then
+			shx = math.floor((s_box_w - slider_breadth) * .5)
+			shy = s_box_y
+			shw = slider_breadth
+			shh = s_box_h
+		else
+			shx = s_box_x
+			shy = math.floor((s_box_h - slider_breadth) * .5)
+			shw = s_box_w
+			shh = slider_breadth
+		end
+	end
+
+	_determineSliderCoords(default_vertical)
+
+	local function _updateSlider(self)
+		-- NOTE: 'self' is any of the sibling controls.
+
+		local sld = self:findSiblingTag("demo_sld")
+		if not sld then
+			print("WARNING: couldn't locate the slider to update!")
+			return
+		end
+
+		local c_max = sld:findSiblingTag("demo_sld_max")
+		if c_max then
+			local v = c_max:getValue()
+			if v then
+				sld:sliderSetMax(v)
+			else
+				print("WARNING: couldn't read slider 'max' from control")
+			end
+		end
+
+		local c_home = sld:findSiblingTag("demo_sld_home")
+		if c_home then
+			local v = c_home:getValue()
+			if v then
+				sld:sliderSetHome(v)
+			else
+				print("WARNING: couldn't read slider 'home' from control")
+			end
+		end
+
+		local c_orientation = sld:findSiblingTag("demo_sld_orientation")
+		if c_orientation then
+			local orientation = c_orientation:menuGetSelectedItem()
+			if orientation then
+				sld:sliderSetOrientation(orientation.text)
+			else
+				print("WARNING: couldn't read slider 'orientation' from control")
+			end
+		end
+
+		local c_use_line = sld:findSiblingTag("demo_sld_use_line")
+		if c_use_line then
+			local use_line = c_use_line:getChecked()
+			sld:sliderSetShowUseLine(use_line)
+		end
+
+		local c_reverse = sld:findSiblingTag("demo_sld_reverse")
+		if c_reverse then
+			local reverse = c_reverse:getChecked()
+			sld:sliderSetCountReverse(reverse)
+		end
+
+		local c_gran = sld:findSiblingTag("demo_sld_granularity")
+		if c_gran then
+			local v = c_gran:getValue()
+			if v then
+				sld:sliderSetGranularity(v)
+			else
+				print("WARNING: couldn't read slider 'granularity' from control")
+			end
+		end
+
+		local c_wheel_dir = sld:findSiblingTag("demo_sld_wheel")
+		if c_wheel_dir then
+			local item = c_wheel_dir:menuGetSelectedItem()
+			local wheel_dir
+			if item then
+				wheel_dir = tonumber(item.text)
+			end
+			if wheel_dir then
+				sld:sliderSetWheelDirection(wheel_dir)
+			else
+				print("WARNING: couldn't read slider 'wheel_dir' from control")
+			end
+		end
+
+		local c_allow_changes = sld:findSiblingTag("demo_sld_allow_changes")
+		if c_allow_changes then
+			local allow_changes = c_allow_changes:getChecked()
+			sld:sliderSetAllowChanges(allow_changes)
+		end
+
+		_determineSliderCoords(sld:sliderGetOrientation() == "vertical")
+		sld:geometrySetMode("relative", shx, shy, shw, shh)
+		sld.parent:reshape()
+	end
+
+
+	local slider = panel:addChild("base/slider_bar")
+	slider:geometrySetMode("relative", shx, shy, shw, shh)
+		:setTag("demo_sld")
+		:sliderSetMax(5)
+		:sliderSetPosition(0)
+		:sliderSetOrientation("horizontal")
+		:sliderSetShowUseLine(true)
+		:sliderSetCountReverse(false)
+		:sliderSetGranularity(1)
+		:sliderSetWheelDirection(1)
+		:sliderSetHome(0)
+		:sliderSetAllowChanges(true)
+		:setLabel("Slider")
+
+	--slider:userCallbackSet("cb_actionSliderChanged", nil)
+
+	local xx, yy = controls_x, controls_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Max: ", "right", "middle", false)
+	local c_max = panel:addChild("wimp/number_box")
+		:setTag("demo_sld_max")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setValue(5)
+
+	c_max:userCallbackSet("cb_action", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "'Home' position: ", "right", "middle", false)
+	local c_home = panel:addChild("wimp/number_box")
+		:setTag("demo_sld_home")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setValue(0)
+
+	c_home:userCallbackSet("cb_action", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Orientation: ", "right", "middle", false)
+	local c_orientation = panel:addChild("base/stepper")
+		:setTag("demo_sld_orientation")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+
+	c_orientation:addItem("horizontal")
+	c_orientation:addItem("vertical")
+
+	c_orientation:userCallbackSet("cb_buttonAction", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Show 'use' line: ", "right", "middle", false)
+	local c_use_line = panel:addChild("base/checkbox")
+		:setTag("demo_sld_use_line")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setChecked(false)
+
+	c_use_line:userCallbackSet("cb_buttonAction", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Reverse count: ", "right", "middle", false)
+	local c_reverse = panel:addChild("base/checkbox")
+		:setTag("demo_sld_reverse")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setChecked(false)
+
+	c_reverse:userCallbackSet("cb_buttonAction", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Granularity: ", "right", "middle", false)
+	local c_gran = panel:addChild("wimp/number_box")
+		:setTag("demo_sld_granularity")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setValue(1)
+
+	c_gran:userCallbackSet("cb_action", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Wheel scroll dir: ", "right", "middle", false)
+	local c_wheel_dir = panel:addChild("base/stepper")
+		:setTag("demo_sld_wheel")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+
+	c_wheel_dir:addItem("1")
+	c_wheel_dir:addItem("-1")
+
+	c_wheel_dir:userCallbackSet("cb_buttonAction", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Allow user changes: ", "right", "middle", false)
+	local c_allow_changes = panel:addChild("base/checkbox")
+		:setTag("demo_sld_allow_changes")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setChecked(true)
+
+	c_allow_changes:userCallbackSet("cb_buttonAction", function(self)
+		_updateSlider(self)
+	end)
+
+	yy = yy + controls_h + controls_spacing_y
+
+	local c_update = panel:addChild("base/button")
+		:setTag("demo_sld_update")
+		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
+		:setLabel("Update!", "single")
+
+	c_update:userCallbackSet("cb_buttonAction", _updateSlider)
+
+	_updateSlider(c_update)
+
+	return panel
+end
+
+
+return plan

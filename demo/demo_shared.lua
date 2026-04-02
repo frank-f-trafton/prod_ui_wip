@@ -1,0 +1,239 @@
+local demoShared = {}
+
+
+local pTable = require("prod_ui.lib.p_table")
+local uiAssert = require("prod_ui.ui_assert")
+local uiRes = require("prod_ui.ui_res")
+
+
+local function _openURL(self)
+	assert(self.url, "no URL specified.")
+	love.system.openURL(self.url)
+	-- TODO: 'love.system.openURL' returns false when the URL couldn't be opened. Maybe this could be noted in an error log?
+end
+
+
+function demoShared.loadThemeDuplicateSkins(context, id)
+	local theme = context:loadTheme(id)
+
+	-- Duplicate some data for demo purposes.
+	-- This wouldn't be done in a normal application.
+
+	-- * Skins
+	local skins = theme.skins
+	if skins then
+		local dupes = {}
+		for k, v in pairs(skins) do
+			if not dupes[k .. "_DEMO"] then
+				dupes[k .. "_DEMO"] = pTable.deepCopy(v)
+			end
+		end
+		for k, v in pairs(dupes) do
+			skins[k] = v
+		end
+	end
+
+	return theme
+end
+
+
+local function _unskin(self)
+	if self.skinner then
+		self:skinRemove()
+	end
+end
+
+
+local function _reskin(self)
+	if self.skinner then
+		self:skinSetRefs()
+		self:skinInstall()
+	end
+end
+
+
+-- @return true on successful change, nil if the scale and Texture Scale are not different from existing values, false if the
+--	change failed.
+function demoShared.executeThemeUpdate(context, scale, tex_scale, id)
+	-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
+	local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(tex_scale), "directory")
+	if not tex_dir then
+		return false
+	else
+		local old_scale, old_tex_scale, old_id = context:getScale(), context:getTextureScale(), context:getThemeId()
+		print("id", id, "old_id", old_id)
+		if not (scale == old_scale and tex_scale == old_tex_scale and id == old_id) then
+			context:setScale(scale)
+			context:setTextureScale(tex_scale)
+
+			local theme = demoShared.loadThemeDuplicateSkins(context, id)
+
+			context.root:nodeForEach(true, _unskin)
+			context:applyTheme(theme)
+			context.root:nodeForEach(true, _reskin)
+			context.root:reshape()
+
+			return true
+		end
+	end
+end
+
+
+function demoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
+	-- If the frame already exists, just switch to it.
+	local frame = root:findTag("FRAME:" .. plan_id)
+	if not frame then
+		local planWindowFrame = require("demo.wimp." .. plan_id)
+		frame = planWindowFrame.makeWindowFrame(root)
+		frame.tag = "FRAME:" .. plan_id
+	end
+
+	if switch_to and frame.frame_is_selectable and not frame.frame_hidden then
+		root:setSelectedFrame(frame, true)
+	end
+
+	return frame
+end
+
+
+function demoShared.makeTitle(self, tag, text)
+	local text_block = self:addChild("wimp/text_block")
+	if tag then
+		text_block:setTag(tag)
+	end
+
+	text_block:setAutoSize("v")
+	text_block:setFontId("h1")
+	text_block:setText(text)
+	text_block:geometrySetMode("segment", "top")
+
+	return text_block
+end
+
+
+function demoShared.makeParagraph(self, tag, text)
+	local text_block = self:addChild("wimp/text_block")
+
+	if tag then
+		text_block.tag = tag
+	end
+
+	text_block:setAutoSize("v")
+	text_block:setWrapping(true)
+	text_block:setFontId("p")
+	text_block:setText(text)
+	text_block:geometrySetMode("segment", "top")
+
+	return text_block
+end
+
+
+function demoShared.makeParagraphSpacer(self, font_id, space)
+	local empty = self:addChild("wimp/text_space")
+		:setFontId(font_id)
+		:setSpacing(space)
+		:geometrySetMode("segment", "top")
+
+	return empty
+end
+
+
+function demoShared.makeHyperlink(self, tag, text, url)
+	local text_block = self:addChild("wimp/text_block")
+	if tag then
+		text_block.tag = tag
+	end
+
+	text_block:setAutoSize("v")
+	text_block:setWrapping(true)
+	text_block:setFontId("p")
+	text_block:setText(text)
+	text_block:setURL(url)
+	text_block:userCallbackSet("cb_buttonAction", _openURL)
+	text_block:userCallbackSet("cb_buttonAction3", _openURL)
+	text_block:geometrySetMode("segment", "top")
+
+	return text_block
+end
+
+
+function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
+	uiAssert.type(2, title, "string")
+	uiAssert.type(3, text, "string")
+	uiAssert.typeEval(4, b1, "string")
+	uiAssert.typeEval(5, b2, "string")
+	uiAssert.typeEval(6, b3, "string")
+
+	local root = context.root
+
+	local dialog = root:newWindowFrame()
+	dialog.w = 448
+	dialog.h = 256
+
+	dialog:setResizable(false)
+	dialog:setMaximizeControlVisibility(false)
+	dialog:setCloseControlVisibility(true)
+
+	dialog:setFrameTitle(title)
+
+	dialog:layoutSetBase("viewport")
+	dialog:containerSetScrollRangeMode("zero")
+	dialog:setScrollBars(false, false)
+
+
+	root:setModalFrame(dialog)
+
+
+	local text_block = dialog:addChild("wimp/text_block")
+	text_block:setAutoSize("v")
+	text_block:setWrapping(true)
+	text_block:setFontId("p")
+	text_block:setText(text)
+	text_block:geometrySetMode("segment", "top")
+
+	local button_n = dialog:addChild("base/button")
+	button_n:setLabel("No")
+	button_n:userCallbackSet("cb_buttonAction", function(self)
+		self:getUIFrame():closeFrame(true)
+	end)
+	button_n:geometrySetMode("segment", "left", 160)
+
+	local button_y = dialog:addChild("base/button")
+	button_y:setLabel("Yes")
+	button_y:userCallbackSet("cb_buttonAction", function(self)
+		self:getUIFrame():closeFrame(true)
+	end)
+	button_y:geometrySetMode("segment", "right", 160)
+
+	local btn_w, btn_h = 96, 32
+
+	dialog:center(true, true)
+
+	root:setSelectedFrame(dialog)
+
+	local try_host = dialog:getOpenThimble1DepthFirst()
+	if try_host then
+		try_host:takeThimble1()
+	end
+
+	dialog:reshape()
+
+	return dialog
+end
+
+
+function demoShared.makeControlLabel(parent, x, y, w, h, relative, text, align_x, align_y, wrap)
+	local geo_mode = relative and "relative" or "static"
+
+	local c_label = parent:addChild("base/control_label")
+		:geometrySetMode(geo_mode, x, y, w, h)
+		:setHorizontalAlignment(align_x)
+		:setVerticalAlignment(align_y)
+		:setWrapMode(wrap)
+		:setText(text)
+
+	return c_label
+end
+
+
+return demoShared
