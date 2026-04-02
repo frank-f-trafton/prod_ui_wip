@@ -36,6 +36,13 @@ do
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
 	local theme = context:loadTheme("vacuum_dark")
+
+	-- Make a second button skin with larger text.
+	-- (Yeah, this sucks. Some parts of the theming system are too specialized, such
+	-- that simple tasks, like changing the font of a button, are a pain in the neck.)
+	theme.skins["button-big-text"] = prodUi.table.deepCopy(theme.skins["button1"])
+	theme.skins["button-big-text"].label_style = "*labels/big"
+
 	context:applyTheme(theme)
 
 	wid_root = context:addRoot("wimp/root_wimp")
@@ -67,9 +74,9 @@ local board = {
 We will be using ProdUI's standard button widgets to interact with the game board.
 Each button represents one cell.
 
-We will be keeping direct references to these widgets for easy access later. In this
-demo, the buttons will never be destroyed or replaced, so we don't have to worry
-about dangling references.
+We'll keep direct references to these widgets for easy access later. In this demo,
+the buttons will never be destroyed or replaced, so we don't have to worry about
+dangling references.
 --]]
 local btn_new_game, btn_end_game
 local cell_buttons = { -- to be filled in later
@@ -77,6 +84,14 @@ local cell_buttons = { -- to be filled in later
 	{},
 	{}
 }
+
+
+local function _updateStatusLabel(str)
+	local label_status = wid_root:findTag("label-stat")
+	if label_status then
+		label_status:setText(str)
+	end
+end
 
 
 local function _getButtonPosition(button)
@@ -135,6 +150,8 @@ local function _newGame()
 
 	btn_end_game:setEnabled(true)
 	btn_new_game:setEnabled(true)
+
+	_updateStatusLabel("")
 end
 
 
@@ -146,16 +163,16 @@ local function _endGame(result)
 	btn_new_game:setEnabled(true)
 
 	if result == "X" or result == "O" then
-		print(result .. " wins!")
+		_updateStatusLabel(result .. " wins!")
 
 	elseif result == "draw" then
-		print("Draw!")
+		_updateStatusLabel("Draw!")
 
 	elseif result == "player-stop" then
-		print("Player ended the game early!")
+		_updateStatusLabel("Ended early!")
 
 	else
-		print("Unknown end game state!")
+		_updateStatusLabel("Unknown end state!")
 	end
 end
 
@@ -300,10 +317,25 @@ do
 	local side_bar = workspace:addChild("base/container_panel")
 		:geometrySetMode("segment", "right", 200)
 
+	local timer_label = side_bar:addChild("wimp/text_block")
+		:geometrySetMode("segment", "top", 32)
+		:setFontId("h3")
+		:setAlign("center")
+		:setText("Time")
+		:setAutoSize("v")
+
 	local timer_text = side_bar:addChild("wimp/text_block")
-		:geometrySetMode("static", 0.5, 0.5, 488, 128, false, false, "in", "in")
+		:geometrySetMode("segment", "top", 128)
 		:setTag("timer-text")
 		:setFontId("h1")
+		:setAlign("center")
+		:setAutoSize("v")
+
+	local status_label = side_bar:addChild("wimp/text_block")
+		--:geometrySetMode("segment", "top", 32)
+		:geometrySetMode("static", 0.5, 0.5, 128, 32, false, false, "in", "in")
+		:setTag("label-stat")
+		:setFontId("h3")
 		:setAlign("center")
 		:setAutoSize("v")
 
@@ -335,7 +367,7 @@ do
 	-- Make the XO buttons; attach 'em to our lookup table.
 	for y = 1, 3 do
 		for x = 1, 3 do
-			local btn_xo = game_board:addChild("base/button")
+			local btn_xo = game_board:addChild("base/button", "button-big-text")
 				:geometrySetMode("grid", x-1, y-1, 1, 1)
 				:userCallbackSet("cb_buttonAction", _cb_buttonPressCell)
 
