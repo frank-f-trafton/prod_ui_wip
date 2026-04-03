@@ -342,13 +342,13 @@ do
 	btn_new_game = side_bar:addChild("base/button")
 		:geometrySetMode("segment", "bottom", 56)
 		:setTag("button-new")
-		:setLabel("New Game", "single")
+		:setLabel("_N_ew Game", "single-ul")
 		:userCallbackSet("cb_buttonAction", _cb_buttonNewGame)
 
 	btn_end_game = side_bar:addChild("base/button")
 		:geometrySetMode("segment", "bottom", 56)
 		:setTag("button-end")
-		:setLabel("End Game", "single")
+		:setLabel("_E_nd Game", "single-ul")
 		:userCallbackSet("cb_buttonAction", _cb_buttonEndGame)
 
 	-- Let's tweak the layout order of the buttons so that 'New Game' appears
@@ -381,6 +381,48 @@ do
 	_setButtonsEnabled(false)
 end
 
+
+-- Keyboard shortcuts
+--[[
+(Yes, this also sucks. I'll work on simplifying shortcut definitions at some point.)
+--]]
+do
+	local shortcuts = {
+		["C+q"] = function(self, key, scancode, isrepeat)
+			love.event.quit()
+		end,
+
+		["C+n"] = function(self, key, scancode, isrepeat)
+			_newGame()
+		end,
+
+		["C+e"] = function(self, key, scancode, isrepeat)
+			_endGame("player-stop")
+		end,
+
+		["+kp1"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[1][3]) end,
+		["+kp2"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[2][3]) end,
+		["+kp3"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[3][3]) end,
+		["+kp4"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[1][2]) end,
+		["+kp5"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[2][2]) end,
+		["+kp6"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[3][2]) end,
+		["+kp7"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[1][1]) end,
+		["+kp8"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[2][1]) end,
+		["+kp9"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[3][1]) end,
+	}
+	local hook_pressed = function(self, tbl, key, scancode, isrepeat)
+		local key_mgr = self.context.key_mgr
+		local mod = key_mgr.mod
+
+		local input_str = prodUi.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
+		if shortcuts[input_str] then
+			shortcuts[input_str](self, key, scancode, isrepeat)
+			return true
+		end
+	end
+
+	table.insert(wid_root.KH_trickle_key_pressed, hook_pressed)
+end
 
 
 _updateTimerText()
