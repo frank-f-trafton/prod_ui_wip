@@ -387,10 +387,13 @@ end
 (Yes, this also sucks. I'll work on simplifying shortcut definitions at some point.)
 --]]
 do
+	local function _fn_quit(self, key, scancode, isrepeat)
+		love.event.quit()
+	end
+
 	local shortcuts = {
-		["C+q"] = function(self, key, scancode, isrepeat)
-			love.event.quit()
-		end,
+		["+escape"] = _fn_quit,
+		["C+q"] = _fn_quit,
 
 		["C+n"] = function(self, key, scancode, isrepeat)
 			_newGame()
@@ -465,11 +468,7 @@ end
 
 
 function love.keypressed(kc, sc, rep)
-	if kc == "escape" then
-		love.event.quit()
-	else
-		context:love_keypressed(kc, sc, rep)
-	end
+	context:love_keypressed(kc, sc, rep)
 end
 
 
