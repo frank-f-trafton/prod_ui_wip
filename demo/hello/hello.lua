@@ -119,8 +119,9 @@ wid_root:reshape()
 --[[
 Finally, the Context requires information from LÖVE events to work.
 
-We also have to call the Context's draw method within love.draw().
+We also call the Context's draw method within love.draw().
 --]]
+
 
 function love.resize(w, h)
 	context:love_resize(w, h)
