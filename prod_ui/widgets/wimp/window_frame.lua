@@ -30,7 +30,20 @@ local def = {
 	skin_id = "window_frame1",
 
 	trickle = {},
+
+	user_callbacks = uiTable.newLutV(
+		"cb_fileDropped", -- forwarded by root
+		"cb_directoryDropped" -- forwarded by root
+	)
 }
+
+
+-- Widget:cb_fileDropped()
+def.cb_fileDropped = uiDummy.func
+
+
+-- Widget:cb_fileDirectoryDropped()
+def.cb_directoryDropped = uiDummy.func
 
 
 def.setScrollBars = wcScrollBar.setScrollBars

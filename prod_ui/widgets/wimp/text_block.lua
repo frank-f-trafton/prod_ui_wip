@@ -255,14 +255,10 @@ function def:evt_reshapePre()
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
 
-	self.text_w, self.text_h = false, false
-
 	vp2:set(0, 0, self.w, self.h)
 	vp2:reduceT(skin.box.border)
 
-	if not self.text_w then
-		_determineTextDimensions(self, self.w)
-	end
+	_determineTextDimensions(self, self.w)
 
 	vp.w, vp.h = self.text_w, self.text_h
 
@@ -319,7 +315,7 @@ def.default_skinner = {
 		)
 
 		if self.wrap then
-			love.graphics.printf(self.text, vp.x, vp.y, vp.w, self.align)
+			love.graphics.printf(self.text, vp2.x, vp2.y, vp2.w, self.align)
 
 		elseif self.align == "left" then
 			love.graphics.print(self.text, vp.x, vp.y)

@@ -23,13 +23,23 @@ local def = {
 	trickle = {},
 
 	user_callbacks = uiTable.newLutV(
-		"cb_workspaceRender"
+		"cb_workspaceRender",
+		"cb_fileDropped", -- forwarded by root
+		"cb_directoryDropped" -- forwarded by root
 	)
 }
 
 
 -- Widget:cb_workspaceRender(ox, oy)
 def.cb_workspaceRender = uiDummy.func
+
+
+-- Widget:cb_fileDropped()
+def.cb_fileDropped = uiDummy.func
+
+
+-- Widget:cb_fileDirectoryDropped()
+def.cb_directoryDropped = uiDummy.func
 
 
 def.setScrollBars = wcScrollBar.setScrollBars
