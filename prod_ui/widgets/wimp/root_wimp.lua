@@ -145,7 +145,7 @@ function def:evt_fileDropped(targ, file)
 end
 
 
-function def.trickle:evt_directoryDropped(targ, file)
+function def:evt_directoryDropped(targ, file)
 	-- Try in this order: the selected window frame, the active workspace, the root.
 
 	local selected_frame = self.selected_frame
