@@ -141,11 +141,85 @@ end
 wid_root:userCallbackSet("cb_fileDropped", _checkFile)
 
 
+--[[
+We're not dealing with dropped directories in this demo. Nevertheless, give some
+kind of feedback in case it happens.
+--]]
+
+
+local function _checkDirectory(self, path)
+	app.last_hex_string = false
+	app.showing_copy_text = false
+
+	local root = self:nodeGetRoot()
+
+	local text_top = root:findTag("text-top")
+	if text_top then
+		text_top:setText("I can't do whole directories; drop a file instead.")
+	end
+
+	local text_hash = root:findTag("text-hash")
+	if text_hash then
+		text_hash:setText("")
+	end
+
+	local text_copy = root:findTag("text-copy")
+	if text_copy then
+		text_copy:setText("")
+	end
+
+	root:reshape()
+
+	-- Tells the event emitter to stop
+	return true
+end
+
+
+wid_root:userCallbackSet("cb_directoryDropped", _checkDirectory)
+
+
 wid_root:reshape()
+
+
+-- Keyboard shortcuts
+do
+	local function _fn_quit(self, key, scancode, isrepeat)
+		love.event.quit()
+	end
+
+	local shortcuts = {
+		["+escape"] = _fn_quit,
+		["C+q"] = _fn_quit,
+
+		["C+c"] = function(self, key, scancode, isrepeat)
+			if app.last_hex_string then
+				love.system.setClipboardText(app.last_hex_string)
+			end
+		end,
+	}
+	local hook_pressed = function(self, tbl, key, scancode, isrepeat)
+		local key_mgr = self.context.key_mgr
+		local mod = key_mgr.mod
+
+		local input_str = prodUi.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
+		if shortcuts[input_str] then
+			shortcuts[input_str](self, key, scancode, isrepeat)
+			return true
+		end
+	end
+
+	table.insert(wid_root.KH_trickle_key_pressed, hook_pressed)
+end
+
 
 
 function love.filedropped(file)
 	context:love_filedropped(file)
+end
+
+
+function love.directorydropped(path)
+	context:love_directorydropped(path)
 end
 
 
