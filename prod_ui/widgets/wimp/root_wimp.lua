@@ -5,17 +5,31 @@ local hndStep = context:getLua("shared/hnd_step")
 local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local pList2 = require(context.conf.prod_ui_req .. "lib.p_list2")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
+local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
+local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
 local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
-local def = {}
+local def = {
+	trickle = {},
+
+	user_callbacks = uiTable.newLutV(
+		"cb_fileDropped",
+		"cb_directoryDropped"
+	)
+}
 
 
-def.trickle = {}
+-- Widget:cb_fileDropped()
+def.cb_fileDropped = uiDummy.func
+
+
+-- Widget:cb_fileDirectoryDropped()
+def.cb_directoryDropped = uiDummy.func
 
 
 widLayout.setupContainerDef(def)
@@ -116,6 +130,30 @@ function def:evt_reshapePost()
 	if workspace then
 		workspace:reshape()
 	end
+end
+
+
+function def:evt_fileDropped(targ, file)
+	-- Try in this order: the selected window frame, the active workspace, the root.
+
+	local selected_frame = self.selected_frame
+	local workspace = self.workspace
+
+	return (selected_frame and selected_frame:cb_fileDropped(file))
+		or (workspace and workspace:cb_fileDropped(file))
+		or self:cb_fileDropped(file)
+end
+
+
+function def.trickle:evt_directoryDropped(targ, file)
+	-- Try in this order: the selected window frame, the active workspace, the root.
+
+	local selected_frame = self.selected_frame
+	local workspace = self.workspace
+
+	return (selected_frame and selected_frame:cb_directoryDropped(file))
+		or (workspace and workspace:cb_directoryDropped(file))
+		or self:cb_directoryDropped(file)
 end
 
 

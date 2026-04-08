@@ -814,13 +814,8 @@ function _mt_context:love_filedropped(file)
 		return
 	end
 
-	-- Any widget has focus: cycle the event
-	local wid_cur = self.thimble2 or self.thimble1
-	if wid_cur then
-		wid_cur:eventCycle("evt_fileDropped", wid_cur, file)
-
-	-- Nothing has focus: send to root widget, if present
-	elseif self.root then
+	-- Send to root widget, if present
+	if self.root then
 		self.root:eventSend("evt_fileDropped", self.root, file) -- no ancestors
 	end
 end
@@ -829,18 +824,14 @@ end
 function _mt_context:love_directorydropped(path)
 	-- Event capture
 	local cap_cur = self.captured_focus
-	if cap_cur and cap_cur.cpt_directoryDropped and cap_cur:cpt_directoryDropped(file) then
+	if cap_cur and cap_cur.cpt_directoryDropped and cap_cur:cpt_directoryDropped(path) then
 		return
 	end
 
+	-- Send to root widget, if present
 	-- Any widget has focus: cycle the event
-	local wid_cur = self.thimble2 or self.thimble1
-	if wid_cur then
-		wid_cur:eventCycle("evt_directoryDropped", wid_cur, file)
-
-	-- Nothing has focus: send to root widget, if present
-	elseif self.root then
-		self.root:eventSend("evt_directoryDropped", self.root, file) -- no ancestors
+	if self.root then
+		self.root:eventSend("evt_directoryDropped", self.root, path) -- no ancestors
 	end
 end
 
