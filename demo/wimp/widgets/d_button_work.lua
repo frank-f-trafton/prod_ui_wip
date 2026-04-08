@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function timeFormatted()
@@ -129,7 +129,7 @@ function plan.make(panel)
 	end)
 
 
-	demoShared.makeControlLabel(panel, 256, 192+48+48+48, 240, 64, false, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "left", "top", true)
+	shared.makeControlLabel(panel, 256, 192+48+48+48, 240, 64, false, "Right-click, middle-click, or hit the 'application' key while the button is focused.", "left", "top", true)
 	local b_secondary = panel:addChild("base/button")
 	b_secondary:geometrySetMode("static", 256, 192+48+48+48+64, 240, 32)
 	b_secondary:setLabel("Alt. Action Button.")

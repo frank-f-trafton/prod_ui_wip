@@ -1,17 +1,17 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
-	demoShared.makeTitle(panel, nil, "Dropdown Boxes")
+	shared.makeTitle(panel, nil, "Dropdown Boxes")
 
 	panel:layoutSetBase("viewport-width")
 	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	demoShared.makeParagraphSpacer(panel, "p", 1.0)
+	shared.makeParagraphSpacer(panel, "p", 1.0)
 
 
 	local function _selection(self, index, tbl)
@@ -24,7 +24,7 @@ function plan.make(panel)
 
 
 	do
-		local c_label = demoShared.makeControlLabel(panel, xx, yy, ww, hh, true, "No items:")
+		local c_label = shared.makeControlLabel(panel, xx, yy, ww, hh, true, "No items:")
 
 		yy = yy + hh
 
@@ -36,7 +36,7 @@ function plan.make(panel)
 
 
 	do
-		local c_label = demoShared.makeControlLabel(panel, xx, yy, ww, hh, true, "A few items:")
+		local c_label = shared.makeControlLabel(panel, xx, yy, ww, hh, true, "A few items:")
 
 		yy = yy + hh
 
@@ -55,7 +55,7 @@ function plan.make(panel)
 
 
 	do
-		local c_label = demoShared.makeControlLabel(panel, xx, yy, ww, hh, true, "Wide item text:")
+		local c_label = shared.makeControlLabel(panel, xx, yy, ww, hh, true, "Wide item text:")
 
 		yy = yy + hh
 
@@ -73,7 +73,7 @@ function plan.make(panel)
 
 
 	do
-		local c_label = demoShared.makeControlLabel(panel, xx, yy, ww, hh, true, "With icons:")
+		local c_label = shared.makeControlLabel(panel, xx, yy, ww, hh, true, "With icons:")
 
 		yy = yy + hh
 
@@ -93,7 +93,7 @@ function plan.make(panel)
 
 
 	do
-		local c_label = demoShared.makeControlLabel(panel, xx, yy, ww, hh, true, "One hundred items:")
+		local c_label = shared.makeControlLabel(panel, xx, yy, ww, hh, true, "One hundred items:")
 
 		yy = yy + hh
 

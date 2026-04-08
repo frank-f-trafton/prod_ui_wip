@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local _evt_quit = function(self)
@@ -28,7 +28,7 @@ end
 
 
 function plan.make(panel)
-	demoShared.makeTitle(panel, nil, "I Wish I Knew how to Quit you")
+	shared.makeTitle(panel, nil, "I Wish I Knew how to Quit you")
 
 	panel:layoutSetBase("viewport")
 	panel:containerSetScrollRangeMode("zero")

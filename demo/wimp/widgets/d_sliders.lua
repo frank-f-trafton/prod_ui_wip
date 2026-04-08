@@ -1,11 +1,11 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
-	demoShared.makeTitle(panel, nil, "Slider Bar")
+	shared.makeTitle(panel, nil, "Slider Bar")
 
 	panel:layoutSetBase("viewport-width")
 	panel:containerSetScrollRangeMode("zero")
@@ -155,7 +155,7 @@ function plan.make(panel)
 
 	local xx, yy = controls_x, controls_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Max: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Max: ", "right", "middle", false)
 	local c_max = panel:addChild("wimp/number_box")
 		:setTag("demo_sld_max")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -167,7 +167,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "'Home' position: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "'Home' position: ", "right", "middle", false)
 	local c_home = panel:addChild("wimp/number_box")
 		:setTag("demo_sld_home")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -179,7 +179,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Orientation: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Orientation: ", "right", "middle", false)
 	local c_orientation = panel:addChild("base/stepper")
 		:setTag("demo_sld_orientation")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -193,7 +193,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Show 'use' line: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Show 'use' line: ", "right", "middle", false)
 	local c_use_line = panel:addChild("base/checkbox")
 		:setTag("demo_sld_use_line")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -205,7 +205,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Reverse count: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Reverse count: ", "right", "middle", false)
 	local c_reverse = panel:addChild("base/checkbox")
 		:setTag("demo_sld_reverse")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -217,7 +217,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Granularity: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Granularity: ", "right", "middle", false)
 	local c_gran = panel:addChild("wimp/number_box")
 		:setTag("demo_sld_granularity")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -229,7 +229,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Wheel scroll dir: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Wheel scroll dir: ", "right", "middle", false)
 	local c_wheel_dir = panel:addChild("base/stepper")
 		:setTag("demo_sld_wheel")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)
@@ -243,7 +243,7 @@ function plan.make(panel)
 
 	yy = yy + controls_h + controls_spacing_y
 
-	demoShared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Allow user changes: ", "right", "middle", false)
+	shared.makeControlLabel(panel, labels_x, yy, labels_w, controls_h, true, "Allow user changes: ", "right", "middle", false)
 	local c_allow_changes = panel:addChild("base/checkbox")
 		:setTag("demo_sld_allow_changes")
 		:geometrySetMode("relative", xx, yy, controls_w, controls_h)

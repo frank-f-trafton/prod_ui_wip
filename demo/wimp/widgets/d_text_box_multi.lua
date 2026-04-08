@@ -1,8 +1,8 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
 local pTable = require("prod_ui.lib.p_table")
+local shared = require("demo.wimp.shared")
 local uiKeyboard = require("prod_ui.ui_keyboard")
 
 
@@ -234,7 +234,7 @@ The five boxing wizards jump quickly.]=]
 
 	_updateButtons(panel)
 
-	--demoShared.makeControlLabel(panel, 0, 800, 500, 64, false, "(make this page scroll)", "center", "middle", false)
+	--shared.makeControlLabel(panel, 0, 800, 500, 64, false, "(make this page scroll)", "center", "middle", false)
 end
 
 

@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function _refreshTreeBox(self)
@@ -73,7 +73,7 @@ function plan.make(panel)
 
 	local wx, wy, ww, wh = 256, 0, 256, 32
 
-	demoShared.makeControlLabel(panel, wx, wy, ww, wh, false, "Item Horizontal Alignment:", "left", "middle", false)
+	shared.makeControlLabel(panel, wx, wy, ww, wh, false, "Item Horizontal Alignment:", "left", "middle", false)
 
 	wy = wy + wh
 
@@ -103,7 +103,7 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		demoShared.makeControlLabel(panel, wx, wy, ww, wh, false, "Item Vertical Pad:", "left", "middle", false)
+		shared.makeControlLabel(panel, wx, wy, ww, wh, false, "Item Vertical Pad:", "left", "middle", false)
 
 		wy = wy + wh
 
@@ -126,7 +126,7 @@ function plan.make(panel)
 	wy = wy + wh
 
 	do
-		demoShared.makeControlLabel(panel, wx, wy, ww, wh, false, "Pipe width:", "left", "middle", false)
+		shared.makeControlLabel(panel, wx, wy, ww, wh, false, "Pipe width:", "left", "middle", false)
 
 		wy = wy + wh
 

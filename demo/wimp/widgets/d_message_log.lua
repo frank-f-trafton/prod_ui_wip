@@ -1,12 +1,12 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
-	demoShared.makeTitle(panel, nil, "Message Log")
-	demoShared.makeParagraph(panel, nil, "")
+	shared.makeTitle(panel, nil, "Message Log")
+	shared.makeParagraph(panel, nil, "")
 
 	panel:layoutSetBase("viewport-width")
 	panel:containerSetScrollRangeMode("auto")

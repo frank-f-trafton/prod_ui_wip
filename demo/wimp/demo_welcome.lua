@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
@@ -9,20 +9,20 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	demoShared.makeTitle(panel, nil, "Welcome")
+	shared.makeTitle(panel, nil, "Welcome")
 
-	demoShared.makeParagraph(panel, nil, [[
+	shared.makeParagraph(panel, nil, [[
 ProdUI is a user interface library for the LÖVE Framework.]])
 
-	demoShared.makeParagraph(panel, nil, "")
+	shared.makeParagraph(panel, nil, "")
 
-	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI repository on GitHub", "https://www.github.com/frank-f-trafton/prod_ui_wip")
+	shared.makeHyperlink(panel, nil, "* LINK: ProdUI repository on GitHub", "https://www.github.com/frank-f-trafton/prod_ui_wip")
 
-	demoShared.makeHyperlink(panel, nil, "* LINK: ProdUI documentation (work in progress)", "https://github.com/frank-f-trafton/prod_ui_docs")
+	shared.makeHyperlink(panel, nil, "* LINK: ProdUI documentation (work in progress)", "https://github.com/frank-f-trafton/prod_ui_docs")
 
-	demoShared.makeParagraph(panel, nil, "\n\n")
+	shared.makeParagraph(panel, nil, "\n\n")
 
-	demoShared.makeParagraph(panel, nil, [[
+	shared.makeParagraph(panel, nil, [[
 DEMO DEBUG KEYS:
 Ctrl + Shift + 1: Show context info
 Ctrl + Shift + 2: Show performance info

@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.makeWindowFrame(root)

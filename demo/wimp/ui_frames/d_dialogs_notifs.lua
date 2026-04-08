@@ -1,8 +1,7 @@
 local plan = {}
 
 
--- WIMP Demo
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function _makeFrameBlock2(self)
@@ -19,7 +18,7 @@ local function _makeFrameBlock2(self)
 		dialog:setFrameBlock(frame)
 		dialog:setFrameTitle("The Frame That Blocks")
 
-		demoShared.makeParagraph(dialog, nil, [[
+		shared.makeParagraph(dialog, nil, [[
 Can't interact with the previous window until this one is dismissed.
 
 (But other things ought to work, like the menu bar.)]])
@@ -67,7 +66,7 @@ local function _makeFrameBlock1(self)
 		dialog:setScrollBars(false, false)
 		dialog:setFrameTitle("The Frame That Is Blocked")
 
-		demoShared.makeParagraph(dialog, nil, [[
+		shared.makeParagraph(dialog, nil, [[
 Click the button to make a blocking UI Frame.
 ]])
 
@@ -101,7 +100,7 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("zero")
 	panel:setScrollBars(false, false)
 
-	demoShared.makeTitle(panel, nil, "Dialogs and Notifications")
+	shared.makeTitle(panel, nil, "Dialogs and Notifications")
 
 	panel.DEBUG = "dimensions" -- XXX: see base/container.lua
 
@@ -111,7 +110,7 @@ function plan.make(panel)
 		btn:geometrySetMode("static", 64, 64, 160, 28)
 		btn:setLabel("Modal Dialog Box")
 		btn:userCallbackSet("cb_buttonAction", function(self)
-			demoShared.makeDialogBox(panel.context, "It's a dialog box", [[
+			shared.makeDialogBox(panel.context, "It's a dialog box", [[
 This window stops you from interacting with the rest of the interface (not including OS-level stuff).
 
 Click a button below (or the 'X' in the header bar) to dismiss it.]]

@@ -32,9 +32,9 @@ love.keyboard.setTextInput(false) -- ProdUI programs should start with text inpu
 
 -- Modules
 local debugPanel = require("lib.debug_panel")
-local demoShared = require("demo.demo_shared")
 local inspect = require("lib.test.inspect")
 local prodUi = require("prod_ui")
+local shared = require("demo.wimp.shared")
 local uiPopUpMenu = require("prod_ui.ui_pop_up_menu")
 
 
@@ -265,7 +265,7 @@ do
 	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
 	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
-	local theme = demoShared.loadThemeDuplicateSkins(context, demo_default_theme)
+	local theme = shared.loadThemeDuplicateSkins(context, demo_default_theme)
 	context:applyTheme(theme)
 
 	wimp_root = context:addRoot("wimp/root_wimp")
@@ -342,10 +342,10 @@ function love.keypressed(kc, sc, rep)
 	-- [====[
 	if love.keyboard.isDown("lctrl", "rctrl") and kc == "`" then
 		if context:getScale() > 1 then
-			demoShared.executeThemeUpdate(context, 1.0, context:getTextureScale(), context:getThemeId())
+			shared.executeThemeUpdate(context, 1.0, context:getTextureScale(), context:getThemeId())
 		else
-			--demoShared.executeThemeUpdate(context, 1.5, 192)
-			demoShared.executeThemeUpdate(context, 1.5, context:getTextureScale(), context:getThemeId())
+			--shared.executeThemeUpdate(context, 1.5, 192)
+			shared.executeThemeUpdate(context, 1.5, context:getTextureScale(), context:getThemeId())
 		end
 	end
 
@@ -416,7 +416,7 @@ do
 		local function _tryLaunchFrame(self, plan_id)
 			local root = self:nodeGetRoot()
 			if root then
-				demoShared.launchWindowFrameFromPlan(root, plan_id, true)
+				shared.launchWindowFrameFromPlan(root, plan_id, true)
 			end
 		end
 
@@ -699,7 +699,7 @@ do
 	wimp_root:reshape()
 
 	for i, window_id in ipairs(demo_window_launch) do
-		demoShared.launchWindowFrameFromPlan(wimp_root, window_id, true)
+		shared.launchWindowFrameFromPlan(wimp_root, window_id, true)
 	end
 end
 

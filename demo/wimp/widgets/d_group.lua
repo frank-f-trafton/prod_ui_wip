@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 -- TODO: stack layout needs padding options...
@@ -9,7 +9,7 @@ local WID_PAD_Y = 8
 
 
 function plan.make(panel)
-	demoShared.makeTitle(panel, nil, "Groups of Controls")
+	shared.makeTitle(panel, nil, "Groups of Controls")
 
 	local context = panel.context
 

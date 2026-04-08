@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
@@ -27,7 +27,7 @@ function plan.make(panel)
 
 	local xx, yy, ww1, ww2, hh1, hh2 = 0, 0, 64, 192, 40, 64
 
-	demoShared.makeControlLabel(panel, xx, yy, ww2, hh1, false, "skin.label_align_h:", "center", "middle", false)
+	shared.makeControlLabel(panel, xx, yy, ww2, hh1, false, "skin.label_align_h:", "center", "middle", false)
 
 	yy = yy + hh1
 
@@ -67,7 +67,7 @@ function plan.make(panel)
 
 	yy = yy + hh1
 
-	demoShared.makeControlLabel(panel, xx, yy, ww2, hh1, false, "skin.label_align_v:", "center", "middle", false)
+	shared.makeControlLabel(panel, xx, yy, ww2, hh1, false, "skin.label_align_v:", "center", "middle", false)
 
 	yy = yy + hh1
 
