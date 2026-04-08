@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
@@ -100,7 +100,7 @@ function plan.make(panel)
 		end
 	end
 
-	local lbl_pos = demoShared.makeControlLabel(panel, 256, 160, 256, 32, false, "Position:", "left", "middle", false)
+	local lbl_pos = shared.makeControlLabel(panel, 256, 160, 256, 32, false, "Position:", "left", "middle", false)
 	lbl_pos:setTag("position_label")
 
 	local sld_pos = panel:addChild("base/slider_bar")
@@ -112,7 +112,7 @@ function plan.make(panel)
 		:userCallbackSet("cb_actionSliderChanged", slider_action)
 
 
-	local lbl_max = demoShared.makeControlLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum:", "left", "middle", false)
+	local lbl_max = shared.makeControlLabel(panel, 256, 160+32+8+32, 256, 32, false, "Maximum:", "left", "middle", false)
 	lbl_max:setTag("maximum_label")
 
 	local sld_max = panel:addChild("base/slider_bar")

@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 local uiTable = require("prod_ui.ui_table")
 
 
@@ -31,8 +31,8 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("zero")
 	panel:setSashesEnabled(true)
 
-	demoShared.makeParagraph(panel, nil, "* == Default length override")
-	demoShared.makeParagraphSpacer(panel, "p", 0.5)
+	shared.makeParagraph(panel, nil, "* == Default length override")
+	shared.makeParagraphSpacer(panel, "p", 0.5)
 
 	local c1 = panel:addChild("base/container_simple")
 		:geometrySetMode("relative", 0, 0, 384, 384)

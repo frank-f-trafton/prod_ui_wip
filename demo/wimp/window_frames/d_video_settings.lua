@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.makeWindowFrame(root)
@@ -22,7 +22,7 @@ function plan.makeWindowFrame(root)
 
 		local xx, yy, ww, hh = 16, 16, 192, 32
 
-		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "VSync Mode:", "left", "middle", false)
+		shared.makeControlLabel(frame, xx, yy, ww, hh, false, "VSync Mode:", "left", "middle", false)
 
 
 		local r_action = function(self)

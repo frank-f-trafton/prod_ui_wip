@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.makeWindowFrame(root)
@@ -22,7 +22,7 @@ function plan.makeWindowFrame(root)
 
 	-- Radio Buttons: Header size
 	do
-		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "Header size:", "left", "middle", false)
+		shared.makeControlLabel(frame, xx, yy, ww, hh, false, "Header size:", "left", "middle", false)
 		yy = yy + hh
 
 		local r_action = function(self)
@@ -247,7 +247,7 @@ function plan.makeWindowFrame(root)
 	-- Radio Buttons: Control placement
 	do
 		yy = yy + hh
-		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "Control Placement:", "left", "middle", false)
+		shared.makeControlLabel(frame, xx, yy, ww, hh, false, "Control Placement:", "left", "middle", false)
 		yy = yy + hh
 
 		local r_action = function(self)
@@ -296,7 +296,7 @@ function plan.makeWindowFrame(root)
 
 	-- Radio Buttons: Header text alignment
 	do
-		demoShared.makeControlLabel(frame, xx, yy, ww, hh, false, "Header Text Alignment:", "left", "middle", false)
+		shared.makeControlLabel(frame, xx, yy, ww, hh, false, "Header Text Alignment:", "left", "middle", false)
 		yy = yy + hh
 
 		local r_action = function(self)

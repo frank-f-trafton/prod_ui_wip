@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 local pPath = require("prod_ui.lib.p_path")
 
 
@@ -59,7 +59,7 @@ local function _updateScale(self)
 		_message(self, "Error: theme is broken or missing")
 
 	else
-		local result = demoShared.executeThemeUpdate(context, scale, tex_scale, theme_id)
+		local result = shared.executeThemeUpdate(context, scale, tex_scale, theme_id)
 		if result == false then
 			_message(self, "Error: unprovisioned Texture Scale")
 		else
@@ -99,19 +99,19 @@ function plan.make(panel)
 	panel:containerSetScrollRangeMode("auto")
 	panel:setScrollBars(false, true)
 
-	demoShared.makeTitle(panel, nil, "Themes and Scale")
+	shared.makeTitle(panel, nil, "Themes and Scale")
 
-	demoShared.makeParagraphSpacer(panel, "p", 0.5)
+	shared.makeParagraphSpacer(panel, "p", 0.5)
 
 	local tex_scale_list = _pollTextureScales(context.conf.prod_ui_path .. "resources/textures")
-	demoShared.makeParagraph(panel, nil, "(Valid Texture Scales are: " .. table.concat(tex_scale_list, ", ") .. ")")
-	demoShared.makeParagraphSpacer(panel, "p", 0.5)
+	shared.makeParagraph(panel, nil, "(Valid Texture Scales are: " .. table.concat(tex_scale_list, ", ") .. ")")
+	shared.makeParagraphSpacer(panel, "p", 0.5)
 
 	local xx, yy, ww, hh = 32, 96, 200, 32
 	local h_pad = 16
 	local list_box_h = 96
 
-	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Theme:", "left", "bottom", false)
+	shared.makeControlLabel(panel, xx, yy, ww, hh, false, "Theme:", "left", "bottom", false)
 
 	yy = yy + hh
 
@@ -147,7 +147,7 @@ function plan.make(panel)
 
 	local input
 
-	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Scale:", "left", "bottom", false)
+	shared.makeControlLabel(panel, xx, yy, ww, hh, false, "Scale:", "left", "bottom", false)
 
 	yy = yy + hh
 
@@ -160,7 +160,7 @@ function plan.make(panel)
 
 	yy = yy + hh
 
-	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Texture Scale:", "left", "bottom", false)
+	shared.makeControlLabel(panel, xx, yy, ww, hh, false, "Texture Scale:", "left", "bottom", false)
 
 	yy = yy + hh
 
@@ -185,7 +185,7 @@ function plan.make(panel)
 		:geometrySetMode("static", xx, yy, 400, 96)
 		:setText("Messages")
 
-	local error_paragraph = demoShared.makeParagraph(grp_messages, "err_msg", "...")
+	local error_paragraph = shared.makeParagraph(grp_messages, "err_msg", "...")
 		:geometrySetMode("remaining")
 
 end

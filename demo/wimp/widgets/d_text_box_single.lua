@@ -1,9 +1,9 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
-local uiKeyboard = require("prod_ui.ui_keyboard")
 local pTable = require("prod_ui.lib.p_table")
+local shared = require("demo.wimp.shared")
+local uiKeyboard = require("prod_ui.ui_keyboard")
 
 
 function plan.make(panel)

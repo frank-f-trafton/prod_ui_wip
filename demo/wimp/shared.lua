@@ -1,4 +1,4 @@
-local demoShared = {}
+local wimpDemoShared = {}
 
 
 local pTable = require("prod_ui.lib.p_table")
@@ -13,7 +13,7 @@ local function _openURL(self)
 end
 
 
-function demoShared.loadThemeDuplicateSkins(context, id)
+function wimpDemoShared.loadThemeDuplicateSkins(context, id)
 	local theme = context:loadTheme(id)
 
 	-- Duplicate some data for demo purposes.
@@ -54,7 +54,7 @@ end
 
 -- @return true on successful change, nil if the scale and Texture Scale are not different from existing values, false if the
 --	change failed.
-function demoShared.executeThemeUpdate(context, scale, tex_scale, id)
+function wimpDemoShared.executeThemeUpdate(context, scale, tex_scale, id)
 	-- A dirty hack to prevent attempting (and failing) to load non-existent sets of textures.
 	local tex_dir = love.filesystem.getInfo(context.conf.prod_ui_path .. "resources/textures/" .. tostring(tex_scale), "directory")
 	if not tex_dir then
@@ -66,7 +66,7 @@ function demoShared.executeThemeUpdate(context, scale, tex_scale, id)
 			context:setScale(scale)
 			context:setTextureScale(tex_scale)
 
-			local theme = demoShared.loadThemeDuplicateSkins(context, id)
+			local theme = wimpDemoShared.loadThemeDuplicateSkins(context, id)
 
 			context.root:nodeForEach(true, _unskin)
 			context:applyTheme(theme)
@@ -79,7 +79,7 @@ function demoShared.executeThemeUpdate(context, scale, tex_scale, id)
 end
 
 
-function demoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
+function wimpDemoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
 	-- If the frame already exists, just switch to it.
 	local frame = root:findTag("FRAME:" .. plan_id)
 	if not frame then
@@ -96,7 +96,7 @@ function demoShared.launchWindowFrameFromPlan(root, plan_id, switch_to)
 end
 
 
-function demoShared.makeTitle(self, tag, text)
+function wimpDemoShared.makeTitle(self, tag, text)
 	local text_block = self:addChild("wimp/text_block")
 	if tag then
 		text_block:setTag(tag)
@@ -111,7 +111,7 @@ function demoShared.makeTitle(self, tag, text)
 end
 
 
-function demoShared.makeParagraph(self, tag, text)
+function wimpDemoShared.makeParagraph(self, tag, text)
 	local text_block = self:addChild("wimp/text_block")
 
 	if tag then
@@ -128,7 +128,7 @@ function demoShared.makeParagraph(self, tag, text)
 end
 
 
-function demoShared.makeParagraphSpacer(self, font_id, space)
+function wimpDemoShared.makeParagraphSpacer(self, font_id, space)
 	local empty = self:addChild("wimp/text_space")
 		:setFontId(font_id)
 		:setSpacing(space)
@@ -138,7 +138,7 @@ function demoShared.makeParagraphSpacer(self, font_id, space)
 end
 
 
-function demoShared.makeHyperlink(self, tag, text, url)
+function wimpDemoShared.makeHyperlink(self, tag, text, url)
 	local text_block = self:addChild("wimp/text_block")
 	if tag then
 		text_block.tag = tag
@@ -157,7 +157,7 @@ function demoShared.makeHyperlink(self, tag, text, url)
 end
 
 
-function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
+function wimpDemoShared.makeDialogBox(context, title, text, b1, b2, b3)
 	uiAssert.type(2, title, "string")
 	uiAssert.type(3, text, "string")
 	uiAssert.typeEval(4, b1, "string")
@@ -222,7 +222,7 @@ function demoShared.makeDialogBox(context, title, text, b1, b2, b3)
 end
 
 
-function demoShared.makeControlLabel(parent, x, y, w, h, relative, text, align_x, align_y, wrap)
+function wimpDemoShared.makeControlLabel(parent, x, y, w, h, relative, text, align_x, align_y, wrap)
 	local geo_mode = relative and "relative" or "static"
 
 	local c_label = parent:addChild("base/control_label")
@@ -236,4 +236,4 @@ function demoShared.makeControlLabel(parent, x, y, w, h, relative, text, align_x
 end
 
 
-return demoShared
+return wimpDemoShared

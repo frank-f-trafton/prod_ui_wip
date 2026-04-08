@@ -10,7 +10,7 @@ local plan = {}
 
 
 local dbg = require("prod_ui.debug.dbg")
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function _deleteLoop(node, _collapsed)

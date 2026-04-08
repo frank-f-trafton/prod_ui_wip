@@ -2,7 +2,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function cb_refresh(self)
@@ -60,9 +60,9 @@ local function _setupWS2(root)
 	frame_ws2:setFrameWorkspace(ws2)
 
 	do
-		demoShared.makeTitle(frame_ws2, nil, "Associated Window Frame")
+		shared.makeTitle(frame_ws2, nil, "Associated Window Frame")
 
-		demoShared.makeParagraph(frame_ws2, nil, [[
+		shared.makeParagraph(frame_ws2, nil, [[
 This Window Frame is "associated" with Workspace #2. It is visible and active only when Workspace #2 is also active.
 
 Other Window Frames in this demo are "unassociated", and may appear in any Workspace.]])

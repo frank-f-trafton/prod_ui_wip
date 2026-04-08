@@ -1,15 +1,15 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 function plan.make(panel)
-	demoShared.makeTitle(panel, nil, "Spacers & Separators")
+	shared.makeTitle(panel, nil, "Spacers & Separators")
 
-	demoShared.makeParagraphSpacer(panel, "p", 0.5)
-	demoShared.makeParagraph(panel, nil, "Left, top to bottom: empty spacer; separators (norm, double). Right: separator (thick)")
-	demoShared.makeParagraphSpacer(panel, "p", 1.0)
+	shared.makeParagraphSpacer(panel, "p", 0.5)
+	shared.makeParagraph(panel, nil, "Left, top to bottom: empty spacer; separators (norm, double). Right: separator (thick)")
+	shared.makeParagraphSpacer(panel, "p", 1.0)
 
 	local context = panel.context
 

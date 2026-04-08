@@ -1,13 +1,13 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function _button_launchFrame(self)
 	if type(self.usr_plan) ~= "string" then error("bad type or missing plan ID to launch") end
 
-	return demoShared.launchWindowFrameFromPlan(self.context.root, self.usr_plan, true)
+	return shared.launchWindowFrameFromPlan(self.context.root, self.usr_plan, true)
 end
 
 

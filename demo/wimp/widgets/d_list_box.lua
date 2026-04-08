@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function getDisplayInfo()
@@ -189,7 +189,7 @@ local function makeListBox1(panel, x, y)
 	end
 
 	local wx, wy, ww, wh = x + 256, y + 0, 128, 32
-	demoShared.makeControlLabel(panel, wx, wy, ww, wh, false, "Text Alignment:", "left", "middle", false)
+	shared.makeControlLabel(panel, wx, wy, ww, wh, false, "Text Alignment:", "left", "middle", false)
 
 	wy = wy + wh
 
@@ -239,7 +239,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
 
-	demoShared.makeControlLabel(panel, wx, wy, ww, wh, false, "Icon Side:", "left", "middle", false)
+	shared.makeControlLabel(panel, wx, wy, ww, wh, false, "Icon Side:", "left", "middle", false)
 
 	wy = wy + wh
 
@@ -271,7 +271,7 @@ local function makeListBox1(panel, x, y)
 	wy = wy + wh
 	wy = wy + math.floor(wh/2)
 
-	demoShared.makeControlLabel(panel, wx, wy, ww, wh, false, "skin.pad_text_x:", "left", "middle", false)
+	shared.makeControlLabel(panel, wx, wy, ww, wh, false, "skin.pad_text_x:", "left", "middle", false)
 	local sld = panel:addChild("base/slider_bar")
 
 	wy = wy + wh

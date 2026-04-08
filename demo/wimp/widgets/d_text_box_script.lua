@@ -1,8 +1,8 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
 local pTable = require("prod_ui.lib.p_table")
+local shared = require("demo.wimp.shared")
 local uiKeyboard = require("prod_ui.ui_keyboard")
 
 
@@ -250,7 +250,7 @@ function plan.make(panel)
 		end
 	end
 
-	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Line illumination:", "left", "middle", false)
+	shared.makeControlLabel(panel, xx, yy, ww, hh, false, "Line illumination:", "left", "middle", false)
 
 	xx = xx + w2
 

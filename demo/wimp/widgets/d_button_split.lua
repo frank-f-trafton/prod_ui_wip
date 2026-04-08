@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 local uiPopUpMenu = require("prod_ui.ui_pop_up_menu")
 
 
@@ -119,7 +119,7 @@ function plan.make(panel)
 	end
 
 	yy = yy + hh
-	demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Aux Side:", "left", "middle", false)
+	shared.makeControlLabel(panel, xx, yy, ww, hh, false, "Aux Side:", "left", "middle", false)
 	yy = yy + hh
 
 	do
@@ -177,7 +177,7 @@ function plan.make(panel)
 	yy = yy + math.floor(hh/2)
 
 	do
-		demoShared.makeControlLabel(panel, xx, yy, ww, hh, false, "Aux Size:", "left", "middle", false)
+		shared.makeControlLabel(panel, xx, yy, ww, hh, false, "Aux Size:", "left", "middle", false)
 
 		yy = yy + hh
 

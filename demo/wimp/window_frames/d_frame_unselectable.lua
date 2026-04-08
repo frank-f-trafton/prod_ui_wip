@@ -1,7 +1,7 @@
 local plan = {}
 
 
-local demoShared = require("demo.demo_shared")
+local shared = require("demo.wimp.shared")
 
 
 local function _assertNoThimble(self, targ)
@@ -35,7 +35,7 @@ function plan.makeWindowFrame(root)
 	frame.evt_thimble1Take = _assertNoThimble
 	frame.evt_thimble2Take = _assertNoThimble
 
-	demoShared.makeControlLabel(frame, 0, 0, 320, 190, false, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "left", "middle", true)
+	shared.makeControlLabel(frame, 0, 0, 320, 190, false, "This frame can be manipulated with the mouse, but it cannot be selected (among other frames), and its controls should not be capable of taking keyboard focus.", "left", "middle", true)
 
 	local xx, yy = 0, 200
 	local ww, hh = 224, 64
