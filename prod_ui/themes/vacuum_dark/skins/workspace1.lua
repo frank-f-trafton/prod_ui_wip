@@ -1,5 +1,5 @@
 return {
-	skinner_id = "wimp/workspace",
+	skinner_id = "workspace",
 
 	box = "*boxes/frame_norm",
 	data_scroll = "*scroll_bar_data/scroll_bar1",

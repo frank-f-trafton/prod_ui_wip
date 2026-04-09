@@ -1,5 +1,5 @@
 return {
-	skinner_id = "wimp/window_frame",
+	skinner_id = "window_frame",
 
 	box = "*boxes/wimp_frame",
 	data_scroll = "*scroll_bar_data/scroll_bar1",

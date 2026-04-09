@@ -688,20 +688,20 @@ end
 
 
 --[[
-Use this instead of root:addChild("wimp/window_frame").
+Use this instead of root:addChild("window_frame").
 --]]
 function def:newWindowFrame(skin_id, unselectable, view_level)
 	view_level = view_level or "normal"
 
 	local lane = wcUIFrame.view_levels[view_level]
 	local pos = widShared.getSortLaneEdge(self.nodes, lane, "last")
-	local w_frame = self:addChild("wimp/window_frame", skin_id, pos, _root_pass, unselectable, view_level)
+	local w_frame = self:addChild("window_frame", skin_id, pos, _root_pass, unselectable, view_level)
 	return w_frame
 end
 
 
 function def:newWorkspace()
-	local w_space = self:addChild("wimp/workspace", nil, nil, _root_pass)
+	local w_space = self:addChild("workspace", nil, nil, _root_pass)
 
 	self:sortG2()
 

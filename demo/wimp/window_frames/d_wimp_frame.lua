@@ -7,7 +7,7 @@ local shared = require("demo.wimp.shared")
 function plan.makeWindowFrame(root)
 	local context = root.context
 
-	local wid_id = "wimp/window_frame"
+	local wid_id = "window_frame"
 	local skin_id = root.context.widget_defs[wid_id].skin_id .. "_DEMO"
 	local frame = root:newWindowFrame(skin_id)
 	frame.w = 640

@@ -142,7 +142,7 @@ end
 
 -- Some widgets should only be created by the root through wrappers.
 function uiAssert.calledByRoot(root, pass, err)
-	if root.id ~= "wimp/root_wimp" or not root._rootPass or not root:_rootPass(pass) then
+	if root.id ~= "root" or not root._rootPass or not root:_rootPass(pass) then
 		error(err)
 	end
 	return root
