@@ -24,11 +24,11 @@ local def = {
 }
 
 
--- Widget:cb_fileDropped()
+-- Widget:cb_fileDropped(file)
 def.cb_fileDropped = uiDummy.func
 
 
--- Widget:cb_fileDirectoryDropped()
+-- Widget:cb_fileDirectoryDropped(path)
 def.cb_directoryDropped = uiDummy.func
 
 
