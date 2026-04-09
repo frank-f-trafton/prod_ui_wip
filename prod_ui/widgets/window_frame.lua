@@ -271,6 +271,7 @@ function def:_refreshWorkspaceState()
 		self.visible = assign
 		self.allow_hover = assign
 		self.sort_id = wcUIFrame.view_levels[self.view_level]
+		self:reshape()
 	-- Become inactive
 	else
 		self.visible = false
