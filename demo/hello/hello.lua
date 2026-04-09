@@ -33,9 +33,6 @@ love.keyboard.setTextInput(false) -- ProdUI programs should start with text inpu
 local prodUi = require("prod_ui")
 
 
-local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.lua")
-
-
 -- * Make a ProdUI Context, a Root widget, and a Workspace widget.
 
 --[[
@@ -45,18 +42,11 @@ A Workspace is one visible "screen" in your program. Typically, small programs l
 this only need one Workspace.
 --]]
 
-local context, wid_root, workspace
-do
-	context, wid_root = prodUi.context.newContext("prod_ui", default_settings)
-	context:setScale(1.0)
-	context:setTextureScale(1)
+local context, wid_root = prodUi.context.newContext("prod_ui")
 
-	local theme = context:loadTheme("vacuum_dark")
-	context:applyTheme(theme)
-
-	workspace = wid_root:newWorkspace()
-	wid_root:setActiveWorkspace(workspace)
-end
+-- The Root automatically creates one default Workspace, which is immediately set as "active."
+-- Let's fetch a reference to that now.
+local workspace = wid_root:getActiveWorkspace()
 
 
 -- * Construct the "Hello, world!" scene.

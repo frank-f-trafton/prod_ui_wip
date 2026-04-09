@@ -80,8 +80,6 @@ function def:evt_initialize()
 
 	widLayout.setupLayoutList(self)
 
-	self.halt_reshape = false
-
 	-- Up to one workspace can be active at a time.
 	self.workspace = false
 
@@ -113,6 +111,9 @@ function def:evt_initialize()
 	self.drop_state = false
 
 	wcKeyHook.setupInstance(self)
+
+	local workspace = self:newWorkspace()
+	self:setActiveWorkspace(workspace)
 end
 
 
@@ -121,8 +122,6 @@ function def:evt_reshapePre()
 	--print(debug.traceback())
 
 	widLayout.resetLayoutSpace(self)
-
-	return self.halt_reshape
 end
 
 
@@ -387,6 +386,11 @@ function def:setActiveWorkspace(targ)
 	end
 
 	self:sortG2()
+end
+
+
+function def:getActiveWorkspace()
+	return self.workspace
 end
 
 

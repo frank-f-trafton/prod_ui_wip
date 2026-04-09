@@ -440,7 +440,6 @@ function def:evt_initialize(_root_pass, unselectable, view_level)
 	self.header_size = "normal" -- _nm_header_sizes
 
 	self.scroll_range_mode = "zero"
-	self.halt_reshape = false
 
 	self.min_w = 0
 	self.min_h = 0
@@ -964,8 +963,6 @@ function def:evt_reshapePre()
 	end
 
 	widLayout.resetLayoutSpace(self)
-
-	--return self.halt_reshape -- ?
 end
 
 
