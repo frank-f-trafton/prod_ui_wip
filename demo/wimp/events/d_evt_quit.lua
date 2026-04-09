@@ -27,6 +27,12 @@ local function cb_buttonAction(self)
 end
 
 
+local function cb_destroy(self)
+	local root = self:nodeGetRoot()
+	root.evt_quit = nil
+end
+
+
 function plan.make(panel)
 	shared.makeTitle(panel, nil, "I Wish I Knew how to Quit you")
 
@@ -39,6 +45,7 @@ function plan.make(panel)
 		:setTag("demo_quitter_blocker")
 		:setLabel("Interrupt love.quit() once", "single")
 		:userCallbackSet("cb_buttonAction", cb_buttonAction)
+		:userCallbackSet("cb_destroy", cb_destroy)
 end
 
 
