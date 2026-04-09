@@ -140,4 +140,13 @@ end
 -- Checking widgets: use 'context:assertWidget(wid)'
 
 
+-- Some widgets should only be created by the root through wrappers.
+function uiAssert.calledByRoot(root, pass, err)
+	if root.id ~= "wimp/root_wimp" or not root._rootPass or not root:_rootPass(pass) then
+		error(err)
+	end
+	return root
+end
+
+
 return uiAssert

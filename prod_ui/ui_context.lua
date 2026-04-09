@@ -179,9 +179,6 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	self.skinners = {}
 
-	-- The root widget must be created as soon as possible.
-	self.root = false
-
 	-- Some context actions are locked during the update function.
 	self.locked = false
 
@@ -326,10 +323,16 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	self._mt_widget = self:getLua("core/_mt_widget")
 
+	self:loadSkinnersInDirectory(prod_ui_path .. "skinners", true)
+	self:loadWidgetDefsInDirectory(prod_ui_path .. "widgets", true)
+
+	self.root = self:_prepareWidgetInstance("wimp/root_wimp")
+	self.root:evt_initialize()
+
 	-- Fields beginning with 'app' or 'usr' are reserved for use by the
 	-- host application.
 
-	return self
+	return self, self.root
 end
 
 

@@ -988,6 +988,7 @@ function _mt_context:_prepareWidgetInstance(id, parent, skin_id)
 end
 
 
+--[=[
 --- Adds a root widget to the context. There must not be an existing root.
 --  Locked during update: yes (context)
 -- @param id The widget def ID.
@@ -1012,6 +1013,7 @@ function _mt_context:addRoot(id, skin_id, ...)
 
 	return root
 end
+--]=]
 
 
 --- Get the context's current root widget.

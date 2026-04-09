@@ -28,12 +28,9 @@ local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.
 
 local context, wid_root, workspace
 do
-	context = prodUi.context.newContext("prod_ui", default_settings)
+	context, wid_root = prodUi.context.newContext("prod_ui", default_settings)
 	context:setScale(1.0)
 	context:setTextureScale(1)
-
-	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
-	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
 
 	local theme = context:loadTheme("vacuum_dark")
 
@@ -45,7 +42,6 @@ do
 
 	context:applyTheme(theme)
 
-	wid_root = context:addRoot("wimp/root_wimp")
 	workspace = wid_root:newWorkspace()
 	wid_root:setActiveWorkspace(workspace)
 end

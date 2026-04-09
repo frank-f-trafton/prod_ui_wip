@@ -1,7 +1,6 @@
 local context = select(1, ...)
 
 
-local debug = context:getLua("core/wid/debug")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiGraphics = require(context.conf.prod_ui_req .. "ui_graphics")
@@ -13,6 +12,7 @@ local wcContainer = context:getLua("shared/wc/wc_container")
 local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
+local widDebug = context:getLua("core/wid/debug")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
@@ -52,7 +52,9 @@ wcUIFrame.definitionSetup(def)
 wcContainer.setupMethods(def)
 
 
-function def:evt_initialize(unselectable)
+function def:evt_initialize(_root_pass, unselectable)
+	uiAssert.calledByRoot(self.parent, _root_pass, "use 'Root:newWorkspace()' to create new Workspace widgets")
+
 	-- UI Frame
 	self.frame_type = "workspace"
 	wcUIFrame.instanceSetup(self, unselectable)
@@ -94,6 +96,7 @@ Viewport #2 is an outer border.
 
 function def:evt_reshapePre()
 	--print("workspace: evt_reshapePre")
+	--print(debug.traceback())
 
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
@@ -121,6 +124,7 @@ end
 
 function def:evt_reshapePost()
 	--print("workspace: evt_reshapePost")
+	--print(debug.traceback())
 
 	widShared.updateDoc(self)
 

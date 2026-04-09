@@ -219,10 +219,13 @@ local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.
 
 local context, wimp_root
 do
-	context = prodUi.context.newContext("prod_ui", default_settings)
+	context, wimp_root = prodUi.context.newContext("prod_ui", default_settings)
 
 	context:setScale(1.0)
 	context:setTextureScale(1)
+
+	local theme = shared.loadThemeDuplicateSkins(context, demo_default_theme)
+	context:applyTheme(theme)
 
 	-- Config/settings specific to this demo.
 	context.app = {
@@ -260,15 +263,6 @@ do
 			wid = false
 		}
 	}
-
-	-- Assign resources ASAP.
-	context:loadSkinnersInDirectory("prod_ui/skinners", true, "")
-	context:loadWidgetDefsInDirectory("prod_ui/widgets", true, "", false)
-
-	local theme = shared.loadThemeDuplicateSkins(context, demo_default_theme)
-	context:applyTheme(theme)
-
-	wimp_root = context:addRoot("wimp/root_wimp")
 end
 
 
