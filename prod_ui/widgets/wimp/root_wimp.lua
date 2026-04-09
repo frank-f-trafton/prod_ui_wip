@@ -14,6 +14,11 @@ local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 
 
+-- Temporary stand-ins while I change how the context+root+theme are initialized.
+local TEMP_COLOR = {1, 1, 1, 1}
+local TEMP_FONT = love.graphics.newFont(16)
+
+
 local def = {
 	trickle = {},
 
@@ -58,11 +63,14 @@ end
 
 
 function def:evt_initialize()
+	if self.parent then
+		error("a root widget cannot be the child of any other widget")
+	end
+
 	self.w, self.h = love.graphics.getDimensions()
 
 	self.allow_hover = true
 	self.thimble_mode = 0
-	self.allow_focus_capture = false
 	self.visible = true
 	self.clip_hover = true
 
@@ -83,9 +91,8 @@ function def:evt_initialize()
 	-- Reference to the base of a pop-up menu, if active.
 	self.pop_up_menu = false
 
-	-- Stack of modal 2nd-gen Window Frames. When populated, the top modal should get exclusive access, blocking
-	-- the active Workspace and all other Window Frames. The user should still be able to interact with ephemeral
-	-- widgets, such as pop-ups.
+	-- Stack of modal 2nd-gen Window Frames. When populated, the top modal should get exclusive access to user
+	-- input (except for some ephemeral widgets like pop-ups).
 	-- Workspaces should never be part of the modal stack.
 	self.modals = {}
 
@@ -93,7 +100,7 @@ function def:evt_initialize()
 	self.frame_order_counter = 0
 
 	-- ToolTip state.
-	self.tool_tip = notifMgr.newToolTip(self.context.resources.fonts.p) -- XXX font ref needs to be refresh-able
+	self.tool_tip = notifMgr.newToolTip(love.graphics.newFont(16)) -- XXX font ref needs to be refresh-able
 
 	self.tool_tip_hover = false
 	self.tool_tip_time = 0.0
@@ -111,6 +118,7 @@ end
 
 function def:evt_reshapePre()
 	--print("root_wimp: evt_reshapePre")
+	--print(debug.traceback())
 
 	widLayout.resetLayoutSpace(self)
 
@@ -120,16 +128,19 @@ end
 
 function def:evt_reshapePost()
 	--print("root_wimp: evt_reshapePost")
+	--print(debug.traceback())
 
 	-- Viewport #1 is the area for Workspaces and maximized Window Frames.
 
 	self.vp:set(self.LO_x, self.LO_y, self.LO_w, self.LO_h)
 
+	-- [=[
 	-- Handle the current active Workspace.
 	local workspace = self.workspace
 	if workspace then
 		workspace:reshape()
 	end
+	--]=]
 end
 
 
@@ -360,9 +371,8 @@ function def:setActiveWorkspace(targ)
 	self.workspace = targ or false
 	if targ then
 		targ.sort_id = 2
+		targ:reshape()
 	end
-
-	targ:reshape()
 
 	for i, wid_g2 in ipairs(self.nodes) do
 		if wid_g2 ~= targ then
@@ -668,6 +678,15 @@ local function resetToolTipState(self)
 end
 
 
+-- A way of checking that the root widget invoked a "restricted" method.
+local _root_pass = {}
+
+
+function def:_rootPass(pass)
+	return pass == _root_pass
+end
+
+
 --[[
 Use this instead of root:addChild("wimp/window_frame").
 --]]
@@ -676,13 +695,13 @@ function def:newWindowFrame(skin_id, unselectable, view_level)
 
 	local lane = wcUIFrame.view_levels[view_level]
 	local pos = widShared.getSortLaneEdge(self.nodes, lane, "last")
-	local w_frame = self:addChild("wimp/window_frame", skin_id, pos, unselectable, view_level)
+	local w_frame = self:addChild("wimp/window_frame", skin_id, pos, _root_pass, unselectable, view_level)
 	return w_frame
 end
 
 
 function def:newWorkspace()
-	local w_space = self:addChild("wimp/workspace")
+	local w_space = self:addChild("wimp/workspace", nil, nil, _root_pass)
 
 	self:sortG2()
 
@@ -767,14 +786,16 @@ function def:renderLast(os_x, os_y)
 
 	if self.drop_state then
 		local rr, gg, bb, aa = love.graphics.getColor()
-		love.graphics.setColor(self.context.resources.info.misc.dropping_text_color)
+		-- XXX: context.resources may not be populated yet.
+		--love.graphics.setColor(self.context.resources.info.misc.dropping_text_color)
+		love.graphics.setColor(TEMP_COLOR)
 		love.graphics.print("Dropping...", self.context.mouse_x - 20, self.context.mouse_y - 20)
 		love.graphics.setColor(rr, gg, bb, aa)
 	end
 
 	-- DEBUG
 	--[[
-	love.graphics.setFont(self.context.resources.fonts.p)
+	love.graphics.setFont(TEMP_FONT)
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("selected_frame: " .. tostring(self.selected_frame), 64, 64)
 	--]]

@@ -412,7 +412,9 @@ function def:closeFrame(force)
 end
 
 
-function def:evt_initialize(unselectable, view_level)
+function def:evt_initialize(_root_pass, unselectable, view_level)
+	uiAssert.calledByRoot(self.parent, _root_pass, "use 'Root:newWindowFrame()' to create new Window Frame widgets")
+
 	-- UI Frame
 	self.frame_type = "window"
 	wcUIFrame.instanceSetup(self, unselectable)
