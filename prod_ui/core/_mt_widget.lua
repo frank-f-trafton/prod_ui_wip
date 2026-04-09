@@ -1015,19 +1015,17 @@ end
 function _mt_widget:reshape()
 	--print("Reshape! " .. self:_getHierarchy())
 
-	if self:evt_reshapePre() then
-		return
-	end
+	if not self:evt_reshapePre() then
+		if self.LO_list then
+			self:evt_applyLayout()
+		end
 
-	if self.LO_list then
-		self:evt_applyLayout()
-	end
+		for i, child in ipairs(self.nodes) do
+			child:reshape()
+		end
 
-	for i, child in ipairs(self.nodes) do
-		child:reshape()
+		self:evt_reshapePost()
 	end
-
-	self:evt_reshapePost()
 
 	return self
 end
