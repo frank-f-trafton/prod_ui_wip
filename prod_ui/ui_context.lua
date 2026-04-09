@@ -326,7 +326,7 @@ function uiContext.newContext(prod_ui_path, settings)
 	self:loadSkinnersInDirectory(prod_ui_path .. "skinners", true)
 	self:loadWidgetDefsInDirectory(prod_ui_path .. "widgets", true)
 
-	self.root = self:_prepareWidgetInstance("wimp/root_wimp")
+	self.root = self:_prepareWidgetInstance("root")
 	self.root:evt_initialize()
 
 	-- Fields beginning with 'app' or 'usr' are reserved for use by the
