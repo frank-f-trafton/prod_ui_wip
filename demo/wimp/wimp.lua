@@ -584,8 +584,7 @@ do
 
 		-- NOTE: Do not register Workspaces to the root layout. Internally, the root takes care of positioning and
 		-- reshaping the current active Workspace.
-		wid_root:setActiveWorkspace(ws1)
-		ws1.tag = "main_workspace"
+		ws1:setTag("main_workspace")
 
 		local demo_tree = ws1:addChild("wimp/tree_box")
 			:geometrySetMode("segment", "left", 300, "norm")
