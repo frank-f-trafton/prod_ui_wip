@@ -576,7 +576,7 @@ do
 
 
 	do
-		local ws1 = wid_root:newWorkspace()
+		local ws1 = wid_root:getActiveWorkspace()
 
 		ws1:layoutSetBase("viewport")
 		ws1:containerSetScrollRangeMode("zero")
