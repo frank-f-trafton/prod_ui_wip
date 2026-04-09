@@ -14,6 +14,7 @@ local uiKeyboard = require(REQ_PATH .. "ui_keyboard")
 local uiLoad = require(REQ_PATH .. "ui_load")
 local uiRes = require(REQ_PATH .. "ui_res")
 local uiTable = require(REQ_PATH .. "ui_table")
+local uiTheme = require(REQ_PATH .. "ui_theme")
 
 
 -- (Key-down and key-up handling is fed through callbacks in a keyboard manager table.)
@@ -109,12 +110,18 @@ end
 --- Create a new UI context object.
 -- @param prod_ui_path The file system path to ProdUI (where ui_context.lua is located). Needed so
 --	that ProdUI components can pull in additional Lua source files through love.filesystem.load().
--- @param settings Table of settings. Usage depends on the front end. If not provided, an empty
---	table will be provisioned.
+-- @param [settings] Table of settings. Usage depends on the front end. If not provided, a table of
+--	default settings will be provisioned.
+-- @param [first_theme] ("vacuum_dark") The starting theme table, or an ID to load.
+-- @param [ui_scale] (1.0) The UI scale. Number >= 0; get clamped to above zero later on.
+-- @param [tex_scale] (1) The texture / resource scale. Integer >= 1.
 -- @return The UI context.
-function uiContext.newContext(prod_ui_path, settings)
+function uiContext.newContext(prod_ui_path, settings, first_theme, ui_scale, tex_scale)
 	uiAssert.type(1, prod_ui_path, "string")
 	uiAssert.typeEval(2, settings, "table")
+	uiAssert.typesEval(3, first_theme, "string", "table")
+	uiAssert.numberGeEval(3, ui_scale, 0)
+	uiAssert.integerGeEval(4, tex_scale, 1)
 
 	-- Ensure that 'prod_ui_path' ends in a slash so that it doesn't need to be
 	-- appended upon later use.
@@ -139,15 +146,12 @@ function uiContext.newContext(prod_ui_path, settings)
 	self.tryLua = _tryLua
 
 	-- UI scale. Affects font sizes, preferred dimensions of widgets, layouts, etc.
-	self.scale = 1.0
+	self.scale = ui_scale or 1.0
 
 	-- Texture Scale. Determines which set of textures and associated metadata to load.
 	-- Some coordinates and measurements are scaled by this, rather than the main UI scale.
 	-- Should always be an integer >= 1.
-	self.tex_scale = 1
-
-	-- When false, no theme is loaded.
-	self.theme_id = false
+	self.tex_scale = tex_scale and math.floor(tex_scale) or 1
 
 	self.path_symbols = {
 		[""] = "%", -- escapes '%%' to '%'
@@ -162,8 +166,7 @@ function uiContext.newContext(prod_ui_path, settings)
 		prod_ui_path = prod_ui_path,
 	}
 
-	-- Usage of the settings table depends on the front-end.
-	self.settings = settings or {}
+	self.settings = settings or uiRes.loadLuaTable(prod_ui_path .. "data/default_settings.lua")
 
 	-- Passed as the settings argument when creating new layer canvases.
 	self.canvas_settings = {}
@@ -325,6 +328,16 @@ function uiContext.newContext(prod_ui_path, settings)
 
 	self:loadSkinnersInDirectory(prod_ui_path .. "skinners", true)
 	self:loadWidgetDefsInDirectory(prod_ui_path .. "widgets", true)
+
+	self.theme_id = false
+	local theme
+	if type(first_theme) == "table" then
+		theme = first_theme
+	else
+		theme = uiTheme.loadTheme(prod_ui_path .. "themes", first_theme or "vacuum_dark")
+	end
+
+	self:applyTheme(theme)
 
 	self.root = self:_prepareWidgetInstance("root")
 	self.root:evt_initialize()

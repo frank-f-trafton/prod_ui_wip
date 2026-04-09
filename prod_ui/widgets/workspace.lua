@@ -64,7 +64,6 @@ function def:evt_initialize(_root_pass, unselectable)
 	self.allow_hover = true
 
 	self.scroll_range_mode = "zero"
-	self.halt_reshape = false
 
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
@@ -117,8 +116,6 @@ function def:evt_reshapePre()
 	widShared.setClipHoverToViewport(self, vp2)
 
 	widLayout.resetLayoutSpace(self)
-
-	return self.halt_reshape
 end
 
 

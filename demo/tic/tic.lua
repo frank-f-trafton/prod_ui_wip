@@ -23,28 +23,16 @@ love.keyboard.setTextInput(false)
 local prodUi = require("prod_ui")
 
 
-local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.lua")
+-- Make a second button skin with larger text.
+-- (Yeah, this sucks. Some parts of the theming system are too specialized, such
+-- that simple tasks, like changing the font of a button, are a pain in the neck.)
+local theme = prodUi.theme.loadTheme("prod_ui/themes", "vacuum_dark")
+theme.skins["button-big-text"] = prodUi.table.deepCopy(theme.skins["button1"])
+theme.skins["button-big-text"].label_style = "*labels/big"
 
 
-local context, wid_root, workspace
-do
-	context, wid_root = prodUi.context.newContext("prod_ui", default_settings)
-	context:setScale(1.0)
-	context:setTextureScale(1)
-
-	local theme = context:loadTheme("vacuum_dark")
-
-	-- Make a second button skin with larger text.
-	-- (Yeah, this sucks. Some parts of the theming system are too specialized, such
-	-- that simple tasks, like changing the font of a button, are a pain in the neck.)
-	theme.skins["button-big-text"] = prodUi.table.deepCopy(theme.skins["button1"])
-	theme.skins["button-big-text"].label_style = "*labels/big"
-
-	context:applyTheme(theme)
-
-	workspace = wid_root:newWorkspace()
-	wid_root:setActiveWorkspace(workspace)
-end
+local context, wid_root = prodUi.context.newContext("prod_ui", nil, theme)
+local workspace = wid_root:getActiveWorkspace()
 
 
 -- * Our application state.

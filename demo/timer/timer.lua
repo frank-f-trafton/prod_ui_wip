@@ -22,21 +22,8 @@ love.keyboard.setTextInput(false)
 local prodUi = require("prod_ui")
 
 
-local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.lua")
-
-
-local context, wid_root, workspace
-do
-	context, wid_root = prodUi.context.newContext("prod_ui", default_settings)
-	context:setScale(1.0)
-	context:setTextureScale(1)
-
-	local theme = context:loadTheme("vacuum_dark")
-	context:applyTheme(theme)
-
-	workspace = wid_root:newWorkspace()
-	wid_root:setActiveWorkspace(workspace)
-end
+local context, wid_root = prodUi.context.newContext("prod_ui")
+local workspace = wid_root:getActiveWorkspace()
 
 
 -- * Our application state.

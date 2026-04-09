@@ -217,53 +217,47 @@ local default_settings = prodUi.res.loadLuaTable("prod_ui/data/default_settings.
 --default_settings.wimp.pop_up_menu.block_1st_click_out = true
 
 
-local context, wimp_root
-do
-	context, wimp_root = prodUi.context.newContext("prod_ui", default_settings)
+local theme = shared.loadThemeDuplicateSkins("prod_ui/themes", demo_default_theme)
+local context, wid_root = prodUi.context.newContext("prod_ui", default_settings, theme)
+local workspace = wid_root:getActiveWorkspace()
 
-	context:setScale(1.0)
-	context:setTextureScale(1)
 
-	local theme = shared.loadThemeDuplicateSkins(context, demo_default_theme)
-	context:applyTheme(theme)
+-- Config/settings specific to this demo.
+context.app = {
+	show_details = false,
+	show_perf = false,
+	show_mouse_cross = false,
+	enable_zoom = false,
 
-	-- Config/settings specific to this demo.
-	context.app = {
-		show_details = false,
-		show_perf = false,
-		show_mouse_cross = false,
-		enable_zoom = false,
+	-- A crappy toast / notification system.
+	-- XXX Write a proper one sometime.
+	notif = {
+		text = "",
+		max = 10.0,
+		time = 10.0,
+		font = love.graphics.newFont(20)
+	},
 
-		-- A crappy toast / notification system.
-		-- XXX Write a proper one sometime.
-		notif = {
-			text = "",
-			max = 10.0,
-			time = 10.0,
-			font = love.graphics.newFont(20)
-		},
+	-- Highlights one widget's bounding rectangle in love.draw().
+	dbg_highlight = {
+		active = false,
+		wid = false,
+		-- fill
+		r = 0.9, g = 0.1, b = 0.1, a = 0.5,
+	},
 
-		-- Highlights one widget's bounding rectangle in love.draw().
-		dbg_highlight = {
-			active = false,
-			wid = false,
-			-- fill
-			r = 0.9, g = 0.1, b = 0.1, a = 0.5,
-		},
+	-- Shows the widget's viewport rectangles in love.draw()
+	dbg_vp = {
+		active = false,
+		wid = false
+	},
 
-		-- Shows the widget's viewport rectangles in love.draw()
-		dbg_vp = {
-			active = false,
-			wid = false
-		},
-
-		-- Shows the widget's layout nodes in love.draw()
-		dbg_lo = {
-			active = false,
-			wid = false
-		}
+	-- Shows the widget's layout nodes in love.draw()
+	dbg_lo = {
+		active = false,
+		wid = false
 	}
-end
+}
 
 
 local function updateDPanelX(dpanel)
@@ -385,7 +379,7 @@ end
 do
 	do
 		-- Construct the application menu bar.
-		local menu_bar = wimp_root:addChild("wimp/menu_bar")
+		local menu_bar = wid_root:addChild("wimp/menu_bar")
 			:setTag("root_menu_bar")
 			:geometrySetMode("segment", "top")
 
@@ -570,19 +564,19 @@ do
 				end
 			end
 
-			table.insert(wimp_root.KH_trickle_key_pressed, hook_pressed)
+			table.insert(wid_root.KH_trickle_key_pressed, hook_pressed)
 		end
 
 		-- Hook menu bar key commands to WIMP root
 		do
-			table.insert(wimp_root.KH_key_pressed, menu_bar.widHook_pressed)
-			table.insert(wimp_root.KH_key_released, menu_bar.widHook_released)
+			table.insert(wid_root.KH_key_pressed, menu_bar.widHook_pressed)
+			table.insert(wid_root.KH_key_released, menu_bar.widHook_released)
 		end
 	end
 
 
 	do
-		local ws1 = wimp_root:newWorkspace()
+		local ws1 = wid_root:newWorkspace()
 
 		ws1:layoutSetBase("viewport")
 		ws1:containerSetScrollRangeMode("zero")
@@ -590,7 +584,7 @@ do
 
 		-- NOTE: Do not register Workspaces to the root layout. Internally, the root takes care of positioning and
 		-- reshaping the current active Workspace.
-		wimp_root:setActiveWorkspace(ws1)
+		wid_root:setActiveWorkspace(ws1)
 		ws1.tag = "main_workspace"
 
 		local demo_tree = ws1:addChild("wimp/tree_box")
@@ -666,7 +660,7 @@ do
 	-- Quick-launch windows and up to one panel (see top of file for the lists).
 	do
 		local panel_id = demo_panel_launch[1]
-		local demo_tree = wimp_root:findTag("plan_menu")
+		local demo_tree = wid_root:findTag("plan_menu")
 		if panel_id and demo_tree then
 			for i, item in ipairs(demo_tree.MN_items) do
 				if item.plan_id == panel_id then
@@ -678,22 +672,22 @@ do
 	end
 
 	-- TODO: need to deal with initial sort state, so that Workspaces don't obscure Window Frames.
-	wimp_root:sortG2()
+	wid_root:sortG2()
 
 	-- Start with the top-most window selected, if any.
-	wimp_root:selectTopFrame()
+	wid_root:selectTopFrame()
 
 	-- If no Window Frames were created, hand the thimble to the main demo list.
-	local demo_tree = wimp_root:findTag("plan_menu")
+	local demo_tree = wid_root:findTag("plan_menu")
 	if demo_tree then
 		demo_tree:tryTakeThimble1()
 	end
 
 	-- Refresh everything.
-	wimp_root:reshape()
+	wid_root:reshape()
 
 	for i, window_id in ipairs(demo_window_launch) do
-		shared.launchWindowFrameFromPlan(wimp_root, window_id, true)
+		shared.launchWindowFrameFromPlan(wid_root, window_id, true)
 	end
 end
 

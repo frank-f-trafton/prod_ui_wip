@@ -3,6 +3,7 @@ local plan = {}
 
 local shared = require("demo.wimp.shared")
 local pPath = require("prod_ui.lib.p_path")
+local uiTheme = require("prod_ui.ui_theme")
 
 
 local function _configureInputBox(self)
@@ -123,10 +124,11 @@ function plan.make(panel)
 	yy = yy + hh + list_box_h
 
 	do
-		local theme_ids = context:enumerateThemes()
+		local themes_path = context.conf.prod_ui_path .. "themes"
+		local theme_ids = uiTheme.enumerateThemes(themes_path)
 
 		for i, id in ipairs(theme_ids) do
-			local theme_details, err = context:getThemeInfo(id)
+			local theme_details, err = uiTheme.getThemeInfo(themes_path, id)
 			if not theme_details then
 				error(err)
 			end
