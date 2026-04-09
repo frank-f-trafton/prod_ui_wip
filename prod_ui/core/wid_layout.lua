@@ -527,8 +527,6 @@ widLayout.handlers = {
 
 		nc.x, nc.w = _staticPlaceOneAxis(nc.x, nc.w, px, pw, GE.x, GE.w, scale, GE.flip_x, GE.unit_x)
 		nc.y, nc.h = _staticPlaceOneAxis(nc.y, nc.h, py, ph, GE.y, GE.h, scale, GE.flip_y, GE.unit_y)
-
-		print("new XYWH", nc.x, nc.y, nc.w, nc.h)
 	end,
 
 	wallet = function(np, nc, GE, orig_x, orig_y, orig_w, orig_h)

@@ -95,7 +95,6 @@ Viewport #2 is an outer border.
 
 function def:evt_reshapePre()
 	--print("workspace: evt_reshapePre")
-	--print(debug.traceback())
 
 	local skin = self.skin
 	local vp, vp2 = self.vp, self.vp2
@@ -121,7 +120,6 @@ end
 
 function def:evt_reshapePost()
 	--print("workspace: evt_reshapePost")
-	--print(debug.traceback())
 
 	widShared.updateDoc(self)
 
