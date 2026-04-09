@@ -341,7 +341,6 @@ function def:evt_initialize()
 	self.visible = true
 	self.allow_hover = true
 	self.thimble_mode = 0
-	self.allow_focus_capture = true
 	self.clip_scissor = true
 
 	widShared.setupDoc(self)
