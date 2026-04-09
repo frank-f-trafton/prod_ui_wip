@@ -117,9 +117,38 @@ function def:evt_initialize()
 end
 
 
+function def:reshape()
+	--print("root: reshape (custom)")
+
+	if not self:evt_reshapePre() then
+		if self.LO_list then
+			self:evt_applyLayout()
+		end
+
+		-- Viewport #1 is the area for Workspaces and maximized Window Frames.
+		local vp = self.vp
+		vp:set(self.LO_x, self.LO_y, self.LO_w, self.LO_h)
+
+		local workspace = self.workspace
+		if workspace then
+			workspace.x, workspace.y, workspace.w, workspace.h = vp.x, vp.y, vp.w, vp.h
+		end
+
+		for i, child in ipairs(self.nodes) do
+			if child.awake then
+				child:reshape()
+			end
+		end
+
+		self:evt_reshapePost()
+	end
+
+	return self
+end
+
+
 function def:evt_reshapePre()
 	--print("root_wimp: evt_reshapePre")
-	--print(debug.traceback())
 
 	widLayout.resetLayoutSpace(self)
 end
@@ -127,19 +156,6 @@ end
 
 function def:evt_reshapePost()
 	--print("root_wimp: evt_reshapePost")
-	--print(debug.traceback())
-
-	-- Viewport #1 is the area for Workspaces and maximized Window Frames.
-
-	self.vp:set(self.LO_x, self.LO_y, self.LO_w, self.LO_h)
-
-	-- [=[
-	-- Handle the current active Workspace.
-	local workspace = self.workspace
-	if workspace then
-		workspace:reshape()
-	end
-	--]=]
 end
 
 
@@ -401,7 +417,7 @@ function def:sortG2()
 	local start_index
 	for i, child in ipairs(self.nodes) do
 		child.awake = child.sort_id > 1
-		if child.sort_id > 1 and not start_index then
+		if not start_index and child.sort_id > 1 then
 			start_index = i
 		end
 	end

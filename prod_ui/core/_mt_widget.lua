@@ -1021,7 +1021,9 @@ function _mt_widget:reshape()
 		end
 
 		for i, child in ipairs(self.nodes) do
-			child:reshape()
+			if child.awake then
+				child:reshape()
+			end
 		end
 
 		self:evt_reshapePost()
