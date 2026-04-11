@@ -13,7 +13,7 @@ local utf8 = require("utf8")
 
 
 -- ProdUI
-local pUTF8 = require(REQ_PATH .. "p_utf8")
+local pUtf8 = require(REQ_PATH .. "p_utf8")
 
 
 textUtil.proxy_code_points = {
@@ -440,14 +440,14 @@ end
 --	otherwise: return an empty string on bad unput.
 function textUtil.sanitize(str, bad_byte_policy)
 	-- Input is good: nothing to do.
-	if pUTF8.check(str) then
+	if pUtf8.check(str) then
 		return str
 	else
 		local str_out = ""
 		local byte_n = 1
 
 		while byte_n <= #str do
-			local ok, bad_byte, err_str = pUTF8.check(str, byte_n)
+			local ok, bad_byte, err_str = pUtf8.check(str, byte_n)
 
 			if ok then
 				str_out = str_out .. str:sub(byte_n)

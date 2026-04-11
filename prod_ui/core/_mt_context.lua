@@ -19,7 +19,7 @@ local mouseLogic = require(context.conf.prod_ui_req .. "core.mouse_logic")
 --local pools = context:getLua("core/res/pools")
 local pMath = require(context.conf.prod_ui_req .. "lib.p_math")
 local pTree = require(context.conf.prod_ui_req .. "lib.p_tree")
-local pUTF8 = require(context.conf.prod_ui_req .. "lib.p_utf8")
+local pUtf8 = require(context.conf.prod_ui_req .. "lib.p_utf8")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiRes = require(context.conf.prod_ui_req .. "ui_res")
@@ -346,7 +346,7 @@ function _mt_context:love_textinput(text)
 	-- In rare cases, a user's system or virtual keyboard may pass in badly-encoded strings as text input.
 	-- NOTE: The Lua 5.3-derived utf8.len() doesn't reject surrogate pairs, which will cause an error with
 	-- LÖVE's UTF-8 conversion code.
-	elseif not pUTF8.check(text) then
+	elseif not pUtf8.check(text) then
 		return
 	end
 
