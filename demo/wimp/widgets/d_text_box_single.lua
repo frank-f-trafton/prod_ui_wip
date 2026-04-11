@@ -73,7 +73,7 @@ function plan.make(panel)
 	end
 	panel:keyShortcutSet("+f4", _fn_alignRight)
 
-	local ui_frame = assert(panel:getUIFrame(), "no UI Frame to hook shortcuts.")
+	local ui_frame = assert(panel:getUiFrame(), "no UI Frame to hook shortcuts.")
 	ui_frame:keyShortcutListAdd(panel)
 	panel:userCallbackSet("cb_destroy", function(self)
 		ui_frame:keyShortcutListRemove(self)

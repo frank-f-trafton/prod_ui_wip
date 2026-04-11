@@ -8,7 +8,7 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
-local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
+local wcUiFrame = context:getLua("shared/wc/wc_ui_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 local widShortcut = context:getLua("core/wid_shortcut")
@@ -44,8 +44,8 @@ widShortcut.setupDef(def)
 widShortcut.setupDefList(def)
 
 
-local function _printUIFrames(self)
-	print("_printUIFrames()")
+local function _printUiFrames(self)
+	print("_printUiFrames()")
 	local selected = self.selected_frame
 	for i, child in ipairs(self.nodes) do
 		if child.frame_type then
@@ -437,7 +437,7 @@ function def:setSelectedFrame(targ, set_new_order)
 		end
 
 		if old_selected ~= targ then
-			wcUIFrame.tryUnbankingThimble1(targ)
+			wcUiFrame.tryUnbankingThimble1(targ)
 
 			if set_new_order then
 				targ.order_id = self:dispenseFrameOrderId()
@@ -690,7 +690,7 @@ Use this instead of root:addChild("window_frame").
 function def:newWindowFrame(skin_id, unselectable, view_level)
 	view_level = view_level or "normal"
 
-	local lane = wcUIFrame.view_levels[view_level]
+	local lane = wcUiFrame.view_levels[view_level]
 	local pos = widShared.getSortLaneEdge(self.nodes, lane, "last")
 	local w_frame = self:addChild("window_frame", skin_id, pos, _root_pass, unselectable, view_level)
 	return w_frame
@@ -763,7 +763,7 @@ function def:evt_destroy(targ)
 	else
 		-- If the current selected window frame is being destroyed, then automatically select the next top frame.
 		if targ.frame_type == "window" and self.selected_frame == targ then
-			--_printUIFrames(self)
+			--_printUiFrames(self)
 			self:selectTopFrame(targ)
 		end
 	end

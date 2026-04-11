@@ -11,7 +11,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
-local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
+local wcUiFrame = context:getLua("shared/wc/wc_ui_frame")
 local wcWindowFrame = context:getLua("shared/wc/wc_window_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
@@ -53,7 +53,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 wcContainer.setupMethods(def)
 
 
-wcUIFrame.definitionSetup(def)
+wcUiFrame.definitionSetup(def)
 
 
 widLayout.setupContainerDef(def)
@@ -216,12 +216,12 @@ end
 
 
 function def:setWindowViewLevel(view_level)
-	if not wcUIFrame.view_levels[view_level] then
+	if not wcUiFrame.view_levels[view_level] then
 		error("invalid view level.")
 	end
 
 	self.view_level = view_level
-	self.sort_id = wcUIFrame.view_levels[view_level]
+	self.sort_id = wcUiFrame.view_levels[view_level]
 	self.context.root:sortG2()
 
 	return self
@@ -278,7 +278,7 @@ function def:_refreshWorkspaceState()
 		local assign = not self.frame_hidden
 		self.visible = assign
 		self.allow_hover = assign
-		self.sort_id = wcUIFrame.view_levels[self.view_level]
+		self.sort_id = wcUiFrame.view_levels[self.view_level]
 		self:reshape()
 	-- Become inactive
 	else
@@ -300,7 +300,7 @@ function def:setFrameWorkspace(workspace)
 
 	self.workspace = workspace
 
-	wcUIFrame.assertFrameBlockWorkspaces(self)
+	wcUiFrame.assertFrameBlockWorkspaces(self)
 
 	self:_refreshWorkspaceState()
 	self.context.root:sortG2()
@@ -426,9 +426,9 @@ function def:evt_initialize(_root_pass, unselectable, view_level)
 
 	-- UI Frame
 	self.frame_type = "window"
-	wcUIFrame.instanceSetup(self, unselectable)
+	wcUiFrame.instanceSetup(self, unselectable)
 	self.view_level = view_level or "normal"
-	self.sort_id = wcUIFrame.view_levels[self.view_level]
+	self.sort_id = wcUiFrame.view_levels[self.view_level]
 
 	-- If associated with a Workspace, a Window Frame is only active if that Workspace is also active.
 	-- Window Frames associated with the root are always active.
@@ -522,7 +522,7 @@ function def:evt_initialize(_root_pass, unselectable, view_level)
 end
 
 
-def.trickle.evt_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
+def.trickle.evt_pointerHoverOn = wcUiFrame.logic_tricklePointerHoverOn
 
 
 local function _getCursorAxisInfo(self, mx, my)
@@ -596,14 +596,14 @@ function def:evt_pointerHoverOff(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 end
 
 
-def.evt_thimble1Take = wcUIFrame.logic_thimble1Take
-def.trickle.evt_keyPressed = wcUIFrame.logic_trickleKeyPressed
-def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
-def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
+def.evt_thimble1Take = wcUiFrame.logic_thimble1Take
+def.trickle.evt_keyPressed = wcUiFrame.logic_trickleKeyPressed
+def.trickle.evt_textInput = wcUiFrame.logic_trickleTextInput
+def.trickle.evt_pointerPress = wcUiFrame.logic_tricklePointerPress
 
 
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
-	if wcUIFrame.pointerPressLogicFirst(self) then
+	if wcUiFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
@@ -707,7 +707,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 end
 
 
-def.evt_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
+def.evt_pointerPressRepeat = wcUiFrame.logic_pointerPressRepeat
 
 
 function def.trickle:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -771,8 +771,8 @@ function def.trickle:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 end
 
 
-def.trickle.evt_pointerWheel = wcUIFrame.logic_tricklePointerWheel
-def.evt_pointerWheel = wcUIFrame.logic_pointerWheel
+def.trickle.evt_pointerWheel = wcUiFrame.logic_tricklePointerWheel
+def.evt_pointerWheel = wcUiFrame.logic_pointerWheel
 
 
 local function _getHeaderSkinTable(self)
@@ -998,7 +998,7 @@ function def:evt_destroy(targ)
 			target:reorder(math.huge)
 			target.parent:sortChildren()
 
-			wcUIFrame.tryUnbankingThimble1(target)
+			wcUiFrame.tryUnbankingThimble1(target)
 			--]]
 		end
 

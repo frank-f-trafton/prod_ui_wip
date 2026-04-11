@@ -93,7 +93,7 @@ local function tree_update(self, dt)
 		if self.usr_timer <= 0 then
 			self.usr_timer = self.usr_timer_max
 			_buildTree(self, root)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:reshape()
 			end

@@ -26,7 +26,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 
 		local r_action = function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setHeaderSize(self.usr_header_size)
 			end
@@ -94,7 +94,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Resizable frame", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setResizable(self.checked)
 			end
@@ -113,7 +113,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("S_h_ow resize sensors", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame.DEBUG_show_resize_range = not not self.checked
 			end
@@ -133,7 +133,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Show 'Close' control", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setCloseControlVisibility(self.checked)
 			end
@@ -153,7 +153,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Enable 'Close'", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setCloseEnabled(self.checked)
 			end
@@ -173,7 +173,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Show 'Maximize' control", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setMaximizeControlVisibility(self.checked)
 			end
@@ -193,7 +193,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Enable 'Maximize'", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setMaximizeEnabled(self.checked)
 			end
@@ -213,7 +213,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Visible header", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setHeaderVisible(self.checked)
 			end
@@ -233,7 +233,7 @@ function plan.makeWindowFrame(root)
 		checkbox:setLabel("Draggable header", "single-ul")
 
 		checkbox:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setDraggable(self.checked)
 			end
@@ -251,7 +251,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 
 		local r_action = function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame:setHeaderButtonSide(self.usr_button_side)
 			end
@@ -300,7 +300,7 @@ function plan.makeWindowFrame(root)
 		yy = yy + hh
 
 		local r_action = function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if frame then
 				frame.skin.header_text_align_h = self.usr_text_align_h
 				frame:reshape()
@@ -368,7 +368,7 @@ function plan.makeWindowFrame(root)
 
 		btn:setLabel("Close (forcefully)")
 		btn:userCallbackSet("cb_buttonAction", function(self)
-			self:getUIFrame():closeFrame(true)
+			self:getUiFrame():closeFrame(true)
 		end)
 		yy = yy + hh
 	end

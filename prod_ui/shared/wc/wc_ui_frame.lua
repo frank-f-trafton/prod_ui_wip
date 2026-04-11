@@ -4,7 +4,7 @@
 local context = select(1, ...)
 
 
-local wcUIFrame = {}
+local wcUiFrame = {}
 
 
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
@@ -14,19 +14,19 @@ local widShared = context:getLua("core/wid_shared")
 local widShortcut = context:getLua("core/wid_shortcut")
 
 
-wcUIFrame._nm_types = uiTable.newNamedMapV("FrameType", "workspace", "window")
+wcUiFrame._nm_types = uiTable.newNamedMapV("FrameType", "workspace", "window")
 
 
 -- View levels for Window Frames. Both Window Frames and the WIMP Root need access to this.
-wcUIFrame.view_levels = {low=3, normal=4, high=5}
+wcUiFrame.view_levels = {low=3, normal=4, high=5}
 
 
-wcUIFrame.methods = {}
-local _methods = wcUIFrame.methods
+wcUiFrame.methods = {}
+local _methods = wcUiFrame.methods
 
 
-function wcUIFrame.definitionSetup(def)
-	uiTable.patch(def, wcUIFrame.methods, false)
+function wcUiFrame.definitionSetup(def)
+	uiTable.patch(def, wcUiFrame.methods, false)
 end
 
 
@@ -73,7 +73,7 @@ function _methods:getFrameHidden()
 end
 
 
-function wcUIFrame.instanceSetup(self, unselectable)
+function wcUiFrame.instanceSetup(self, unselectable)
 	-- When false:
 	-- * No widget in the frame should be capable of taking the thimble.
 	--   (Otherwise, why not just make it selectable?)
@@ -101,7 +101,7 @@ end
 
 
 --[====[
-function wcUIFrame.assertModalNoWorkspace(self)
+function wcUiFrame.assertModalNoWorkspace(self)
 	local modals = self.context.root.modals
 	for i, g2 in ipairs(modals) do
 		if g2 == self then
@@ -112,7 +112,7 @@ end
 --]====]
 
 
-function wcUIFrame.assertFrameBlockWorkspaces(self)
+function wcUiFrame.assertFrameBlockWorkspaces(self)
 	local workspace = self.workspace
 	local wid = self
 
@@ -130,7 +130,7 @@ function wcUIFrame.assertFrameBlockWorkspaces(self)
 end
 
 
-function wcUIFrame.getLastBlockingFrame(self)
+function wcUiFrame.getLastBlockingFrame(self)
 	if not self.ref_block_next then
 		return
 	end
@@ -142,7 +142,7 @@ function wcUIFrame.getLastBlockingFrame(self)
 end
 
 
-function wcUIFrame.tryUnbankingThimble1(self)
+function wcUiFrame.tryUnbankingThimble1(self)
 	-- Check modal/frame-blocking state before calling.
 
 	local wid_banked = self.banked_thimble1
@@ -154,7 +154,7 @@ end
 
 
 -- @param keep_in_view When true, the container scrolls to ensure that the widget is visible within the viewport.
-function wcUIFrame.logic_thimble1Take(self, targ, keep_in_view)
+function wcUiFrame.logic_thimble1Take(self, targ, keep_in_view)
 	--print("thimbleTake", self.id, targ.id)
 	self.banked_thimble1 = targ
 
@@ -168,7 +168,7 @@ function wcUIFrame.logic_thimble1Take(self, targ, keep_in_view)
 end
 
 
-function wcUIFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat, hot_key, hot_scan)
+function wcUiFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat, hot_key, hot_scan)
 	if self.ref_block_next then
 		return
 	end
@@ -179,14 +179,14 @@ function wcUIFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat, 
 end
 
 
-function wcUIFrame.logic_trickleTextInput(self, targ, text)
+function wcUiFrame.logic_trickleTextInput(self, targ, text)
 	if self.ref_block_next then
 		return
 	end
 end
 
 
-function wcUIFrame.logic_tricklePointerHoverOn(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
+function wcUiFrame.logic_tricklePointerHoverOn(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self.ref_block_next then
 		self.context.current_hover = false
 		return true
@@ -194,9 +194,9 @@ function wcUIFrame.logic_tricklePointerHoverOn(self, targ, mouse_x, mouse_y, mou
 end
 
 
-function wcUIFrame.logic_tricklePointerPress(self, targ, x, y, button, istouch, presses)
+function wcUiFrame.logic_tricklePointerPress(self, targ, x, y, button, istouch, presses)
 	if self.ref_block_next then
-		local block_last = wcUIFrame.getLastBlockingFrame(self)
+		local block_last = wcUiFrame.getLastBlockingFrame(self)
 
 		if block_last then
 			self.context.root:setSelectedFrame(block_last, true)
@@ -211,7 +211,7 @@ function wcUIFrame.logic_tricklePointerPress(self, targ, x, y, button, istouch, 
 end
 
 
-function wcUIFrame.pointerPressLogicFirst(self)
+function wcUiFrame.pointerPressLogicFirst(self)
 	-- Press events that create a pop-up menu should block propagation (return truthy)
 	-- so that this and the WIMP root do not cause interference.
 
@@ -223,13 +223,13 @@ function wcUIFrame.pointerPressLogicFirst(self)
 		-- If thimble1 is not in this widget tree, move it to the Window Frame.
 		local thimble1 = self.context.thimble1
 		if not thimble1 or not thimble1:nodeIsInLineage(self) then
-			wcUIFrame.tryUnbankingThimble1(self)
+			wcUiFrame.tryUnbankingThimble1(self)
 		end
 	end
 end
 
 
-function wcUIFrame.logic_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
+function wcUiFrame.logic_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
 	if self == targ then
 		if button == 1 and button == self.context.mouse_pressed_button then
 			local fixed_step = context.settings.wimp.navigation.scroll_button_click
@@ -240,14 +240,14 @@ function wcUIFrame.logic_pointerPressRepeat(self, targ, x, y, button, istouch, r
 end
 
 
-function wcUIFrame.logic_tricklePointerWheel(self, targ, x, y)
+function wcUiFrame.logic_tricklePointerWheel(self, targ, x, y)
 	if self.ref_block_next then
 		return
 	end
 end
 
 
-function wcUIFrame.logic_pointerWheel(self, targ, x, y)
+function wcUiFrame.logic_pointerWheel(self, targ, x, y)
 	if self.ref_block_next then
 		return
 	end
@@ -261,4 +261,4 @@ function wcUIFrame.logic_pointerWheel(self, targ, x, y)
 end
 
 
-return wcUIFrame
+return wcUiFrame

@@ -964,7 +964,7 @@ end
 
 -- Looks for a UI Frame, starting at this widget and traveling upwards.
 -- @return The UI Frame, or nil if not found.
-function _mt_widget:getUIFrame()
+function _mt_widget:getUiFrame()
 	return self:nodeFindKeyAscending(true, "frame_type", nil)
 end
 

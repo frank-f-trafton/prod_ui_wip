@@ -10,7 +10,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
-local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
+local wcUiFrame = context:getLua("shared/wc/wc_ui_frame")
 local widDebug = context:getLua("core/wid/debug")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
@@ -52,7 +52,7 @@ def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 widLayout.setupContainerDef(def)
 widShared.scrollSetMethods(def)
-wcUIFrame.definitionSetup(def)
+wcUiFrame.definitionSetup(def)
 wcContainer.setupMethods(def)
 
 
@@ -61,7 +61,7 @@ function def:evt_initialize(_root_pass, unselectable)
 
 	-- UI Frame
 	self.frame_type = "workspace"
-	wcUIFrame.instanceSetup(self, unselectable)
+	wcUiFrame.instanceSetup(self, unselectable)
 	self.sort_id = 1
 
 	self.visible = true
@@ -134,7 +134,7 @@ function def:evt_reshapePost()
 end
 
 
-def.trickle.evt_pointerHoverOn = wcUIFrame.logic_tricklePointerHoverOn
+def.trickle.evt_pointerHoverOn = wcUiFrame.logic_tricklePointerHoverOn
 
 
 function def.trickle:evt_pointerHover(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
@@ -178,7 +178,7 @@ end
 
 
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
-	if wcUIFrame.pointerPressLogicFirst(self) then
+	if wcUiFrame.pointerPressLogicFirst(self) then
 		return
 	end
 
@@ -201,7 +201,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 end
 
 
-def.evt_pointerPressRepeat = wcUIFrame.logic_pointerPressRepeat
+def.evt_pointerPressRepeat = wcUiFrame.logic_pointerPressRepeat
 
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
@@ -215,12 +215,12 @@ function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 end
 
 
-def.trickle.evt_pointerWheel = wcUIFrame.logic_tricklePointerWheel
-def.evt_pointerWheel = wcUIFrame.logic_pointerWheel
-def.evt_thimble1Take = wcUIFrame.logic_thimble1Take
-def.trickle.evt_keyPressed = wcUIFrame.logic_trickleKeyPressed
-def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
-def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
+def.trickle.evt_pointerWheel = wcUiFrame.logic_tricklePointerWheel
+def.evt_pointerWheel = wcUiFrame.logic_pointerWheel
+def.evt_thimble1Take = wcUiFrame.logic_thimble1Take
+def.trickle.evt_keyPressed = wcUiFrame.logic_trickleKeyPressed
+def.trickle.evt_textInput = wcUiFrame.logic_trickleTextInput
+def.trickle.evt_pointerPress = wcUiFrame.logic_tricklePointerPress
 
 
 function def:evt_update(dt)

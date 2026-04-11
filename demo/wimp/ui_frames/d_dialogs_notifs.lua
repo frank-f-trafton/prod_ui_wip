@@ -7,7 +7,7 @@ local shared = require("demo.wimp.shared")
 local function _makeFrameBlock2(self)
 	local root = self:nodeGetRoot()
 	local frame, dialog
-	frame = self:getUIFrame()
+	frame = self:getUiFrame()
 
 	if frame then
 		dialog = root:newWindowFrame()
@@ -31,7 +31,7 @@ Can't interact with the previous window until this one is dismissed.
 		button_close.h = 32
 		button_close:setLabel("All right, close it")
 		button_close:userCallbackSet("cb_buttonAction", function(self)
-			self:getUIFrame():closeFrame(true)
+			self:getUiFrame():closeFrame(true)
 		end)
 
 		dialog:center(true, true)
@@ -56,7 +56,7 @@ end
 local function _makeFrameBlock1(self)
 	local root = self:nodeGetRoot()
 	local frame, dialog
-	frame = self:getUIFrame()
+	frame = self:getUiFrame()
 
 	if frame then
 		dialog = root:newWindowFrame()
@@ -137,7 +137,7 @@ Click a button below (or the 'X' in the header bar) to dismiss it.]]
 		button_quote.str_tool_tip = "Click for an inspiring quote."
 
 		button_quote:userCallbackSet("cb_buttonAction", function(self)
-			local frame = self:getUIFrame()
+			local frame = self:getUiFrame()
 			if not frame then
 				print("Demo Error: frame not found")
 			else

@@ -21,7 +21,7 @@ end
 -- @param self Any widget belonging to the current UI Frame, or the UI Frame itself.
 -- @return Nothing.
 function wcWimp.closeFrame(self)
-	local frame = self:getUIFrame()
+	local frame = self:getUiFrame()
 	if frame then
 		if not self.context:isLocked() then
 			frame:destroy()
