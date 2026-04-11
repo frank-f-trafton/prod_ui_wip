@@ -196,7 +196,7 @@ end
 
 function wcContainer.sashPressLogic(self, x, y, button)
 	if button == 1
-	and self.context.mouse_pressed_button == button
+	and context.mouse_pressed_button == button
 	and self.SA_enabled
 	then
 		local wid = self.SA_hover

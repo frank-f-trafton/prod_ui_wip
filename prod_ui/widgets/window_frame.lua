@@ -222,7 +222,7 @@ function def:setWindowViewLevel(view_level)
 
 	self.view_level = view_level
 	self.sort_id = wcUiFrame.view_levels[view_level]
-	self.context.root:sortG2()
+	context.root:sortG2()
 
 	return self
 end
@@ -266,7 +266,7 @@ end
 
 function def:bringWindowToFront()
 	self:reorder(math.huge)
-	self.context.root:sortG2()
+	context.root:sortG2()
 
 	return self
 end
@@ -274,7 +274,7 @@ end
 
 function def:_refreshWorkspaceState()
 	-- Become active
-	if not self.workspace or self.workspace == self.context.root.workspace then
+	if not self.workspace or self.workspace == context.root.workspace then
 		local assign = not self.frame_hidden
 		self.visible = assign
 		self.allow_hover = assign
@@ -303,7 +303,7 @@ function def:setFrameWorkspace(workspace)
 	wcUiFrame.assertFrameBlockWorkspaces(self)
 
 	self:_refreshWorkspaceState()
-	self.context.root:sortG2()
+	context.root:sortG2()
 
 	return self
 end
@@ -328,7 +328,7 @@ local function _initiateResizeMode(self, axis_x, axis_y)
 	self.adjust_axis_y = axis_y
 
 	local ax, ay = self:getAbsolutePosition()
-	local mx, my = self.context.mouse_x, self.context.mouse_y
+	local mx, my = context.mouse_x, context.mouse_y
 
 	-- Track mouse offsets for a less jarring transition to resize mode.
 	self.adjust_ox = axis_x < 0 and ax - mx or axis_x > 0 and ax + self.w - mx or 0
@@ -611,7 +611,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 		local mx, my = self:getRelativePosition(x, y)
 		local handled = false
 
-		if button == 1 and self.context.mouse_pressed_button == button then
+		if button == 1 and context.mouse_pressed_button == button then
 			-- Check for pressing on scroll bar components.
 			-- Since this widget can accept mouse events that are out of bounds, we must
 			-- perform an additional intersection check.
@@ -641,8 +641,8 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 					if self.allow_resize
 					and self.allow_maximize
 					and self.cseq_header
-					and self.context.cseq_button == 1
-					and self.context.cseq_presses % 2 == 0
+					and context.cseq_button == 1
+					and context.cseq_presses % 2 == 0
 					then
 						if self.wid_maximize and self.wid_unmaximize then
 							if not self.maximized then
@@ -728,7 +728,7 @@ end
 
 function def.trickle:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == 1 and self.context.mouse_pressed_button == button then
+		if button == 1 and context.mouse_pressed_button == button then
 			if self.press_busy == "resize" or self.press_busy == "drag" then
 				-- Hack: clamp frame to parent. This isn't handled while resizing because the
 				-- width and height can go haywire when resizing against the bounds of the
@@ -786,7 +786,7 @@ function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 
 	if wcScrollBar.press_busy_codes[self.press_busy] then
-		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
 		wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 	end
@@ -1170,12 +1170,12 @@ def.default_skinner = {
 
 	render = function(self, ox, oy)
 		local skin = self.skin
-		local root = self.context.root
+		local root = context.root
 
 		love.graphics.push("all")
 
 		-- Window shadow
-		local render_shadow = self.context.settings.wimp.window_frame.render_shadow
+		local render_shadow = context.settings.wimp.window_frame.render_shadow
 		if render_shadow == "all" or render_shadow == "active" and self == root.selected_frame then
 			love.graphics.setColor(skin.color_shadow)
 			uiGraphics.drawSlice(skin.slc_shadow,

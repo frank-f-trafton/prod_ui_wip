@@ -108,7 +108,7 @@ function def:setURL(url)
 
 	self.allow_hover = not not self.url
 
-	if self.context.thimble1 == self or self.context.thimble2 == self then
+	if context.thimble1 == self or context.thimble2 == self then
 		self:releaseThimble2()
 		self:releaseThimble1()
 	end

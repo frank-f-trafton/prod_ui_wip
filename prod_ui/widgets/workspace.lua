@@ -188,7 +188,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 		local handled = false
 
 		-- Check for pressing on scroll bar components.
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			local fixed_step = context.settings.wimp.navigation.scroll_button_click
 			handled = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 		end
@@ -226,7 +226,7 @@ def.trickle.evt_pointerPress = wcUiFrame.logic_tricklePointerPress
 function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 	if wcScrollBar.press_busy_codes[self.press_busy] then
-		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
 		wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 	end
@@ -240,7 +240,7 @@ end
 function def:evt_destroy(targ)
 	if self == targ then
 		-- Destroy any Window Frames that are associated with this Workspace.
-		local root = self.context.root
+		local root = context.root
 		for i, wid_g2 in ipairs(root.nodes) do
 			if wid_g2.frame_type == "window" and wid_g2.workspace == self then
 				wid_g2:destroy()

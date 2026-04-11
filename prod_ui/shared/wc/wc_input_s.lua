@@ -227,7 +227,7 @@ end
 function wcInputS.keyPressLogic(self, key, scancode, isrepeat, hot_key, hot_scan)
 	local LE = self.LE
 
-	local ctrl_down, shift_down, alt_down, gui_down = self.context.key_mgr:getModState()
+	local ctrl_down, shift_down, alt_down, gui_down = context.key_mgr:getModState()
 
 	editWid.resetCaretBlink(self)
 
@@ -350,7 +350,7 @@ function wcInputS.mousePressLogic(self, button, mx, my, had_thimble1_before)
 		local root = self:nodeGetRoot()
 		self.pop_up_proto:configure(self)
 
-		--print("thimble1, thimble2", self.context.thimble1, self.context.thimble2)
+		--print("thimble1, thimble2", context.thimble1, context.thimble2)
 
 		local ax, ay = self:getAbsolutePosition()
 		local pop_up = wcWimp.makePopUpMenu(self, self.pop_up_proto, ax + mx, ay + my)
@@ -366,7 +366,7 @@ end
 
 -- Used in evt_update(). Before calling, check that text-drag state is active.
 function wcInputS.mouseDragLogic(self)
-	local context = self.context
+	local context = context
 	local LE = self.LE
 
 	local widget_needs_update = false

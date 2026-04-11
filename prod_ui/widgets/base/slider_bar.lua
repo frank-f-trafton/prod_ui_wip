@@ -157,7 +157,7 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if self.context.mouse_pressed_button == button then
+			if context.mouse_pressed_button == button then
 				if button <= 3 then
 					self:takeThimble1()
 				end
@@ -188,7 +188,7 @@ function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self == targ then
 		if self.enabled then
 			if self.pressed then
-				if self.context.mouse_pressed_button == 1 then
+				if context.mouse_pressed_button == 1 then
 					local mx, my = self:getRelativePosition(mouse_x, mouse_y)
 					wcSlider.checkMousePress(self, mx, my, self.skin.trough_click_anywhere)
 				end

@@ -70,22 +70,22 @@ function wcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 	self.drag_oy
 	--]]
 
-	local old_x, old_y = self.context.mouse_x, self.context.mouse_y
+	local old_x, old_y = context.mouse_x, context.mouse_y
 
 	if self.maximized and self.allow_resize and self.allow_maximize then
 		-- Unmaximize only if the mouse has wandered a bit from its original click-point.
-		if self.context.mouse_x < self.adjust_mouse_orig_a_x - 32
-		or self.context.mouse_x >= self.adjust_mouse_orig_a_x + 32
-		or self.context.mouse_y < self.adjust_mouse_orig_a_y - 32
-		or self.context.mouse_y >= self.adjust_mouse_orig_a_y + 32
+		if context.mouse_x < self.adjust_mouse_orig_a_x - 32
+		or context.mouse_x >= self.adjust_mouse_orig_a_x + 32
+		or context.mouse_y < self.adjust_mouse_orig_a_y - 32
+		or context.mouse_y >= self.adjust_mouse_orig_a_y + 32
 		then
 			-- If unmaximizing as a result of the pointer dragging the top bar, tweak the
 			-- container's XY position so that it looks like the mouse pointer has gripped
 			-- the window.
 
 			local a_x, a_y = self:getAbsolutePosition()
-			local mouse_rel_x = self.context.mouse_x - a_x
-			local mouse_rel_y = self.context.mouse_y - a_y
+			local mouse_rel_x = context.mouse_x - a_x
+			local mouse_rel_y = context.mouse_y - a_y
 
 			-- 0.0 == left or top, 1.0 == bottom or right
 			local lerp_x = _lerp(0, self.w, mouse_rel_x / self.w) / self.w
@@ -107,8 +107,8 @@ function wcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 		if parent then
 			local pa_x, pa_y = parent:getAbsolutePosition()
 
-			self.x = self.context.mouse_x - pa_x + self.drag_ox
-			self.y = self.context.mouse_y - pa_y + self.drag_oy
+			self.x = context.mouse_x - pa_x + self.drag_ox
+			self.y = context.mouse_y - pa_y + self.drag_oy
 		end
 
 		local bx1, by1, bx2, by2 = self:calculateWindowPlacementBoundaries()
@@ -117,11 +117,11 @@ function wcWindowFrame.mouseMovedDrag(self, x, y, dx, dy, istouch)
 
 	-- Tweak to fix accidental maximizes from double-clicks.
 	if self.drag_dc_fix_x then
-		local fix_pad = self.context.cseq_range
+		local fix_pad = context.cseq_range
 		if x < self.drag_dc_fix_x - fix_pad or x > self.drag_dc_fix_x + fix_pad
 		or y < self.drag_dc_fix_y - fix_pad or y > self.drag_dc_fix_y + fix_pad
 		then
-			self.context:forceClickSequence(false, 1, 1)
+			context:forceClickSequence(false, 1, 1)
 		end
 	end
 end

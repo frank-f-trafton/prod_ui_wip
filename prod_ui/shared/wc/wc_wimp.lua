@@ -23,10 +23,10 @@ end
 function wcWimp.closeFrame(self)
 	local frame = self:getUiFrame()
 	if frame then
-		if not self.context:isLocked() then
+		if not context:isLocked() then
 			frame:destroy()
 		else
-			self.context:appendAsyncAction(frame, wcWimp.async_widget_destroy, false)
+			context:appendAsyncAction(frame, wcWimp.async_widget_destroy, false)
 		end
 	end
 end

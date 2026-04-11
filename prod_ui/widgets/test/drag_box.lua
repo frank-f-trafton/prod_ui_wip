@@ -65,7 +65,7 @@ end
 
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == self.context.mouse_pressed_button then
+		if button == context.mouse_pressed_button then
 			if button == 1 then
 				self.pressed = true
 				local ax, ay = self:getAbsolutePosition()
@@ -87,8 +87,8 @@ end
 
 function def:cpt_mouseMoved(x, y, dx, dy, istouch)
 	-- Update mouse position
-	self.context.mouse_x = x
-	self.context.mouse_y = y
+	context.mouse_x = x
+	context.mouse_y = y
 
 	local parent = self.parent
 	if not parent then
@@ -109,8 +109,8 @@ end
 
 function def:cpt_mouseReleased(x, y, button, istouch, presses)
 	if button == 1 then
-		self.context.current_pressed = false
-		self.context.mouse_pressed_button = false
+		context.current_pressed = false
+		context.mouse_pressed_button = false
 
 		self:uncaptureFocus() -- XXX need to refresh hover state in case the widget has moved away from the pointer
 

@@ -193,7 +193,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 		local handled = false
 
 		-- Check for pressing on scroll bar components.
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			local fixed_step = context.settings.wimp.navigation.scroll_button_click
 			handled = wcScrollBar.widgetScrollPress(self, x, y, fixed_step)
 		end
@@ -218,7 +218,7 @@ end
 
 function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			local fixed_step = context.settings.wimp.navigation.scroll_button_hold
 
 			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
@@ -271,7 +271,7 @@ end
 function def:evt_update(dt)
 	dt = math.min(dt, 1.0)
 	if wcScrollBar.press_busy_codes[self.press_busy] then
-		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 		local button_step = 350 -- [XXX 6] style/config
 		wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 	end

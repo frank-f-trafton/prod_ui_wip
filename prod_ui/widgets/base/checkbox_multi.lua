@@ -210,7 +210,7 @@ def.default_skinner = {
 			love.graphics.push("all")
 
 			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.setFont(self.context.resources.fonts.internal)
+			love.graphics.setFont(context.resources.fonts.internal)
 			love.graphics.print(tostring(self.value), box_x, box_y)
 
 			love.graphics.pop()

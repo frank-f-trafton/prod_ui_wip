@@ -372,7 +372,7 @@ end
 function wcButton.evt_pointerPress(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button <= 3 then
 					self:tryTakeThimble1()
 				end
@@ -399,7 +399,7 @@ end
 function wcButton.evt_pointerPressActivate(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button <= 3 then
 					self:tryTakeThimble1()
 				end
@@ -429,13 +429,13 @@ end
 function wcButton.evt_pointerPressDoubleClick(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button <= 3 then
 					self:tryTakeThimble1()
 				end
 
 				if button == 1 then
-					if self.context.cseq_widget == self and self.context.cseq_presses % 2 == 0 then
+					if context.cseq_widget == self and context.cseq_presses % 2 == 0 then
 
 						-- First-press action.
 						self:cb_buttonAction()
@@ -459,7 +459,7 @@ end
 function wcButton.evt_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					-- Repeat-press actions
 					self:cb_buttonAction()
@@ -476,7 +476,7 @@ end
 function wcButton.evt_pointerPressSticky(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button <= 3 then
 					self:tryTakeThimble1()
 				end
@@ -514,7 +514,7 @@ end
 function wcButton.evt_pointerReleaseActivate(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 					self:cb_buttonAction()
@@ -529,7 +529,7 @@ end
 function wcButton.evt_pointerRelease(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 				end
@@ -543,7 +543,7 @@ end
 function wcButton.evt_pointerReleaseCheck(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 					self:setChecked(not self.checked)
@@ -558,7 +558,7 @@ end
 function wcButton.evt_pointerReleaseCheckMulti(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 					self:rollValue(1)
@@ -574,7 +574,7 @@ end
 function wcButton.evt_pointerReleaseRadio(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 					self:setChecked(true)
@@ -593,7 +593,7 @@ end
 function wcButton.evt_pointerUnpress(self, targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 					self.cursor_press = nil

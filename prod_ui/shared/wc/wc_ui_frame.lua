@@ -31,8 +31,8 @@ end
 
 
 function _methods:setFrameSelectable(enabled)
-	if not enabled and self.context.root.selected_frame == self then
-		self.context.root:setSelectedFrame(false)
+	if not enabled and context.root.selected_frame == self then
+		context.root:setSelectedFrame(false)
 	end
 
 	self.frame_is_selectable = not not enabled
@@ -51,7 +51,7 @@ function _methods:setFrameHidden(enabled)
 	self.frame_hidden = not not enabled
 
 	if self.frame_type == "workspace"
-	or (self.frame_type == "window" and not self.workspace or self.workspace == self.context.root.workspace)
+	or (self.frame_type == "window" and not self.workspace or self.workspace == context.root.workspace)
 	then
 		self.visible = not enabled
 		self.allow_hover = not enabled
@@ -60,8 +60,8 @@ function _methods:setFrameHidden(enabled)
 		self.allow_hover = false
 	end
 
-	if self.frame_hidden and self.context.root.selected_frame == self then
-		self.context.root:stepSelectedFrame(-1)
+	if self.frame_hidden and context.root.selected_frame == self then
+		context.root:stepSelectedFrame(-1)
 	end
 
 	return self
@@ -96,13 +96,13 @@ function wcUiFrame.instanceSetup(self, unselectable)
 	self.frame_hidden = false
 
 	-- Helps with ctrl+tabbing through UI Frames.
-	self.order_id = self.context.root:dispenseFrameOrderId()
+	self.order_id = context.root:dispenseFrameOrderId()
 end
 
 
 --[====[
 function wcUiFrame.assertModalNoWorkspace(self)
-	local modals = self.context.root.modals
+	local modals = context.root.modals
 	for i, g2 in ipairs(modals) do
 		if g2 == self then
 			error("Modal Window Frames cannot be associated with any Workspace.")
@@ -188,7 +188,7 @@ end
 
 function wcUiFrame.logic_tricklePointerHoverOn(self, targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 	if self.ref_block_next then
-		self.context.current_hover = false
+		context.current_hover = false
 		return true
 	end
 end
@@ -199,9 +199,9 @@ function wcUiFrame.logic_tricklePointerPress(self, targ, x, y, button, istouch, 
 		local block_last = wcUiFrame.getLastBlockingFrame(self)
 
 		if block_last then
-			self.context.root:setSelectedFrame(block_last, true)
+			context.root:setSelectedFrame(block_last, true)
 		end
-		self.context.current_pressed = false
+		context.current_pressed = false
 		return true
 	end
 
@@ -221,7 +221,7 @@ function wcUiFrame.pointerPressLogicFirst(self)
 		root:setSelectedFrame(self, true)
 
 		-- If thimble1 is not in this widget tree, move it to the Window Frame.
-		local thimble1 = self.context.thimble1
+		local thimble1 = context.thimble1
 		if not thimble1 or not thimble1:nodeIsInLineage(self) then
 			wcUiFrame.tryUnbankingThimble1(self)
 		end
@@ -231,7 +231,7 @@ end
 
 function wcUiFrame.logic_pointerPressRepeat(self, targ, x, y, button, istouch, reps)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			local fixed_step = context.settings.wimp.navigation.scroll_button_click
 
 			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)

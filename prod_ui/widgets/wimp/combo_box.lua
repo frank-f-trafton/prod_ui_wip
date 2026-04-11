@@ -353,8 +353,8 @@ end
 
 function def:wid_popUpCleanup(reason_code)
 	-- Prevent instantly creating the drawer again when clicking on the dropdown body (with the intention of closing it).
-	if self.context.current_pressed == self then
-		self.context.current_pressed = false
+	if context.current_pressed == self then
+		context.current_pressed = false
 	end
 
 	self.wid_drawer = false
@@ -526,9 +526,9 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ
 	and self.enabled
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
-		local had_thimble1_before = self == self.context.thimble1
+		local had_thimble1_before = self == context.thimble1
 		if button <= 3 then
 			self:tryTakeThimble1()
 		end
@@ -575,7 +575,7 @@ function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if not (mouse_x >= ax1 and mouse_x < ax1 + self.w and mouse_y >= ay1 and mouse_y < ay1 + self.h)
 		and (mouse_x >= ax2 and mouse_x < ax2 + wid_drawer.w and mouse_y >= ay2 and mouse_y < ay2 + wid_drawer.h)
 		then
-			self.context:transferPressedState(wid_drawer)
+			context:transferPressedState(wid_drawer)
 
 			wid_drawer.press_busy = "menu-drag"
 			wid_drawer:cacheUpdate(true)
@@ -586,7 +586,7 @@ end
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			self.press_busy = false
 		end
 	end
@@ -761,7 +761,7 @@ def.default_skinner = {
 		end
 		local col_highlight = (self:hasAnyThimble() and context.window_focus) and res.color_highlight_active or res.color_highlight
 		local col_caret
-		if self.context.window_focus then
+		if context.window_focus then
 			col_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 		else
 			col_caret = self.LE_replace_mode and res.color_caret_replace_not_focused or res.color_caret_insert_not_focused

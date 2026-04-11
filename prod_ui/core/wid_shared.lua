@@ -552,7 +552,7 @@ end
 -- @return true if the widget was scrolled, otherwise nil.
 function widShared.dragToScroll(self, dt)
 	local vp = self.vp
-	local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+	local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 
 	-- Mouse position relative to viewport #1.
 	mx = mx - vp.x
@@ -661,7 +661,7 @@ function widShared.checkScrollWheelScroll(self, x, y)
 	then
 		local old_scr_tx, old_scr_ty = self.scr_tx, self.scr_ty
 
-		local wheel_scale = context.scale * self.context.settings.wimp.navigation.mouse_wheel_move_size_v
+		local wheel_scale = context.scale * context.settings.wimp.navigation.mouse_wheel_move_size_v
 		self:scrollDeltaHV(-x*wheel_scale, -y*wheel_scale)
 
 		return self.scr_ty ~= self.scr_y or old_scr_tx ~= self.scr_tx or old_scr_ty ~= self.scr_ty

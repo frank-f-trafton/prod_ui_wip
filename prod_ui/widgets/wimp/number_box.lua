@@ -560,9 +560,9 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ
 	and self.enabled
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
-		local had_thimble1_before = self == self.context.thimble1
+		local had_thimble1_before = self == context.thimble1
 		if button <= 3 then
 			self:tryTakeThimble1()
 		end
@@ -603,7 +603,7 @@ end
 function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					if self.btn_rep == 1 then
 						_callback(self, self.cb_incrementButton, reps + 1)
@@ -622,7 +622,7 @@ end
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			self.press_busy = false
 			self.btn_rep = false
 		end
@@ -784,7 +784,7 @@ def.default_skinner = {
 		end
 		local col_highlight = (self:hasAnyThimble() and context.window_focus) and res.color_highlight_active or res.color_highlight
 		local col_caret
-		if self.context.window_focus then
+		if context.window_focus then
 			col_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 		else
 			col_caret = self.LE_replace_mode and res.color_caret_replace_not_focused or res.color_caret_insert_not_focused

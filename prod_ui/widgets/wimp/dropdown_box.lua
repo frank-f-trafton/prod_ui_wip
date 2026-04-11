@@ -302,8 +302,8 @@ end
 
 function def:wid_popUpCleanup(reason_code)
 	-- Prevent instantly creating the drawer again when clicking on the dropdown body (with the intention of closing it).
-	if self.context.current_pressed == self then
-		self.context.current_pressed = false
+	if context.current_pressed == self then
+		context.current_pressed = false
 	end
 
 	self.wid_drawer = false
@@ -405,7 +405,7 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ
 	and self.enabled
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
 		if button <= 3 then
 			self:tryTakeThimble1()
@@ -437,7 +437,7 @@ function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 		if not (mouse_x >= ax1 and mouse_x < ax1 + self.w and mouse_y >= ay1 and mouse_y < ay1 + self.h)
 		and (mouse_x >= ax2 and mouse_x < ax2 + wid_drawer.w and mouse_y >= ay2 and mouse_y < ay2 + wid_drawer.h)
 		then
-			self.context:transferPressedState(wid_drawer)
+			context:transferPressedState(wid_drawer)
 
 			wid_drawer.press_busy = "menu-drag"
 			wid_drawer:cacheUpdate(true)
@@ -590,7 +590,7 @@ def.default_skinner = {
 		)
 
 		-- Draw a highlight rectangle if this widget has the thimble and there is no drawer.
-		if not self.wid_drawer and self.context.thimble1 == self then
+		if not self.wid_drawer and context.thimble1 == self then
 			love.graphics.push("all")
 
 			love.graphics.setScissor()

@@ -562,7 +562,7 @@ end
 
 --- The default navigational key input.
 function def:wid_defaultKeyNav(key, scancode, isrepeat)
-	local mod = self.context.key_mgr.mod
+	local mod = context.key_mgr.mod
 
 	if key == "up" or (key == "tab" and mod["shift"]) then
 		self:movePrev(1, true, isrepeat)
@@ -665,7 +665,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 			end
 		end
 
-		local mod = self.context.key_mgr.mod
+		local mod = context.key_mgr.mod
 		if not mod["ctrl"] and not mod["alt"] and not mod["shift"] then
 			-- Finally, check for key mnemonics.
 			local item_i, item = keyMnemonicSearch(self.MN_items, key)
@@ -703,8 +703,8 @@ end
 
 
 local function pressedAndThimbleHandoff(self, wid)
-	if self.context.current_pressed == self and wid.allow_hover then
-		self.context:transferPressedState(wid)
+	if context.current_pressed == self and wid.allow_hover then
+		context:transferPressedState(wid)
 
 		wid.press_busy = self.press_busy
 		self.press_busy = false
@@ -920,7 +920,7 @@ end
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == self.context.mouse_pressed_button then
+		if button == context.mouse_pressed_button then
 			self.press_busy = false
 
 			-- Handle mouse unpressing over the selected item.
@@ -994,7 +994,7 @@ function def:evt_update(dt)
 	local selected = self.MN_items[self.MN_index]
 
 	--[[
-	local cur_thimble2 = self.context.thimble2
+	local cur_thimble2 = context.thimble2
 	local in_chain = false
 	local wid = self["next"]
 	while wid do
@@ -1011,9 +1011,9 @@ function def:evt_update(dt)
 
 	-- Is the mouse currently hovering over the selected item?
 	local item_i, item_t
-	if self.context.mouse_focus then
+	if context.mouse_focus then
 		local vp = self.vp
-		local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 		item_i, item_t = self:getItemAtPoint(mx + self.scr_x - vp.x, my + self.scr_y - vp.y, 1, #self.MN_items)
 	end
 
@@ -1029,7 +1029,7 @@ function def:evt_update(dt)
 	end
 
 	if self.open_time >= 0.20 then -- XXX config/style
-		self.context:appendAsyncAction(self, async_changeSubMenu, self.MN_index)
+		context:appendAsyncAction(self, async_changeSubMenu, self.MN_index)
 		self.open_time = 0
 	end
 

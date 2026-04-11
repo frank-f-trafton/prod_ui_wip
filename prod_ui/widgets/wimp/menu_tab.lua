@@ -1067,7 +1067,7 @@ end
 
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
 		if button <= 3 then
 			self:tryTakeThimble1()
@@ -1077,7 +1077,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 		if wcMenu.pointerPressScrollBars(self, x, y, button) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
-			self.context:forceClickSequence(false, button, 1)
+			context:forceClickSequence(false, button, 1)
 
 		-- Header bar
 		elseif self.col_bar_visible and self.vp3:pointOverlap(mx, my) then
@@ -1125,7 +1125,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 					-- Reset click-sequence if clicking on a different item.
 					if self.MN_mouse_clicked_item ~= item_t then
-						self.context:forceClickSequence(self, button, 1)
+						context:forceClickSequence(self, button, 1)
 					end
 
 					self.MN_mouse_clicked_item = item_t
@@ -1161,7 +1161,7 @@ end
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == self.context.mouse_pressed_button then
+		if button == context.mouse_pressed_button then
 			wcScrollBar.widgetClearPress(self)
 
 			local old_press_busy = self.press_busy
@@ -1305,7 +1305,7 @@ function def:evt_update(dt)
 	local needs_update = false
 
 	-- Clear click-sequence item
-	if self.MN_mouse_clicked_item and self.context.cseq_widget ~= self then
+	if self.MN_mouse_clicked_item and context.cseq_widget ~= self then
 		self.MN_mouse_clicked_item = false
 	end
 
@@ -1314,8 +1314,8 @@ function def:evt_update(dt)
 		needs_update = true
 
 	elseif wcScrollBar.press_busy_codes[self.press_busy] then
-		if self.context.mouse_pressed_ticks > 1 then
-			local mx, my = self.context.mouse_x, self.context.mouse_y
+		if context.mouse_pressed_ticks > 1 then
+			local mx, my = context.mouse_x, context.mouse_y
 			local ax, ay = self:getAbsolutePosition()
 			local button_step = 350 -- XXX style/config
 			wcScrollBar.widgetDragLogic(self, mx - ax, my - ay, button_step*dt)

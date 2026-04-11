@@ -301,7 +301,7 @@ end
 
 
 function def:wid_popUpCleanup(reason_code)
-	--print("wid_popUpCleanup", "reason_code", reason_code, "thimble1", self.context.thimble1, "thimble2", self.context.thimble2, "self", self)
+	--print("wid_popUpCleanup", "reason_code", reason_code, "thimble1", context.thimble1, "thimble2", context.thimble2, "self", self)
 	--print(debug.traceback())
 
 	if reason_code == "concluded" then
@@ -552,7 +552,7 @@ end
 --- Code to handle stepping left and right through the menu bar, which is called from a couple of places.
 local function handleLeftRightKeys(self, key, scancode, isrepeat)
 	local selection_old = self.MN_index
-	local mod = self.context.key_mgr.mod
+	local mod = context.key_mgr.mod
 
 	if key == "left" or (key == "tab" and mod["shift"]) then
 		self:movePrev(1, true, isrepeat)
@@ -604,7 +604,7 @@ function def:evt_pointerDrag(targ, mouse_x, mouse_y, mouse_dx, mouse_dy)
 			local wid = widShared.checkChainPointerOverlap(self, mouse_x, mouse_y)
 
 			if wid and wid ~= self then
-				self.context:transferPressedState(wid)
+				context:transferPressedState(wid)
 
 				wid.press_busy = self.press_busy
 				self.press_busy = false
@@ -651,7 +651,7 @@ function def:wid_dragAfterRoll(mouse_x, mouse_y, mouse_dx, mouse_dy)
 			self:menuSetSelectedIndex(item_i)
 			--self:selectionInView()
 
-			if self.context.mouse_pressed_button == 1 then
+			if context.mouse_pressed_button == 1 then
 				--print("item_t.pop_up_proto", item_t.pop_up_proto, "self.state", self.state)
 				if item_t.pop_up_proto and self.state ~= "idle" then
 					if self.last_open ~= item_t then
@@ -735,7 +735,7 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	--print("menu bar pointerPress", self, targ, x, y, button)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			local vp, vp2 = self.vp, self.vp2
 			local ax, ay = self:getAbsolutePosition()
 			local ms_x = x - ax
@@ -792,7 +792,7 @@ end
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == self.context.mouse_pressed_button then
+		if button == context.mouse_pressed_button then
 			self.press_busy = false
 
 			-- Mouse is over the selected item
@@ -849,7 +849,7 @@ function def:evt_update(dt)
 
 	-- Set underline render state
 	local uline_draw = context.settings.wimp.menu_bar.draw_underlines
-	local mod = self.context.key_mgr.mod
+	local mod = context.key_mgr.mod
 	local pop_up = context.root.pop_up_menu
 
 	if uline_draw == "idle" then
@@ -1030,13 +1030,13 @@ def.default_skinner = {
 		--[[
 		love.graphics.origin()
 		love.graphics.setColor(1,1,1,1)
-		love.graphics.setFont(self.context.resources.fonts.p)
+		love.graphics.setFont(context.resources.fonts.p)
 		local ww = love.graphics.getWidth() - 288
 
 		local root = self:nodeGetRoot()
 
 		love.graphics.print("state: " .. self.state
-		.. "\npressed: " .. tostring(self == self.context.current_pressed)
+		.. "\npressed: " .. tostring(self == context.current_pressed)
 		.. "\nMN_item_hover: " .. tostring(self.MN_item_hover)
 		.. "\nself.MN_index: " .. tostring(self.MN_index)
 		,

@@ -284,7 +284,7 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat)
 		then
 			if old_item ~= items[self.MN_index] then
 				if self.MN_mark_mode == "cursor" then
-					local mods = self.context.key_mgr.mod
+					local mods = context.key_mgr.mod
 					if mods["shift"] then
 						self:menuClearAllMarkedItems()
 						wcMenu.markItemsCursorMode(self, old_index)
@@ -343,7 +343,7 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ
 	and self.enabled
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
 		if button <= 3 then
 			self:tryTakeThimble1()
@@ -405,9 +405,9 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 						self.press_busy = "menu-drag"
 
 						-- Double-clicking Button 1 invokes action 1.
-						if self.context.cseq_button == 1
-						and self.context.cseq_widget == self
-						and self.context.cseq_presses % 2 == 0
+						if context.cseq_button == 1
+						and context.cseq_widget == self
+						and context.cseq_presses % 2 == 0
 						then
 							self:cb_action(item_t, item_i)
 						end
@@ -444,7 +444,7 @@ end
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ
 	and self.enabled
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
 		wcScrollBar.widgetClearPress(self)
 		self.press_busy = false
@@ -506,7 +506,7 @@ function def:evt_update(dt)
 	local needs_update = false
 
 	-- Clear click-sequence item.
-	if self.MN_mouse_clicked_item and self.context.cseq_widget ~= self then
+	if self.MN_mouse_clicked_item and context.cseq_widget ~= self then
 		self.MN_mouse_clicked_item = false
 	end
 
@@ -518,8 +518,8 @@ function def:evt_update(dt)
 		needs_update = true
 
 	elseif wcScrollBar.press_busy_codes[self.press_busy] then
-		if self.context.mouse_pressed_ticks > 1 then
-			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		if context.mouse_pressed_ticks > 1 then
+			local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 			local button_step = 350 -- XXX style/config
 			wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 		end
@@ -742,7 +742,7 @@ def.default_skinner = {
 		-- Selection glow.
 		local sel_item = items[self.MN_index]
 		if sel_item then
-			local is_active = self == self.context.thimble1
+			local is_active = self == context.thimble1
 			local col = is_active and skin.color_active_glow or skin.color_select_glow
 			love.graphics.setColor(col)
 

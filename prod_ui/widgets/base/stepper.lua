@@ -293,7 +293,7 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button <= 3 then
 					self:tryTakeThimble1()
 				end
@@ -335,7 +335,7 @@ end
 function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					x, y = self:getRelativePosition(x, y)
 
@@ -359,7 +359,7 @@ end
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
 		if self.enabled then
-			if button == self.context.mouse_pressed_button then
+			if button == context.mouse_pressed_button then
 				if button == 1 then
 					self.pressed = false
 

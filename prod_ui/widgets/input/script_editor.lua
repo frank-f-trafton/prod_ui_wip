@@ -205,9 +205,9 @@ end
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 	if self == targ
 	and self.enabled
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
-		local had_thimble1_before = self == self.context.thimble1
+		local had_thimble1_before = self == context.thimble1
 		if button <= 3 then
 			self:tryTakeThimble1()
 		end
@@ -224,7 +224,7 @@ function def:evt_pointerPress(targ, x, y, button, istouch, presses)
 
 		-- Successful mouse interaction with scroll bars should break any existing click-sequence.
 		if handled then
-			self.context:forceClickSequence(false, button, 1)
+			context:forceClickSequence(false, button, 1)
 
 		elseif self.vp2:pointOverlap(mx, my) then
 			-- Propagation is halted when a context menu is created.
@@ -240,7 +240,7 @@ end
 
 function def:evt_pointerPressRepeat(targ, x, y, button, istouch, reps)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			local fixed_step = context.settings.wimp.navigation.scroll_button_hold
 
 			wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
@@ -251,7 +251,7 @@ end
 
 function def:evt_pointerUnpress(targ, x, y, button, istouch, presses)
 	if self == targ then
-		if button == 1 and button == self.context.mouse_pressed_button then
+		if button == 1 and button == context.mouse_pressed_button then
 			wcScrollBar.widgetClearPress(self)
 
 			self.press_busy = false
@@ -327,8 +327,8 @@ function def:evt_update(dt)
 	end
 
 	if wcScrollBar.press_busy_codes[self.press_busy] then
-		if self.context.mouse_pressed_ticks > 1 then
-			local mx, my = self:getRelativePosition(self.context.mouse_x, self.context.mouse_y)
+		if context.mouse_pressed_ticks > 1 then
+			local mx, my = self:getRelativePosition(context.mouse_x, context.mouse_y)
 			local button_step = 350 -- XXX style/config
 			wcScrollBar.widgetDragLogic(self, mx, my, button_step*dt)
 		end
@@ -456,7 +456,7 @@ def.default_skinner = {
 		local font = LE.font
 
 		local res = self.LE_allow_input and skin.res_readwrite or skin.res_readonly
-		local has_thimble = self == self.context.thimble1
+		local has_thimble = self == context.thimble1
 
 		local scx, scy, scw, sch = love.graphics.getScissor()
 		uiGraphics.intersectScissor(
@@ -545,7 +545,7 @@ def.default_skinner = {
 		end
 		local col_highlight = (self:hasAnyThimble() and context.window_focus) and res.color_highlight_active or res.color_highlight
 		local col_caret
-		if self.context.window_focus then
+		if context.window_focus then
 			col_caret = self.LE_replace_mode and res.color_caret_replace or res.color_caret_insert
 		else
 			col_caret = self.LE_replace_mode and res.color_caret_replace_not_focused or res.color_caret_insert_not_focused

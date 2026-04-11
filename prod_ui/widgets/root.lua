@@ -198,10 +198,10 @@ local function clearPopUp(self, reason_code)
 	-- the context table.
 	-- We exclude `wid_ref` which may be part of the chain (to the left of the base pop-up) because it is not
 	-- being destroyed by this function.
-	if self.context.current_pressed
-	and pList2.nodeInListForward(self.pop_up_menu["next"], self.context.current_pressed)
+	if context.current_pressed
+	and pList2.nodeInListForward(self.pop_up_menu["next"], context.current_pressed)
 	then
-		self.context.current_pressed = false
+		context.current_pressed = false
 	end
 
 	local wid_ref = self.pop_up_menu.wid_ref
@@ -220,7 +220,7 @@ end
 
 function def.trickle:evt_pointerPress(targ, x, y, button, istouch, presses)
 	-- Destroy pop-up menu when clicking outside of its lateral chain.
-	local cur_pres = self.context.current_pressed
+	local cur_pres = context.current_pressed
 	local pop_up = self.pop_up_menu
 	local targ_in_pop_up
 	if pop_up then
@@ -240,7 +240,7 @@ function def.trickle:evt_pointerPress(targ, x, y, button, istouch, presses)
 			self:setSelectedFrame(modal_wid, true)
 		end
 		if not targ:nodeIsInLineage(modal_wid) and not targ_in_pop_up then
-			self.context.current_pressed = false
+			context.current_pressed = false
 			return true
 		end
 	end
@@ -415,7 +415,7 @@ function def:setSelectedFrame(targ, set_new_order)
 		elseif not targ.frame_is_selectable then
 			error("cannot select this G2 widget.")
 
-		elseif targ.frame_type == "window" and targ.workspace and targ.workspace ~= self.context.root.workspace then
+		elseif targ.frame_type == "window" and targ.workspace and targ.workspace ~= context.root.workspace then
 			error("cannot select a Window Frame whose Workspace is inactive.")
 
 		elseif targ.frame_hidden then
@@ -580,9 +580,9 @@ function def:doctorCurrentPressed(new_pressed, press_busy_code)
 
 	-- If this was the result of a click action, doctor the current-pressed state
 	-- to reference the menu, not the clicked widget.
-	if self.context.current_pressed and new_pressed.allow_hover then
-		--self.context.current_hover = new_pressed
-		self.context.current_pressed = new_pressed
+	if context.current_pressed and new_pressed.allow_hover then
+		--context.current_hover = new_pressed
+		context.current_pressed = new_pressed
 
 		if press_busy_code then
 			new_pressed.press_busy = press_busy_code
@@ -644,7 +644,7 @@ function def:setModalFrame(frame)
 	end
 
 	self.modals[#self.modals + 1] = frame
-	self.context.mouse_start = frame
+	context.mouse_start = frame
 end
 
 
@@ -656,7 +656,7 @@ function def:clearModalFrame(frame)
 	end
 
 	self.modals[#self.modals] = nil
-	self.context.mouse_start = self.modals[#self.modals] or false
+	context.mouse_start = self.modals[#self.modals] or false
 end
 
 
@@ -723,7 +723,7 @@ def.trickle.evt_thimble2Take = _thimbleCheck
 
 function def:evt_update(dt)
 	local tool_tip = self.tool_tip
-	local current_hover = self.context.current_hover
+	local current_hover = context.current_hover
 
 	-- Don't show tool-tips when:
 	-- * Any pop-up menu is open
@@ -733,7 +733,7 @@ function def:evt_update(dt)
 	if self.pop_up_menu
 	or not current_hover
 	or current_hover ~= self.tool_tip_hover
-	or self.context.mouse_pressed_button then
+	or context.mouse_pressed_button then
 		resetToolTipState(self)
 	end
 
@@ -772,7 +772,7 @@ end
 
 function def:renderLast(os_x, os_y)
 	if self.tool_tip.visible then
-		local mx, my = self.context.mouse_x, self.context.mouse_y
+		local mx, my = context.mouse_x, context.mouse_y
 		local xx, yy, ww, hh = self.x, self.y, self.w, self.h
 		local tool_tip = self.tool_tip
 		local tw, th = tool_tip.w, tool_tip.h
@@ -784,9 +784,9 @@ function def:renderLast(os_x, os_y)
 	if self.drop_state then
 		local rr, gg, bb, aa = love.graphics.getColor()
 		-- XXX: context.resources may not be populated yet.
-		--love.graphics.setColor(self.context.resources.info.misc.dropping_text_color)
+		--love.graphics.setColor(context.resources.info.misc.dropping_text_color)
 		love.graphics.setColor(TEMP_COLOR)
-		love.graphics.print("Dropping...", self.context.mouse_x - 20, self.context.mouse_y - 20)
+		love.graphics.print("Dropping...", context.mouse_x - 20, context.mouse_y - 20)
 		love.graphics.setColor(rr, gg, bb, aa)
 	end
 

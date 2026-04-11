@@ -1001,7 +1001,7 @@ function wcMenu.widgetMovePageUp(self, immediate)
 		return
 	end
 
-	local dist = self.vp.h * self.context.settings.wimp.navigation.page_viewport_factor
+	local dist = self.vp.h * context.settings.wimp.navigation.page_viewport_factor
 	local new_selection = _pageStep(self, self.MN_index, true, -1, dist)
 
 	if new_selection then
@@ -1026,7 +1026,7 @@ function wcMenu.widgetMovePageDown(self, immediate)
 		return
 	end
 
-	local dist = self.vp.h * self.context.settings.wimp.navigation.page_viewport_factor
+	local dist = self.vp.h * context.settings.wimp.navigation.page_viewport_factor
 	local new_selection = _pageStep(self, self.MN_index, true, 1, dist)
 	if new_selection then
 		self:menuSetSelectedItem(new_selection)
@@ -1233,7 +1233,7 @@ function wcMenu.checkItemIntersect(self, mx, my, button)
 
 	-- Reset click-sequence if clicking on a different item.
 	if self.MN_mouse_clicked_item ~= item_t then
-		self.context:forceClickSequence(self, button, 1)
+		context:forceClickSequence(self, button, 1)
 	end
 	return item_i, item_t
 end
@@ -1246,7 +1246,7 @@ function wcMenu.pointerPressButton1(self, item_t, old_index)
 		self.MN_mark_state = item_t.marked
 
 	elseif self.MN_mark_mode == "cursor" then
-		local mods = self.context.key_mgr.mod
+		local mods = context.key_mgr.mod
 
 		if mods["shift"] then
 			-- Unmark all items, then mark the range between the previous and current selections.
@@ -1272,7 +1272,7 @@ function wcMenu.pointerPressScrollBars(self, x, y, button)
 		local fixed_step = context.settings.wimp.navigation.scroll_button_click
 		if wcScrollBar.widgetScrollPress(self, x, y, fixed_step) then
 			-- Successful mouse interaction with scroll bars should break any existing click-sequence.
-			self.context:clearClickSequence()
+			context:clearClickSequence()
 			return true
 		end
 	end
@@ -1283,7 +1283,7 @@ function wcMenu.pointerPressRepeatLogic(self, x, y, button, istouch, reps)
 	-- Repeat-press events for scroll bar buttons
 	if wcScrollBar.press_busy_codes[self.press_busy]
 	and button == 1
-	and button == self.context.mouse_pressed_button
+	and button == context.mouse_pressed_button
 	then
 		local fixed_step = context.settings.wimp.navigation.scroll_button_hold
 		wcScrollBar.widgetScrollPressRepeat(self, x, y, fixed_step)
@@ -1311,7 +1311,7 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 	-- "toggle" mark mode is incompatible with all built-in drag-and-drop features.
 	-- "cursor" mark mode overrides MN_drag_drop_mode when active (hold shift while clicking and dragging).
 	if self.MN_drag_drop_mode and self.MN_mark_mode ~= "toggle" and not self.MN_mark_index then
-		local context = self.context
+		local context = context
 		local mpx, mpy, mpr = context.mouse_pressed_x, context.mouse_pressed_y, context.mouse_pressed_range
 		if mouse_x > mpx + mpr or mouse_x < mpx - mpr or mouse_y > mpy + mpr or mouse_y < mpy - mpr then
 			self.press_busy = "drag-drop"
@@ -1349,7 +1349,7 @@ function wcMenu.menuPointerDragLogic(self, mouse_x, mouse_y)
 				if self.MN_drag_select then
 					self:menuSetSelectedIndex(item_i)
 
-					local mods = self.context.key_mgr.mod
+					local mods = context.key_mgr.mod
 					if self.MN_mark_mode == "cursor" and self.MN_mark_index then
 						self:menuClearAllMarkedItems()
 						wcMenu.markItemsCursorMode(self, old_index)
