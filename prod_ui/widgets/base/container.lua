@@ -32,6 +32,7 @@ local wcContainer = context:getLua("shared/wc/wc_container")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 local def = {
@@ -44,9 +45,17 @@ def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
-widLayout.setupContainerDef(def)
-widShared.scrollSetMethods(def)
 wcContainer.setupMethods(def)
+
+
+widLayout.setupContainerDef(def)
+
+
+widShared.scrollSetMethods(def)
+
+
+widShortcut.setupDef(def)
+widShortcut.setupDefList(def)
 
 
 function def:evt_initialize()
@@ -60,6 +69,7 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 2)
 	wcContainer.setupSashState(self)
 	widLayout.setupLayoutList(self)
+	widShortcut.setupInstanceList(self)
 
 	self:layoutSetBase("viewport")
 
@@ -235,6 +245,13 @@ function def:evt_pointerWheel(targ, x, y)
 
 	-- Stop bubbling if the view scrolled.
 	return caught
+end
+
+
+function def.trickle:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
+	if not context.root.pop_up_menu then
+		return self:cb_key_shortcut(hot_key, hot_scan) or widShortcut.evaluateList(self, hot_key, hot_scan)
+	end
 end
 
 

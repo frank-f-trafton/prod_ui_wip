@@ -8,10 +8,10 @@ local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
-local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
 local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 -- Temporary stand-ins while I change how the context+root+theme are initialized.
@@ -38,6 +38,10 @@ def.cb_directoryDropped = uiDummy.func
 
 
 widLayout.setupContainerDef(def)
+
+
+widShortcut.setupDef(def)
+widShortcut.setupDefList(def)
 
 
 local function _printUIFrames(self)
@@ -76,9 +80,11 @@ function def:evt_initialize()
 
 	self.sort_max = 7
 
+	widLayout.setupLayoutList(self)
+
 	widShared.setupViewports(self, 1)
 
-	widLayout.setupLayoutList(self)
+	widShortcut.setupInstanceList(self)
 
 	-- Up to one workspace can be active at a time.
 	self.workspace = false
@@ -109,8 +115,6 @@ function def:evt_initialize()
 	-- false/nil: Not active.
 	-- table: a DropState object.
 	self.drop_state = false
-
-	wcKeyHook.setupInstance(self)
 
 	local workspace = self:newWorkspace()
 	self:setActiveWorkspace(workspace)
@@ -244,8 +248,6 @@ end
 
 
 function def:evt_pointerPress(targ, x, y, button, istouch, presses)
-	local context = self.context
-
 	-- User clicked on the root widget (whether directly or because other widgets aren't clickable).
 	if self == targ then
 		if button <= 3 then
@@ -263,24 +265,17 @@ function def:evt_pointerDragDestRelease(targ, x, y, button, istouch, presses)
 end
 
 
-function def.trickle:evt_keyPressed(targ, key, scancode, isrepeat)
-	if #self.modals == 0 and not context.root.pop_up_menu then
-		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
-			return true
-		end
+function def.trickle:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
+	if key == "f10" and self.pop_up_menu then
+		clearPopUp(self, "concluded")
+
+	elseif #self.modals == 0 and not context.root.pop_up_menu then
+		return self:cb_key_shortcut(hot_key, hot_scan) or widShortcut.evaluateList(self, hot_key, hot_scan)
 	end
 end
 
 
 function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
-	if #self.modals == 0 and not context.root.pop_up_menu then
-		if self.KH_key_pressed(self, key, scancode, isrepeat) then
-			return true
-		end
-	end
-
-	local context = self.context
-
 	-- Run thimble logic.
 	-- Block keyboard-driven thimble actions if the mouse is currently pressed.
 	if not context.current_pressed then
@@ -339,24 +334,6 @@ function def:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
 	end
 
 	return true
-end
-
-
-function def:evt_keyReleased(targ, key, scancode)
-	if #self.modals == 0 and not context.root.pop_up_menu then
-		if self.KH_key_released(self, key, scancode) then
-			return true
-		end
-	end
-end
-
-
-function def.trickle:evt_keyReleased(targ, key, scancode)
-	if #self.modals == 0 and not context.root.pop_up_menu then
-		if self.KH_trickle_key_released(self, key, scancode) then
-			return true
-		end
-	end
 end
 
 
@@ -822,7 +799,6 @@ function def:renderLast(os_x, os_y)
 
 	-- DEBUG: Draw click-sequence intersect.
 	--[[
-	local context = self.context
 	if context.cseq_widget then
 		love.graphics.setLineStyle("rough")
 		love.graphics.setLineJoin("miter")

@@ -427,7 +427,7 @@ end
 
 
 function _mt_context:love_keypressed(key, scancode, isrepeat)
-	self.key_mgr:keyDown(self, key, scancode, isrepeat) -- See cb_keyDown() for logic
+	self.key_mgr:keyDown(self, key, scancode, isrepeat) -- See ui_context.lua -> cb_keyDown() for logic
 end
 
 

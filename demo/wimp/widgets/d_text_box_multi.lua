@@ -82,58 +82,50 @@ function plan.make(panel)
 	-- * Toggle copy
 	-- * Toggle paste
 
+	local function _fn_wrapMode(self)
+		local tb = panel:findTag("demo_text_box")
+		if tb then
+			tb:setWrapMode(not tb:getWrapMode())
+		end
+		_updateButtons(panel)
+		return true
+	end
+	panel:keyShortcutSet("+f5", _fn_wrapMode)
 
-	local shortcuts = {
-		["+f5"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
-			if tb then
-				tb:setWrapMode(not tb:getWrapMode())
-			end
-			_updateButtons(panel)
-		end,
-		["+f2"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
-			if tb then
-				tb:setTextAlignment("left")
-			end
-			_updateButtons(panel)
-		end,
-		["+f3"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
-			if tb then
-				tb:setTextAlignment("center")
-			end
-			_updateButtons(panel)
-		end,
-		["+f4"] = function(self, key, scancode, isrepeat)
-			local tb = panel:findTag("demo_text_box")
-			if tb then
-				tb:setTextAlignment("right")
-			end
-			_updateButtons(panel)
-		end,
-	}
-
-	local hook_pressed = function(self, tbl, key, scancode, isrepeat)
-		local key_mgr = self.context.key_mgr
-		local mod = key_mgr.mod
-
-		local input_str = uiKeyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
-		if shortcuts[input_str] then
-			shortcuts[input_str](self, key, scancode, isrepeat)
-			return true
+	local function _textAlign(wid, side)
+		local tb = panel:findTag("demo_text_box")
+		if tb then
+			tb:setTextAlignment(side)
 		end
 	end
 
-	local ui_frame = assert(panel:getUIFrame(), "no UI Frame to hook into.")
+	local function _fn_textAlignLeft(self)
+		_textAlign(self, "left")
+		_updateButtons(panel)
+		return true
+	end
+	panel:keyShortcutSet("+f2", _fn_textAlignLeft)
 
-	table.insert(ui_frame.KH_trickle_key_pressed, hook_pressed)
+	local function _fn_textAlignCenter(self)
+		_textAlign(self, "center")
+		_updateButtons(panel)
+		return true
+	end
+	panel:keyShortcutSet("+f3", _fn_textAlignCenter)
+
+	local function _fn_textAlignRight(self)
+		_textAlign(self, "right")
+		_updateButtons(panel)
+		return true
+	end
+	panel:keyShortcutSet("+f4", _fn_textAlignRight)
+
+	local ui_frame = assert(panel:getUIFrame(), "no UI Frame to hook shortcuts.")
+	ui_frame:keyShortcutListAdd(panel)
 	panel:userCallbackSet("cb_destroy", function(self)
-		local ui_frame = panel:getUIFrame()
-		if ui_frame then
-			pTable.removeValueFromArray(ui_frame.KH_trickle_key_pressed, hook_pressed)
-		end
+		ui_frame:keyShortcutListRemove(self)
 	end)
+
 
 	local x1, y1 = 16, 16
 	local xx, yy, ww, hh = x1, y1, 160, 32

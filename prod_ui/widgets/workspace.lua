@@ -9,12 +9,12 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
-local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
 local widDebug = context:getLua("core/wid/debug")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 local def = {
@@ -42,6 +42,10 @@ def.cb_fileDropped = uiDummy.func
 def.cb_directoryDropped = uiDummy.func
 
 
+widShortcut.setupDef(def)
+widShortcut.setupDefList(def)
+
+
 def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
@@ -65,15 +69,16 @@ function def:evt_initialize(_root_pass, unselectable)
 
 	self.scroll_range_mode = "zero"
 
+	widLayout.setupLayoutList(self)
+	self:layoutSetBase("viewport")
+
 	widShared.setupDoc(self)
 	widShared.setupScroll(self, -1, -1)
 	widShared.setupViewports(self, 2)
 
-	widLayout.setupLayoutList(self)
-	self:layoutSetBase("viewport")
+	widShortcut.setupInstanceList(self)
 
 	wcContainer.setupSashState(self)
-	wcKeyHook.setupInstance(self)
 
 	self.press_busy = false
 
@@ -214,9 +219,6 @@ def.trickle.evt_pointerWheel = wcUIFrame.logic_tricklePointerWheel
 def.evt_pointerWheel = wcUIFrame.logic_pointerWheel
 def.evt_thimble1Take = wcUIFrame.logic_thimble1Take
 def.trickle.evt_keyPressed = wcUIFrame.logic_trickleKeyPressed
-def.evt_keyPressed = wcUIFrame.logic_keyPressed
-def.trickle.evt_keyReleased = wcUIFrame.logic_trickleKeyReleased
-def.evt_keyReleased = wcUIFrame.logic_keyReleased
 def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
 def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
 

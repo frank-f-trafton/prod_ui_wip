@@ -538,39 +538,28 @@ do
 
 		menu_bar.sort_id = 6
 
-		-- Hook application-level shortcuts to WIMP root
+		-- Assign application-level shortcuts to WIMP root
 		do
-			local shortcuts = {
-				["C+q"] = function(self, key, scancode, isrepeat) love.event.quit() end,
-				["+f8"] = function(self, key, scancode, isrepeat)
-					local root = self:nodeGetRoot()
-					if root then
-						local menu_bar = root:findTag("root_menu_bar")
-						if menu_bar then
-							menu_bar:setHidden(not menu_bar:getHidden())
-							root:reshape()
-						end
-					end
-				end,
-			}
-			local hook_pressed = function(self, tbl, key, scancode, isrepeat)
-				local key_mgr = self.context.key_mgr
-				local mod = key_mgr.mod
+			local function _fn_quit()
+				love.event.quit()
+				return true
+			end
+			wid_root:keyShortcutSet("C+q", _fn_quit)
 
-				local input_str = prodUi.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
-				if shortcuts[input_str] then
-					shortcuts[input_str](self, key, scancode, isrepeat)
-					return true
+			local function _fn_toggle_menu(self)
+				local root = self:nodeGetRoot()
+				local menu_bar = root:findTag("root_menu_bar")
+				if menu_bar then
+					menu_bar:setHidden(not menu_bar:getHidden())
+					root:reshape()
 				end
 			end
-
-			table.insert(wid_root.KH_trickle_key_pressed, hook_pressed)
+			wid_root:keyShortcutSet("+f8", _fn_toggle_menu)
 		end
 
-		-- Hook menu bar key commands to WIMP root
+		-- Assign menu bar key commands to WIMP root
 		do
-			table.insert(wid_root.KH_key_pressed, menu_bar.widHook_pressed)
-			table.insert(wid_root.KH_key_released, menu_bar.widHook_released)
+			wid_root:keyShortcutListAdd(menu_bar)
 		end
 	end
 

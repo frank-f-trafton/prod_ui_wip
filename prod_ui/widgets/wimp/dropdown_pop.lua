@@ -380,39 +380,41 @@ function def:evt_reshapePre()
 end
 
 
-function def:evt_keyPressed(key, scancode, isrepeat)
-	if scancode == "up" then
-		self:movePrev(1, true, isrepeat)
-		return true
+function def:evt_keyPressed(targ, key, scancode, isrepeat)
+	if targ == self then
+		if scancode == "up" then
+			self:movePrev(1, true, isrepeat)
+			return true
 
-	elseif scancode == "down" then
-		self:moveNext(1, true, isrepeat)
-		return true
+		elseif scancode == "down" then
+			self:moveNext(1, true, isrepeat)
+			return true
 
-	elseif scancode == "home" then
-		self:moveFirst(true)
-		return true
+		elseif scancode == "home" then
+			self:moveFirst(true)
+			return true
 
-	elseif scancode == "end" then
-		self:moveLast(true)
-		return true
+		elseif scancode == "end" then
+			self:moveLast(true)
+			return true
 
-	elseif scancode == "pageup" then
-		self:movePageUp(true)
-		return true
+		elseif scancode == "pageup" then
+			self:movePageUp(true)
+			return true
 
-	elseif scancode == "pagedown" then
-		self:movePageDown(true)
-		return true
+		elseif scancode == "pagedown" then
+			self:movePageDown(true)
+			return true
 
-	elseif scancode == "escape" then
-		self:_closeSelf(false)
-		return true
+		elseif scancode == "escape" then
+			self:_closeSelf(false)
+			return true
 
-	-- Enter toggles the pop-up, closing it here. Update the chosen selection.
-	elseif scancode == "return" or scancode == "kpenter" then
-		self:_closeSelf(true)
-		return true
+		-- Enter toggles the pop-up, closing it here. Update the chosen selection.
+		elseif scancode == "return" or scancode == "kpenter" then
+			self:_closeSelf(true)
+			return true
+		end
 	end
 end
 

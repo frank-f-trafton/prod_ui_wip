@@ -367,48 +367,36 @@ end
 
 
 -- Keyboard shortcuts
---[[
-(Yes, this also sucks. I'll work on simplifying shortcut definitions at some point.)
---]]
 do
-	local function _fn_quit(self, key, scancode, isrepeat)
+	local function _fn_quit(self)
 		love.event.quit()
+		return true
 	end
+	wid_root:keyShortcutSet("+escape", _fn_quit)
+	wid_root:keyShortcutSet("C+q", _fn_quit)
 
-	local shortcuts = {
-		["+escape"] = _fn_quit,
-		["C+q"] = _fn_quit,
-
-		["C+n"] = function(self, key, scancode, isrepeat)
-			_newGame()
-		end,
-
-		["C+e"] = function(self, key, scancode, isrepeat)
-			_endGame("player-stop")
-		end,
-
-		["+kp1"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[1][3]) end,
-		["+kp2"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[2][3]) end,
-		["+kp3"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[3][3]) end,
-		["+kp4"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[1][2]) end,
-		["+kp5"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[2][2]) end,
-		["+kp6"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[3][2]) end,
-		["+kp7"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[1][1]) end,
-		["+kp8"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[2][1]) end,
-		["+kp9"] = function(self, key, scancode, isrepeat) _pickCell(cell_buttons[3][1]) end,
-	}
-	local hook_pressed = function(self, tbl, key, scancode, isrepeat)
-		local key_mgr = self.context.key_mgr
-		local mod = key_mgr.mod
-
-		local input_str = prodUi.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
-		if shortcuts[input_str] then
-			shortcuts[input_str](self, key, scancode, isrepeat)
-			return true
-		end
+	local function _fn_newGame(self)
+		_newGame()
+		return true
 	end
+	wid_root:keyShortcutSet("C+n", _fn_newGame)
 
-	table.insert(wid_root.KH_trickle_key_pressed, hook_pressed)
+	local function _fn_endGame(self)
+		_endGame("player-stop")
+		return true
+	end
+	wid_root:keyShortcutSet("C+e", _fn_endGame)
+
+	-- Map the numeric keypad to the game grid.
+	wid_root:keyShortcutSet("+kp1", function() _pickCell(cell_buttons[1][3]) return true end)
+	wid_root:keyShortcutSet("+kp2", function() _pickCell(cell_buttons[2][3]) return true end)
+	wid_root:keyShortcutSet("+kp3", function() _pickCell(cell_buttons[3][3]) return true end)
+	wid_root:keyShortcutSet("+kp4", function() _pickCell(cell_buttons[1][2]) return true end)
+	wid_root:keyShortcutSet("+kp5", function() _pickCell(cell_buttons[2][2]) return true end)
+	wid_root:keyShortcutSet("+kp6", function() _pickCell(cell_buttons[3][2]) return true end)
+	wid_root:keyShortcutSet("+kp7", function() _pickCell(cell_buttons[1][1]) return true end)
+	wid_root:keyShortcutSet("+kp8", function() _pickCell(cell_buttons[2][1]) return true end)
+	wid_root:keyShortcutSet("+kp9", function() _pickCell(cell_buttons[3][1]) return true end)
 end
 
 

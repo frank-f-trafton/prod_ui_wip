@@ -21,6 +21,7 @@ local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 -- Pull in some methods from PILE Tree.
@@ -54,12 +55,14 @@ _mt_widget.nodeFindKeyAscending = pTree.nodeFindKeyAscending
 -- User callbacks that are valid for any and every widget.
 local _default_user_callbacks = uiTable.newLutV(
 	"cb_update",
-	"cb_destroy"
+	"cb_destroy",
+	"cb_key_shortcut"
 )
 
 
 _mt_widget.cb_update = uiDummy.func
 _mt_widget.cb_destroy = uiDummy.func
+_mt_widget.cb_key_shortcut = widShortcut.cb_key_shortcut
 
 
 local function _assertValidUserCallback(self, id)
@@ -192,6 +195,10 @@ These fields are set with widget methods.
 	dx, dy: Increment vector, to get to the next card position.
 	main_axis: The primary increment axis: "x" or "y".
 --]]
+
+
+-- Table of keyboard shortcuts. Populated by: core/wid_shortcut.lua
+_mt_widget.KS_callbacks = false
 
 
 -- Default canvas stack parameters. (See: ui_draw.lua)
@@ -894,7 +901,7 @@ function _mt_widget:sortChildren(recurse)
 			sort_count[i] = sort_count[i] + sort_count[i - 1]
 		end
 
-		-- Sort children in workspace array.
+		-- Sort children in scratchspace array.
 		for i = #seq, 1, -1 do
 			local c = seq[i].sort_id
 			sort_work[sort_count[c]] = seq[i]
@@ -905,7 +912,7 @@ function _mt_widget:sortChildren(recurse)
 		for i = 1, #seq do
 			seq[i] = sort_work[i]
 
-			-- Overwrite workspace entries with 'false' so that it doesn't interfere with garbage collection.
+			-- Overwrite scratchspace entries with 'false' so that it doesn't interfere with garbage collection.
 			sort_work[i] = false
 		end
 

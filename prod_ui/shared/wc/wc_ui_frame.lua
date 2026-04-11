@@ -11,6 +11,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcContainer = context:getLua("shared/wc/wc_container")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 wcUIFrame._nm_types = uiTable.newNamedMapV("FrameType", "workspace", "window")
@@ -167,54 +168,13 @@ function wcUIFrame.logic_thimble1Take(self, targ, keep_in_view)
 end
 
 
-function wcUIFrame.logic_keyPressed(self, targ, key, scancode, isrepeat)
+function wcUIFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat, hot_key, hot_scan)
 	if self.ref_block_next then
 		return
 	end
 
 	if not context.root.pop_up_menu then
-		if self.KH_key_pressed(self, key, scancode, isrepeat) then
-			return true
-		end
-	end
-end
-
-
-function wcUIFrame.logic_trickleKeyPressed(self, targ, key, scancode, isrepeat)
-	if self.ref_block_next then
-		return
-	end
-
-	if not context.root.pop_up_menu then
-		if self.KH_trickle_key_pressed(self, key, scancode, isrepeat) then
-			return true
-		end
-	end
-end
-
-
-function wcUIFrame.logic_keyReleased(self, targ, key, scancode)
-	if self.ref_block_next then
-		return
-	end
-
-	if not context.root.pop_up_menu then
-		if self.KH_key_released(self, key, scancode) then
-			return true
-		end
-	end
-end
-
-
-function wcUIFrame.logic_trickleKeyReleased(self, targ, key, scancode)
-	if self.ref_block_next then
-		return
-	end
-
-	if not context.root.pop_up_menu then
-		if self.KH_trickle_key_released(self, key, scancode) then
-			return true
-		end
+		return self:cb_key_shortcut(hot_key, hot_scan) or widShortcut.evaluateList(self, hot_key, hot_scan)
 	end
 end
 

@@ -166,32 +166,20 @@ wid_root:reshape()
 
 -- Keyboard shortcuts
 do
-	local function _fn_quit(self, key, scancode, isrepeat)
+	local function _fn_quit(self)
 		love.event.quit()
+		return true
 	end
+	wid_root:keyShortcutSet("+escape", _fn_quit)
+	wid_root:keyShortcutSet("C+q", _fn_quit)
 
-	local shortcuts = {
-		["+escape"] = _fn_quit,
-		["C+q"] = _fn_quit,
-
-		["C+c"] = function(self, key, scancode, isrepeat)
-			if app.last_hex_string then
-				love.system.setClipboardText(app.last_hex_string)
-			end
-		end,
-	}
-	local hook_pressed = function(self, tbl, key, scancode, isrepeat)
-		local key_mgr = self.context.key_mgr
-		local mod = key_mgr.mod
-
-		local input_str = prodUi.keyboard.getKeyString(mod["ctrl"], mod["shift"], mod["alt"], mod["gui"], false, key)
-		if shortcuts[input_str] then
-			shortcuts[input_str](self, key, scancode, isrepeat)
-			return true
+	local function _fn_copy(self)
+		if app.last_hex_string then
+			love.system.setClipboardText(app.last_hex_string)
 		end
+		return true
 	end
-
-	table.insert(wid_root.KH_trickle_key_pressed, hook_pressed)
+	wid_root:keyShortcutSet("C+c", _fn_copy)
 end
 
 

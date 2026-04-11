@@ -10,12 +10,12 @@ local uiSchema = require(context.conf.prod_ui_req .. "ui_schema")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local wcContainer = context:getLua("shared/wc/wc_container")
-local wcKeyHook = context:getLua("shared/wc/wc_key_hook")
 local wcScrollBar = context:getLua("shared/wc/wc_scroll_bar")
 local wcUIFrame = context:getLua("shared/wc/wc_ui_frame")
 local wcWindowFrame = context:getLua("shared/wc/wc_window_frame")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 local _lerp = pMath.lerp
@@ -50,10 +50,18 @@ def.setScrollBars = wcScrollBar.setScrollBars
 def.impl_scroll_bar = context:getLua("shared/impl_scroll_bar1")
 
 
+wcContainer.setupMethods(def)
+
+
+wcUIFrame.definitionSetup(def)
+
+
 widLayout.setupContainerDef(def)
 widShared.scrollSetMethods(def)
-wcUIFrame.definitionSetup(def)
-wcContainer.setupMethods(def)
+
+
+widShortcut.setupDef(def)
+widShortcut.setupDefList(def)
 
 
 def.center = widShared.centerInParent
@@ -455,7 +463,7 @@ function def:evt_initialize(_root_pass, unselectable, view_level)
 	self:layoutSetBase("viewport")
 
 	wcContainer.setupSashState(self)
-	wcKeyHook.setupInstance(self)
+	widShortcut.setupInstanceList(self)
 
 	self.hover_zone = false -- false, "button-close", "button-size"
 	self.mouse_in_resize_zone = false
@@ -590,9 +598,6 @@ end
 
 def.evt_thimble1Take = wcUIFrame.logic_thimble1Take
 def.trickle.evt_keyPressed = wcUIFrame.logic_trickleKeyPressed
-def.evt_keyPressed = wcUIFrame.logic_keyPressed
-def.trickle.evt_keyReleased = wcUIFrame.logic_trickleKeyReleased
-def.evt_keyReleased = wcUIFrame.logic_keyReleased
 def.trickle.evt_textInput = wcUIFrame.logic_trickleTextInput
 def.trickle.evt_pointerPress = wcUIFrame.logic_tricklePointerPress
 

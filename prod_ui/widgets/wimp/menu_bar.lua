@@ -456,66 +456,34 @@ local function _findMenuInParent(parent)
 end
 
 
---- KeyPress hooks for the widget that owns the menu.
-function def:widHook_pressed(key, scancode, isrepeat)
-	-- 'self' is the menu's parent.
-
-	-- Find this menu.
-	local menu_bar = _findMenuInParent(self)
-	if not menu_bar then
+--- Key shortcut hooks for the widget that owns the menu.
+function def:cb_key_shortcut(hot_key, hot_scan)
+	if not hot_key then
 		return
 	end
 
-	local key_mgr = self.context.key_mgr
+	local key_mgr = context.key_mgr
 
-	if not self.context.mouse_pressed_button then
-	--if not self.context.mouse_pressed_button and not isrepeat then
+	if not context.mouse_pressed_button then
+		local mod = key_mgr.mod
+		local alt, shift = mod["alt"], mod["shift"]
+		local key = hot_key:match("%+(.+)$")
 
-		-- Menu deactivation
-		if key == "f10" then
-			local root = self:nodeGetRoot()
-			if root.pop_up_menu then
-				_destroyPopUpMenu(menu_bar, "concluded")
-				setStateIdle(menu_bar)
-
-				key_mgr:stunRecent()
-
-				return true
-			end
+		-- (Reason for excluding shift: Shift+F10 is used in some applications to open a right-click context menu.)
+		if key == "f10" and not shift then
+			self:widCall_keyboardActivate()
+			return true
 		-- Check category key mnemonics (when idle, and only if alt is held)
 		else
 			local alt_state = key_mgr:getModAlt()
-			if (menu_bar.state == "idle" and alt_state) then
-				--print("hook_pressed", key, alt_state, "menu_bar.state", menu_bar.state)
-
-				local item_i, item = keyMnemonicSearch(menu_bar.MN_items, key)
+			if (self.state == "idle" and alt_state) then
+				local item_i, item = keyMnemonicSearch(self.MN_items, key)
 				if item then
 					--print("got it", key, item.text)
-					menu_bar:widCall_keyboardRunItem(item)
+					self:widCall_keyboardRunItem(item)
 					return true
 				end
 			end
-		end
-	end
-end
-
-
---- A callback function to use for keyRelease hooks.
-function def:widHook_released(key, scancode, isrepeat)
-	-- 'self' is the parent container.
-	-- Find this menu.
-	local menu_bar = _findMenuInParent(self)
-	if not menu_bar then
-		return
-	end
-
-	local key_mgr = self.context.key_mgr
-
-	if not self.context.mouse_pressed_button then
-		-- (Reason for excluding shift: Shift+F10 is used in some applications to open a right-click context menu.)
-		if key == "f10" and key_mgr:getRecentKeyConstant() == key and not key_mgr:getModShift() then
-			menu_bar:widCall_keyboardActivate()
-			return true
 		end
 	end
 end
