@@ -140,6 +140,10 @@ end
 
 
 local function _endGame(result)
+	if app.state == "game-over" then
+		return
+	end
+
 	app.state = "game-over"
 
 	_setButtonsEnabled(false)
