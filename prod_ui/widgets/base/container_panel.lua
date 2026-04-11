@@ -12,6 +12,7 @@ local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local uiTheme = require(context.conf.prod_ui_req .. "ui_theme")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
+local widShortcut = context:getLua("core/wid_shortcut")
 
 
 local slices = context.resources.slices
@@ -23,6 +24,9 @@ local def = {
 
 
 widLayout.setupContainerDef(def)
+
+
+widShortcut.setupDef(def)
 
 
 function def:evt_initialize()

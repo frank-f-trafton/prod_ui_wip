@@ -55,7 +55,6 @@ widShared.scrollSetMethods(def)
 
 
 widShortcut.setupDef(def)
-widShortcut.setupDefList(def)
 
 
 function def:evt_initialize()
@@ -69,7 +68,6 @@ function def:evt_initialize()
 	widShared.setupViewports(self, 2)
 	wcContainer.setupSashState(self)
 	widLayout.setupLayoutList(self)
-	widShortcut.setupInstanceList(self)
 
 	self:layoutSetBase("viewport")
 
@@ -248,13 +246,6 @@ function def:evt_pointerWheel(targ, x, y)
 end
 
 
-function def.trickle:evt_keyPressed(targ, key, scancode, isrepeat, hot_key, hot_scan)
-	if not context.root.pop_up_menu then
-		return self:cb_key_shortcut(hot_key, hot_scan) or widShortcut.evaluateList(self, hot_key, hot_scan)
-	end
-end
-
-
 -- Catch focus step actions so that we can ensure the hosted widget is in view.
 -- @param keep_in_view When true, viewport scrolls to ensure the widget is visible within the viewport.
 function def:evt_thimble1Take(targ, keep_in_view)
@@ -390,4 +381,3 @@ def.default_skinner = {
 
 
 return def
-
