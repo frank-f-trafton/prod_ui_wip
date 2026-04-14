@@ -13,8 +13,8 @@ Documentation (also a work in progress): https://github.com/frank-f-trafton/prod
 
 ## Repository Structure
 
-* Base directory: Example programs.
-* `prod_ui`: ProdUI.
+* `demo`: Example programs.
+* `prod_ui`: ProdUI (the actual library).
 * `theme_works`: Theme builder scripts.
 
 
