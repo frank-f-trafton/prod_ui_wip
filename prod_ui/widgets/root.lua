@@ -2,21 +2,16 @@ local context = select(1, ...)
 
 
 local hndStep = context:getLua("shared/hnd_step")
-local notifMgr = require(context.conf.prod_ui_req .. "lib.notif_mgr")
 local pList2 = require(context.conf.prod_ui_req .. "lib.p_list2")
 local uiAssert = require(context.conf.prod_ui_req .. "ui_assert")
 local uiDummy = require(context.conf.prod_ui_req .. "ui_dummy")
 local uiKeyboard = require(context.conf.prod_ui_req .. "ui_keyboard")
 local uiTable = require(context.conf.prod_ui_req .. "ui_table")
 local wcUiFrame = context:getLua("shared/wc/wc_ui_frame")
+local wcToolTip = context:getLua("shared/wc/wc_tool_tip")
 local widLayout = context:getLua("core/wid_layout")
 local widShared = context:getLua("core/wid_shared")
 local widShortcut = context:getLua("core/wid_shortcut")
-
-
--- Temporary stand-ins while I change how the context+root+theme are initialized.
-local TEMP_COLOR = {1, 1, 1, 1}
-local TEMP_FONT = love.graphics.newFont(16)
 
 
 local def = {
@@ -104,7 +99,7 @@ function def:evt_initialize()
 	self.frame_order_counter = 0
 
 	-- ToolTip state.
-	self.tool_tip = notifMgr.newToolTip(love.graphics.newFont(16)) -- XXX font ref needs to be refresh-able
+	self.tool_tip = wcToolTip.newToolTip()
 
 	self.tool_tip_hover = false
 	self.tool_tip_time = 0.0
@@ -747,7 +742,7 @@ function def:evt_update(dt)
 			self.tool_tip_time = self.tool_tip_time + dt
 		end
 		if self.tool_tip_time >= self.tool_tip_time_max then
-			tool_tip:arrange(tip_hover.str_tool_tip, 0, 0)
+			tool_tip:arrange(tip_hover.str_tool_tip)
 			tool_tip.visible = true
 		end
 	else
@@ -783,16 +778,14 @@ function def:renderLast(os_x, os_y)
 
 	if self.drop_state then
 		local rr, gg, bb, aa = love.graphics.getColor()
-		-- XXX: context.resources may not be populated yet.
-		--love.graphics.setColor(context.resources.info.misc.dropping_text_color)
-		love.graphics.setColor(TEMP_COLOR)
+		love.graphics.setColor(context.resources.info.misc.dropping_text_color)
 		love.graphics.print("Dropping...", context.mouse_x - 20, context.mouse_y - 20)
 		love.graphics.setColor(rr, gg, bb, aa)
 	end
 
 	-- DEBUG
 	--[[
-	love.graphics.setFont(TEMP_FONT)
+	love.graphics.setFont(context.resources.fonts.internal)
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("selected_frame: " .. tostring(self.selected_frame), 64, 64)
 	--]]
