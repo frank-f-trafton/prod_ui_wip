@@ -48,6 +48,7 @@ local demo_default_theme = "vacuum_dark"
 -- The first panel to load.
 -- (The leading path is: demo/wimp/…)
 local demo_panel_launch = {
+	"demo_welcome",
 	"widgets.d_card_box",
 	"widgets.d_group",
 	"layouts.d_layout_stack",
@@ -64,7 +65,6 @@ local demo_panel_launch = {
 	"widgets.d_separator",
 	"themes_and_scale",
 	"widgets.d_message_log",
-	"demo_welcome",
 	"widgets.d_tree_box",
 	"widgets.d_text_box_multi",
 	"widgets.d_text_box_single",
